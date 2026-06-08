@@ -974,22 +974,32 @@ function submitForm() {
   });
 }
 
-function showToast(msg, isError) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  if (isError) {
-    toast.style.background = 'linear-gradient(135deg,#c0392b,#e74c3c)';
-    toast.style.color = '#fff';
-  } else {
-    toast.style.background = 'linear-gradient(135deg,var(--gold),var(--gold-light))';
-    toast.style.color = 'var(--navy)';
-  }
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 4000);
-}
+function submitForm() {
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const service = document.getElementById('service').value;
+  const destination = document.getElementById('destination').value;
+  const message = document.getElementById('message').value;
 
-// Set home as active initially
-document.querySelector('[data-page="home"]').classList.add('active');
-</script>
-</body>
-</html>
+  if (!fname || !email || !service) {
+    showToast('⚠️ Please fill required fields.', true);
+    return;
+  }
+
+  emailjs.send("YOUR_SERVICE_ID", "template_repg5mi", {
+    fname: fname,
+    lname: lname,
+    email: email,
+    phone: phone,
+    service: service,
+    destination: destination,
+    message: message
+  }).then(() => {
+    showToast("✅ Request sent successfully!");
+  }).catch((error) => {
+    console.log(error);
+    showToast("❌ Failed to send. Try again.", true);
+  });
+}
