@@ -1,1005 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SKYGLOBE LIMITED — Your Gateway to Global Opportunity</title>
-<meta name="description" content="Skyglobe Limited is a premium global travel and study-abroad consultancy. Visas, university admissions, work relocation, and travel documentation.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SKYGLOBE LIMITED — Global Travel & Study Abroad</title>
+
+<meta name="description" content="Skyglobe Limited helps you study abroad, get work visas, travel documents, and global relocation services with expert guidance." />
+<meta name="theme-color" content="#0a1628"/>
+
+<!-- Open Graph -->
+<meta property="og:title" content="Skyglobe Limited"/>
+<meta property="og:description" content="Your Gateway to Global Opportunity"/>
+<meta property="og:type" content="website"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#0a1628;
-  --navy-2:#0d1f3e;
-  --navy-3:#132952;
-  --navy-light:#1e3a6e;
+  --bg:#0a1628;
+  --card:#0f2342;
   --gold:#c9a84c;
-  --gold-light:#e6c97a;
-  --gold-pale:#f5e8c0;
-  --white:#ffffff;
-  --off-white:#f8f6f0;
-  --muted:#8899bb;
-  --border:rgba(201,168,76,0.18);
-  --border-strong:rgba(201,168,76,0.38);
-  --text-body:#cdd8ee;
-  --radius:12px;
-  --radius-lg:20px;
-  --radius-xl:32px;
-  --trans:0.32s cubic-bezier(0.4,0,0.2,1);
+  --text:#e8eefc;
+  --muted:#9fb0d0;
+  --radius:14px;
+  --shadow:0 20px 60px rgba(0,0,0,0.35);
 }
-html{scroll-behavior:smooth;font-size:16px}
-body{background:var(--navy);color:var(--white);font-family:'Outfit',sans-serif;line-height:1.6;overflow-x:hidden;min-height:100vh}
 
-/* SCROLLBAR */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--navy)}
-::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:Outfit,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
 
-/* PAGE ROUTER */
-.page{display:none;animation:fadeUp 0.5s ease both}
-.page.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+/* LOADER */
+#loader{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+  z-index:9999;
+}
+.spinner{
+  width:60px;height:60px;
+  border:3px solid rgba(255,255,255,0.1);
+  border-top:3px solid var(--gold);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:72px;transition:var(--trans);border-bottom:1px solid transparent}
-nav.scrolled{background:rgba(10,22,40,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
-.nav-logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.nav-logo-text{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;color:var(--white);letter-spacing:0.04em}
-.nav-logo-text span{color:var(--gold)}
-.nav-links{display:flex;align-items:center;gap:2.5rem;list-style:none}
-.nav-links a{color:var(--text-body);text-decoration:none;font-size:0.92rem;font-weight:400;letter-spacing:0.03em;transition:var(--trans);cursor:pointer}
-.nav-links a:hover,.nav-links a.active{color:var(--gold)}
-.nav-cta{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy)!important;padding:10px 22px;border-radius:8px;font-weight:600!important;transition:var(--trans)!important}
-.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.3)}
-.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
-.hamburger span{width:24px;height:2px;background:var(--white);transition:var(--trans)}
-.mobile-menu{display:none;position:fixed;inset:0;background:var(--navy-2);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:2rem}
-.mobile-menu.open{display:flex}
-.mobile-menu a{color:var(--white);text-decoration:none;font-size:1.4rem;font-family:'Cormorant Garamond',serif;cursor:pointer}
+nav{
+  position:fixed;top:0;left:0;right:0;
+  height:70px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 6%;
+  background:rgba(10,22,40,0.7);
+  backdrop-filter:blur(10px);
+  z-index:1000;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.logo{font-weight:700;color:var(--gold);letter-spacing:2px}
+.nav-links{display:flex;gap:25px}
+.nav-links a{font-size:14px;color:var(--muted)}
+.nav-links a:hover{color:var(--gold)}
 
 /* HERO */
-.hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:100px 5% 60px}
-.hero-bg{position:absolute;inset:0;z-index:0}
-.globe-svg{position:absolute;right:-5%;top:50%;transform:translateY(-50%);width:55%;max-width:700px;opacity:0.18;animation:globeSpin 80s linear infinite}
-@keyframes globeSpin{from{transform:translateY(-50%) rotate(0deg)}to{transform:translateY(-50%) rotate(360deg)}}
-.grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.04) 1px,transparent 1px);background-size:60px 60px}
-.glow-blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
-.blob-1{width:500px;height:500px;background:rgba(201,168,76,0.08);top:-100px;right:100px}
-.blob-2{width:400px;height:400px;background:rgba(30,58,110,0.5);bottom:-50px;left:-50px}
-.hero-content{position:relative;z-index:1;max-width:660px}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.12);border:1px solid var(--border-strong);border-radius:100px;padding:6px 16px;font-size:0.8rem;font-weight:500;color:var(--gold-light);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:1.8rem;animation:fadeUp 0.6s 0.1s both}
-.hero-badge::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
-.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,6vw,4.4rem);font-weight:300;line-height:1.12;letter-spacing:-0.01em;margin-bottom:1.4rem;animation:fadeUp 0.6s 0.2s both}
-.hero h1 em{font-style:italic;color:var(--gold)}
-.hero h1 strong{font-weight:600}
-.hero p{font-size:1.1rem;color:var(--text-body);line-height:1.7;max-width:520px;margin-bottom:2.4rem;animation:fadeUp 0.6s 0.3s both}
-.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;animation:fadeUp 0.6s 0.4s both}
-.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);padding:14px 32px;border-radius:10px;font-weight:600;font-size:0.95rem;text-decoration:none;border:none;cursor:pointer;transition:var(--trans);display:inline-flex;align-items:center;gap:8px}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(201,168,76,0.35)}
-.btn-outline{background:transparent;color:var(--white);padding:14px 32px;border-radius:10px;font-weight:500;font-size:0.95rem;text-decoration:none;border:1px solid var(--border-strong);cursor:pointer;transition:var(--trans);display:inline-flex;align-items:center;gap:8px}
-.btn-outline:hover{background:rgba(201,168,76,0.08);border-color:var(--gold)}
-.hero-stats{display:flex;gap:3rem;margin-top:3.5rem;animation:fadeUp 0.6s 0.5s both;padding-top:2rem;border-top:1px solid var(--border)}
-.stat-item{text-align:center}
-.stat-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;color:var(--gold);display:block}
-.stat-label{font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.hero{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:120px 20px 60px;
+}
+.hero h1{
+  font-size:clamp(2rem,5vw,4rem);
+  line-height:1.1;
+}
+.hero h1 span{color:var(--gold)}
+.hero p{
+  margin-top:15px;
+  max-width:600px;
+  margin-inline:auto;
+  color:var(--muted);
+}
+.btn{
+  margin-top:25px;
+  padding:12px 22px;
+  border-radius:10px;
+  border:1px solid var(--gold);
+  background:transparent;
+  color:var(--gold);
+  transition:0.3s;
+}
+.btn:hover{
+  background:var(--gold);
+  color:#000;
+}
 
 /* SECTIONS */
-section{padding:100px 5%}
-.section-tag{display:inline-block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.8rem}
-.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.2;margin-bottom:1.2rem}
-.section-title strong{font-weight:600}
-.section-sub{color:var(--text-body);font-size:1rem;max-width:560px;line-height:1.7}
-.text-center{text-align:center}
-.text-center .section-sub{margin:0 auto}
-.section-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-strong),transparent);margin:0 5%}
+section{
+  padding:80px 6%;
+}
 
-/* SERVICES SECTION */
-.services-preview{background:var(--navy-2)}
-.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;margin-top:3.5rem}
-.service-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;transition:var(--trans);position:relative;overflow:hidden;cursor:default}
-.service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:var(--trans)}
-.service-card:hover{background:rgba(201,168,76,0.06);border-color:var(--border-strong);transform:translateY(-4px)}
-.service-card:hover::before{opacity:1}
-.service-icon{width:52px;height:52px;background:rgba(201,168,76,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.2rem;border:1px solid var(--border)}
-.service-card h3{font-size:1.05rem;font-weight:600;margin-bottom:0.6rem}
-.service-card p{font-size:0.88rem;color:var(--text-body);line-height:1.6}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
+}
 
-/* ABOUT */
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-top:4rem}
-.about-visual{position:relative}
-.about-img-frame{width:100%;aspect-ratio:4/5;background:linear-gradient(135deg,var(--navy-2),var(--navy-3));border-radius:var(--radius-xl);border:1px solid var(--border);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
-.about-globe-anim{width:80%;animation:float 6s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
-.about-badge{position:absolute;bottom:2rem;left:-1.5rem;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:var(--radius);padding:1.2rem 1.5rem;color:var(--navy)}
-.about-badge strong{display:block;font-size:1.8rem;font-weight:700;font-family:'Cormorant Garamond',serif}
-.about-badge span{font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em}
-.trust-items{margin-top:2rem;display:flex;flex-direction:column;gap:1rem}
-.trust-item{display:flex;gap:1rem;align-items:flex-start}
-.trust-icon{width:36px;height:36px;background:rgba(201,168,76,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
-.trust-item h4{font-size:0.95rem;font-weight:600;margin-bottom:0.2rem}
-.trust-item p{font-size:0.85rem;color:var(--text-body)}
-
-/* DESTINATIONS */
-.dest-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:3rem}
-.dest-card{border-radius:var(--radius-lg);overflow:hidden;position:relative;cursor:pointer;aspect-ratio:3/4;border:1px solid var(--border);transition:var(--trans)}
-.dest-card:hover{transform:translateY(-6px);border-color:var(--gold)}
-.dest-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:5rem;background:var(--navy-2)}
-.dest-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,40,0.95) 30%,transparent 70%)}
-.dest-info{position:absolute;bottom:0;left:0;right:0;padding:1.5rem}
-.dest-flag{font-size:2rem;margin-bottom:0.4rem;display:block}
-.dest-name{font-size:1.1rem;font-weight:600;display:block;margin-bottom:0.2rem}
-.dest-badge{display:inline-block;font-size:0.72rem;background:rgba(201,168,76,0.2);border:1px solid var(--border-strong);color:var(--gold-light);padding:3px 10px;border-radius:100px}
+.card{
+  background:var(--card);
+  padding:20px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  transform:translateY(20px);
+  opacity:0;
+  transition:0.6s ease;
+}
+.card.show{
+  transform:translateY(0);
+  opacity:1;
+}
 
 /* CONTACT */
-.contact-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:4rem;margin-top:4rem}
-.contact-info{display:flex;flex-direction:column;gap:1.5rem}
-.contact-detail{display:flex;gap:1rem;align-items:flex-start}
-.contact-icon{width:44px;height:44px;background:rgba(201,168,76,0.1);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
-.contact-detail h4{font-weight:600;margin-bottom:0.2rem;font-size:0.95rem}
-.contact-detail p,.contact-detail a{font-size:0.9rem;color:var(--text-body);text-decoration:none}
-.contact-detail a:hover{color:var(--gold)}
-.contact-form{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2.5rem}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
-.form-group{margin-bottom:1rem}
-.form-group label{display:block;font-size:0.85rem;color:var(--text-body);margin-bottom:0.5rem;font-weight:500}
-.form-group input,.form-group select,.form-group textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--white);font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none;transition:var(--trans)}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold);background:rgba(201,168,76,0.04)}
-.form-group select option{background:var(--navy-2)}
-.form-group textarea{resize:vertical;min-height:120px}
-.wa-btn{display:inline-flex;align-items:center;gap:10px;background:#25D366;color:white;padding:13px 24px;border-radius:10px;font-weight:600;font-size:0.9rem;text-decoration:none;transition:var(--trans);margin-top:1rem}
-.wa-btn:hover{background:#20b258;transform:translateY(-2px)}
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:#0c1b33;
+  color:white;
+}
+
+.form{
+  max-width:600px;
+  margin:auto;
+}
 
 /* FOOTER */
-footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 5% 30px}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
-.footer-brand p{font-size:0.88rem;color:var(--text-body);margin-top:1rem;max-width:280px;line-height:1.7}
-.footer-col h5{font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold-light);margin-bottom:1rem}
-.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:0.6rem}
-.footer-col ul li a{font-size:0.88rem;color:var(--text-body);text-decoration:none;transition:var(--trans);cursor:pointer}
-.footer-col ul li a:hover{color:var(--gold)}
-.footer-bottom{border-top:1px solid var(--border);padding-top:1.5rem;display:flex;justify-content:space-between;align-items:center;font-size:0.82rem;color:var(--muted)}
+footer{
+  text-align:center;
+  padding:40px;
+  border-top:1px solid rgba(255,255,255,0.08);
+  color:var(--muted);
+}
 
 /* TOAST */
-.toast{position:fixed;bottom:2rem;right:2rem;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);padding:14px 24px;border-radius:12px;font-weight:600;font-size:0.9rem;z-index:9999;transform:translateY(80px);opacity:0;transition:var(--trans);display:flex;align-items:center;gap:10px;max-width:320px}
-.toast.show{transform:translateY(0);opacity:1}
-
-/* WHATSAPP FLOAT */
-.wa-float{position:fixed;bottom:2rem;left:2rem;width:54px;height:54px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;z-index:998;box-shadow:0 4px 20px rgba(37,211,102,0.4);transition:var(--trans)}
-.wa-float:hover{transform:scale(1.1)}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .about-grid,.contact-grid{grid-template-columns:1fr}
-  .about-img-frame{aspect-ratio:16/9}
-  .footer-grid{grid-template-columns:1fr 1fr}
-  .hero-stats{gap:1.5rem}
-  .form-row{grid-template-columns:1fr}
-  nav .nav-links{display:none}
-  .hamburger{display:flex}
+.toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:var(--gold);
+  color:#000;
+  padding:12px 18px;
+  border-radius:10px;
+  display:none;
 }
-@media(max-width:600px){
-  .hero h1{font-size:2.4rem}
-  .footer-grid{grid-template-columns:1fr}
-  .hero-stats{flex-wrap:wrap;gap:1rem}
+.toast.show{display:block}
+
+/* MOBILE */
+@media(max-width:768px){
+  .nav-links{display:none}
 }
-
-/* SERVICES PAGE */
-.services-full-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:3rem}
-.service-full-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;transition:var(--trans);position:relative;overflow:hidden}
-.service-full-card:hover{border-color:var(--gold);background:rgba(201,168,76,0.05);transform:translateY(-3px)}
-.service-full-card .s-icon{font-size:2.2rem;margin-bottom:1rem;display:block}
-.service-full-card h3{font-size:1.1rem;font-weight:600;margin-bottom:0.6rem;color:var(--white)}
-.service-full-card p{font-size:0.88rem;color:var(--text-body);line-height:1.65}
-.service-full-card .s-tag{display:inline-block;margin-top:1rem;font-size:0.75rem;color:var(--gold);font-weight:500;letter-spacing:0.06em;text-transform:uppercase}
-
-/* DESTINATIONS FULL */
-.dest-region{margin-bottom:3rem}
-.dest-region h3{font-size:1.3rem;font-weight:600;margin-bottom:1.5rem;display:flex;align-items:center;gap:10px}
-.dest-region h3::after{content:'';flex:1;height:1px;background:var(--border)}
-.dest-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
-.dest-info-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;transition:var(--trans)}
-.dest-info-card:hover{border-color:var(--border-strong)}
-.dest-info-card .flag{font-size:2rem;margin-bottom:0.8rem;display:block}
-.dest-info-card h4{font-weight:600;margin-bottom:0.6rem}
-.dest-info-card ul{list-style:none;font-size:0.85rem;color:var(--text-body);display:flex;flex-direction:column;gap:0.3rem}
-.dest-info-card ul li::before{content:'→ ';color:var(--gold)}
-
-/* ABOUT FULL */
-.about-mission{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem}
-.mission-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem}
-.mission-card h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--gold);margin-bottom:1rem}
-.mission-card p{color:var(--text-body);line-height:1.75;font-size:0.95rem}
-.team-strip{margin-top:4rem}
-.values-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:2rem}
-.value-card{background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center}
-.value-card .v-icon{font-size:2rem;margin-bottom:0.8rem;display:block}
-.value-card h4{font-weight:600;margin-bottom:0.4rem}
-.value-card p{font-size:0.83rem;color:var(--text-body)}
 </style>
 </head>
+
 <body>
 
-<!-- NAV -->
-<nav id="navbar">
-  <div class="nav-logo" onclick="showPage('home')">
-    <div class="nav-logo-icon">🌐</div>
-    <div class="nav-logo-text">SKY<span>GLOBE</span></div>
-  </div>
-  <ul class="nav-links">
-    <li><a onclick="showPage('home')" data-page="home">Home</a></li>
-    <li><a onclick="showPage('about')" data-page="about">About</a></li>
-    <li><a onclick="showPage('services')" data-page="services">Services</a></li>
-    <li><a onclick="showPage('destinations')" data-page="destinations">Destinations</a></li>
-    <li><a onclick="showPage('contact')" class="nav-cta" data-page="contact">Get Consultation</a></li>
-  </ul>
-  <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu">
-    <span></span><span></span><span></span>
+<div id="loader"><div class="spinner"></div></div>
+
+<nav>
+  <div class="logo">SKYGLOBE</div>
+  <div class="nav-links">
+    <a href="#home">Home</a>
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
   </div>
 </nav>
 
-<!-- MOBILE MENU -->
-<div class="mobile-menu" id="mobileMenu">
-  <div class="nav-logo" onclick="showPage('home');toggleMenu()">
-    <div class="nav-logo-icon">🌐</div>
-    <div class="nav-logo-text">SKY<span>GLOBE</span></div>
+<!-- HERO -->
+<section class="hero" id="home">
+  <div>
+    <h1>Your Gateway to <span>Global Opportunity</span></h1>
+    <p>Study abroad, work visas, travel documentation, and immigration support — all in one premium platform.</p>
+    <button class="btn" onclick="scrollToSection('contact')">Get Consultation</button>
   </div>
-  <a onclick="showPage('home');toggleMenu()">Home</a>
-  <a onclick="showPage('about');toggleMenu()">About</a>
-  <a onclick="showPage('services');toggleMenu()">Services</a>
-  <a onclick="showPage('destinations');toggleMenu()">Destinations</a>
-  <a onclick="showPage('contact');toggleMenu()">Contact</a>
-</div>
+</section>
 
-<!-- ============ HOME PAGE ============ -->
-<div class="page active" id="page-home">
+<!-- SERVICES -->
+<section id="services">
+  <h2>Our Services</h2>
+  <div class="grid">
+    <div class="card">🎓 Student Visa Processing</div>
+    <div class="card">💼 Work Visa Support</div>
+    <div class="card">✈️ Travel Documentation</div>
+    <div class="card">🏛️ University Admission</div>
+    <div class="card">🛡️ Travel Insurance</div>
+    <div class="card">📋 Document Verification</div>
+  </div>
+</section>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-bg">
-      <div class="grid-lines"></div>
-      <div class="glow-blob blob-1"></div>
-      <div class="glow-blob blob-2"></div>
-      <svg class="globe-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="200" cy="200" r="195" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.8"/>
-        <ellipse cx="200" cy="200" rx="100" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
-        <ellipse cx="200" cy="200" rx="50" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <ellipse cx="200" cy="200" rx="150" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <line x1="5" y1="200" x2="395" y2="200" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
-        <line x1="200" y1="5" x2="200" y2="395" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <ellipse cx="200" cy="200" rx="195" ry="80" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <ellipse cx="200" cy="200" rx="195" ry="140" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
-        <!-- Continents approximation -->
-        <circle cx="165" cy="155" r="35" fill="#c9a84c" opacity="0.12"/>
-        <circle cx="225" cy="165" r="28" fill="#c9a84c" opacity="0.1"/>
-        <circle cx="200" cy="230" r="22" fill="#c9a84c" opacity="0.08"/>
-        <circle cx="260" cy="175" r="18" fill="#c9a84c" opacity="0.1"/>
-        <circle cx="145" cy="200" r="15" fill="#c9a84c" opacity="0.08"/>
-      </svg>
-    </div>
-    <div class="hero-content">
-      <div class="hero-badge">✦ Global Opportunity Awaits</div>
-      <h1>Your <em>Gateway</em> to<br><strong>Travel & Study Abroad</strong></h1>
-      <p>We bridge borders, open universities, and unlock careers across the world. From visa processing to university admissions — Skyglobe turns your global ambitions into reality.</p>
-      <div class="hero-btns">
-        <button class="btn-primary" onclick="showPage('contact')">✦ Get Consultation</button>
-        <button class="btn-outline" onclick="showPage('services')">Explore Services →</button>
-      </div>
-      <div class="hero-stats">
-        <div class="stat-item"><span class="stat-num">12K+</span><span class="stat-label">Visas Processed</span></div>
-        <div class="stat-item"><span class="stat-num">98%</span><span class="stat-label">Success Rate</span></div>
-        <div class="stat-item"><span class="stat-num">47</span><span class="stat-label">Countries Served</span></div>
-        <div class="stat-item"><span class="stat-num">8yr</span><span class="stat-label">Experience</span></div>
-      </div>
-    </div>
-  </section>
+<!-- ABOUT -->
+<section id="about">
+  <h2>About Skyglobe</h2>
+  <p style="max-width:700px;color:var(--muted)">
+    We are a global mobility consultancy helping individuals achieve study, work, and travel goals across 47+ countries.
+  </p>
+</section>
 
-  <!-- SERVICES PREVIEW -->
-  <section class="services-preview">
-    <div class="text-center">
-      <div class="section-tag">What We Do</div>
-      <h2 class="section-title">World-Class <strong>Services</strong></h2>
-      <p class="section-sub">Comprehensive travel, immigration, and education solutions tailored to your destination and goals.</p>
-    </div>
-    <div class="services-grid">
-      <div class="service-card">
-        <div class="service-icon">🎓</div>
-        <h3>Student Visa</h3>
-        <p>Expert guidance for student visa applications to top universities worldwide — UK, USA, Canada & beyond.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon">💼</div>
-        <h3>Work Visa</h3>
-        <p>Skilled worker visas, employer sponsorships, and work permit processing handled professionally.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon">✈️</div>
-        <h3>Travel Services</h3>
-        <p>Flight reservations, hotel bookings, travel insurance, and complete trip documentation.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon">🏛️</div>
-        <h3>University Admissions</h3>
-        <p>End-to-end support from shortlisting institutions to application submission and scholarship discovery.</p>
-      </div>
-    </div>
-    <div style="text-align:center;margin-top:2.5rem">
-      <button class="btn-outline" onclick="showPage('services')">View All 10 Services →</button>
-    </div>
-  </section>
+<!-- CONTACT -->
+<section id="contact">
+  <h2>Contact Us</h2>
 
-  <div class="section-divider"></div>
+  <div class="form">
+    <input id="name" placeholder="Full Name"/>
+    <input id="email" placeholder="Email"/>
+    <select id="service">
+      <option>Select Service</option>
+      <option>Student Visa</option>
+      <option>Work Visa</option>
+      <option>Travel Docs</option>
+    </select>
+    <textarea id="msg" placeholder="Your message"></textarea>
+    <button class="btn" onclick="submitForm()">Submit</button>
+  </div>
+</section>
 
-  <!-- ABOUT PREVIEW -->
-  <section>
-    <div class="about-grid">
-      <div class="about-visual">
-        <div class="about-img-frame">
-          <svg class="about-globe-anim" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="globeGrad" cx="35%" cy="35%">
-                <stop offset="0%" stop-color="#1e3a6e"/>
-                <stop offset="100%" stop-color="#0a1628"/>
-              </radialGradient>
-            </defs>
-            <circle cx="150" cy="150" r="140" fill="url(#globeGrad)" stroke="#c9a84c" stroke-width="1.5"/>
-            <ellipse cx="150" cy="150" rx="70" ry="140" fill="none" stroke="#c9a84c" stroke-width="1" opacity="0.5"/>
-            <ellipse cx="150" cy="150" rx="35" ry="140" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.4"/>
-            <line x1="10" y1="150" x2="290" y2="150" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/>
-            <ellipse cx="150" cy="150" rx="140" ry="55" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.4"/>
-            <ellipse cx="150" cy="150" rx="140" ry="95" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.3"/>
-            <!-- Land masses -->
-            <ellipse cx="120" cy="115" rx="30" ry="22" fill="#c9a84c" opacity="0.2"/>
-            <ellipse cx="175" cy="125" rx="24" ry="18" fill="#c9a84c" opacity="0.18"/>
-            <ellipse cx="155" cy="170" rx="18" ry="14" fill="#c9a84c" opacity="0.15"/>
-            <ellipse cx="200" cy="155" rx="14" ry="10" fill="#c9a84c" opacity="0.15"/>
-            <!-- Plane -->
-            <g transform="translate(190,90) rotate(-30)">
-              <path d="M0,0 L12,-4 L12,4 Z" fill="#c9a84c" opacity="0.9"/>
-              <path d="M6,-1 L0,-8 L2,-8 L7,0" fill="#c9a84c" opacity="0.7"/>
-              <path d="M6,1 L0,8 L2,8 L7,0" fill="#c9a84c" opacity="0.7"/>
-            </g>
-          </svg>
-          <div class="about-badge">
-            <strong>2016</strong>
-            <span>Est. New York</span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="section-tag">About Skyglobe</div>
-        <h2 class="section-title">More Than a <br><strong>Travel Agency</strong></h2>
-        <p class="section-sub">We are architects of global mobility — combining expert knowledge, trusted relationships, and a genuine passion for helping people achieve their international dreams.</p>
-        <div class="trust-items">
-          <div class="trust-item">
-            <div class="trust-icon">⚡</div>
-            <div>
-              <h4>Lightning-Fast Processing</h4>
-              <p>Our streamlined systems ensure your applications move swiftly through every stage, minimizing wait times.</p>
-            </div>
-          </div>
-          <div class="trust-item">
-            <div class="trust-icon">🛡️</div>
-            <div>
-              <h4>Trusted & Certified</h4>
-              <p>Licensed immigration consultants with direct embassy relationships and a 98% visa approval record.</p>
-            </div>
-          </div>
-          <div class="trust-item">
-            <div class="trust-icon">🌍</div>
-            <div>
-              <h4>Global Reach</h4>
-              <p>Active partnerships with universities, employers, and embassies across 47 countries on 6 continents.</p>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:2rem">
-          <button class="btn-primary" onclick="showPage('about')">Our Full Story →</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- DESTINATIONS PREVIEW -->
-  <section style="padding-top:0">
-    <div class="text-center">
-      <div class="section-tag">Where We Go</div>
-      <h2 class="section-title">Top <strong>Destinations</strong></h2>
-      <p class="section-sub">From the ivy leagues of America to the ancient universities of Europe — we unlock access everywhere.</p>
-    </div>
-    <div class="dest-grid" style="margin-top:2.5rem">
-      <div class="dest-card" onclick="showPage('destinations')">
-        <div class="dest-bg">🗽</div>
-        <div class="dest-overlay"></div>
-        <div class="dest-info">
-          <span class="dest-flag">🇺🇸</span>
-          <span class="dest-name">United States</span>
-          <span class="dest-badge">F1 · H1B · B1/B2</span>
-        </div>
-      </div>
-      <div class="dest-card" onclick="showPage('destinations')">
-        <div class="dest-bg">🍁</div>
-        <div class="dest-overlay"></div>
-        <div class="dest-info">
-          <span class="dest-flag">🇨🇦</span>
-          <span class="dest-name">Canada</span>
-          <span class="dest-badge">Study · Express Entry</span>
-        </div>
-      </div>
-      <div class="dest-card" onclick="showPage('destinations')">
-        <div class="dest-bg">🎡</div>
-        <div class="dest-overlay"></div>
-        <div class="dest-info">
-          <span class="dest-flag">🇬🇧</span>
-          <span class="dest-name">United Kingdom</span>
-          <span class="dest-badge">Tier 4 · Skilled Worker</span>
-        </div>
-      </div>
-      <div class="dest-card" onclick="showPage('destinations')">
-        <div class="dest-bg">🗼</div>
-        <div class="dest-overlay"></div>
-        <div class="dest-info">
-          <span class="dest-flag">🇪🇺</span>
-          <span class="dest-name">Europe</span>
-          <span class="dest-badge">Schengen · Student</span>
-        </div>
-      </div>
-      <div class="dest-card" onclick="showPage('destinations')">
-        <div class="dest-bg">🏯</div>
-        <div class="dest-overlay"></div>
-        <div class="dest-info">
-          <span class="dest-flag">🌏</span>
-          <span class="dest-name">Asia</span>
-          <span class="dest-badge">Work · Student</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA STRIP -->
-  <section style="padding-top:0">
-    <div style="background:linear-gradient(135deg,var(--navy-2),var(--navy-3));border:1px solid var(--border);border-radius:var(--radius-xl);padding:4rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-50px;right:-50px;width:300px;height:300px;background:rgba(201,168,76,0.05);border-radius:50%;filter:blur(40px)"></div>
-      <div class="section-tag">Ready to Begin?</div>
-      <h2 class="section-title" style="margin-bottom:1rem">Start Your Global Journey <strong>Today</strong></h2>
-      <p style="color:var(--text-body);max-width:480px;margin:0 auto 2rem">Book a free 30-minute consultation with our experts and get a clear roadmap to your international goals.</p>
-      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-        <button class="btn-primary" onclick="showPage('contact')">✦ Book Free Consultation</button>
-        <a href="https://wa.me/17373998522" class="wa-btn" target="_blank">💬 Chat on WhatsApp</a>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<!-- ============ ABOUT PAGE ============ -->
-<div class="page" id="page-about">
-  <section style="padding-top:140px">
-    <div class="section-tag">Our Story</div>
-    <h1 class="section-title">Skyglobe is a <em style="font-family:'Cormorant Garamond',serif;color:var(--gold);font-weight:300">Gateway</em><br>to <strong>Global Opportunity</strong></h1>
-    <p class="section-sub" style="max-width:640px">Founded in 2016 in New York City, Skyglobe Limited was born from a simple belief: every person deserves the chance to pursue their dreams — wherever in the world those dreams live.</p>
-    
-    <div class="about-mission">
-      <div class="mission-card">
-        <h3>Our Mission</h3>
-        <p>To democratize global mobility by providing world-class immigration, education, and travel consultancy services that are accessible, transparent, and results-driven. We believe borders should never limit ambition.</p>
-      </div>
-      <div class="mission-card">
-        <h3>Our Vision</h3>
-        <p>To become the most trusted name in global mobility — the first call anyone makes when they want to study, work, or live abroad. A world where every qualified dream finds its destination.</p>
-      </div>
-    </div>
-
-    <div style="margin-top:4rem">
-      <div class="section-tag">Why We're Different</div>
-      <h2 class="section-title">Why <strong>12,000+ Clients</strong> Trust Skyglobe</h2>
-      <div class="values-grid" style="margin-top:2rem">
-        <div class="value-card">
-          <span class="v-icon">🏆</span>
-          <h4>98% Success Rate</h4>
-          <p>Industry-leading visa approval record built over 8 years of expert practice</p>
-        </div>
-        <div class="value-card">
-          <span class="v-icon">⚡</span>
-          <h4>Fast Turnaround</h4>
-          <p>Streamlined processes mean faster applications without sacrificing quality</p>
-        </div>
-        <div class="value-card">
-          <span class="v-icon">🤝</span>
-          <h4>End-to-End Support</h4>
-          <p>From initial consultation to arrival — we're with you every step of the journey</p>
-        </div>
-        <div class="value-card">
-          <span class="v-icon">🌐</span>
-          <h4>Global Network</h4>
-          <p>Direct relationships with embassies, universities, and employers in 47 countries</p>
-        </div>
-        <div class="value-card">
-          <span class="v-icon">🔒</span>
-          <h4>Fully Compliant</h4>
-          <p>All services strictly follow immigration laws and embassy protocols</p>
-        </div>
-        <div class="value-card">
-          <span class="v-icon">💛</span>
-          <h4>Client-First Culture</h4>
-          <p>Your success is our success — we invest personally in every client's outcome</p>
-        </div>
-      </div>
-    </div>
-
-    <div style="margin-top:4rem;background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:var(--radius-xl);padding:3rem">
-      <div class="text-center">
-        <div class="section-tag">Global Impact</div>
-        <h2 class="section-title" style="margin-bottom:2.5rem">The Numbers <strong>Speak</strong></h2>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:2rem;text-align:center">
-        <div><div class="stat-num">12,400+</div><div class="stat-label">Visas Approved</div></div>
-        <div><div class="stat-num">3,200+</div><div class="stat-label">Students Placed</div></div>
-        <div><div class="stat-num">47</div><div class="stat-label">Countries</div></div>
-        <div><div class="stat-num">98%</div><div class="stat-label">Approval Rate</div></div>
-        <div><div class="stat-num">8yr</div><div class="stat-label">Experience</div></div>
-        <div><div class="stat-num">24/7</div><div class="stat-label">Client Support</div></div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- ============ SERVICES PAGE ============ -->
-<div class="page" id="page-services">
-  <section style="padding-top:140px">
-    <div class="section-tag">Full Services</div>
-    <h1 class="section-title">Everything You Need <br>to Go <strong>Global</strong></h1>
-    <p class="section-sub">Ten specialist services covering every dimension of international travel, immigration, and education — handled by certified consultants with proven track records.</p>
-
-    <div class="services-full-grid">
-      <div class="service-full-card">
-        <span class="s-icon">🎓</span>
-        <h3>Student Visa Processing</h3>
-        <p>Comprehensive student visa applications for the USA (F-1), UK (Tier 4), Canada, Australia, Germany, and more. We handle documentation, financial proof, and interview preparation.</p>
-        <span class="s-tag">Education → Global</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">💼</span>
-        <h3>Work Visa Processing</h3>
-        <p>Skilled worker visas, employer sponsorship management, and work permit applications across the UK, USA, Canada, and EU. We navigate complex immigration rules so you don't have to.</p>
-        <span class="s-tag">Career → Abroad</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">🌴</span>
-        <h3>Visit / Tourist Visa Services</h3>
-        <p>Short-stay and tourist visa applications for Schengen, USA B-1/B-2, UK Standard Visitor, and more. Fast-tracked options available for urgent travel needs.</p>
-        <span class="s-tag">Tourism → Anywhere</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">✈️</span>
-        <h3>Flight Reservation Services</h3>
-        <p>Genuine flight reservations and itinerary documentation for visa applications and embassy appointments — without requiring upfront ticket purchase.</p>
-        <span class="s-tag">Travel → Ready</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">🛡️</span>
-        <h3>Travel Insurance</h3>
-        <p>Comprehensive travel insurance plans that meet Schengen and embassy requirements — covering medical emergencies, trip cancellation, and baggage loss worldwide.</p>
-        <span class="s-tag">Protection → Global</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">🏛️</span>
-        <h3>University Admission Assistance</h3>
-        <p>End-to-end university application support: shortlisting, personal statement writing, application submission, and offer acceptance — across the UK, USA, Canada, and Europe.</p>
-        <span class="s-tag">Education → Future</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">🌟</span>
-        <h3>Scholarship Support</h3>
-        <p>Identify and apply for merit-based, need-based, and country-specific scholarships. We've helped students secure over $2M in scholarship awards across multiple cycles.</p>
-        <span class="s-tag">Funding → Dreams</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">🏨</span>
-        <h3>Hotel Booking Services</h3>
-        <p>Hotel accommodation bookings for visa application requirements, business travel, and study-abroad arrivals. Confirmation letters issued same-day for embassy use.</p>
-        <span class="s-tag">Accommodation → Sorted</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">📋</span>
-        <h3>Document Verification</h3>
-        <p>Authentication, notarization, apostille, and legalization of educational certificates, police clearances, financial statements, and other supporting documents.</p>
-        <span class="s-tag">Documents → Verified</span>
-      </div>
-      <div class="service-full-card">
-        <span class="s-icon">🧭</span>
-        <h3>Travel & Immigration Consultation</h3>
-        <p>One-on-one expert consultation sessions to map out the best immigration pathway for your specific goals, timeline, and background — with a clear, actionable plan.</p>
-        <span class="s-tag">Strategy → Success</span>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin-top:3rem;padding:3rem;background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:var(--radius-xl)">
-      <h3 style="font-family:'Cormorant Garamond',serif;font-size:2rem;margin-bottom:0.8rem">Ready to get started?</h3>
-      <p style="color:var(--text-body);margin-bottom:1.5rem">Book a free consultation and let our experts find the right service combination for your goals.</p>
-      <button class="btn-primary" onclick="showPage('contact')">✦ Book Free Consultation</button>
-    </div>
-  </section>
-</div>
-
-<!-- ============ DESTINATIONS PAGE ============ -->
-<div class="page" id="page-destinations">
-  <section style="padding-top:140px">
-    <div class="section-tag">Destinations</div>
-    <h1 class="section-title">Where We Can <strong>Take You</strong></h1>
-    <p class="section-sub">We operate in 47 countries across 5 major regions. Here's a snapshot of visa requirements and opportunities in each area.</p>
-
-    <div style="margin-top:3rem">
-      <div class="dest-region">
-        <h3>🇺🇸 North America</h3>
-        <div class="dest-info-grid">
-          <div class="dest-info-card">
-            <span class="flag">🇺🇸</span>
-            <h4>United States</h4>
-            <ul>
-              <li>F-1 Student Visa</li>
-              <li>H-1B Work Visa</li>
-              <li>B-1/B-2 Visitor Visa</li>
-              <li>O-1 Extraordinary Ability</li>
-              <li>J-1 Exchange Visitor</li>
-            </ul>
-          </div>
-          <div class="dest-info-card">
-            <span class="flag">🇨🇦</span>
-            <h4>Canada</h4>
-            <ul>
-              <li>Study Permit</li>
-              <li>Express Entry (PR)</li>
-              <li>Work Permit</li>
-              <li>Visitor Visa</li>
-              <li>Provincial Nominee Program</li>
-            </ul>
-          </div>
-          <div class="dest-info-card">
-            <span class="flag">🇲🇽</span>
-            <h4>Mexico & Caribbean</h4>
-            <ul>
-              <li>Tourist Visa</li>
-              <li>Temporary Resident</li>
-              <li>Business Visa</li>
-              <li>Retirement Visa</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="dest-region">
-        <h3>🇬🇧 United Kingdom</h3>
-        <div class="dest-info-grid">
-          <div class="dest-info-card">
-            <span class="flag">🇬🇧</span>
-            <h4>United Kingdom</h4>
-            <ul>
-              <li>Student Visa (formerly Tier 4)</li>
-              <li>Skilled Worker Visa</li>
-              <li>Standard Visitor Visa</li>
-              <li>Graduate Visa (Post-Study Work)</li>
-              <li>Global Talent Visa</li>
-            </ul>
-          </div>
-          <div class="dest-info-card">
-            <span class="flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span>
-            <h4>Scotland & Ireland</h4>
-            <ul>
-              <li>Independent pathways</li>
-              <li>Scottish Graduate Route</li>
-              <li>IRL Critical Skills Permit</li>
-              <li>Irish Student Visa</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="dest-region">
-        <h3>🇪🇺 Europe</h3>
-        <div class="dest-info-grid">
-          <div class="dest-info-card">
-            <span class="flag">🇩🇪</span>
-            <h4>Germany</h4>
-            <ul>
-              <li>Student Visa</li>
-              <li>Skilled Worker Visa</li>
-              <li>Job Seeker Visa</li>
-              <li>Schengen (tourist)</li>
-            </ul>
-          </div>
-          <div class="dest-info-card">
-            <span class="flag">🇫🇷</span>
-            <h4>France</h4>
-            <ul>
-              <li>Long-Stay Student Visa</li>
-              <li>Talent Passport</li>
-              <li>Schengen Visa</li>
-              <li>Work Authorization</li>
-            </ul>
-          </div>
-          <div class="dest-info-card">
-            <span class="flag">🇳🇱</span>
-            <h4>Netherlands & Nordics</h4>
-            <ul>
-              <li>Highly Skilled Migrant</li>
-              <li>Orientation Year Visa</li>
-              <li>Student Visa</li>
-              <li>Schengen Short-Stay</li>
-            </ul>
-          </div>
-          <div class="dest-info-card">
-            <span class="flag">🇦🇺</span>
-            <h4>Australia & NZ</h4>
-            <ul>
-              <li>Student Visa (Subclass 500)</li>
-              <li>Skilled Independent (189)</li>
-              <li>Working Holiday</li>
-              <li>Employer Sponsored</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="dest-region">
-        <h3>🌏 Asia</h3>
-        <div class="dest-info-grid">
-          <div class="dest-info-card">
-            <span class="flag">🇯🇵</span>
-            <h4>Japan</h4>
-            <ul>
-              <li>Student Visa</li>
-              <li>Specified Skilled Worker</li>
-              <li>Short-Term Stay</li>
-              <li>Cultural Activities Visa</li>
-            </ul>
-          </div>
-          <div class="dest-info-card">
-            <span class="flag">🇸🇬</span>
-            <h4>Singapore & UAE</h4>
-            <ul>
-              <li>Employment Pass</li>
-              <li>Student Pass</li>
-              <li>Golden Visa (UAE)</li>
-              <li>Work Permit</li>
-            </ul>
-          </div>
-          <div class="dest-info-card">
-            <span class="flag">🇨🇳</span>
-            <h4>China & East Asia</h4>
-            <ul>
-              <li>X1/X2 Student Visa</li>
-              <li>Work Visa (Z Visa)</li>
-              <li>Business Visa (M)</li>
-              <li>Tourist Visa (L)</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin-top:2rem;padding:2.5rem;background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:var(--radius-xl)">
-      <p style="color:var(--text-body);margin-bottom:1.2rem">Don't see your destination? We cover 47+ countries — let's talk.</p>
-      <button class="btn-primary" onclick="showPage('contact')">Ask About Your Destination →</button>
-    </div>
-  </section>
-</div>
-
-<!-- ============ CONTACT PAGE ============ -->
-<div class="page" id="page-contact">
-  <section style="padding-top:140px">
-    <div class="section-tag">Get In Touch</div>
-    <h1 class="section-title">Start Your Journey <strong>Today</strong></h1>
-    <p class="section-sub">Fill in the form below and one of our consultants will reach out within 24 hours with a personalized consultation plan.</p>
-
-    <div class="contact-grid">
-      <div class="contact-info">
-        <div class="contact-detail">
-          <div class="contact-icon">📧</div>
-          <div>
-            <h4>Email Us</h4>
-            <a href="mailto:insights.skyglobe@gmail.com">insights.skyglobe@gmail.com</a>
-          </div>
-        </div>
-        <div class="contact-detail">
-          <div class="contact-icon">📞</div>
-          <div>
-            <h4>Call Us</h4>
-            <a href="tel:+17373998522">+1 737-399-8522</a>
-          </div>
-        </div>
-        <div class="contact-detail">
-          <div class="contact-icon">📍</div>
-          <div>
-            <h4>Our Office</h4>
-            <p>123 Fifth Avenue, Suite 450<br>New York, NY 10011, USA</p>
-          </div>
-        </div>
-        <div class="contact-detail">
-          <div class="contact-icon">🕐</div>
-          <div>
-            <h4>Office Hours</h4>
-            <p>Monday – Friday: 9am – 6pm EST<br>Saturday: 10am – 3pm EST</p>
-          </div>
-        </div>
-        <a href="https://wa.me/17373998522" class="wa-btn" target="_blank">
-          💬 Chat on WhatsApp — Fast Response
-        </a>
-        <div style="margin-top:2rem;padding:1.5rem;background:rgba(201,168,76,0.08);border:1px solid var(--border);border-radius:var(--radius);border-left:3px solid var(--gold)">
-          <p style="font-size:0.88rem;color:var(--text-body);line-height:1.7"><strong style="color:var(--gold-light)">Free Consultation Included.</strong><br>Your first 30-minute consultation is completely free — no obligation, no pressure. Just expert guidance to help you understand your options.</p>
-        </div>
-      </div>
-
-      <div class="contact-form">
-        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;margin-bottom:1.5rem">Book a <strong>Free Consultation</strong></h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>First Name *</label>
-            <input type="text" placeholder="John" id="fname">
-          </div>
-          <div class="form-group">
-            <label>Last Name *</label>
-            <input type="text" placeholder="Doe" id="lname">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Email Address *</label>
-          <input type="email" placeholder="john.doe@email.com" id="email">
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" placeholder="+1 000 000 0000" id="phone">
-        </div>
-        <div class="form-group">
-          <label>Service Interested In *</label>
-          <select id="service">
-            <option value="">— Select a Service —</option>
-            <option>Student Visa Processing</option>
-            <option>Work Visa Processing</option>
-            <option>Visit / Tourist Visa</option>
-            <option>Flight Reservation</option>
-            <option>Travel Insurance</option>
-            <option>University Admission Assistance</option>
-            <option>Scholarship Support</option>
-            <option>Hotel Booking</option>
-            <option>Document Verification</option>
-            <option>Immigration Consultation</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Target Destination</label>
-          <input type="text" placeholder="e.g. United Kingdom, Canada..." id="destination">
-        </div>
-        <div class="form-group">
-          <label>Tell Us About Your Goals</label>
-          <textarea placeholder="Share a bit about your situation, timeline, and what you hope to achieve..." id="message"></textarea>
-        </div>
-        <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitForm()">
-          ✦ Submit Consultation Request
-        </button>
-        <p style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:1rem">🔒 Your information is secure and never shared with third parties.</p>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- FOOTER (shown on all pages) -->
 <footer>
-  <div class="footer-grid">
-    <div class="footer-brand">
-      <div class="nav-logo" style="cursor:default">
-        <div class="nav-logo-icon">🌐</div>
-        <div class="nav-logo-text">SKY<span>GLOBE</span> <span style="font-family:'Outfit',sans-serif;font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0.02em">LIMITED</span></div>
-      </div>
-      <p>Your trusted partner for global travel, immigration, and education. Turning international ambitions into lived realities since 2016.</p>
-    </div>
-    <div class="footer-col">
-      <h5>Services</h5>
-      <ul>
-        <li><a onclick="showPage('services')">Student Visa</a></li>
-        <li><a onclick="showPage('services')">Work Visa</a></li>
-        <li><a onclick="showPage('services')">Tourist Visa</a></li>
-        <li><a onclick="showPage('services')">University Admission</a></li>
-        <li><a onclick="showPage('services')">Scholarship Support</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h5>Company</h5>
-      <ul>
-        <li><a onclick="showPage('about')">About Us</a></li>
-        <li><a onclick="showPage('destinations')">Destinations</a></li>
-        <li><a onclick="showPage('contact')">Contact</a></li>
-        <li><a onclick="showPage('contact')">Free Consultation</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h5>Contact</h5>
-      <ul>
-        <li><a href="mailto:insights.skyglobe@gmail.com">insights.skyglobe@gmail.com</a></li>
-        <li><a href="tel:+17373998522">+1 737-399-8522</a></li>
-        <li><a>123 Fifth Ave, Suite 450</a></li>
-        <li><a>New York, NY 10011</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>© 2025 Skyglobe Limited. All rights reserved.</span>
-    <span>Trusted Global Travel & Immigration Consultancy</span>
-  </div>
+  © 2026 Skyglobe Limited — All Rights Reserved
 </footer>
 
-<!-- WhatsApp Float -->
-<a href="https://wa.me/17373998522" class="wa-float" target="_blank" title="Chat on WhatsApp">💬</a>
-
-<!-- Toast -->
-<div class="toast" id="toast">✅ Consultation request submitted! We'll be in touch within 24 hours.</div>
+<div class="toast" id="toast"></div>
 
 <script>
-// PAGE ROUTING
-function showPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.querySelectorAll('.nav-links a').forEach(a => {
-    a.classList.toggle('active', a.dataset.page === page);
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// NAV SCROLL
-window.addEventListener('scroll', () => {
-  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+window.addEventListener("load", () => {
+  document.getElementById("loader").style.display = "none";
 });
 
-// MOBILE MENU
-function toggleMenu() {
-  document.getElementById('mobileMenu').classList.toggle('open');
+// Smooth scroll
+function scrollToSection(id){
+  document.getElementById(id).scrollIntoView({behavior:"smooth"});
 }
 
-// FORM SUBMIT
-function submitForm() {
-  const fname = document.getElementById('fname').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const service = document.getElementById('service').value;
-  if (!fname || !email || !service) {
-    showToast('⚠️ Please fill in your name, email, and service selection.', true);
+// reveal animation
+const cards = document.querySelectorAll(".card");
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add("show");
+    }
+  });
+},{threshold:0.2});
+
+cards.forEach(c=>observer.observe(c));
+
+// toast
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.innerText=msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3000);
+}
+
+// form
+function submitForm(){
+  const name=document.getElementById("name").value;
+  const email=document.getElementById("email").value;
+  const service=document.getElementById("service").value;
+
+  if(!name||!email||service==="Select Service"){
+    showToast("Fill all required fields");
     return;
   }
-  showToast('✅ Request submitted! We\'ll contact you within 24 hours.');
-  // Clear form
-  ['fname','lname','email','phone','service','destination','message'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+
+  showToast("Request submitted successfully!");
 }
+</script>
 
-function submitForm() {
-  const fname = document.getElementById('fname').value.trim();
-  const lname = document.getElementById('lname').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const service = document.getElementById('service').value;
-  const destination = document.getElementById('destination').value;
-  const message = document.getElementById('message').value;
-
-  if (!fname || !email || !service) {
-    showToast('⚠️ Please fill required fields.', true);
-    return;
-  }
-
-  emailjs.send("YOUR_SERVICE_ID", "template_repg5mi", {
-    fname: fname,
-    lname: lname,
-    email: email,
-    phone: phone,
-    service: service,
-    destination: destination,
-    message: message
-  }).then(() => {
-    showToast("✅ Request sent successfully!");
-  }).catch((error) => {
-    console.log(error);
-    showToast("❌ Failed to send. Try again.", true);
-  });
-}
+</body>
+</html>
