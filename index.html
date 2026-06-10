@@ -1401,4 +1401,132 @@ function renderCountryCard(c, idx) {
         </div>
         <div style="color:var(--gold);font-size:1.2rem" id="arrow-c${idx}">▼</div>
       </div>
-      <div class="result-body">${
+      <div class="result-body">${official}${subregion ? ' — ' + subregion : ''}. Capital: <strong style="color:var(--white)">${capital}</strong>. Population: <strong style="color:var(--white)">${population}</strong>.</div>
+      <div class="result-tags">
+        <span class="result-tag">${region}</span>
+        ${subregion ? `<span class="result-tag">${subregion}</span>` : ''}
+        <span class="result-tag">Pop: ${population}</span>
+      </div>
+      <div class="result-detail" id="detail-c${idx}">
+        <div class="detail-grid" style="margin-top:0.5rem">
+          <div class="detail-item"><strong>Capital</strong><span>${capital}</span></div>
+          <div class="detail-item"><strong>Population</strong><span>${population}</span></div>
+          <div class="detail-item"><strong>Area</strong><span>${area}</span></div>
+          <div class="detail-item"><strong>Currency</strong><span>${currencies}</span></div>
+          <div class="detail-item"><strong>Languages</strong><span>${languages}</span></div>
+          <div class="detail-item"><strong>Region</strong><span>${region}${subregion ? ' / ' + subregion : ''}</span></div>
+          <div class="detail-item"><strong>Timezones</strong><span>${timezones}</span></div>
+          <div class="detail-item"><strong>Internet TLD</strong><span>${tld}</span></div>
+          <div class="detail-item"><strong>Driving Side</strong><span>${drive}</span></div>
+        </div>
+        <div style="margin-top:1.2rem;display:flex;gap:0.8rem;flex-wrap:wrap">
+          <button class="btn-primary" style="font-size:0.85rem;padding:10px 20px" onclick="event.stopPropagation();searchFor('${name} visa')">🛂 ${name} Visa Info</button>
+          <button class="btn-outline" style="font-size:0.85rem;padding:10px 20px" onclick="event.stopPropagation();showPage('contact')">✦ Get Consultation</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('searchResults');
+  const popularEl = document.getElementById('popularSection');
+
+  if (!q) {
+    popularEl.style.display = 'block';
+    resultsEl.innerHTML = '';
+    return;
+  }
+  popularEl.style.display = 'none';
+
+  let kbResults = KB.filter(item => {
+    const matchFilter = activeFilter === 'all' || item.cat === activeFilter;
+    const matchQuery = item.title.toLowerCase().includes(q) ||
+      item.summary.toLowerCase().includes(q) ||
+      item.tags.some(t => t.toLowerCase().includes(q)) ||
+      item.cat.toLowerCase().includes(q);
+    return matchFilter && matchQuery;
+  });
+
+  let countryResults = [];
+  let countriesStillLoading = false;
+  if (activeFilter === 'all' || activeFilter === 'country') {
+    if (!countriesLoaded) {
+      loadAllCountries();
+      countriesStillLoading = true;
+    } else {
+      countryResults = ALL_COUNTRIES.filter(c => {
+        const name = (c.name?.common || '').toLowerCase();
+        const official = (c.name?.official || '').toLowerCase();
+        const capital = (c.capital?.[0] || '').toLowerCase();
+        const region = (c.region || '').toLowerCase();
+        const subregion = (c.subregion || '').toLowerCase();
+        const currencies = c.currencies ? Object.values(c.currencies).map(cu=>cu.name).join(' ').toLowerCase() : '';
+        const languages = c.languages ? Object.values(c.languages).join(' ').toLowerCase() : '';
+        return name.includes(q) || official.includes(q) || capital.includes(q) ||
+               region.includes(q) || subregion.includes(q) || languages.includes(q) || currencies.includes(q);
+      }).sort((a, b) => (b.population || 0) - (a.population || 0)).slice(0, 20);
+    }
+  }
+
+  const totalCount = kbResults.length + countryResults.length;
+
+  if (totalCount === 0 && !countriesStillLoading) {
+    resultsEl.innerHTML = `<div class="no-results"><div class="nr-icon">🔍</div><p>No results found for "<strong>${q}</strong>"</p><p style="font-size:0.85rem;margin-top:0.5rem;color:var(--muted)">Try any country name, city, visa type, university, work permit, insurance, or scholarship</p></div>`;
+    return;
+  }
+
+  const kbHTML = kbResults.map((item, i) => `
+    <div class="result-card" onclick="toggleDetail(${i})">
+      <div class="result-card-header">
+        <div class="result-icon">${item.icon}</div>
+        <div style="flex:1">
+          <div class="result-category">${item.cat.toUpperCase()}</div>
+          <div class="result-title">${item.title}</div>
+        </div>
+        <div style="color:var(--gold);font-size:1.2rem" id="arrow-${i}">▼</div>
+      </div>
+      <div class="result-body">${item.summary}</div>
+      <div class="result-tags">${item.tags.map(t=>`<span class="result-tag">${t}</span>`).join('')}</div>
+      <div class="result-detail" id="detail-${i}">
+        ${item.details.requirements ? `<p style="font-size:0.82rem;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem">Requirements</p><ul>${item.details.requirements.map(r=>`<li>${r}</li>`).join('')}</ul>` : ''}
+        <div class="detail-grid" style="margin-top:1rem">
+          ${item.details.duration?`<div class="detail-item"><strong>Duration</strong><span>${item.details.duration}</span></div>`:''}
+          ${item.details.processing?`<div class="detail-item"><strong>Processing Time</strong><span>${item.details.processing}</span></div>`:''}
+          ${item.details.cost?`<div class="detail-item"><strong>Cost</strong><span>${item.details.cost}</span></div>`:''}
+          ${item.details.workRights&&item.details.workRights!=='N/A'?`<div class="detail-item"><strong>Work Rights</strong><span>${item.details.workRights}</span></div>`:''}
+        </div>
+        ${item.details.successTips?`<p style="font-size:0.82rem;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin:1rem 0 0.6rem">Tips for Success</p><ul>${item.details.successTips.map(t=>`<li>${t}</li>`).join('')}</ul>`:''}
+        <div style="margin-top:1.2rem"><button class="btn-primary" style="font-size:0.85rem;padding:10px 20px" onclick="event.stopPropagation();showPage('contact')">✦ Get Help With This</button></div>
+      </div>
+    </div>`).join('');
+
+  const countryHTML = countryResults.map((c, i) => renderCountryCard(c, i)).join('');
+
+  const loadingNote = countriesStillLoading ? `<div style="text-align:center;padding:2rem;color:var(--muted);border:1px solid var(--border);border-radius:var(--radius-lg);margin-top:1rem">🌍 Loading world countries data… please wait a moment</div>` : '';
+
+  const countrySection = countryResults.length > 0 ? `
+    ${kbResults.length > 0 ? `<div style="margin:1.5rem 0 1rem;font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold)">🌍 World Countries (${countryResults.length})</div>` : ''}
+    ${countryHTML}` : '';
+
+  resultsEl.innerHTML = `<p class="results-count">${totalCount} result${totalCount>1?'s':''} found for "<strong>${q}</strong>"</p>` + kbHTML + countrySection + loadingNote;
+}
+
+function toggleDetail(i) {
+  const d = document.getElementById('detail-'+i);
+  const a = document.getElementById('arrow-'+i);
+  if (!d) return;
+  d.classList.toggle('open');
+  a.textContent = d.classList.contains('open') ? '▲' : '▼';
+}
+
+// Pre-load countries when search page is first visited
+const _origShowPage = showPage;
+showPage = function(page) {
+  _origShowPage(page);
+  if (page === 'search' && !countriesLoaded) loadAllCountries();
+};
+
+</script>
+</body>
+</html>
