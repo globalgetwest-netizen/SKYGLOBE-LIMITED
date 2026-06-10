@@ -184,16 +184,53 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 .mission-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem}
 .mission-card h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--gold);margin-bottom:1rem}
 .mission-card p{color:var(--text-body);line-height:1.75;font-size:0.95rem}
-.team-strip{margin-top:4rem}
 .values-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:2rem}
 .value-card{background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center}
 .value-card .v-icon{font-size:2rem;margin-bottom:0.8rem;display:block}
 .value-card h4{font-weight:600;margin-bottom:0.4rem}
 .value-card p{font-size:0.83rem;color:var(--text-body)}
+/* SEARCH PAGE */
+.search-hero{text-align:center;padding:140px 5% 40px}
+.search-box{display:flex;gap:0;max-width:680px;margin:2rem auto 0;border-radius:14px;overflow:hidden;border:2px solid var(--border-strong);background:rgba(255,255,255,0.04)}
+.search-box input{flex:1;background:transparent;border:none;padding:18px 24px;color:var(--white);font-family:'Outfit',sans-serif;font-size:1rem;outline:none}
+.search-box input::placeholder{color:var(--muted)}
+.search-box button{background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;padding:0 28px;cursor:pointer;font-size:1.2rem;transition:var(--trans)}
+.search-box button:hover{opacity:0.9}
+.search-filters{display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;margin:1.5rem auto;max-width:680px}
+.filter-btn{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:100px;padding:6px 18px;color:var(--text-body);font-size:0.82rem;cursor:pointer;transition:var(--trans);font-family:'Outfit',sans-serif}
+.filter-btn:hover,.filter-btn.active{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold-light)}
+.search-results{padding:0 5% 80px;max-width:1100px;margin:0 auto}
+.results-count{font-size:0.88rem;color:var(--muted);margin-bottom:1.5rem}
+.result-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.8rem;margin-bottom:1rem;transition:var(--trans);cursor:pointer}
+.result-card:hover{border-color:var(--gold);background:rgba(201,168,76,0.05)}
+.result-card-header{display:flex;align-items:flex-start;gap:1rem;margin-bottom:0.8rem}
+.result-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;background:rgba(201,168,76,0.1);border:1px solid var(--border)}
+.result-category{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);font-weight:600;margin-bottom:0.3rem}
+.result-title{font-size:1.05rem;font-weight:600;color:var(--white)}
+.result-body{font-size:0.88rem;color:var(--text-body);line-height:1.7}
+.result-tags{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.8rem}
+.result-tag{font-size:0.72rem;background:rgba(201,168,76,0.1);border:1px solid var(--border);color:var(--gold-light);padding:3px 10px;border-radius:100px}
+.result-detail{display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.result-detail.open{display:block}
+.result-detail ul{list-style:none;display:flex;flex-direction:column;gap:0.4rem}
+.result-detail ul li{font-size:0.87rem;color:var(--text-body);padding-left:1rem;position:relative}
+.result-detail ul li::before{content:'→';position:absolute;left:0;color:var(--gold)}
+.result-detail .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:0.8rem}
+.result-detail .detail-item{background:rgba(255,255,255,0.03);border-radius:8px;padding:0.8rem;border:1px solid var(--border)}
+.result-detail .detail-item strong{display:block;font-size:0.78rem;color:var(--gold);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.06em}
+.result-detail .detail-item span{font-size:0.85rem;color:var(--text-body)}
+.no-results{text-align:center;padding:4rem 0;color:var(--muted)}
+.no-results .nr-icon{font-size:3rem;margin-bottom:1rem}
+.search-popular{max-width:680px;margin:0 auto;text-align:center}
+.search-popular p{font-size:0.85rem;color:var(--muted);margin-bottom:0.8rem}
+.popular-tags{display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center}
+.popular-tag{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:100px;padding:5px 14px;color:var(--text-body);font-size:0.82rem;cursor:pointer;transition:var(--trans)}
+.popular-tag:hover{border-color:var(--gold);color:var(--gold-light)}
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav id="navbar">
   <div class="nav-logo" onclick="showPage('home')">
     <div class="nav-logo-icon">🌐</div>
@@ -204,6 +241,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
     <li><a onclick="showPage('about')" data-page="about">About</a></li>
     <li><a onclick="showPage('services')" data-page="services">Services</a></li>
     <li><a onclick="showPage('destinations')" data-page="destinations">Destinations</a></li>
+    <li><a onclick="showPage('search')" data-page="search">🔍 Search</a></li>
     <li><a onclick="showPage('contact')" class="nav-cta" data-page="contact">Get Consultation</a></li>
   </ul>
   <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu">
@@ -211,6 +249,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   </div>
 </nav>
 
+<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
   <div class="nav-logo" onclick="showPage('home');toggleMenu()">
     <div class="nav-logo-icon">🌐</div>
@@ -220,9 +259,11 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   <a onclick="showPage('about');toggleMenu()">About</a>
   <a onclick="showPage('services');toggleMenu()">Services</a>
   <a onclick="showPage('destinations');toggleMenu()">Destinations</a>
+  <a onclick="showPage('search');toggleMenu()">🔍 Search</a>
   <a onclick="showPage('contact');toggleMenu()">Contact</a>
 </div>
 
+<!-- HOME PAGE -->
 <div class="page active" id="page-home">
   <section class="hero">
     <div class="hero-bg">
@@ -349,6 +390,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   </section>
 </div>
 
+<!-- ABOUT PAGE -->
 <div class="page" id="page-about">
   <section style="padding-top:140px">
     <div class="section-tag">Our Story</div>
@@ -361,7 +403,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
     <div style="margin-top:4rem">
       <div class="section-tag">Why We're Different</div>
       <h2 class="section-title">Why <strong>12,000+ Clients</strong> Trust Skyglobe</h2>
-      <div class="values-grid" style="margin-top:2rem">
+      <div class="values-grid">
         <div class="value-card"><span class="v-icon">🏆</span><h4>98% Success Rate</h4><p>Industry-leading visa approval record built over 8 years of expert practice</p></div>
         <div class="value-card"><span class="v-icon">⚡</span><h4>Fast Turnaround</h4><p>Streamlined processes mean faster applications without sacrificing quality</p></div>
         <div class="value-card"><span class="v-icon">🤝</span><h4>End-to-End Support</h4><p>From initial consultation to arrival — we're with you every step of the journey</p></div>
@@ -387,6 +429,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   </section>
 </div>
 
+<!-- SERVICES PAGE -->
 <div class="page" id="page-services">
   <section style="padding-top:140px">
     <div class="section-tag">Full Services</div>
@@ -412,29 +455,27 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   </section>
 </div>
 
+<!-- DESTINATIONS PAGE -->
 <div class="page" id="page-destinations">
   <section style="padding-top:140px">
     <div class="section-tag">Destinations</div>
     <h1 class="section-title">Where We Can <strong>Take You</strong></h1>
     <p class="section-sub">We operate in 47 countries across 5 major regions. Here's a snapshot of visa requirements and opportunities in each area.</p>
     <div style="margin-top:3rem">
-      <div class="dest-region">
-        <h3>🇺🇸 North America</h3>
+      <div class="dest-region"><h3>🇺🇸 North America</h3>
         <div class="dest-info-grid">
           <div class="dest-info-card"><span class="flag">🇺🇸</span><h4>United States</h4><ul><li>F-1 Student Visa</li><li>H-1B Work Visa</li><li>B-1/B-2 Visitor Visa</li><li>O-1 Extraordinary Ability</li><li>J-1 Exchange Visitor</li></ul></div>
           <div class="dest-info-card"><span class="flag">🇨🇦</span><h4>Canada</h4><ul><li>Study Permit</li><li>Express Entry (PR)</li><li>Work Permit</li><li>Visitor Visa</li><li>Provincial Nominee Program</li></ul></div>
           <div class="dest-info-card"><span class="flag">🇲🇽</span><h4>Mexico & Caribbean</h4><ul><li>Tourist Visa</li><li>Temporary Resident</li><li>Business Visa</li><li>Retirement Visa</li></ul></div>
         </div>
       </div>
-      <div class="dest-region">
-        <h3>🇬🇧 United Kingdom</h3>
+      <div class="dest-region"><h3>🇬🇧 United Kingdom</h3>
         <div class="dest-info-grid">
           <div class="dest-info-card"><span class="flag">🇬🇧</span><h4>United Kingdom</h4><ul><li>Student Visa (formerly Tier 4)</li><li>Skilled Worker Visa</li><li>Standard Visitor Visa</li><li>Graduate Visa (Post-Study Work)</li><li>Global Talent Visa</li></ul></div>
           <div class="dest-info-card"><span class="flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span><h4>Scotland & Ireland</h4><ul><li>Independent pathways</li><li>Scottish Graduate Route</li><li>IRL Critical Skills Permit</li><li>Irish Student Visa</li></ul></div>
         </div>
       </div>
-      <div class="dest-region">
-        <h3>🇪🇺 Europe</h3>
+      <div class="dest-region"><h3>🇪🇺 Europe</h3>
         <div class="dest-info-grid">
           <div class="dest-info-card"><span class="flag">🇩🇪</span><h4>Germany</h4><ul><li>Student Visa</li><li>Skilled Worker Visa</li><li>Job Seeker Visa</li><li>Schengen (tourist)</li></ul></div>
           <div class="dest-info-card"><span class="flag">🇫🇷</span><h4>France</h4><ul><li>Long-Stay Student Visa</li><li>Talent Passport</li><li>Schengen Visa</li><li>Work Authorization</li></ul></div>
@@ -442,8 +483,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
           <div class="dest-info-card"><span class="flag">🇦🇺</span><h4>Australia & NZ</h4><ul><li>Student Visa (Subclass 500)</li><li>Skilled Independent (189)</li><li>Working Holiday</li><li>Employer Sponsored</li></ul></div>
         </div>
       </div>
-      <div class="dest-region">
-        <h3>🌏 Asia</h3>
+      <div class="dest-region"><h3>🌏 Asia</h3>
         <div class="dest-info-grid">
           <div class="dest-info-card"><span class="flag">🇯🇵</span><h4>Japan</h4><ul><li>Student Visa</li><li>Specified Skilled Worker</li><li>Short-Term Stay</li><li>Cultural Activities Visa</li></ul></div>
           <div class="dest-info-card"><span class="flag">🇸🇬</span><h4>Singapore & UAE</h4><ul><li>Employment Pass</li><li>Student Pass</li><li>Golden Visa (UAE)</li><li>Work Permit</li></ul></div>
@@ -458,6 +498,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   </section>
 </div>
 
+<!-- CONTACT PAGE -->
 <div class="page" id="page-contact">
   <section style="padding-top:140px">
     <div class="section-tag">Get In Touch</div>
@@ -471,7 +512,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
         <div class="contact-detail"><div class="contact-icon">🕐</div><div><h4>Office Hours</h4><p>Monday – Friday: 9am – 6pm EST<br>Saturday: 10am – 3pm EST</p></div></div>
         <a href="https://wa.me/17373998522" class="wa-btn" target="_blank">💬 Chat on WhatsApp — Fast Response</a>
         <div style="margin-top:2rem;padding:1.5rem;background:rgba(201,168,76,0.08);border:1px solid var(--border);border-radius:var(--radius);border-left:3px solid var(--gold)">
-          <p style="font-size:0.88rem;color:var(--text-body);line-height:1.7"><strong style="color:var(--gold-light)">Free Consultation Included.</strong><br>Your first 30-minute consultation is completely free — no obligation, no pressure. Just expert guidance to help you understand your options.</p>
+          <p style="font-size:0.88rem;color:var(--text-body);line-height:1.7"><strong style="color:var(--gold-light)">Free Consultation Included.</strong><br>Your first 30-minute consultation is completely free — no obligation, no pressure.</p>
         </div>
       </div>
       <div class="contact-form">
@@ -507,6 +548,46 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   </section>
 </div>
 
+<!-- SEARCH PAGE -->
+<div class="page" id="page-search">
+  <div class="search-hero">
+    <div class="section-tag">Knowledge Base</div>
+    <h1 class="section-title">Search <strong>Real Information</strong></h1>
+    <p class="section-sub" style="margin:0 auto">Search for countries, universities, visa types, work permits, travel insurance, hotels and more — real detailed information.</p>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search e.g. USA student visa, Oxford University, Canada work permit..." oninput="doSearch()" onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
+    </div>
+    <div class="search-filters">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('visa',this)">🛂 Visas</button>
+      <button class="filter-btn" onclick="setFilter('university',this)">🎓 Universities</button>
+      <button class="filter-btn" onclick="setFilter('country',this)">🌍 Countries</button>
+      <button class="filter-btn" onclick="setFilter('work',this)">💼 Work Permits</button>
+      <button class="filter-btn" onclick="setFilter('hotel',this)">🏨 Hotels</button>
+      <button class="filter-btn" onclick="setFilter('insurance',this)">🛡️ Insurance</button>
+      <button class="filter-btn" onclick="setFilter('scholarship',this)">🌟 Scholarships</button>
+    </div>
+    <div class="search-popular" id="popularSection">
+      <p>Popular searches:</p>
+      <div class="popular-tags">
+        <span class="popular-tag" onclick="searchFor('UK student visa')">UK Student Visa</span>
+        <span class="popular-tag" onclick="searchFor('Canada work permit')">Canada Work Permit</span>
+        <span class="popular-tag" onclick="searchFor('Harvard University')">Harvard University</span>
+        <span class="popular-tag" onclick="searchFor('Schengen visa')">Schengen Visa</span>
+        <span class="popular-tag" onclick="searchFor('Australia skilled visa')">Australia Skilled Visa</span>
+        <span class="popular-tag" onclick="searchFor('travel insurance')">Travel Insurance</span>
+        <span class="popular-tag" onclick="searchFor('Dubai work permit')">Dubai Work Permit</span>
+        <span class="popular-tag" onclick="searchFor('Oxford University')">Oxford University</span>
+        <span class="popular-tag" onclick="searchFor('USA F1 visa')">USA F1 Visa</span>
+        <span class="popular-tag" onclick="searchFor('Germany job seeker')">Germany Job Seeker</span>
+      </div>
+    </div>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- FOOTER -->
 <footer>
   <div class="footer-grid">
     <div class="footer-brand">
@@ -538,15 +619,12 @@ function showPage(page) {
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 window.addEventListener('scroll', () => {
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
 });
-
 function toggleMenu() {
   document.getElementById('mobileMenu').classList.toggle('open');
 }
-
 async function submitForm() {
   const fname = document.getElementById('fname').value.trim();
   const lname = document.getElementById('lname').value.trim();
@@ -555,16 +633,13 @@ async function submitForm() {
   const service = document.getElementById('service').value;
   const destination = document.getElementById('destination').value.trim();
   const message = document.getElementById('message').value.trim();
-
   if (!fname || !email || !service) {
     showToast('⚠️ Please fill in your name, email, and service selection.', true);
     return;
   }
-
   const btn = document.querySelector('#page-contact .btn-primary');
   btn.disabled = true;
   btn.textContent = 'Sending…';
-
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -579,13 +654,11 @@ async function submitForm() {
     });
   } catch (err) {
     showToast('⚠️ Failed to send. Please email us directly or try WhatsApp.', true);
-    console.error('Contact form error:', err);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '✦ Submit Consultation Request';
   }
 }
-
 function showToast(msg, isError) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -599,8 +672,545 @@ function showToast(msg, isError) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 4000);
 }
-
 document.querySelector('[data-page="home"]').classList.add('active');
+
+// SEARCH KNOWLEDGE BASE
+const KB = [
+  {cat:'visa',icon:'🛂',title:'USA F-1 Student Visa',tags:['USA','student','university','america'],
+   summary:'The F-1 visa is a non-immigrant student visa that allows foreign nationals to pursue full-time academic studies at accredited US institutions.',
+   details:{
+     requirements:['Valid passport (6+ months beyond stay)','Form I-20 from a SEVIS-approved school','DS-160 online application form','SEVIS fee payment ($350)','Proof of financial support ($20,000–$50,000/year)','Academic transcripts and diplomas','English proficiency (TOEFL/IELTS)','Visa interview at US Embassy'],
+     duration:'Duration of Status (D/S) — stays as long as enrolled',
+     processing:'3–5 weeks (varies by embassy)',
+     cost:'$185 visa application fee + $350 SEVIS fee',
+     workRights:'On-campus: 20hrs/week. Off-campus (OPT/CPT): requires authorization',
+     successTips:['Show strong ties to home country','Prove sufficient funds','Have clear study plan','Book interview early — slots fill fast']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'UK Student Visa (formerly Tier 4)',tags:['UK','student','britain','england'],
+   summary:'The UK Student Visa allows you to study at a licensed UK education provider. You must have a Confirmation of Acceptance for Studies (CAS) from your university.',
+   details:{
+     requirements:['CAS number from UK university','Valid passport','English proficiency (IELTS 5.5–7.0 depending on course)','Proof of funds: £1,334/month in London, £1,023/month outside London','Tuberculosis test (some countries)','Academic qualifications'],
+     duration:'Course length + 4 months (undergraduate), + 2 months (postgraduate)',
+     processing:'3 weeks (online), up to 6 weeks (paper)',
+     cost:'£363 visa fee + £776/year Immigration Health Surcharge',
+     workRights:'20 hrs/week during term, full-time during holidays',
+     successTips:['Apply no earlier than 6 months before course start','Maintain £1,334/month for 28 consecutive days in bank','Get CAS before applying']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'Canada Study Permit',tags:['canada','student','university','study'],
+   summary:'A Study Permit is required for most international students studying in Canada for programs longer than 6 months.',
+   details:{
+     requirements:['Letter of acceptance from a DLI (Designated Learning Institution)','Proof of financial support ($10,000/year + tuition)','Valid passport','Medical exam (some countries)','Police certificate','Proof of English/French proficiency'],
+     duration:'Length of study program + 90 days',
+     processing:'8–12 weeks (online applications faster)',
+     cost:'CAD $150',
+     workRights:'20 hrs/week off-campus during studies, full-time during scheduled breaks',
+     successTips:['Apply as soon as you receive acceptance letter','Show proof of funds clearly','PGWP after graduation allows 1–3 years work']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'Schengen Visa (Europe)',tags:['europe','schengen','tourist','travel','germany','france','italy'],
+   summary:'The Schengen Visa allows travel to 27 European countries within the Schengen Area for up to 90 days in any 180-day period.',
+   details:{
+     requirements:['Valid passport (3+ months beyond stay)','Completed Schengen application form','2 passport photos','Travel insurance (min €30,000 coverage)','Flight itinerary (return ticket)','Hotel/accommodation proof','Bank statements (last 3–6 months)','Cover letter explaining purpose of visit'],
+     duration:'Up to 90 days within 180-day period',
+     processing:'15 calendar days (can take up to 30–60 days)',
+     cost:'€80 adults, €40 children (6–12 years), free under 6',
+     workRights:'No work rights on standard Schengen tourist visa',
+     successTips:['Apply at the embassy of your main destination country','Book refundable flights and hotels','Show sufficient funds: €50–100/day','Apply 3–4 weeks in advance']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'Australia Student Visa (Subclass 500)',tags:['australia','student','study'],
+   summary:'The Student Visa (subclass 500) lets you stay in Australia to study full-time in a registered course.',
+   details:{
+     requirements:['Confirmation of Enrolment (CoE) from CRICOS-registered provider','Genuine Temporary Entrant (GTE) requirement','English proficiency (IELTS 5.5–6.0)','Proof of financial capacity (AUD $21,041/year + tuition)','Overseas Student Health Cover (OSHC)','Valid passport'],
+     duration:'Length of course + 1–2 months',
+     processing:'75% of applications: 29 days; 90%: 40 days',
+     cost:'AUD $650',
+     workRights:'48 hrs/fortnight during semester, unlimited during breaks',
+     successTips:['Apply online via ImmiAccount','Demonstrate genuine intention to study and return home','Graduate Visa (subclass 485) available after graduation']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'Germany Student Visa',tags:['germany','student','study','europe'],
+   summary:'Germany offers free or low-cost university education. A national student visa (Type D) is required for non-EU citizens studying in Germany.',
+   details:{
+     requirements:['University admission letter','Blocked account: €11,208/year (approx €934/month)','Health insurance','Language proficiency (German B2/C1 or English C1)','APS certificate (for applicants from China, India, Vietnam)','Valid passport','Proof of accommodation'],
+     duration:'Initially 1–2 years, renewable',
+     processing:'4–12 weeks at German embassy',
+     cost:'€75',
+     workRights:'120 full days or 240 half days per year',
+     successTips:['Open a blocked account (Fintiba or Expatrio) early','Apply for language course visa first if needed','Many programs are taught in English — no German required']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'UAE Golden Visa',tags:['UAE','dubai','golden visa','residency'],
+   summary:'The UAE Golden Visa is a long-term residency visa valid for 5 or 10 years, renewable, for investors, entrepreneurs, professionals, and outstanding students.',
+   details:{
+     requirements:['Investors: AED 2 million property investment','Entrepreneurs: approved startup or AED 500K capital','Professionals: valid employment contract, salary AED 30,000+/month','Researchers/specialists: recommended by MOHESR','Outstanding students: GPA 3.75+ from UAE university or top world university'],
+     duration:'5 or 10 years (renewable)',
+     processing:'2–4 weeks',
+     cost:'Varies: AED 2,800–4,000 approx',
+     workRights:'Full work rights — sponsor yourself and family',
+     successTips:['No need for an Emirati sponsor','Family members included','Can stay outside UAE for more than 6 months without visa expiry']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'USA H-1B Work Visa',tags:['USA','work','america','h1b','tech'],
+   summary:"The H-1B is a non-immigrant work visa for specialty occupations requiring at least a bachelor's degree, commonly used in tech, finance, and engineering.",
+   details:{
+     requirements:["Job offer from US employer","Bachelor's degree or equivalent in specialty field","Employer must file Labor Condition Application (LCA)","Subject to annual cap: 65,000 regular + 20,000 for US master's holders"],
+     duration:'3 years, extendable to 6 years',
+     processing:'Standard: 3–6 months. Premium: 15 business days ($2,805 fee)',
+     cost:'$730 base fee + ACWIA fee + fraud prevention fee',
+     workRights:'Full-time work for sponsoring employer only',
+     successTips:['Registration lottery opens in March each year','Employers file petitions in April','OPT STEM extension increases H-1B chances','Consider O-1 visa if highly distinguished']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'UK Skilled Worker Visa',tags:['UK','work','skilled','britain'],
+   summary:'The UK Skilled Worker visa replaced the Tier 2 General visa. It allows you to work in the UK if you have a job offer from an approved employer.',
+   details:{
+     requirements:['Job offer from a UK Home Office-licensed sponsor','Certificate of Sponsorship (CoS)','Salary: at least £26,200/year or going rate for the role','English language: B1 level (CEFR)','Enough money to support yourself (£1,270 in bank for 28 days)'],
+     duration:'Up to 5 years, renewable',
+     processing:'3 weeks (inside UK), 3 weeks (outside UK)',
+     cost:'£719–£1,420 depending on length + Immigration Health Surcharge £776/year',
+     workRights:'Full-time for sponsoring employer. Can do second job in same SOC code.',
+     successTips:['After 5 years, apply for Indefinite Leave to Remain (ILR)','Shortage occupation list roles have lower salary threshold','Healthcare workers: IHS surcharge is refunded']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'Canada Express Entry (PR)',tags:['canada','permanent residence','express entry','skilled worker'],
+   summary:"Express Entry is Canada's primary system for managing applications for permanent residence for skilled workers through three programs: FSWP, FSTP, and CEC.",
+   details:{
+     requirements:['At least 1 year skilled work experience','Language proficiency: CLB 7+ (IELTS 6.0+)','Educational Credential Assessment (ECA)','Comprehensive Ranking System (CRS) score — competitive scores: 470–530+'],
+     duration:'Permanent Residence',
+     processing:'6 months from ITA (Invitation to Apply)',
+     cost:'CAD $1,365 principal applicant + CAD $1,365 spouse + CAD $230 per dependent child',
+     workRights:'Unlimited work rights anywhere in Canada',
+     successTips:['Improve CRS score: language test retake, provincial nomination, Canadian job offer','PNP (Provincial Nominee Program) adds 600 CRS points','Canadian education and work experience boosts CRS significantly']
+   }
+  },
+  {cat:'visa',icon:'🛂',title:'Germany Job Seeker Visa',tags:['germany','work','job seeker','europe'],
+   summary:'The Germany Job Seeker Visa allows qualified professionals to enter Germany for up to 6 months to look for a job matching their qualifications.',
+   details:{
+     requirements:['University degree recognized in Germany (or equivalent)','At least 5 years relevant work experience','Basic German language skills (helpful but not always required)','Proof of financial means: €1,027/month (€6,162 for 6 months)','Health insurance for the stay','Accommodation proof'],
+     duration:'6 months (non-extendable)',
+     processing:'4–12 weeks',
+     cost:'€75',
+     workRights:'Can work up to 10 hrs/week during job search. Full rights once employed.',
+     successTips:['Convert to work visa once job found — stay in Germany','Germany has critical shortage in IT, engineering, healthcare, skilled trades','Recognized qualification from anabin database required']
+   }
+  },
+  {cat:'university',icon:'🎓',title:'Harvard University — USA',tags:['harvard','USA','ivy league','university'],
+   summary:'Harvard University is a private Ivy League research university in Cambridge, Massachusetts. Consistently ranked #1–3 globally.',
+   details:{
+     requirements:['GPA: 3.9+ (unweighted)','SAT: 1460–1580 / ACT: 33–36','TOEFL: 100+ / IELTS: 7.0+','2–3 recommendation letters','Personal essays','Extracurricular achievements'],
+     duration:'Undergraduate: 4 years | Masters: 1–2 years | PhD: 4–6 years',
+     processing:'Regular Decision: Jan 1 deadline, notified in late March',
+     cost:'Tuition: ~$59,076/year | Total: ~$80,000/year | Financial aid available',
+     workRights:'F-1 visa: 20 hrs/week on-campus, OPT after graduation',
+     successTips:['Apply Early Action by Nov 1 for better odds','Acceptance rate: ~3.4%','Strong financial aid — meets 100% of demonstrated need','Apply to scholarships: Harvard College Financial Aid']
+   }
+  },
+  {cat:'university',icon:'🎓',title:'University of Oxford — UK',tags:['oxford','UK','britain','university'],
+   summary:'The University of Oxford is the oldest English-speaking university in the world, located in Oxford, UK. Ranked #1 globally multiple years.',
+   details:{
+     requirements:["A-levels: A*A*A to AAA depending on course","UCAS application via ucas.com","TOEFL: 100+ / IELTS: 7.0+","Personal statement","Interview (most courses)","Written work or admissions tests (BMAT, MAT, TSA, etc.)"],
+     duration:'Undergraduate: 3–4 years | Masters: 1 year | DPhil: 3–4 years',
+     processing:'UCAS deadline: October 15 for Oxford',
+     cost:'International tuition: £26,770–£39,010/year | Living: ~£1,200/month',
+     workRights:'UK Student Visa: 20 hrs/week during term',
+     successTips:['Apply only to Oxford OR Cambridge (not both via UCAS)','Prepare thoroughly for admissions tests','Oxford has 44 semi-autonomous colleges — research which college suits you','Rhodes Scholarship, Clarendon Fund available']
+   }
+  },
+  {cat:'university',icon:'🎓',title:'University of Toronto — Canada',tags:['toronto','canada','university'],
+   summary:"University of Toronto is Canada's top-ranked university and a global research powerhouse, located in Toronto, Ontario.",
+   details:{
+     requirements:['High school average: 85–95%+','TOEFL: 100+ / IELTS: 6.5+','Supplemental application for competitive programs','Reference letters (graduate level)'],
+     duration:'Undergraduate: 4 years | Masters: 1–2 years | PhD: 4–5 years',
+     processing:'Application deadline: January 13 (most undergrad programs)',
+     cost:'International tuition: CAD $45,000–$65,000/year | Living: CAD ~$15,000/year',
+     workRights:'Study permit: 20 hrs/week off-campus. PGWP available after graduation.',
+     successTips:['U of T has 700+ undergraduate programs','Strong co-op programs available','Post-Graduation Work Permit: up to 3 years',"Located in one of Canada's most diverse cities"]
+   }
+  },
+  {cat:'university',icon:'🎓',title:'MIT — Massachusetts Institute of Technology',tags:['MIT','USA','technology','engineering','university'],
+   summary:"MIT is the world's leading technology and engineering university, located in Cambridge, Massachusetts. Known for innovation and research.",
+   details:{
+     requirements:['GPA: 3.9+ (near perfect)','SAT: 1510–1580 / ACT: 34–36','TOEFL: 90+ / IELTS: 6.5+','Strong math and science background','Research experience highly valued','2–3 recommendations'],
+     duration:'Undergraduate: 4 years | Masters: 1–2 years | PhD: 4–7 years',
+     processing:'Early Action: Nov 1 | Regular: Jan 1 | Decision: mid-March',
+     cost:'Tuition: ~$59,750/year | Need-based aid — no merit scholarships',
+     workRights:'F-1 visa + OPT/STEM OPT (3 years for STEM)',
+     successTips:['Acceptance rate: ~3.9%','91% of undergrads receive financial aid','Strong alumni network in Silicon Valley, Wall Street','Research opportunities from freshman year']
+   }
+  },
+  {cat:'university',icon:'🎓',title:'University of Melbourne — Australia',tags:['melbourne','australia','university'],
+   summary:"The University of Melbourne is Australia's top-ranked university, a member of the Group of Eight research universities.",
+   details:{
+     requirements:['ATAR equivalent: 80–99 depending on course','TOEFL: 79+ / IELTS: 6.5+','Graduate Research: Honours degree or equivalent','Portfolio (architecture/fine arts)'],
+     duration:'Undergraduate: 3 years | Masters: 1.5–2 years | PhD: 3–4 years',
+     processing:'Multiple intakes: February and July',
+     cost:'International tuition: AUD $40,000–$50,000/year | Living: AUD ~$20,000/year',
+     workRights:'Student visa: 48 hrs/fortnight. Graduate visa (485): 2–4 years after graduation.',
+     successTips:['Melbourne Model: broad undergraduate then specialised masters','Strong graduate employment outcomes','Australia Global Alumni Award worth AUD $10,000','Research Training Program (RTP) scholarships for PhD students']
+   }
+  },
+  {cat:'university',icon:'🎓',title:'Technical University of Munich (TUM) — Germany',tags:['TUM','germany','engineering','university','europe'],
+   summary:"TU Munich is Germany's top-ranked technical university and one of Europe's best engineering and technology institutions. Many programs are tuition-free.",
+   details:{
+     requirements:["Bachelor's degree (first-class) in relevant field","GRE/GMAT (some programs)","TOEFL: 88+ / IELTS: 6.5+ (English programs)","German B2/C1 for German-language programs","APS certificate for Chinese, Indian, Vietnamese applicants"],
+     duration:'Masters: 2 years | PhD: 3–4 years',
+     processing:'Winter: May 31 deadline | Summer: Jan 15 deadline',
+     cost:'Semester fee: ~€145. No tuition for most programs! Living: ~€1,000/month',
+     workRights:'120 full days/year work rights on student visa',
+     successTips:['Germany charges no tuition at public universities','Blocked account required for visa: €11,208/year','TUM is ranked top 50 globally in Engineering','Deutschlandticket (€29/month) for all public transport']
+   }
+  },
+  {cat:'university',icon:'🎓',title:'McGill University — Canada',tags:['mcgill','canada','montreal','university'],
+   summary:'McGill University in Montreal is one of Canada\'s most prestigious universities, known for medicine, law, and sciences. Bilingual city — English and French.',
+   details:{
+     requirements:['High school average: 87–95%+','TOEFL: 86–100 / IELTS: 6.5–7.0','Supplemental application for medicine/dentistry','Letters of reference for graduate programs'],
+     duration:'Undergraduate: 3–4 years | Masters: 1.5–2 years | PhD: 4–5 years',
+     processing:'January 15 deadline for most undergraduate programs',
+     cost:'International tuition: CAD $21,000–$55,000/year | Living: CAD ~$15,000/year',
+     workRights:'20 hrs/week during studies. PGWP 1–3 years after graduation.',
+     successTips:['Montreal has lower cost of living than Toronto or Vancouver','Both English and French programs available','Strong medical and law schools','Quebec Experience Program (PEQ) pathway to Quebec PR']
+   }
+  },
+  {cat:'university',icon:'🎓',title:'Imperial College London — UK',tags:['imperial','london','UK','science','engineering','university'],
+   summary:'Imperial College London specialises in science, engineering, medicine and business. Located in South Kensington, London. Consistently top 10 globally.',
+   details:{
+     requirements:['A-levels: A*AA–AAA','UCAS application','TOEFL: 92+ / IELTS: 6.5+','BMAT for medicine','Personal statement emphasising STEM passion'],
+     duration:'Undergraduate: 3–4 years | Masters: 1 year | PhD: 3.5 years',
+     processing:'UCAS deadline: January 31 (most courses), October 15 (medicine)',
+     cost:'International tuition: £32,000–£45,000/year | Living: £1,500–£2,000/month in London',
+     workRights:'Student visa: 20 hrs/week during term, full-time in holidays',
+     successTips:['Graduate Visa allows 2 years work after graduation (3 for PhD)',"President's PhD Scholarships available (full funding)",'Strong industry links — placements at top companies','South Kensington campus next to world-class museums']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'United States of America',tags:['USA','america','united states'],
+   summary:"The USA is the world's largest economy and most popular destination for international students and skilled workers. Home to world's top universities.",
+   details:{
+     requirements:['Visa types: F-1 (student), H-1B (work), B1/B2 (tourist), O-1 (talent), J-1 (exchange)','ESTA for visa-waiver countries','Strong English required for study/work'],
+     duration:'Varies by visa type',
+     processing:'Tourist: 1–3 weeks | Student: 3–5 weeks | Work: 3–6 months',
+     cost:'Visa fees: $160–$290 depending on type',
+     workRights:'Depends on visa category',
+     successTips:["World's highest number of top-ranked universities",'Diverse cities: New York, San Francisco, Boston, Chicago','Healthcare is expensive — always get insurance','SSN (Social Security Number) needed to work legally']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'United Kingdom',tags:['UK','britain','england','london'],
+   summary:'The UK is home to world-class universities including Oxford and Cambridge. A top destination for international students with a post-study work visa available.',
+   details:{
+     requirements:['Student Visa, Skilled Worker Visa, BNO Visa, Ancestry Visa','English proficiency (IELTS/TOEFL) required','NHS provides healthcare — IHS surcharge applies'],
+     duration:'Varies by visa',
+     processing:'Student visa: 3 weeks | Skilled worker: 3 weeks',
+     cost:'IHS: £776/year on top of visa fee',
+     workRights:'Student: 20 hrs/week. Graduate Visa: 2 years unrestricted work.',
+     successTips:['Graduate Visa is very popular — 2 years to find work after graduation','5 years leads to ILR (permanent residence)','Strong job market in finance, tech, healthcare','London is most expensive — consider Manchester, Edinburgh, Birmingham']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'Canada',tags:['canada','toronto','vancouver','montreal'],
+   summary:'Canada is the most immigration-friendly developed country. Express Entry, PNP, and study-to-PR pathways make it a top choice for permanent residence.',
+   details:{
+     requirements:['Multiple pathways: Express Entry, PNP, Family Sponsorship, Study→PR','Language: IELTS/TEF required for most programs','ECA for foreign credentials'],
+     duration:'PR processing: 6 months (Express Entry)',
+     processing:'Study permit: 8–12 weeks | Work permit: 2–6 months',
+     cost:'PR application: CAD $1,365 per adult',
+     workRights:'Open Work Permit available for spouses of students/workers',
+     successTips:['PGWP after graduation: 1–3 years work permit','CRS score improvement: language test, Canadian experience, PNP','Free healthcare for PR holders and citizens','Extremely multicultural — 23% of population are immigrants']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'Germany',tags:['germany','europe','german','berlin','munich'],
+   summary:'Germany offers free or near-free university education, a strong economy, and a clear immigration pathway for skilled workers.',
+   details:{
+     requirements:['Recognised qualification (anabin database)','German language for some roles (B2/C1)','Job Seeker Visa for initial entry','Blocked account: €11,208/year for students'],
+     duration:'EU Blue Card: 4 years (2 years with B1 German)',
+     processing:'Job seeker visa: 4–12 weeks | Work visa: 1–3 months',
+     cost:'Visa: €75 | No tuition at public universities',
+     workRights:'EU Blue Card: full rights. After 21–33 months: Permanent Residence.',
+     successTips:['Critical shortage: IT, engineering, healthcare, skilled trades','Minimum EU Blue Card salary: €43,992 (€39,682 for shortage occupations)','Germany launched the Chancenkarte (Opportunity Card) in 2024','Family reunification possible after arrival']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'Australia',tags:['australia','sydney','melbourne','brisbane'],
+   summary:'Australia offers high quality of life, strong wages, and multiple pathways from student visa to permanent residence.',
+   details:{
+     requirements:['Skills assessment by relevant authority (e.g., ACS for IT)','English: IELTS 6.0–7.0+ depending on visa','Points test for skilled migration (65+ points required)','State sponsorship for subclass 190'],
+     duration:'Subclass 189 (independent): Permanent from grant',
+     processing:'Student visa: 29–40 days | Skilled: 6–12 months',
+     cost:'Skilled visa: AUD $4,640 | Student: AUD $650',
+     workRights:'Student: 48 hrs/fortnight. Graduate 485 visa: 2–4 years unrestricted.',
+     successTips:['485 Graduate visa: 2 years (bachelor), 3 years (masters), 4 years (PhD)','Regional areas offer extra points and easier PR','Occupation Ceiling limits — check SOL and MLTSSL lists','Healthcare: OSHC for students, Medicare for PR holders']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'United Arab Emirates (Dubai)',tags:['UAE','dubai','abu dhabi','emirates'],
+   summary:'UAE (Dubai/Abu Dhabi) offers tax-free income, world-class infrastructure, and the Golden Visa for long-term residency. No personal income tax.',
+   details:{
+     requirements:['Employment visa: sponsored by employer','Freelance permit: from Dubai Internet City, DMCC, etc.','Golden Visa: investment, talent, or student pathways','Medical fitness certificate required'],
+     duration:'Employment visa: 2–3 years renewable | Golden Visa: 5–10 years',
+     processing:'Employment visa: 2–4 weeks | Golden Visa: 2–4 weeks',
+     cost:'Employment visa: AED 3,000–5,000 (often employer-paid)',
+     workRights:'Employment visa: full rights with sponsoring employer. Golden Visa: self-sponsor.',
+     successTips:['No income tax on salaries','Strong job market: finance, tech, tourism, healthcare, construction','DMCC free zone allows business ownership for foreigners','Family visa available for dependents']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'Singapore',tags:['singapore','asia','employment pass'],
+   summary:"Singapore is Asia's financial hub with world-class infrastructure, safety, and a transparent immigration system.",
+   details:{
+     requirements:['Employment Pass: salary SGD $5,000+/month (graduates from top universities: lower threshold)','S Pass: SGD $3,150+/month for mid-level skills','Work Permit: unskilled/semi-skilled workers'],
+     duration:'Employment Pass: 1–2 years (renewable)',
+     processing:'Employment Pass: 3 weeks online',
+     cost:'Employment Pass: SGD $105',
+     workRights:'Employment Pass: work for sponsoring employer',
+     successTips:['Permanent Residence (PR) after 2–6 years on EP','COMPASS points system for EP applications from 2023','Strong demand in finance, tech, biomedical','CPF (pension) contributions begin for PR holders']
+   }
+  },
+  {cat:'work',icon:'💼',title:'Canada Open Work Permit',tags:['canada','work permit','open work','PGWP'],
+   summary:'Canada offers several open work permits that are not tied to a specific employer, giving maximum flexibility.',
+   details:{
+     requirements:['PGWP: completed degree at eligible Canadian institution','Spousal OWP: spouse of skilled worker or student','IEC Working Holiday: aged 18–35 for eligible nationalities','Bridging OWP: applied for PR while current permit expires'],
+     duration:'PGWP: 1–3 years depending on study length | Working Holiday: 1–2 years',
+     processing:'PGWP: 3–6 months online | Working Holiday: varies',
+     cost:'CAD $255',
+     workRights:'Work for ANY employer in Canada — maximum flexibility',
+     successTips:['PGWP is the #1 path to Canadian PR for international graduates','Get Canadian work experience to boost Express Entry CRS score','IEC Working Holiday: apply as soon as pool opens — limited spots','Spousal OWP allows entire family to work simultaneously']
+   }
+  },
+  {cat:'work',icon:'💼',title:'UK Graduate Visa (Post-Study Work)',tags:['UK','graduate visa','post study work','britain'],
+   summary:'The UK Graduate Visa allows international students who have completed a degree at a UK university to stay and work for 2 years (3 for PhD).',
+   details:{
+     requirements:['Must have completed a UK degree at a licensed student sponsor','Must currently be in the UK on a valid Student Visa','Apply from inside the UK only'],
+     duration:'2 years (undergraduate/masters), 3 years (PhD)',
+     processing:'8 weeks typically',
+     cost:'£715',
+     workRights:'Work in any job, any number of hours — no employer restriction',
+     successTips:['No job offer required to apply','Can switch to Skilled Worker Visa if you find qualifying job','No extension possible — must find sponsoring employer before expiry','Start job hunting before graduation']
+   }
+  },
+  {cat:'work',icon:'💼',title:'Australia Working Holiday Visa (417 & 462)',tags:['australia','working holiday','backpacker'],
+   summary:"Australia's Working Holiday visa lets young people (18–30, or 35 for some countries) live and work in Australia for up to 1 year, extendable to 3 years.",
+   details:{
+     requirements:['Age: 18–30 (35 for some passport holders)','Valid passport from eligible country','AUD $5,000 in savings','No dependent children accompanying','Health and character requirements'],
+     duration:'1 year, extendable to 2nd and 3rd year with regional work',
+     processing:'1–4 weeks',
+     cost:'AUD $635',
+     workRights:'Work for any employer — max 6 months with same employer',
+     successTips:['88 days regional work extends visa to 2nd year','179 days regional work in year 2 unlocks 3rd year','In-demand jobs: farm work, hospitality, construction','Can study up to 4 months','Strong job market: AUD $25/hour minimum wage']
+   }
+  },
+  {cat:'work',icon:'💼',title:'Germany EU Blue Card',tags:['germany','EU Blue Card','work','europe','skilled'],
+   summary:'The EU Blue Card is a work and residence permit for highly qualified non-EU professionals. It leads to permanent residence in as little as 21 months.',
+   details:{
+     requirements:['University degree (recognised in Germany)','Job offer with minimum salary: €43,992/year (€39,682 for shortage occupations)','Relevant qualifications for the job','Health insurance'],
+     duration:'4 years, or length of employment contract + 3 months',
+     processing:'1–3 months at German immigration office (Ausländerbehörde)',
+     cost:'€100–140',
+     workRights:'Full work rights for all employers (not tied to one job after 2 years)',
+     successTips:['Permanent Residence in 21 months with B1 German','Shortage occupations: IT specialists, engineers, doctors, nurses','Family reunification allowed — spouse gets work permit immediately','Upgrade to settlement permit (Niederlassungserlaubnis) quickly']
+   }
+  },
+  {cat:'work',icon:'💼',title:'USA OPT & STEM OPT Extension',tags:['USA','OPT','STEM','work','america','F1'],
+   summary:'Optional Practical Training (OPT) allows F-1 students to work in the USA for 12 months after graduation. STEM graduates get an additional 24-month extension.',
+   details:{
+     requirements:['Must be on valid F-1 status','Full-time enrollment for at least 1 academic year','Apply through DSO (Designated School Official)','STEM OPT: degree in STEM field + E-Verify employer'],
+     duration:'12 months standard. 24-month extension for STEM = 36 months total',
+     processing:'Apply 90 days before graduation. USCIS processing: 3–5 months.',
+     cost:'$410 (I-765 form)',
+     workRights:'Work for any employer related to your field of study',
+     successTips:['Apply early — EAD card processing takes time','STEM OPT increases H-1B lottery chances (3 attempts)','Must work 20+ hrs/week and maintain status','Track your job/hours in SEVP portal for STEM OPT']
+   }
+  },
+  {cat:'hotel',icon:'🏨',title:'Hotel Booking for Visa Applications',tags:['hotel','visa','booking','accommodation'],
+   summary:'Many visa applications require proof of accommodation. We provide official hotel reservation letters accepted by all embassies worldwide.',
+   details:{
+     requirements:['Passport details','Travel dates','Destination city','Purpose of visit'],
+     duration:'Same-day to 24-hour delivery',
+     processing:'Skyglobe provides official hotel reservations without upfront full payment',
+     cost:'Service fee applies — contact us for pricing',
+     workRights:'N/A',
+     successTips:['Embassy-accepted reservations — not just screenshots','Refundable or non-refundable options available','We work with hotels in 150+ countries','Include in your visa application package for stronger approval chances']
+   }
+  },
+  {cat:'hotel',icon:'🏨',title:'Student Accommodation Booking',tags:['hotel','student','accommodation','dormitory','university'],
+   summary:'Finding accommodation before arriving abroad is critical. We help book university dorms, private student halls, and apartments near your institution.',
+   details:{
+     requirements:['University acceptance letter','Arrival date','Budget range','Preferred location (on-campus vs off-campus)'],
+     duration:'Book 3–6 months before arrival for best options',
+     processing:'We search and secure accommodation within 48–72 hours',
+     cost:'Varies: UK dorms £150–300/week | Canada CAD 800–1,500/month | Australia AUD 250–450/week',
+     workRights:'N/A',
+     successTips:['University accommodation fills up fast — apply immediately after acceptance','Off-campus is usually cheaper but requires longer commute','Check if utilities (electricity, internet) are included','Look for student-specific platforms: Unite Students (UK), Amber Student (global)']
+   }
+  },
+  {cat:'hotel',icon:'🏨',title:'Business Travel Hotel Reservations',tags:['hotel','business','travel','corporate'],
+   summary:'Corporate and business travel hotel bookings with official confirmation letters for visa and expense purposes.',
+   details:{
+     requirements:['Business travel dates','Destination','Company name (for invoice)','Room requirements'],
+     duration:'Same-day booking available',
+     processing:'24-hour confirmation with official letter',
+     cost:'Contact Skyglobe for corporate rates',
+     workRights:'N/A',
+     successTips:['We negotiate corporate rates at 3–5 star hotels globally','Official invoices provided for expense claims','Multi-city itineraries handled in one booking','Cancellation protection available']
+   }
+  },
+  {cat:'insurance',icon:'🛡️',title:'Schengen Travel Insurance',tags:['insurance','schengen','europe','travel'],
+   summary:'Schengen visa applicants MUST have travel insurance with minimum €30,000 medical coverage valid for the entire Schengen Area. This is mandatory.',
+   details:{
+     requirements:['Minimum €30,000 medical coverage','Valid for all Schengen countries','Covers repatriation in case of death','Must cover entire duration of stay'],
+     duration:'Single trip or multi-trip annual policies available',
+     processing:'Same-day policy issuance',
+     cost:'Approximately €20–50 for a 2-week policy',
+     workRights:'N/A',
+     successTips:['Buy before booking flights — needed for visa application','Skyglobe provides embassy-accepted insurance documents','Annual multi-trip policies save money for frequent travellers','COVID-19 coverage now recommended by many embassies']
+   }
+  },
+  {cat:'insurance',icon:'🛡️',title:'Overseas Student Health Cover (OSHC) — Australia',tags:['insurance','OSHC','australia','student'],
+   summary:'OSHC is mandatory for international students in Australia. It covers doctor visits, hospital stays, and some pharmaceuticals.',
+   details:{
+     requirements:['Mandatory for all international student visa holders','Must be purchased before or when applying for student visa','Cover entire duration of visa'],
+     duration:'Match your visa duration',
+     processing:'Same-day purchase online',
+     cost:'AUD ~$600–700/year (single). AUD ~$2,300/year (family)',
+     workRights:'N/A',
+     successTips:['Providers: Medibank, BUPA, Allianz, NIB, AHM','Compare via comparetravelinsurance.com.au','OSHC does NOT cover dental, optical, physiotherapy — get extras cover separately','Keep your OSHC card with you at all times']
+   }
+  },
+  {cat:'insurance',icon:'🛡️',title:'International Student Health Insurance — UK',tags:['insurance','UK','student','IHS','britain'],
+   summary:'International students in the UK pay the Immigration Health Surcharge (IHS) which grants access to the NHS — no separate insurance needed for most healthcare.',
+   details:{
+     requirements:['IHS paid as part of UK visa application','£776/year per person','Covers NHS services: GP, hospital, emergency'],
+     duration:'Paid upfront for entire visa duration',
+     processing:'Paid during visa application online',
+     cost:'£776/year (£388 for students and under-18s) — 2024 rates',
+     workRights:'N/A',
+     successTips:['NHS is free at point of use after IHS payment','Register with a GP (General Practitioner) immediately on arrival','Dental and optical care may require additional insurance','Emergency A&E is always free regardless of insurance status']
+   }
+  },
+  {cat:'insurance',icon:'🛡️',title:'Comprehensive Travel Insurance — General',tags:['insurance','travel','general','worldwide'],
+   summary:'Comprehensive travel insurance covers medical emergencies, trip cancellation, lost luggage, flight delays, and repatriation worldwide.',
+   details:{
+     requirements:['Passport details','Travel dates and destinations','Activities planned (adventure sports need additional cover)'],
+     duration:'Single trip or annual multi-trip',
+     processing:'Instant policy via Skyglobe',
+     cost:'Single trip: $30–$100 | Annual: $150–$300 | Varies by age and destination',
+     workRights:'N/A',
+     successTips:['Always buy before departure — cannot buy after incident','Pre-existing medical conditions must be declared','Adventure activities (skiing, scuba diving) need add-on cover','Keep all receipts for medical expenses — needed for claims']
+   }
+  },
+  {cat:'scholarship',icon:'🌟',title:'Chevening Scholarship — UK',tags:['scholarship','UK','chevening','funding'],
+   summary:"Chevening is the UK Government's global scholarship programme, funded by the Foreign, Commonwealth & Development Office. Fully funded masters scholarships.",
+   details:{
+     requirements:['Citizens of Chevening-eligible countries','At least 2 years work experience','Undergraduate degree (2:1 or equivalent)','Unconditional offer from a UK university','Leadership potential and strong academics'],
+     duration:'1 year masters degree in UK',
+     processing:'Applications open August–November each year',
+     cost:'FULLY FUNDED: tuition, flights, living allowance, visa',
+     workRights:'Student visa rights during study',
+     successTips:['Apply to 3 UK universities before applying for Chevening','Leadership and networking essays are key — show impact','Results announced in June following application year','Network of 50,000+ Chevening Alumni worldwide']
+   }
+  },
+  {cat:'scholarship',icon:'🌟',title:'Commonwealth Scholarship — UK',tags:['scholarship','commonwealth','UK','funding'],
+   summary:'Commonwealth Scholarships are for citizens of Commonwealth countries to study masters and PhD programs at UK universities.',
+   details:{
+     requirements:['Citizen of a Commonwealth country','Bachelors degree (first class or 2:1)','Under 35 years old for most awards','Research proposal for PhD applications'],
+     duration:'1–3 years depending on program',
+     processing:'Applications via Commonwealth Scholarship Commission (CSC)',
+     cost:'FULLY FUNDED: tuition, flights, living allowance, thesis grant',
+     workRights:'Student visa during study',
+     successTips:['Development-focused research preferred','Apply through your national nominating agency','High competition — strong academic record essential','800+ scholarships awarded annually']
+   }
+  },
+  {cat:'scholarship',icon:'🌟',title:'Vanier Canada Graduate Scholarship',tags:['scholarship','canada','PhD','research','funding'],
+   summary:'The Vanier CGS awards $50,000/year for 3 years to doctoral students who demonstrate leadership skills and a high standard of scholarly achievement.',
+   details:{
+     requirements:['First full-time PhD student at eligible Canadian university','Nominated by your university (not a direct application)','Academic excellence (A- minimum average)','Research leadership potential'],
+     duration:'3 years (PhD funding)',
+     processing:'Universities nominate by November each year',
+     cost:'CAD $50,000/year for 3 years = CAD $150,000 total',
+     workRights:'Study permit work rights',
+     successTips:['Contact your university graduate office early — they nominate you','Strong letters of reference are critical','Both Canadian and international students eligible','Strengthens PR application after graduation']
+   }
+  },
+  {cat:'scholarship',icon:'🌟',title:'DAAD Scholarship — Germany',tags:['scholarship','germany','DAAD','funding','europe'],
+   summary:"DAAD (German Academic Exchange Service) is the world's largest funding organisation for international student exchange. Hundreds of programs available.",
+   details:{
+     requirements:['Varies by program: undergraduate, masters, PhD, research','Strong academic record','Language skills (German or English depending on program)','Research proposal for some programs'],
+     duration:'1 month to 4 years depending on program',
+     processing:'Applications typically 6–12 months before program start',
+     cost:'FUNDED: monthly stipend €850–1,200 + travel + health insurance',
+     workRights:'Student visa work rights',
+     successTips:['Over 100 different scholarship programs — find your match at daad.de','Both degree scholarships and research grants available','Many programs specifically for developing country applicants','Germany also has Helmholtz, Alexander von Humboldt fellowships']
+   }
+  },
+];
+
+let activeFilter = 'all';
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  doSearch();
+}
+
+function searchFor(term) {
+  document.getElementById('searchInput').value = term;
+  document.getElementById('popularSection').style.display = 'none';
+  doSearch();
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('searchResults');
+  const popularEl = document.getElementById('popularSection');
+  if (!q) {
+    popularEl.style.display = 'block';
+    resultsEl.innerHTML = '';
+    return;
+  }
+  popularEl.style.display = 'none';
+  let results = KB.filter(item => {
+    const matchFilter = activeFilter === 'all' || item.cat === activeFilter;
+    const matchQuery = item.title.toLowerCase().includes(q) ||
+      item.summary.toLowerCase().includes(q) ||
+      item.tags.some(t => t.toLowerCase().includes(q)) ||
+      item.cat.toLowerCase().includes(q);
+    return matchFilter && matchQuery;
+  });
+  if (results.length === 0) {
+    resultsEl.innerHTML = `<div class="no-results"><div class="nr-icon">🔍</div><p>No results found for "<strong>${q}</strong>"</p><p style="font-size:0.85rem;margin-top:0.5rem;color:var(--muted)">Try: visa, university, work permit, insurance, scholarship, or a country name</p></div>`;
+    return;
+  }
+  resultsEl.innerHTML = `<p class="results-count">${results.length} result${results.length>1?'s':''} found for "<strong>${q}</strong>"</p>` +
+    results.map((item,i) => `
+      <div class="result-card" onclick="toggleDetail(${i})">
+        <div class="result-card-header">
+          <div class="result-icon">${item.icon}</div>
+          <div style="flex:1">
+            <div class="result-category">${item.cat.toUpperCase()}</div>
+            <div class="result-title">${item.title}</div>
+          </div>
+          <div style="color:var(--gold);font-size:1.2rem" id="arrow-${i}">▼</div>
+        </div>
+        <div class="result-body">${item.summary}</div>
+        <div class="result-tags">${item.tags.map(t=>`<span class="result-tag">${t}</span>`).join('')}</div>
+        <div class="result-detail" id="detail-${i}">
+          ${item.details.requirements ? `<p style="font-size:0.82rem;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem">Requirements</p><ul>${item.details.requirements.map(r=>`<li>${r}</li>`).join('')}</ul>` : ''}
+          <div class="detail-grid" style="margin-top:1rem">
+            ${item.details.duration?`<div class="detail-item"><strong>Duration</strong><span>${item.details.duration}</span></div>`:''}
+            ${item.details.processing?`<div class="detail-item"><strong>Processing Time</strong><span>${item.details.processing}</span></div>`:''}
+            ${item.details.cost?`<div class="detail-item"><strong>Cost</strong><span>${item.details.cost}</span></div>`:''}
+            ${item.details.workRights&&item.details.workRights!=='N/A'?`<div class="detail-item"><strong>Work Rights</strong><span>${item.details.workRights}</span></div>`:''}
+          </div>
+          ${item.details.successTips?`<p style="font-size:0.82rem;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin:1rem 0 0.6rem">Tips for Success</p><ul>${item.details.successTips.map(t=>`<li>${t}</li>`).join('')}</ul>`:''}
+          <div style="margin-top:1.2rem"><button class="btn-primary" style="font-size:0.85rem;padding:10px 20px" onclick="event.stopPropagation();showPage('contact')">✦ Get Help With This</button></div>
+        </div>
+      </div>
+    `).join('');
+}
+
+function toggleDetail(i) {
+  const d = document.getElementById('detail-'+i);
+  const a = document.getElementById('arrow-'+i);
+  d.classList.toggle('open');
+  a.textContent = d.classList.contains('open') ? '▲' : '▼';
+}
 </script>
 </body>
 </html>
