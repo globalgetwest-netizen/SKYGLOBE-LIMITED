@@ -1225,11 +1225,15 @@ async function submitForm() {
   btn.textContent = 'Sending…';
 
   try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fname, lname, email, phone, service, destination, message }),
+      signal: ctrl.signal,
     });
+    clearTimeout(timer);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Server error');
     showToast('✅ Request submitted! We\'ll contact you within 24 hours.');
@@ -1237,7 +1241,11 @@ async function submitForm() {
       document.getElementById(id).value = '';
     });
   } catch (err) {
-    showToast('⚠️ Failed to send. Please email us directly or try WhatsApp.', true);
+    if (err.name === 'AbortError') {
+      showToast('⚠️ Server is taking too long. Please try WhatsApp or email us directly.', true);
+    } else {
+      showToast('⚠️ ' + (err.message || 'Failed to send') + '. Try WhatsApp instead.', true);
+    }
     console.error('Contact form error:', err);
   } finally {
     btn.disabled = false;
@@ -2250,9 +2258,13 @@ async function submitApplication() {
     notes: document.getElementById('ap_notes').value.trim()
   };
   try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
     const res = await fetch(APPLY_API, {
-      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload), signal: ctrl.signal
     });
+    clearTimeout(timer);
     const data = await res.json();
     if (!res.ok && !data.ref) throw new Error(data.error || 'Server error');
     document.getElementById('appRefDisplay').textContent = data.ref || 'SKY-SUBMITTED';
@@ -2261,7 +2273,11 @@ async function submitApplication() {
     document.querySelectorAll('.apply-step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
     window.scrollTo({top: document.getElementById('page-apply').offsetTop - 80, behavior:'smooth'});
   } catch(err) {
-    showToast('⚠️ Failed to submit. Please try again or contact us via WhatsApp.', true);
+    if (err.name === 'AbortError') {
+      showToast('⚠️ Server timeout. Your application may still be saved — check via WhatsApp.', true);
+    } else {
+      showToast('⚠️ ' + (err.message || 'Failed to submit') + '. Please try WhatsApp.', true);
+    }
     console.error(err);
   } finally {
     btn.disabled = false;
