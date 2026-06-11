@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — SkyGlobe Limited</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#0a1628; color:#e8eaf0; min-height:100vh; }
+  .gold { color:#c9a84c; }
+  .container { max-width:1100px; margin:0 auto; padding:24px 16px; }
+
+  /* Login */
+  #loginScreen { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+  .login-box { background:#111f38; border:1px solid #233452; border-radius:16px; padding:40px; width:100%; max-width:380px; text-align:center; }
+  .login-box h1 { font-size:1.4rem; margin-bottom:6px; }
+  .login-box p { color:#8899bb; font-size:0.85rem; margin-bottom:24px; }
+  .login-box input { width:100%; padding:13px 16px; border-radius:8px; border:1px solid #233452; background:#0a1628; color:#fff; font-size:1rem; margin-bottom:14px; }
+  .login-box input:focus { outline:none; border-color:#c9a84c; }
+  .btn { background:#c9a84c; color:#0a1628; border:none; padding:13px 28px; border-radius:8px; font-weight:700; font-size:0.95rem; cursor:pointer; }
+  .btn:hover { background:#dbbe6a; }
+  .btn-sm { padding:8px 16px; font-size:0.85rem; }
+  .err { color:#ff6b6b; font-size:0.85rem; margin-top:10px; min-height:1.2em; }
+
+  /* Dashboard */
+  #dashboard { display:none; }
+  header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:18px 0; border-bottom:1px solid #233452; margin-bottom:20px; }
+  header h1 { font-size:1.2rem; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px; }
+  .stat { background:#111f38; border:1px solid #233452; border-radius:12px; padding:16px; text-align:center; }
+  .stat .num { font-size:1.8rem; font-weight:700; color:#c9a84c; }
+  .stat .lbl { font-size:0.75rem; color:#8899bb; text-transform:uppercase; letter-spacing:0.06em; }
+
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .toolbar input, .toolbar select { padding:10px 14px; border-radius:8px; border:1px solid #233452; background:#111f38; color:#fff; font-size:0.9rem; }
+  .toolbar input { flex:1; min-width:200px; }
+
+  table { width:100%; border-collapse:collapse; background:#111f38; border-radius:12px; overflow:hidden; }
+  th, td { padding:12px 14px; text-align:left; font-size:0.88rem; border-bottom:1px solid #1a2c4a; }
+  th { background:#0d1a30; color:#8899bb; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; }
+  tr.app-row { cursor:pointer; }
+  tr.app-row:hover { background:#16264a; }
+  .badge { display:inline-block; padding:4px 12px; border-radius:12px; font-size:0.72rem; font-weight:700; }
+  .b-Received { background:#1565c044; color:#64b5f6; }
+  .b-InReview { background:#ef6c0044; color:#ffb74d; }
+  .b-Approved, .b-Completed { background:#2e7d3244; color:#81c784; }
+  .b-NeedsMoreInfo, .b-Rejected { background:#c6282844; color:#ef9a9a; }
+  .empty { text-align:center; color:#8899bb; padding:40px; }
+
+  /* Detail modal */
+  #modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; overflow-y:auto; padding:24px 12px; }
+  .modal-box { background:#111f38; border:1px solid #233452; border-radius:16px; max-width:680px; margin:0 auto; padding:28px; }
+  .modal-box h2 { font-size:1.1rem; margin-bottom:4px; }
+  .modal-box .sub { color:#8899bb; font-size:0.85rem; margin-bottom:18px; }
+  .detail-table { margin-bottom:18px; }
+  .detail-table td:first-child { color:#8899bb; width:160px; }
+  .respond { background:#0a1628; border:1px solid #233452; border-radius:12px; padding:18px; }
+  .respond label { display:block; font-size:0.78rem; color:#8899bb; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+  .respond select, .respond textarea { width:100%; padding:11px 14px; border-radius:8px; border:1px solid #233452; background:#111f38; color:#fff; font-size:0.92rem; margin-bottom:14px; }
+  .respond textarea { min-height:100px; resize:vertical; font-family:inherit; }
+  .resp-history { margin:14px 0; }
+  .resp-item { background:#0d1a30; border-left:3px solid #c9a84c; padding:10px 14px; border-radius:6px; margin-bottom:8px; font-size:0.85rem; }
+  .resp-item .meta { color:#8899bb; font-size:0.72rem; margin-bottom:4px; }
+  .close-x { float:right; background:none; border:none; color:#8899bb; font-size:1.4rem; cursor:pointer; }
+  .ok-msg { color:#81c784; font-size:0.85rem; margin-top:10px; min-height:1.2em; }
+  @media (max-width:640px){ th:nth-child(4), td:nth-child(4){ display:none; } }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>SKY<span class="gold">GLOBE</span> Admin</h1>
+    <p>Staff access only</p>
+    <input type="password" id="pwInput" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn" style="width:100%" onclick="doLogin()">Sign In</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="container">
+    <header>
+      <h1>SKY<span class="gold">GLOBE</span> — Applications <span id="adminName" style="color:#8899bb;font-size:0.8rem;font-weight:400"></span></h1>
+      <div>
+        <button class="btn btn-sm" onclick="loadApps()">⟳ Refresh</button>
+        <button class="btn btn-sm" style="background:#233452;color:#e8eaf0" onclick="logout()">Log out</button>
+      </div>
+    </header>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="toolbar">
+      <input type="text" id="searchBox" placeholder="Search name, email, reference…" oninput="renderTable()">
+      <select id="statusFilter" onchange="renderTable()">
+        <option value="">All statuses</option>
+        <option>Received</option><option>In Review</option><option>Approved</option>
+        <option>Needs More Info</option><option>Completed</option><option>Rejected</option>
+      </select>
+      <select id="serviceFilter" onchange="renderTable()"><option value="">All services</option></select>
+    </div>
+
+    <table>
+      <thead><tr><th>Reference</th><th>Name</th><th>Service</th><th>Submitted</th><th>Status</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" id="modalContent"></div>
+</div>
+
+<script>
+const API = location.origin;
+let KEY = sessionStorage.getItem('skyadmin_key') || '';
+let APPS = [];
+
+if (KEY) { showDash(); }
+
+async function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.textContent = '';
+  try {
+    const r = await fetch(API + '/api/admin/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ password: pw })
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error || 'Login failed.'; return; }
+    KEY = pw;
+    sessionStorage.setItem('skyadmin_key', pw);
+    sessionStorage.setItem('skyadmin_name', d.name || 'admin');
+    showDash();
+  } catch(e) { errEl.textContent = 'Network error — try again.'; }
+}
+
+function logout() {
+  sessionStorage.removeItem('skyadmin_key');
+  location.reload();
+}
+
+function showDash() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  const n = sessionStorage.getItem('skyadmin_name');
+  if (n) document.getElementById('adminName').textContent = '· signed in as ' + n;
+  loadApps();
+}
+
+async function loadApps() {
+  try {
+    const r = await fetch(API + '/api/admin/applications', { headers: {'x-admin-key': KEY} });
+    if (r.status === 401) { logout(); return; }
+    APPS = await r.json();
+  } catch(e) { APPS = []; }
+  renderStats(); renderServiceFilter(); renderTable();
+}
+
+function renderStats() {
+  const total = APPS.length;
+  const count = s => APPS.filter(a => a.status === s).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="num">${total}</div><div class="lbl">Total</div></div>
+    <div class="stat"><div class="num">${count('Received')}</div><div class="lbl">New</div></div>
+    <div class="stat"><div class="num">${count('In Review')}</div><div class="lbl">In Review</div></div>
+    <div class="stat"><div class="num">${count('Approved')+count('Completed')}</div><div class="lbl">Approved/Done</div></div>`;
+}
+
+function renderServiceFilter() {
+  const sel = document.getElementById('serviceFilter');
+  const cur = sel.value;
+  const services = [...new Set(APPS.map(a => a.service))].sort();
+  sel.innerHTML = '<option value="">All services</option>' + services.map(s => `<option${s===cur?' selected':''}>${esc(s)}</option>`).join('');
+}
+
+function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function badge(s){ return `<span class="badge b-${(s||'Received').replace(/\s/g,'')}">${esc(s||'Received')}</span>`; }
+
+function renderTable() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const st = document.getElementById('statusFilter').value;
+  const sv = document.getElementById('serviceFilter').value;
+  const rows = APPS.filter(a =>
+    (!st || a.status === st) && (!sv || a.service === sv) &&
+    (!q || (a.fname+' '+a.lname+' '+a.email+' '+a.ref).toLowerCase().includes(q))
+  );
+  document.getElementById('tbody').innerHTML = rows.length ? rows.map((a,i) => `
+    <tr class="app-row" onclick="openApp('${esc(a.ref)}')">
+      <td class="gold" style="font-weight:600">${esc(a.ref)}</td>
+      <td>${esc(a.fname)} ${esc(a.lname)}</td>
+      <td>${esc(a.service)}</td>
+      <td>${a.timestamp ? new Date(a.timestamp).toLocaleDateString() : '—'}</td>
+      <td>${badge(a.status)}</td>
+    </tr>`).join('')
+    : '<tr><td colspan="5" class="empty">No applications found.</td></tr>';
+}
+
+function openApp(ref) {
+  const a = APPS.find(x => x.ref === ref);
+  if (!a) return;
+  const row = (k,v) => v ? `<tr><td>${k}</td><td>${esc(v)}</td></tr>` : '';
+  const history = (a.responses||[]).map(r => `
+    <div class="resp-item"><div class="meta">${esc(r.by)} · ${new Date(r.date).toLocaleString()}</div>${esc(r.message)}</div>`).join('');
+  document.getElementById('modalContent').innerHTML = `
+    <button class="close-x" onclick="closeModal()">✕</button>
+    <h2 class="gold">${esc(a.ref)}</h2>
+    <div class="sub">${esc(a.service)} · ${badge(a.status)}</div>
+    <table class="detail-table">
+      ${row('Name', (a.fname+' '+a.lname).trim())}
+      ${row('Email', a.email)}${row('Phone', a.phone)}
+      ${row('Nationality', a.nationality)}${row('Date of Birth', a.dob)}
+      ${row('Passport', a.passport)}${row('Passport Expiry', a.passportExpiry)}
+      ${row('Destination', a.destination)}${row('Travel Date', a.travelDate)}
+      ${row('Duration', a.duration)}${row('Purpose', a.purpose)}
+      ${row('Institution', a.institution)}${row('Employer', a.employer)}
+      ${row('Hotel City', a.hotelCity)}${row('Check-in', a.checkin)}${row('Check-out', a.checkout)}
+      ${row('Coverage', a.coverage)}${row('Document Type', a.docType)}
+      ${row('Scholarship', a.scholarship)}${row('Notes', a.notes)}
+      ${row('Submitted', a.timestamp ? new Date(a.timestamp).toLocaleString() : '')}
+    </table>
+    ${history ? '<label style="font-size:0.78rem;color:#8899bb;text-transform:uppercase">Previous responses</label><div class="resp-history">'+history+'</div>' : ''}
+    <div class="respond">
+      <label>Update status</label>
+      <select id="newStatus">
+        ${['Received','In Review','Approved','Needs More Info','Completed','Rejected'].map(s =>
+          `<option${s===a.status?' selected':''}>${s}</option>`).join('')}
+      </select>
+      <label>Message to applicant (optional — sent by email)</label>
+      <textarea id="respMsg" placeholder="e.g. Your visa appointment is booked for June 20th. Please bring your passport and the documents listed…"></textarea>
+      <button class="btn" onclick="sendUpdate('${esc(a.ref)}')">Send Update to ${esc(a.fname)}</button>
+      <div class="ok-msg" id="updateMsg"></div>
+    </div>`;
+  document.getElementById('modal').style.display = 'block';
+}
+
+function closeModal(){ document.getElementById('modal').style.display = 'none'; }
+
+async function sendUpdate(ref) {
+  const status = document.getElementById('newStatus').value;
+  const response = document.getElementById('respMsg').value.trim();
+  const msgEl = document.getElementById('updateMsg');
+  msgEl.style.color = '#8899bb'; msgEl.textContent = 'Sending…';
+  try {
+    const r = await fetch(API + '/api/admin/update', {
+      method:'POST',
+      headers: {'Content-Type':'application/json','x-admin-key': KEY},
+      body: JSON.stringify({ ref, status, response })
+    });
+    const d = await r.json();
+    if (!r.ok) { msgEl.style.color = '#ff6b6b'; msgEl.textContent = d.error || 'Update failed.'; return; }
+    msgEl.style.color = '#81c784';
+    msgEl.textContent = d.emailed ? '✅ Status updated and email sent to applicant.' : '✅ Status updated (email could not be sent).';
+    await loadApps();
+  } catch(e) { msgEl.style.color = '#ff6b6b'; msgEl.textContent = 'Network error.'; }
+}
+</script>
+</body>
+</html>
