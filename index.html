@@ -345,6 +345,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
         <line x1="200" y1="5" x2="200" y2="395" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
         <ellipse cx="200" cy="200" rx="195" ry="80" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
         <ellipse cx="200" cy="200" rx="195" ry="140" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+        <!-- Continents approximation -->
         <circle cx="165" cy="155" r="35" fill="#c9a84c" opacity="0.12"/>
         <circle cx="225" cy="165" r="28" fill="#c9a84c" opacity="0.1"/>
         <circle cx="200" cy="230" r="22" fill="#c9a84c" opacity="0.08"/>
@@ -423,10 +424,12 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
             <line x1="10" y1="150" x2="290" y2="150" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/>
             <ellipse cx="150" cy="150" rx="140" ry="55" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.4"/>
             <ellipse cx="150" cy="150" rx="140" ry="95" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.3"/>
+            <!-- Land masses -->
             <ellipse cx="120" cy="115" rx="30" ry="22" fill="#c9a84c" opacity="0.2"/>
             <ellipse cx="175" cy="125" rx="24" ry="18" fill="#c9a84c" opacity="0.18"/>
             <ellipse cx="155" cy="170" rx="18" ry="14" fill="#c9a84c" opacity="0.15"/>
             <ellipse cx="200" cy="155" rx="14" ry="10" fill="#c9a84c" opacity="0.15"/>
+            <!-- Plane -->
             <g transform="translate(190,90) rotate(-30)">
               <path d="M0,0 L12,-4 L12,4 Z" fill="#c9a84c" opacity="0.9"/>
               <path d="M6,-1 L0,-8 L2,-8 L7,0" fill="#c9a84c" opacity="0.7"/>
@@ -1179,7 +1182,9 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 <a href="https://wa.me/17373998522" class="wa-float" target="_blank" title="Chat on WhatsApp">💬</a>
 
 <!-- Toast -->
-<div class="toast" id="toast">✅ Consultation request submitted! We'll be in touch within 24 hours.</div><script>
+<div class="toast" id="toast">✅ Consultation request submitted! We'll be in touch within 24 hours.</div>
+
+<script>
 // PAGE ROUTING
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1501,3 +1506,958 @@ const KB = [
      cost:'Visa fees: $160–$290 depending on type',
      workRights:'Depends on visa category',
      successTips:['World\'s highest number of top-ranked universities','Diverse cities: New York, San Francisco, Boston, Chicago','Healthcare is expensive — always get insurance','SSN (Social Security Number) needed to work legally']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'United Kingdom',tags:['UK','britain','england','london'],
+   summary:'The UK is home to world-class universities including Oxford and Cambridge. A top destination for international students with a post-study work visa available.',
+   details:{
+     requirements:['Student Visa, Skilled Worker Visa, BNO Visa, Ancestry Visa','English proficiency (IELTS/TOEFL) required','NHS provides healthcare — IHS surcharge applies'],
+     duration:'Varies by visa',
+     processing:'Student visa: 3 weeks | Skilled worker: 3 weeks',
+     cost:'IHS: £776/year on top of visa fee',
+     workRights:'Student: 20 hrs/week. Graduate Visa: 2 years unrestricted work.',
+     successTips:['Graduate Visa is very popular — 2 years to find work after graduation','5 years leads to ILR (permanent residence)','Strong job market in finance, tech, healthcare','London is most expensive — consider Manchester, Edinburgh, Birmingham']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'Canada',tags:['canada','toronto','vancouver','montreal'],
+   summary:'Canada is the most immigration-friendly developed country. Express Entry, PNP, and study-to-PR pathways make it a top choice for permanent residence.',
+   details:{
+     requirements:['Multiple pathways: Express Entry, PNP, Family Sponsorship, Study→PR','Language: IELTS/TEF required for most programs','ECA for foreign credentials'],
+     duration:'PR processing: 6 months (Express Entry)',
+     processing:'Study permit: 8–12 weeks | Work permit: 2–6 months',
+     cost:'PR application: CAD $1,365 per adult',
+     workRights:'Open Work Permit available for spouses of students/workers',
+     successTips:['PGWP after graduation: 1–3 years work permit','CRS score improvement: language test, Canadian experience, PNP','Free healthcare for PR holders and citizens','Extremely multicultural — 23% of population are immigrants']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'Germany',tags:['germany','europe','german','berlin','munich'],
+   summary:'Germany offers free or near-free university education, a strong economy, and a clear immigration pathway for skilled workers.',
+   details:{
+     requirements:['Recognised qualification (anabin database)','German language for some roles (B2/C1)','Job Seeker Visa for initial entry','Blocked account: €11,208/year for students'],
+     duration:'EU Blue Card: 4 years (2 years with B1 German)',
+     processing:'Job seeker visa: 4–12 weeks | Work visa: 1–3 months',
+     cost:'Visa: €75 | No tuition at public universities',
+     workRights:'EU Blue Card: full rights. After 21–33 months: Permanent Residence.',
+     successTips:['Critical shortage: IT, engineering, healthcare, skilled trades','Minimum EU Blue Card salary: €43,992 (€39,682 for shortage occupations)','Germany launched the Chancenkarte (Opportunity Card) in 2024','Family reunification possible after arrival']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'Australia',tags:['australia','sydney','melbourne','brisbane'],
+   summary:'Australia offers high quality of life, strong wages, and multiple pathways from student visa to permanent residence.',
+   details:{
+     requirements:['Skills assessment by relevant authority (e.g., ACS for IT)','English: IELTS 6.0–7.0+ depending on visa','Points test for skilled migration (65+ points required)','State sponsorship for subclass 190'],
+     duration:'Subclass 189 (independent): Permanent from grant',
+     processing:'Student visa: 29–40 days | Skilled: 6–12 months',
+     cost:'Skilled visa: AUD $4,640 | Student: AUD $650',
+     workRights:'Student: 48 hrs/fortnight. Graduate 485 visa: 2–4 years unrestricted.',
+     successTips:['485 Graduate visa: 2 years (bachelor), 3 years (masters), 4 years (PhD)','Regional areas offer extra points and easier PR','Occupation Ceiling limits — check SOL and MLTSSL lists','Healthcare: OSHC for students, Medicare for PR holders']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'United Arab Emirates (Dubai)',tags:['UAE','dubai','abu dhabi','emirates'],
+   summary:'UAE (Dubai/Abu Dhabi) offers tax-free income, world-class infrastructure, and the Golden Visa for long-term residency. No personal income tax.',
+   details:{
+     requirements:['Employment visa: sponsored by employer','Freelance permit: from Dubai Internet City, DMCC, etc.','Golden Visa: investment, talent, or student pathways','Medical fitness certificate required'],
+     duration:'Employment visa: 2–3 years renewable | Golden Visa: 5–10 years',
+     processing:'Employment visa: 2–4 weeks | Golden Visa: 2–4 weeks',
+     cost:'Employment visa: AED 3,000–5,000 (often employer-paid)',
+     workRights:'Employment visa: full rights with sponsoring employer. Golden Visa: self-sponsor.',
+     successTips:['No income tax on salaries','Strong job market: finance, tech, tourism, healthcare, construction','DMCC free zone allows business ownership for foreigners','Family visa available for dependents']
+   }
+  },
+  {cat:'country',icon:'🌍',title:'Singapore',tags:['singapore','asia','employment pass'],
+   summary:'Singapore is Asia\'s financial hub with world-class infrastructure, safety, and a transparent immigration system.',
+   details:{
+     requirements:['Employment Pass: salary SGD $5,000+/month (graduates from top universities: lower threshold)','S Pass: SGD $3,150+/month for mid-level skills','Work Permit: unskilled/semi-skilled workers'],
+     duration:'Employment Pass: 1–2 years (renewable)',
+     processing:'Employment Pass: 3 weeks online',
+     cost:'Employment Pass: SGD $105',
+     workRights:'Employment Pass: work for sponsoring employer',
+     successTips:['Permanent Residence (PR) after 2–6 years on EP','COMPASS points system for EP applications from 2023','Strong demand in finance, tech, biomedical','CPF (pension) contributions begin for PR holders']
+   }
+  },
+
+  // ── WORK PERMITS ──
+  {cat:'work',icon:'💼',title:'Canada Open Work Permit',tags:['canada','work permit','open work','PGWP'],
+   summary:'Canada offers several open work permits that are not tied to a specific employer, giving maximum flexibility.',
+   details:{
+     requirements:['PGWP: completed degree at eligible Canadian institution','Spousal OWP: spouse of skilled worker or student','IEC Working Holiday: aged 18–35 for eligible nationalities','Bridging OWP: applied for PR while current permit expires'],
+     duration:'PGWP: 1–3 years depending on study length | Working Holiday: 1–2 years',
+     processing:'PGWP: 3–6 months online | Working Holiday: varies',
+     cost:'CAD $255',
+     workRights:'Work for ANY employer in Canada — maximum flexibility',
+     successTips:['PGWP is the #1 path to Canadian PR for international graduates','Get Canadian work experience to boost Express Entry CRS score','IEC Working Holiday: apply as soon as pool opens — limited spots','Spousal OWP allows entire family to work simultaneously']
+   }
+  },
+  {cat:'work',icon:'💼',title:'UK Graduate Visa (Post-Study Work)',tags:['UK','graduate visa','post study work','britain'],
+   summary:'The UK Graduate Visa allows international students who have completed a degree at a UK university to stay and work for 2 years (3 for PhD).',
+   details:{
+     requirements:['Must have completed a UK degree at a licensed student sponsor','Must currently be in the UK on a valid Student Visa','Apply from inside the UK only'],
+     duration:'2 years (undergraduate/masters), 3 years (PhD)',
+     processing:'8 weeks typically',
+     cost:'£715',
+     workRights:'Work in any job, any number of hours — no employer restriction',
+     successTips:['No job offer required to apply','Can switch to Skilled Worker Visa if you find qualifying job','No extension possible — must find sponsoring employer before expiry','Start job hunting before graduation']
+   }
+  },
+  {cat:'work',icon:'💼',title:'Australia Working Holiday Visa (417 & 462)',tags:['australia','working holiday','backpacker'],
+   summary:'Australia\'s Working Holiday visa lets young people (18–30, or 35 for some countries) live and work in Australia for up to 1 year, extendable to 3 years.',
+   details:{
+     requirements:['Age: 18–30 (35 for some passport holders)','Valid passport from eligible country','AUD $5,000 in savings','No dependent children accompanying','Health and character requirements'],
+     duration:'1 year, extendable to 2nd and 3rd year with regional work',
+     processing:'1–4 weeks',
+     cost:'AUD $635',
+     workRights:'Work for any employer — max 6 months with same employer',
+     successTips:['88 days regional work extends visa to 2nd year','179 days regional work in year 2 unlocks 3rd year','In-demand jobs: farm work, hospitality, construction','Can study up to 4 months','Strong job market: AUD $25/hour minimum wage']
+   }
+  },
+  {cat:'work',icon:'💼',title:'Germany EU Blue Card',tags:['germany','EU Blue Card','work','europe','skilled'],
+   summary:'The EU Blue Card is a work and residence permit for highly qualified non-EU professionals. It leads to permanent residence in as little as 21 months.',
+   details:{
+     requirements:['University degree (recognised in Germany)','Job offer with minimum salary: €43,992/year (€39,682 for shortage occupations)','Relevant qualifications for the job','Health insurance'],
+     duration:'4 years, or length of employment contract + 3 months',
+     processing:'1–3 months at German immigration office (Ausländerbehörde)',
+     cost:'€100–140',
+     workRights:'Full work rights for all employers (not tied to one job after 2 years)',
+     successTips:['Permanent Residence in 21 months with B1 German','Shortage occupations: IT specialists, engineers, doctors, nurses','Family reunification allowed — spouse gets work permit immediately','Upgrade to settlement permit (Niederlassungserlaubnis) quickly']
+   }
+  },
+  {cat:'work',icon:'💼',title:'USA OPT & STEM OPT Extension',tags:['USA','OPT','STEM','work','america','F1'],
+   summary:'Optional Practical Training (OPT) allows F-1 students to work in the USA for 12 months after graduation. STEM graduates get an additional 24-month extension.',
+   details:{
+     requirements:['Must be on valid F-1 status','Full-time enrollment for at least 1 academic year','Apply through DSO (Designated School Official)','STEM OPT: degree in STEM field + E-Verify employer'],
+     duration:'12 months standard. 24-month extension for STEM = 36 months total',
+     processing:'Apply 90 days before graduation. USCIS processing: 3–5 months.',
+     cost:'$410 (I-765 form)',
+     workRights:'Work for any employer related to your field of study',
+     successTips:['Apply early — EAD card processing takes time','STEM OPT increases H-1B lottery chances (3 attempts)','Must work 20+ hrs/week and maintain status','Track your job/hours in SEVP portal for STEM OPT']
+   }
+  },
+
+  // ── HOTELS ──
+  {cat:'hotel',icon:'🏨',title:'Hotel Booking for Visa Applications',tags:['hotel','visa','booking','accommodation'],
+   summary:'Many visa applications require proof of accommodation. We provide official hotel reservation letters accepted by all embassies worldwide. Also book real hotels at the best rates.',
+   details:{
+     requirements:['Passport details','Travel dates','Destination city','Purpose of visit'],
+     duration:'Same-day to 24-hour delivery',
+     processing:'Skyglobe provides official hotel reservations without upfront full payment',
+     cost:'Visa reservation letter: from $15 | Real hotel booking: varies by property',
+     workRights:'N/A',
+     successTips:['Embassy-accepted reservations — not just screenshots','Refundable or non-refundable options available','We work with hotels in 150+ countries','Include in your visa application package for stronger approval chances']
+   },
+   bookingLinks:[
+     {label:'🏨 Search on Booking.com',url:'https://www.booking.com'},
+     {label:'🛏️ Hotels.com',url:'https://www.hotels.com'},
+     {label:'🌐 Agoda Hotels',url:'https://www.agoda.com'},
+     {label:'🏡 Airbnb',url:'https://www.airbnb.com'}
+   ]
+  },
+  {cat:'hotel',icon:'🏨',title:'Student Accommodation Booking',tags:['hotel','student','accommodation','dormitory','university'],
+   summary:'Finding accommodation before arriving abroad is critical. We help book university dorms, private student halls, and apartments near your institution.',
+   details:{
+     requirements:['University acceptance letter','Arrival date','Budget range','Preferred location (on-campus vs off-campus)'],
+     duration:'Book 3–6 months before arrival for best options',
+     processing:'We search and secure accommodation within 48–72 hours',
+     cost:'Varies: UK dorms £150–300/week | Canada CAD 800–1,500/month | Australia AUD 250–450/week',
+     workRights:'N/A',
+     successTips:['University accommodation fills up fast — apply immediately after acceptance','Off-campus is usually cheaper but requires longer commute','Check if utilities (electricity, internet) are included','Look for student-specific platforms: Unite Students (UK), Amber Student (global)']
+   }
+  },
+  {cat:'hotel',icon:'🏨',title:'Business Travel Hotel Reservations',tags:['hotel','business','travel','corporate'],
+   summary:'Corporate and business travel hotel bookings with official confirmation letters for visa and expense purposes.',
+   details:{
+     requirements:['Business travel dates','Destination','Company name (for invoice)','Room requirements'],
+     duration:'Same-day booking available',
+     processing:'24-hour confirmation with official letter',
+     cost:'Contact Skyglobe for corporate rates',
+     workRights:'N/A',
+     successTips:['We negotiate corporate rates at 3–5 star hotels globally','Official invoices provided for expense claims','Multi-city itineraries handled in one booking','Cancellation protection available']
+   }
+  },
+
+  // ── TRAVEL INSURANCE ──
+  {cat:'insurance',icon:'🛡️',title:'Schengen Travel Insurance',tags:['insurance','schengen','europe','travel'],
+   summary:'Schengen visa applicants MUST have travel insurance with minimum €30,000 medical coverage valid for the entire Schengen Area. This is mandatory.',
+   details:{
+     requirements:['Minimum €30,000 medical coverage','Valid for all Schengen countries','Covers repatriation in case of death','Must cover entire duration of stay'],
+     duration:'Single trip or multi-trip annual policies available',
+     processing:'Same-day policy issuance',
+     cost:'Approximately €20–50 for a 2-week policy',
+     workRights:'N/A',
+     successTips:['Buy before booking flights — needed for visa application','Skyglobe provides embassy-accepted insurance documents','Annual multi-trip policies save money for frequent travellers','COVID-19 coverage now recommended by many embassies']
+   },
+   bookingLinks:[
+     {label:'🌍 World Nomads',url:'https://www.worldnomads.com/travel-insurance/'},
+     {label:'🛡️ Allianz Travel',url:'https://www.allianztravelinsurance.com/'},
+     {label:'🏥 SafetyWing',url:'https://safetywing.com/'},
+     {label:'📋 InsureMyTrip',url:'https://www.insuremytrip.com/'}
+   ]
+  },
+  {cat:'insurance',icon:'🛡️',title:'Overseas Student Health Cover (OSHC) — Australia',tags:['insurance','OSHC','australia','student'],
+   summary:'OSHC is mandatory for international students in Australia. It covers doctor visits, hospital stays, and some pharmaceuticals.',
+   details:{
+     requirements:['Mandatory for all international student visa holders','Must be purchased before or when applying for student visa','Cover entire duration of visa'],
+     duration:'Match your visa duration',
+     processing:'Same-day purchase online',
+     cost:'AUD ~$600–700/year (single). AUD ~$2,300/year (family)',
+     workRights:'N/A',
+     successTips:['Providers: Medibank, BUPA, Allianz, NIB, AHM','Compare via comparetravelinsurance.com.au','OSHC does NOT cover dental, optical, physiotherapy — get extras cover separately','Keep your OSHC card with you at all times']
+   }
+  },
+  {cat:'insurance',icon:'🛡️',title:'International Student Health Insurance — UK',tags:['insurance','UK','student','IHS','britain'],
+   summary:'International students in the UK pay the Immigration Health Surcharge (IHS) which grants access to the NHS — no separate insurance needed for most healthcare.',
+   details:{
+     requirements:['IHS paid as part of UK visa application','£776/year per person','Covers NHS services: GP, hospital, emergency'],
+     duration:'Paid upfront for entire visa duration',
+     processing:'Paid during visa application online',
+     cost:'£776/year (£388 for students and under-18s) — 2024 rates',
+     workRights:'N/A',
+     successTips:['NHS is free at point of use after IHS payment','Register with a GP (General Practitioner) immediately on arrival','Dental and optical care may require additional insurance','Emergency A&E is always free regardless of insurance status']
+   }
+  },
+  {cat:'insurance',icon:'🛡️',title:'Comprehensive Travel Insurance — General',tags:['insurance','travel','general','worldwide'],
+   summary:'Comprehensive travel insurance covers medical emergencies, trip cancellation, lost luggage, flight delays, and repatriation worldwide.',
+   details:{
+     requirements:['Passport details','Travel dates and destinations','Activities planned (adventure sports need additional cover)'],
+     duration:'Single trip or annual multi-trip',
+     processing:'Instant policy via Skyglobe',
+     cost:'Single trip: $30–$100 | Annual: $150–$300 | Varies by age and destination',
+     workRights:'N/A',
+     successTips:['Always buy before departure — cannot buy after incident','Pre-existing medical conditions must be declared','Adventure activities (skiing, scuba diving) need add-on cover','Keep all receipts for medical expenses — needed for claims']
+   },
+   bookingLinks:[
+     {label:'🌍 World Nomads',url:'https://www.worldnomads.com/travel-insurance/'},
+     {label:'🛡️ SafetyWing (nomads)',url:'https://safetywing.com/'},
+     {label:'🏥 Allianz Travel',url:'https://www.allianztravelinsurance.com/'},
+     {label:'📋 Compare at InsureMyTrip',url:'https://www.insuremytrip.com/'}
+   ]
+  },
+
+  // ── FLIGHTS ──
+  {cat:'flight',icon:'✈️',title:'Flight Booking & Reservation Services',tags:['flight','flights','booking','ticket','reservation','air travel'],
+   summary:'Skyglobe provides official flight reservation letters accepted by all embassies, plus real ticket booking to 500+ airlines worldwide.',
+   details:{
+     requirements:['Passport details','Travel dates','Destination','Purpose of travel'],
+     duration:'Same-day delivery for reservation letters',
+     processing:'Official reservation letter: 2–6 hours | Real ticket: instant confirmation',
+     cost:'Reservation letter: contact us | Tickets: varies by airline and route',
+     workRights:'N/A',
+     successTips:['Reservation letters are accepted by ALL embassies worldwide','You do NOT need to buy a real ticket before your visa is approved','We issue official PNR-backed reservation letters','Real ticket booking available for 500+ airlines worldwide']
+   },
+   officialLink:'https://www.skyscanner.com',
+   bookingLinks:[
+     {label:'🔍 Search on Skyscanner',url:'https://www.skyscanner.com'},
+     {label:'✈️ Google Flights',url:'https://www.google.com/travel/flights'},
+     {label:'💺 Booking.com Flights',url:'https://flights.booking.com'},
+     {label:'🛩️ Kayak Flights',url:'https://www.kayak.com/flights'}
+   ]
+  },
+  {cat:'flight',icon:'✈️',title:'Visa Flight Reservation Letter',tags:['flight','reservation','letter','visa','embassy','PNR'],
+   summary:'An official flight reservation letter (PNR-backed itinerary) required for visa applications. Accepted by Schengen, US, UK, Canada, and all embassies.',
+   details:{
+     requirements:['Full name as in passport','Passport number and expiry','Travel dates (arrival + departure)','Destination country and cities'],
+     duration:'Valid for 30 days typically',
+     processing:'2–6 hours after order',
+     cost:'Starting from $15 — contact Skyglobe',
+     workRights:'N/A',
+     successTips:['Do NOT book a real ticket before visa approval — use a reservation','All major airlines: Emirates, British Airways, Air France, Lufthansa etc.','Includes full itinerary, booking reference, airline confirmation','Refundable if visa is denied']
+   }
+  },
+
+  // ── DOCUMENTATION ──
+  {cat:'visa',icon:'📋',title:'Document Authentication & Apostille',tags:['document','apostille','authentication','notarization','legalization'],
+   summary:'Authentication, apostille, notarization, and legalization of certificates for visa, work, and study applications worldwide. Required by embassies and universities.',
+   details:{
+     requirements:['Original document or certified copy','Identify destination country','Determine if Hague Convention member (apostille) or non-member (full legalization)'],
+     duration:'Apostille: 1–5 business days | Full legalization: 1–3 weeks',
+     processing:'We handle collection, authentication, and delivery end-to-end',
+     cost:'Apostille: $50–150 per document | Full legalization: $100–300 per document',
+     workRights:'N/A',
+     successTips:['Apostille accepted in 120+ countries — check if your destination qualifies','Common documents: degree, transcripts, police clearance, birth certificate, marriage certificate','FBI background check: 3–4 months standard, 1–2 months premium processing','We can notarize, apostille, AND translate in one service']
+   },
+   officialLink:'https://www.hcch.net/en/instruments/conventions/status-table/?cid=41'
+  },
+  {cat:'visa',icon:'🪪',title:'Visa Application Document Checklist',tags:['document','checklist','visa','application','required documents','paperwork'],
+   summary:'Missing documents are the #1 cause of visa refusals and delays. Our expert checklist review ensures your application is complete, signed, and submission-ready.',
+   details:{
+     requirements:['Valid passport (6+ months validity)','Biometric passport photos','Bank statements (3–6 months)','Travel insurance certificate','Hotel/accommodation proof','Flight reservation letter','Employer or enrollment letter','Purpose of travel statement'],
+     duration:'Checklist review: 24–48 hours',
+     processing:'Document preparation and review service',
+     cost:'Document review: from $50 | Full preparation package: from $150',
+     workRights:'N/A',
+     successTips:['All foreign documents must be officially translated by a certified translator','Certified copies often required — originals returned after review','Bank statements must be stamped/signed by the bank','Photos must meet biometric standards: white background, 35mm x 45mm']
+   }
+  },
+
+  // ── SCHOLARSHIPS ──
+  {cat:'scholarship',icon:'🌟',title:'Chevening Scholarship — UK',tags:['scholarship','UK','chevening','funding'],
+   summary:'Chevening is the UK Government\'s global scholarship programme, funded by the Foreign, Commonwealth & Development Office. Fully funded masters scholarships.',
+   details:{
+     requirements:['Citizens of Chevening-eligible countries','At least 2 years work experience','Undergraduate degree (2:1 or equivalent)','Unconditional offer from a UK university','Leadership potential and strong academics'],
+     duration:'1 year masters degree in UK',
+     processing:'Applications open August–November each year',
+     cost:'FULLY FUNDED: tuition, flights, living allowance, visa',
+     workRights:'Student visa rights during study',
+     successTips:['Apply to 3 UK universities before applying for Chevening','Leadership and networking essays are key — show impact','Results announced in June following application year','Network of 50,000+ Chevening Alumni worldwide']
+   }
+  },
+  {cat:'scholarship',icon:'🌟',title:'Commonwealth Scholarship — UK',tags:['scholarship','commonwealth','UK','funding'],
+   summary:'Commonwealth Scholarships are for citizens of Commonwealth countries to study masters and PhD programs at UK universities.',
+   details:{
+     requirements:['Citizen of a Commonwealth country','Bachelors degree (first class or 2:1)','Under 35 years old for most awards','Research proposal for PhD applications'],
+     duration:'1–3 years depending on program',
+     processing:'Applications via Commonwealth Scholarship Commission (CSC)',
+     cost:'FULLY FUNDED: tuition, flights, living allowance, thesis grant',
+     workRights:'Student visa during study',
+     successTips:['Development-focused research preferred','Apply through your national nominating agency','High competition — strong academic record essential','800+ scholarships awarded annually']
+   }
+  },
+  {cat:'scholarship',icon:'🌟',title:'Vanier Canada Graduate Scholarship',tags:['scholarship','canada','PhD','research','funding'],
+   summary:'The Vanier CGS awards $50,000/year for 3 years to doctoral students who demonstrate leadership skills and a high standard of scholarly achievement.',
+   details:{
+     requirements:['First full-time PhD student at eligible Canadian university','Nominated by your university (not a direct application)','Academic excellence (A- minimum average)','Research leadership potential'],
+     duration:'3 years (PhD funding)',
+     processing:'Universities nominate by November each year',
+     cost:'CAD $50,000/year for 3 years = CAD $150,000 total',
+     workRights:'Study permit work rights',
+     successTips:['Contact your university graduate office early — they nominate you','Strong letters of reference are critical','Both Canadian and international students eligible','Strengthens PR application after graduation']
+   }
+  },
+  {cat:'scholarship',icon:'🌟',title:'DAAD Scholarship — Germany',tags:['scholarship','germany','DAAD','funding','europe'],
+   summary:'DAAD (German Academic Exchange Service) is the world\'s largest funding organisation for international student exchange. Hundreds of programs available.',
+   details:{
+     requirements:['Varies by program: undergraduate, masters, PhD, research','Strong academic record','Language skills (German or English depending on program)','Research proposal for some programs'],
+     duration:'1 month to 4 years depending on program',
+     processing:'Applications typically 6–12 months before program start',
+     cost:'FUNDED: monthly stipend €850–1,200 + travel + health insurance',
+     workRights:'Student visa work rights',
+     successTips:['Over 100 different scholarship programs — find your match at daad.de','Both degree scholarships and research grants available','Many programs specifically for developing country applicants','Germany also has Helmholtz, Alexander von Humboldt fellowships']
+   }
+  },
+];
+
+let activeFilter = 'all';
+let ALL_COUNTRIES = [];
+let countriesLoaded = false;
+
+// Load all world countries from REST Countries API
+async function loadAllCountries() {
+  if (countriesLoaded) return;
+  try {
+    const res = await fetch('https://restcountries.com/v3.1/all?fields=name,capital,population,currencies,languages,flags,flag,region,subregion,area,timezones,tld,car');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    ALL_COUNTRIES = await res.json();
+    countriesLoaded = true;
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) doSearch();
+  } catch(e) {
+    console.warn('Countries API failed:', e.message);
+    countriesLoaded = true; // prevent infinite loading spinner
+    ALL_COUNTRIES = [];
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) doSearch(); // re-run so KB results still show
+  }
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  doSearch();
+}
+
+function searchFor(term) {
+  document.getElementById('searchInput').value = term;
+  document.getElementById('popularSection').style.display = 'none';
+  doSearch();
+}
+
+function fmtNum(n) {
+  if (!n) return '—';
+  if (n >= 1e9) return (n/1e9).toFixed(2) + ' billion';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + ' million';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + ',000';
+  return n.toString();
+}
+
+function renderCountryCard(c, idx) {
+  const name = c.name?.common || '—';
+  const official = c.name?.official || name;
+  const flagEmoji = c.flag || '';
+  const flag = flagEmoji ? `<span style="font-size:1.8rem;line-height:1">${flagEmoji}</span>` : (c.flags?.png ? `<img src="${c.flags.png}" style="width:32px;height:22px;object-fit:cover;border-radius:3px;border:1px solid var(--border)">` : '🌍');
+  const capital = c.capital?.[0] || '';
+  const capitalDisplay = c.capital?.join(', ') || '—';
+  const population = fmtNum(c.population);
+  const region = c.region || '—';
+  const subregion = c.subregion || '';
+  const currencyCode = c.currencies ? Object.keys(c.currencies)[0] : '';
+  const currencies = c.currencies ? Object.values(c.currencies).map(cur => `${cur.name}${cur.symbol?' ('+cur.symbol+')':''}`).join(', ') : '—';
+  const languages = c.languages ? Object.values(c.languages).join(', ') : '—';
+  const area = c.area ? (c.area).toLocaleString() + ' km²' : '—';
+  const tld = c.tld?.join(', ') || '—';
+  const drive = c.car?.side === 'left' ? 'Left-hand (like UK)' : 'Right-hand';
+  const timezones = c.timezones?.slice(0,3).join(', ') + (c.timezones?.length > 3 ? '…' : '') || '—';
+  const safeCapital = capital.replace(/'/g,"&#39;");
+  const safeName = name.replace(/'/g,"&#39;");
+
+  return `
+    <div class="result-card" onclick="toggleDetail('c${idx}')" data-country="${safeName}" data-capital="${safeCapital}" data-currency="${currencyCode}">
+      <div class="result-card-header">
+        <div class="result-icon" style="font-size:1.6rem;overflow:hidden">${flag}</div>
+        <div style="flex:1">
+          <div class="result-category">COUNTRY · ${region.toUpperCase()}</div>
+          <div class="result-title">${name}</div>
+        </div>
+        <div style="color:var(--gold);font-size:1.2rem" id="arrow-c${idx}">▼</div>
+      </div>
+      <div class="result-body">${official}${subregion ? ' — ' + subregion : ''}. Capital: <strong style="color:var(--white)">${capitalDisplay}</strong>. Population: <strong style="color:var(--white)">${population}</strong>.</div>
+      <div class="result-tags">
+        <span class="result-tag">${region}</span>
+        ${subregion ? `<span class="result-tag">${subregion}</span>` : ''}
+        <span class="result-tag">Pop: ${population}</span>
+      </div>
+      <div class="result-detail" id="detail-c${idx}">
+        <div class="detail-grid" style="margin-top:0.5rem">
+          <div class="detail-item"><strong>Capital</strong><span>${capitalDisplay}</span></div>
+          <div class="detail-item"><strong>Population</strong><span>${population}</span></div>
+          <div class="detail-item"><strong>Area</strong><span>${area}</span></div>
+          <div class="detail-item"><strong>Currency</strong><span>${currencies}</span></div>
+          <div class="detail-item"><strong>Languages</strong><span>${languages}</span></div>
+          <div class="detail-item"><strong>Region</strong><span>${region}${subregion ? ' / ' + subregion : ''}</span></div>
+          <div class="detail-item"><strong>Timezones</strong><span>${timezones}</span></div>
+          <div class="detail-item"><strong>Internet TLD</strong><span>${tld}</span></div>
+          <div class="detail-item"><strong>Driving Side</strong><span>${drive}</span></div>
+        </div>
+        <div id="live-c${idx}" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+          <p style="font-size:0.78rem;color:var(--muted)">📡 Expand to load live weather, exchange rate & universities…</p>
+        </div>
+        <div style="margin-top:1.2rem;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">
+          <a href="https://www.google.com/travel/flights?q=flights+to+${encodeURIComponent(name)}" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.82rem;padding:9px 16px;text-decoration:none" onclick="event.stopPropagation()">✈️ Search Flights</a>
+          <a href="https://www.booking.com/search.html?ss=${encodeURIComponent(capital||name)}" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.82rem;padding:9px 16px;text-decoration:none" onclick="event.stopPropagation()">🏨 Find Hotels</a>
+          <a href="https://www.worldnomads.com/travel-insurance/" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.82rem;padding:9px 16px;text-decoration:none" onclick="event.stopPropagation()">🛡️ Get Insurance</a>
+          <button class="btn-primary" style="font-size:0.82rem;padding:9px 16px" onclick="event.stopPropagation();searchFor('${safeName} visa')">🛂 Visa Info</button>
+          <button class="btn-outline" style="font-size:0.82rem;padding:9px 16px" onclick="event.stopPropagation();showPage('contact')">✦ Consult</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('searchResults');
+  const popularEl = document.getElementById('popularSection');
+
+  if (!q) {
+    popularEl.style.display = 'block';
+    resultsEl.innerHTML = '';
+    return;
+  }
+  popularEl.style.display = 'none';
+
+  // KB results
+  let kbResults = KB.filter(item => {
+    const matchFilter = activeFilter === 'all' || item.cat === activeFilter;
+    const matchQuery = item.title.toLowerCase().includes(q) ||
+      item.summary.toLowerCase().includes(q) ||
+      item.tags.some(t => t.toLowerCase().includes(q)) ||
+      item.cat.toLowerCase().includes(q);
+    return matchFilter && matchQuery;
+  });
+
+  // Country results (only when filter is 'all' or 'country')
+  let countryResults = [];
+  let countriesStillLoading = false;
+  if (activeFilter === 'all' || activeFilter === 'country') {
+    if (!countriesLoaded) {
+      loadAllCountries(); // trigger loading in background
+      countriesStillLoading = true; // show loading note but DON'T block KB results
+    } else {
+      countryResults = ALL_COUNTRIES.filter(c => {
+        const name = (c.name?.common || '').toLowerCase();
+        const official = (c.name?.official || '').toLowerCase();
+        const capital = (c.capital?.[0] || '').toLowerCase();
+        const region = (c.region || '').toLowerCase();
+        const subregion = (c.subregion || '').toLowerCase();
+        const currencies = c.currencies ? Object.values(c.currencies).map(cu=>cu.name).join(' ').toLowerCase() : '';
+        const languages = c.languages ? Object.values(c.languages).join(' ').toLowerCase() : '';
+        return name.includes(q) || official.includes(q) || capital.includes(q) ||
+               region.includes(q) || subregion.includes(q) || languages.includes(q) || currencies.includes(q);
+      }).sort((a, b) => (b.population || 0) - (a.population || 0)).slice(0, 20);
+    }
+  }
+
+  const totalCount = kbResults.length + countryResults.length;
+
+  if (totalCount === 0 && !countriesStillLoading) {
+    resultsEl.innerHTML = `<div class="no-results"><div class="nr-icon">🔍</div><p>No results found for "<strong>${q}</strong>"</p><p style="font-size:0.85rem;margin-top:0.5rem;color:var(--muted)">Try any country name, city, visa type, university, work permit, insurance, or scholarship</p></div>`;
+    return;
+  }
+
+  // Smart intent cards
+  let intentHTML = '';
+  const flightIntent = /flight|fly|flies|airline|ticket|airfare/.test(q);
+  const hotelIntent = /hotel|hostel|accommodation|stay|lodg|airbnb/.test(q);
+  const insureIntent = /insur|cover|protection|medical|health cover/.test(q);
+  const destMatch = q.replace(/flights?\s*(to|from|in)?|hotels?\s*(in|at)?|insurance\s*(for)?/gi,'').trim();
+  const encDest = encodeURIComponent(destMatch || q);
+
+  if (flightIntent) {
+    intentHTML += `<div class="result-card" style="border-color:var(--gold);background:rgba(201,168,76,0.04)">
+      <div class="result-card-header">
+        <div class="result-icon">✈️</div>
+        <div style="flex:1"><div class="result-category">LIVE FLIGHT SEARCH</div><div class="result-title">Find Real Flights${destMatch?' to '+destMatch.charAt(0).toUpperCase()+destMatch.slice(1):''}</div></div>
+      </div>
+      <div class="result-body">Compare real-time prices across hundreds of airlines. Click any platform below to search live fares.</div>
+      <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+        <a href="https://www.google.com/travel/flights?q=flights+${encDest}" target="_blank" rel="noopener" class="btn-primary" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🔍 Google Flights</a>
+        <a href="https://www.skyscanner.com/transport/flights/anywhere/?query=${encDest}" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">✈️ Skyscanner</a>
+        <a href="https://www.kayak.com/flights/anywhere-${encDest}/" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🛩️ Kayak</a>
+        <a href="https://flights.booking.com" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🌐 Booking.com</a>
+        <button class="btn-outline" style="font-size:0.85rem;padding:10px 18px" onclick="showPage('contact')">📄 Visa Reservation Letter</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:0.8rem">💡 Need a flight reservation letter for your visa application? Skyglobe provides official PNR-backed letters accepted by all embassies.</p>
+    </div>`;
+  }
+  if (hotelIntent) {
+    intentHTML += `<div class="result-card" style="border-color:var(--gold);background:rgba(201,168,76,0.04)">
+      <div class="result-card-header">
+        <div class="result-icon">🏨</div>
+        <div style="flex:1"><div class="result-category">LIVE HOTEL SEARCH</div><div class="result-title">Find Real Hotels${destMatch?' in '+destMatch.charAt(0).toUpperCase()+destMatch.slice(1):''}</div></div>
+      </div>
+      <div class="result-body">Search and book real hotels worldwide. Compare prices across all major platforms.</div>
+      <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+        <a href="https://www.booking.com/search.html?ss=${encDest}" target="_blank" rel="noopener" class="btn-primary" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🏨 Booking.com</a>
+        <a href="https://www.hotels.com/search.do?q-destination=${encDest}" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🛏️ Hotels.com</a>
+        <a href="https://www.agoda.com/search?city=${encDest}" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🌐 Agoda</a>
+        <a href="https://www.airbnb.com/s/${encDest}/homes" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🏡 Airbnb</a>
+        <button class="btn-outline" style="font-size:0.85rem;padding:10px 18px" onclick="showPage('contact')">📄 Visa Hotel Letter</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:0.8rem">💡 Need an official hotel reservation letter for your visa? Skyglobe issues embassy-accepted accommodation letters same-day.</p>
+    </div>`;
+  }
+  if (insureIntent) {
+    intentHTML += `<div class="result-card" style="border-color:var(--gold);background:rgba(201,168,76,0.04)">
+      <div class="result-card-header">
+        <div class="result-icon">🛡️</div>
+        <div style="flex:1"><div class="result-category">TRAVEL INSURANCE</div><div class="result-title">Get Real Travel Insurance</div></div>
+      </div>
+      <div class="result-body">Compare travel insurance from leading providers. Schengen-compliant plans with €30,000+ medical coverage from €20.</div>
+      <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+        <a href="https://www.worldnomads.com/travel-insurance/get-a-quote" target="_blank" rel="noopener" class="btn-primary" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🌍 World Nomads</a>
+        <a href="https://safetywing.com/" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🏥 SafetyWing</a>
+        <a href="https://www.allianztravelinsurance.com/" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">🛡️ Allianz Travel</a>
+        <a href="https://www.insuremytrip.com/" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.85rem;padding:10px 18px;text-decoration:none">📋 InsureMyTrip</a>
+      </div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:0.8rem">💡 Schengen visa requires minimum €30,000 medical cover valid for all 27 Schengen countries. Single-trip policies from ~€20.</p>
+    </div>`;
+  }
+
+  const kbHTML = kbResults.map((item, i) => `
+    <div class="result-card" onclick="toggleDetail(${i})">
+      <div class="result-card-header">
+        <div class="result-icon">${item.icon}</div>
+        <div style="flex:1">
+          <div class="result-category">${item.cat.toUpperCase()}</div>
+          <div class="result-title">${item.title}</div>
+        </div>
+        <div style="color:var(--gold);font-size:1.2rem" id="arrow-${i}">▼</div>
+      </div>
+      <div class="result-body">${item.summary}</div>
+      <div class="result-tags">${item.tags.map(t=>`<span class="result-tag">${t}</span>`).join('')}</div>
+      <div class="result-detail" id="detail-${i}">
+        ${item.details.requirements ? `<p style="font-size:0.82rem;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem">Requirements</p><ul>${item.details.requirements.map(r=>`<li>${r}</li>`).join('')}</ul>` : ''}
+        <div class="detail-grid" style="margin-top:1rem">
+          ${item.details.duration?`<div class="detail-item"><strong>Duration</strong><span>${item.details.duration}</span></div>`:''}
+          ${item.details.processing?`<div class="detail-item"><strong>Processing Time</strong><span>${item.details.processing}</span></div>`:''}
+          ${item.details.cost?`<div class="detail-item"><strong>Cost</strong><span>${item.details.cost}</span></div>`:''}
+          ${item.details.workRights&&item.details.workRights!=='N/A'?`<div class="detail-item"><strong>Work Rights</strong><span>${item.details.workRights}</span></div>`:''}
+        </div>
+        ${item.details.successTips?`<p style="font-size:0.82rem;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin:1rem 0 0.6rem">Tips for Success</p><ul>${item.details.successTips.map(t=>`<li>${t}</li>`).join('')}</ul>`:''}
+        <div style="margin-top:1.2rem;display:flex;gap:0.7rem;flex-wrap:wrap;align-items:center">
+          ${item.officialLink?`<a href="${item.officialLink}" target="_blank" rel="noopener" class="btn-primary" style="font-size:0.82rem;padding:9px 18px;text-decoration:none" onclick="event.stopPropagation()">🌐 Official Portal</a>`:''}
+          ${item.bookingLinks?item.bookingLinks.map(bl=>`<a href="${bl.url}" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.82rem;padding:9px 18px;text-decoration:none" onclick="event.stopPropagation()">${bl.label}</a>`).join(''):''}
+          <button class="btn-outline" style="font-size:0.82rem;padding:9px 18px" onclick="event.stopPropagation();showPage('contact')">✦ Get Expert Help</button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const countryHTML = countryResults.map((c, i) => renderCountryCard(c, i)).join('');
+
+  const loadingNote = countriesStillLoading ? `<div style="text-align:center;padding:2rem;color:var(--muted);border:1px solid var(--border);border-radius:var(--radius-lg);margin-top:1rem">🌍 Loading world countries data… please wait a moment</div>` : '';
+
+  const countrySection = countryResults.length > 0 ? `
+    ${kbResults.length > 0 ? `<div style="margin:1.5rem 0 1rem;font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold)">🌍 World Countries (${countryResults.length})</div>` : ''}
+    ${countryHTML}` : '';
+
+  const intentCount = (flightIntent?1:0)+(hotelIntent?1:0)+(insureIntent?1:0);
+  const displayTotal = totalCount + intentCount;
+  resultsEl.innerHTML = `<p class="results-count">${displayTotal} result${displayTotal>1?'s':''} found for "<strong>${q}</strong>"</p>` + intentHTML + kbHTML + countrySection + loadingNote;
+}
+
+async function fetchLiveData(name, capital, currencyCode, idx) {
+  const el = document.getElementById('live-'+idx);
+  if (!el || el.dataset.loaded) return;
+  el.dataset.loaded = 'true';
+  el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">📡 Loading live data…</p>';
+  const [weather, rates, unis] = await Promise.allSettled([
+    capital ? fetch('https://wttr.in/'+encodeURIComponent(capital)+'?format=%C,+%t,+Humidity+%h&m').then(r=>r.text()) : Promise.reject('no capital'),
+    fetch('https://open.er-api.com/v6/latest/USD').then(r=>r.json()),
+    fetch('https://universities.hipolabs.com/search?country='+encodeURIComponent(name)).then(r=>r.json())
+  ]);
+  let html = '<div class="detail-grid" style="margin-top:0">';
+  if (weather.status==='fulfilled' && weather.value.trim()) {
+    html += `<div class="detail-item"><strong>🌤️ Live Weather (${capital})</strong><span>${weather.value.trim()}</span></div>`;
+  }
+  if (rates.status==='fulfilled' && currencyCode && rates.value.rates?.[currencyCode]) {
+    html += `<div class="detail-item"><strong>💱 Exchange Rate</strong><span>1 USD = ${rates.value.rates[currencyCode].toLocaleString(undefined,{maximumFractionDigits:4})} ${currencyCode}</span></div>`;
+  }
+  if (unis.status==='fulfilled' && unis.value?.length) {
+    html += `<div class="detail-item" style="grid-column:1/-1"><strong>🎓 Universities in ${name}</strong><span>${unis.value.slice(0,6).map(u=>u.name).join(' • ')}</span></div>`;
+  }
+  html += '</div>';
+  if (html === '<div class="detail-grid" style="margin-top:0"></div>') {
+    el.innerHTML = '<p style="color:var(--muted);font-size:0.78rem">Live data unavailable for this country.</p>';
+  } else {
+    el.innerHTML = html;
+  }
+}
+
+function toggleDetail(i) {
+  const d = document.getElementById('detail-'+i);
+  const a = document.getElementById('arrow-'+i);
+  if (!d) return;
+  d.classList.toggle('open');
+  a.textContent = d.classList.contains('open') ? '▲' : '▼';
+  if (d.classList.contains('open') && String(i).startsWith('c')) {
+    const card = d.closest('.result-card') || document.querySelector(`[onclick="toggleDetail('${i}')"]`);
+    if (card) {
+      const name = card.dataset.country;
+      const capital = card.dataset.capital;
+      const currency = card.dataset.currency;
+      fetchLiveData(name, capital, currency, String(i));
+    }
+  }
+}
+
+// Pre-load countries when search page is first visited
+const _origShowPage = showPage;
+showPage = function(page) {
+  _origShowPage(page);
+  if (page === 'search' && !countriesLoaded) loadAllCountries();
+};
+
+// ── APPLICATION FORM ──────────────────────────────────────────────────────────
+let selectedService = '';
+let currentAppStep = 1;
+const APPLY_API = API_URL.replace('/api/contact', '/api/apply');
+
+const serviceFields = {
+  'Student Visa Processing':          ['institution'],
+  'Work Visa Processing':             ['employer'],
+  'Tourist / Visit Visa':             [],
+  'University Admission Assistance':  ['institution'],
+  'Flight Reservation Letter':        [],
+  'Hotel Booking / Accommodation Letter': ['hotelCity','checkIn','checkOut'],
+  'Travel Insurance':                 ['coverage'],
+  'Document Authentication / Apostille': ['docType'],
+  'Scholarship Application Support':  ['scholarship','institution'],
+  'Express Entry / PR Pathway':       []
+};
+const allOptFields = ['institution','employer','hotelCity','checkIn','checkOut','coverage','docType','scholarship'];
+
+function selectService(name, el) {
+  selectedService = name;
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  const btn = document.getElementById('step1Next');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
+function goStep(n) {
+  if (n === 2) {
+    if (!selectedService) { showToast('⚠️ Please select a service first.', true); return; }
+  }
+  if (n === 3) {
+    const fname = document.getElementById('ap_fname').value.trim();
+    const email = document.getElementById('ap_email').value.trim();
+    const phone = document.getElementById('ap_phone').value.trim();
+    const nationality = document.getElementById('ap_nationality').value.trim();
+    if (!fname || !email || !phone || !nationality) { showToast('⚠️ Please fill in all required fields.', true); return; }
+    document.getElementById('selectedServiceLabel').textContent = selectedService;
+    showServiceFields();
+  }
+  if (n === 4) {
+    buildReview();
+  }
+  currentAppStep = n;
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('applyStep' + n).classList.add('active');
+  document.querySelectorAll('.apply-step').forEach((s, i) => {
+    s.classList.remove('active','done');
+    if (i + 1 < n) s.classList.add('done');
+    if (i + 1 === n) s.classList.add('active');
+  });
+  window.scrollTo({top: document.getElementById('page-apply').offsetTop - 80, behavior:'smooth'});
+}
+
+function showServiceFields() {
+  const show = serviceFields[selectedService] || [];
+  allOptFields.forEach(f => {
+    const el = document.getElementById('field' + f.charAt(0).toUpperCase() + f.slice(1));
+    if (el) el.style.display = show.includes(f) ? '' : 'none';
+  });
+}
+
+function buildReview() {
+  const rows = [
+    ['Service', selectedService],
+    ['Name', (document.getElementById('ap_fname').value+' '+document.getElementById('ap_lname').value).trim()],
+    ['Email', document.getElementById('ap_email').value],
+    ['Phone', document.getElementById('ap_phone').value],
+    ['Date of Birth', document.getElementById('ap_dob').value || '—'],
+    ['Nationality', document.getElementById('ap_nationality').value],
+    ['Passport No.', document.getElementById('ap_passport').value || '—'],
+    ['Destination', document.getElementById('ap_destination').value || '—'],
+    ['Travel Date', document.getElementById('ap_travelDate').value || '—'],
+    ['Duration', document.getElementById('ap_duration').value || '—'],
+    ['Purpose', document.getElementById('ap_purpose').value || '—'],
+    ['Institution', document.getElementById('ap_institution').value || '—'],
+    ['Employer', document.getElementById('ap_employer').value || '—'],
+    ['Notes', document.getElementById('ap_notes').value || '—'],
+  ];
+  document.getElementById('reviewSummary').innerHTML = rows.filter(r=>r[1]&&r[1]!=='—').map(r =>
+    `<span style="color:var(--gold);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em">${r[0]}</span>: <strong style="color:var(--white)">${r[1]}</strong><br>`
+  ).join('');
+}
+
+async function submitApplication() {
+  const btn = document.getElementById('submitAppBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  const payload = {
+    service: selectedService,
+    fname: document.getElementById('ap_fname').value.trim(),
+    lname: document.getElementById('ap_lname').value.trim(),
+    email: document.getElementById('ap_email').value.trim(),
+    phone: document.getElementById('ap_phone').value.trim(),
+    dob: document.getElementById('ap_dob').value,
+    nationality: document.getElementById('ap_nationality').value.trim(),
+    passport: document.getElementById('ap_passport').value.trim(),
+    passportExpiry: document.getElementById('ap_passportExpiry').value,
+    destination: document.getElementById('ap_destination').value.trim(),
+    travelDate: document.getElementById('ap_travelDate').value,
+    duration: document.getElementById('ap_duration').value.trim(),
+    purpose: document.getElementById('ap_purpose').value.trim(),
+    institution: document.getElementById('ap_institution').value.trim(),
+    employer: document.getElementById('ap_employer').value.trim(),
+    hotelCity: document.getElementById('ap_hotelCity').value.trim(),
+    checkin: document.getElementById('ap_checkin').value,
+    checkout: document.getElementById('ap_checkout').value,
+    coverage: document.getElementById('ap_coverage').value,
+    docType: document.getElementById('ap_docType').value,
+    scholarship: document.getElementById('ap_scholarship').value,
+    notes: document.getElementById('ap_notes').value.trim()
+  };
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
+    const res = await fetch(APPLY_API, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload), signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    const data = await res.json();
+    if (!res.ok && !data.ref) throw new Error(data.error || 'Server error');
+    const ref = data.ref || ('SKY-' + new Date().getFullYear() + '-SAVE');
+    document.getElementById('appRefDisplay').textContent = ref;
+    // Save to localStorage so tracking works even after server restarts
+    const savedApp = {...payload, ref, timestamp: new Date().toISOString(), status: 'Received'};
+    try { localStorage.setItem('skyapp_' + ref, JSON.stringify(savedApp)); } catch(e){}
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('applySuccess').classList.add('active');
+    document.querySelectorAll('.apply-step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+    window.scrollTo({top: document.getElementById('page-apply').offsetTop - 80, behavior:'smooth'});
+  } catch(err) {
+    if (err.name === 'AbortError') {
+      showToast('⚠️ Server timeout. Your application may still be saved — check via WhatsApp.', true);
+    } else {
+      showToast('⚠️ ' + (err.message || 'Failed to submit') + '. Please try WhatsApp.', true);
+    }
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Submit Application';
+  }
+}
+
+function resetApplyForm() {
+  selectedService = '';
+  currentAppStep = 1;
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
+  ['ap_fname','ap_lname','ap_email','ap_phone','ap_dob','ap_nationality','ap_passport','ap_passportExpiry',
+   'ap_destination','ap_travelDate','ap_duration','ap_purpose','ap_institution','ap_employer',
+   'ap_hotelCity','ap_checkin','ap_checkout','ap_notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['ap_coverage','ap_docType','ap_scholarship'].forEach(id => { const el = document.getElementById(id); if(el) el.selectedIndex=0; });
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('applyStep1').classList.add('active');
+  document.querySelectorAll('.apply-step').forEach((s,i) => { s.classList.remove('active','done'); if(i===0) s.classList.add('active'); });
+  const btn = document.getElementById('step1Next');
+  btn.disabled = true; btn.style.opacity = '0.4';
+}
+
+function showTracker() {
+  document.getElementById('trackInput').focus();
+  document.getElementById('trackInput').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+async function trackApplication() {
+  const val = document.getElementById('trackInput').value.trim();
+  const resultEl = document.getElementById('trackResult');
+  if (!val) { resultEl.innerHTML = '<p style="color:var(--muted)">Enter a reference number or email address.</p>'; return; }
+  resultEl.innerHTML = '<p style="color:var(--muted)">🔍 Searching…</p>';
+
+  // Helper: load all saved apps from localStorage
+  function localApps() {
+    const apps = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('skyapp_')) {
+        try { apps.push(JSON.parse(localStorage.getItem(key))); } catch(e){}
+      }
+    }
+    return apps;
+  }
+
+  try {
+    if (val.toUpperCase().startsWith('SKY-')) {
+      const ref = val.toUpperCase();
+      // Check localStorage first
+      const local = localStorage.getItem('skyapp_' + ref);
+      if (local) { resultEl.innerHTML = renderAppCard(JSON.parse(local)); return; }
+      // Fall back to server
+      const res = await fetch(APPLY_API + '/' + encodeURIComponent(ref));
+      const data = await res.json();
+      if (!res.ok) { resultEl.innerHTML = `<p style="color:var(--muted)">No application found for reference <strong>${ref}</strong>. Make sure you are using the same device/browser you applied from, or contact us via WhatsApp with your reference number.</p>`; return; }
+      // Cache the server result locally for future lookups
+      try { localStorage.setItem('skyapp_' + ref, JSON.stringify(data)); } catch(e){}
+      resultEl.innerHTML = renderAppCard(data);
+    } else {
+      const email = val.toLowerCase();
+      // Check localStorage for matching email
+      const localMatches = localApps().filter(a => a.email && a.email.toLowerCase() === email);
+      if (localMatches.length) { resultEl.innerHTML = localMatches.map(renderAppCard).join(''); return; }
+      // Fall back to server
+      const res = await fetch(APPLY_API + '?email=' + encodeURIComponent(val));
+      const data = await res.json();
+      if (!res.ok || !data.length) { resultEl.innerHTML = '<p style="color:var(--muted)">No applications found for that email address. Make sure you are using the same device/browser you applied from, or contact us on WhatsApp.</p>'; return; }
+      data.forEach(a => { try { localStorage.setItem('skyapp_' + a.ref, JSON.stringify(a)); } catch(e){} });
+      resultEl.innerHTML = data.map(renderAppCard).join('');
+    }
+  } catch(e) {
+    // Last resort: check localStorage only
+    const email = val.toLowerCase();
+    const localMatches = localApps().filter(a =>
+      (a.ref && a.ref === val.toUpperCase()) ||
+      (a.email && a.email.toLowerCase() === email)
+    );
+    if (localMatches.length) { resultEl.innerHTML = localMatches.map(renderAppCard).join(''); return; }
+    resultEl.innerHTML = '<p style="color:var(--muted)">Could not connect to server. Please try again.</p>';
+  }
+}
+
+function renderAppCard(app) {
+  const statusColor = {Received:'#3b82f6',Processing:'#f59e0b',Approved:'#22c55e',Rejected:'#ef4444'}[app.status]||'#3b82f6';
+  const statusIcon = {Received:'📥',Processing:'⚙️',Approved:'✅',Rejected:'❌'}[app.status]||'📥';
+  const date = app.timestamp ? new Date(app.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+
+  function row(label, val) {
+    if (!val || val === '—' || val === '') return '';
+    return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+      <td style="padding:7px 10px 7px 0;color:var(--muted);font-size:0.82rem;white-space:nowrap;vertical-align:top">${label}</td>
+      <td style="padding:7px 0 7px 10px;font-size:0.87rem;font-weight:500">${val}</td>
+    </tr>`;
+  }
+
+  const printId = 'print_' + app.ref;
+  return `<div class="app-tracker" id="${printId}">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.8rem;margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Application Reference</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);font-weight:700;letter-spacing:0.04em">${app.ref}</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:2px">Submitted: ${date}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="display:inline-flex;align-items:center;gap:6px;background:${statusColor}22;border:1px solid ${statusColor}55;border-radius:20px;padding:6px 14px;font-size:0.85rem;font-weight:600;color:${statusColor}">${statusIcon} ${app.status}</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:6px">Service: <strong style="color:var(--white)">${app.service||'—'}</strong></div>
+      </div>
+    </div>
+
+    <!-- Details Table -->
+    <table style="width:100%;border-collapse:collapse">
+      ${row('Full Name', [app.fname, app.lname].filter(Boolean).join(' '))}
+      ${row('Email', app.email)}
+      ${row('Phone', app.phone)}
+      ${row('Nationality', app.nationality)}
+      ${row('Date of Birth', app.dob)}
+      ${row('Passport No.', app.passport)}
+      ${row('Passport Expiry', app.passportExpiry)}
+      ${row('Destination', app.destination)}
+      ${row('Travel Date', app.travelDate)}
+      ${row('Duration', app.duration)}
+      ${row('Purpose', app.purpose)}
+      ${row('Institution', app.institution)}
+      ${row('Employer', app.employer)}
+      ${row('Hotel City', app.hotelCity)}
+      ${row('Check-in', app.checkin)}
+      ${row('Check-out', app.checkout)}
+      ${row('Coverage', app.coverage)}
+      ${row('Document Type', app.docType)}
+      ${row('Scholarship', app.scholarship)}
+    </table>
+    ${app.notes ? `<div style="margin-top:0.8rem;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;border-left:3px solid var(--gold)"><div style="font-size:0.75rem;color:var(--muted);margin-bottom:4px">Notes</div><div style="font-size:0.85rem;line-height:1.5">${app.notes}</div></div>` : ''}
+
+    <!-- Status message -->
+    <div style="margin-top:1rem;padding:12px;background:rgba(59,130,246,0.08);border-radius:8px;border:1px solid rgba(59,130,246,0.2);font-size:0.82rem;color:var(--text-body)">
+      Our team will contact you at <strong style="color:var(--gold-light)">${app.email}</strong> within 24 hours. Use your reference number for any enquiries.
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1rem">
+      <button onclick="printApp('${printId}')" style="display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:var(--navy);border:none;padding:10px 18px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer">🖨️ Print / Save PDF</button>
+      <a href="https://wa.me/17373998522?text=Hi%2C%20my%20application%20reference%20is%20${app.ref}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:600;font-size:0.85rem;text-decoration:none">💬 WhatsApp Us</a>
+    </div>
+  </div>`;
+}
+
+function printApp(cardId) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  const w = window.open('', '_blank', 'width=800,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><title>SkyGlobe Application</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Outfit',sans-serif;background:#fff;color:#111;padding:40px;max-width:700px;margin:0 auto}
+    .logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid #c9a84c}
+    .logo-box{width:44px;height:44px;background:linear-gradient(135deg,#c9a84c,#e6c97a);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+    .logo-text{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:#0a1628}
+    .ref{font-family:'Cormorant Garamond',serif;font-size:2rem;color:#c9a84c;font-weight:700;letter-spacing:0.04em}
+    .status{display:inline-flex;align-items:center;gap:6px;background:#e8f4fe;border:1px solid #3b82f6;border-radius:20px;padding:5px 14px;font-size:0.85rem;font-weight:600;color:#1d4ed8}
+    table{width:100%;border-collapse:collapse;margin-top:16px}
+    td{padding:8px 6px;border-bottom:1px solid #e5e7eb;font-size:0.9rem}
+    td:first-child{color:#6b7280;width:180px;font-size:0.82rem}
+    td:last-child{font-weight:500;color:#111}
+    .notes-box{margin-top:12px;padding:12px;background:#f9fafb;border-radius:8px;border-left:3px solid #c9a84c;font-size:0.88rem;color:#374151}
+    .footer{margin-top:28px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:0.78rem;color:#9ca3af;text-align:center}
+    @media print{body{padding:20px}button{display:none!important}}
+  </style></head><body>
+  <div class="logo"><div class="logo-box">🌐</div><div class="logo-text">SKYGLOBE <span style="font-size:0.75rem;font-weight:400;color:#6b7280">LIMITED</span></div></div>
+  ${card.innerHTML.replace(/style="[^"]*color:var\([^)]+\)[^"]*"/g, '')}
+  <div class="footer">Skyglobe Limited · insights.skyglobe@gmail.com · +1 737-399-8522 · 123 Fifth Ave, New York NY 10011</div>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+</script>
+</body>
+</html>
