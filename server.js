@@ -3,47 +3,33 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname)));
 
-// ── EMAIL TRANSPORTER (Nodemailer + Gmail) ────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 20000,
-  tls: { rejectUnauthorized: false },
-});
-
-// Verify connection on startup
-transporter.verify((err) => {
-  if (err) {
-    console.error('⚠️  Email connection failed:', err.message);
-    console.error('    Check MAIL_USER and MAIL_PASS env vars in Render dashboard.');
-  } else {
-    console.log('✅ Email transporter ready —', process.env.MAIL_USER);
-  }
-});
-
+// ── RESEND EMAIL (HTTPS — works on all cloud platforms) ───────────────────────
 async function sendEmail(to, subject, html, replyTo) {
-  const mailOptions = {
-    from: `"SkyGlobe Limited" <${process.env.MAIL_USER}>`,
-    to,
+  const body = {
+    from: 'SkyGlobe Limited <onboarding@resend.dev>',
+    to: [to],
     subject,
     html,
   };
-  if (replyTo) mailOptions.replyTo = replyTo;
-  return transporter.sendMail(mailOptions);
+  if (replyTo) body.reply_to = replyTo;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
 }
 
 // ── APPLICATIONS STORAGE ──────────────────────────────────────────────────────
@@ -66,14 +52,6 @@ function genRef() {
 }
 
 // ── CONTACT / CONSULTATION FORM ───────────────────────────────────────────────
-// Helper: wrap any promise with a timeout
-function withTimeout(promise, ms) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms))
-  ]);
-}
-
 app.post('/api/contact', async (req, res) => {
   const { fname, lname, email, phone, service, destination, message } = req.body;
 
@@ -81,12 +59,11 @@ app.post('/api/contact', async (req, res) => {
     return res.status(400).json({ error: 'Name, email and service are required.' });
   }
 
-  if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
-    console.error('MAIL_USER or MAIL_PASS env vars not set!');
-    return res.status(500).json({ error: 'Server email not configured. Please contact us via WhatsApp.' });
+  if (!process.env.RESEND_API_KEY) {
+    return res.status(500).json({ error: 'Email service not configured. Contact us via WhatsApp.' });
   }
 
-  const recipientEmail = process.env.RECIPIENT_EMAIL || process.env.MAIL_USER;
+  const recipientEmail = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
 
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
@@ -108,11 +85,11 @@ app.post('/api/contact', async (req, res) => {
     </div>`;
 
   try {
-    await withTimeout(sendEmail(recipientEmail, `New Consultation Request — ${service}`, html, email), 18000);
+    await sendEmail(recipientEmail, `New Consultation — ${service}`, html, email);
     res.json({ success: true });
   } catch (err) {
-    console.error('Mail error:', err.message);
-    res.status(500).json({ error: 'Email failed: ' + err.message + '. Please contact us via WhatsApp.' });
+    console.error('Email error:', err.message);
+    res.status(500).json({ error: 'Email failed: ' + err.message });
   }
 });
 
@@ -148,7 +125,7 @@ app.post('/api/apply', async (req, res) => {
   apps.push(application);
   saveApps(apps);
 
-  const recipientEmail = process.env.RECIPIENT_EMAIL || process.env.MAIL_USER;
+  const recipientEmail = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
 
   const adminHtml = `
     <div style="font-family:sans-serif;max-width:660px;margin:0 auto">
@@ -215,11 +192,11 @@ app.post('/api/apply', async (req, res) => {
     </div>`;
 
   try {
-    await withTimeout(sendEmail(recipientEmail, `New Application [${ref}] — ${service}`, adminHtml, email), 18000);
+    await sendEmail(recipientEmail, `New Application [${ref}] — ${service}`, adminHtml, email);
   } catch (e) { console.error('Admin email failed:', e.message); }
 
   try {
-    await withTimeout(sendEmail(email, `Application Confirmed [${ref}] — Skyglobe Limited`, userHtml), 18000);
+    await sendEmail(email, `Application Confirmed [${ref}] — Skyglobe Limited`, userHtml);
   } catch (e) { console.error('User email failed:', e.message); }
 
   res.json({ success: true, ref, status: 'Received' });
@@ -249,4 +226,4 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`SkyGlobe server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`SkyGlobe server running on port ${PORT}`));
