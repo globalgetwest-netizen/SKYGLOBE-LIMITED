@@ -260,6 +260,34 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 .popular-tags{display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center}
 .popular-tag{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:100px;padding:5px 14px;color:var(--text-body);font-size:0.82rem;cursor:pointer;transition:var(--trans)}
 .popular-tag:hover{border-color:var(--gold);color:var(--gold-light)}
+
+/* APPLY PAGE */
+.apply-steps{display:flex;justify-content:center;gap:0;margin:2rem auto 2.5rem;max-width:700px;position:relative}
+.apply-steps::before{content:'';position:absolute;top:18px;left:10%;right:10%;height:2px;background:var(--border);z-index:0}
+.apply-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;z-index:1;cursor:pointer}
+.step-num{width:36px;height:36px;border-radius:50%;background:var(--navy-2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:var(--muted);transition:var(--trans)}
+.apply-step.active .step-num{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.apply-step.done .step-num{background:rgba(201,168,76,0.2);border-color:var(--gold);color:var(--gold)}
+.step-label{font-size:0.72rem;color:var(--muted);text-align:center;white-space:nowrap}
+.apply-step.active .step-label{color:var(--gold-light)}
+.form-step{display:none}
+.form-step.active{display:block;animation:fadeUp 0.35s ease both}
+.service-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-top:1rem}
+.svc-card{background:rgba(255,255,255,0.03);border:2px solid var(--border);border-radius:var(--radius-lg);padding:1.4rem 1rem;text-align:center;cursor:pointer;transition:var(--trans)}
+.svc-card:hover{border-color:var(--gold);background:rgba(201,168,76,0.06)}
+.svc-card.selected{border-color:var(--gold);background:rgba(201,168,76,0.1)}
+.svc-card .sc-icon{font-size:2rem;display:block;margin-bottom:0.6rem}
+.svc-card h4{font-size:0.88rem;font-weight:600;color:var(--white);margin-bottom:0.3rem}
+.svc-card p{font-size:0.75rem;color:var(--muted)}
+.app-ref-card{background:linear-gradient(135deg,var(--navy-2),var(--navy-3));border:2px solid var(--gold);border-radius:var(--radius-xl);padding:3rem;text-align:center;max-width:560px;margin:2rem auto}
+.app-ref-number{font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--gold);font-weight:600;letter-spacing:0.06em;margin:1rem 0}
+.app-tracker{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-top:2rem;max-width:560px;margin-left:auto;margin-right:auto}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:100px;font-size:0.82rem;font-weight:600}
+.status-received{background:rgba(201,168,76,0.15);border:1px solid var(--gold);color:var(--gold-light)}
+.status-processing{background:rgba(30,100,200,0.15);border:1px solid #4a90d9;color:#7ab4f5}
+.status-approved{background:rgba(0,180,100,0.15);border:1px solid #00b464;color:#00d980}
+.status-rejected{background:rgba(200,50,50,0.15);border:1px solid #c83232;color:#f57878}
+@media(max-width:600px){.apply-steps::before{display:none}.step-label{display:none}.service-select-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -276,7 +304,8 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
     <li><a onclick="showPage('services')" data-page="services">Services</a></li>
     <li><a onclick="showPage('destinations')" data-page="destinations">Destinations</a></li>
     <li><a onclick="showPage('search')" data-page="search">🔍 Search</a></li>
-    <li><a onclick="showPage('contact')" class="nav-cta" data-page="contact">Get Consultation</a></li>
+    <li><a onclick="showPage('apply')" data-page="apply" style="color:var(--gold)">📋 Apply Now</a></li>
+    <li><a onclick="showPage('contact')" class="nav-cta" data-page="contact">Free Consult</a></li>
   </ul>
   <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu">
     <span></span><span></span><span></span>
@@ -293,6 +322,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   <a onclick="showPage('about');toggleMenu()">About</a>
   <a onclick="showPage('services');toggleMenu()">Services</a>
   <a onclick="showPage('destinations');toggleMenu()">Destinations</a>
+  <a onclick="showPage('apply');toggleMenu()" style="color:var(--gold)">📋 Apply Now</a>
   <a onclick="showPage('search');toggleMenu()">🔍 Search</a>
   <a onclick="showPage('contact');toggleMenu()">Contact</a>
 </div>
@@ -328,7 +358,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
       <h1>Your <em>Gateway</em> to<br><strong>Travel & Study Abroad</strong></h1>
       <p>We bridge borders, open universities, and unlock careers across the world. From visa processing to university admissions — Skyglobe turns your global ambitions into reality.</p>
       <div class="hero-btns">
-        <button class="btn-primary" onclick="showPage('contact')">✦ Get Consultation</button>
+        <button class="btn-primary" onclick="showPage('apply')">📋 Start Application</button>
         <button class="btn-outline" onclick="showPage('services')">Explore Services →</button>
       </div>
       <div class="hero-stats">
@@ -970,6 +1000,137 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
     </div>
   </div>
   <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- ============ APPLY PAGE ============ -->
+<div class="page" id="page-apply">
+  <section style="padding-top:140px;max-width:860px;margin:0 auto">
+    <div class="section-tag">Submit Your Application</div>
+    <h1 class="section-title">Apply for Any <strong>Service Online</strong></h1>
+    <p class="section-sub">Fill out the form below — your application is saved permanently and our team will contact you within 24 hours. No need to visit an office.</p>
+
+    <!-- Step Indicators -->
+    <div class="apply-steps" id="applySteps">
+      <div class="apply-step active" id="stepInd1"><div class="step-num">1</div><div class="step-label">Service</div></div>
+      <div class="apply-step" id="stepInd2"><div class="step-num">2</div><div class="step-label">Personal</div></div>
+      <div class="apply-step" id="stepInd3"><div class="step-num">3</div><div class="step-label">Travel Details</div></div>
+      <div class="apply-step" id="stepInd4"><div class="step-num">4</div><div class="step-label">Review</div></div>
+    </div>
+
+    <!-- STEP 1: Select Service -->
+    <div class="form-step active" id="applyStep1">
+      <h3 style="margin-bottom:0.4rem">What service do you need?</h3>
+      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1rem">Select one to continue. You can apply for multiple services by submitting separate applications.</p>
+      <div class="service-select-grid" id="serviceGrid">
+        <div class="svc-card" onclick="selectService('Student Visa Processing',this)"><span class="sc-icon">🎓</span><h4>Student Visa</h4><p>Study abroad application</p></div>
+        <div class="svc-card" onclick="selectService('Work Visa Processing',this)"><span class="sc-icon">💼</span><h4>Work Visa</h4><p>Employment abroad</p></div>
+        <div class="svc-card" onclick="selectService('Tourist / Visit Visa',this)"><span class="sc-icon">🌴</span><h4>Tourist Visa</h4><p>Travel & visit</p></div>
+        <div class="svc-card" onclick="selectService('University Admission Assistance',this)"><span class="sc-icon">🏛️</span><h4>University Admission</h4><p>Enrolment support</p></div>
+        <div class="svc-card" onclick="selectService('Flight Reservation Letter',this)"><span class="sc-icon">✈️</span><h4>Flight Reservation</h4><p>Visa itinerary letter</p></div>
+        <div class="svc-card" onclick="selectService('Hotel Booking / Accommodation Letter',this)"><span class="sc-icon">🏨</span><h4>Hotel Booking</h4><p>Accommodation proof</p></div>
+        <div class="svc-card" onclick="selectService('Travel Insurance',this)"><span class="sc-icon">🛡️</span><h4>Travel Insurance</h4><p>Coverage certificate</p></div>
+        <div class="svc-card" onclick="selectService('Document Authentication / Apostille',this)"><span class="sc-icon">📋</span><h4>Document Auth</h4><p>Apostille & notarization</p></div>
+        <div class="svc-card" onclick="selectService('Scholarship Application Support',this)"><span class="sc-icon">🌟</span><h4>Scholarship</h4><p>Funding assistance</p></div>
+        <div class="svc-card" onclick="selectService('Express Entry / PR Pathway',this)"><span class="sc-icon">🍁</span><h4>Express Entry / PR</h4><p>Permanent residence</p></div>
+      </div>
+      <div style="margin-top:1.5rem;text-align:right">
+        <button class="btn-primary" onclick="goStep(2)" id="step1Next" disabled style="opacity:0.4">Next: Personal Details →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Personal Information -->
+    <div class="form-step" id="applyStep2">
+      <h3 style="margin-bottom:1.2rem">Your Personal Information</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group"><label>First Name *</label><input type="text" id="ap_fname" placeholder="John"></div>
+        <div class="form-group"><label>Last Name *</label><input type="text" id="ap_lname" placeholder="Doe"></div>
+        <div class="form-group"><label>Email Address *</label><input type="email" id="ap_email" placeholder="john.doe@email.com"></div>
+        <div class="form-group"><label>Phone / WhatsApp *</label><input type="tel" id="ap_phone" placeholder="+1 000 000 0000"></div>
+        <div class="form-group"><label>Date of Birth</label><input type="date" id="ap_dob"></div>
+        <div class="form-group"><label>Nationality / Country of Origin *</label><input type="text" id="ap_nationality" placeholder="e.g. Nigerian, Indian, Brazilian"></div>
+        <div class="form-group"><label>Passport Number</label><input type="text" id="ap_passport" placeholder="A12345678 (optional)"></div>
+        <div class="form-group"><label>Passport Expiry Date</label><input type="date" id="ap_passportExpiry"></div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:1rem;justify-content:space-between">
+        <button class="btn-outline" onclick="goStep(1)">← Back</button>
+        <button class="btn-primary" onclick="goStep(3)">Next: Travel Details →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Travel Details -->
+    <div class="form-step" id="applyStep3">
+      <h3 style="margin-bottom:0.4rem">Travel & Service Details</h3>
+      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.2rem">Service selected: <strong id="selectedServiceLabel" style="color:var(--gold-light)">—</strong></p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group"><label>Destination Country *</label><input type="text" id="ap_destination" placeholder="e.g. United Kingdom, Canada"></div>
+        <div class="form-group"><label>Intended Travel / Start Date</label><input type="date" id="ap_travelDate"></div>
+        <div class="form-group"><label>Duration of Stay</label><input type="text" id="ap_duration" placeholder="e.g. 3 years, 2 weeks, 6 months"></div>
+        <div class="form-group"><label>Purpose</label><input type="text" id="ap_purpose" placeholder="e.g. Study, Work, Tourism, Business"></div>
+        <div class="form-group" id="fieldInstitution"><label>University / Institution Name</label><input type="text" id="ap_institution" placeholder="e.g. University of Toronto"></div>
+        <div class="form-group" id="fieldEmployer"><label>Employer / Company Name</label><input type="text" id="ap_employer" placeholder="e.g. Google UK Ltd (if known)"></div>
+        <div class="form-group" id="fieldHotelCity"><label>City / Hotel Destination</label><input type="text" id="ap_hotelCity" placeholder="e.g. Paris, London, Dubai"></div>
+        <div class="form-group" id="fieldCheckIn"><label>Check-in / Arrival Date</label><input type="date" id="ap_checkin"></div>
+        <div class="form-group" id="fieldCheckOut"><label>Check-out / Departure Date</label><input type="date" id="ap_checkout"></div>
+        <div class="form-group" id="fieldCoverage"><label>Insurance Coverage Type</label>
+          <select id="ap_coverage"><option value="">— Select —</option><option>Schengen (€30,000 min)</option><option>Comprehensive Worldwide</option><option>Student Health Cover</option><option>Business Travel</option></select>
+        </div>
+        <div class="form-group" id="fieldDocType"><label>Document Type</label>
+          <select id="ap_docType"><option value="">— Select —</option><option>University Degree / Diploma</option><option>Birth Certificate</option><option>Marriage Certificate</option><option>Police Clearance Certificate</option><option>Academic Transcripts</option><option>Power of Attorney</option><option>Other</option></select>
+        </div>
+        <div class="form-group" id="fieldScholarship"><label>Scholarship Program</label>
+          <select id="ap_scholarship"><option value="">— Select —</option><option>Chevening (UK)</option><option>Commonwealth Scholarship</option><option>DAAD (Germany)</option><option>Vanier CGS (Canada)</option><option>Fulbright (USA)</option><option>Other / General Search</option></select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:0.5rem">
+        <label>Additional Notes / Special Requirements</label>
+        <textarea id="ap_notes" placeholder="Any additional information we should know — previous visa refusals, specific requirements, timeline urgency, etc." style="min-height:100px;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--white);font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none;resize:vertical"></textarea>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:1rem;justify-content:space-between">
+        <button class="btn-outline" onclick="goStep(2)">← Back</button>
+        <button class="btn-primary" onclick="goStep(4)">Review Application →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Review & Submit -->
+    <div class="form-step" id="applyStep4">
+      <h3 style="margin-bottom:1rem">Review Your Application</h3>
+      <div id="reviewSummary" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.5rem;font-size:0.9rem;color:var(--text-body);line-height:2"></div>
+      <div style="padding:1rem;background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem">
+        <p style="font-size:0.85rem;color:var(--text-body)">✅ By submitting, you agree that Skyglobe Limited may contact you about your application via email or phone. Your data is kept securely and used only to process your request. You will receive a reference number for tracking.</p>
+      </div>
+      <div style="display:flex;gap:1rem;justify-content:space-between;align-items:center">
+        <button class="btn-outline" onclick="goStep(3)">← Back</button>
+        <button class="btn-primary" style="padding:14px 40px;font-size:1rem" onclick="submitApplication()" id="submitAppBtn">✦ Submit Application</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="form-step" id="applySuccess">
+      <div class="app-ref-card">
+        <div style="font-size:3rem;margin-bottom:0.5rem">🎉</div>
+        <div class="section-tag">Application Submitted!</div>
+        <div class="app-ref-number" id="appRefDisplay">SKY-2024-XXXX</div>
+        <p style="color:var(--text-body);margin-bottom:0.5rem">Your application has been received and saved. A confirmation has been sent to your email.</p>
+        <p style="color:var(--muted);font-size:0.85rem">Our team will review your application and contact you within <strong style="color:var(--gold-light)">24 hours</strong>.</p>
+        <div style="margin-top:1.5rem;display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap">
+          <button class="btn-primary" onclick="showTracker()">📍 Track My Application</button>
+          <button class="btn-outline" onclick="resetApplyForm()">Submit Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPLICATION TRACKER -->
+    <div style="margin-top:4rem;padding-top:3rem;border-top:1px solid var(--border)">
+      <div class="section-tag">Track Application</div>
+      <h2 class="section-title" style="margin-bottom:0.5rem">Check Your <strong>Application Status</strong></h2>
+      <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem">Enter your reference number (e.g. SKY-2024-ABCD) or your email address to view all your submitted applications.</p>
+      <div style="display:flex;gap:0.8rem;max-width:560px;flex-wrap:wrap">
+        <input type="text" id="trackInput" placeholder="SKY-2024-ABCD or your email" style="flex:1;min-width:200px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--white);font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none">
+        <button class="btn-primary" onclick="trackApplication()">🔍 Track</button>
+      </div>
+      <div id="trackResult" style="margin-top:1.2rem;max-width:560px"></div>
+    </div>
+  </section>
 </div>
 
 <!-- FOOTER (shown on all pages) -->
@@ -1974,6 +2135,208 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'search' && !countriesLoaded) loadAllCountries();
 };
+
+// ── APPLICATION FORM ──────────────────────────────────────────────────────────
+let selectedService = '';
+let currentAppStep = 1;
+const APPLY_API = API_URL.replace('/api/contact', '/api/apply');
+
+const serviceFields = {
+  'Student Visa Processing':          ['institution'],
+  'Work Visa Processing':             ['employer'],
+  'Tourist / Visit Visa':             [],
+  'University Admission Assistance':  ['institution'],
+  'Flight Reservation Letter':        [],
+  'Hotel Booking / Accommodation Letter': ['hotelCity','checkIn','checkOut'],
+  'Travel Insurance':                 ['coverage'],
+  'Document Authentication / Apostille': ['docType'],
+  'Scholarship Application Support':  ['scholarship','institution'],
+  'Express Entry / PR Pathway':       []
+};
+const allOptFields = ['institution','employer','hotelCity','checkIn','checkOut','coverage','docType','scholarship'];
+
+function selectService(name, el) {
+  selectedService = name;
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  const btn = document.getElementById('step1Next');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
+function goStep(n) {
+  if (n === 2) {
+    if (!selectedService) { showToast('⚠️ Please select a service first.', true); return; }
+  }
+  if (n === 3) {
+    const fname = document.getElementById('ap_fname').value.trim();
+    const email = document.getElementById('ap_email').value.trim();
+    const phone = document.getElementById('ap_phone').value.trim();
+    const nationality = document.getElementById('ap_nationality').value.trim();
+    if (!fname || !email || !phone || !nationality) { showToast('⚠️ Please fill in all required fields.', true); return; }
+    document.getElementById('selectedServiceLabel').textContent = selectedService;
+    showServiceFields();
+  }
+  if (n === 4) {
+    buildReview();
+  }
+  currentAppStep = n;
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('applyStep' + n).classList.add('active');
+  document.querySelectorAll('.apply-step').forEach((s, i) => {
+    s.classList.remove('active','done');
+    if (i + 1 < n) s.classList.add('done');
+    if (i + 1 === n) s.classList.add('active');
+  });
+  window.scrollTo({top: document.getElementById('page-apply').offsetTop - 80, behavior:'smooth'});
+}
+
+function showServiceFields() {
+  const show = serviceFields[selectedService] || [];
+  allOptFields.forEach(f => {
+    const el = document.getElementById('field' + f.charAt(0).toUpperCase() + f.slice(1));
+    if (el) el.style.display = show.includes(f) ? '' : 'none';
+  });
+}
+
+function buildReview() {
+  const rows = [
+    ['Service', selectedService],
+    ['Name', (document.getElementById('ap_fname').value+' '+document.getElementById('ap_lname').value).trim()],
+    ['Email', document.getElementById('ap_email').value],
+    ['Phone', document.getElementById('ap_phone').value],
+    ['Date of Birth', document.getElementById('ap_dob').value || '—'],
+    ['Nationality', document.getElementById('ap_nationality').value],
+    ['Passport No.', document.getElementById('ap_passport').value || '—'],
+    ['Destination', document.getElementById('ap_destination').value || '—'],
+    ['Travel Date', document.getElementById('ap_travelDate').value || '—'],
+    ['Duration', document.getElementById('ap_duration').value || '—'],
+    ['Purpose', document.getElementById('ap_purpose').value || '—'],
+    ['Institution', document.getElementById('ap_institution').value || '—'],
+    ['Employer', document.getElementById('ap_employer').value || '—'],
+    ['Notes', document.getElementById('ap_notes').value || '—'],
+  ];
+  document.getElementById('reviewSummary').innerHTML = rows.filter(r=>r[1]&&r[1]!=='—').map(r =>
+    `<span style="color:var(--gold);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em">${r[0]}</span>: <strong style="color:var(--white)">${r[1]}</strong><br>`
+  ).join('');
+}
+
+async function submitApplication() {
+  const btn = document.getElementById('submitAppBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  const payload = {
+    service: selectedService,
+    fname: document.getElementById('ap_fname').value.trim(),
+    lname: document.getElementById('ap_lname').value.trim(),
+    email: document.getElementById('ap_email').value.trim(),
+    phone: document.getElementById('ap_phone').value.trim(),
+    dob: document.getElementById('ap_dob').value,
+    nationality: document.getElementById('ap_nationality').value.trim(),
+    passport: document.getElementById('ap_passport').value.trim(),
+    passportExpiry: document.getElementById('ap_passportExpiry').value,
+    destination: document.getElementById('ap_destination').value.trim(),
+    travelDate: document.getElementById('ap_travelDate').value,
+    duration: document.getElementById('ap_duration').value.trim(),
+    purpose: document.getElementById('ap_purpose').value.trim(),
+    institution: document.getElementById('ap_institution').value.trim(),
+    employer: document.getElementById('ap_employer').value.trim(),
+    hotelCity: document.getElementById('ap_hotelCity').value.trim(),
+    checkin: document.getElementById('ap_checkin').value,
+    checkout: document.getElementById('ap_checkout').value,
+    coverage: document.getElementById('ap_coverage').value,
+    docType: document.getElementById('ap_docType').value,
+    scholarship: document.getElementById('ap_scholarship').value,
+    notes: document.getElementById('ap_notes').value.trim()
+  };
+  try {
+    const res = await fetch(APPLY_API, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok && !data.ref) throw new Error(data.error || 'Server error');
+    document.getElementById('appRefDisplay').textContent = data.ref || 'SKY-SUBMITTED';
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('applySuccess').classList.add('active');
+    document.querySelectorAll('.apply-step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+    window.scrollTo({top: document.getElementById('page-apply').offsetTop - 80, behavior:'smooth'});
+  } catch(err) {
+    showToast('⚠️ Failed to submit. Please try again or contact us via WhatsApp.', true);
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Submit Application';
+  }
+}
+
+function resetApplyForm() {
+  selectedService = '';
+  currentAppStep = 1;
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
+  ['ap_fname','ap_lname','ap_email','ap_phone','ap_dob','ap_nationality','ap_passport','ap_passportExpiry',
+   'ap_destination','ap_travelDate','ap_duration','ap_purpose','ap_institution','ap_employer',
+   'ap_hotelCity','ap_checkin','ap_checkout','ap_notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['ap_coverage','ap_docType','ap_scholarship'].forEach(id => { const el = document.getElementById(id); if(el) el.selectedIndex=0; });
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('applyStep1').classList.add('active');
+  document.querySelectorAll('.apply-step').forEach((s,i) => { s.classList.remove('active','done'); if(i===0) s.classList.add('active'); });
+  const btn = document.getElementById('step1Next');
+  btn.disabled = true; btn.style.opacity = '0.4';
+}
+
+function showTracker() {
+  document.getElementById('trackInput').focus();
+  document.getElementById('trackInput').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+async function trackApplication() {
+  const val = document.getElementById('trackInput').value.trim();
+  const resultEl = document.getElementById('trackResult');
+  if (!val) { resultEl.innerHTML = '<p style="color:var(--muted)">Enter a reference number or email address.</p>'; return; }
+  resultEl.innerHTML = '<p style="color:var(--muted)">🔍 Searching…</p>';
+  try {
+    let url, res, data;
+    if (val.toUpperCase().startsWith('SKY-')) {
+      url = APPLY_API + '/' + encodeURIComponent(val.toUpperCase());
+      res = await fetch(url);
+      data = await res.json();
+      if (!res.ok) { resultEl.innerHTML = `<p style="color:var(--muted)">No application found for reference <strong>${val.toUpperCase()}</strong>. Please check your reference number.</p>`; return; }
+      resultEl.innerHTML = renderAppCard(data);
+    } else {
+      url = APPLY_API + '?email=' + encodeURIComponent(val);
+      res = await fetch(url);
+      data = await res.json();
+      if (!res.ok || !data.length) { resultEl.innerHTML = '<p style="color:var(--muted)">No applications found for that email address.</p>'; return; }
+      resultEl.innerHTML = data.map(renderAppCard).join('');
+    }
+  } catch(e) {
+    resultEl.innerHTML = '<p style="color:var(--muted)">Could not connect to server. Please try again.</p>';
+  }
+}
+
+function renderAppCard(app) {
+  const statusClass = {Received:'status-received',Processing:'status-processing',Approved:'status-approved',Rejected:'status-rejected'}[app.status]||'status-received';
+  const date = app.timestamp ? new Date(app.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+  return `<div class="app-tracker">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem">
+      <div>
+        <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Reference</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--gold);font-weight:600">${app.ref}</div>
+      </div>
+      <div class="status-badge ${statusClass}">${app.status === 'Received' ? '📥' : app.status === 'Processing' ? '⚙️' : app.status === 'Approved' ? '✅' : '❌'} ${app.status}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;font-size:0.87rem">
+      <div><span style="color:var(--muted)">Service</span><br><strong>${app.service}</strong></div>
+      <div><span style="color:var(--muted)">Submitted</span><br><strong>${date}</strong></div>
+      <div><span style="color:var(--muted)">Applicant</span><br><strong>${app.fname} ${app.lname||''}</strong></div>
+      <div><span style="color:var(--muted)">Destination</span><br><strong>${app.destination||'—'}</strong></div>
+    </div>
+    <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <p style="font-size:0.82rem;color:var(--text-body)">Our team will contact you at <strong style="color:var(--gold-light)">${app.email}</strong> within 24 hours. For urgent matters, reach us on WhatsApp.</p>
+      <a href="https://wa.me/17373998522?text=Hi, my application reference is ${app.ref}" target="_blank" class="wa-btn" style="display:inline-flex;margin-top:0.8rem;font-size:0.85rem;padding:10px 18px">💬 WhatsApp about this application</a>
+    </div>
+  </div>`;
+}
 
 </script>
 </body>
