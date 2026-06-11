@@ -221,6 +221,110 @@ app.get('/api/apply', (req, res) => {
   res.json(found);
 });
 
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+// Set ADMIN_PASSWORDS env var on Render. Multiple admins: comma-separated,
+// e.g. "boss:secret123,mary:pass456" or just plain passwords "secret123,pass456".
+function checkAdmin(req) {
+  const raw = process.env.ADMIN_PASSWORDS || process.env.ADMIN_PASSWORD || '';
+  if (!raw) return null;
+  const supplied = req.headers['x-admin-key'] || '';
+  for (const entry of raw.split(',').map(s => s.trim()).filter(Boolean)) {
+    const [a, b] = entry.includes(':') ? entry.split(':') : [null, entry];
+    if (supplied === b) return a || 'admin';
+  }
+  return null;
+}
+
+app.post('/api/admin/login', (req, res) => {
+  const fakeReq = { headers: { 'x-admin-key': (req.body && req.body.password) || '' } };
+  const who = checkAdmin(fakeReq);
+  if (!who) return res.status(401).json({ error: 'Wrong password.' });
+  res.json({ success: true, name: who });
+});
+
+app.get('/api/admin/applications', (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  res.json(readApps().slice().reverse());
+});
+
+app.post('/api/admin/update', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { ref, status, response } = req.body;
+  if (!ref || !status) return res.status(400).json({ error: 'ref and status required.' });
+
+  const apps = readApps();
+  const app_ = apps.find(a => a.ref === ref.toUpperCase());
+  if (!app_) return res.status(404).json({ error: 'Application not found.' });
+
+  app_.status = status;
+  if (response) {
+    app_.responses = app_.responses || [];
+    app_.responses.push({ by: who, message: response, date: new Date().toISOString() });
+  }
+  saveApps(apps);
+
+  // Notify the applicant by email
+  let emailed = false;
+  try {
+    const statusColors = { 'Received': '#1976d2', 'In Review': '#f57c00', 'Approved': '#2e7d32', 'Completed': '#2e7d32', 'Needs More Info': '#c62828', 'Rejected': '#c62828' };
+    const color = statusColors[status] || '#1976d2';
+    const html = `
+      <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+        <div style="background:#0a1628;padding:28px;border-radius:8px 8px 0 0;text-align:center">
+          <h1 style="color:#c9a84c;margin:0;font-size:1.4rem">Application Update</h1>
+          <p style="color:#8899bb;margin:6px 0 0">SKYGLOBE LIMITED</p>
+        </div>
+        <div style="background:#f9f9f9;padding:28px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
+          <p style="color:#333">Dear <strong>${app_.fname}</strong>, there is an update on your application <strong>${app_.ref}</strong> (${app_.service}):</p>
+          <div style="text-align:center;margin:20px 0">
+            <span style="display:inline-block;background:${color};color:#fff;padding:10px 28px;border-radius:24px;font-weight:700;font-size:1.1rem">${status}</span>
+          </div>
+          ${response ? `<div style="background:#fff;border-left:4px solid #c9a84c;padding:16px;border-radius:4px;margin-bottom:16px">
+            <p style="color:#555;margin:0 0 6px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em"><strong>Message from our team</strong></p>
+            <p style="color:#333;margin:0;line-height:1.6">${response.replace(/\n/g,'<br>')}</p>
+          </div>` : ''}
+          <p style="color:#555;font-size:0.85rem">Track your application anytime on our website with reference <strong>${app_.ref}</strong>.</p>
+          <a href="https://wa.me/17373998522?text=Hi, regarding my application ${app_.ref}" style="display:inline-block;background:#25D366;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:8px">💬 Reply on WhatsApp</a>
+        </div>
+      </div>`;
+    await sendEmail(app_.email, `Update on Application ${app_.ref} — ${status}`, html);
+    emailed = true;
+  } catch (e) { console.error('Status email failed:', e.message); }
+
+  res.json({ success: true, emailed });
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// ── TEST ENDPOINT — visit /api/test in browser to check email ─────────────────
+app.get('/api/test', async (req, res) => {
+  const key = process.env.RESEND_API_KEY;
+  const to  = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
+
+  if (!key) return res.json({ ok: false, error: 'RESEND_API_KEY env var is missing' });
+
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'SkyGlobe Test <onboarding@resend.dev>',
+        to: [to],
+        subject: 'SkyGlobe — Email Test',
+        html: '<p>✅ Email is working! Your Resend + Render setup is correct.</p>',
+      }),
+    });
+    const data = await r.json();
+    res.json({ ok: r.ok, status: r.status, resend_response: data });
+  } catch (err) {
+    res.json({ ok: false, error: err.message });
+  }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
