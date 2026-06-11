@@ -12,11 +12,27 @@ app.use(express.static(path.join(__dirname)));
 
 // ── EMAIL TRANSPORTER (Nodemailer + Gmail) ────────────────────────────────────
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
   },
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
+  tls: { rejectUnauthorized: false },
+});
+
+// Verify connection on startup
+transporter.verify((err) => {
+  if (err) {
+    console.error('⚠️  Email connection failed:', err.message);
+    console.error('    Check MAIL_USER and MAIL_PASS env vars in Render dashboard.');
+  } else {
+    console.log('✅ Email transporter ready —', process.env.MAIL_USER);
+  }
 });
 
 async function sendEmail(to, subject, html, replyTo) {
@@ -50,11 +66,24 @@ function genRef() {
 }
 
 // ── CONTACT / CONSULTATION FORM ───────────────────────────────────────────────
+// Helper: wrap any promise with a timeout
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms))
+  ]);
+}
+
 app.post('/api/contact', async (req, res) => {
   const { fname, lname, email, phone, service, destination, message } = req.body;
 
   if (!fname || !email || !service) {
     return res.status(400).json({ error: 'Name, email and service are required.' });
+  }
+
+  if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
+    console.error('MAIL_USER or MAIL_PASS env vars not set!');
+    return res.status(500).json({ error: 'Server email not configured. Please contact us via WhatsApp.' });
   }
 
   const recipientEmail = process.env.RECIPIENT_EMAIL || process.env.MAIL_USER;
@@ -79,11 +108,11 @@ app.post('/api/contact', async (req, res) => {
     </div>`;
 
   try {
-    await sendEmail(recipientEmail, `New Consultation Request — ${service}`, html, email);
+    await withTimeout(sendEmail(recipientEmail, `New Consultation Request — ${service}`, html, email), 18000);
     res.json({ success: true });
   } catch (err) {
     console.error('Mail error:', err.message);
-    res.status(500).json({ error: 'Failed to send email. Please try again.' });
+    res.status(500).json({ error: 'Email failed: ' + err.message + '. Please contact us via WhatsApp.' });
   }
 });
 
@@ -186,11 +215,11 @@ app.post('/api/apply', async (req, res) => {
     </div>`;
 
   try {
-    await sendEmail(recipientEmail, `New Application [${ref}] — ${service}`, adminHtml, email);
+    await withTimeout(sendEmail(recipientEmail, `New Application [${ref}] — ${service}`, adminHtml, email), 18000);
   } catch (e) { console.error('Admin email failed:', e.message); }
 
   try {
-    await sendEmail(email, `Application Confirmed [${ref}] — Skyglobe Limited`, userHtml);
+    await withTimeout(sendEmail(email, `Application Confirmed [${ref}] — Skyglobe Limited`, userHtml), 18000);
   } catch (e) { console.error('User email failed:', e.message); }
 
   res.json({ success: true, ref, status: 'Received' });
