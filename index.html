@@ -68,7 +68,7 @@ nav.scrolled{background:rgba(10,22,40,0.96);backdrop-filter:blur(12px);border-bo
 /* HERO */
 .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:100px 5% 60px}
 .hero-bg{position:absolute;inset:0;z-index:0}
-.globe-svg{position:absolute;right:-5%;top:50%;transform:translateY(-50%);width:55%;max-width:700px;opacity:0.18;animation:globeSpin 80s linear infinite}
+.globe-svg{position:absolute;right:-5%;top:50%;transform:translateY(-50%);width:55%;max-width:700px;opacity:0.55;animation:globeSpin 80s linear infinite;filter:drop-shadow(0 0 40px rgba(100,180,255,0.18)) drop-shadow(0 0 80px rgba(201,168,76,0.12))}
 @keyframes globeSpin{from{transform:translateY(-50%) rotate(0deg)}to{transform:translateY(-50%) rotate(360deg)}}
 .grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.04) 1px,transparent 1px);background-size:60px 60px}
 .glow-blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
@@ -298,6 +298,63 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 .status-approved{background:rgba(0,180,100,0.15);border:1px solid #00b464;color:#00d980}
 .status-rejected{background:rgba(200,50,50,0.15);border:1px solid #c83232;color:#f57878}
 @media(max-width:600px){.apply-steps::before{display:none}.step-label{display:none}.service-select-grid{grid-template-columns:1fr 1fr}}
+
+/* ── CHAT WIDGET ─────────────────────────────────────────────────── */
+.chat-fab{position:fixed;bottom:28px;right:28px;z-index:9000;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;cursor:pointer;box-shadow:0 8px 28px rgba(201,168,76,0.45);display:flex;align-items:center;justify-content:center;font-size:26px;transition:var(--trans);animation:chatPop 0.5s 1.5s both}
+@keyframes chatPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.chat-fab:hover{transform:scale(1.1);box-shadow:0 14px 40px rgba(201,168,76,0.6)}
+.chat-badge{position:absolute;top:-3px;right:-3px;width:20px;height:20px;background:#e53935;border-radius:50%;border:2px solid var(--navy);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:white;animation:pulse 2s infinite}
+.chat-panel{position:fixed;bottom:100px;right:28px;z-index:8999;width:360px;background:var(--navy-2);border:1px solid var(--border-strong);border-radius:var(--radius-xl);box-shadow:0 24px 60px rgba(0,0,0,0.55);display:none;flex-direction:column;overflow:hidden}
+.chat-panel.open{display:flex;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.chat-head{background:linear-gradient(135deg,var(--navy-3),var(--navy-light));padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.chat-head-info{display:flex;align-items:center;gap:10px}
+.chat-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.chat-status .cname{font-size:0.88rem;font-weight:600;color:var(--white)}
+.chat-status .online{font-size:0.72rem;color:#4caf50;display:flex;align-items:center;gap:4px;margin-top:2px}
+.chat-status .online::before{content:'';width:6px;height:6px;background:#4caf50;border-radius:50%;display:inline-block}
+.chat-tabs{display:flex;border-bottom:1px solid var(--border)}
+.chat-tab{flex:1;padding:10px 6px;background:none;border:none;color:var(--muted);font-size:0.78rem;font-weight:500;cursor:pointer;transition:var(--trans);border-bottom:2px solid transparent;font-family:'Outfit',sans-serif}
+.chat-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(201,168,76,0.05)}
+.chat-body{flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:180px;max-height:280px}
+.chat-body::-webkit-scrollbar{width:4px}.chat-body::-webkit-scrollbar-track{background:transparent}.chat-body::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.chat-msg{max-width:84%;padding:10px 13px;border-radius:14px;font-size:0.83rem;line-height:1.5;word-break:break-word}
+.chat-msg.bot{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-body);align-self:flex-start;border-bottom-left-radius:4px}
+.chat-msg.user{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);align-self:flex-end;font-weight:500;border-bottom-right-radius:4px}
+.chat-sugs{padding:8px 14px 4px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border)}
+.chat-sug{background:rgba(201,168,76,0.1);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:0.73rem;color:var(--gold-light);cursor:pointer;transition:var(--trans);font-family:'Outfit',sans-serif}
+.chat-sug:hover{background:rgba(201,168,76,0.22);border-color:var(--gold)}
+.chat-footer{padding:10px 13px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.chat-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--white);font-size:0.83rem;outline:none;transition:var(--trans);font-family:'Outfit',sans-serif}
+.chat-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.08)}
+.chat-send-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);border:none;border-radius:8px;padding:9px 14px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:var(--trans);font-family:'Outfit',sans-serif;flex-shrink:0}
+.chat-send-btn:hover{opacity:0.85}
+@media(max-width:400px){.chat-panel{width:calc(100vw - 32px);right:16px}.chat-fab{bottom:16px;right:16px}}
+
+/* ── ELIGIBILITY CHECKER ─────────────────────────────────────────── */
+.elig-overlay{position:fixed;inset:0;z-index:9500;background:rgba(5,10,25,0.85);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px}
+.elig-overlay.open{display:flex}
+.elig-modal{background:var(--navy-2);border:1px solid var(--border-strong);border-radius:var(--radius-xl);max-width:560px;width:100%;padding:2.4rem;position:relative;animation:fadeUp 0.35s ease;max-height:90vh;overflow-y:auto}
+.elig-modal::-webkit-scrollbar{width:4px}.elig-modal::-webkit-scrollbar-track{background:transparent}.elig-modal::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.elig-progress{display:flex;gap:5px;margin-bottom:1.8rem}
+.elig-dot{height:4px;border-radius:2px;flex:1;background:rgba(201,168,76,0.15);transition:background 0.4s}
+.elig-dot.done{background:var(--gold)}
+.elig-q{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:400;margin-bottom:1.4rem;line-height:1.3;color:var(--white)}
+.elig-opts{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:1.2rem}
+.elig-opt{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem;cursor:pointer;transition:var(--trans);text-align:left}
+.elig-opt:hover{border-color:var(--gold);background:rgba(201,168,76,0.08);transform:translateY(-2px)}
+.elig-opt.selected{border-color:var(--gold);background:rgba(201,168,76,0.12)}
+.elig-opt-icon{font-size:1.5rem;margin-bottom:0.3rem;display:block}
+.elig-opt-label{font-size:0.88rem;font-weight:600;display:block;margin-bottom:2px;color:var(--white)}
+.elig-opt-sub{font-size:0.73rem;color:var(--muted)}
+.elig-result-badge{display:inline-block;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);padding:7px 20px;border-radius:100px;font-weight:700;font-size:0.82rem;margin-bottom:1rem}
+.elig-recs{display:flex;flex-direction:column;gap:0.6rem;margin-top:1rem}
+.elig-rec{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;display:flex;align-items:center;gap:12px;cursor:pointer;transition:var(--trans)}
+.elig-rec:hover{border-color:var(--gold);background:rgba(201,168,76,0.08);transform:translateX(4px)}
+.elig-rec-icon{font-size:1.4rem;width:38px;text-align:center;flex-shrink:0}
+.elig-rec-title{font-size:0.88rem;font-weight:600;color:var(--white)}
+.elig-rec-sub{font-size:0.73rem;color:var(--muted)}
+@media(max-width:480px){.elig-opts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -345,20 +402,45 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
       <div class="glow-blob blob-1"></div>
       <div class="glow-blob blob-2"></div>
       <svg class="globe-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="200" cy="200" r="195" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.8"/>
-        <ellipse cx="200" cy="200" rx="100" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
-        <ellipse cx="200" cy="200" rx="50" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <ellipse cx="200" cy="200" rx="150" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <line x1="5" y1="200" x2="395" y2="200" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
+        <defs>
+          <radialGradient id="globeGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#64b4ff" stop-opacity="0.15"/>
+            <stop offset="60%" stop-color="#c9a84c" stop-opacity="0.06"/>
+            <stop offset="100%" stop-color="#0a1628" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- Glow fill -->
+        <circle cx="200" cy="200" r="195" fill="url(#globeGlow)"/>
+        <!-- Outer ring -->
+        <circle cx="200" cy="200" r="195" fill="none" stroke="#64b4ff" stroke-width="1.2" opacity="0.7"/>
+        <!-- Meridians -->
+        <ellipse cx="200" cy="200" rx="60" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.7" opacity="0.55"/>
+        <ellipse cx="200" cy="200" rx="120" ry="195" fill="none" stroke="#64b4ff" stroke-width="0.6" opacity="0.45"/>
+        <ellipse cx="200" cy="200" rx="170" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.38"/>
+        <!-- Equator and axis -->
+        <line x1="5" y1="200" x2="395" y2="200" stroke="#64b4ff" stroke-width="0.9" opacity="0.6"/>
         <line x1="200" y1="5" x2="200" y2="395" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <ellipse cx="200" cy="200" rx="195" ry="80" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <ellipse cx="200" cy="200" rx="195" ry="140" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
-        <!-- Continents approximation -->
-        <circle cx="165" cy="155" r="35" fill="#c9a84c" opacity="0.12"/>
-        <circle cx="225" cy="165" r="28" fill="#c9a84c" opacity="0.1"/>
-        <circle cx="200" cy="230" r="22" fill="#c9a84c" opacity="0.08"/>
-        <circle cx="260" cy="175" r="18" fill="#c9a84c" opacity="0.1"/>
-        <circle cx="145" cy="200" r="15" fill="#c9a84c" opacity="0.08"/>
+        <!-- Latitude rings -->
+        <ellipse cx="200" cy="200" rx="195" ry="95" fill="none" stroke="#64b4ff" stroke-width="0.7" opacity="0.5"/>
+        <ellipse cx="200" cy="200" rx="195" ry="155" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
+        <ellipse cx="200" cy="200" rx="185" ry="45" fill="none" stroke="#a0cfff" stroke-width="0.5" opacity="0.35"/>
+        <!-- Continent blobs — more vivid -->
+        <circle cx="158" cy="148" r="36" fill="#3a8fd4" opacity="0.22"/>
+        <circle cx="220" cy="162" r="29" fill="#c9a84c" opacity="0.18"/>
+        <circle cx="196" cy="232" r="24" fill="#3a8fd4" opacity="0.16"/>
+        <circle cx="258" cy="172" r="20" fill="#c9a84c" opacity="0.18"/>
+        <circle cx="140" cy="202" r="16" fill="#64b4ff" opacity="0.2"/>
+        <circle cx="248" cy="228" r="14" fill="#a0cfff" opacity="0.16"/>
+        <!-- Network nodes -->
+        <circle cx="200" cy="5" r="3" fill="#c9a84c" opacity="0.8"/>
+        <circle cx="200" cy="395" r="3" fill="#c9a84c" opacity="0.8"/>
+        <circle cx="5" cy="200" r="3" fill="#64b4ff" opacity="0.8"/>
+        <circle cx="395" cy="200" r="3" fill="#64b4ff" opacity="0.8"/>
+        <circle cx="200" cy="200" r="4" fill="#e6c97a" opacity="0.6"/>
+        <!-- Connection lines -->
+        <line x1="200" y1="200" x2="158" y2="148" stroke="#c9a84c" stroke-width="0.5" opacity="0.3" stroke-dasharray="3,4"/>
+        <line x1="200" y1="200" x2="258" y2="172" stroke="#64b4ff" stroke-width="0.5" opacity="0.3" stroke-dasharray="3,4"/>
+        <line x1="200" y1="200" x2="196" y2="232" stroke="#c9a84c" stroke-width="0.5" opacity="0.25" stroke-dasharray="3,4"/>
       </svg>
     </div>
     <div class="hero-content">
@@ -368,6 +450,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
       <div class="hero-btns">
         <button class="btn-primary" onclick="showPage('apply')">📋 Start Application</button>
         <button class="btn-outline" onclick="showPage('services')">Explore Services →</button>
+        <button class="btn-outline" onclick="openElig()" style="border-color:rgba(100,180,255,0.4);color:#a0cfff">✦ Check My Eligibility</button>
       </div>
       <div class="hero-stats">
         <div class="stat-item"><span class="stat-num">12K+</span><span class="stat-label">Visas Processed</span></div>
@@ -2810,6 +2893,258 @@ async function uploadUserDoc(ref) {
   btn.disabled = false; btn.textContent = '⬆️ Upload';
 }
 
+// ── ELIGIBILITY CHECKER ──────────────────────────────────────────────────────
+const ELIG_QUESTIONS = {
+  goal:{q:'What is your main goal?',opts:[
+    {icon:'🎓',label:'Study Abroad',sub:'University or college',val:'study'},
+    {icon:'💼',label:'Work Abroad',sub:'Job or career move',val:'work'},
+    {icon:'🌴',label:'Travel / Tourism',sub:'Holiday or visit',val:'travel'},
+    {icon:'🇪🇺',label:'EU Employment',sub:'Direct job in Europe',val:'eu'},
+  ]},
+  dest_study:{q:'Which destination interests you?',opts:[
+    {icon:'🇬🇧',label:'United Kingdom',sub:'Top universities',val:'UK'},
+    {icon:'🇺🇸',label:'USA / Canada',sub:'Ivy League & beyond',val:'USA'},
+    {icon:'🇩🇪',label:'Europe (EU)',sub:'Germany, France, etc.',val:'EU'},
+    {icon:'🌏',label:'Australia / NZ',sub:'World-class education',val:'AUS'},
+  ]},
+  dest_work:{q:'Where would you like to work?',opts:[
+    {icon:'🇬🇧',label:'United Kingdom',sub:'Skilled Worker Visa',val:'UK'},
+    {icon:'🇨🇦',label:'Canada',sub:'Express Entry',val:'Canada'},
+    {icon:'🇩🇪',label:'Germany / EU',sub:'EU Blue Card',val:'EU'},
+    {icon:'🇦🇺',label:'Australia',sub:'Skilled Migration',val:'AUS'},
+  ]},
+  dest_travel:{q:'Where are you travelling?',opts:[
+    {icon:'🌍',label:'Schengen / Europe',sub:'27 EU countries',val:'Schengen'},
+    {icon:'🇺🇸',label:'USA / Canada',sub:'Tourist B-2 / eTA',val:'USA'},
+    {icon:'🇦🇪',label:'Middle East',sub:'UAE, Qatar, Saudi',val:'UAE'},
+    {icon:'🌏',label:'Asia Pacific',sub:'Japan, Australia, etc.',val:'Asia'},
+  ]},
+  jobfield:{q:'What is your field of work?',opts:[
+    {icon:'🏗️',label:'Construction / Trades',sub:'Building, welding, etc.',val:'construction'},
+    {icon:'🏭',label:'Manufacturing',sub:'Factory, production',val:'manufacturing'},
+    {icon:'🌱',label:'Agriculture',sub:'Farming, food processing',val:'agriculture'},
+    {icon:'🏥',label:'Healthcare / Care',sub:'Nursing, care work',val:'healthcare'},
+  ]},
+  passport:{q:'Do you have a valid passport?',opts:[
+    {icon:'✅',label:'Yes — valid 6+ months',sub:'Ready to apply',val:'yes'},
+    {icon:'⏳',label:'Expiring soon',sub:'Less than 6 months',val:'soon'},
+    {icon:'❌',label:'No passport yet',sub:'Need to apply first',val:'no'},
+  ]},
+};
+
+let eligState = {};
+let eligFlow = [];
+let eligStep = 0;
+
+function openElig(){
+  eligState={};eligFlow=[];eligStep=0;
+  document.getElementById('eligOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  buildEligFlow();
+  renderEligStep();
+}
+function closeElig(){
+  document.getElementById('eligOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function buildEligFlow(){
+  const g=eligState.goal;
+  eligFlow=['goal'];
+  if(g==='study') eligFlow.push('dest_study');
+  else if(g==='work') eligFlow.push('dest_work');
+  else if(g==='travel') eligFlow.push('dest_travel');
+  else if(g==='eu') eligFlow.push('jobfield');
+  eligFlow.push('passport','result');
+}
+function renderEligStep(){
+  const total=eligFlow.length;
+  const prog=document.getElementById('eligProgress');
+  prog.innerHTML=eligFlow.map((_,i)=>`<div class="elig-dot ${i<eligStep?'done':''}"></div>`).join('');
+  const key=eligFlow[eligStep];
+  const cont=document.getElementById('eligContent');
+  if(key==='result'){cont.innerHTML=renderEligResult();return;}
+  const step=ELIG_QUESTIONS[key];
+  cont.innerHTML=`<h3 class="elig-q">${step.q}</h3>
+    <div class="elig-opts">${step.opts.map(o=>`<div class="elig-opt" onclick="pickElig('${key}','${o.val}',this)">
+      <span class="elig-opt-icon">${o.icon}</span>
+      <span class="elig-opt-label">${o.label}</span>
+      <span class="elig-opt-sub">${o.sub}</span>
+    </div>`).join('')}</div>
+    ${eligStep>0?`<button onclick="eligBack()" style="background:none;border:none;color:var(--muted);font-size:0.82rem;cursor:pointer;padding:0">← Back</button>`:''}`;
+}
+function pickElig(key,val,el){
+  el.closest('.elig-opts').querySelectorAll('.elig-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  eligState[key]=val;
+  if(key==='goal'){buildEligFlow();}
+  setTimeout(()=>{eligStep++;renderEligStep();},280);
+}
+function eligBack(){if(eligStep>0){eligStep--;renderEligStep();}}
+function renderEligResult(){
+  const g=eligState.goal,dest=eligState.dest_study||eligState.dest_work||eligState.dest_travel||'';
+  const passport=eligState.passport||'yes';
+  if(passport==='no'){
+    return `<div style="text-align:center"><div class="elig-result-badge">⚠️ Passport Required First</div>
+      <h3 class="elig-q" style="font-size:1.4rem;margin-bottom:0.8rem">You Need a Valid Passport</h3>
+      <p style="color:var(--text-body);font-size:0.9rem;margin-bottom:1.5rem">A valid passport is the first step for any visa application. Our team can guide you through the passport application process.</p>
+      <button class="btn-primary" onclick="closeElig();showPage('contact')" style="width:100%">📋 Get Guidance on Passport Application</button>
+    </div>`;
+  }
+  let recs=[];
+  if(g==='study'){
+    if(dest==='UK') recs=[{icon:'🇬🇧',t:'UK Student Visa (Tier 4)',s:'England, Scotland & Wales',svc:'Student Visa Processing'},{icon:'🏛️',t:'University Admission Assistance',s:'We apply to UK universities for you',svc:'University Admission Assistance'},{icon:'🌟',t:'Scholarship Support',s:'Identify and apply for scholarships',svc:'Scholarship Application Support'}];
+    else if(dest==='USA') recs=[{icon:'🇺🇸',t:'USA F-1 Student Visa',s:'Accredited US universities and colleges',svc:'Student Visa Processing'},{icon:'🇨🇦',t:'Canada Study Permit',s:'World-class Canadian universities',svc:'Student Visa Processing'},{icon:'🌟',t:'Scholarship Support',s:'Merit-based and need-based awards',svc:'Scholarship Application Support'}];
+    else if(dest==='EU') recs=[{icon:'🇩🇪',t:'Germany Student Visa',s:'Free/low-cost university education',svc:'Student Visa Processing'},{icon:'🌍',t:'Schengen Country Study Visa',s:'France, Netherlands, Sweden & more',svc:'Student Visa Processing'}];
+    else recs=[{icon:'🇦🇺',t:'Australia Student Visa (Subclass 500)',s:'CRICOS-registered institutions',svc:'Student Visa Processing'},{icon:'🏛️',t:'University Admission Assistance',s:'Applications to Australian/NZ universities',svc:'University Admission Assistance'}];
+  } else if(g==='work'){
+    if(dest==='UK') recs=[{icon:'🇬🇧',t:'UK Skilled Worker Visa',s:'Employer-sponsored work in the UK',svc:'Work Visa Processing'}];
+    else if(dest==='Canada') recs=[{icon:'🇨🇦',t:'Canada Express Entry',s:'Permanent residence for skilled workers',svc:'Work Visa Processing'},{icon:'🍁',t:'Canada Open Work Permit',s:'Work for any Canadian employer',svc:'Work Visa Processing'}];
+    else if(dest==='EU') recs=[{icon:'🇩🇪',t:'Germany EU Blue Card',s:'Highly qualified professionals in Germany',svc:'Work Visa Processing'},{icon:'🇪🇺',t:'EU Direct Employment Programme',s:'Job placement in 14 European countries',svc:'EU Direct Employment'}];
+    else recs=[{icon:'🇦🇺',t:'Australia Skilled Migration',s:'Points-based visa for skilled workers',svc:'Work Visa Processing'},{icon:'🏖️',t:'Working Holiday Visa',s:'Live and work in Australia up to 3 years',svc:'Work Visa Processing'}];
+  } else if(g==='travel'){
+    if(dest==='Schengen') recs=[{icon:'🌍',t:'Schengen Tourist Visa',s:'Travel 27 European countries, up to 90 days',svc:'Tourist / Visit Visa'},{icon:'✈️',t:'Flight Reservation Letter',s:'Official PNR itinerary accepted by all embassies',svc:'Flight Reservation Letter'},{icon:'🛡️',t:'Schengen Travel Insurance',s:'Mandatory €30,000 medical coverage',svc:'Travel Insurance'}];
+    else recs=[{icon:'🌴',t:'Tourist / Visit Visa',s:'Professional visa application preparation',svc:'Tourist / Visit Visa'},{icon:'✈️',t:'Flight Reservation Letter',s:'Embassy-accepted flight itinerary, same-day',svc:'Flight Reservation Letter'},{icon:'🏨',t:'Hotel Reservation Letter',s:'Official accommodation proof for embassy',svc:'Hotel Booking / Accommodation Letter'}];
+  } else if(g==='eu'){
+    recs=[{icon:'🇪🇺',t:'EU Direct Employment Programme',s:'Job offer + work permit + visa — full package',svc:'EU Direct Employment'},{icon:'📋',t:'Document Authentication / Apostille',s:'We authenticate your credentials for EU employers',svc:'Document Authentication / Apostille'}];
+  }
+  const recsHtml=recs.map(r=>`<div class="elig-rec" onclick="closeElig();applyForService('${r.svc}')">
+    <div class="elig-rec-icon">${r.icon}</div>
+    <div style="flex:1"><div class="elig-rec-title">${r.t}</div><div class="elig-rec-sub">${r.s}</div></div>
+    <span style="color:var(--gold);font-size:1.1rem">→</span>
+  </div>`).join('');
+  return `<div style="text-align:center;margin-bottom:1.2rem"><div class="elig-result-badge">✅ You're Eligible!</div>
+    <h3 class="elig-q" style="font-size:1.35rem;margin-bottom:0.5rem">We Can Help You</h3>
+    <p style="color:var(--text-body);font-size:0.87rem">Click any service below to start your application:</p>
+  </div>
+  <div class="elig-recs">${recsHtml}</div>
+  <div style="text-align:center;margin-top:1.2rem">
+    <button onclick="eligStep=0;eligState={};eligFlow=[];buildEligFlow();renderEligStep()" style="background:none;border:none;color:var(--muted);font-size:0.82rem;cursor:pointer;padding:0">← Start over</button>
+  </div>`;
+}
+
+// ── AI ASSISTANT & CHAT WIDGET ────────────────────────────────────────────────
+let chatOpen=false,aiGreeted=false,currentChatTab='ai';
+
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chatPanel').classList.toggle('open',chatOpen);
+  document.getElementById('chatFabIcon').textContent=chatOpen?'✕':'💬';
+  document.getElementById('chatBadge').style.display='none';
+  if(chatOpen&&!aiGreeted){
+    aiGreeted=true;
+    setTimeout(()=>addChatMsg('aiMessages',`👋 Hi! I'm SkyGlobe's AI assistant.\n\nI can answer questions about visas, universities, work permits, our services, fees, and more. What would you like to know?`,'bot'),450);
+  }
+}
+function switchChatTab(tab){
+  currentChatTab=tab;
+  ['ai','live','send'].forEach(t=>{
+    const c=document.getElementById('chatContent_'+t);
+    if(c) c.style.display=t===tab?'flex':'none';
+    const b=document.getElementById('chatTab_'+t);
+    if(b) b.classList.toggle('active',t===tab);
+  });
+  if(tab==='live'&&document.getElementById('liveMessages').children.length===0){
+    addChatMsg('liveMessages','🕐 Our team is available Mon–Sat, 9am–6pm. Use WhatsApp for instant replies, or send a message below and we\'ll get back to you within a few hours.','bot');
+  }
+}
+function addChatMsg(containerId,text,type){
+  const c=document.getElementById(containerId);
+  if(!c)return;
+  const d=document.createElement('div');
+  d.className='chat-msg '+type;
+  d.innerHTML=text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
+}
+function askAI(preset){
+  const inp=document.getElementById('aiInput');
+  const q=(preset||(inp?inp.value.trim():'')).trim();
+  if(!q)return;
+  if(inp)inp.value='';
+  document.getElementById('aiSugs').style.display='none';
+  addChatMsg('aiMessages',q,'user');
+  const typing=document.createElement('div');
+  typing.className='chat-msg bot';typing.id='aiTyping';typing.innerHTML='<em style="opacity:0.5">typing…</em>';
+  document.getElementById('aiMessages').appendChild(typing);
+  document.getElementById('aiMessages').scrollTop=99999;
+  setTimeout(()=>{
+    document.getElementById('aiTyping')?.remove();
+    addChatMsg('aiMessages',getAIAnswer(q),'bot');
+  },500+Math.random()*400);
+}
+function getAIAnswer(q){
+  const l=q.toLowerCase();
+  if(/skyglobe|who are you|about you|your company/.test(l))
+    return `**SkyGlobe Limited** is a premium global travel & immigration consultancy founded in 2016, based in New York City.\n\n✦ 12,400+ visas approved\n✦ 98% success rate\n✦ 47 countries served\n✦ 8 years of experience\n\nWe handle student visas, work visas, university admissions, EU employment, flight & hotel reservations, travel insurance, and document services.`;
+  if(/contact|phone|email|whatsapp|reach you/.test(l))
+    return `📞 **Phone:** +1 737-399-8522\n📧 **Email:** insights.skyglobe@gmail.com\n💬 **WhatsApp:** +1 737-399-8522\n\nAvailable Mon–Sat, 9am–6pm. You can also track your application anytime with your reference number.`;
+  if(/cost|fee|price|how much|pay|charge/.test(l))
+    return `Fees vary by service and destination:\n\n✦ **Flight Reservation Letter:** from $15\n✦ **Hotel Reservation Letter:** from $15\n✦ **Travel Insurance:** from $20\n✦ **Tourist/Schengen Visa:** service fee from $150\n✦ **Student Visa:** service fee from $300\n✦ **Work Visa:** service fee from $400\n✦ **EU Employment Programme:** contact us\n\nGovernment/embassy fees are separate. Book a **free consultation** for an exact quote — no hidden charges.`;
+  if(/track|reference|status|application/.test(l))
+    return `Track your application 24/7 with your reference number (format: **SKY-2026-XXXX**):\n\n1. Click **"Track Application"** in the top navigation\n2. Enter your reference number + email\n3. See live status, team messages, and documents\n\nYou can also upload your own documents there.`;
+  if(/how long|processing time|duration|timeline/.test(l))
+    return `**Processing times by service:**\n\n✈️ Flight/Hotel letter: Same day\n🌴 Tourist/Schengen Visa: 1–4 weeks\n🎓 Student Visa: 4–12 weeks\n💼 Work Visa: 6–16 weeks\n🇪🇺 EU Employment: 8–20 weeks\n\nWe provide a realistic timeline during your free consultation and keep you updated at every step.`;
+  if(/refusal|rejected|denied|fail|refused/.test(l))
+    return `Our **98% success rate** comes from only submitting properly prepared applications.\n\nIf a refusal happens:\n\n✦ We analyse the reasons **free of charge**\n✦ We advise on reapplication or appeal\n✦ Many of our best clients came to us after a refusal elsewhere\n\nBook a free consultation and we'll tell you exactly what went wrong and how to fix it.`;
+  if(/document|upload|passport copy|certificate/.test(l))
+    return `**Upload documents securely through our website:**\n\n1. Track your application with your reference number\n2. Go to the **Documents** section\n3. Upload: passport copy, certificates, bank statements, photos\n\nOur team will also upload your finished visa, approval letters, and documents there for you to download.`;
+  if(/eu.*(employ|job|work)|poland|direct employment|europe.*job/.test(l))
+    return `**EU Direct Employment Programme** — We place workers directly with verified employers in 14 European countries:\n\n🇵🇱 Poland · 🇱🇹 Lithuania · 🇵🇹 Portugal · 🇪🇸 Spain · 🇳🇴 Norway · 🇫🇮 Finland · 🇨🇿 Czech Republic · 🇸🇰 Slovakia · 🇺🇦 Ukraine · 🇦🇹 Austria · 🇲🇰 North Macedonia · 🇧🇬 Bulgaria · 🇭🇺 Hungary · 🇲🇪 Montenegro\n\n**Full package:** job matching + work permit + national visa + pre-departure support.\n**Timeline:** 8–20 weeks.`;
+  if(/student visa|study.*visa|f-1|tier 4|study permit/.test(l))
+    return `**Student Visa Services** — We process visas for:\n\n🇬🇧 UK Student Visa (Tier 4)\n🇺🇸 USA F-1 Visa\n🇨🇦 Canada Study Permit\n🇦🇺 Australia (Subclass 500)\n🇩🇪 Germany Student Visa\nAnd many more destinations...\n\nWe also provide **university admission assistance** and **scholarship applications**.\n\nTry our **Eligibility Checker** to see what you qualify for!`;
+  if(/work visa|work permit|skilled worker|h.?1.?b|blue card/.test(l))
+    return `**Work Visa Services** — We process:\n\n🇬🇧 UK Skilled Worker Visa\n🇨🇦 Canada Express Entry (PR)\n🇩🇪 Germany EU Blue Card\n🇦🇺 Australia Skilled Migration\n🇺🇸 USA H-1B (employer-sponsored)\n\nWe manage the entire process: documentation, sponsorship coordination, and visa submission.`;
+  if(/tourist|visit visa|schengen|b.?2|travel visa/.test(l))
+    return `**Tourist & Visit Visa Services:**\n\n🌍 Schengen Visa (27 countries, 90 days)\n🇺🇸 USA B-1/B-2 Tourist Visa\n🇬🇧 UK Standard Visitor Visa\n🇦🇪 UAE Visit Visa\n40+ other destinations...\n\nFor Schengen: we provide the **complete package** — visa + flight reservation + hotel letter + travel insurance. Fast-tracked options available.`;
+  if(/flight|ticket|reservation letter/.test(l))
+    return `**Flight Services:**\n\n✦ **Flight Reservation Letters** — Official PNR-backed itinerary accepted by ALL embassies. No need to buy a real ticket before your visa is approved! **From $15, same day.**\n\n✦ **Real Ticket Booking** — We search 500+ airlines for best fares and book directly.`;
+  if(/hotel|accommodation|reservation/.test(l))
+    return `**Hotel Services:**\n\n✦ **Visa Hotel Reservation Letters** — Official confirmation accepted by all embassies. No full upfront payment needed. **Same-day delivery.**\n\n✦ **Real Hotel Booking** — 150+ countries at competitive rates.\n\nEmbassy-accepted letters are mandatory for many visa types — Schengen in particular.`;
+  if(/insurance|travel insurance|medical cover/.test(l))
+    return `**Travel Insurance Services:**\n\n🛡️ **Schengen Insurance** — mandatory €30,000 coverage (required for visa)\n🏥 **Comprehensive Travel Insurance** — medical, trip cancellation, luggage\n📋 **Student Health Cover** — OSHC (Australia), IHS (UK)\n\nAll policies are embassy-accepted. Same-day issuance available.`;
+  if(/scholarship|funding|financial aid|grant/.test(l))
+    return `**Scholarship Support:**\n\nWe've helped students secure over **$2 million** in scholarships!\n\n✦ Identify scholarships matching your profile\n✦ Write compelling personal statements and SOP\n✦ Submit applications on your behalf\n\nPopular: Chevening (UK), Commonwealth, Erasmus+, DAAD (Germany), and many university awards.`;
+  if(/eligib|qualify|can i apply|am i eligible/.test(l))
+    return `Use our **Eligibility Checker** to find out in under 2 minutes! Click the **"Check My Eligibility"** button on the homepage.\n\nOr book a **free 30-minute consultation** with one of our certified experts for a personalised assessment.`;
+  // KB search fallback
+  const words=l.split(/\s+/).filter(w=>w.length>3);
+  let best=null,bestScore=0;
+  for(const item of KB){
+    const txt=(item.title+' '+item.tags.join(' ')+' '+item.summary).toLowerCase();
+    const score=words.reduce((n,w)=>n+(txt.includes(w)?1:0),0);
+    if(score>bestScore){bestScore=score;best=item;}
+  }
+  if(best&&bestScore>=2){
+    const d=best.details;
+    let r=`**${best.title}**\n\n${best.summary}`;
+    if(d.processing)r+=`\n\n⏱️ **Processing:** ${d.processing}`;
+    if(d.cost)r+=`\n💰 **Cost:** ${d.cost}`;
+    if(d.duration)r+=`\n📅 **Duration:** ${d.duration}`;
+    if(d.requirements?.length)r+=`\n\n**Key Requirements:**\n${d.requirements.slice(0,4).map(x=>`• ${x}`).join('\n')}`;
+    r+=`\n\n_Our team handles this process for you. Click **Apply** or book a free consultation._`;
+    return r;
+  }
+  return `Thank you for your question! For the most accurate and personalised answer:\n\n1. 📋 **Book a free consultation** — our experts answer everything\n2. 💬 **WhatsApp:** +1 737-399-8522\n3. 📧 **Email:** insights.skyglobe@gmail.com\n\nOr try our **Eligibility Checker** to find services that match your goals.`;
+}
+async function sendChatMsg(){
+  const name=document.getElementById('chatSendName').value.trim();
+  const email=document.getElementById('chatSendEmail').value.trim();
+  const msg=document.getElementById('chatSendMsg').value.trim();
+  const res=document.getElementById('chatSendRes');
+  if(!name||!email||!msg){res.style.color='#e57373';res.textContent='Please fill all fields.';return;}
+  res.style.color='var(--muted)';res.textContent='Sending…';
+  try{
+    const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fname:name,email,service:'General Enquiry',message:msg})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'Failed');
+    res.style.color='#66bb6a';res.textContent='✅ Sent! We\'ll reply within a few hours.';
+    document.getElementById('chatSendName').value='';
+    document.getElementById('chatSendEmail').value='';
+    document.getElementById('chatSendMsg').value='';
+  }catch(e){res.style.color='#e57373';res.textContent='Error: '+e.message;}
+}
+
 function printApp(cardId) {
   const data = (window.__printApps || {})[cardId];
   if (!data) return;
@@ -2924,5 +3259,78 @@ function printApp(cardId) {
 }
 
 </script>
+
+<!-- ===== ELIGIBILITY CHECKER OVERLAY ===== -->
+<div class="elig-overlay" id="eligOverlay" onclick="if(event.target===this)closeElig()">
+  <div class="elig-modal">
+    <button onclick="closeElig()" style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;color:var(--muted);font-size:1.6rem;cursor:pointer;line-height:1">×</button>
+    <div class="section-tag">Eligibility Checker</div>
+    <div class="elig-progress" id="eligProgress"></div>
+    <div id="eligContent"></div>
+  </div>
+</div>
+
+<!-- ===== CHAT WIDGET ===== -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Chat with us · AI Assistant">
+  <span id="chatFabIcon">💬</span>
+  <div class="chat-badge" id="chatBadge">1</div>
+</button>
+
+<div class="chat-panel" id="chatPanel">
+  <!-- Header -->
+  <div class="chat-head">
+    <div class="chat-head-info">
+      <div class="chat-avatar">🌐</div>
+      <div class="chat-status">
+        <div class="cname">SkyGlobe Support</div>
+        <div class="online">AI + Live Team</div>
+      </div>
+    </div>
+    <button onclick="toggleChat()" style="background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer;line-height:1;padding:4px">×</button>
+  </div>
+  <!-- Tabs -->
+  <div class="chat-tabs">
+    <button class="chat-tab active" id="chatTab_ai" onclick="switchChatTab('ai')">🤖 AI Assistant</button>
+    <button class="chat-tab" id="chatTab_live" onclick="switchChatTab('live')">👥 Live Support</button>
+    <button class="chat-tab" id="chatTab_send" onclick="switchChatTab('send')">✉️ Message Us</button>
+  </div>
+
+  <!-- AI Tab -->
+  <div id="chatContent_ai" style="display:flex;flex-direction:column">
+    <div class="chat-sugs" id="aiSugs">
+      <span class="chat-sug" onclick="askAI('How do I apply for a student visa?')">Student visa</span>
+      <span class="chat-sug" onclick="askAI('How long does processing take?')">Processing time</span>
+      <span class="chat-sug" onclick="askAI('Tell me about EU Direct Employment')">EU Jobs</span>
+      <span class="chat-sug" onclick="askAI('How much do your services cost?')">Fees & cost</span>
+    </div>
+    <div class="chat-body" id="aiMessages"></div>
+    <div class="chat-footer">
+      <input class="chat-input" id="aiInput" placeholder="Ask me anything about visas, travel…" onkeypress="if(event.key==='Enter')askAI()">
+      <button class="chat-send-btn" onclick="askAI()">Send</button>
+    </div>
+  </div>
+
+  <!-- Live Support Tab -->
+  <div id="chatContent_live" style="display:none;flex-direction:column">
+    <div class="chat-body" id="liveMessages"></div>
+    <div style="padding:12px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px">
+      <a href="https://wa.me/17373998522" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:white;padding:13px;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.88rem">💬 Chat on WhatsApp — Instant Reply</a>
+      <button class="chat-send-btn" style="width:100%;padding:11px;border-radius:10px;font-size:0.85rem" onclick="switchChatTab('send')">✉️ Send Us a Message Instead</button>
+    </div>
+  </div>
+
+  <!-- Message Tab -->
+  <div id="chatContent_send" style="display:none;flex-direction:column">
+    <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+      <p style="font-size:0.8rem;color:var(--muted);margin:0 0 4px">We reply within a few hours Mon–Sat.</p>
+      <input id="chatSendName" class="chat-input" style="width:100%" placeholder="Your full name">
+      <input id="chatSendEmail" class="chat-input" style="width:100%" placeholder="Your email address">
+      <textarea id="chatSendMsg" class="chat-input" style="width:100%;height:90px;resize:none" placeholder="How can we help you?"></textarea>
+      <button class="chat-send-btn" style="width:100%;padding:12px;border-radius:10px" onclick="sendChatMsg()">Send Message →</button>
+      <div id="chatSendRes" style="font-size:0.8rem;text-align:center;min-height:18px"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
