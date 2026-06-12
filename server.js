@@ -2,14 +2,58 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname)));
 
-// ── RESEND EMAIL (HTTPS — works on all cloud platforms) ───────────────────────
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+// Env vars needed on Render:
+//   SUPABASE_URL  = https://xxxx.supabase.co
+//   SUPABASE_KEY  = your anon/service role key
+const SUPA_URL = process.env.SUPABASE_URL;
+const SUPA_KEY = process.env.SUPABASE_KEY;
+
+async function dbQuery(method, table, body, params) {
+  let url = `${SUPA_URL}/rest/v1/${table}`;
+  if (params) url += '?' + new URLSearchParams(params);
+  const headers = {
+    'apikey': SUPA_KEY,
+    'Authorization': `Bearer ${SUPA_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': method === 'POST' ? 'return=representation' : 'return=representation',
+  };
+  const r = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const text = await r.text();
+  if (!r.ok) throw new Error(`Supabase ${method} ${table}: ${r.status} ${text}`);
+  return text ? JSON.parse(text) : [];
+}
+
+async function insertApp(data) {
+  const rows = await dbQuery('POST', 'applications', data);
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+
+async function getAppByRef(ref) {
+  const rows = await dbQuery('GET', 'applications', null, { ref: `eq.${ref}`, limit: 1 });
+  return rows[0] || null;
+}
+
+async function getAppsByEmail(email) {
+  return dbQuery('GET', 'applications', null, { email: `eq.${email}`, order: 'created_at.desc' });
+}
+
+async function getAllApps() {
+  return dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 500 });
+}
+
+async function updateApp(ref, patch) {
+  const rows = await dbQuery('PATCH', 'applications', patch, { ref: `eq.${ref}` });
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+
+// ── RESEND EMAIL ──────────────────────────────────────────────────────────────
 async function sendEmail(to, subject, html, replyTo) {
   const body = {
     from: 'SkyGlobe Limited <onboarding@resend.dev>',
@@ -18,31 +62,14 @@ async function sendEmail(to, subject, html, replyTo) {
     html,
   };
   if (replyTo) body.reply_to = replyTo;
-
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(JSON.stringify(data));
   return data;
-}
-
-// ── APPLICATIONS STORAGE ──────────────────────────────────────────────────────
-const APPS_FILE = path.join(__dirname, 'applications.json');
-
-function readApps() {
-  try { return JSON.parse(fs.readFileSync(APPS_FILE, 'utf8')); }
-  catch { return []; }
-}
-
-function saveApps(apps) {
-  try { fs.writeFileSync(APPS_FILE, JSON.stringify(apps, null, 2)); }
-  catch (e) { console.error('Could not save applications:', e.message); }
 }
 
 function genRef() {
@@ -54,17 +81,12 @@ function genRef() {
 // ── CONTACT / CONSULTATION FORM ───────────────────────────────────────────────
 app.post('/api/contact', async (req, res) => {
   const { fname, lname, email, phone, service, destination, message } = req.body;
-
-  if (!fname || !email || !service) {
+  if (!fname || !email || !service)
     return res.status(400).json({ error: 'Name, email and service are required.' });
-  }
-
-  if (!process.env.RESEND_API_KEY) {
+  if (!process.env.RESEND_API_KEY)
     return res.status(500).json({ error: 'Email service not configured. Contact us via WhatsApp.' });
-  }
 
   const recipientEmail = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
-
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0">
@@ -83,7 +105,6 @@ app.post('/api/contact', async (req, res) => {
         <p style="color:#333;margin:0;line-height:1.6">${message.replace(/\n/g,'<br>')}</p>` : ''}
       </div>
     </div>`;
-
   try {
     await sendEmail(recipientEmail, `New Consultation — ${service}`, html, email);
     res.json({ success: true });
@@ -101,30 +122,32 @@ app.post('/api/apply', async (req, res) => {
     hotelCity, checkin, checkout, coverage, docType, scholarship, notes
   } = req.body;
 
-  if (!fname || !email || !service) {
+  if (!fname || !email || !service)
     return res.status(400).json({ error: 'Name, email, and service are required.' });
-  }
 
   const ref = genRef();
-  const timestamp = new Date().toISOString();
   const application = {
     ref, service,
     fname, lname: lname || '', email, phone: phone || '',
     dob: dob || '', nationality: nationality || '',
-    passport: passport || '', passportExpiry: passportExpiry || '',
-    destination: destination || '', travelDate: travelDate || '',
+    passport: passport || '', passport_expiry: passportExpiry || '',
+    destination: destination || '', travel_date: travelDate || '',
     duration: duration || '', purpose: purpose || '',
     institution: institution || '', employer: employer || '',
-    hotelCity: hotelCity || '', checkin: checkin || '', checkout: checkout || '',
-    coverage: coverage || '', docType: docType || '',
+    hotel_city: hotelCity || '', checkin: checkin || '', checkout: checkout || '',
+    coverage: coverage || '', doc_type: docType || '',
     scholarship: scholarship || '', notes: notes || '',
-    timestamp, status: 'Received'
+    status: 'Received', responses: []
   };
 
-  const apps = readApps();
-  apps.push(application);
-  saveApps(apps);
+  try {
+    await insertApp(application);
+  } catch (e) {
+    console.error('DB insert failed:', e.message);
+    return res.status(500).json({ error: 'Could not save application. Please try again.' });
+  }
 
+  const timestamp = new Date().toISOString();
   const recipientEmail = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
 
   const adminHtml = `
@@ -187,43 +210,40 @@ app.post('/api/apply', async (req, res) => {
         <a href="https://wa.me/17373998522?text=Hi, my application reference is ${ref}" style="display:inline-block;background:#25D366;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:12px">💬 WhatsApp Us About This Application</a>
       </div>
       <div style="padding:20px;text-align:center;color:#999;font-size:0.8rem">
-        Skyglobe Limited · 123 Fifth Avenue, New York, NY · insights.skyglobe@gmail.com
+        Skyglobe Limited · insights.skyglobe@gmail.com
       </div>
     </div>`;
 
-  try {
-    await sendEmail(recipientEmail, `New Application [${ref}] — ${service}`, adminHtml, email);
-  } catch (e) { console.error('Admin email failed:', e.message); }
+  try { await sendEmail(recipientEmail, `New Application [${ref}] — ${service}`, adminHtml, email); }
+  catch (e) { console.error('Admin email failed:', e.message); }
 
-  try {
-    await sendEmail(email, `Application Confirmed [${ref}] — Skyglobe Limited`, userHtml);
-  } catch (e) { console.error('User email failed:', e.message); }
+  try { await sendEmail(email, `Application Confirmed [${ref}] — Skyglobe Limited`, userHtml); }
+  catch (e) { console.error('User email failed:', e.message); }
 
   res.json({ success: true, ref, status: 'Received' });
 });
 
 // ── GET APPLICATION BY REFERENCE ──────────────────────────────────────────────
-app.get('/api/apply/:ref', (req, res) => {
-  const apps = readApps();
-  const found = apps.find(a => a.ref === req.params.ref.toUpperCase());
-  if (!found) return res.status(404).json({ error: 'Application not found.' });
-  const { passport, passportExpiry, ...safe } = found;
-  res.json(safe);
+app.get('/api/apply/:ref', async (req, res) => {
+  try {
+    const found = await getAppByRef(req.params.ref.toUpperCase());
+    if (!found) return res.status(404).json({ error: 'Application not found.' });
+    const { passport, passport_expiry, ...safe } = found;
+    res.json(safe);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ── GET ALL APPLICATIONS BY EMAIL ─────────────────────────────────────────────
-app.get('/api/apply', (req, res) => {
+app.get('/api/apply', async (req, res) => {
   if (!req.query.email) return res.status(400).json({ error: 'Email required.' });
-  const apps = readApps();
-  const found = apps
-    .filter(a => a.email.toLowerCase() === req.query.email.toLowerCase())
-    .map(({ passport, passportExpiry, ...safe }) => safe);
-  res.json(found);
+  try {
+    const found = (await getAppsByEmail(req.query.email.toLowerCase()))
+      .map(({ passport, passport_expiry, ...safe }) => safe);
+    res.json(found);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ── ADMIN ─────────────────────────────────────────────────────────────────────
-// Set ADMIN_PASSWORDS env var on Render. Multiple admins: comma-separated,
-// e.g. "boss:secret123,mary:pass456" or just plain passwords "secret123,pass456".
 function checkAdmin(req) {
   const raw = process.env.ADMIN_PASSWORDS || process.env.ADMIN_PASSWORD || '';
   if (!raw) return null;
@@ -242,9 +262,10 @@ app.post('/api/admin/login', (req, res) => {
   res.json({ success: true, name: who });
 });
 
-app.get('/api/admin/applications', (req, res) => {
+app.get('/api/admin/applications', async (req, res) => {
   if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
-  res.json(readApps().slice().reverse());
+  try { res.json(await getAllApps()); }
+  catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/admin/update', async (req, res) => {
@@ -254,96 +275,77 @@ app.post('/api/admin/update', async (req, res) => {
   const { ref, status, response } = req.body;
   if (!ref || !status) return res.status(400).json({ error: 'ref and status required.' });
 
-  const apps = readApps();
-  const app_ = apps.find(a => a.ref === ref.toUpperCase());
-  if (!app_) return res.status(404).json({ error: 'Application not found.' });
-
-  app_.status = status;
-  if (response) {
-    app_.responses = app_.responses || [];
-    app_.responses.push({ by: who, message: response, date: new Date().toISOString() });
-  }
-  saveApps(apps);
-
-  // Notify the applicant by email
-  let emailed = false;
   try {
-    const statusColors = { 'Received': '#1976d2', 'In Review': '#f57c00', 'Approved': '#2e7d32', 'Completed': '#2e7d32', 'Needs More Info': '#c62828', 'Rejected': '#c62828' };
-    const color = statusColors[status] || '#1976d2';
-    const html = `
-      <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
-        <div style="background:#0a1628;padding:28px;border-radius:8px 8px 0 0;text-align:center">
-          <h1 style="color:#c9a84c;margin:0;font-size:1.4rem">Application Update</h1>
-          <p style="color:#8899bb;margin:6px 0 0">SKYGLOBE LIMITED</p>
-        </div>
-        <div style="background:#f9f9f9;padding:28px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
-          <p style="color:#333">Dear <strong>${app_.fname}</strong>, there is an update on your application <strong>${app_.ref}</strong> (${app_.service}):</p>
-          <div style="text-align:center;margin:20px 0">
-            <span style="display:inline-block;background:${color};color:#fff;padding:10px 28px;border-radius:24px;font-weight:700;font-size:1.1rem">${status}</span>
-          </div>
-          ${response ? `<div style="background:#fff;border-left:4px solid #c9a84c;padding:16px;border-radius:4px;margin-bottom:16px">
-            <p style="color:#555;margin:0 0 6px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em"><strong>Message from our team</strong></p>
-            <p style="color:#333;margin:0;line-height:1.6">${response.replace(/\n/g,'<br>')}</p>
-          </div>` : ''}
-          <p style="color:#555;font-size:0.85rem">Track your application anytime on our website with reference <strong>${app_.ref}</strong>.</p>
-          <a href="https://wa.me/17373998522?text=Hi, regarding my application ${app_.ref}" style="display:inline-block;background:#25D366;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:8px">💬 Reply on WhatsApp</a>
-        </div>
-      </div>`;
-    await sendEmail(app_.email, `Update on Application ${app_.ref} — ${status}`, html);
-    emailed = true;
-  } catch (e) {
-    console.error('Status email failed:', e.message);
-    // Fallback: notify admin so they can follow up manually
+    const app_ = await getAppByRef(ref.toUpperCase());
+    if (!app_) return res.status(404).json({ error: 'Application not found.' });
+
+    const responses = app_.responses || [];
+    if (response) responses.push({ by: who, message: response, date: new Date().toISOString() });
+    await updateApp(ref.toUpperCase(), { status, responses });
+
+    let emailed = false;
     try {
-      const recipientEmail = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
-      const fallbackHtml = `<div style="font-family:sans-serif;padding:20px">
-        <h3 style="color:#c9a84c">Status Update (applicant email failed)</h3>
-        <p>Could not email <strong>${app_.email}</strong> directly.</p>
-        <p><strong>Application:</strong> ${app_.ref} — ${app_.service}</p>
-        <p><strong>New status:</strong> ${status}</p>
-        ${response ? `<p><strong>Your message:</strong><br>${response.replace(/\n/g,'<br>')}</p>` : ''}
-        <p style="color:#888;font-size:0.85rem">Email error: ${e.message}</p>
-        <p>Please follow up with the applicant manually at: <a href="mailto:${app_.email}">${app_.email}</a></p>
-      </div>`;
-      await sendEmail(recipientEmail, `⚠️ Manual follow-up needed: ${app_.ref}`, fallbackHtml);
-    } catch (e2) { console.error('Fallback email also failed:', e2.message); }
-  }
+      const statusColors = { 'Received':'#1976d2','In Review':'#f57c00','Approved':'#2e7d32','Completed':'#2e7d32','Needs More Info':'#c62828','Rejected':'#c62828' };
+      const color = statusColors[status] || '#1976d2';
+      const html = `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:#0a1628;padding:28px;border-radius:8px 8px 0 0;text-align:center">
+            <h1 style="color:#c9a84c;margin:0;font-size:1.4rem">Application Update</h1>
+            <p style="color:#8899bb;margin:6px 0 0">SKYGLOBE LIMITED</p>
+          </div>
+          <div style="background:#f9f9f9;padding:28px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
+            <p style="color:#333">Dear <strong>${app_.fname}</strong>, there is an update on your application <strong>${app_.ref}</strong> (${app_.service}):</p>
+            <div style="text-align:center;margin:20px 0">
+              <span style="display:inline-block;background:${color};color:#fff;padding:10px 28px;border-radius:24px;font-weight:700;font-size:1.1rem">${status}</span>
+            </div>
+            ${response ? `<div style="background:#fff;border-left:4px solid #c9a84c;padding:16px;border-radius:4px;margin-bottom:16px">
+              <p style="color:#555;margin:0 0 6px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em"><strong>Message from our team</strong></p>
+              <p style="color:#333;margin:0;line-height:1.6">${response.replace(/\n/g,'<br>')}</p>
+            </div>` : ''}
+            <p style="color:#555;font-size:0.85rem">Track your application anytime on our website with reference <strong>${app_.ref}</strong>.</p>
+            <a href="https://wa.me/17373998522?text=Hi, regarding my application ${app_.ref}" style="display:inline-block;background:#25D366;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:8px">💬 Reply on WhatsApp</a>
+          </div>
+        </div>`;
+      await sendEmail(app_.email, `Update on Application ${app_.ref} — ${status}`, html);
+      emailed = true;
+    } catch (e) {
+      console.error('Status email failed:', e.message);
+      try {
+        const recipientEmail = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
+        await sendEmail(recipientEmail, `⚠️ Manual follow-up needed: ${app_.ref}`,
+          `<div style="font-family:sans-serif;padding:20px">
+            <h3 style="color:#c9a84c">Status Update (applicant email failed)</h3>
+            <p>Could not email <strong>${app_.email}</strong> directly.</p>
+            <p><strong>Application:</strong> ${app_.ref} — ${app_.service}</p>
+            <p><strong>New status:</strong> ${status}</p>
+            ${response ? `<p><strong>Your message:</strong><br>${response.replace(/\n/g,'<br>')}</p>` : ''}
+            <p>Please follow up manually: <a href="mailto:${app_.email}">${app_.email}</a></p>
+          </div>`);
+      } catch (e2) { console.error('Fallback email also failed:', e2.message); }
+    }
 
-  res.json({ success: true, emailed, emailError: emailed ? null : 'Could not email applicant directly — a fallback notification was sent to your admin email instead. To fix this permanently, verify a domain on Resend.' });
+    res.json({ success: true, emailed, emailError: emailed ? null : 'Could not email applicant directly — a fallback notification was sent to your admin email. To fix permanently, verify a domain on Resend.' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin.html'));
-});
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
-// ── TEST ENDPOINT — visit /api/test in browser to check email ─────────────────
+// ── TEST ──────────────────────────────────────────────────────────────────────
 app.get('/api/test', async (req, res) => {
   const key = process.env.RESEND_API_KEY;
   const to  = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
-
   if (!key) return res.json({ ok: false, error: 'RESEND_API_KEY env var is missing' });
-
   try {
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'SkyGlobe Test <onboarding@resend.dev>',
-        to: [to],
-        subject: 'SkyGlobe — Email Test',
-        html: '<p>✅ Email is working! Your Resend + Render setup is correct.</p>',
-      }),
+      body: JSON.stringify({ from: 'SkyGlobe Test <onboarding@resend.dev>', to: [to], subject: 'SkyGlobe — Email Test', html: '<p>✅ Email is working!</p>' }),
     });
-    const data = await r.json();
-    res.json({ ok: r.ok, status: r.status, resend_response: data });
-  } catch (err) {
-    res.json({ ok: false, error: err.message });
-  }
+    res.json({ ok: r.ok, status: r.status, resend_response: await r.json() });
+  } catch (err) { res.json({ ok: false, error: err.message }); }
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`SkyGlobe server running on port ${PORT}`));
