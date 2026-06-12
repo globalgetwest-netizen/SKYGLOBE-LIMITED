@@ -688,6 +688,18 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
         <p>One-on-one expert consultation sessions to map out the best immigration pathway for your specific goals, timeline, and background — with a clear, actionable plan.</p>
         <span class="s-tag">Strategy → Success</span>
       </div>
+      <div class="service-full-card">
+        <span class="s-icon">🎫</span>
+        <h3>Flight Booking</h3>
+        <p>Full flight ticket booking service — we search the best fares, book one-way, round-trip or multi-city tickets, and deliver your e-ticket directly to you. Pay only the best available price.</p>
+        <span class="s-tag">Fly → Anywhere</span>
+      </div>
+      <div class="service-full-card">
+        <span class="s-icon">🇪🇺</span>
+        <h3>EU Direct Employment</h3>
+        <p>Direct job placement with employers in Poland, Lithuania, Portugal, Spain, Norway, Finland, Czech Republic, Slovakia, Austria, Hungary, Bulgaria, Montenegro, North Macedonia and Ukraine — including work permit and visa processing from start to finish.</p>
+        <span class="s-tag">Work → Europe</span>
+      </div>
     </div>
 
     <div style="text-align:center;margin-top:3rem;padding:3rem;background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:var(--radius-xl)">
@@ -940,6 +952,8 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
             <option>Hotel Booking</option>
             <option>Document Verification</option>
             <option>Immigration Consultation</option>
+            <option>Flight Booking</option>
+            <option>EU Direct Employment</option>
           </select>
         </div>
         <div class="form-group">
@@ -1032,6 +1046,8 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
         <div class="svc-card" onclick="selectService('Document Authentication / Apostille',this)"><span class="sc-icon">📋</span><h4>Document Auth</h4><p>Apostille & notarization</p></div>
         <div class="svc-card" onclick="selectService('Scholarship Application Support',this)"><span class="sc-icon">🌟</span><h4>Scholarship</h4><p>Funding assistance</p></div>
         <div class="svc-card" onclick="selectService('Express Entry / PR Pathway',this)"><span class="sc-icon">🍁</span><h4>Express Entry / PR</h4><p>Permanent residence</p></div>
+        <div class="svc-card" onclick="selectService('Flight Booking',this)"><span class="sc-icon">🎫</span><h4>Flight Booking</h4><p>Ticket purchase & booking</p></div>
+        <div class="svc-card" onclick="selectService('EU Direct Employment',this)"><span class="sc-icon">🇪🇺</span><h4>EU Direct Employment</h4><p>Jobs in Europe + work permit</p></div>
       </div>
       <div style="margin-top:1.5rem;text-align:right">
         <button class="btn-primary" onclick="goStep(2)" id="step1Next" disabled style="opacity:0.4">Next: Personal Details →</button>
@@ -1079,6 +1095,16 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
         </div>
         <div class="form-group" id="fieldScholarship"><label>Scholarship Program</label>
           <select id="ap_scholarship"><option value="">— Select —</option><option>Chevening (UK)</option><option>Commonwealth Scholarship</option><option>DAAD (Germany)</option><option>Vanier CGS (Canada)</option><option>Fulbright (USA)</option><option>Other / General Search</option></select>
+        </div>
+        <div class="form-group" id="fieldFlightFrom"><label>Departure City / Airport</label><input type="text" id="ap_flightFrom" placeholder="e.g. Lagos (LOS), Accra (ACC)"></div>
+        <div class="form-group" id="fieldFlightType"><label>Trip Type</label>
+          <select id="ap_flightType"><option value="">— Select —</option><option>One Way</option><option>Round Trip</option><option>Multi-City</option></select>
+        </div>
+        <div class="form-group" id="fieldEuCountry"><label>Preferred Country (Europe)</label>
+          <select id="ap_euCountry" onchange="if(this.value)document.getElementById('ap_destination').value=this.value"><option value="">— Select —</option><option>Poland</option><option>Montenegro</option><option>Lithuania</option><option>Portugal</option><option>Spain</option><option>Norway</option><option>Finland</option><option>Czech Republic</option><option>Slovakia</option><option>Ukraine</option><option>Austria</option><option>North Macedonia</option><option>Bulgaria</option><option>Hungary</option><option>Any / Best Available</option></select>
+        </div>
+        <div class="form-group" id="fieldJobField"><label>Job Field / Industry</label>
+          <select id="ap_jobField"><option value="">— Select —</option><option>Construction & Skilled Trades</option><option>Factory / Warehouse / Production</option><option>Hospitality & Hotels</option><option>Agriculture & Farming</option><option>Transport / Drivers</option><option>Caregiving & Healthcare</option><option>Cleaning & Housekeeping</option><option>IT & Office Work</option><option>Other / Any Available</option></select>
         </div>
       </div>
       <div class="form-group" style="margin-top:0.5rem">
@@ -2158,9 +2184,11 @@ const serviceFields = {
   'Travel Insurance':                 ['coverage'],
   'Document Authentication / Apostille': ['docType'],
   'Scholarship Application Support':  ['scholarship','institution'],
-  'Express Entry / PR Pathway':       []
+  'Express Entry / PR Pathway':       [],
+  'Flight Booking':                   ['flightFrom','flightType'],
+  'EU Direct Employment':             ['euCountry','jobField']
 };
-const allOptFields = ['institution','employer','hotelCity','checkIn','checkOut','coverage','docType','scholarship'];
+const allOptFields = ['institution','employer','hotelCity','checkIn','checkOut','coverage','docType','scholarship','flightFrom','flightType','euCountry','jobField'];
 
 function selectService(name, el) {
   selectedService = name;
@@ -2221,6 +2249,10 @@ function buildReview() {
     ['Purpose', document.getElementById('ap_purpose').value || '—'],
     ['Institution', document.getElementById('ap_institution').value || '—'],
     ['Employer', document.getElementById('ap_employer').value || '—'],
+    ['Departure City', document.getElementById('ap_flightFrom').value || '—'],
+    ['Trip Type', document.getElementById('ap_flightType').value || '—'],
+    ['Preferred Country', document.getElementById('ap_euCountry').value || '—'],
+    ['Job Field', document.getElementById('ap_jobField').value || '—'],
     ['Notes', document.getElementById('ap_notes').value || '—'],
   ];
   document.getElementById('reviewSummary').innerHTML = rows.filter(r=>r[1]&&r[1]!=='—').map(r =>
@@ -2256,6 +2288,17 @@ async function submitApplication() {
     scholarship: document.getElementById('ap_scholarship').value,
     notes: document.getElementById('ap_notes').value.trim()
   };
+  // New service-specific fields are appended to notes (no DB changes needed)
+  const extras = [];
+  const flightFrom = document.getElementById('ap_flightFrom').value.trim();
+  const flightType = document.getElementById('ap_flightType').value;
+  const euCountry = document.getElementById('ap_euCountry').value;
+  const jobField = document.getElementById('ap_jobField').value;
+  if (flightFrom) extras.push('Departure: ' + flightFrom);
+  if (flightType) extras.push('Trip type: ' + flightType);
+  if (euCountry) { extras.push('Preferred country: ' + euCountry); if (!payload.destination) payload.destination = euCountry; }
+  if (jobField) extras.push('Job field: ' + jobField);
+  if (extras.length) payload.notes = (payload.notes ? payload.notes + '\n\n' : '') + '— ' + extras.join('\n— ');
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 25000);
@@ -2294,8 +2337,8 @@ function resetApplyForm() {
   document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
   ['ap_fname','ap_lname','ap_email','ap_phone','ap_dob','ap_nationality','ap_passport','ap_passportExpiry',
    'ap_destination','ap_travelDate','ap_duration','ap_purpose','ap_institution','ap_employer',
-   'ap_hotelCity','ap_checkin','ap_checkout','ap_notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-  ['ap_coverage','ap_docType','ap_scholarship'].forEach(id => { const el = document.getElementById(id); if(el) el.selectedIndex=0; });
+   'ap_hotelCity','ap_checkin','ap_checkout','ap_flightFrom','ap_notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['ap_coverage','ap_docType','ap_scholarship','ap_flightType','ap_euCountry','ap_jobField'].forEach(id => { const el = document.getElementById(id); if(el) el.selectedIndex=0; });
   document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
   document.getElementById('applyStep1').classList.add('active');
   document.querySelectorAll('.apply-step').forEach((s,i) => { s.classList.remove('active','done'); if(i===0) s.classList.add('active'); });
@@ -2382,6 +2425,7 @@ function renderAppCard(app) {
 
   const printId = 'print_' + app.ref;
   (window.__printApps = window.__printApps || {})[printId] = { app, responses, date, statusColor, statusIcon };
+  setTimeout(() => loadAppDocs(app.ref), 100);
   return `<div class="app-tracker" id="${printId}">
     <!-- Header -->
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.8rem;margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
@@ -2438,13 +2482,16 @@ function renderAppCard(app) {
     <!-- Documents -->
     <div style="margin-top:1.1rem;border-top:1px solid var(--border);padding-top:0.9rem">
       <div style="font-size:0.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">📎 Documents</div>
-      <div id="docs_${app.ref}" style="font-size:0.82rem;color:var(--muted)">Loading documents…</div>
-      <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-top:10px">
-        <input type="file" id="docfile_${app.ref}" style="font-size:0.78rem;color:var(--muted);max-width:230px">
-        <button onclick="uploadUserDoc('${app.ref}')" id="docbtn_${app.ref}" style="background:transparent;border:1px solid var(--gold);color:var(--gold);padding:8px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer">⬆️ Upload Document</button>
+      <div id="docs_${app.ref}" style="font-size:0.82rem;color:var(--muted)">Loading…</div>
+      <div style="margin-top:10px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:12px">
+        <div style="font-size:0.74rem;color:var(--muted);margin-bottom:8px;font-weight:600">Upload a document to your application:</div>
+        <input type="text" id="doclabel_${app.ref}" placeholder="Document name (e.g. Passport copy, Bank statement…)" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--white);font-size:0.82rem;margin-bottom:8px">
+        <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap">
+          <input type="file" id="docfile_${app.ref}" style="font-size:0.78rem;color:var(--muted);flex:1;min-width:0">
+          <button onclick="uploadUserDoc('${app.ref}')" id="docbtn_${app.ref}" style="background:transparent;border:1px solid var(--gold);color:var(--gold);padding:8px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap">⬆️ Upload</button>
+        </div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:6px">Max 8 MB. PDF, JPG, PNG accepted. Documents sent by our team will also appear here.</div>
       </div>
-      <div style="font-size:0.7rem;color:var(--muted);margin-top:5px">Upload passport copies, photos or supporting documents (max 8 MB). Documents issued by our team will also appear here for you to download.</div>
-      <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" style="display:none" onload="loadAppDocs('${app.ref}')" alt="">
     </div>
 
     <!-- Action buttons -->
@@ -2480,10 +2527,14 @@ async function loadAppDocs(ref) {
 
 async function uploadUserDoc(ref) {
   const input = document.getElementById('docfile_' + ref);
+  const labelEl = document.getElementById('doclabel_' + ref);
   const btn = document.getElementById('docbtn_' + ref);
   const file = input && input.files && input.files[0];
   if (!file) { alert('Please choose a file first.'); return; }
   if (file.size > 8 * 1024 * 1024) { alert('File too large — maximum size is 8 MB.'); return; }
+  const label = (labelEl && labelEl.value.trim()) || file.name;
+  const ext = file.name.includes('.') ? '.' + file.name.split('.').pop() : '';
+  const displayName = label.endsWith(ext) ? label : label + ext;
   btn.disabled = true; btn.textContent = '⏳ Uploading…';
   try {
     const data = await new Promise((ok, err) => {
@@ -2495,17 +2546,17 @@ async function uploadUserDoc(ref) {
     const res = await fetch(DOCS_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ref, filename: file.name, contentType: file.type, data }),
+      body: JSON.stringify({ ref, filename: displayName, contentType: file.type, data }),
     });
     const out = await res.json();
     if (!res.ok) throw new Error(out.error || 'Upload failed');
     input.value = '';
-    alert('✅ Document uploaded successfully!');
+    if (labelEl) labelEl.value = '';
     loadAppDocs(ref);
   } catch (e) {
     alert('Upload failed: ' + e.message);
   }
-  btn.disabled = false; btn.textContent = '⬆️ Upload Document';
+  btn.disabled = false; btn.textContent = '⬆️ Upload';
 }
 
 function printApp(cardId) {
