@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Letterhead — SkyGlobe Limited</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Outfit',sans-serif; background:#e8eaf0; color:#1a1a1a; }
+  .toolbar { max-width:800px; margin:0 auto; padding:16px; display:flex; gap:10px; justify-content:flex-end; }
+  .toolbar button { background:#c9a84c; color:#0a1628; border:none; padding:10px 22px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.9rem; }
+  .page {
+    background:#fff; max-width:800px; min-height:1050px; margin:0 auto 30px;
+    padding:0; box-shadow:0 4px 30px rgba(0,0,0,0.15); display:flex; flex-direction:column;
+  }
+  .lh-header {
+    background:#0a1628; padding:28px 50px; display:flex; align-items:center;
+    justify-content:space-between; gap:20px; border-bottom:4px solid #c9a84c;
+  }
+  .lh-header img { height:78px; width:auto; border-radius:10px; }
+  .lh-header .co { text-align:right; color:#fff; }
+  .lh-header .co .name { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:700; letter-spacing:0.06em; }
+  .lh-header .co .name span { color:#c9a84c; }
+  .lh-header .co .tag { font-size:0.72rem; color:#8899bb; letter-spacing:0.12em; text-transform:uppercase; margin-top:2px; }
+  .lh-body { flex:1; padding:50px; font-size:0.95rem; line-height:1.8; }
+  .lh-body[contenteditable]:focus { outline:2px dashed #c9a84c33; }
+  .lh-date { color:#555; margin-bottom:30px; }
+  .lh-footer {
+    background:#0a1628; color:#8899bb; padding:18px 50px; font-size:0.75rem;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    border-top:4px solid #c9a84c;
+  }
+  .lh-footer span strong { color:#c9a84c; }
+  @media print {
+    body { background:#fff; }
+    .toolbar { display:none; }
+    .page { box-shadow:none; margin:0; max-width:none; min-height:100vh; }
+    .lh-header, .lh-footer { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button onclick="document.getElementById('today').textContent=new Date().toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'})">📅 Insert Today's Date</button>
+  <button onclick="window.print()">🖨️ Print / Save as PDF</button>
+</div>
+
+<div class="page">
+  <div class="lh-header">
+    <img src="logo.png" alt="SkyGlobe Limited">
+    <div class="co">
+      <div class="name">SKY<span>GLOBE</span> LIMITED</div>
+      <div class="tag">Global Travel · Immigration · Education</div>
+    </div>
+  </div>
+
+  <div class="lh-body" contenteditable="true" spellcheck="true">
+    <p class="lh-date" id="today">[Date]</p>
+    <p>[Recipient Name]<br>[Recipient Address]<br>[City, Country]</p>
+    <br>
+    <p><strong>RE: [Subject of the Letter]</strong></p>
+    <br>
+    <p>Dear [Recipient],</p>
+    <br>
+    <p>Click anywhere in this area and start typing your letter. This whole section is editable — replace the placeholders with your content. When finished, click "Print / Save as PDF" above to produce the final document.</p>
+    <br>
+    <br>
+    <p>Yours sincerely,</p>
+    <br><br>
+    <p><strong>[Name]</strong><br>[Position]<br>SkyGlobe Limited</p>
+  </div>
+
+  <div class="lh-footer">
+    <span><strong>✉</strong> insights.skyglobe@gmail.com</span>
+    <span><strong>☎</strong> +1 737-399-8522</span>
+    <span><strong>⌂</strong> 123 Fifth Avenue, New York, NY 10011</span>
+  </div>
+</div>
+
+</body>
+</html>
