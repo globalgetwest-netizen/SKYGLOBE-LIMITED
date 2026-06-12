@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SKYGLOBE LIMITED — Your Gateway to Global Opportunity</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <meta name="description" content="Skyglobe Limited is a premium global travel and study-abroad consultancy. Visas, university admissions, work relocation, and travel documentation.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -295,8 +297,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 <!-- NAV -->
 <nav id="navbar">
   <div class="nav-logo" onclick="showPage('home')">
-    <div class="nav-logo-icon">🌐</div>
-    <div class="nav-logo-text">SKY<span>GLOBE</span></div>
+    <img src="logo.png" alt="SkyGlobe Limited" style="height:52px;width:auto;border-radius:10px">
   </div>
   <ul class="nav-links">
     <li><a onclick="showPage('home')" data-page="home">Home</a></li>
@@ -315,8 +316,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
   <div class="nav-logo" onclick="showPage('home');toggleMenu()">
-    <div class="nav-logo-icon">🌐</div>
-    <div class="nav-logo-text">SKY<span>GLOBE</span></div>
+    <img src="logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:12px">
   </div>
   <a onclick="showPage('home');toggleMenu()">Home</a>
   <a onclick="showPage('about');toggleMenu()">About</a>
@@ -1138,8 +1138,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
   <div class="footer-grid">
     <div class="footer-brand">
       <div class="nav-logo" style="cursor:default">
-        <div class="nav-logo-icon">🌐</div>
-        <div class="nav-logo-text">SKY<span>GLOBE</span> <span style="font-family:'Outfit',sans-serif;font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0.02em">LIMITED</span></div>
+        <img src="logo.png" alt="SkyGlobe Limited" style="height:72px;width:auto;border-radius:12px">
       </div>
       <p>Your trusted partner for global travel, immigration, and education. Turning international ambitions into lived realities since 2016.</p>
     </div>
@@ -2464,7 +2463,7 @@ function printApp(cardId) {
     .footer{margin-top:28px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:0.78rem;color:#9ca3af;text-align:center}
     @media print{body{padding:20px}button{display:none!important}}
   </style></head><body>
-  <div class="logo"><div class="logo-box">🌐</div><div class="logo-text">SKYGLOBE <span style="font-size:0.75rem;font-weight:400;color:#6b7280">LIMITED</span></div></div>
+  <div class="logo"><img src="${location.origin}/logo.png" alt="SkyGlobe Limited" style="height:60px;width:auto;border-radius:10px"><div class="logo-text">SKYGLOBE <span style="font-size:0.75rem;font-weight:400;color:#6b7280">LIMITED</span></div></div>
   ${card.innerHTML.replace(/style="[^"]*color:var\([^)]+\)[^"]*"/g, '')}
   <div class="footer">Skyglobe Limited · insights.skyglobe@gmail.com · +1 737-399-8522 · 123 Fifth Ave, New York NY 10011</div>
   <script>window.onload=function(){window.print();}<\/script>
