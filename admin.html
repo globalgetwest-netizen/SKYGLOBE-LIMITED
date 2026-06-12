@@ -251,8 +251,10 @@ async function sendUpdate(ref) {
     });
     const d = await r.json();
     if (!r.ok) { msgEl.style.color = '#ff6b6b'; msgEl.textContent = d.error || 'Update failed.'; return; }
-    msgEl.style.color = '#81c784';
-    msgEl.textContent = d.emailed ? '✅ Status updated and email sent to applicant.' : '✅ Status updated (email could not be sent).';
+    msgEl.style.color = d.emailed ? '#81c784' : '#ffb74d';
+    msgEl.textContent = d.emailed
+      ? '✅ Status updated and email sent to applicant.'
+      : '⚠️ Status updated. ' + (d.emailError || 'Email could not be sent — check your admin email for a fallback notification.');
     await loadApps();
   } catch(e) { msgEl.style.color = '#ff6b6b'; msgEl.textContent = 'Network error.'; }
 }
