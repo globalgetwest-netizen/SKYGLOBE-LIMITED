@@ -223,6 +223,12 @@ function openApp(ref) {
       ${row('Submitted', a.timestamp ? new Date(a.timestamp).toLocaleString() : '')}
     </table>
     ${history ? '<label style="font-size:0.78rem;color:#8899bb;text-transform:uppercase">Previous responses</label><div class="resp-history">'+history+'</div>' : ''}
+    <label style="font-size:0.78rem;color:#8899bb;text-transform:uppercase">📎 Documents</label>
+    <div id="adminDocs" style="margin:10px 0 14px;font-size:0.85rem;color:#8899bb">Loading documents…</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px">
+      <input type="file" id="adminDocFile" style="font-size:0.8rem;color:#8899bb;max-width:240px">
+      <button class="btn btn-sm" id="adminDocBtn" onclick="adminUploadDoc('${esc(a.ref)}')">⬆️ Upload Document for Applicant</button>
+    </div>
     <div class="respond">
       <label>Update status</label>
       <select id="newStatus">
@@ -235,6 +241,63 @@ function openApp(ref) {
       <div class="ok-msg" id="updateMsg"></div>
     </div>`;
   document.getElementById('modal').style.display = 'block';
+  loadAdminDocs(ref);
+}
+
+async function loadAdminDocs(ref) {
+  const el = document.getElementById('adminDocs');
+  if (!el) return;
+  try {
+    const r = await fetch(API + '/api/documents/' + encodeURIComponent(ref));
+    const docs = await r.json();
+    if (!r.ok) throw new Error();
+    if (!docs.length) { el.innerHTML = 'No documents yet.'; return; }
+    el.innerHTML = docs.map(d => `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0d1a30;border:1px solid #233452;border-radius:8px;padding:8px 12px;margin-bottom:6px">
+        <div style="min-width:0">
+          <a href="${d.url}" target="_blank" style="color:#dbbe6a;text-decoration:none;font-weight:500;word-break:break-all">📄 ${esc(d.filename)}</a>
+          <div style="font-size:0.7rem;color:#8899bb">${String(d.uploaded_by||'').startsWith('admin') ? '✅ ' + esc(d.uploaded_by) : 'From applicant'}${d.created_at ? ' · ' + new Date(d.created_at).toLocaleString() : ''}</div>
+        </div>
+        <button onclick="adminDeleteDoc(${d.id},'${esc(ref)}')" style="background:none;border:1px solid #c62828;color:#ef9a9a;border-radius:6px;padding:4px 10px;font-size:0.72rem;cursor:pointer;white-space:nowrap">🗑 Delete</button>
+      </div>`).join('');
+  } catch(e) { el.innerHTML = 'Could not load documents.'; }
+}
+
+async function adminUploadDoc(ref) {
+  const input = document.getElementById('adminDocFile');
+  const btn = document.getElementById('adminDocBtn');
+  const file = input && input.files && input.files[0];
+  if (!file) { alert('Choose a file first.'); return; }
+  if (file.size > 8 * 1024 * 1024) { alert('File too large — maximum 8 MB.'); return; }
+  btn.disabled = true; btn.textContent = '⏳ Uploading…';
+  try {
+    const data = await new Promise((ok, err) => {
+      const r = new FileReader();
+      r.onload = () => ok(String(r.result).split(',')[1]);
+      r.onerror = err;
+      r.readAsDataURL(file);
+    });
+    const r = await fetch(API + '/api/documents', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': KEY },
+      body: JSON.stringify({ ref, filename: file.name, contentType: file.type, data }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Upload failed');
+    input.value = '';
+    loadAdminDocs(ref);
+  } catch(e) { alert('Upload failed: ' + e.message); }
+  btn.disabled = false; btn.textContent = '⬆️ Upload Document for Applicant';
+}
+
+async function adminDeleteDoc(id, ref) {
+  if (!confirm('Delete this document permanently?')) return;
+  try {
+    const r = await fetch(API + '/api/documents/' + id, { method: 'DELETE', headers: { 'x-admin-key': KEY } });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Delete failed');
+    loadAdminDocs(ref);
+  } catch(e) { alert('Delete failed: ' + e.message); }
 }
 
 function closeModal(){ document.getElementById('modal').style.display = 'none'; }
