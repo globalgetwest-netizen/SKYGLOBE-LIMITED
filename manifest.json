@@ -1,0 +1,27 @@
+{
+  "name": "SkyGlobe Limited",
+  "short_name": "SkyGlobe",
+  "description": "Your Gateway to Global Opportunity — Visa processing, university admissions, EU employment, and travel services.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "business", "education"],
+  "lang": "en",
+  "scope": "/"
+}
