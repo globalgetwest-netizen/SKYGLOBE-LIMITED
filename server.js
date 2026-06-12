@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
 app.use(cors());
 app.use(express.static(path.join(__dirname)));
 
@@ -51,6 +51,25 @@ async function getAllApps() {
 async function updateApp(ref, patch) {
   const rows = await dbQuery('PATCH', 'applications', patch, { ref: `eq.${ref}` });
   return Array.isArray(rows) ? rows[0] : rows;
+}
+
+// ── SUPABASE STORAGE (documents bucket) ──────────────────────────────────────
+async function storageUpload(filePath, buffer, contentType) {
+  const r = await fetch(`${SUPA_URL}/storage/v1/object/documents/${filePath}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Content-Type': contentType || 'application/octet-stream',
+      'x-upsert': 'true',
+    },
+    body: buffer,
+  });
+  if (!r.ok) throw new Error(`Storage upload ${r.status}: ${await r.text()}`);
+}
+
+function storagePublicUrl(filePath) {
+  return `${SUPA_URL}/storage/v1/object/public/documents/${filePath}`;
 }
 
 // ── RESEND EMAIL ──────────────────────────────────────────────────────────────
@@ -329,6 +348,70 @@ app.post('/api/admin/update', async (req, res) => {
     }
 
     res.json({ success: true, emailed, emailError: emailed ? null : 'Could not email applicant directly — a fallback notification was sent to your admin email. To fix permanently, verify a domain on Resend.' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── DOCUMENTS ─────────────────────────────────────────────────────────────────
+// Upload a document. Body: { ref, filename, contentType, data (base64) }
+// Users upload from the tracking page; admins (with x-admin-key) from the dashboard.
+app.post('/api/documents', async (req, res) => {
+  const { ref, filename, contentType, data } = req.body || {};
+  if (!ref || !filename || !data)
+    return res.status(400).json({ error: 'ref, filename and data are required.' });
+
+  const who = checkAdmin(req); // null = regular applicant
+  const cleanRef = String(ref).toUpperCase().trim();
+
+  try {
+    const app_ = await getAppByRef(cleanRef);
+    if (!app_) return res.status(404).json({ error: 'Application not found. Check the reference number.' });
+
+    const buffer = Buffer.from(data, 'base64');
+    if (buffer.length > 8 * 1024 * 1024)
+      return res.status(400).json({ error: 'File too large. Maximum size is 8 MB.' });
+    if (buffer.length === 0)
+      return res.status(400).json({ error: 'Empty file.' });
+
+    const safeName = String(filename).replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80);
+    const filePath = `${cleanRef}/${Date.now()}_${safeName}`;
+
+    await storageUpload(filePath, buffer, contentType);
+    const rows = await dbQuery('POST', 'documents', {
+      ref: cleanRef,
+      filename: safeName,
+      path: filePath,
+      uploaded_by: who ? `admin:${who}` : 'applicant',
+    });
+
+    res.json({ success: true, document: Array.isArray(rows) ? rows[0] : rows, url: storagePublicUrl(filePath) });
+  } catch (e) {
+    console.error('Document upload failed:', e.message);
+    res.status(500).json({ error: 'Could not upload document. Please try again.' });
+  }
+});
+
+// List documents for an application
+app.get('/api/documents/:ref', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'documents', null, {
+      ref: `eq.${req.params.ref.toUpperCase()}`, order: 'created_at.asc',
+    });
+    res.json(rows.map(d => ({ ...d, url: storagePublicUrl(d.path) })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Admin: delete a document
+app.delete('/api/documents/:id', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'documents', null, { id: `eq.${req.params.id}`, limit: 1 });
+    if (!rows[0]) return res.status(404).json({ error: 'Document not found.' });
+    await fetch(`${SUPA_URL}/storage/v1/object/documents/${rows[0].path}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` },
+    });
+    await dbQuery('DELETE', 'documents', null, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
