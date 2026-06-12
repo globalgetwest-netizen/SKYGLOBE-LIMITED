@@ -2330,25 +2330,27 @@ async function trackApplication() {
   try {
     if (val.toUpperCase().startsWith('SKY-')) {
       const ref = val.toUpperCase();
-      // Check localStorage first
-      const local = localStorage.getItem('skyapp_' + ref);
-      if (local) { resultEl.innerHTML = renderAppCard(JSON.parse(local)); return; }
-      // Fall back to server
+      // Server first — always shows the latest status and team responses
       const res = await fetch(APPLY_API + '/' + encodeURIComponent(ref));
       const data = await res.json();
-      if (!res.ok) { resultEl.innerHTML = `<p style="color:var(--muted)">No application found for reference <strong>${ref}</strong>. Make sure you are using the same device/browser you applied from, or contact us via WhatsApp with your reference number.</p>`; return; }
-      // Cache the server result locally for future lookups
+      if (!res.ok) {
+        // Fall back to a locally saved copy
+        const local = localStorage.getItem('skyapp_' + ref);
+        if (local) { resultEl.innerHTML = renderAppCard(JSON.parse(local)); return; }
+        resultEl.innerHTML = `<p style="color:var(--muted)">No application found for reference <strong>${ref}</strong>. Please check the reference, or contact us via WhatsApp.</p>`; return;
+      }
       try { localStorage.setItem('skyapp_' + ref, JSON.stringify(data)); } catch(e){}
       resultEl.innerHTML = renderAppCard(data);
     } else {
       const email = val.toLowerCase();
-      // Check localStorage for matching email
-      const localMatches = localApps().filter(a => a.email && a.email.toLowerCase() === email);
-      if (localMatches.length) { resultEl.innerHTML = localMatches.map(renderAppCard).join(''); return; }
-      // Fall back to server
+      // Server first — always shows the latest status and team responses
       const res = await fetch(APPLY_API + '?email=' + encodeURIComponent(val));
       const data = await res.json();
-      if (!res.ok || !data.length) { resultEl.innerHTML = '<p style="color:var(--muted)">No applications found for that email address. Make sure you are using the same device/browser you applied from, or contact us on WhatsApp.</p>'; return; }
+      if (!res.ok || !data.length) {
+        const localMatches = localApps().filter(a => a.email && a.email.toLowerCase() === email);
+        if (localMatches.length) { resultEl.innerHTML = localMatches.map(renderAppCard).join(''); return; }
+        resultEl.innerHTML = '<p style="color:var(--muted)">No applications found for that email address. Please check the email, or contact us on WhatsApp.</p>'; return;
+      }
       data.forEach(a => { try { localStorage.setItem('skyapp_' + a.ref, JSON.stringify(a)); } catch(e){} });
       resultEl.innerHTML = data.map(renderAppCard).join('');
     }
@@ -2365,9 +2367,11 @@ async function trackApplication() {
 }
 
 function renderAppCard(app) {
-  const statusColor = {Received:'#3b82f6',Processing:'#f59e0b',Approved:'#22c55e',Rejected:'#ef4444'}[app.status]||'#3b82f6';
-  const statusIcon = {Received:'📥',Processing:'⚙️',Approved:'✅',Rejected:'❌'}[app.status]||'📥';
-  const date = app.timestamp ? new Date(app.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  const statusColor = {'Received':'#3b82f6','Processing':'#f59e0b','In Review':'#f59e0b','Needs More Info':'#ef4444','Approved':'#22c55e','Completed':'#22c55e','Rejected':'#ef4444'}[app.status]||'#3b82f6';
+  const statusIcon = {'Received':'📥','Processing':'⚙️','In Review':'⚙️','Needs More Info':'📋','Approved':'✅','Completed':'✅','Rejected':'❌'}[app.status]||'📥';
+  const ts = app.timestamp || app.created_at;
+  const date = ts ? new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  const responses = Array.isArray(app.responses) ? app.responses : [];
 
   function row(label, val) {
     if (!val || val === '—' || val === '') return '';
@@ -2400,26 +2404,36 @@ function renderAppCard(app) {
       ${row('Nationality', app.nationality)}
       ${row('Date of Birth', app.dob)}
       ${row('Passport No.', app.passport)}
-      ${row('Passport Expiry', app.passportExpiry)}
+      ${row('Passport Expiry', app.passportExpiry || app.passport_expiry)}
       ${row('Destination', app.destination)}
-      ${row('Travel Date', app.travelDate)}
+      ${row('Travel Date', app.travelDate || app.travel_date)}
       ${row('Duration', app.duration)}
       ${row('Purpose', app.purpose)}
       ${row('Institution', app.institution)}
       ${row('Employer', app.employer)}
-      ${row('Hotel City', app.hotelCity)}
+      ${row('Hotel City', app.hotelCity || app.hotel_city)}
       ${row('Check-in', app.checkin)}
       ${row('Check-out', app.checkout)}
       ${row('Coverage', app.coverage)}
-      ${row('Document Type', app.docType)}
+      ${row('Document Type', app.docType || app.doc_type)}
       ${row('Scholarship', app.scholarship)}
     </table>
     ${app.notes ? `<div style="margin-top:0.8rem;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;border-left:3px solid var(--gold)"><div style="font-size:0.75rem;color:var(--muted);margin-bottom:4px">Notes</div><div style="font-size:0.85rem;line-height:1.5">${app.notes}</div></div>` : ''}
 
+    ${responses.length ? `
+    <!-- Messages from our team -->
+    <div style="margin-top:1rem">
+      <div style="font-size:0.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">💬 Messages From Our Team</div>
+      ${responses.map(r => `
+      <div style="padding:12px 14px;background:rgba(201,168,76,0.07);border-radius:8px;border-left:3px solid var(--gold);margin-bottom:8px">
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:5px">${r.date ? new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</div>
+        <div style="font-size:0.88rem;line-height:1.6;color:var(--text-body)">${String(r.message||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+      </div>`).join('')}
+    </div>` : `
     <!-- Status message -->
     <div style="margin-top:1rem;padding:12px;background:rgba(59,130,246,0.08);border-radius:8px;border:1px solid rgba(59,130,246,0.2);font-size:0.82rem;color:var(--text-body)">
       Our team will contact you at <strong style="color:var(--gold-light)">${app.email}</strong> within 24 hours. Use your reference number for any enquiries.
-    </div>
+    </div>`}
 
     <!-- Action buttons -->
     <div style="display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1rem">
