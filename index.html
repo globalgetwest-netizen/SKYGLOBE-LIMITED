@@ -173,6 +173,12 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 .toast.show{transform:translateY(0);opacity:1}
 
 /* WHATSAPP FLOAT */
+.faq-item{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;background:rgba(255,255,255,0.02)}
+.faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;background:none;border:none;color:var(--white);font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:500;text-align:left;padding:18px 22px;cursor:pointer}
+.faq-q span{color:var(--gold);font-size:1.3rem;font-weight:400;transition:transform 0.25s}
+.faq-item.open .faq-q span{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 22px;font-size:0.88rem;color:var(--text-body);line-height:1.7}
+.faq-item.open .faq-a{max-height:300px;padding:0 22px 18px}
 .wa-float{position:fixed;bottom:2rem;left:2rem;width:54px;height:54px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;z-index:998;box-shadow:0 4px 20px rgba(37,211,102,0.4);transition:var(--trans)}
 .wa-float:hover{transform:scale(1.1)}
 
@@ -380,29 +386,29 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
       <p class="section-sub">Comprehensive travel, immigration, and education solutions tailored to your destination and goals.</p>
     </div>
     <div class="services-grid">
-      <div class="service-card">
+      <div class="service-card" onclick="showSvcDetail('Student Visa Processing')" style="cursor:pointer">
         <div class="service-icon">🎓</div>
         <h3>Student Visa</h3>
         <p>Expert guidance for student visa applications to top universities worldwide — UK, USA, Canada & beyond.</p>
       </div>
-      <div class="service-card">
+      <div class="service-card" onclick="showSvcDetail('Work Visa Processing')" style="cursor:pointer">
         <div class="service-icon">💼</div>
         <h3>Work Visa</h3>
         <p>Skilled worker visas, employer sponsorships, and work permit processing handled professionally.</p>
       </div>
-      <div class="service-card">
+      <div class="service-card" onclick="showSvcDetail('Flight Booking')" style="cursor:pointer">
         <div class="service-icon">✈️</div>
         <h3>Travel Services</h3>
-        <p>Flight reservations, hotel bookings, travel insurance, and complete trip documentation.</p>
+        <p>Flight booking, reservations, hotel bookings, travel insurance, and complete trip documentation.</p>
       </div>
-      <div class="service-card">
+      <div class="service-card" onclick="showSvcDetail('University Admission Assistance')" style="cursor:pointer">
         <div class="service-icon">🏛️</div>
         <h3>University Admissions</h3>
         <p>End-to-end support from shortlisting institutions to application submission and scholarship discovery.</p>
       </div>
     </div>
     <div style="text-align:center;margin-top:2.5rem">
-      <button class="btn-outline" onclick="showPage('services')">View All 10 Services →</button>
+      <button class="btn-outline" onclick="showPage('services')">View All 12 Services →</button>
     </div>
   </section>
 
@@ -533,6 +539,95 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
       </div>
     </div>
   </section>
+
+  <!-- HOW IT WORKS -->
+  <section>
+    <div style="text-align:center;margin-bottom:3rem">
+      <div class="section-tag">Our Process</div>
+      <h2 class="section-title">How It <strong>Works</strong></h2>
+      <p class="section-sub">A clear, transparent process from first contact to final approval — you always know exactly where your application stands.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem">
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.8rem;text-align:center;position:relative">
+        <div style="width:46px;height:46px;background:rgba(201,168,76,0.12);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--gold)">1</div>
+        <h3 style="font-size:1rem;margin-bottom:0.5rem">Choose Your Service</h3>
+        <p style="font-size:0.85rem;color:var(--text-body);line-height:1.6">Browse our services, read the full details, and submit your application online in minutes — or book a free consultation first.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.8rem;text-align:center;position:relative">
+        <div style="width:46px;height:46px;background:rgba(201,168,76,0.12);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--gold)">2</div>
+        <h3 style="font-size:1rem;margin-bottom:0.5rem">Expert Review</h3>
+        <p style="font-size:0.85rem;color:var(--text-body);line-height:1.6">Our consultants review your application within 24 hours, contact you with a document checklist, and confirm your eligibility.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.8rem;text-align:center;position:relative">
+        <div style="width:46px;height:46px;background:rgba(201,168,76,0.12);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--gold)">3</div>
+        <h3 style="font-size:1rem;margin-bottom:0.5rem">We Process Everything</h3>
+        <p style="font-size:0.85rem;color:var(--text-body);line-height:1.6">Upload your documents securely on our site. We prepare, submit, and manage your application — track progress anytime with your reference number.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.8rem;text-align:center;position:relative">
+        <div style="width:46px;height:46px;background:rgba(201,168,76,0.12);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--gold)">4</div>
+        <h3 style="font-size:1rem;margin-bottom:0.5rem">Approval & Departure</h3>
+        <p style="font-size:0.85rem;color:var(--text-body);line-height:1.6">Receive your visa, documents, and pre-departure briefing. We stay with you until you've safely arrived at your destination.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- TESTIMONIALS -->
+  <section>
+    <div style="text-align:center;margin-bottom:3rem">
+      <div class="section-tag">Client Stories</div>
+      <h2 class="section-title">What Our <strong>Clients Say</strong></h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem">
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem">
+        <div style="color:var(--gold);font-size:1rem;margin-bottom:0.8rem">★★★★★</div>
+        <p style="font-size:0.9rem;color:var(--text-body);line-height:1.7;font-style:italic;margin-bottom:1.2rem">"SkyGlobe handled my UK student visa from start to finish. The document checklist alone saved me weeks of confusion. Visa approved on the first attempt!"</p>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;background:rgba(201,168,76,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700">A</div>
+          <div><div style="font-size:0.88rem;font-weight:600;color:var(--white)">Adaeze O.</div><div style="font-size:0.75rem;color:var(--muted)">Student Visa → United Kingdom</div></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem">
+        <div style="color:var(--gold);font-size:1rem;margin-bottom:0.8rem">★★★★★</div>
+        <p style="font-size:0.9rem;color:var(--text-body);line-height:1.7;font-style:italic;margin-bottom:1.2rem">"I got a factory job in Poland through their EU employment programme. They handled the work permit, the visa, everything. I'm now earning in euros and supporting my family back home."</p>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;background:rgba(201,168,76,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700">K</div>
+          <div><div style="font-size:0.88rem;font-weight:600;color:var(--white)">Kwame B.</div><div style="font-size:0.75rem;color:var(--muted)">EU Direct Employment → Poland</div></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem">
+        <div style="color:var(--gold);font-size:1rem;margin-bottom:0.8rem">★★★★★</div>
+        <p style="font-size:0.9rem;color:var(--text-body);line-height:1.7;font-style:italic;margin-bottom:1.2rem">"Needed a Schengen visa urgently for a business trip. Flight reservation, hotel letter, and insurance — all delivered the same day. Professional service from start to finish."</p>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;background:rgba(201,168,76,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700">M</div>
+          <div><div style="font-size:0.88rem;font-weight:600;color:var(--white)">Maria S.</div><div style="font-size:0.75rem;color:var(--muted)">Tourist Visa → Schengen Area</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- FAQ -->
+  <section>
+    <div style="text-align:center;margin-bottom:3rem">
+      <div class="section-tag">Questions & Answers</div>
+      <h2 class="section-title">Frequently Asked <strong>Questions</strong></h2>
+    </div>
+    <div style="max-width:760px;margin:0 auto" id="faqList">
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How long does visa processing take?<span>+</span></button><div class="faq-a">It depends on the visa type and destination. Tourist visas typically take 1–4 weeks, student visas 4–12 weeks, and work visas 6–16 weeks. We give you a realistic timeline during your free consultation and keep you updated at every stage through our online tracking system.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How much do your services cost?<span>+</span></button><div class="faq-a">Fees vary by service and destination country. Embassy/government fees are separate from our service fees, and we are always transparent about both before you commit. Book a free consultation for an exact quote — no hidden charges, ever.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What happens if my visa is refused?<span>+</span></button><div class="faq-a">Our 98% success rate comes from only submitting applications that are properly prepared. If a refusal does happen, we analyse the refusal reasons free of charge and advise on reapplication or appeal — many of our successful clients came to us after a refusal elsewhere.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How does the EU Direct Employment programme work?<span>+</span></button><div class="faq-a">We match your CV with verified employers in 14 European countries. Once an employer selects you, they issue a job offer letter, and we process your work permit and national visa. The full journey typically takes 8–20 weeks. You need a valid passport, a clean criminal record, and relevant work experience.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How do I track my application?<span>+</span></button><div class="faq-a">Every application receives a unique reference number (e.g. SKY-2026-XXXX). Enter it in the Track Application section of our website to see your live status, messages from our team, and any documents we've issued to you — 24/7.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How do I send you my documents?<span>+</span></button><div class="faq-a">Securely through our website. After applying, open your application with your reference number and use the Documents section to upload passport copies, certificates, and photos. We deliver your finished documents (visas, letters, tickets) the same way.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Are you a registered company?<span>+</span></button><div class="faq-a">Yes — SkyGlobe Limited is a registered travel and immigration consultancy. We operate transparently: every application gets a written reference, documented communication, and printable official records on our company letterhead.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I pay in instalments?<span>+</span></button><div class="faq-a">For longer processes such as student visas and EU employment placements, staged payments tied to milestones are available. Discuss your situation during the free consultation and we'll agree a plan that works for you.</div></div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
 
   <!-- CTA STRIP -->
   <section style="padding-top:0">
@@ -716,6 +811,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 <div id="svcOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;overflow-y:auto;padding:24px 12px" onclick="if(event.target===this)closeSvcOverlay()">
   <div id="svcOverlayBox" style="max-width:720px;margin:0 auto;background:#111f38;border:1px solid #233452;border-radius:20px;padding:36px 40px;position:relative">
     <button onclick="closeSvcOverlay()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:#8899bb;font-size:1.5rem;cursor:pointer">✕</button>
+    <button onclick="closeSvcOverlay()" style="position:absolute;top:18px;left:24px;background:none;border:1px solid #233452;border-radius:8px;color:#8899bb;font-size:0.8rem;cursor:pointer;padding:6px 14px">← Back</button>
     <div id="svcOverlayContent"></div>
   </div>
 </div>
@@ -1181,11 +1277,13 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
     <div class="footer-col">
       <h5>Services</h5>
       <ul>
-        <li><a onclick="showPage('services')">Student Visa</a></li>
-        <li><a onclick="showPage('services')">Work Visa</a></li>
-        <li><a onclick="showPage('services')">Tourist Visa</a></li>
-        <li><a onclick="showPage('services')">University Admission</a></li>
-        <li><a onclick="showPage('services')">Scholarship Support</a></li>
+        <li><a onclick="showSvcDetail('Student Visa Processing')">Student Visa</a></li>
+        <li><a onclick="showSvcDetail('Work Visa Processing')">Work Visa</a></li>
+        <li><a onclick="showSvcDetail('Tourist / Visit Visa')">Tourist Visa</a></li>
+        <li><a onclick="showSvcDetail('University Admission Assistance')">University Admission</a></li>
+        <li><a onclick="showSvcDetail('Scholarship Application Support')">Scholarship Support</a></li>
+        <li><a onclick="showSvcDetail('Flight Booking')">Flight Booking</a></li>
+        <li><a onclick="showSvcDetail('EU Direct Employment')">EU Direct Employment</a></li>
       </ul>
     </div>
     <div class="footer-col">
@@ -2316,6 +2414,13 @@ function showSvcDetail(name) {
     </div>`;
   document.getElementById('svcOverlay').style.display = 'block';
   document.body.style.overflow = 'hidden';
+}
+
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
 }
 
 function closeSvcOverlay() {
