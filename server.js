@@ -90,6 +90,7 @@ app.post('/api/contact', async (req, res) => {
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0">
+        <img src="https://skyglobe-limited-1.onrender.com/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h2 style="color:#c9a84c;margin:0">New Consultation Request</h2>
       </div>
       <div style="background:#f9f9f9;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
@@ -153,6 +154,7 @@ app.post('/api/apply', async (req, res) => {
   const adminHtml = `
     <div style="font-family:sans-serif;max-width:660px;margin:0 auto">
       <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0">
+        <img src="https://skyglobe-limited-1.onrender.com/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h2 style="color:#c9a84c;margin:0">New Application — <span style="color:#fff">${ref}</span></h2>
       </div>
       <div style="background:#f9f9f9;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
@@ -189,6 +191,7 @@ app.post('/api/apply', async (req, res) => {
   const userHtml = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#0a1628;padding:32px;border-radius:8px 8px 0 0;text-align:center">
+        <img src="https://skyglobe-limited-1.onrender.com/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h1 style="color:#c9a84c;margin:0 0 8px;font-size:1.6rem">Application Received ✅</h1>
         <p style="color:#8899bb;margin:0">SKYGLOBE LIMITED</p>
       </div>
@@ -290,6 +293,7 @@ app.post('/api/admin/update', async (req, res) => {
       const html = `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <div style="background:#0a1628;padding:28px;border-radius:8px 8px 0 0;text-align:center">
+            <img src="https://skyglobe-limited-1.onrender.com/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
             <h1 style="color:#c9a84c;margin:0;font-size:1.4rem">Application Update</h1>
             <p style="color:#8899bb;margin:6px 0 0">SKYGLOBE LIMITED</p>
           </div>
