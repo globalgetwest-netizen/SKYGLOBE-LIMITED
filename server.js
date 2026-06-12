@@ -291,9 +291,25 @@ app.post('/api/admin/update', async (req, res) => {
       </div>`;
     await sendEmail(app_.email, `Update on Application ${app_.ref} — ${status}`, html);
     emailed = true;
-  } catch (e) { console.error('Status email failed:', e.message); }
+  } catch (e) {
+    console.error('Status email failed:', e.message);
+    // Fallback: notify admin so they can follow up manually
+    try {
+      const recipientEmail = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
+      const fallbackHtml = `<div style="font-family:sans-serif;padding:20px">
+        <h3 style="color:#c9a84c">Status Update (applicant email failed)</h3>
+        <p>Could not email <strong>${app_.email}</strong> directly.</p>
+        <p><strong>Application:</strong> ${app_.ref} — ${app_.service}</p>
+        <p><strong>New status:</strong> ${status}</p>
+        ${response ? `<p><strong>Your message:</strong><br>${response.replace(/\n/g,'<br>')}</p>` : ''}
+        <p style="color:#888;font-size:0.85rem">Email error: ${e.message}</p>
+        <p>Please follow up with the applicant manually at: <a href="mailto:${app_.email}">${app_.email}</a></p>
+      </div>`;
+      await sendEmail(recipientEmail, `⚠️ Manual follow-up needed: ${app_.ref}`, fallbackHtml);
+    } catch (e2) { console.error('Fallback email also failed:', e2.message); }
+  }
 
-  res.json({ success: true, emailed });
+  res.json({ success: true, emailed, emailError: emailed ? null : 'Could not email applicant directly — a fallback notification was sent to your admin email instead. To fix this permanently, verify a domain on Resend.' });
 });
 
 app.get('/admin', (req, res) => {
