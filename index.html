@@ -194,12 +194,14 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 
 /* SERVICES PAGE */
 .services-full-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:3rem}
-.service-full-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;transition:var(--trans);position:relative;overflow:hidden}
+.service-full-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;transition:var(--trans);position:relative;overflow:hidden;cursor:pointer}
 .service-full-card:hover{border-color:var(--gold);background:rgba(201,168,76,0.05);transform:translateY(-3px)}
 .service-full-card .s-icon{font-size:2.2rem;margin-bottom:1rem;display:block}
 .service-full-card h3{font-size:1.1rem;font-weight:600;margin-bottom:0.6rem;color:var(--white)}
 .service-full-card p{font-size:0.88rem;color:var(--text-body);line-height:1.65}
 .service-full-card .s-tag{display:inline-block;margin-top:1rem;font-size:0.75rem;color:var(--gold);font-weight:500;letter-spacing:0.06em;text-transform:uppercase}
+.service-full-card .apply-hint{display:inline-block;margin-top:0.8rem;margin-left:0.6rem;font-size:0.75rem;color:var(--muted);opacity:0;transition:opacity 0.2s}
+.service-full-card:hover .apply-hint{opacity:1}
 
 /* DESTINATIONS FULL */
 .dest-region{margin-bottom:3rem}
@@ -628,77 +630,77 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
     <p class="section-sub">Ten specialist services covering every dimension of international travel, immigration, and education — handled by certified consultants with proven track records.</p>
 
     <div class="services-full-grid">
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Student Visa Processing')">
         <span class="s-icon">🎓</span>
         <h3>Student Visa Processing</h3>
         <p>Comprehensive student visa applications for the USA (F-1), UK (Tier 4), Canada, Australia, Germany, and more. We handle documentation, financial proof, and interview preparation.</p>
-        <span class="s-tag">Education → Global</span>
+        <span class="s-tag">Education → Global</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Work Visa Processing')">
         <span class="s-icon">💼</span>
         <h3>Work Visa Processing</h3>
         <p>Skilled worker visas, employer sponsorship management, and work permit applications across the UK, USA, Canada, and EU. We navigate complex immigration rules so you don't have to.</p>
-        <span class="s-tag">Career → Abroad</span>
+        <span class="s-tag">Career → Abroad</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Tourist / Visit Visa')">
         <span class="s-icon">🌴</span>
         <h3>Visit / Tourist Visa Services</h3>
         <p>Short-stay and tourist visa applications for Schengen, USA B-1/B-2, UK Standard Visitor, and more. Fast-tracked options available for urgent travel needs.</p>
-        <span class="s-tag">Tourism → Anywhere</span>
+        <span class="s-tag">Tourism → Anywhere</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Flight Reservation Letter')">
         <span class="s-icon">✈️</span>
         <h3>Flight Reservation Services</h3>
         <p>Genuine flight reservations and itinerary documentation for visa applications and embassy appointments — without requiring upfront ticket purchase.</p>
-        <span class="s-tag">Travel → Ready</span>
+        <span class="s-tag">Travel → Ready</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Travel Insurance')">
         <span class="s-icon">🛡️</span>
         <h3>Travel Insurance</h3>
         <p>Comprehensive travel insurance plans that meet Schengen and embassy requirements — covering medical emergencies, trip cancellation, and baggage loss worldwide.</p>
-        <span class="s-tag">Protection → Global</span>
+        <span class="s-tag">Protection → Global</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('University Admission Assistance')">
         <span class="s-icon">🏛️</span>
         <h3>University Admission Assistance</h3>
         <p>End-to-end university application support: shortlisting, personal statement writing, application submission, and offer acceptance — across the UK, USA, Canada, and Europe.</p>
-        <span class="s-tag">Education → Future</span>
+        <span class="s-tag">Education → Future</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Scholarship Application Support')">
         <span class="s-icon">🌟</span>
         <h3>Scholarship Support</h3>
         <p>Identify and apply for merit-based, need-based, and country-specific scholarships. We've helped students secure over $2M in scholarship awards across multiple cycles.</p>
-        <span class="s-tag">Funding → Dreams</span>
+        <span class="s-tag">Funding → Dreams</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Hotel Booking / Accommodation Letter')">
         <span class="s-icon">🏨</span>
         <h3>Hotel Booking Services</h3>
         <p>Hotel accommodation bookings for visa application requirements, business travel, and study-abroad arrivals. Confirmation letters issued same-day for embassy use.</p>
-        <span class="s-tag">Accommodation → Sorted</span>
+        <span class="s-tag">Accommodation → Sorted</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Document Authentication / Apostille')">
         <span class="s-icon">📋</span>
         <h3>Document Verification</h3>
         <p>Authentication, notarization, apostille, and legalization of educational certificates, police clearances, financial statements, and other supporting documents.</p>
-        <span class="s-tag">Documents → Verified</span>
+        <span class="s-tag">Documents → Verified</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showPage('contact')">
         <span class="s-icon">🧭</span>
         <h3>Travel & Immigration Consultation</h3>
         <p>One-on-one expert consultation sessions to map out the best immigration pathway for your specific goals, timeline, and background — with a clear, actionable plan.</p>
-        <span class="s-tag">Strategy → Success</span>
+        <span class="s-tag">Strategy → Success</span><span class="apply-hint">→ Book consultation</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('Flight Booking')">
         <span class="s-icon">🎫</span>
         <h3>Flight Booking</h3>
         <p>Full flight ticket booking service — we search the best fares, book one-way, round-trip or multi-city tickets, and deliver your e-ticket directly to you. Pay only the best available price.</p>
-        <span class="s-tag">Fly → Anywhere</span>
+        <span class="s-tag">Fly → Anywhere</span><span class="apply-hint">→ Apply now</span>
       </div>
-      <div class="service-full-card">
+      <div class="service-full-card" onclick="showSvcDetail('EU Direct Employment')">
         <span class="s-icon">🇪🇺</span>
         <h3>EU Direct Employment</h3>
         <p>Direct job placement with employers in Poland, Lithuania, Portugal, Spain, Norway, Finland, Czech Republic, Slovakia, Austria, Hungary, Bulgaria, Montenegro, North Macedonia and Ukraine — including work permit and visa processing from start to finish.</p>
-        <span class="s-tag">Work → Europe</span>
+        <span class="s-tag">Work → Europe</span><span class="apply-hint">→ Apply now</span>
       </div>
     </div>
 
@@ -708,6 +710,14 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
       <button class="btn-primary" onclick="showPage('contact')">✦ Book Free Consultation</button>
     </div>
   </section>
+</div>
+
+<!-- ============ SERVICE DETAIL OVERLAY ============ -->
+<div id="svcOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;overflow-y:auto;padding:24px 12px" onclick="if(event.target===this)closeSvcOverlay()">
+  <div id="svcOverlayBox" style="max-width:720px;margin:0 auto;background:#111f38;border:1px solid #233452;border-radius:20px;padding:36px 40px;position:relative">
+    <button onclick="closeSvcOverlay()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:#8899bb;font-size:1.5rem;cursor:pointer">✕</button>
+    <div id="svcOverlayContent"></div>
+  </div>
 </div>
 
 <!-- ============ DESTINATIONS PAGE ============ -->
@@ -2189,6 +2199,142 @@ const serviceFields = {
   'EU Direct Employment':             ['euCountry','jobField']
 };
 const allOptFields = ['institution','employer','hotelCity','checkIn','checkOut','coverage','docType','scholarship','flightFrom','flightType','euCountry','jobField'];
+
+const SERVICE_DETAILS = {
+  'Student Visa Processing': {
+    icon:'🎓', tag:'Education → Global',
+    headline:'Student Visa Processing',
+    about:'We handle the complete student visa process so you can focus on your studies. From document preparation to embassy booking, our team manages every step for USA (F-1), UK (Student), Canada, Australia, Germany, Netherlands, and more.',
+    includes:['Eligibility assessment & country recommendation','Full document checklist & review','Personal statement & cover letter guidance','Financial proof advisory','Embassy / VFS appointment booking','Application form completion & submission','Interview preparation & mock sessions','Follow-up until visa decision'],
+    timeline:'4–12 weeks depending on destination',
+    note:'Processing fees vary by country. Contact us for a tailored quote.'
+  },
+  'Work Visa Processing': {
+    icon:'💼', tag:'Career → Abroad',
+    headline:'Work Visa Processing',
+    about:'We guide skilled professionals through the complete work visa and employer sponsorship process for the UK, USA, Canada, UAE, Germany, and EU countries. We navigate complex immigration rules so you arrive job-ready.',
+    includes:['Skills & eligibility assessment','Job offer verification & employer guidance','Sponsorship documentation support','Work permit & visa application','Police clearance & background doc support','Biometrics & embassy appointment booking','Post-arrival registration guidance'],
+    timeline:'6–16 weeks depending on destination',
+    note:'Employer letter of offer typically required. We advise on alternatives where applicable.'
+  },
+  'Tourist / Visit Visa': {
+    icon:'🌴', tag:'Tourism → Anywhere',
+    headline:'Visit / Tourist Visa Services',
+    about:'Whether it\'s a holiday, family visit, or short business trip, we handle Schengen, UK Standard Visitor, USA B-1/B-2, and dozens of other tourist visa categories. Fast-track options available.',
+    includes:['Visa category selection & eligibility check','Full document preparation checklist','Hotel & flight booking support for application','Bank statement & financial proof advisory','Application form completion','VFS / embassy appointment booking','Tracking until decision'],
+    timeline:'1–4 weeks for most destinations',
+    note:'Schengen visa requires travel insurance. We can arrange this for you.'
+  },
+  'Flight Reservation Letter': {
+    icon:'✈️', tag:'Travel → Ready',
+    headline:'Flight Reservation / Itinerary Letter',
+    about:'Get a genuine, verifiable flight reservation for your visa application or embassy appointment — without paying the full ticket price upfront. Accepted by all major embassies.',
+    includes:['Genuine PNR-verified reservation','Full itinerary on airline letterhead','Round-trip or one-way options','Delivery within 24 hours','Valid for 2–4 weeks (enough for embassy)'],
+    timeline:'Within 24 hours of order',
+    note:'This is a reservation, not a purchased ticket. Suitable for visa applications only.'
+  },
+  'Travel Insurance': {
+    icon:'🛡️', tag:'Protection → Global',
+    headline:'Travel Insurance',
+    about:'Comprehensive travel insurance meeting Schengen and embassy requirements — covering medical emergencies, trip cancellation, and baggage loss. We partner with leading global insurers.',
+    includes:['Schengen-compliant €30,000 minimum cover','Medical emergency & hospitalisation','Trip cancellation & curtailment','Baggage loss & delay','24/7 emergency assistance','Certificate ready within 24 hours'],
+    timeline:'Certificate issued within 24 hours',
+    note:'Coverage amounts can be increased. Business and student health plans also available.'
+  },
+  'University Admission Assistance': {
+    icon:'🏛️', tag:'Education → Future',
+    headline:'University Admission Assistance',
+    about:'End-to-end support for university applications — from choosing the right institution to receiving your offer letter. We\'ve placed students in universities across the UK, USA, Canada, Australia, and Europe.',
+    includes:['University shortlisting based on your profile','Personal statement writing & editing','Application portal submission (UCAS, Common App, etc.)','Reference letter guidance','Scholarship identification','Offer letter follow-up','Conditional offer fulfilment support','Pre-departure orientation'],
+    timeline:'3–8 weeks per application cycle',
+    note:'We recommend applying to 4–6 universities to maximise offer chances.'
+  },
+  'Scholarship Application Support': {
+    icon:'🌟', tag:'Funding → Dreams',
+    headline:'Scholarship Application Support',
+    about:'We help you identify and successfully apply for merit-based, need-based, and country-specific scholarships. Our clients have secured awards from Chevening, Commonwealth, DAAD, Fulbright, and many more.',
+    includes:['Scholarship matching based on your profile','Personal statement & motivation letter writing','CV / résumé preparation','Reference letter guidance','Application form completion & review','Submission tracking','Interview preparation for shortlisted candidates'],
+    timeline:'Varies by scholarship deadline',
+    note:'Early applications have the highest success rates. Contact us as early as possible.'
+  },
+  'Hotel Booking / Accommodation Letter': {
+    icon:'🏨', tag:'Accommodation → Sorted',
+    headline:'Hotel Booking & Accommodation Letters',
+    about:'Hotel booking confirmation letters for visa applications, business travel, and study-abroad arrivals. Same-day letters accepted at all embassies and consulates.',
+    includes:['Embassy-accepted hotel confirmation letter','Booking in your name & travel dates','Same-day delivery','Support for all countries','Student accommodation booking assistance'],
+    timeline:'Same day (within a few hours)',
+    note:'Cancellable reservations available for visa purposes. Full bookings also arranged.'
+  },
+  'Document Authentication / Apostille': {
+    icon:'📋', tag:'Documents → Verified',
+    headline:'Document Authentication & Apostille',
+    about:'We handle authentication, notarization, apostille certification, and legalization of all types of documents for international use — education certificates, birth certificates, police clearances, and more.',
+    includes:['Notarization & certified true copies','Apostille certification (Hague Convention)','Embassy legalization','Educational certificate authentication','Police clearance certificate processing','Translation services (where required)'],
+    timeline:'3–10 business days depending on document type',
+    note:'Original documents are required for most authentication processes.'
+  },
+  'Flight Booking': {
+    icon:'🎫', tag:'Fly → Anywhere',
+    headline:'Flight Booking Service',
+    about:'We search and book the best available flight tickets for you — one-way, round trip, or multi-city. Competitive fares, e-ticket delivery directly to your email, and full booking support.',
+    includes:['Fare comparison across all major airlines','One-way, round-trip, or multi-city booking','Economy, business & first class options','E-ticket issued to your email','Booking confirmation & itinerary','Date change guidance if needed'],
+    timeline:'Tickets booked within 24 hours of payment confirmation',
+    note:'Final ticket price depends on selected airline, route and dates. We charge a small booking service fee.'
+  },
+  'EU Direct Employment': {
+    icon:'🇪🇺', tag:'Work → Europe',
+    headline:'EU Direct Employment Programme',
+    about:'We connect you directly with verified employers in 14 European countries — and handle the complete work permit and visa process from offer letter to arrival. No agency fees charged to the employer.',
+    includes:['CV review & job matching','Direct employer introduction','Job offer letter facilitation','Work permit application & support','National visa (D-visa) processing','Flight & accommodation advisory','Pre-departure briefing & orientation','Post-arrival support & employer check-in'],
+    countries:['🇵🇱 Poland','🇲🇪 Montenegro','🇱🇹 Lithuania','🇵🇹 Portugal','🇪🇸 Spain','🇳🇴 Norway','🇫🇮 Finland','🇨🇿 Czech Republic','🇸🇰 Slovakia','🇺🇦 Ukraine','🇦🇹 Austria','🇲🇰 North Macedonia','🇧🇬 Bulgaria','🇭🇺 Hungary'],
+    timeline:'8–20 weeks from application to departure',
+    note:'Requires valid passport, clean criminal record, and relevant work experience.'
+  },
+};
+
+function showSvcDetail(name) {
+  const d = SERVICE_DETAILS[name];
+  if (!d) { applyForService(name); return; }
+  const countriesHtml = d.countries ? `<div style="margin-top:1.2rem"><div style="font-size:0.72rem;color:#c9a84c;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Available Countries</div><div style="display:flex;flex-wrap:wrap;gap:6px">${d.countries.map(c=>`<span style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:4px 12px;font-size:0.8rem;color:#e8eaf0">${c}</span>`).join('')}</div></div>` : '';
+  document.getElementById('svcOverlayContent').innerHTML = `
+    <div style="font-size:2.6rem;margin-bottom:0.6rem">${d.icon}</div>
+    <div style="font-size:0.72rem;color:#c9a84c;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px">${d.tag}</div>
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;color:#fff;margin-bottom:1rem">${d.headline}</h2>
+    <p style="color:#b0bdd4;line-height:1.75;margin-bottom:1.4rem">${d.about}</p>
+    <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:18px 22px;margin-bottom:1.2rem">
+      <div style="font-size:0.72rem;color:#c9a84c;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">✦ What's Included</div>
+      <ul style="list-style:none;padding:0;margin:0">${d.includes.map(i=>`<li style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.88rem;color:#d0dbe8"><span style="color:#c9a84c;margin-top:2px">✓</span>${i}</li>`).join('')}</ul>
+    </div>
+    ${countriesHtml}
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:0.8rem;padding:14px 18px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid #233452">
+      <div style="flex:1;min-width:160px"><div style="font-size:0.68rem;color:#8899bb;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">⏱ Typical Timeline</div><div style="font-size:0.88rem;color:#e8eaf0">${d.timeline}</div></div>
+      <div style="flex:2;min-width:200px"><div style="font-size:0.68rem;color:#8899bb;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">ℹ Note</div><div style="font-size:0.82rem;color:#8899bb">${d.note}</div></div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:1.4rem">
+      <button onclick="closeSvcOverlay();applyForService('${name.replace(/'/g,"\\'")}');" style="flex:1;background:#c9a84c;color:#0a1628;border:none;padding:14px 24px;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;min-width:180px">✦ Apply for This Service</button>
+      <button onclick="closeSvcOverlay();showPage('contact');" style="background:transparent;border:1px solid #233452;color:#8899bb;padding:14px 20px;border-radius:10px;font-size:0.88rem;cursor:pointer">Ask a Question First</button>
+    </div>`;
+  document.getElementById('svcOverlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSvcOverlay() {
+  document.getElementById('svcOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function applyForService(name) {
+  showPage('apply');
+  // Pre-select the service and jump directly to step 2
+  selectedService = name;
+  document.querySelectorAll('.svc-card').forEach(c => {
+    c.classList.remove('selected');
+    if (c.getAttribute('onclick') && c.getAttribute('onclick').includes("'" + name + "'")) c.classList.add('selected');
+  });
+  const btn = document.getElementById('step1Next');
+  btn.disabled = false; btn.style.opacity = '1';
+  goStep(2);
+}
 
 function selectService(name, el) {
   selectedService = name;
