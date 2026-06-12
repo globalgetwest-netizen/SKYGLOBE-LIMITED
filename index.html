@@ -6,6 +6,11 @@
 <title>SKYGLOBE LIMITED — Your Gateway to Global Opportunity</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a1628">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SkyGlobe">
 <meta name="description" content="Skyglobe Limited is a premium global travel and study-abroad consultancy. Visas, university admissions, work relocation, and travel documentation.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -299,6 +304,55 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 .status-rejected{background:rgba(200,50,50,0.15);border:1px solid #c83232;color:#f57878}
 @media(max-width:600px){.apply-steps::before{display:none}.step-label{display:none}.service-select-grid{grid-template-columns:1fr 1fr}}
 
+/* ── APPLICATION PROGRESS BAR ────────────────────────────────────── */
+.app-progress{display:flex;align-items:flex-start;margin:0.8rem 0 1.2rem;position:relative}
+.app-prog-step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.app-prog-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:rgba(255,255,255,0.07);z-index:0;transition:background 0.4s}
+.app-prog-step.done:not(:last-child)::after{background:var(--gold)}
+.app-prog-dot{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.12);background:var(--navy-2);display:flex;align-items:center;justify-content:center;font-size:0.7rem;z-index:1;position:relative;transition:all 0.4s}
+.app-prog-step.done .app-prog-dot{border-color:var(--gold);background:rgba(201,168,76,0.18);color:var(--gold)}
+.app-prog-step.current .app-prog-dot{border-color:var(--gold-light);background:var(--gold);color:var(--navy);box-shadow:0 0 14px rgba(201,168,76,0.5);font-size:0.9rem}
+.app-prog-step.rejected .app-prog-dot{border-color:#ef4444;background:rgba(239,68,68,0.18);color:#ef4444}
+.app-prog-label{font-size:0.6rem;color:var(--muted);margin-top:5px;text-align:center;line-height:1.3;white-space:nowrap}
+.app-prog-step.done .app-prog-label,.app-prog-step.current .app-prog-label{color:var(--gold-light)}
+.app-prog-step.rejected .app-prog-label{color:#f87171}
+
+/* ── DOCUMENT CHECKLIST ──────────────────────────────────────────── */
+.checklist-overlay{position:fixed;inset:0;z-index:9400;background:rgba(5,10,25,0.88);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px}
+.checklist-overlay.open{display:flex}
+.checklist-modal{background:var(--navy-2);border:1px solid var(--border-strong);border-radius:var(--radius-xl);max-width:600px;width:100%;padding:2.2rem;position:relative;animation:fadeUp 0.35s ease;max-height:88vh;overflow-y:auto}
+.checklist-modal::-webkit-scrollbar{width:4px}.checklist-modal::-webkit-scrollbar-track{background:transparent}.checklist-modal::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.cl-item input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--gold);margin-top:2px;flex-shrink:0}
+.cl-item label{font-size:0.86rem;line-height:1.5;cursor:pointer;color:var(--white)}
+.cl-item .cl-sub{font-size:0.73rem;color:var(--muted);display:block;margin-top:2px}
+.cl-item:has(input:checked) label{color:var(--muted);text-decoration:line-through}
+
+/* ── COUNTRY GUIDES ──────────────────────────────────────────────── */
+.country-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:var(--trans)}
+.country-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 12px 32px rgba(201,168,76,0.12)}
+.country-card-flag{height:80px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:var(--navy-3)}
+.country-card-body{padding:1.1rem}
+.country-card h3{font-size:0.95rem;margin-bottom:0.2rem;color:var(--white)}
+.country-card .ctag{font-size:0.68rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em}
+.country-card .cinfo{font-size:0.78rem;color:var(--text-body);margin-top:0.5rem;line-height:1.5}
+.country-guide-overlay{position:fixed;inset:0;z-index:9300;background:rgba(5,10,25,0.88);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:80px 16px 16px;overflow-y:auto}
+.country-guide-overlay.open{display:flex}
+.country-guide-panel{background:var(--navy-2);border:1px solid var(--border-strong);border-radius:var(--radius-xl);max-width:700px;width:100%;padding:2.4rem;position:relative;animation:fadeUp 0.35s ease}
+.cg-section{margin-bottom:1.6rem}
+.cg-section h4{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);margin-bottom:0.6rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem}
+.cg-row{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:0.85rem}
+.cg-row .lbl{color:var(--muted);font-size:0.75rem;min-width:130px;flex-shrink:0;padding-top:2px}
+.cg-row .val{color:var(--text-body);line-height:1.5}
+.cg-visa-chip{display:inline-block;background:rgba(201,168,76,0.1);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:0.75rem;color:var(--gold-light);margin:2px}
+
+/* ── POLICY PAGES ────────────────────────────────────────────────── */
+.policy-body{max-width:760px;margin:2rem 0;color:var(--text-body);font-size:0.92rem;line-height:1.9}
+.policy-body h3{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.25rem;margin:1.8rem 0 0.6rem;color:var(--gold-light)}
+.policy-body p{margin-bottom:1rem}
+.policy-body ul{padding-left:1.4rem;margin-bottom:1rem}
+.policy-body li{margin-bottom:0.4rem}
+
 /* ── CHAT WIDGET ─────────────────────────────────────────────────── */
 .chat-fab{position:fixed;bottom:28px;right:28px;z-index:9000;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;cursor:pointer;box-shadow:0 8px 28px rgba(201,168,76,0.45);display:flex;align-items:center;justify-content:center;font-size:26px;transition:var(--trans);animation:chatPop 0.5s 1.5s both}
 @keyframes chatPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
@@ -368,6 +422,7 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
     <li><a onclick="showPage('home')" data-page="home">Home</a></li>
     <li><a onclick="showPage('about')" data-page="about">About</a></li>
     <li><a onclick="showPage('services')" data-page="services">Services</a></li>
+    <li><a onclick="showPage('countries')" data-page="countries">Country Guides</a></li>
     <li><a onclick="showPage('destinations')" data-page="destinations">Destinations</a></li>
     <li><a onclick="showPage('search')" data-page="search">🔍 Search</a></li>
     <li><a onclick="showPage('apply')" data-page="apply" style="color:var(--gold)">📋 Apply Now</a></li>
@@ -1374,8 +1429,10 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
       <ul>
         <li><a onclick="showPage('about')">About Us</a></li>
         <li><a onclick="showPage('destinations')">Destinations</a></li>
+        <li><a onclick="showPage('countries')">Country Guides</a></li>
         <li><a onclick="showPage('contact')">Contact</a></li>
         <li><a onclick="showPage('contact')">Free Consultation</a></li>
+        <li><a onclick="openChecklist('Tourist / Visit Visa')">Document Checklist</a></li>
       </ul>
     </div>
     <div class="footer-col">
@@ -1389,10 +1446,148 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2025 Skyglobe Limited. All rights reserved.</span>
+    <span>© 2026 Skyglobe Limited. All rights reserved.</span>
+    <div style="display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap;justify-content:center">
+      <a onclick="showPage('privacy')" style="color:var(--muted);font-size:0.78rem;cursor:pointer;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
+      <span style="color:var(--border-strong)">·</span>
+      <a onclick="showPage('terms')" style="color:var(--muted);font-size:0.78rem;cursor:pointer;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Terms of Service</a>
+      <span style="color:var(--border-strong)">·</span>
+      <a onclick="showPage('antiFraud')" style="color:var(--muted);font-size:0.78rem;cursor:pointer;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Anti-Fraud Policy</a>
+    </div>
     <span>Trusted Global Travel & Immigration Consultancy</span>
   </div>
 </footer>
+
+<!-- ============ COUNTRY GUIDES PAGE ============ -->
+<div class="page" id="page-countries">
+  <section style="padding-top:140px">
+    <div class="section-tag">Country Guides</div>
+    <h1 class="section-title">Where Do You Want<br>to <strong>Go?</strong></h1>
+    <p class="section-sub">Select a destination to see visa types, costs, processing times, and how we can help you get there.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-top:2.5rem" id="countryGrid"></div>
+    <div style="margin-top:3rem;padding:2rem;background:rgba(201,168,76,0.05);border:1px solid var(--border);border-radius:var(--radius-xl);text-align:center">
+      <div class="section-tag">Don't see your country?</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;margin:0.5rem 0">We Cover 47+ Countries</h3>
+      <p style="color:var(--text-body);font-size:0.9rem;margin-bottom:1.5rem">Our consultants have processed applications for destinations worldwide. Book a free consultation for a personalised assessment.</p>
+      <button class="btn-primary" onclick="showPage('contact')">📋 Book Free Consultation</button>
+    </div>
+  </section>
+</div>
+
+<!-- ============ PRIVACY POLICY PAGE ============ -->
+<div class="page" id="page-privacy">
+  <section style="padding-top:140px">
+    <div class="section-tag">Legal</div>
+    <h1 class="section-title">Privacy <strong>Policy</strong></h1>
+    <div class="policy-body">
+      <p><strong style="color:var(--white)">Last updated: June 2026</strong></p>
+      <h3>1. Information We Collect</h3>
+      <p>We collect personal information you voluntarily provide when completing our application forms, including name, email address, phone number, date of birth, passport details, travel preferences, and uploaded documents. We also collect standard server log data when you visit our website.</p>
+      <h3>2. How We Use Your Information</h3>
+      <p>Your information is used solely to:</p>
+      <ul>
+        <li>Process your visa, travel, education, or employment application</li>
+        <li>Communicate updates and decisions on your application</li>
+        <li>Send transactional emails related to your application</li>
+        <li>Improve our services and website</li>
+      </ul>
+      <p>We do not sell, rent, or share your personal information with any third party except where strictly required to process your application (e.g., embassies, universities, employers, partner agencies).</p>
+      <h3>3. Data Storage & Security</h3>
+      <p>All personal data and documents are stored securely in encrypted cloud databases. Access is restricted to authorised SkyGlobe staff only. We retain your data for up to 5 years to support reapplication or reference needs, after which it is securely deleted upon request.</p>
+      <h3>4. Cookies & Local Storage</h3>
+      <p>We use your browser's localStorage to save your application reference number for your convenience when tracking. We do not use third-party tracking cookies or advertising pixels.</p>
+      <h3>5. Your Rights</h3>
+      <p>You have the right to access, correct, or request deletion of your personal data at any time. To exercise these rights, contact us at <a href="mailto:insights.skyglobe@gmail.com" style="color:var(--gold)">insights.skyglobe@gmail.com</a> with your application reference number.</p>
+      <h3>6. Contact</h3>
+      <p>For any privacy enquiries: <a href="mailto:insights.skyglobe@gmail.com" style="color:var(--gold)">insights.skyglobe@gmail.com</a><br>SkyGlobe Limited, 123 Fifth Avenue, Suite 450, New York, NY 10011, USA.</p>
+    </div>
+    <button class="btn-outline" onclick="history.back()||showPage('home')" style="margin-top:1rem">← Back</button>
+  </section>
+</div>
+
+<!-- ============ TERMS OF SERVICE PAGE ============ -->
+<div class="page" id="page-terms">
+  <section style="padding-top:140px">
+    <div class="section-tag">Legal</div>
+    <h1 class="section-title">Terms of <strong>Service</strong></h1>
+    <div class="policy-body">
+      <p><strong style="color:var(--white)">Last updated: June 2026</strong></p>
+      <h3>1. Services</h3>
+      <p>SkyGlobe Limited provides visa consultancy, university admission assistance, travel documentation, and employment placement services. We act as a consultancy and intermediary — final visa decisions are made by the relevant government authority or institution, not by SkyGlobe.</p>
+      <h3>2. Fees & Payment</h3>
+      <p>Our service fees are separate from and in addition to all government, embassy, and institutional fees. All fees are communicated transparently before you commit. Fees paid for services rendered are non-refundable unless a specific refund commitment was made in writing.</p>
+      <h3>3. No Guarantee of Outcome</h3>
+      <p>While SkyGlobe maintains a 98% success rate, we cannot and do not guarantee visa approval, university admission, or employment placement, as final decisions rest with third-party authorities. We guarantee professional, thorough preparation and representation of your application.</p>
+      <h3>4. Client Responsibilities</h3>
+      <p>Clients are responsible for providing accurate, truthful, and complete information. Submitting false documents or misrepresenting information is illegal and will result in immediate termination of services without refund.</p>
+      <h3>5. Intellectual Property</h3>
+      <p>All content on this website including text, graphics, and code is the property of SkyGlobe Limited and may not be reproduced without written permission.</p>
+      <h3>6. Limitation of Liability</h3>
+      <p>SkyGlobe Limited's liability is limited to the service fees paid. We are not liable for consequential damages including lost travel costs, lost income, or personal inconvenience resulting from visa refusals or delays beyond our control.</p>
+      <h3>7. Governing Law</h3>
+      <p>These terms are governed by the laws of the State of New York, USA. Any disputes shall be resolved through binding arbitration in New York City.</p>
+      <h3>8. Contact</h3>
+      <p><a href="mailto:insights.skyglobe@gmail.com" style="color:var(--gold)">insights.skyglobe@gmail.com</a> — SkyGlobe Limited, 123 Fifth Avenue, New York, NY 10011.</p>
+    </div>
+    <button class="btn-outline" onclick="showPage('home')" style="margin-top:1rem">← Back to Home</button>
+  </section>
+</div>
+
+<!-- ============ ANTI-FRAUD POLICY PAGE ============ -->
+<div class="page" id="page-antiFraud">
+  <section style="padding-top:140px">
+    <div class="section-tag">Important Notice</div>
+    <h1 class="section-title">Anti-Fraud <strong>Policy</strong></h1>
+    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:2rem">
+      <div style="font-size:1.3rem;margin-bottom:0.5rem">⚠️ <strong style="color:#f87171">Warning: Protect Yourself from Fraud</strong></div>
+      <p style="color:var(--text-body);font-size:0.9rem;line-height:1.7">Fraudsters sometimes impersonate legitimate agencies. Please verify you are dealing with the real SkyGlobe Limited before making any payment.</p>
+    </div>
+    <div class="policy-body">
+      <h3>Our Official Channels Only</h3>
+      <ul>
+        <li>Website: <strong style="color:var(--gold)">skyglobe-limited-1.onrender.com</strong></li>
+        <li>Email: <strong style="color:var(--gold)">insights.skyglobe@gmail.com</strong></li>
+        <li>WhatsApp: <strong style="color:var(--gold)">+1 737-399-8522</strong></li>
+      </ul>
+      <h3>We Will NEVER:</h3>
+      <ul>
+        <li>Ask for payment via gift cards, cryptocurrency, or Western Union</li>
+        <li>Ask for your password or full bank account details</li>
+        <li>Contact you first and pressure you to pay immediately</li>
+        <li>Promise 100% guaranteed visa approval in an unofficial message</li>
+        <li>Ask you to keep our communication secret</li>
+        <li>Operate through multiple unverified WhatsApp numbers claiming to be us</li>
+      </ul>
+      <h3>How to Verify You Are Talking to Us</h3>
+      <ul>
+        <li>All printed documents from SkyGlobe contain a reference number traceable on this website</li>
+        <li>All official emails come from <strong style="color:var(--gold-light)">insights.skyglobe@gmail.com</strong></li>
+        <li>Every application receives a unique SKY-YEAR-XXXX reference you can track here 24/7</li>
+        <li>If in doubt, contact us directly via WhatsApp: +1 737-399-8522</li>
+      </ul>
+      <h3>Report a Scam</h3>
+      <p>If you believe someone is impersonating SkyGlobe Limited or has defrauded you, please contact us immediately at <a href="mailto:insights.skyglobe@gmail.com" style="color:var(--gold)">insights.skyglobe@gmail.com</a> and report to your local authorities.</p>
+    </div>
+    <button class="btn-outline" onclick="showPage('home')" style="margin-top:1rem">← Back to Home</button>
+  </section>
+</div>
+
+<!-- ===== DOCUMENT CHECKLIST MODAL ===== -->
+<div class="checklist-overlay" id="checklistOverlay" onclick="if(event.target===this)closeChecklist()">
+  <div class="checklist-modal">
+    <button onclick="closeChecklist()" style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;color:var(--muted);font-size:1.6rem;cursor:pointer;line-height:1">×</button>
+    <div class="section-tag">Document Checklist</div>
+    <div id="checklistContent"></div>
+  </div>
+</div>
+
+<!-- ===== COUNTRY GUIDE PANEL ===== -->
+<div class="country-guide-overlay" id="countryGuideOverlay" onclick="if(event.target===this)closeCountryGuide()">
+  <div class="country-guide-panel">
+    <button onclick="closeCountryGuide()" style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;color:var(--muted);font-size:1.6rem;cursor:pointer;line-height:1">×</button>
+    <div id="countryGuideContent"></div>
+  </div>
+</div>
 
 <!-- WhatsApp Float -->
 <a href="https://wa.me/17373998522" class="wa-float" target="_blank" title="Chat on WhatsApp">💬</a>
@@ -1404,11 +1599,14 @@ footer{background:var(--navy-2);border-top:1px solid var(--border);padding:60px 
 // PAGE ROUTING
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
+  const target = document.getElementById('page-' + page);
+  if (!target) return;
+  target.classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(a => {
     a.classList.toggle('active', a.dataset.page === page);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (page === 'countries') initCountryGrid();
 }
 
 // NAV SCROLL
@@ -2493,6 +2691,7 @@ function showSvcDetail(name) {
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:1.4rem">
       <button onclick="closeSvcOverlay();applyForService('${name.replace(/'/g,"\\'")}');" style="flex:1;background:#c9a84c;color:#0a1628;border:none;padding:14px 24px;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;min-width:180px">✦ Apply for This Service</button>
+      <button onclick="closeSvcOverlay();openChecklist('${name.replace(/'/g,"\\'")}');" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:#c9a84c;padding:14px 20px;border-radius:10px;font-size:0.88rem;cursor:pointer;font-weight:500">📋 Document Checklist</button>
       <button onclick="closeSvcOverlay();showPage('contact');" style="background:transparent;border:1px solid #233452;color:#8899bb;padding:14px 20px;border-radius:10px;font-size:0.88rem;cursor:pointer">Ask a Question First</button>
     </div>`;
   document.getElementById('svcOverlay').style.display = 'block';
@@ -2774,6 +2973,9 @@ function renderAppCard(app) {
       </div>
     </div>
 
+    <!-- Progress Bar -->
+    ${getAppProgressBar(app.status)}
+
     <!-- Details Table -->
     <table style="width:100%;border-collapse:collapse">
       ${row('Full Name', [app.fname, app.lname].filter(Boolean).join(' '))}
@@ -2891,6 +3093,410 @@ async function uploadUserDoc(ref) {
     alert('Upload failed: ' + e.message);
   }
   btn.disabled = false; btn.textContent = '⬆️ Upload';
+}
+
+// ── APPLICATION PROGRESS BAR ─────────────────────────────────────────────────
+function getAppProgressBar(status) {
+  const stages = [
+    {label:'Received', icon:'📥'},
+    {label:'In Review', icon:'🔍'},
+    {label:'Processing', icon:'⚙️'},
+    {label:'Complete', icon:'✅'},
+  ];
+  const idxMap = {
+    'Received':0,'In Review':1,'Needs More Info':1,
+    'Processing':2,'Approved':3,'Completed':3,'Rejected':3
+  };
+  const idx = idxMap[status] ?? 0;
+  const isRejected = status === 'Rejected';
+  return `<div class="app-progress">
+    ${stages.map((s,i) => {
+      const done = i < idx;
+      const current = i === idx;
+      const rej = isRejected && current;
+      const dot = rej ? '✕' : current ? s.icon : done ? '✓' : String(i+1);
+      return `<div class="app-prog-step ${done?'done':''} ${current&&!rej?'current':''} ${rej?'rejected':''}">
+        <div class="app-prog-dot">${dot}</div>
+        <div class="app-prog-label">${rej ? 'Rejected' : s.label}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ── DOCUMENT CHECKLIST GENERATOR ─────────────────────────────────────────────
+const CHECKLISTS = {
+  'Student Visa Processing':{title:'Student Visa Document Checklist',sections:[
+    {h:'Personal Documents',items:[
+      {t:'Valid passport — min 6 months validity beyond intended stay',s:'All pages clear, no damage'},
+      {t:'2–6 passport-size photographs',s:'White background, recent, biometric format (35×45mm)'},
+      {t:'Birth certificate',s:'Certified copy required by some embassies'},
+      {t:'National ID card copy'},
+    ]},
+    {h:'Academic Documents',items:[
+      {t:'University / College acceptance letter or CAS number',s:'Original, signed by institution'},
+      {t:'Previous academic certificates and transcripts',s:'WAEC, A-Level, Bachelor\'s etc.'},
+      {t:'English language test result',s:'IELTS min 5.5–6.5, TOEFL, or Duolingo'},
+      {t:'SEVIS fee receipt (USA F-1 only)',s:'$350 — must be paid before embassy interview'},
+    ]},
+    {h:'Financial Documents',items:[
+      {t:'Bank statements — last 3 to 6 months',s:'Must show sufficient funds for tuition + living costs'},
+      {t:'Sponsorship letter if parent or guardian is paying',s:'Signed and notarized'},
+      {t:'Sponsor\'s bank statements and employment/income letter'},
+      {t:'Scholarship award letter (if applicable)'},
+    ]},
+    {h:'Application Documents',items:[
+      {t:'Completed visa application form',s:'DS-160 for USA; online for UK, Canada, Australia'},
+      {t:'Visa application fee payment receipt'},
+      {t:'Medical exam certificate (required by some countries)'},
+      {t:'Police clearance certificate (required by some countries)'},
+      {t:'Yellow fever vaccination card (required for some nationalities)'},
+    ]},
+  ]},
+  'Work Visa Processing':{title:'Work Visa Document Checklist',sections:[
+    {h:'Personal Documents',items:[
+      {t:'Valid passport — min 6 months validity'},
+      {t:'Passport-size photographs'},
+      {t:'Birth certificate'},
+      {t:'Marriage certificate (if applicable, for dependent visas)'},
+    ]},
+    {h:'Employment Documents',items:[
+      {t:'Job offer letter from employer',s:'On company letterhead, signed and dated'},
+      {t:'Certificate of Sponsorship (CoS) — UK Skilled Worker Visa',s:'Employer must be Home Office licensed'},
+      {t:'Labor Condition Application (LCA) — USA H-1B',s:'Filed by US employer with Department of Labor'},
+      {t:'Signed employment contract'},
+    ]},
+    {h:'Qualification Documents',items:[
+      {t:'University degree certificates and transcripts'},
+      {t:'Professional licences and certifications'},
+      {t:'Updated CV / Résumé'},
+      {t:'Work experience letters from previous employers',s:'Covering last 3–5 years'},
+    ]},
+    {h:'Financial Documents',items:[
+      {t:'Bank statements — last 3 months'},
+      {t:'Recent payslips'},
+      {t:'Tax returns (required by some countries)'},
+    ]},
+  ]},
+  'Tourist / Visit Visa':{title:'Tourist / Visit Visa Checklist',sections:[
+    {h:'Identity Documents',items:[
+      {t:'Valid passport',s:'3+ months beyond stay for Schengen; 6+ for USA and UK'},
+      {t:'Previous visa copies',s:'Shows travel history — strengthens your application'},
+      {t:'2 passport photographs',s:'White background, recent, biometric format'},
+    ]},
+    {h:'Travel Documents',items:[
+      {t:'Flight reservation letter',s:'Official PNR-backed itinerary — SkyGlobe provides this same day'},
+      {t:'Hotel reservation or accommodation proof',s:'Official letter accepted by embassy — SkyGlobe provides'},
+      {t:'Detailed travel itinerary / cover letter explaining trip'},
+    ]},
+    {h:'Financial Proof',items:[
+      {t:'Bank statements — last 3 to 6 months',s:'Show regular income and sufficient balance'},
+      {t:'Payslips or employer salary letter'},
+      {t:'Sponsorship letter + sponsor\'s bank statement (if someone else funds your trip)'},
+    ]},
+    {h:'Supporting Documents',items:[
+      {t:'Travel insurance',s:'Min €30,000 coverage — MANDATORY for Schengen visa'},
+      {t:'Employment letter with approved leave dates',s:'Proves you will return home'},
+      {t:'Business registration (if self-employed)'},
+      {t:'Proof of ties to home country',s:'Property, family, business — shows intent to return'},
+      {t:'Invitation letter from host (if visiting family or friends)'},
+    ]},
+  ]},
+  'EU Direct Employment':{title:'EU Direct Employment Checklist',sections:[
+    {h:'Personal Documents',items:[
+      {t:'Valid international passport',s:'Minimum 12 months validity'},
+      {t:'National ID card (certified copy)'},
+      {t:'Birth certificate'},
+      {t:'Marriage certificate (if married)'},
+      {t:'2–4 passport photographs'},
+    ]},
+    {h:'Qualifications & Experience',items:[
+      {t:'Highest educational certificate',s:'WAEC/NECO, HND, Bachelor\'s — certified copy'},
+      {t:'Vocational training certificates (if applicable)'},
+      {t:'Work experience letters',s:'On company letterhead, showing role and duration'},
+      {t:'Updated CV / Résumé in English',s:'We can prepare a Europass-style CV for you'},
+      {t:'2 professional references'},
+    ]},
+    {h:'Health & Background',items:[
+      {t:'Police clearance certificate',s:'From your home country — apostilled if required'},
+      {t:'Medical fitness certificate'},
+      {t:'Vaccination records'},
+    ]},
+    {h:'Financial',items:[
+      {t:'Bank statement — last 3 months'},
+    ]},
+  ]},
+  'University Admission Assistance':{title:'University Admission Checklist',sections:[
+    {h:'Academic Documents',items:[
+      {t:'Secondary school certificate and transcripts',s:'WAEC, NECO, IGCSE, A-Levels'},
+      {t:'Undergraduate degree and transcripts (for Master\'s applicants)'},
+      {t:'Graded coursework or portfolio (some programmes)'},
+      {t:'Research proposal (for PhD applications)'},
+    ]},
+    {h:'Language & Test Scores',items:[
+      {t:'IELTS result',s:'Min 6.0–7.0 depending on university and programme'},
+      {t:'TOEFL result (alternative to IELTS)'},
+      {t:'GRE or GMAT scores (USA / some UK Master\'s programmes)'},
+      {t:'SAT / ACT scores (USA undergraduate)'},
+    ]},
+    {h:'Personal Documents',items:[
+      {t:'Personal Statement / Statement of Purpose',s:'We write and edit this professionally for you'},
+      {t:'CV / Résumé'},
+      {t:'2–3 reference letters from academics or employers'},
+      {t:'Passport copy'},
+      {t:'Passport-size photographs'},
+    ]},
+    {h:'Application Requirements',items:[
+      {t:'Portfolio of work (design, arts, architecture programmes)'},
+      {t:'Writing samples (journalism, law, humanities)'},
+      {t:'Application fee payment receipt'},
+    ]},
+  ]},
+  'Scholarship Application Support':{title:'Scholarship Application Checklist',sections:[
+    {h:'Academic Records',items:[
+      {t:'Academic transcripts (all levels)',s:'Certified copies with grades'},
+      {t:'Degree certificate(s)'},
+      {t:'IELTS / TOEFL score',s:'Most scholarships require min IELTS 6.5'},
+    ]},
+    {h:'Application Essays',items:[
+      {t:'Personal statement',s:'Why you deserve the scholarship — 500–1000 words'},
+      {t:'Statement of Purpose (for Master\'s / PhD)',s:'Research focus and goals'},
+      {t:'Leadership / community impact essay',s:'Required for Chevening, Commonwealth and similar'},
+    ]},
+    {h:'References & Evidence',items:[
+      {t:'2–3 reference letters',s:'From academics or professional supervisors'},
+      {t:'Community service / volunteering evidence'},
+      {t:'Work experience letters'},
+      {t:'Awards, publications, certificates of achievement'},
+      {t:'Bank statement (some scholarships check financial need)'},
+    ]},
+    {h:'Personal Documents',items:[
+      {t:'Passport copy'},
+      {t:'Passport photographs'},
+    ]},
+  ]},
+  'Flight Reservation Letter':{title:'Flight Reservation Checklist',sections:[
+    {h:'Information Needed',items:[
+      {t:'Full name exactly as in passport'},
+      {t:'Passport number and expiry date'},
+      {t:'Travel dates — outbound and return'},
+      {t:'Destination country and cities'},
+      {t:'Purpose of visit'},
+    ]},
+    {h:'Documents to Attach to Visa Application',items:[
+      {t:'SkyGlobe official flight reservation letter',s:'Delivered same day — accepted by all embassies'},
+      {t:'Hotel reservation letter',s:'Also provided by SkyGlobe'},
+      {t:'Travel insurance certificate',s:'Mandatory for Schengen — also provided by SkyGlobe'},
+    ]},
+  ]},
+};
+
+let __clTotal = 0;
+
+function openChecklist(service) {
+  const cl = CHECKLISTS[service] || CHECKLISTS['Tourist / Visit Visa'];
+  const cont = document.getElementById('checklistContent');
+  let total = 0;
+  let html = `<h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:0.3rem;color:var(--white)">${cl.title}</h3>
+    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem">Tick each item as you prepare it. Print or save for reference.</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(201,168,76,0.07);border-radius:8px;border:1px solid var(--border);margin-bottom:1.2rem">
+      <span style="font-size:0.8rem;color:var(--gold-light)" id="clProgress">0 items checked</span>
+      <button onclick="window.print()" style="background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);border:none;padding:7px 16px;border-radius:6px;font-size:0.76rem;font-weight:600;cursor:pointer">🖨️ Print</button>
+    </div>`;
+  cl.sections.forEach(sec => {
+    html += `<div style="margin-bottom:1.3rem">
+      <div style="font-size:0.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:0.5rem;border-bottom:1px solid var(--border);padding-bottom:0.35rem">${sec.h}</div>`;
+    sec.items.forEach(item => {
+      total++;
+      const id = 'cl_' + Math.random().toString(36).slice(2,8);
+      html += `<div class="cl-item"><input type="checkbox" id="${id}" onchange="updateClProgress()"><div><label for="${id}">${item.t}</label>${item.s?`<span class="cl-sub">${item.s}</span>`:''}</div></div>`;
+    });
+    html += `</div>`;
+  });
+  html += `<div style="margin-top:1.2rem;padding:12px 14px;background:rgba(201,168,76,0.07);border-radius:8px;border-left:3px solid var(--gold);font-size:0.83rem;color:var(--text-body)">
+    💡 <strong style="color:var(--gold-light)">SkyGlobe prepares all documents for you.</strong> Gather these items and we handle the rest.
+    <a onclick="closeChecklist();applyForService('${service}')" style="color:var(--gold);cursor:pointer;text-decoration:underline;margin-left:6px">Start application →</a>
+  </div>`;
+  cont.innerHTML = html;
+  __clTotal = total;
+  updateClProgress();
+  document.getElementById('checklistOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeChecklist() {
+  document.getElementById('checklistOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function updateClProgress() {
+  const checked = document.querySelectorAll('#checklistContent input:checked').length;
+  const el = document.getElementById('clProgress');
+  if (el) el.textContent = `${checked} / ${__clTotal} items checked`;
+}
+
+// ── COUNTRY GUIDES ─────────────────────────────────────────────────────────
+const COUNTRIES = [
+  {flag:'🇬🇧',name:'United Kingdom',tag:'Study · Work · Visit',visas:['Student Visa (Tier 4)','Skilled Worker Visa','Standard Visitor Visa','Graduate Visa'],
+   sections:[
+    {h:'Popular Visa Types',rows:[
+      {l:'Student Visa',v:'For university / college — requires CAS from institution. 20 hrs/week work allowed.'},
+      {l:'Skilled Worker',v:'Employer-sponsored. Min salary £26,200/year. Leads to ILR after 5 years.'},
+      {l:'Visitor Visa',v:'Up to 6 months. No work rights. For tourism, family visits, business meetings.'},
+      {l:'Graduate Visa',v:'2 years (3 for PhD) post-study work — no employer required.'},
+    ]},
+    {h:'Key Facts',rows:[
+      {l:'Currency',v:'British Pound (GBP)'},
+      {l:'Language',v:'English'},
+      {l:'Processing',v:'Visitor: 3 weeks · Student: 3 weeks · Skilled Worker: 3 weeks'},
+      {l:'Visa Fee',v:'Visitor: £115 · Student: £363 + IHS · Skilled Worker: £719–£1,420'},
+      {l:'IHS Surcharge',v:'£1,035/year for workers; £776/year for students'},
+    ]},
+    {h:'Top Universities',rows:[
+      {l:'',v:'Oxford, Cambridge, Imperial College, UCL, LSE, Edinburgh, Manchester'},
+    ]},
+   ],svc:'Student Visa Processing'},
+  {flag:'🇺🇸',name:'United States',tag:'Study · Work · Travel',visas:['F-1 Student','H-1B Work','B-1/B-2 Tourist','O-1 Extraordinary Ability'],
+   sections:[
+    {h:'Popular Visa Types',rows:[
+      {l:'F-1 Student',v:'Full-time study at SEVIS-approved institution. 20 hrs/week on-campus work. OPT/STEM OPT after graduation.'},
+      {l:'H-1B Work',v:'Specialty occupations. Annual cap lottery. 3 years, extendable to 6.'},
+      {l:'B-1/B-2',v:'Business/tourist visits up to 6 months. No work rights.'},
+    ]},
+    {h:'Key Facts',rows:[
+      {l:'Currency',v:'US Dollar (USD)'},
+      {l:'Language',v:'English'},
+      {l:'Processing',v:'F-1: 3–5 weeks · H-1B: 3–6 months (premium: 15 days) · B-2: varies'},
+      {l:'Visa Fee',v:'F-1: $185 + $350 SEVIS · B-2: $185 · H-1B: employer pays'},
+    ]},
+    {h:'Top Universities',rows:[
+      {l:'',v:'Harvard, MIT, Stanford, Yale, Princeton, Columbia, NYU, UCLA'},
+    ]},
+   ],svc:'Student Visa Processing'},
+  {flag:'🇨🇦',name:'Canada',tag:'Study · Work · Permanent Residence',visas:['Study Permit','Express Entry PR','Open Work Permit','Visitor Visa'],
+   sections:[
+    {h:'Popular Pathways',rows:[
+      {l:'Study Permit',v:'For programs over 6 months at DLI. 20 hrs/week work. PGWP 1–3 years after graduation.'},
+      {l:'Express Entry',v:'Points-based PR system. CRS score 470–530+. Decision in 6 months.'},
+      {l:'Open Work Permit',v:'PGWP, spousal, IEC Working Holiday. Work for ANY employer.'},
+    ]},
+    {h:'Key Facts',rows:[
+      {l:'Currency',v:'Canadian Dollar (CAD)'},
+      {l:'Language',v:'English / French'},
+      {l:'Processing',v:'Study Permit: 8–12 weeks · PR (Express Entry): 6 months'},
+      {l:'Visa Fee',v:'Study Permit: CAD $150 · Express Entry: CAD $1,365 principal'},
+    ]},
+   ],svc:'Work Visa Processing'},
+  {flag:'🇩🇪',name:'Germany',tag:'Study · Work · EU Blue Card',visas:['Student Visa','EU Blue Card','Job Seeker Visa','National Work Visa'],
+   sections:[
+    {h:'Popular Pathways',rows:[
+      {l:'Student Visa',v:'Type D national visa. Many programs free or €500/semester admin fee. Blocked account €11,208/year required.'},
+      {l:'EU Blue Card',v:'Highly qualified professionals. Salary €43,992+/year. PR in 21 months with B1 German.'},
+      {l:'Job Seeker Visa',v:'6 months to search for work. Convert to work visa once employed.'},
+    ]},
+    {h:'Key Facts',rows:[
+      {l:'Currency',v:'Euro (EUR)'},
+      {l:'Language',v:'German (many English-taught programmes available)'},
+      {l:'Processing',v:'Student: 4–12 weeks · EU Blue Card: 1–3 months'},
+      {l:'Visa Fee',v:'€75 for most visa types · EU Blue Card: €100–140'},
+    ]},
+   ],svc:'Work Visa Processing'},
+  {flag:'🇦🇺',name:'Australia',tag:'Study · Work · Working Holiday',visas:['Student Visa 500','Skilled Migration','Working Holiday 417','Graduate Visa 485'],
+   sections:[
+    {h:'Popular Pathways',rows:[
+      {l:'Student Visa 500',v:'Study at CRICOS-registered provider. 48 hrs/fortnight work. Graduate Visa 485 after graduation.'},
+      {l:'Working Holiday',v:'18–30 years. Work up to 3 years with regional work requirement.'},
+      {l:'Skilled Migration',v:'Points-based system. Invitation to Apply, then permanent residence.'},
+    ]},
+    {h:'Key Facts',rows:[
+      {l:'Currency',v:'Australian Dollar (AUD)'},
+      {l:'Language',v:'English'},
+      {l:'Processing',v:'Student: 29–40 days · Working Holiday: 1–4 weeks'},
+      {l:'Visa Fee',v:'Student: AUD $650 · Working Holiday: AUD $635'},
+    ]},
+   ],svc:'Student Visa Processing'},
+  {flag:'🌍',name:'Schengen Area',tag:'Tourist · Business · Short Stay',visas:['Type C Schengen','Multiple Entry','Business Visa'],
+   sections:[
+    {h:'About Schengen',rows:[
+      {l:'Countries',v:'27 European countries including France, Germany, Italy, Spain, Netherlands, Belgium, and more'},
+      {l:'Duration',v:'Up to 90 days in any 180-day period'},
+      {l:'Insurance',v:'Min €30,000 medical coverage — MANDATORY'},
+    ]},
+    {h:'Key Facts',rows:[
+      {l:'Currency',v:'Euro (most countries)'},
+      {l:'Processing',v:'15 calendar days (can take up to 30–60 days)'},
+      {l:'Visa Fee',v:'€80 adults · €40 children (6–12) · Free under 6'},
+      {l:'Apply at',v:'Embassy of your main destination country'},
+    ]},
+   ],svc:'Tourist / Visit Visa'},
+  {flag:'🇵🇱',name:'Poland',tag:'EU Direct Employment',visas:['National Work Visa (D)','Seasonal Work Visa','EU Blue Card'],
+   sections:[
+    {h:'Direct Employment Overview',rows:[
+      {l:'In-demand roles',v:'Manufacturing, construction, warehouse, hospitality, agriculture'},
+      {l:'Work permit',v:'SkyGlobe arranges employer-sponsored work permit'},
+      {l:'Timeline',v:'8–16 weeks from registration to departure'},
+      {l:'Language',v:'Polish (basic helpful); most factory jobs need none'},
+    ]},
+    {h:'Key Facts',rows:[
+      {l:'Currency',v:'Polish Zloty (PLN) — approx €0.23 per PLN'},
+      {l:'Min wage',v:'Approx PLN 4,300/month gross (2024)'},
+      {l:'Work visa',v:'National Visa Type D — sponsored by employer'},
+    ]},
+   ],svc:'EU Direct Employment'},
+  {flag:'🇦🇪',name:'UAE / Dubai',tag:'Work · Tourism · Golden Visa',visas:['Employment Visa','Tourist Visa','Golden Visa','Freelance Permit'],
+   sections:[
+    {h:'Popular Pathways',rows:[
+      {l:'Employment Visa',v:'Sponsored by UAE employer. Employment Pass: salary AED 5,000+/month.'},
+      {l:'Tourist Visa',v:'30 or 60 days. Extendable. Available on arrival for many nationalities.'},
+      {l:'Golden Visa',v:'5 or 10 years for investors, professionals, and outstanding students.'},
+    ]},
+    {h:'Key Facts',rows:[
+      {l:'Currency',v:'UAE Dirham (AED) — pegged to USD'},
+      {l:'Language',v:'Arabic (official); English widely spoken'},
+      {l:'Processing',v:'Employment: 2–4 weeks · Tourist: 3–5 days'},
+      {l:'Tax',v:'No personal income tax'},
+    ]},
+   ],svc:'Work Visa Processing'},
+];
+
+function showCountryGuide(idx) {
+  const c = COUNTRIES[idx];
+  const secs = c.sections.map(s => `
+    <div class="cg-section">
+      <h4>${s.h}</h4>
+      ${s.rows.map(r => `<div class="cg-row"><span class="lbl">${r.l}</span><span class="val">${r.v}</span></div>`).join('')}
+    </div>`).join('');
+  const chips = c.visas.map(v => `<span class="cg-visa-chip">${v}</span>`).join('');
+  document.getElementById('countryGuideContent').innerHTML = `
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border)">
+      <div style="font-size:3.5rem;line-height:1">${c.flag}</div>
+      <div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400">${c.name}</h2>
+        <div style="font-size:0.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em">${c.tag}</div>
+        <div style="margin-top:0.4rem">${chips}</div>
+      </div>
+    </div>
+    ${secs}
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:1.5rem">
+      <button class="btn-primary" onclick="closeCountryGuide();applyForService('${c.svc}')">📋 Apply for ${c.name}</button>
+      <button onclick="closeCountryGuide();openChecklist('${c.svc}')" style="background:rgba(201,168,76,0.1);border:1px solid var(--border-strong);color:var(--gold-light);padding:12px 20px;border-radius:10px;cursor:pointer;font-size:0.88rem;font-weight:500">📋 Document Checklist</button>
+    </div>`;
+  document.getElementById('countryGuideOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCountryGuide() {
+  document.getElementById('countryGuideOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function initCountryGrid() {
+  const grid = document.getElementById('countryGrid');
+  if (!grid) return;
+  grid.innerHTML = COUNTRIES.map((c,i) => `
+    <div class="country-card" onclick="showCountryGuide(${i})">
+      <div class="country-card-flag">${c.flag}</div>
+      <div class="country-card-body">
+        <h3>${c.name}</h3>
+        <div class="ctag">${c.tag}</div>
+        <div class="cinfo">${c.visas.slice(0,2).join(' · ')}</div>
+      </div>
+    </div>`).join('');
 }
 
 // ── ELIGIBILITY CHECKER ──────────────────────────────────────────────────────
@@ -3211,6 +3817,10 @@ function printApp(cardId) {
         <div class="name">SKY<span>GLOBE</span> LIMITED</div>
         <div class="tag">Global Travel · Immigration · Education</div>
         <div class="tag2">Your Gateway to Global Opportunity</div>
+      </div>
+      <div style="text-align:center;margin-left:8px">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=72x72&bgcolor=0a1628&color=c9a84c&data=${encodeURIComponent('https://skyglobe-limited-1.onrender.com/?ref='+esc(app.ref))}" alt="QR" style="border-radius:6px;width:72px;height:72px;display:block" onerror="this.style.display='none'">
+        <div style="font-size:0.52rem;color:#9badd1;margin-top:3px;letter-spacing:0.08em">VERIFY ONLINE</div>
       </div>
     </div>
     <div class="lh-body">
