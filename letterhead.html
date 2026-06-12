@@ -8,75 +8,149 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Outfit',sans-serif; background:#e8eaf0; color:#1a1a1a; }
-  .toolbar { max-width:800px; margin:0 auto; padding:16px; display:flex; gap:10px; justify-content:flex-end; }
+  html, body { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  body { font-family:'Outfit',sans-serif; background:#d8dce4; color:#1a1a1a; }
+
+  .toolbar { max-width:820px; margin:0 auto; padding:16px; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
   .toolbar button { background:#c9a84c; color:#0a1628; border:none; padding:10px 22px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.9rem; }
+  .toolbar .hint { flex:1; min-width:240px; font-size:0.75rem; color:#555; align-self:center; }
+
   .page {
-    background:#fff; max-width:800px; min-height:1050px; margin:0 auto 30px;
-    padding:0; box-shadow:0 4px 30px rgba(0,0,0,0.15); display:flex; flex-direction:column;
+    position:relative; background:#fffdf8; max-width:820px; min-height:1100px;
+    margin:0 auto 30px; box-shadow:0 4px 30px rgba(0,0,0,0.2);
+    display:flex; flex-direction:column; overflow:hidden;
   }
+
+  /* ── Decorative frame ── */
+  .frame {
+    position:absolute; inset:14px; border:1.5px solid #c9a84c55; pointer-events:none; z-index:2;
+  }
+  .frame::before {
+    content:''; position:absolute; inset:4px; border:0.5px solid #c9a84c33;
+  }
+  /* gold corner ornaments */
+  .corner { position:absolute; width:46px; height:46px; z-index:3; pointer-events:none; }
+  .corner::before, .corner::after { content:''; position:absolute; background:#c9a84c; }
+  .corner::before { width:100%; height:3px; }
+  .corner::after { width:3px; height:100%; }
+  .c-tl { top:14px; left:14px; }
+  .c-tr { top:14px; right:14px; transform:scaleX(-1); }
+  .c-bl { bottom:14px; left:14px; transform:scaleY(-1); }
+  .c-br { bottom:14px; right:14px; transform:scale(-1); }
+
+  /* ── Watermark ── */
+  .watermark {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    z-index:0; pointer-events:none;
+  }
+  .watermark img { width:62%; opacity:0.055; filter:grayscale(35%); }
+  .watermark-text {
+    position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  }
+  .watermark-text span {
+    position:absolute; font-family:'Cormorant Garamond',serif; font-weight:700;
+    color:#0a162808; font-size:2rem; letter-spacing:0.35em; white-space:nowrap;
+    transform:rotate(-32deg);
+  }
+
+  /* ── Header ── */
   .lh-header {
-    background:#0a1628; padding:28px 50px; display:flex; align-items:center;
-    justify-content:space-between; gap:20px; border-bottom:4px solid #c9a84c;
+    position:relative; z-index:4; background:#0a1628; margin:14px 14px 0; padding:26px 44px 22px;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
   }
-  .lh-header img { height:78px; width:auto; border-radius:10px; }
+  .lh-header::after {
+    content:''; position:absolute; left:0; right:0; bottom:-9px; height:9px;
+    background:linear-gradient(90deg, #8a6f2a, #c9a84c 30%, #f0d98c 50%, #c9a84c 70%, #8a6f2a);
+  }
+  .lh-header img { height:84px; width:auto; border-radius:10px; }
   .lh-header .co { text-align:right; color:#fff; }
-  .lh-header .co .name { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:700; letter-spacing:0.06em; }
+  .lh-header .co .name { font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:700; letter-spacing:0.08em; }
   .lh-header .co .name span { color:#c9a84c; }
-  .lh-header .co .tag { font-size:0.72rem; color:#8899bb; letter-spacing:0.12em; text-transform:uppercase; margin-top:2px; }
-  .lh-body { flex:1; padding:50px; font-size:0.95rem; line-height:1.8; }
-  .lh-body[contenteditable]:focus { outline:2px dashed #c9a84c33; }
-  .lh-date { color:#555; margin-bottom:30px; }
-  .lh-footer {
-    background:#0a1628; color:#8899bb; padding:18px 50px; font-size:0.75rem;
-    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
-    border-top:4px solid #c9a84c;
+  .lh-header .co .tag { font-size:0.7rem; color:#9badd1; letter-spacing:0.22em; text-transform:uppercase; margin-top:4px; }
+  .lh-header .co .tag2 { font-size:0.66rem; color:#c9a84c; letter-spacing:0.12em; margin-top:3px; font-style:italic; }
+
+  /* ── Body ── */
+  .lh-body {
+    position:relative; z-index:4; flex:1; padding:54px 64px; font-size:0.95rem; line-height:1.9;
   }
-  .lh-footer span strong { color:#c9a84c; }
+  .lh-body[contenteditable]:focus { outline:2px dashed #c9a84c44; }
+  .lh-date { color:#555; margin-bottom:28px; }
+  .lh-ref { font-size:0.8rem; color:#8a6f2a; letter-spacing:0.08em; margin-bottom:18px; }
+
+  /* ── Footer ── */
+  .lh-footer {
+    position:relative; z-index:4; background:#0a1628; margin:0 14px 14px; padding:16px 44px;
+    color:#9badd1; font-size:0.74rem; display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:8px; align-items:center;
+  }
+  .lh-footer::before {
+    content:''; position:absolute; left:0; right:0; top:-9px; height:9px;
+    background:linear-gradient(90deg, #8a6f2a, #c9a84c 30%, #f0d98c 50%, #c9a84c 70%, #8a6f2a);
+  }
+  .lh-footer span strong { color:#c9a84c; margin-right:4px; }
+  .lh-footer .motto { width:100%; text-align:center; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.82rem; color:#c9a84c; border-bottom:1px solid #1e3a6e; padding-bottom:8px; margin-bottom:2px; letter-spacing:0.06em; }
+
   @media print {
     body { background:#fff; }
     .toolbar { display:none; }
     .page { box-shadow:none; margin:0; max-width:none; min-height:100vh; }
-    .lh-header, .lh-footer { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    @page { margin:0; size:A4; }
   }
 </style>
 </head>
 <body>
 
 <div class="toolbar">
+  <div class="hint">💡 When printing: in the print window, enable <strong>“Background graphics”</strong> (Chrome: More settings → Background graphics) so the colors and watermark appear.</div>
   <button onclick="document.getElementById('today').textContent=new Date().toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'})">📅 Insert Today's Date</button>
   <button onclick="window.print()">🖨️ Print / Save as PDF</button>
 </div>
 
 <div class="page">
+  <!-- decorative frame + corners -->
+  <div class="frame"></div>
+  <div class="corner c-tl"></div><div class="corner c-tr"></div>
+  <div class="corner c-bl"></div><div class="corner c-br"></div>
+
+  <!-- watermarks -->
+  <div class="watermark"><img src="logo.png" alt=""></div>
+  <div class="watermark-text">
+    <span style="top:18%; left:-6%">SKYGLOBE LIMITED · SKYGLOBE LIMITED</span>
+    <span style="top:45%; left:-12%">SKYGLOBE LIMITED · SKYGLOBE LIMITED</span>
+    <span style="top:72%; left:-4%">SKYGLOBE LIMITED · SKYGLOBE LIMITED</span>
+  </div>
+
   <div class="lh-header">
     <img src="logo.png" alt="SkyGlobe Limited">
     <div class="co">
       <div class="name">SKY<span>GLOBE</span> LIMITED</div>
       <div class="tag">Global Travel · Immigration · Education</div>
+      <div class="tag2">Your Gateway to Global Opportunity</div>
     </div>
   </div>
 
   <div class="lh-body" contenteditable="true" spellcheck="true">
+    <p class="lh-ref">Ref: SGL/[YEAR]/[NUMBER]</p>
     <p class="lh-date" id="today">[Date]</p>
     <p>[Recipient Name]<br>[Recipient Address]<br>[City, Country]</p>
     <br>
-    <p><strong>RE: [Subject of the Letter]</strong></p>
+    <p><strong>RE: [SUBJECT OF THE LETTER]</strong></p>
     <br>
     <p>Dear [Recipient],</p>
     <br>
-    <p>Click anywhere in this area and start typing your letter. This whole section is editable — replace the placeholders with your content. When finished, click "Print / Save as PDF" above to produce the final document.</p>
-    <br>
-    <br>
-    <p>Yours sincerely,</p>
+    <p>Click anywhere in this area and start typing your letter. Replace all the placeholders in brackets with your content. When finished, click "Print / Save as PDF" above — and remember to enable "Background graphics" in the print window.</p>
     <br><br>
-    <p><strong>[Name]</strong><br>[Position]<br>SkyGlobe Limited</p>
+    <p>Yours sincerely,</p>
+    <br><br><br>
+    <p style="border-top:1.5px solid #c9a84c; width:230px; padding-top:6px"><strong>[Name]</strong><br><span style="color:#555;font-size:0.85rem">[Position]<br>SkyGlobe Limited</span></p>
   </div>
 
   <div class="lh-footer">
+    <div class="motto">“Turning international ambitions into lived realities”</div>
     <span><strong>✉</strong> insights.skyglobe@gmail.com</span>
     <span><strong>☎</strong> +1 737-399-8522</span>
     <span><strong>⌂</strong> 123 Fifth Avenue, New York, NY 10011</span>
+    <span><strong>🌐</strong> skyglobe-limited-1.onrender.com</span>
   </div>
 </div>
 
