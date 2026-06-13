@@ -427,9 +427,57 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 .elig-rec-title{font-size:0.88rem;font-weight:600;color:#0a1628}
 .elig-rec-sub{font-size:0.73rem;color:#64748b}
 @media(max-width:480px){.elig-opts{grid-template-columns:1fr}}
+
+/* ── WORLD CUP 2026 BANNER ───────────────────────────────────────── */
+#wcBanner{position:fixed;top:0;left:0;right:0;z-index:1100;display:flex;align-items:center;justify-content:center;gap:14px;padding:9px 48px 9px 16px;background:linear-gradient(90deg,#0a1628,#132952 40%,#1e3a6e);border-bottom:2px solid var(--gold);overflow:hidden}
+#wcBanner::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.18),transparent);background-size:200% 100%;animation:wcShine 4s linear infinite;pointer-events:none}
+@keyframes wcShine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.wc-ball{font-size:1.1rem;animation:wcBounce 1.6s ease-in-out infinite;flex-shrink:0}
+@keyframes wcBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.wc-text{font-size:0.83rem;color:#e8eef6;line-height:1.3;position:relative;z-index:1}
+.wc-text strong{color:var(--gold-light)}
+.wc-cta{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0a1628;border:none;border-radius:7px;padding:7px 16px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Outfit',sans-serif;flex-shrink:0;position:relative;z-index:1;transition:var(--trans)}
+.wc-cta:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
+.wc-close{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#8899bb;font-size:1.1rem;cursor:pointer;z-index:2;line-height:1;padding:4px}
+.wc-close:hover{color:#fff}
+body.wc-active nav{top:46px}
+body.wc-active .hero{padding-top:150px}
+body.wc-active .mobile-menu{padding-top:46px}
+@media(max-width:760px){
+  #wcBanner{padding:8px 40px 8px 12px;gap:10px}
+  .wc-text{font-size:0.74rem}
+  .wc-cta{padding:6px 12px;font-size:0.74rem}
+  body.wc-active nav{top:60px}
+}
+@media(max-width:480px){
+  .wc-cta{display:none}
+  body.wc-active nav{top:52px}
+}
 </style>
 </head>
 <body>
+
+<!-- WORLD CUP 2026 TOP BANNER -->
+<div id="wcBanner">
+  <span class="wc-ball">🏆</span>
+  <span class="wc-text"><strong>World Cup 2026 is here!</strong> Fast-track your <strong>USA &amp; Canada</strong> visa, flight &amp; hotel letters — limited slots.</span>
+  <button class="wc-cta" onclick="showPage('contact')">Get My World Cup Visa →</button>
+  <button class="wc-close" onclick="dismissWC()" aria-label="Close">✕</button>
+</div>
+<script>
+  (function(){
+    if(localStorage.getItem('wcDismissed')==='1'){
+      var b=document.getElementById('wcBanner'); if(b) b.style.display='none';
+    } else {
+      document.body.classList.add('wc-active');
+    }
+  })();
+  function dismissWC(){
+    localStorage.setItem('wcDismissed','1');
+    var b=document.getElementById('wcBanner'); if(b) b.style.display='none';
+    document.body.classList.remove('wc-active');
+  }
+</script>
 
 <!-- NAV -->
 <nav id="navbar">
@@ -490,6 +538,40 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
         <div class="stat-item"><span class="stat-num">98%</span><span class="stat-label">Success Rate</span></div>
         <div class="stat-item"><span class="stat-num">47</span><span class="stat-label">Countries Served</span></div>
         <div class="stat-item"><span class="stat-num">8yr</span><span class="stat-label">Experience</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLAG STRIP -->
+  <div style="background:#0a1628;padding:14px 0;overflow:hidden;border-top:1px solid rgba(201,168,76,0.15);border-bottom:1px solid rgba(201,168,76,0.15)">
+    <div style="display:flex;gap:0;width:max-content;animation:scrollLeft 30s linear infinite">
+      <div style="display:flex;gap:32px;align-items:center;padding:0 16px;white-space:nowrap;font-size:0.85rem;color:#8899bb">
+        <span>🇬🇧 United Kingdom</span><span>🇺🇸 United States</span><span>🇨🇦 Canada</span><span>🇩🇪 Germany</span><span>🇦🇺 Australia</span><span>🇵🇱 Poland</span><span>🇵🇹 Portugal</span><span>🇱🇻 Latvia</span><span>🇯🇵 Japan</span><span>🇰🇷 South Korea</span><span>🇦🇪 UAE</span><span>🇫🇷 France</span><span>🇳🇱 Netherlands</span><span>🇧🇪 Belgium</span><span>🇮🇹 Italy</span><span>🇪🇸 Spain</span><span>🇸🇬 Singapore</span><span>🇳🇴 Norway</span><span>🇫🇮 Finland</span><span style="color:#b8860b">✦ 47 Countries Served ✦</span>
+      </div>
+      <div style="display:flex;gap:32px;align-items:center;padding:0 16px;white-space:nowrap;font-size:0.85rem;color:#8899bb">
+        <span>🇬🇧 United Kingdom</span><span>🇺🇸 United States</span><span>🇨🇦 Canada</span><span>🇩🇪 Germany</span><span>🇦🇺 Australia</span><span>🇵🇱 Poland</span><span>🇵🇹 Portugal</span><span>🇱🇻 Latvia</span><span>🇯🇵 Japan</span><span>🇰🇷 South Korea</span><span>🇦🇪 UAE</span><span>🇫🇷 France</span><span>🇳🇱 Netherlands</span><span>🇧🇪 Belgium</span><span>🇮🇹 Italy</span><span>🇪🇸 Spain</span><span>🇸🇬 Singapore</span><span>🇳🇴 Norway</span><span>🇫🇮 Finland</span><span style="color:#b8860b">✦ 47 Countries Served ✦</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORLD CUP 2026 PROMO SECTION -->
+  <section style="padding:70px 5%">
+    <div style="max-width:1100px;margin:0 auto;background:linear-gradient(135deg,#0a1628 0%,#132952 55%,#1e3a6e 100%);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-xl);padding:3rem;position:relative;overflow:hidden;box-shadow:0 20px 50px rgba(10,22,40,0.25)">
+      <div style="position:absolute;top:-60px;right:-40px;font-size:14rem;opacity:0.07;pointer-events:none;line-height:1">🏆</div>
+      <div style="position:absolute;bottom:-50px;left:-30px;width:260px;height:260px;background:rgba(201,168,76,0.08);border-radius:50%;filter:blur(50px);pointer-events:none"></div>
+      <div style="position:relative;z-index:1">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:100px;padding:6px 16px;font-size:0.75rem;font-weight:600;color:var(--gold-light);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:1.4rem">🏆 FIFA World Cup 2026 · USA · Canada · Mexico</div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;color:#fff;line-height:1.15;margin-bottom:1rem">Going to the <strong style="font-weight:600;color:var(--gold-light)">World Cup?</strong><br>We'll get your visa ready.</h2>
+        <p style="color:#cdd8ee;font-size:1rem;line-height:1.7;max-width:560px;margin-bottom:1.8rem">The biggest tournament on Earth is happening across the <strong style="color:#fff">USA &amp; Canada</strong>. Don't miss a single match because of paperwork. We fast-track everything you need to be in the stadium.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1.2rem"><div style="font-size:1.6rem;margin-bottom:0.4rem">🛂</div><div style="color:#fff;font-weight:600;font-size:0.92rem;margin-bottom:0.2rem">USA &amp; Canada Visas</div><div style="color:#8899bb;font-size:0.8rem">B-1/B-2 visitor &amp; eTA — expertly prepared</div></div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1.2rem"><div style="font-size:1.6rem;margin-bottom:0.4rem">✈️</div><div style="color:#fff;font-weight:600;font-size:0.92rem;margin-bottom:0.2rem">Flight &amp; Hotel Letters</div><div style="color:#8899bb;font-size:0.8rem">Embassy-accepted, same-day delivery</div></div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1.2rem"><div style="font-size:1.6rem;margin-bottom:0.4rem">🛡️</div><div style="color:#fff;font-weight:600;font-size:0.92rem;margin-bottom:0.2rem">Travel Insurance</div><div style="color:#8899bb;font-size:0.8rem">Full medical cover for your trip</div></div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button onclick="showPage('contact')" style="background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0a1628;border:none;padding:14px 30px;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;box-shadow:0 6px 18px rgba(201,168,76,0.35)">🏆 Get My World Cup Visa</button>
+          <button onclick="showSvcDetail('Tourist / Visit Visa')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);color:#fff;padding:14px 28px;border-radius:10px;font-weight:500;font-size:0.95rem;cursor:pointer">See the Full Package</button>
+        </div>
       </div>
     </div>
   </section>
@@ -917,7 +999,7 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
       <div class="service-full-card" onclick="showSvcDetail('EU Direct Employment')">
         <span class="s-icon">🇪🇺</span>
         <h3>EU Direct Employment</h3>
-        <p>Direct job placement with employers in Poland, Lithuania, Portugal, Spain, Norway, Finland, Czech Republic, Slovakia, Austria, Hungary, Bulgaria, Montenegro, North Macedonia and Ukraine — including work permit and visa processing from start to finish.</p>
+        <p>Direct job placement with employers in Poland, Latvia, Lithuania, Portugal, Spain, Norway, Finland, Czech Republic, Slovakia, Austria, Hungary, Bulgaria, Montenegro, North Macedonia, Ukraine, Japan and South Korea — including work permit and visa processing from start to finish.</p>
         <span class="s-tag">Work → Europe</span><span class="apply-hint">→ Apply now</span>
       </div>
     </div>
@@ -1396,6 +1478,18 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
         <img src="logo.png" alt="SkyGlobe Limited" style="height:72px;width:auto;border-radius:12px">
       </div>
       <p>Your trusted partner for global travel, immigration, and education. Turning international ambitions into lived realities since 2016.</p>
+      <div style="display:flex;gap:10px;margin-top:1.2rem;flex-wrap:wrap">
+        <a href="https://www.tiktok.com/@skyglobe_limited" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:#fff;font-size:0.78rem;font-weight:500;text-decoration:none;transition:0.25s" onmouseover="this.style.borderColor='#b8860b';this.style.color='#e6c97a'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='#fff'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.28 8.28 0 004.83 1.55V6.79a4.85 4.85 0 01-1.06-.1z"/></svg>
+          @skyglobe_limited
+        </a>
+        <a href="https://wa.me/17373998522" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.25);border-radius:8px;padding:7px 13px;color:#25D366;font-size:0.78rem;font-weight:500;text-decoration:none;transition:0.25s" onmouseover="this.style.background='rgba(37,211,102,0.2)'" onmouseout="this.style.background='rgba(37,211,102,0.12)'">
+          💬 WhatsApp Us
+        </a>
+        <a href="mailto:insights.skyglobe@gmail.com" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:#8899bb;font-size:0.78rem;font-weight:500;text-decoration:none;transition:0.25s" onmouseover="this.style.color='#e6c97a'" onmouseout="this.style.color='#8899bb'">
+          ✉️ Email Us
+        </a>
+      </div>
     </div>
     <div class="footer-col">
       <h5>Services</h5>
@@ -2648,9 +2742,9 @@ const SERVICE_DETAILS = {
   'EU Direct Employment': {
     icon:'🇪🇺', tag:'Work → Europe',
     headline:'EU Direct Employment Programme',
-    about:'We connect you directly with verified employers in 14 European countries — and handle the complete work permit and visa process from offer letter to arrival. No agency fees charged to the employer.',
+    about:'We connect you directly with verified employers in 17 countries across Europe and Asia — and handle the complete work permit and visa process from offer letter to arrival. No agency fees charged to the employer.',
     includes:['CV review & job matching','Direct employer introduction','Job offer letter facilitation','Work permit application & support','National visa (D-visa) processing','Flight & accommodation advisory','Pre-departure briefing & orientation','Post-arrival support & employer check-in'],
-    countries:['🇵🇱 Poland','🇲🇪 Montenegro','🇱🇹 Lithuania','🇵🇹 Portugal','🇪🇸 Spain','🇳🇴 Norway','🇫🇮 Finland','🇨🇿 Czech Republic','🇸🇰 Slovakia','🇺🇦 Ukraine','🇦🇹 Austria','🇲🇰 North Macedonia','🇧🇬 Bulgaria','🇭🇺 Hungary'],
+    countries:['🇵🇱 Poland','🇲🇪 Montenegro','🇱🇹 Lithuania','🇵🇹 Portugal','🇱🇻 Latvia','🇪🇸 Spain','🇳🇴 Norway','🇫🇮 Finland','🇨🇿 Czech Republic','🇸🇰 Slovakia','🇺🇦 Ukraine','🇦🇹 Austria','🇲🇰 North Macedonia','🇧🇬 Bulgaria','🇭🇺 Hungary','🇯🇵 Japan','🇰🇷 South Korea'],
     timeline:'8–20 weeks from application to departure',
     note:'Requires valid passport, clean criminal record, and relevant work experience.'
   },
@@ -3823,6 +3917,34 @@ function initGlobe(){
   if(!el||typeof Globe==='undefined')return;
   const size=el.offsetWidth||560;
   const globe=Globe()(el);
+
+  const continentLabels=[
+    {lat:45,lng:-100,text:'North America'},
+    {lat:-15,lng:-55,text:'South America'},
+    {lat:52,lng:20,text:'Europe'},
+    {lat:10,lng:22,text:'Africa'},
+    {lat:35,lng:90,text:'Asia'},
+    {lat:-25,lng:135,text:'Australia'},
+    {lat:-75,lng:0,text:'Antarctica'},
+  ];
+
+  const cities=[
+    {lat:40.71,lng:-74.0,label:'🗽 New York (HQ)',color:'#b8860b'},
+    {lat:51.5,lng:-0.12,label:'🇬🇧 London',color:'#d4a017'},
+    {lat:48.85,lng:2.35,label:'🇫🇷 Paris',color:'#b8860b'},
+    {lat:52.23,lng:21.01,label:'🇵🇱 Warsaw',color:'#d4a017'},
+    {lat:25.2,lng:55.27,label:'🇦🇪 Dubai',color:'#b8860b'},
+    {lat:6.46,lng:3.39,label:'🇳🇬 Lagos',color:'#d4a017'},
+    {lat:-33.87,lng:151.21,label:'🇦🇺 Sydney',color:'#b8860b'},
+    {lat:1.35,lng:103.82,label:'🇸🇬 Singapore',color:'#d4a017'},
+    {lat:28.63,lng:77.22,label:'🇮🇳 New Delhi',color:'#b8860b'},
+    {lat:-1.29,lng:36.82,label:'🇰🇪 Nairobi',color:'#d4a017'},
+    {lat:35.68,lng:139.69,label:'🇯🇵 Tokyo',color:'#b8860b'},
+    {lat:37.57,lng:126.97,label:'🇰🇷 Seoul',color:'#d4a017'},
+    {lat:38.72,lng:-9.14,label:'🇵🇹 Lisbon',color:'#b8860b'},
+    {lat:56.95,lng:24.11,label:'🇱🇻 Riga',color:'#d4a017'},
+  ];
+
   globe
     .width(size).height(size)
     .backgroundColor('rgba(0,0,0,0)')
@@ -3841,30 +3963,33 @@ function initGlobe(){
       {startLat:1.35,startLng:103.82,endLat:40.71,endLng:-74.0,color:'#d4a017'},
       {startLat:28.63,startLng:77.22,endLat:51.5,endLng:-0.12,color:'#b8860b'},
       {startLat:-1.29,startLng:36.82,endLat:48.85,endLng:2.35,color:'#d4a017'},
+      {startLat:35.68,startLng:139.69,endLat:40.71,endLng:-74.0,color:'#b8860b'},
+      {startLat:37.57,startLng:126.97,endLat:51.5,endLng:-0.12,color:'#d4a017'},
+      {startLat:38.72,startLng:-9.14,endLat:6.46,endLng:3.39,color:'#b8860b'},
+      {startLat:56.95,startLng:24.11,endLat:6.46,endLng:3.39,color:'#d4a017'},
     ])
     .arcColor('color')
     .arcDashLength(0.4)
     .arcDashGap(0.2)
-    .arcDashAnimateTime(2200)
-    .arcStroke(0.5)
-    .pointsData([
-      {lat:40.71,lng:-74.0,label:'New York (HQ)'},
-      {lat:51.5,lng:-0.12,label:'London'},
-      {lat:48.85,lng:2.35,label:'Paris'},
-      {lat:52.23,lng:21.01,label:'Warsaw'},
-      {lat:25.2,lng:55.27,label:'Dubai'},
-      {lat:6.46,lng:3.39,label:'Lagos'},
-      {lat:-33.87,lng:151.21,label:'Sydney'},
-      {lat:1.35,lng:103.82,label:'Singapore'},
-      {lat:28.63,lng:77.22,label:'New Delhi'},
-      {lat:-1.29,lng:36.82,label:'Nairobi'},
-    ])
-    .pointColor(()=>'#b8860b')
-    .pointAltitude(0.04)
-    .pointRadius(0.4)
-    .pointLabel('label');
+    .arcDashAnimateTime(2000)
+    .arcStroke(0.6)
+    .pointsData(cities)
+    .pointColor('color')
+    .pointAltitude(0.05)
+    .pointRadius(0.5)
+    .pointLabel('label')
+    .labelsData(continentLabels)
+    .labelLat('lat')
+    .labelLng('lng')
+    .labelText('text')
+    .labelSize(1.4)
+    .labelColor(()=>'rgba(230,201,122,0.85)')
+    .labelResolution(2)
+    .labelAltitude(0.02)
+    .labelDotRadius(0);
+
   globe.controls().autoRotate=true;
-  globe.controls().autoRotateSpeed=0.6;
+  globe.controls().autoRotateSpeed=0.5;
   globe.controls().enableZoom=false;
   window.addEventListener('resize',()=>{
     const w=el.offsetWidth;
