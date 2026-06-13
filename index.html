@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/globe.gl@2.31.0/dist/globe.gl.min.js"></script>
 <script>
   const API_URL = 'https://skyglobe-limited-1.onrender.com/api/contact';
 </script>
@@ -73,8 +74,7 @@ nav.scrolled{background:#ffffff;backdrop-filter:blur(12px);border-bottom:1px sol
 /* HERO */
 .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:100px 5% 60px;background:linear-gradient(135deg,#ffffff 0%,#f0f5ff 50%,#fdf9f0 100%)}
 .hero-bg{position:absolute;inset:0;z-index:0}
-.globe-svg{position:absolute;right:-5%;top:50%;transform:translateY(-50%);width:55%;max-width:700px;opacity:0.18;animation:globeSpin 80s linear infinite;filter:drop-shadow(0 0 40px rgba(10,22,40,0.12))}
-@keyframes globeSpin{from{transform:translateY(-50%) rotate(0deg)}to{transform:translateY(-50%) rotate(360deg)}}
+#globeContainer canvas{border-radius:50%}
 .grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(10,22,40,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(10,22,40,0.03) 1px,transparent 1px);background-size:60px 60px}
 .glow-blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
 .blob-1{width:500px;height:500px;background:rgba(184,134,11,0.06);top:-100px;right:100px}
@@ -354,37 +354,54 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 .policy-body li{margin-bottom:0.4rem}
 
 /* ── CHAT WIDGET ─────────────────────────────────────────────────── */
-.chat-fab{position:fixed;bottom:28px;right:28px;z-index:9000;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;cursor:pointer;box-shadow:0 8px 28px rgba(201,168,76,0.45);display:flex;align-items:center;justify-content:center;font-size:26px;transition:var(--trans);animation:chatPop 0.5s 1.5s both}
+.chat-fab{position:fixed;bottom:28px;right:28px;z-index:9000;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;cursor:pointer;box-shadow:0 8px 28px rgba(184,134,11,0.45);display:flex;align-items:center;justify-content:center;font-size:26px;transition:var(--trans);animation:chatPop 0.5s 1.5s both}
 @keyframes chatPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes aiDot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
-.chat-fab:hover{transform:scale(1.1);box-shadow:0 14px 40px rgba(201,168,76,0.6)}
-.chat-badge{position:absolute;top:-3px;right:-3px;width:20px;height:20px;background:#e53935;border-radius:50%;border:2px solid var(--navy);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:white;animation:pulse 2s infinite}
-.chat-panel{position:fixed;bottom:100px;right:28px;z-index:8999;width:360px;background:var(--navy-2);border:1px solid var(--border-strong);border-radius:var(--radius-xl);box-shadow:0 24px 60px rgba(0,0,0,0.55);display:none;flex-direction:column;overflow:hidden}
+.chat-fab:hover{transform:scale(1.1);box-shadow:0 14px 40px rgba(184,134,11,0.6)}
+.chat-badge{position:absolute;top:-3px;right:-3px;width:20px;height:20px;background:#e53935;border-radius:50%;border:2px solid #0a1628;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:white;animation:pulse 2s infinite}
+.chat-panel{position:fixed;bottom:100px;right:28px;z-index:8999;width:360px;background:#0d1f3e;border:1px solid rgba(201,168,76,0.25);border-radius:var(--radius-xl);box-shadow:0 24px 60px rgba(0,0,0,0.55);display:none;flex-direction:column;overflow:hidden}
 .chat-panel.open{display:flex;animation:slideUp 0.3s ease}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.chat-head{background:linear-gradient(135deg,var(--navy-3),var(--navy-light));padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.chat-head{background:linear-gradient(135deg,#132952,#1e3a6e);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,0.15)}
 .chat-head-info{display:flex;align-items:center;gap:10px}
 .chat-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.chat-status .cname{font-size:0.88rem;font-weight:600;color:var(--white)}
+.chat-status .cname{font-size:0.88rem;font-weight:600;color:#ffffff}
 .chat-status .online{font-size:0.72rem;color:#4caf50;display:flex;align-items:center;gap:4px;margin-top:2px}
 .chat-status .online::before{content:'';width:6px;height:6px;background:#4caf50;border-radius:50%;display:inline-block}
-.chat-tabs{display:flex;border-bottom:1px solid var(--border)}
-.chat-tab{flex:1;padding:10px 6px;background:none;border:none;color:var(--muted);font-size:0.78rem;font-weight:500;cursor:pointer;transition:var(--trans);border-bottom:2px solid transparent;font-family:'Outfit',sans-serif}
+.chat-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,0.08)}
+.chat-tab{flex:1;padding:10px 6px;background:none;border:none;color:#8899bb;font-size:0.78rem;font-weight:500;cursor:pointer;transition:var(--trans);border-bottom:2px solid transparent;font-family:'Outfit',sans-serif}
 .chat-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(201,168,76,0.05)}
 .chat-body{flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:180px;max-height:280px}
-.chat-body::-webkit-scrollbar{width:4px}.chat-body::-webkit-scrollbar-track{background:transparent}.chat-body::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.chat-body::-webkit-scrollbar{width:4px}.chat-body::-webkit-scrollbar-track{background:transparent}.chat-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px}
 .chat-msg{max-width:84%;padding:10px 13px;border-radius:14px;font-size:0.83rem;line-height:1.5;word-break:break-word}
-.chat-msg.bot{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-body);align-self:flex-start;border-bottom-left-radius:4px}
-.chat-msg.user{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);align-self:flex-end;font-weight:500;border-bottom-right-radius:4px}
-.chat-sugs{padding:8px 14px 4px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border)}
-.chat-sug{background:rgba(201,168,76,0.1);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:0.73rem;color:var(--gold-light);cursor:pointer;transition:var(--trans);font-family:'Outfit',sans-serif}
+.chat-msg.bot{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#cdd8ee;align-self:flex-start;border-bottom-left-radius:4px}
+.chat-msg.user{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0a1628;align-self:flex-end;font-weight:500;border-bottom-right-radius:4px}
+.chat-sugs{padding:8px 14px 4px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,0.06)}
+.chat-sug{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:20px;padding:5px 11px;font-size:0.73rem;color:#e6c97a;cursor:pointer;transition:var(--trans);font-family:'Outfit',sans-serif}
 .chat-sug:hover{background:rgba(201,168,76,0.22);border-color:var(--gold)}
-.chat-footer{padding:10px 13px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center}
-.chat-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--white);font-size:0.83rem;outline:none;transition:var(--trans);font-family:'Outfit',sans-serif}
-.chat-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.08)}
-.chat-send-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);border:none;border-radius:8px;padding:9px 14px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:var(--trans);font-family:'Outfit',sans-serif;flex-shrink:0}
+.chat-footer{padding:10px 13px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:8px;align-items:center}
+.chat-input{flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:#ffffff;font-size:0.83rem;outline:none;transition:var(--trans);font-family:'Outfit',sans-serif}
+.chat-input::placeholder{color:#8899bb}
+.chat-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.1)}
+.chat-send-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0a1628;border:none;border-radius:8px;padding:9px 14px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:var(--trans);font-family:'Outfit',sans-serif;flex-shrink:0}
 .chat-send-btn:hover{opacity:0.85}
 @media(max-width:400px){.chat-panel{width:calc(100vw - 32px);right:16px}.chat-fab{bottom:16px;right:16px}}
+
+/* ── TESTIMONIAL TICKER ──────────────────────────────────────────── */
+.testi-track-wrap{overflow:hidden;mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.testi-track{display:flex;gap:1rem;width:max-content;animation:scrollLeft 40s linear infinite}
+.testi-track-rev{animation:scrollRight 44s linear infinite}
+@keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes scrollRight{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
+.testi-track-wrap:hover .testi-track,.testi-track-wrap:hover .testi-track-rev{animation-play-state:paused}
+.testi-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1.4rem 1.6rem;width:300px;flex-shrink:0;transition:transform 0.3s,border-color 0.3s}
+.testi-card:hover{transform:translateY(-4px);border-color:rgba(184,134,11,0.5)}
+.testi-stars{color:#b8860b;font-size:0.9rem;margin-bottom:0.7rem;letter-spacing:2px}
+.testi-card p{font-size:0.85rem;color:#cdd8ee;line-height:1.65;font-style:italic;margin-bottom:1rem}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#b8860b,#d4a017);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.9rem;flex-shrink:0}
+.testi-author strong{display:block;font-size:0.83rem;font-weight:600;color:#fff}
+.testi-author span{font-size:0.72rem;color:#8899bb}
 
 /* ── ELIGIBILITY CHECKER ─────────────────────────────────────────── */
 .elig-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px}
@@ -457,47 +474,7 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
       <div class="grid-lines"></div>
       <div class="glow-blob blob-1"></div>
       <div class="glow-blob blob-2"></div>
-      <svg class="globe-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="globeGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#64b4ff" stop-opacity="0.15"/>
-            <stop offset="60%" stop-color="#c9a84c" stop-opacity="0.06"/>
-            <stop offset="100%" stop-color="#0a1628" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <!-- Glow fill -->
-        <circle cx="200" cy="200" r="195" fill="url(#globeGlow)"/>
-        <!-- Outer ring -->
-        <circle cx="200" cy="200" r="195" fill="none" stroke="#64b4ff" stroke-width="1.2" opacity="0.7"/>
-        <!-- Meridians -->
-        <ellipse cx="200" cy="200" rx="60" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.7" opacity="0.55"/>
-        <ellipse cx="200" cy="200" rx="120" ry="195" fill="none" stroke="#64b4ff" stroke-width="0.6" opacity="0.45"/>
-        <ellipse cx="200" cy="200" rx="170" ry="195" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.38"/>
-        <!-- Equator and axis -->
-        <line x1="5" y1="200" x2="395" y2="200" stroke="#64b4ff" stroke-width="0.9" opacity="0.6"/>
-        <line x1="200" y1="5" x2="200" y2="395" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <!-- Latitude rings -->
-        <ellipse cx="200" cy="200" rx="195" ry="95" fill="none" stroke="#64b4ff" stroke-width="0.7" opacity="0.5"/>
-        <ellipse cx="200" cy="200" rx="195" ry="155" fill="none" stroke="#c9a84c" stroke-width="0.6" opacity="0.4"/>
-        <ellipse cx="200" cy="200" rx="185" ry="45" fill="none" stroke="#a0cfff" stroke-width="0.5" opacity="0.35"/>
-        <!-- Continent blobs — more vivid -->
-        <circle cx="158" cy="148" r="36" fill="#3a8fd4" opacity="0.22"/>
-        <circle cx="220" cy="162" r="29" fill="#c9a84c" opacity="0.18"/>
-        <circle cx="196" cy="232" r="24" fill="#3a8fd4" opacity="0.16"/>
-        <circle cx="258" cy="172" r="20" fill="#c9a84c" opacity="0.18"/>
-        <circle cx="140" cy="202" r="16" fill="#64b4ff" opacity="0.2"/>
-        <circle cx="248" cy="228" r="14" fill="#a0cfff" opacity="0.16"/>
-        <!-- Network nodes -->
-        <circle cx="200" cy="5" r="3" fill="#c9a84c" opacity="0.8"/>
-        <circle cx="200" cy="395" r="3" fill="#c9a84c" opacity="0.8"/>
-        <circle cx="5" cy="200" r="3" fill="#64b4ff" opacity="0.8"/>
-        <circle cx="395" cy="200" r="3" fill="#64b4ff" opacity="0.8"/>
-        <circle cx="200" cy="200" r="4" fill="#e6c97a" opacity="0.6"/>
-        <!-- Connection lines -->
-        <line x1="200" y1="200" x2="158" y2="148" stroke="#c9a84c" stroke-width="0.5" opacity="0.3" stroke-dasharray="3,4"/>
-        <line x1="200" y1="200" x2="258" y2="172" stroke="#64b4ff" stroke-width="0.5" opacity="0.3" stroke-dasharray="3,4"/>
-        <line x1="200" y1="200" x2="196" y2="232" stroke="#c9a84c" stroke-width="0.5" opacity="0.25" stroke-dasharray="3,4"/>
-      </svg>
+      <div id="globeContainer" style="position:absolute;right:-8%;top:50%;transform:translateY(-50%);width:56%;max-width:680px;aspect-ratio:1/1;z-index:0"></div>
     </div>
     <div class="hero-content">
       <div class="hero-badge">✦ Global Opportunity Awaits</div>
@@ -713,35 +690,42 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
   <div class="section-divider"></div>
 
   <!-- TESTIMONIALS -->
-  <section>
+  <section style="background:#0a1628;padding:80px 5%;overflow:hidden">
     <div style="text-align:center;margin-bottom:3rem">
-      <div class="section-tag">Client Stories</div>
-      <h2 class="section-title">What Our <strong>Clients Say</strong></h2>
+      <div style="display:inline-block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.8rem">Client Stories</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.2;margin-bottom:0.5rem;color:#ffffff">What Our <strong style="font-weight:600">Clients Say</strong></h2>
+      <p style="color:#8899bb;font-size:0.95rem">Real stories from clients across 47 countries</p>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem">
-      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem">
-        <div style="color:var(--gold);font-size:1rem;margin-bottom:0.8rem">★★★★★</div>
-        <p style="font-size:0.9rem;color:var(--text-body);line-height:1.7;font-style:italic;margin-bottom:1.2rem">"SkyGlobe handled my UK student visa from start to finish. The document checklist alone saved me weeks of confusion. Visa approved on the first attempt!"</p>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;background:rgba(201,168,76,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700">A</div>
-          <div><div style="font-size:0.88rem;font-weight:600;color:var(--white)">Adaeze O.</div><div style="font-size:0.75rem;color:var(--muted)">Student Visa → United Kingdom</div></div>
-        </div>
+
+    <!-- Scrolling ticker row 1 (left→right) -->
+    <div class="testi-track-wrap" style="margin-bottom:1rem">
+      <div class="testi-track" id="testiRow1">
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"SkyGlobe handled my UK student visa from start to finish. Approved on the first attempt — incredible service!"</p><div class="testi-author"><div class="testi-av">A</div><div><strong>Adaeze O.</strong><span>🇳🇬 Nigeria → 🇬🇧 UK</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"Got a job in Poland through their EU programme. They handled the work permit and visa. I'm now earning in euros!"</p><div class="testi-author"><div class="testi-av">K</div><div><strong>Kwame B.</strong><span>🇬🇭 Ghana → 🇵🇱 Poland</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"Schengen visa, flight letter and hotel letter all delivered the same day. Truly professional service."</p><div class="testi-author"><div class="testi-av">M</div><div><strong>Maria S.</strong><span>🇧🇷 Brazil → 🇪🇺 Schengen</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"My Canada Express Entry was processed flawlessly. SkyGlobe's knowledge of immigration law is unmatched."</p><div class="testi-author"><div class="testi-av">R</div><div><strong>Ravi M.</strong><span>🇮🇳 India → 🇨🇦 Canada</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"I was rejected twice before finding SkyGlobe. They identified the errors and my third application was approved!"</p><div class="testi-author"><div class="testi-av">F</div><div><strong>Fatima A.</strong><span>🇲🇦 Morocco → 🇩🇪 Germany</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"The scholarship application support was exceptional. I secured a full scholarship to a top UK university!"</p><div class="testi-author"><div class="testi-av">C</div><div><strong>Chisom E.</strong><span>🇳🇬 Nigeria → 🇬🇧 UK</span></div></div></div>
+        <!-- duplicates for infinite scroll -->
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"SkyGlobe handled my UK student visa from start to finish. Approved on the first attempt — incredible service!"</p><div class="testi-author"><div class="testi-av">A</div><div><strong>Adaeze O.</strong><span>🇳🇬 Nigeria → 🇬🇧 UK</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"Got a job in Poland through their EU programme. They handled the work permit and visa. I'm now earning in euros!"</p><div class="testi-author"><div class="testi-av">K</div><div><strong>Kwame B.</strong><span>🇬🇭 Ghana → 🇵🇱 Poland</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"Schengen visa, flight letter and hotel letter all delivered the same day. Truly professional service."</p><div class="testi-author"><div class="testi-av">M</div><div><strong>Maria S.</strong><span>🇧🇷 Brazil → 🇪🇺 Schengen</span></div></div></div>
       </div>
-      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem">
-        <div style="color:var(--gold);font-size:1rem;margin-bottom:0.8rem">★★★★★</div>
-        <p style="font-size:0.9rem;color:var(--text-body);line-height:1.7;font-style:italic;margin-bottom:1.2rem">"I got a factory job in Poland through their EU employment programme. They handled the work permit, the visa, everything. I'm now earning in euros and supporting my family back home."</p>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;background:rgba(201,168,76,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700">K</div>
-          <div><div style="font-size:0.88rem;font-weight:600;color:var(--white)">Kwame B.</div><div style="font-size:0.75rem;color:var(--muted)">EU Direct Employment → Poland</div></div>
-        </div>
-      </div>
-      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem">
-        <div style="color:var(--gold);font-size:1rem;margin-bottom:0.8rem">★★★★★</div>
-        <p style="font-size:0.9rem;color:var(--text-body);line-height:1.7;font-style:italic;margin-bottom:1.2rem">"Needed a Schengen visa urgently for a business trip. Flight reservation, hotel letter, and insurance — all delivered the same day. Professional service from start to finish."</p>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;background:rgba(201,168,76,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700">M</div>
-          <div><div style="font-size:0.88rem;font-weight:600;color:var(--white)">Maria S.</div><div style="font-size:0.75rem;color:var(--muted)">Tourist Visa → Schengen Area</div></div>
-        </div>
+    </div>
+
+    <!-- Scrolling ticker row 2 (right→left) -->
+    <div class="testi-track-wrap">
+      <div class="testi-track testi-track-rev" id="testiRow2">
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"Australia student visa processed in 6 weeks. The team kept me updated at every stage. So professional!"</p><div class="testi-author"><div class="testi-av">L</div><div><strong>Linh N.</strong><span>🇻🇳 Vietnam → 🇦🇺 Australia</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"My family's UAE visit visa was ready in 3 days. The application portal makes everything so easy to track."</p><div class="testi-author"><div class="testi-av">O</div><div><strong>Omar A.</strong><span>🇪🇬 Egypt → 🇦🇪 UAE</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"From job offer in Lithuania to landing in Vilnius — SkyGlobe managed every step. Forever grateful."</p><div class="testi-author"><div class="testi-av">J</div><div><strong>John M.</strong><span>🇰🇪 Kenya → 🇱🇹 Lithuania</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"Needed a USA tourist visa on short notice. They prepared everything perfectly and I got a 10-year visa!"</p><div class="testi-author"><div class="testi-av">P</div><div><strong>Priya K.</strong><span>🇵🇰 Pakistan → 🇺🇸 USA</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"University admission in Germany sorted in 8 weeks. SkyGlobe even helped with my German bank account!"</p><div class="testi-author"><div class="testi-av">E</div><div><strong>Emmanuel T.</strong><span>🇨🇲 Cameroon → 🇩🇪 Germany</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"The travel insurance they provided covered my whole Schengen trip. Simple, fast, reliable — 10/10."</p><div class="testi-author"><div class="testi-av">S</div><div><strong>Sara H.</strong><span>🇸🇦 Saudi Arabia → 🇫🇷 France</span></div></div></div>
+        <!-- duplicates -->
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"Australia student visa processed in 6 weeks. The team kept me updated at every stage. So professional!"</p><div class="testi-author"><div class="testi-av">L</div><div><strong>Linh N.</strong><span>🇻🇳 Vietnam → 🇦🇺 Australia</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"My family's UAE visit visa was ready in 3 days. The application portal makes everything so easy to track."</p><div class="testi-author"><div class="testi-av">O</div><div><strong>Omar A.</strong><span>🇪🇬 Egypt → 🇦🇪 UAE</span></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><p>"From job offer in Lithuania to landing in Vilnius — SkyGlobe managed every step. Forever grateful."</p><div class="testi-author"><div class="testi-av">J</div><div><strong>John M.</strong><span>🇰🇪 Kenya → 🇱🇹 Lithuania</span></div></div></div>
       </div>
     </div>
   </section>
@@ -3833,6 +3817,63 @@ function printApp(cardId) {
   w.document.close();
 }
 
+// ── REAL 3D GLOBE ─────────────────────────────────────────────────────
+function initGlobe(){
+  const el=document.getElementById('globeContainer');
+  if(!el||typeof Globe==='undefined')return;
+  const size=el.offsetWidth||560;
+  const globe=Globe()(el);
+  globe
+    .width(size).height(size)
+    .backgroundColor('rgba(0,0,0,0)')
+    .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+    .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+    .atmosphereColor('#b8860b')
+    .atmosphereAltitude(0.22)
+    .arcsData([
+      {startLat:40.71,startLng:-74.0,endLat:51.5,endLng:-0.12,color:'#b8860b'},
+      {startLat:51.5,startLng:-0.12,endLat:48.85,endLng:2.35,color:'#d4a017'},
+      {startLat:40.71,startLng:-74.0,endLat:52.23,endLng:21.01,color:'#b8860b'},
+      {startLat:40.71,startLng:-74.0,endLat:-33.87,endLng:151.21,color:'#d4a017'},
+      {startLat:51.5,startLng:-0.12,endLat:25.2,endLng:55.27,color:'#b8860b'},
+      {startLat:6.46,startLng:3.39,endLat:40.71,endLng:-74.0,color:'#d4a017'},
+      {startLat:6.46,startLng:3.39,endLat:51.5,endLng:-0.12,color:'#b8860b'},
+      {startLat:1.35,startLng:103.82,endLat:40.71,endLng:-74.0,color:'#d4a017'},
+      {startLat:28.63,startLng:77.22,endLat:51.5,endLng:-0.12,color:'#b8860b'},
+      {startLat:-1.29,startLng:36.82,endLat:48.85,endLng:2.35,color:'#d4a017'},
+    ])
+    .arcColor('color')
+    .arcDashLength(0.4)
+    .arcDashGap(0.2)
+    .arcDashAnimateTime(2200)
+    .arcStroke(0.5)
+    .pointsData([
+      {lat:40.71,lng:-74.0,label:'New York (HQ)'},
+      {lat:51.5,lng:-0.12,label:'London'},
+      {lat:48.85,lng:2.35,label:'Paris'},
+      {lat:52.23,lng:21.01,label:'Warsaw'},
+      {lat:25.2,lng:55.27,label:'Dubai'},
+      {lat:6.46,lng:3.39,label:'Lagos'},
+      {lat:-33.87,lng:151.21,label:'Sydney'},
+      {lat:1.35,lng:103.82,label:'Singapore'},
+      {lat:28.63,lng:77.22,label:'New Delhi'},
+      {lat:-1.29,lng:36.82,label:'Nairobi'},
+    ])
+    .pointColor(()=>'#b8860b')
+    .pointAltitude(0.04)
+    .pointRadius(0.4)
+    .pointLabel('label');
+  globe.controls().autoRotate=true;
+  globe.controls().autoRotateSpeed=0.6;
+  globe.controls().enableZoom=false;
+  window.addEventListener('resize',()=>{
+    const w=el.offsetWidth;
+    globe.width(w).height(w);
+  });
+}
+// Wait for globe.gl to load
+if(typeof Globe!=='undefined'){initGlobe();}
+else{window.addEventListener('load',initGlobe);}
 </script>
 
 <!-- ===== ELIGIBILITY CHECKER OVERLAY ===== -->
