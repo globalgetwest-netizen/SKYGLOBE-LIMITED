@@ -458,33 +458,36 @@ app.post('/api/chat', async (req, res) => {
   if (!message || !String(message).trim())
     return res.status(400).json({ error: 'Message is required.' });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey)
     return res.status(500).json({ error: 'AI assistant is not configured yet. Please WhatsApp us at +1 737-399-8522 for help.' });
 
   try {
     const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
-    const messages = [...safeHistory, { role: 'user', content: String(message).trim() }];
+    // Convert history to Gemini format (role: user/model)
+    const contents = safeHistory.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
+    contents.push({ role: 'user', parts: [{ text: String(message).trim() }] });
 
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 1024,
-        system: SKYGLOBE_SYSTEM,
-        messages,
-      }),
-    });
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SKYGLOBE_SYSTEM }] },
+          contents,
+          generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
+        }),
+      }
+    );
 
     const data = await r.json();
     if (!r.ok) throw new Error(data.error?.message || `API error ${r.status}`);
 
-    const reply = data.content?.[0]?.text || 'Sorry, I could not generate a response.';
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
     res.json({ reply });
   } catch (e) {
     console.error('AI chat error:', e.message);
@@ -494,17 +497,20 @@ app.post('/api/chat', async (req, res) => {
 
 // ── TEST ──────────────────────────────────────────────────────────────────────
 app.get('/api/test-ai', async (req, res) => {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return res.json({ ok: false, error: 'ANTHROPIC_API_KEY is NOT set on Render. Please add it in Environment settings.' });
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return res.json({ ok: false, error: 'GEMINI_API_KEY is NOT set on Render. Please add it in Environment settings.' });
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 50, messages: [{ role: 'user', content: 'Say: AI is working!' }] }),
-    });
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Say: AI is working!' }] }] }),
+      }
+    );
     const data = await r.json();
-    if (!r.ok) return res.json({ ok: false, error: data.error?.message || `API returned ${r.status}`, hint: 'Check your API key is correct and has credits.' });
-    res.json({ ok: true, reply: data.content?.[0]?.text });
+    if (!r.ok) return res.json({ ok: false, error: data.error?.message || `API returned ${r.status}`, hint: 'Check your Gemini API key at aistudio.google.com' });
+    res.json({ ok: true, reply: data.candidates?.[0]?.content?.parts?.[0]?.text });
   } catch (e) {
     res.json({ ok: false, error: e.message });
   }
