@@ -76,7 +76,7 @@ function storagePublicUrl(filePath) {
 async function sendEmail(to, subject, html, replyTo) {
   const body = {
     from: 'SkyGlobe Limited <support@skyglobegroup.com>',
-    to: [to],
+    to: Array.isArray(to) ? to : [to],
     subject,
     html,
   };
@@ -105,7 +105,7 @@ app.post('/api/contact', async (req, res) => {
   if (!process.env.RESEND_API_KEY)
     return res.status(500).json({ error: 'Email service not configured. Contact us via WhatsApp.' });
 
-  const recipientEmail = process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com';
+  const recipientEmail = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0">
@@ -168,7 +168,7 @@ app.post('/api/apply', async (req, res) => {
   }
 
   const timestamp = new Date().toISOString();
-  const recipientEmail = process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com';
+  const recipientEmail = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
 
   const adminHtml = `
     <div style="font-family:sans-serif;max-width:660px;margin:0 auto">
@@ -334,7 +334,7 @@ app.post('/api/admin/update', async (req, res) => {
     } catch (e) {
       console.error('Status email failed:', e.message);
       try {
-        const recipientEmail = process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com';
+        const recipientEmail = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
         await sendEmail(recipientEmail, `⚠️ Manual follow-up needed: ${app_.ref}`,
           `<div style="font-family:sans-serif;padding:20px">
             <h3 style="color:#c9a84c">Status Update (applicant email failed)</h3>
