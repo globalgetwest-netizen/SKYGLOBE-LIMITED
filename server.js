@@ -426,12 +426,13 @@ Company facts:
 - Phone/WhatsApp: +1 737-399-8522
 - Email: insights.skyglobe@gmail.com
 - Website: https://skyglobe-limited-1.onrender.com
+- TikTok: @skyglobe_limited (https://www.tiktok.com/@skyglobe_limited)
 
 Services offered:
 - Student Visas: UK (Tier 4/Student Route), USA (F-1), Canada (Study Permit), Australia (Subclass 500), Germany, Schengen and more
 - Work Visas: UK Skilled Worker, Canada Express Entry/PR, Germany EU Blue Card, Australia Skilled Migration, USA H-1B
 - Tourist & Schengen Visas: 40+ destinations, full package (visa + flight letter + hotel letter + insurance)
-- EU Direct Employment Programme: job placement + work permit + visa in Poland, Lithuania, Portugal, Spain, Norway, Finland, Czech Republic, Slovakia, Ukraine, Austria, North Macedonia, Bulgaria, Hungary, Montenegro — 8–20 weeks
+- EU Direct Employment Programme: job placement + work permit + visa in Poland, Latvia, Lithuania, Portugal, Spain, Norway, Finland, Czech Republic, Slovakia, Ukraine, Austria, North Macedonia, Bulgaria, Hungary, Montenegro, Japan, South Korea — 8–20 weeks (17 countries)
 - University Admissions & Scholarship Applications (helped secure $2M+ in scholarships)
 - Flight Reservation Letters: PNR-backed, embassy-accepted, from $15, same day
 - Real Flight Ticket Booking: 500+ airlines
