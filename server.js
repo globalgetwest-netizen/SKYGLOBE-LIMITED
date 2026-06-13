@@ -417,7 +417,99 @@ app.delete('/api/documents/:id', async (req, res) => {
 
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
+// ── AI CHAT ───────────────────────────────────────────────────────────────────
+const SKYGLOBE_SYSTEM = `You are the AI assistant for SkyGlobe Limited, a premium global travel and immigration consultancy. You are knowledgeable, professional, warm, and concise.
+
+Company facts:
+- Founded 2016, based in New York City
+- 12,400+ visas approved, 98% success rate, 47 countries served
+- Phone/WhatsApp: +1 737-399-8522
+- Email: insights.skyglobe@gmail.com
+- Website: https://skyglobe-limited-1.onrender.com
+
+Services offered:
+- Student Visas: UK (Tier 4/Student Route), USA (F-1), Canada (Study Permit), Australia (Subclass 500), Germany, Schengen and more
+- Work Visas: UK Skilled Worker, Canada Express Entry/PR, Germany EU Blue Card, Australia Skilled Migration, USA H-1B
+- Tourist & Schengen Visas: 40+ destinations, full package (visa + flight letter + hotel letter + insurance)
+- EU Direct Employment Programme: job placement + work permit + visa in Poland, Lithuania, Portugal, Spain, Norway, Finland, Czech Republic, Slovakia, Ukraine, Austria, North Macedonia, Bulgaria, Hungary, Montenegro — 8–20 weeks
+- University Admissions & Scholarship Applications (helped secure $2M+ in scholarships)
+- Flight Reservation Letters: PNR-backed, embassy-accepted, from $15, same day
+- Real Flight Ticket Booking: 500+ airlines
+- Hotel Reservation Letters: embassy-accepted, same day
+- Real Hotel Booking: 150+ countries
+- Travel Insurance: Schengen (€30,000 min), comprehensive, student health cover (OSHC/IHS)
+- Document Translation & Attestation
+- National ID Card Assistance
+
+Fees (service fees, not including government/embassy fees):
+- Flight/Hotel letter: from $15 each, same day
+- Travel insurance: from $20
+- Tourist/Schengen Visa: from $150
+- Student Visa: from $300
+- Work Visa: from $400
+- EU Employment: contact for quote
+
+Application tracking: clients use reference numbers (format SKY-YEAR-XXXX) to track status at any time on the website.
+
+Answer any question the user has about immigration, visas, studying abroad, working abroad, travel, or SkyGlobe's services. If a question is completely unrelated to these topics, politely redirect. Keep answers helpful, accurate, and not too long. Use bullet points or line breaks for clarity. Always encourage users to book a free consultation or WhatsApp for personalised advice.`;
+
+app.post('/api/chat', async (req, res) => {
+  const { message, history } = req.body || {};
+  if (!message || !String(message).trim())
+    return res.status(400).json({ error: 'Message is required.' });
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey)
+    return res.status(500).json({ error: 'AI assistant is not configured yet. Please WhatsApp us at +1 737-399-8522 for help.' });
+
+  try {
+    const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
+    const messages = [...safeHistory, { role: 'user', content: String(message).trim() }];
+
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 1024,
+        system: SKYGLOBE_SYSTEM,
+        messages,
+      }),
+    });
+
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error?.message || `API error ${r.status}`);
+
+    const reply = data.content?.[0]?.text || 'Sorry, I could not generate a response.';
+    res.json({ reply });
+  } catch (e) {
+    console.error('AI chat error:', e.message);
+    res.status(500).json({ error: 'AI assistant is temporarily unavailable. Please WhatsApp us at +1 737-399-8522.' });
+  }
+});
+
 // ── TEST ──────────────────────────────────────────────────────────────────────
+app.get('/api/test-ai', async (req, res) => {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return res.json({ ok: false, error: 'ANTHROPIC_API_KEY is NOT set on Render. Please add it in Environment settings.' });
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 50, messages: [{ role: 'user', content: 'Say: AI is working!' }] }),
+    });
+    const data = await r.json();
+    if (!r.ok) return res.json({ ok: false, error: data.error?.message || `API returned ${r.status}`, hint: 'Check your API key is correct and has credits.' });
+    res.json({ ok: true, reply: data.content?.[0]?.text });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
 app.get('/api/test', async (req, res) => {
   const key = process.env.RESEND_API_KEY;
   const to  = process.env.RECIPIENT_EMAIL || 'insights.skyglobe@gmail.com';
