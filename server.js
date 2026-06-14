@@ -691,6 +691,103 @@ app.post('/api/admin/messages', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── DOCUMENT GENERATOR (SOP / Cover Letter / Visa Letter) ────────────────────
+app.post('/api/generate-doc', async (req, res) => {
+  const { docType, fullName, nationality, destination, institution, program,
+          background, experience, whyHere, goals, extraNotes } = req.body || {};
+
+  if (!docType || !fullName || !destination)
+    return res.status(400).json({ error: 'Missing required fields.' });
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey)
+    return res.status(500).json({ error: 'AI not configured. Please contact support.' });
+
+  const prompts = {
+    sop: `You are an expert academic writer. Write a compelling, professional Statement of Purpose (SOP) for a university application.
+Details:
+- Applicant Name: ${fullName}
+- Nationality: ${nationality || 'Not specified'}
+- Target University/Country: ${institution ? institution + ', ' + destination : destination}
+- Program/Course: ${program || 'Not specified'}
+- Academic Background: ${background || 'Not provided'}
+- Work Experience: ${experience || 'None provided'}
+- Why this university/program: ${whyHere || 'Not provided'}
+- Career Goals: ${goals || 'Not provided'}
+- Additional Notes: ${extraNotes || 'None'}
+
+Write a 4-5 paragraph SOP (600-800 words) that:
+1. Opens with a compelling hook about their motivation
+2. Details their academic/professional background
+3. Explains why this specific program and institution
+4. Describes their future career goals
+5. Closes with a strong statement of intent
+Use formal, professional academic language. Write in first person as the applicant.`,
+
+    coverletter: `You are an expert career coach and professional writer. Write a compelling job cover letter.
+Details:
+- Applicant Name: ${fullName}
+- Nationality: ${nationality || 'Not specified'}
+- Target Country/Company: ${institution ? institution + ', ' + destination : destination}
+- Job Position: ${program || 'Not specified'}
+- Background/Skills: ${background || 'Not provided'}
+- Work Experience: ${experience || 'None provided'}
+- Why this company/role: ${whyHere || 'Not provided'}
+- Career Goals: ${goals || 'Not provided'}
+- Additional Notes: ${extraNotes || 'None'}
+
+Write a professional 3-4 paragraph cover letter (350-500 words) that:
+1. Opens with enthusiasm for the specific role
+2. Highlights 2-3 key achievements from their background
+3. Shows why they are the perfect fit for this company
+4. Closes with a clear call to action
+Use confident, engaging professional language. Write in first person as the applicant.`,
+
+    visaletter: `You are an immigration document specialist. Write a professional visa cover letter / personal statement for a visa application.
+Details:
+- Applicant Name: ${fullName}
+- Nationality: ${nationality || 'Not specified'}
+- Destination Country: ${destination}
+- Purpose of Travel/Study: ${program || 'Visit / Study / Work'}
+- Background: ${background || 'Not provided'}
+- Why travelling to this country: ${whyHere || 'Not provided'}
+- Ties to home country / return plans: ${goals || 'Not provided'}
+- Additional Notes: ${extraNotes || 'None'}
+
+Write a professional visa cover letter (300-400 words) that:
+1. Clearly states the purpose of the visa application
+2. Explains their background and financial stability (reference that documents are enclosed)
+3. Shows genuine ties to their home country and intent to return
+4. Politely requests the visa and thanks the officer
+Use formal, respectful language. Write in first person as the applicant.`,
+  };
+
+  const prompt = prompts[docType];
+  if (!prompt) return res.status(400).json({ error: 'Invalid document type.' });
+
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 2048, temperature: 0.72 },
+        }),
+      }
+    );
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error?.message || `API error ${r.status}`);
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!text) throw new Error('Empty response from AI');
+    res.json({ text });
+  } catch (e) {
+    console.error('Doc gen error:', e.message);
+    res.status(500).json({ error: 'Document generation failed. Please try again.' });
+  }
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
