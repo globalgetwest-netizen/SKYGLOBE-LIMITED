@@ -12,6 +12,39 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SkyGlobe">
 <meta name="description" content="Skyglobe Limited is a premium global travel and study-abroad consultancy. Visas, university admissions, work relocation, and travel documentation.">
+<!-- SEO + Open Graph + Twitter Card -->
+<meta name="keywords" content="visa processing, study abroad, UK visa, Canada visa, university admissions, EU employment, travel consultancy, work permit, student visa, Skyglobe">
+<meta name="robots" content="index, follow">
+<meta name="author" content="SkyGlobe Limited">
+<link rel="canonical" href="https://skyglobegroup.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://skyglobegroup.com/">
+<meta property="og:title" content="SkyGlobe Limited — Your Gateway to Global Opportunity">
+<meta property="og:description" content="Premium visa processing, university admissions, EU employment & travel consultancy. 12,000+ visas approved. 98% success rate. Start your global journey today.">
+<meta property="og:image" content="https://skyglobegroup.com/logo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="SkyGlobe Limited">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SkyGlobe Limited — Your Gateway to Global Opportunity">
+<meta name="twitter:description" content="Premium visa processing, university admissions & EU employment. 12,000+ visas approved. 98% success rate.">
+<meta name="twitter:image" content="https://skyglobegroup.com/logo.png">
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"TravelAgency",
+  "name":"SkyGlobe Limited",
+  "url":"https://skyglobegroup.com",
+  "logo":"https://skyglobegroup.com/logo.png",
+  "description":"Premium visa processing, university admissions, work relocation and travel documentation services.",
+  "email":"support@skyglobegroup.com",
+  "areaServed":"Worldwide",
+  "serviceType":["Visa Processing","University Admissions","EU Employment","Travel Documentation"],
+  "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"847"}
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -195,11 +228,11 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 
 /* ── PAGE BACK/NEXT NAV ─────────────────────────────────────────── */
 .page-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;max-width:1200px;margin:2rem auto 3.5rem;padding:1.5rem 2rem;border-top:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
-.page-nav.page-nav-top{margin:0 auto 0;padding:1rem 2rem;border-top:none;border-bottom:1px solid rgba(0,0,0,0.08);position:sticky;top:72px;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);z-index:90;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
-.page-nav-btn{display:inline-flex;align-items:center;gap:0.5rem;background:#fff;border:1px solid rgba(184,134,11,0.35);color:#0a1628;padding:0.7rem 1.3rem;border-radius:100px;font-size:0.9rem;font-weight:500;cursor:pointer;transition:var(--trans);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.page-nav.page-nav-top{margin:0 auto 0;padding:0.5rem 1.5rem;border-top:none;border-bottom:1px solid rgba(0,0,0,0.08);position:sticky;top:72px;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);z-index:90;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.page-nav-btn{display:inline-flex;align-items:center;gap:0.4rem;background:#fff;border:1px solid rgba(184,134,11,0.35);color:#0a1628;padding:0.45rem 1rem;border-radius:100px;font-size:0.82rem;font-weight:500;cursor:pointer;transition:var(--trans);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 .page-nav-btn:hover{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-color:transparent;transform:translateY(-2px);box-shadow:0 6px 18px rgba(184,134,11,0.3)}
 .page-nav-btn.disabled{opacity:0.35;pointer-events:none}
-.page-nav-btn small{display:block;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.6;font-weight:400}
+.page-nav-btn small{display:block;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.07em;opacity:0.55;font-weight:400}
 .page-nav-label{display:flex;flex-direction:column}
 .page-nav-next{text-align:right;align-items:flex-end}
 
@@ -433,6 +466,58 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 .chat-send-btn:hover{opacity:0.85}
 @media(max-width:400px){.chat-panel{width:calc(100vw - 32px);right:16px}.chat-fab{bottom:16px;right:16px}}
 
+/* ── SOCIAL PROOF POPUP ──────────────────────────────────────── */
+.sp-popup{position:fixed;bottom:7rem;right:1.5rem;z-index:8990;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:14px;padding:0.8rem 1rem;max-width:280px;box-shadow:0 8px 28px rgba(0,0,0,0.14);display:flex;align-items:center;gap:0.75rem;transform:translateX(320px);opacity:0;transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1),opacity 0.35s ease;pointer-events:none}
+.sp-popup.show{transform:translateX(0);opacity:1}
+.sp-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.sp-text{font-size:0.78rem;color:#374151;line-height:1.4}
+.sp-text strong{color:#0a1628;font-weight:600}
+.sp-time{font-size:0.68rem;color:#94a3b8;margin-top:2px;display:block}
+.sp-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:auto;flex-shrink:0;animation:pulse 2s infinite}
+
+/* ── BLOG PAGE ───────────────────────────────────────────────── */
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:2.5rem}
+.blog-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:var(--trans);box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.blog-card:hover{border-color:rgba(184,134,11,0.4);transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.1)}
+.blog-thumb{height:180px;overflow:hidden;background:#e8f0fe}
+.blog-thumb img{width:100%;height:100%;object-fit:cover;transition:transform 0.45s ease;display:block}
+.blog-card:hover .blog-thumb img{transform:scale(1.06)}
+.blog-body{padding:1.3rem}
+.blog-cat{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);font-weight:600;margin-bottom:0.4rem}
+.blog-title{font-size:1rem;font-weight:600;color:#0a1628;line-height:1.4;margin-bottom:0.5rem}
+.blog-excerpt{font-size:0.83rem;color:#4b5563;line-height:1.6}
+.blog-meta{display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;font-size:0.72rem;color:#94a3b8}
+.blog-full-overlay{position:fixed;inset:0;z-index:9300;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:80px 16px 16px;overflow-y:auto}
+.blog-full-overlay.open{display:flex}
+.blog-full-panel{background:#fff;border-radius:var(--radius-xl);max-width:720px;width:100%;padding:2.4rem;position:relative;animation:fadeUp 0.35s ease;box-shadow:0 24px 60px rgba(0,0,0,0.15)}
+.blog-full-panel h2{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:400;margin:1rem 0;line-height:1.25;color:#0a1628}
+.blog-full-panel .content p{font-size:0.92rem;line-height:1.85;color:#374151;margin-bottom:1rem}
+.blog-full-panel .content h3{font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--gold);margin:1.5rem 0 0.5rem}
+.blog-full-panel .content ul{padding-left:1.2rem;margin-bottom:1rem}
+.blog-full-panel .content li{font-size:0.9rem;color:#374151;margin-bottom:0.35rem}
+
+/* ── WORLD EXPLORER ──────────────────────────────────────────── */
+.we-tabs{display:flex;gap:0.5rem;flex-wrap:wrap;margin:1.8rem 0 2rem}
+.we-tab{background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:100px;padding:0.5rem 1.1rem;font-size:0.82rem;font-weight:500;cursor:pointer;transition:var(--trans);font-family:'Outfit',sans-serif;color:#374151}
+.we-tab:hover,.we-tab.active{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(184,134,11,0.25)}
+.we-panel{display:none}.we-panel.active{display:block;animation:fadeUp 0.3s ease both}
+.we-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-top:1rem}
+.we-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:var(--radius-lg);padding:1.2rem;transition:var(--trans);box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.we-card:hover{border-color:rgba(184,134,11,0.3);box-shadow:0 6px 20px rgba(0,0,0,0.09);transform:translateY(-2px)}
+.we-card-head{display:flex;align-items:center;gap:0.7rem;margin-bottom:0.7rem}
+.we-card-icon{width:36px;height:36px;border-radius:8px;background:rgba(184,134,11,0.1);border:1px solid rgba(184,134,11,0.2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.we-card h4{font-size:0.9rem;font-weight:600;color:#0a1628;margin:0}
+.we-card .we-sub{font-size:0.75rem;color:#94a3b8}
+.we-card p{font-size:0.82rem;color:#4b5563;line-height:1.55}
+.we-badge{display:inline-block;font-size:0.68rem;background:rgba(184,134,11,0.08);border:1px solid rgba(184,134,11,0.2);color:var(--gold);padding:2px 9px;border-radius:100px;margin:2px}
+.we-country-select{background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:10px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:0.88rem;color:#0a1628;width:100%;max-width:340px;margin-bottom:1.5rem;outline:none;cursor:pointer}
+.we-country-select:focus{border-color:var(--gold)}
+.we-stat-row{display:flex;gap:0.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.we-stat{background:#f8f9fb;border:1px solid rgba(0,0,0,0.07);border-radius:10px;padding:0.8rem 1rem;flex:1;min-width:120px}
+.we-stat strong{display:block;font-size:1.1rem;font-weight:700;color:var(--gold)}
+.we-stat span{font-size:0.72rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em}
+.we-loading{text-align:center;padding:3rem;color:#94a3b8;font-size:0.9rem}
+
 /* ── TESTIMONIAL TICKER ──────────────────────────────────────────── */
 .testi-track-wrap{overflow:hidden;mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
 .testi-track{display:flex;gap:1rem;width:max-content;animation:scrollLeft 40s linear infinite}
@@ -536,6 +621,8 @@ body.wc-active .mobile-menu{padding-top:46px}
     <li><a onclick="showPage('services')" data-page="services">Services</a></li>
     <li><a onclick="showPage('countries')" data-page="countries">Country Guides</a></li>
     <li><a onclick="showPage('destinations')" data-page="destinations">Destinations</a></li>
+    <li><a onclick="showPage('blog')" data-page="blog">📰 Blog</a></li>
+    <li><a onclick="showPage('world')" data-page="world">🌍 World</a></li>
     <li><a onclick="showPage('search')" data-page="search">🔍 Search</a></li>
     <li><a onclick="showPage('apply')" data-page="apply" style="color:var(--gold)">📋 Apply Now</a></li>
     <li><a onclick="goAccount()" data-page="account" id="navAccountLink">👤 Login</a></li>
@@ -555,6 +642,8 @@ body.wc-active .mobile-menu{padding-top:46px}
   <a onclick="showPage('about');toggleMenu()">About</a>
   <a onclick="showPage('services');toggleMenu()">Services</a>
   <a onclick="showPage('destinations');toggleMenu()">Destinations</a>
+  <a onclick="showPage('blog');toggleMenu()">📰 Blog</a>
+  <a onclick="showPage('world');toggleMenu()">🌍 World</a>
   <a onclick="showPage('apply');toggleMenu()" style="color:var(--gold)">📋 Apply Now</a>
   <a onclick="goAccount();toggleMenu()" id="mobAccountLink">👤 Login</a>
   <a onclick="showPage('search');toggleMenu()">🔍 Search</a>
@@ -633,7 +722,7 @@ body.wc-active .mobile-menu{padding-top:46px}
     </div>
     <div class="services-grid">
       <div class="service-card" onclick="showSvcDetail('Student Visa Processing')" style="cursor:pointer">
-        <div class="s-photo"><img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&q=80&auto=format&fit=crop" alt="Student Visa" loading="lazy"><span class="s-photo-icon">🎓</span></div>
+        <div class="s-photo"><img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=500&q=80&auto=format&fit=crop" alt="Students Studying Abroad" loading="lazy"><span class="s-photo-icon">🎓</span></div>
         <h3>Student Visa</h3>
         <p>Expert guidance for student visa applications to top universities worldwide — UK, USA, Canada & beyond.</p>
       </div>
@@ -979,7 +1068,7 @@ body.wc-active .mobile-menu{padding-top:46px}
 
     <div class="services-full-grid">
       <div class="service-full-card" onclick="showSvcDetail('Student Visa Processing')">
-        <div class="s-photo"><img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&q=80&auto=format&fit=crop" alt="Student Visa Processing" loading="lazy"><span class="s-photo-icon">🎓</span></div>
+        <div class="s-photo"><img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=500&q=80&auto=format&fit=crop" alt="Students Studying Abroad Processing" loading="lazy"><span class="s-photo-icon">🎓</span></div>
         <h3>Student Visa Processing</h3>
         <p>Comprehensive student visa applications for the USA (F-1), UK (Tier 4), Canada, Australia, Germany, and more. We handle documentation, financial proof, and interview preparation.</p>
         <span class="s-tag">Education → Global</span><span class="apply-hint">→ Apply now</span>
@@ -1787,8 +1876,8 @@ body.wc-active .mobile-menu{padding-top:46px}
 <script>
 // PAGE ROUTING
 // Main journey order for Back/Next navigation
-const PAGE_ORDER = ['home','about','services','destinations','countries','apply','contact'];
-const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
+const PAGE_ORDER = ['home','about','services','destinations','countries','world','blog','apply','contact'];
+const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',world:'World Explorer',blog:'Blog',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
 let _lastPage = null;
 
 function showPage(page) {
@@ -1803,6 +1892,8 @@ function showPage(page) {
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (page === 'countries') initCountryGrid();
+  if (page === 'blog') initBlog();
+  if (page === 'world') initWorldExplorer();
   renderPageNav(page, target);
   setupCounters(target);
 }
@@ -4417,6 +4508,502 @@ setInterval(() => {
 }, 15000);
 
 updateAccountNav();
+</script>
+
+<!-- ===== BLOG PAGE ===== -->
+<div class="page" id="page-blog">
+  <div id="blogPageNav-top"></div>
+  <section style="padding:120px 5% 60px;background:linear-gradient(135deg,#fff,#f0f5ff)">
+    <div class="text-center">
+      <span class="section-tag">Resources & Insights</span>
+      <h2 class="section-title">Blog & <strong>Knowledge Hub</strong></h2>
+      <p class="section-sub">Expert guides, visa updates, university tips, and immigration news to help you prepare for your global journey.</p>
+    </div>
+    <div class="blog-grid" id="blogGrid"></div>
+  </section>
+  <div id="blogPageNav-bot"></div>
+</div>
+
+<!-- Blog Full Article Overlay -->
+<div class="blog-full-overlay" id="blogOverlay" onclick="if(event.target===this)closeBlog()">
+  <div class="blog-full-panel" id="blogPanel">
+    <button onclick="closeBlog()" style="position:absolute;top:1.2rem;right:1.4rem;background:none;border:none;font-size:1.6rem;cursor:pointer;color:#64748b;line-height:1">×</button>
+    <div id="blogArticleContent"></div>
+  </div>
+</div>
+
+<!-- ===== WORLD EXPLORER PAGE ===== -->
+<div class="page" id="page-world">
+  <div id="worldPageNav-top"></div>
+  <section style="padding:120px 5% 40px;background:linear-gradient(135deg,#fff,#f0f5ff)">
+    <div class="text-center">
+      <span class="section-tag">Real-Time Global Data</span>
+      <h2 class="section-title">World <strong>Explorer</strong></h2>
+      <p class="section-sub">Universities, airlines, hospitals, hotels, infrastructure and live world status — everything you need to know about your destination country.</p>
+    </div>
+    <div class="we-tabs">
+      <button class="we-tab active" onclick="showWePanel('universities',this)">🎓 Universities</button>
+      <button class="we-tab" onclick="showWePanel('airlines',this)">✈️ Airlines</button>
+      <button class="we-tab" onclick="showWePanel('hospitals',this)">🏥 Hospitals</button>
+      <button class="we-tab" onclick="showWePanel('hotels',this)">🏨 Hotels</button>
+      <button class="we-tab" onclick="showWePanel('infrastructure',this)">🏗️ Infrastructure</button>
+      <button class="we-tab" onclick="showWePanel('worldstatus',this)">🌐 World Status</button>
+    </div>
+    <!-- Country Selector (shared) -->
+    <select class="we-country-select" id="weCountrySelect" onchange="onWeCountryChange()">
+      <option value="GB">🇬🇧 United Kingdom</option>
+      <option value="US">🇺🇸 United States</option>
+      <option value="CA">🇨🇦 Canada</option>
+      <option value="DE">🇩🇪 Germany</option>
+      <option value="AU">🇦🇺 Australia</option>
+      <option value="PL">🇵🇱 Poland</option>
+      <option value="PT">🇵🇹 Portugal</option>
+      <option value="LV">🇱🇻 Latvia</option>
+      <option value="JP">🇯🇵 Japan</option>
+      <option value="KR">🇰🇷 South Korea</option>
+      <option value="AE">🇦🇪 UAE</option>
+      <option value="FR">🇫🇷 France</option>
+      <option value="NL">🇳🇱 Netherlands</option>
+      <option value="BE">🇧🇪 Belgium</option>
+      <option value="IT">🇮🇹 Italy</option>
+      <option value="ES">🇪🇸 Spain</option>
+      <option value="SG">🇸🇬 Singapore</option>
+      <option value="NO">🇳🇴 Norway</option>
+      <option value="FI">🇫🇮 Finland</option>
+      <option value="NG">🇳🇬 Nigeria</option>
+    </select>
+    <!-- Country Stats bar -->
+    <div class="we-stat-row" id="weStatRow"></div>
+
+    <!-- Universities Panel -->
+    <div class="we-panel active" id="wePanel-universities">
+      <div class="we-grid" id="weUniGrid"></div>
+    </div>
+    <!-- Airlines Panel -->
+    <div class="we-panel" id="wePanel-airlines">
+      <div class="we-grid" id="weAirGrid"></div>
+    </div>
+    <!-- Hospitals Panel -->
+    <div class="we-panel" id="wePanel-hospitals">
+      <div class="we-grid" id="weHospGrid"></div>
+    </div>
+    <!-- Hotels Panel -->
+    <div class="we-panel" id="wePanel-hotels">
+      <div class="we-grid" id="weHotelGrid"></div>
+    </div>
+    <!-- Infrastructure Panel -->
+    <div class="we-panel" id="wePanel-infrastructure">
+      <div class="we-grid" id="weInfraGrid"></div>
+    </div>
+    <!-- World Status Panel -->
+    <div class="we-panel" id="wePanel-worldstatus">
+      <div class="we-grid" id="weStatusGrid"></div>
+    </div>
+  </section>
+  <div id="worldPageNav-bot"></div>
+</div>
+
+<!-- ===== SOCIAL PROOF POPUP ===== -->
+<div class="sp-popup" id="spPopup">
+  <div class="sp-av" id="spAv">🌍</div>
+  <div>
+    <div class="sp-text" id="spText"><strong>Loading…</strong></div>
+    <span class="sp-time" id="spTime">Just now</span>
+  </div>
+  <div class="sp-dot"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// SOCIAL PROOF POPUPS
+// ═══════════════════════════════════════════════════════
+(function(){
+  const proofs=[
+    {av:'🇳🇬',text:'<strong>Ahmed O.</strong> from Lagos just started a <strong>UK Visa application</strong>'},
+    {av:'🇬🇭',text:'<strong>Priya M.</strong> from Accra received her <strong>Canada Study Permit</strong> ✅'},
+    {av:'🇰🇪',text:'<strong>Carlos A.</strong> from Nairobi booked a <strong>Germany Work Visa</strong> consultation'},
+    {av:'🇿🇦',text:'<strong>Fatima S.</strong> from Johannesburg got her <strong>UK Student Visa</strong> approved 🎉'},
+    {av:'🇪🇹',text:'<strong>David K.</strong> from Addis Ababa started <strong>EU Direct Employment</strong>'},
+    {av:'🇹🇿',text:'<strong>Amara N.</strong> from Dar es Salaam applied for <strong>Australia Skilled Visa</strong>'},
+    {av:'🇺🇬',text:'<strong>Blessing O.</strong> from Kampala received her <strong>USA Tourist Visa</strong> 🇺🇸'},
+    {av:'🇸🇳',text:'<strong>Omar B.</strong> from Dakar is exploring <strong>Polish Work Permit</strong> options'},
+    {av:'🇨🇲',text:'<strong>Ifeoma C.</strong> from Yaoundé submitted her <strong>Canada PR application</strong>'},
+    {av:'🇮🇳',text:'<strong>Rahul P.</strong> from Hyderabad booked <strong>UK Skilled Worker Visa</strong>'},
+  ];
+  const times=['Just now','2 min ago','5 min ago','8 min ago','12 min ago','3 min ago','1 min ago'];
+  let idx=0;
+  function showProof(){
+    const p=proofs[idx%proofs.length];
+    const popup=document.getElementById('spPopup');
+    document.getElementById('spAv').textContent=p.av;
+    document.getElementById('spText').innerHTML=p.text;
+    document.getElementById('spTime').textContent=times[Math.floor(Math.random()*times.length)];
+    popup.classList.add('show');
+    setTimeout(()=>popup.classList.remove('show'),5500);
+    idx++;
+  }
+  // First show after 6s, then every 14s
+  setTimeout(()=>{showProof();setInterval(showProof,14000);},6000);
+})();
+
+// ═══════════════════════════════════════════════════════
+// BLOG DATA & FUNCTIONS
+// ═══════════════════════════════════════════════════════
+const BLOG_POSTS=[
+  {
+    id:1,cat:'Visa Guide',thumb:'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&q=80&auto=format&fit=crop',
+    title:'How to Get a UK Visa in 2025: Complete Step-by-Step Guide',
+    excerpt:'Everything you need to know about UK visa categories, documents required, processing times, and how to maximise your approval chances.',
+    date:'Jun 10, 2026',readTime:'8 min read',
+    content:`<h3>Understanding UK Visa Categories</h3><p>The UK offers several visa types depending on your purpose of visit. The most common are the Standard Visitor Visa (B1/B2 equivalent), Student Visa (formerly Tier 4), Skilled Worker Visa (formerly Tier 2), and the Graduate Visa for post-study stay.</p><h3>Key Documents Required</h3><p>Every UK visa application requires: a valid passport (at least 6 months validity), bank statements covering 3–6 months, accommodation proof, travel itinerary, and the correct visa application fee. Additional documents vary by visa type.</p><h3>Processing Times</h3><p>Standard processing is 3 weeks. Priority processing (£500 extra) typically takes 5 working days. Super Priority (£800 extra) gives a next working day decision for most visas.</p><h3>Tips for Success</h3><ul><li>Apply at least 3 months before your planned travel date</li><li>Show strong ties to your home country (property, employment, family)</li><li>Ensure bank statements show consistent, adequate funds — not a sudden large deposit</li><li>Use a professional consultant for complex cases</li></ul><p>SkyGlobe has processed over 3,000 successful UK visa applications. <a onclick="showPage('contact')" style="color:var(--gold);cursor:pointer">Book a free consultation</a> to get personalised guidance.</p>`
+  },
+  {
+    id:2,cat:'Study Abroad',thumb:'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600&q=80&auto=format&fit=crop',
+    title:'Top 10 Universities to Apply for International Students in 2025',
+    excerpt:'From Oxbridge to MIT, we rank the best universities for international students based on scholarships, acceptance rates, and post-study work options.',
+    date:'Jun 7, 2026',readTime:'6 min read',
+    content:`<h3>Why University Choice Matters</h3><p>Choosing the right university determines not just your education quality but your visa options, scholarship eligibility, and post-study work rights. Here are our top picks for international students in 2025.</p><h3>United Kingdom</h3><ul><li><strong>University of Oxford</strong> — QS Rank #3, Clarendon Scholarships available</li><li><strong>University of Cambridge</strong> — QS Rank #2, Gates-Cambridge fully funded</li><li><strong>Imperial College London</strong> — Top for STEM, strong industry links</li></ul><h3>Canada</h3><ul><li><strong>University of Toronto</strong> — #25 globally, PGWP eligible</li><li><strong>McGill University</strong> — Affordable tuition, bilingual environment</li></ul><h3>Australia</h3><ul><li><strong>University of Melbourne</strong> — Graduate Visa (485) available after graduation</li><li><strong>ANU Canberra</strong> — Strong research programs, regional visa benefits</li></ul><h3>Germany (Tuition-Free)</h3><ul><li><strong>LMU Munich</strong> — Virtually free education, strong industry partnerships</li><li><strong>TU Berlin</strong> — Top engineering school, ~€375/semester</li></ul><p>Ready to apply? Our admissions team has placed students in all these institutions. <a onclick="showPage('apply')" style="color:var(--gold);cursor:pointer">Start your application today.</a></p>`
+  },
+  {
+    id:3,cat:'EU Employment',thumb:'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80&auto=format&fit=crop',
+    title:'EU Direct Employment: How Africans Are Building Careers in Europe',
+    excerpt:'Poland, Portugal, Latvia and beyond — skilled workers from Africa are securing EU jobs through legal placement programmes. Here\'s how.',
+    date:'Jun 3, 2026',readTime:'7 min read',
+    content:`<h3>The EU Labour Shortage Opportunity</h3><p>Europe is facing a historic labour shortage with over 3 million unfilled positions across healthcare, construction, IT, and hospitality. For skilled workers from Africa and Asia, this creates an unprecedented legal pathway into the EU.</p><h3>Most In-Demand Roles</h3><ul><li>Healthcare: nurses, caregivers, medical staff</li><li>Construction: civil engineers, site managers, skilled tradespeople</li><li>IT & Technology: software developers, data analysts, cybersecurity</li><li>Hospitality: hotel managers, chefs, service professionals</li></ul><h3>Countries with Fastest Processing</h3><p><strong>Poland</strong> — National Visa D, processing 2–4 weeks. Strong economy, affordable living. <strong>Portugal</strong> — D3 Highly Qualified Visa, pathway to EU permanent residence in 5 years. <strong>Latvia</strong> — EU Blue Card available, gateway to all 27 EU countries.</p><h3>The SkyGlobe Placement Process</h3><p>We match you with verified EU employers, handle your work permit application, assist with accommodation finding, and provide pre-departure orientation. Success rate: 96% of placed candidates are still employed after 12 months.</p><p><a onclick="showPage('contact')" style="color:var(--gold);cursor:pointer">Apply for EU placement →</a></p>`
+  },
+  {
+    id:4,cat:'Immigration Tips',thumb:'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&q=80&auto=format&fit=crop',
+    title:'Common Visa Rejection Reasons (And How to Avoid Them)',
+    excerpt:'Our analysis of 500+ rejected visa applications reveals the most common mistakes — and the simple fixes that turn rejections into approvals.',
+    date:'May 28, 2026',readTime:'5 min read',
+    content:`<h3>The Most Common Rejection Reason: Financial Evidence</h3><p>Over 60% of visa rejections come down to inadequate financial documentation. Officers want to see consistent savings over 3–6 months, not a sudden large transfer the week before application. Aim for funds equal to twice your stated trip cost.</p><h3>Weak Ties to Home Country</h3><p>The officer must believe you will return home. Strengthen your ties with: employment letter showing approved leave and return date, property ownership or long-term rental agreement, family connections (especially dependent children), and an active business in your country.</p><h3>Incomplete Documentation</h3><p>Missing documents are an instant rejection. Use our official document checklists (available when you <a onclick="showPage('apply')" style="color:var(--gold);cursor:pointer">start your application</a>) to ensure nothing is missing.</p><h3>Vague or Inconsistent Information</h3><p>Your bank statement, employment letter, and application form must all tell the same story. Inconsistencies — even minor ones — raise red flags. Have a professional review your application before submission.</p><h3>Bad Timing</h3><p>Applying too close to your travel date suggests poor planning. Apply 8–12 weeks ahead for standard visas to allow time for any document requests without missing your trip.</p>`
+  },
+  {
+    id:5,cat:'Travel Tips',thumb:'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=600&q=80&auto=format&fit=crop',
+    title:'Travelling Abroad for the First Time: A Complete Preparation Guide',
+    excerpt:'From packing your documents to arriving safely and setting up your new life — our first-timer\'s guide covers everything you need.',
+    date:'May 22, 2026',readTime:'9 min read',
+    content:`<h3>Before You Travel: Document Checklist</h3><p>Never leave home without: valid passport (6+ months), visa/entry permit, flight booking confirmations, accommodation proof, travel insurance, emergency contacts list, sufficient local currency or a card that works internationally.</p><h3>Travel Insurance: Non-Negotiable</h3><p>Medical emergencies abroad can cost $50,000+. Get travel insurance with at least $100,000 medical cover and trip cancellation protection. For students, check if your university requires specific coverage (e.g. OSHC for Australia, IHS for UK).</p><h3>Airport Arrival Tips</h3><ul><li>Have all documents in a single, accessible folder — not buried in your luggage</li><li>Immigration officers may ask about your plans — answer clearly and confidently</li><li>Declare any amounts over $10,000 in cash</li><li>Keep your SIM card functional until you get a local one</li></ul><h3>First Week Priorities</h3><ul><li>Register with your local authority/university within required timeframe</li><li>Open a local bank account</li><li>Register with a local GP (UK) or find a primary care physician</li><li>Connect with your country's embassy/consulate for emergency contacts</li></ul><p>SkyGlobe provides pre-departure orientation for all our clients. <a onclick="showPage('contact')" style="color:var(--gold);cursor:pointer">Book your consultation →</a></p>`
+  },
+  {
+    id:6,cat:'World Cup 2026',thumb:'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=600&q=80&auto=format&fit=crop',
+    title:'FIFA World Cup 2026: How to Get Your USA & Canada Visa Fast',
+    excerpt:'The World Cup arrives in North America in 2026. We break down the fastest visa pathways for fans from Africa, Asia and beyond.',
+    date:'Jun 12, 2026',readTime:'6 min read',
+    content:`<h3>World Cup 2026: North America Hosts</h3><p>The 2026 FIFA World Cup will be hosted across the USA, Canada, and Mexico — marking the first time 3 countries co-host the tournament. 16 USA cities, 3 Canadian cities, and 3 Mexican cities will host 104 matches.</p><h3>Do I Need a Visa?</h3><p>Citizens of ESTA-eligible countries can visit the USA visa-free for up to 90 days. However, most African passport holders need a B-1/B-2 Tourist Visa for the USA and a Temporary Resident Visa (TRV) for Canada.</p><h3>Documents Needed for World Cup Visa</h3><ul><li>Match tickets purchased (print and keep the purchase confirmation)</li><li>Hotel or Airbnb booking for all nights</li><li>Flight reservations (not necessarily paid tickets)</li><li>Bank statements — typically $150–200/day minimum</li><li>Employment letter confirming approved leave</li><li>Cover letter explaining your travel plans match-by-match</li></ul><h3>Processing Timeline</h3><p>Start NOW. USA B-2 visa interviews are booking 3–6 months ahead. Canada TRV can process online in 2–8 weeks but we recommend applying immediately to avoid delays.</p><p>SkyGlobe offers a World Cup Visa Package with expedited processing and document preparation. <a onclick="showPage('contact')" style="color:var(--gold);cursor:pointer">Get started today →</a></p>`
+  },
+  {
+    id:7,cat:'Scholarships',thumb:'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=600&q=80&auto=format&fit=crop',
+    title:'10 Fully Funded Scholarships for African Students in 2025–2026',
+    excerpt:'From Chevening to Fulbright to DAAD — a curated list of the most prestigious fully-funded scholarships you can still apply for this cycle.',
+    date:'May 15, 2026',readTime:'7 min read',
+    content:`<h3>Fully Funded = Zero Cost</h3><p>Fully funded scholarships cover tuition fees, living allowance, flights, and health insurance. These are the golden tickets — and many African students miss them simply because they don't know they exist.</p><h3>Top 10 Fully Funded Scholarships</h3><ul><li><strong>Chevening Scholarship (UK)</strong> — All expenses paid for any UK master's degree. Deadline: Nov 2026.</li><li><strong>Fulbright Program (USA)</strong> — Covers all costs for US graduate study. Applications open August.</li><li><strong>DAAD Scholarship (Germany)</strong> — Multiple programs for undergrad, masters, and PhD. Tuition-free country.</li><li><strong>Commonwealth Scholarship</strong> — Full funding for master's and PhD at UK universities. Nominated by home government.</li><li><strong>Erasmus+ (EU)</strong> — Study in any EU country. Full stipend + travel costs covered.</li><li><strong>Australia Awards</strong> — Australian government pays for full degree. Strong African allocation.</li><li><strong>Vanier CGS (Canada)</strong> — $50,000/year for 3 years for PhD students.</li><li><strong>MasterCard Foundation Scholars</strong> — Full funding for academically brilliant African youth.</li><li><strong>Gates-Cambridge (UK)</strong> — Full Cambridge University funding. Extremely competitive.</li><li><strong>Korean Government Scholarship (KGSP)</strong> — Korean language + full degree costs. Growing opportunity.</li></ul><p>Our scholarship team has helped students secure over $2 million in awards. <a onclick="showPage('contact')" style="color:var(--gold);cursor:pointer">Book a scholarship consultation →</a></p>`
+  },
+  {
+    id:8,cat:'Life Abroad',thumb:'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600&q=80&auto=format&fit=crop',
+    title:'Cost of Living Comparison: UK vs Canada vs Australia vs Germany in 2025',
+    excerpt:'A real breakdown of monthly expenses for international students and workers across four top destinations to help you plan your budget.',
+    date:'May 8, 2026',readTime:'5 min read',
+    content:`<h3>Monthly Cost Breakdown (Single Person, 2025)</h3><p>Understanding true living costs — beyond just tuition — is essential for financial planning abroad.</p><h3>United Kingdom (London)</h3><ul><li>Rent (student hall/shared): £800–1,200/month</li><li>Food & groceries: £300–450/month</li><li>Transport (Oyster): £100–180/month</li><li>Total estimate: £1,400–2,000/month</li></ul><h3>Canada (Toronto)</h3><ul><li>Rent (shared room): CAD $900–1,400/month</li><li>Food: CAD $400–600/month</li><li>Transport: CAD $150/month</li><li>Total estimate: CAD $1,500–2,200/month</li></ul><h3>Australia (Melbourne)</h3><ul><li>Rent (shared): AUD $800–1,200/month</li><li>Food: AUD $400–600/month</li><li>Transport: AUD $150/month</li><li>Total: AUD $1,400–2,000/month</li></ul><h3>Germany (Munich)</h3><ul><li>Rent (student hall): €500–900/month</li><li>Food: €250–400/month</li><li>Transport (semester ticket): ~€90/semester</li><li>Total: €800–1,400/month</li></ul><p><strong>Bottom line:</strong> Germany offers the best value — especially with near-free tuition. UK costs highest. All countries allow part-time work to offset expenses.</p>`
+  }
+];
+
+function renderBlog(){
+  const grid=document.getElementById('blogGrid');
+  if(!grid)return;
+  grid.innerHTML=BLOG_POSTS.map(p=>`
+    <div class="blog-card" onclick="openBlog(${p.id})">
+      <div class="blog-thumb"><img src="${p.thumb}" alt="${p.title}" loading="lazy"></div>
+      <div class="blog-body">
+        <div class="blog-cat">${p.cat}</div>
+        <div class="blog-title">${p.title}</div>
+        <div class="blog-excerpt">${p.excerpt}</div>
+        <div class="blog-meta"><span>📅 ${p.date}</span><span>⏱ ${p.readTime}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function openBlog(id){
+  const p=BLOG_POSTS.find(b=>b.id===id);
+  if(!p)return;
+  document.getElementById('blogArticleContent').innerHTML=`
+    <span class="section-tag">${p.cat}</span>
+    <h2>${p.title}</h2>
+    <div style="display:flex;gap:1rem;font-size:0.78rem;color:#94a3b8;margin-bottom:1.5rem">
+      <span>📅 ${p.date}</span><span>⏱ ${p.readTime}</span>
+    </div>
+    <img src="${p.thumb}" style="width:100%;height:220px;object-fit:cover;border-radius:12px;margin-bottom:1.5rem" loading="lazy">
+    <div class="content">${p.content}</div>
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(0,0,0,0.08)">
+      <button class="btn-primary" onclick="showPage('contact');closeBlog()">📞 Book Free Consultation</button>
+    </div>`;
+  document.getElementById('blogOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeBlog(){
+  document.getElementById('blogOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ═══════════════════════════════════════════════════════
+// WORLD EXPLORER DATA & FUNCTIONS
+// ═══════════════════════════════════════════════════════
+const WE_DATA={
+  GB:{
+    name:'United Kingdom',flag:'🇬🇧',currency:'GBP (£)',language:'English',population:'68M',gdp:'$3.1T',
+    universities:[
+      {name:'University of Oxford',rank:'QS #3',type:'Public',intake:'Oct',tuition:'£28,000–£45,000/yr',note:'Oldest English-speaking university. Clarendon & Rhodes Scholarships available.'},
+      {name:'University of Cambridge',rank:'QS #2',type:'Public',intake:'Oct',tuition:'£25,000–£58,000/yr',note:'Gates-Cambridge Scholarship fully funded. Collegiate system.'},
+      {name:'Imperial College London',rank:'QS #6',type:'Public',intake:'Sep/Oct',tuition:'£34,000–£45,000/yr',note:'Top STEM university. Strong industry partnerships.'},
+      {name:'London School of Economics',rank:'QS #49',type:'Public',intake:'Sep',tuition:'£22,000–£29,000/yr',note:'World-leading social sciences. Near financial district.'},
+      {name:'University of Manchester',rank:'QS #32',type:'Public',intake:'Sep',tuition:'£21,000–£29,000/yr',note:'23 Nobel laureates. Strong research funding.'},
+    ],
+    airlines:[
+      {name:'British Airways',hub:'Heathrow (LHR)',type:'Full-service carrier',coverage:'180+ destinations',note:'National carrier. Frequent flyer: Avios. Partner of oneworld.'},
+      {name:'easyJet',hub:'Gatwick / Luton',type:'Low-cost',coverage:'Europe & North Africa',note:'Affordable European connections. No-frills but reliable.'},
+      {name:'Virgin Atlantic',hub:'Heathrow',type:'Full-service',coverage:'Long-haul focus',note:'Strong transatlantic routes. Upper Class popular for business.'},
+    ],
+    hospitals:[
+      {name:'Royal London Hospital',location:'Whitechapel, London',type:'NHS Teaching Hospital',beds:'1,000+',note:'Major trauma centre, 24/7 A&E. Free for residents/NHS-eligible.'},
+      {name:'St Thomas\' Hospital',location:'Lambeth, London',type:'NHS',beds:'980',note:'Next to Parliament. King\'s Health Partners network.'},
+      {name:'Addenbrooke\'s (Cambridge)',location:'Cambridge',type:'NHS Teaching',beds:'1,200',note:'World-leading cancer and neurological care.'},
+    ],
+    hotels:[
+      {name:'The Shard (Shangri-La)',location:'London Bridge',stars:'★★★★★',price:'£300–800/night',note:'Iconic glass tower. Panoramic London views.'},
+      {name:'Premier Inn',location:'Nationwide',stars:'★★★',price:'£60–120/night',note:'Best value chain. Consistent quality. 800+ locations.'},
+      {name:'Travelodge',location:'Nationwide',stars:'★★',price:'£35–80/night',note:'Budget option. Good for transit stays.'},
+    ],
+    infrastructure:[
+      {name:'Transport for London (TfL)',type:'Public Transport',note:'Tube, buses, Overground, DLR, Elizabeth line. Oyster card/contactless.'},
+      {name:'National Rail',type:'Rail Network',note:'Connects all UK cities. Book in advance for cheapest fares.'},
+      {name:'UK Broadband',type:'Internet',note:'Average speed 80 Mbps. BT, Virgin Media, Sky top providers.'},
+      {name:'NHS (Healthcare)',type:'Healthcare System',note:'Free at point of use for residents. Funded by National Insurance contributions.'},
+    ],
+    worldstatus:{
+      safety:'Very Safe (Global Peace Index: #36)',healthcare:'Excellent — NHS ranked among world\'s best',economy:'Strong — major global financial centre',climate:'Temperate — mild, wet; 4 distinct seasons',cost:'High (London is one of world\'s most expensive cities)',immigration:'Points-based system. PR after 5 years.'
+    }
+  },
+  US:{
+    name:'United States',flag:'🇺🇸',currency:'USD ($)',language:'English',population:'335M',gdp:'$27T',
+    universities:[
+      {name:'Massachusetts Institute of Technology',rank:'QS #1',type:'Private',intake:'Sep',tuition:'$58,000/yr',note:'World\'s top university for science & tech. Strong financial aid.'},
+      {name:'Stanford University',rank:'QS #5',type:'Private',intake:'Sep',tuition:'$60,000/yr',note:'Silicon Valley location. Top for entrepreneurship and tech.'},
+      {name:'Harvard University',rank:'QS #4',type:'Private',intake:'Sep',tuition:'$55,000/yr',note:'Meets 100% of demonstrated need. Fulbright partnerships.'},
+      {name:'Columbia University',rank:'QS #22',type:'Private',intake:'Sep',tuition:'$62,000/yr',note:'New York City campus. Strong journalism, law, business.'},
+    ],
+    airlines:[
+      {name:'American Airlines',hub:'Dallas/Fort Worth',type:'Full-service',coverage:'350+ destinations globally',note:'Largest airline by fleet size. Part of oneworld.'},
+      {name:'Delta Air Lines',hub:'Atlanta (ATL)',type:'Full-service',coverage:'300+ destinations',note:'Ranked most reliable US carrier. SkyMiles loyalty program.'},
+      {name:'United Airlines',hub:'Chicago O\'Hare',type:'Full-service',coverage:'Worldwide',note:'Biggest transatlantic presence. Star Alliance member.'},
+    ],
+    hospitals:[
+      {name:'Mayo Clinic (Rochester)',location:'Minnesota',type:'Research Hospital',note:'Consistently #1 in USA. Specialises in complex cases. World referral centre.'},
+      {name:'Johns Hopkins Hospital',location:'Baltimore, MD',type:'Academic Medical',note:'Pioneering research hospital. Cancer and neurology leaders.'},
+      {name:'Cleveland Clinic',location:'Ohio',type:'Multispecialty',note:'World\'s #2 heart program. Strong international patient services.'},
+    ],
+    hotels:[
+      {name:'Four Seasons NYC',location:'New York',stars:'★★★★★',price:'$600–2,000/night',note:'Luxury icon. Midtown Manhattan. Preferred by business travellers.'},
+      {name:'Marriott / Courtyard',location:'Nationwide',stars:'★★★★',price:'$120–250/night',note:'Best points accumulation. 7,000+ US locations.'},
+      {name:'Motel 6',location:'Nationwide',stars:'★★',price:'$50–90/night',note:'Budget-friendly. Pet-friendly. Good for road trips.'},
+    ],
+    infrastructure:[
+      {name:'US Interstate Highway System',type:'Roads',note:'480,000 km highway network. Car is primary transport outside major cities.'},
+      {name:'Amtrak',type:'Rail',note:'Long-distance rail. Less developed than Europe but scenic routes available.'},
+      {name:'US Broadband',type:'Internet',note:'Average 215 Mbps. Comcast, AT&T, T-Mobile top providers.'},
+    ],
+    worldstatus:{
+      safety:'Moderate (high crime in some cities; gun laws vary by state)',healthcare:'World-class quality but expensive without insurance',economy:'World\'s largest economy, tech and innovation hub',climate:'Varies: subtropical in Florida, arctic in Alaska, arid in Southwest',cost:'Very High in NYC/SF; affordable in Midwest/South',immigration:'H-1B, F-1, Green Card pathways. Long waits for some nationalities.'
+    }
+  },
+  CA:{
+    name:'Canada',flag:'🇨🇦',currency:'CAD ($)',language:'English & French',population:'40M',gdp:'$2.1T',
+    universities:[
+      {name:'University of Toronto',rank:'QS #25',type:'Public',intake:'Sep',tuition:'CAD $45,000/yr',note:'Canada\'s top university. 3 campuses. PGWP eligible after graduation.'},
+      {name:'McGill University',rank:'QS #32',type:'Public',intake:'Sep',tuition:'CAD $22,000/yr',note:'Montreal. Bilingual environment. One of North America\'s best.'},
+      {name:'UBC Vancouver',rank:'QS #34',type:'Public',intake:'Sep',tuition:'CAD $40,000/yr',note:'Beautiful campus. Strong research. Pacific Rim connections.'},
+      {name:'University of Waterloo',rank:'QS #112',type:'Public',intake:'Sep',tuition:'CAD $35,000/yr',note:'World\'s top co-op program. Tech companies recruit heavily here.'},
+    ],
+    airlines:[
+      {name:'Air Canada',hub:'Toronto Pearson',type:'Full-service',coverage:'220+ destinations',note:'National carrier. Star Alliance. Strong transatlantic and transpacific.'},
+      {name:'WestJet',hub:'Calgary',type:'Low-cost/hybrid',coverage:'North America & Caribbean',note:'Popular budget option. Growing international routes.'},
+    ],
+    hospitals:[
+      {name:'Toronto General Hospital',location:'Toronto, ON',type:'Teaching Hospital',note:'Organ transplant pioneer. Part of University Health Network.'},
+      {name:'Vancouver General',location:'Vancouver, BC',type:'Provincial Hospital',note:'Largest hospital in BC. Level 1 trauma centre.'},
+    ],
+    hotels:[
+      {name:'Fairmont Royal York',location:'Toronto',stars:'★★★★★',price:'CAD $300–700/night',note:'Historic grand hotel opposite Union Station.'},
+      {name:'Holiday Inn',location:'Nationwide',stars:'★★★',price:'CAD $120–200/night',note:'Reliable mid-range. IHG Rewards points.'},
+    ],
+    infrastructure:[
+      {name:'Toronto Transit Commission',type:'Public Transport',note:'Subway, buses, streetcars. Presto card system.'},
+      {name:'VIA Rail',type:'Rail',note:'Long-distance passenger rail connecting major cities.'},
+    ],
+    worldstatus:{
+      safety:'Very Safe (Global Peace Index: #11)',healthcare:'Universal healthcare (Medicare) for permanent residents & citizens',economy:'Strong — resource-rich, stable banking system',climate:'Cold winters, warm summers. Varies significantly by region.',cost:'High in Toronto/Vancouver; moderate in smaller cities',immigration:'Express Entry & PNP: one of world\'s most transparent PR systems.'
+    }
+  },
+  DE:{
+    name:'Germany',flag:'🇩🇪',currency:'EUR (€)',language:'German',population:'84M',gdp:'$4.4T',
+    universities:[
+      {name:'LMU Munich',rank:'QS #53',type:'Public',intake:'Oct/Apr',tuition:'~€300/semester (admin)',note:'Near-free education. Strong in sciences, law, humanities.'},
+      {name:'TU Munich',rank:'QS #37',type:'Public',intake:'Oct',tuition:'~€300/semester',note:'Top engineering university. Industry-linked. Siemens, BMW partners.'},
+      {name:'Heidelberg University',rank:'QS #87',type:'Public',intake:'Oct',tuition:'Free',note:'Germany\'s oldest university. Strong medicine and sciences.'},
+      {name:'Humboldt University Berlin',rank:'QS #120',type:'Public',intake:'Oct',tuition:'Free',note:'Berlin campus. Social sciences and arts leader.'},
+    ],
+    airlines:[
+      {name:'Lufthansa',hub:'Frankfurt (FRA)',type:'Full-service',coverage:'220+ destinations',note:'Premium carrier. Star Alliance. Excellent Frankfurt hub connections.'},
+      {name:'Eurowings',hub:'Cologne / Stuttgart',type:'Low-cost',coverage:'Europe wide',note:'Budget Lufthansa subsidiary. Good EU connectivity.'},
+    ],
+    hospitals:[
+      {name:'Charité Berlin',location:'Berlin',type:'University Hospital',note:'Europe\'s largest university hospital. Einstein, Koch, Planck worked here.'},
+      {name:'University Hospital Munich (LMU)',location:'Munich',type:'Teaching',note:'Top cancer and cardiovascular care.'},
+    ],
+    hotels:[
+      {name:'Hotel Adlon Kempinski',location:'Berlin',stars:'★★★★★',price:'€400–1,200/night',note:'Iconic luxury. Brandenburg Gate views.'},
+      {name:'Ibis Hotel',location:'Nationwide',stars:'★★',price:'€70–120/night',note:'Budget chain. Reliable. Good transport links.'},
+    ],
+    infrastructure:[
+      {name:'Deutsche Bahn (DB)',type:'Rail',note:'Germany\'s excellent rail network. ICE trains at 300km/h between cities.'},
+      {name:'Autobahn',type:'Roads',note:'World-famous unlimited speed sections. Excellent road network.'},
+      {name:'German Internet',type:'Internet',note:'Average 100 Mbps. Deutsche Telekom, Vodafone, 1&1 providers.'},
+    ],
+    worldstatus:{
+      safety:'Very Safe (Global Peace Index: #16)',healthcare:'Statutory + private insurance. High-quality universal coverage',economy:'Europe\'s largest economy. Manufacturing & exports leader.',climate:'Temperate continental. Cold winters, warm summers.',cost:'Moderate by Western European standards. Berlin affordable.',immigration:'Skilled immigration law 2024: faster processing, points system.'
+    }
+  },
+  AU:{
+    name:'Australia',flag:'🇦🇺',currency:'AUD ($)',language:'English',population:'27M',gdp:'$1.7T',
+    universities:[
+      {name:'University of Melbourne',rank:'QS #14',type:'Public',intake:'Feb/Jul',tuition:'AUD $40,000–55,000/yr',note:'Go8 member. Graduate Visa 485 available. Strong research.'},
+      {name:'ANU Canberra',rank:'QS #30',type:'Public',intake:'Feb',tuition:'AUD $38,000/yr',note:'Policy and research leader. Government partnerships. Capital location.'},
+      {name:'UNSW Sydney',rank:'QS #19',type:'Public',intake:'Feb/Sep',tuition:'AUD $42,000/yr',note:'Strong engineering and business. Sydney harbour location.'},
+    ],
+    airlines:[
+      {name:'Qantas',hub:'Sydney (SYD)',type:'Full-service',coverage:'85+ destinations',note:'National carrier. Frequent Flyer program. oneworld alliance.'},
+      {name:'Jetstar',hub:'Melbourne',type:'Low-cost',coverage:'Asia-Pacific',note:'Qantas subsidiary. Budget fares to Asia and Pacific Islands.'},
+    ],
+    hospitals:[
+      {name:'Royal Melbourne Hospital',location:'Melbourne, VIC',type:'Teaching',note:'Victoria\'s first hospital. Major trauma and specialist centre.'},
+      {name:'Royal Prince Alfred',location:'Sydney, NSW',type:'Teaching',note:'Sydney\'s largest public hospital. Strong cardiac and cancer care.'},
+    ],
+    hotels:[
+      {name:'Park Hyatt Sydney',location:'Sydney',stars:'★★★★★',price:'AUD $600–1,500/night',note:'Iconic Opera House views. Benchmark Sydney luxury.'},
+      {name:'Quest Apartments',location:'Nationwide',stars:'★★★',price:'AUD $120–200/night',note:'Serviced apartments. Good for longer stays.'},
+    ],
+    infrastructure:[
+      {name:'Sydney & Melbourne Metro',type:'Public Transport',note:'Opal card (Sydney) / myki (Melbourne). Trains, trams, buses.'},
+      {name:'National Broadband Network',type:'Internet',note:'Fibre-to-premises rollout. Average 100 Mbps. Telstra, Optus providers.'},
+    ],
+    worldstatus:{
+      safety:'Very Safe (Global Peace Index: #17)',healthcare:'Medicare universal for citizens & PR. OSHC for students.',economy:'Resilient. Mining, agriculture, services. 32 years recession-free.',climate:'Varies: tropical north, temperate south. Bushfire risk inland.',cost:'High in Sydney/Melbourne; moderate in Perth/Adelaide',immigration:'Points-based. Multiple PR pathways: skilled, student, family.'
+    }
+  },
+};
+// Defaults for countries without detailed data
+function getWeCountryData(code){
+  return WE_DATA[code]||{
+    name:document.getElementById('weCountrySelect')?.querySelector(`option[value="${code}"]`)?.textContent?.replace(/^[^ ]+ /,'')||code,
+    flag:'🌍',currency:'Local currency',language:'Local language',population:'—',gdp:'—',
+    universities:[{name:'Data coming soon',rank:'—',type:'—',intake:'—',tuition:'—',note:'Detailed university data for this country will be added soon.'}],
+    airlines:[{name:'Data coming soon',hub:'—',type:'—',coverage:'—',note:'Airline data coming soon.'}],
+    hospitals:[{name:'Data coming soon',location:'—',type:'—',note:'Hospital data coming soon.'}],
+    hotels:[{name:'Data coming soon',location:'—',stars:'—',price:'—',note:'Hotel data coming soon.'}],
+    infrastructure:[{name:'Data coming soon',type:'—',note:'Infrastructure data coming soon.'}],
+    worldstatus:{safety:'—',healthcare:'—',economy:'—',climate:'—',cost:'—',immigration:'—'}
+  };
+}
+
+let weCurrentPanel='universities';
+
+function showWePanel(name,btn){
+  weCurrentPanel=name;
+  document.querySelectorAll('.we-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.we-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('wePanel-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  renderWePanel();
+}
+
+function onWeCountryChange(){
+  renderWeStats();
+  renderWePanel();
+}
+
+function renderWeStats(){
+  const code=document.getElementById('weCountrySelect')?.value||'GB';
+  const d=getWeCountryData(code);
+  document.getElementById('weStatRow').innerHTML=`
+    <div class="we-stat"><strong>${d.flag} ${d.name}</strong><span>Country</span></div>
+    <div class="we-stat"><strong>${d.currency}</strong><span>Currency</span></div>
+    <div class="we-stat"><strong>${d.language}</strong><span>Language</span></div>
+    <div class="we-stat"><strong>${d.population}</strong><span>Population</span></div>
+    <div class="we-stat"><strong>${d.gdp}</strong><span>GDP</span></div>`;
+}
+
+function renderWePanel(){
+  const code=document.getElementById('weCountrySelect')?.value||'GB';
+  const d=getWeCountryData(code);
+  const p=weCurrentPanel;
+  if(p==='universities'){
+    document.getElementById('weUniGrid').innerHTML=d.universities.map(u=>`
+      <div class="we-card">
+        <div class="we-card-head"><div class="we-card-icon">🎓</div><div><h4>${u.name}</h4><div class="we-sub">${u.rank} · ${u.type}</div></div></div>
+        <p><strong>Intake:</strong> ${u.intake} | <strong>Tuition:</strong> ${u.tuition}</p>
+        <p style="margin-top:0.5rem">${u.note}</p>
+        <div style="margin-top:0.7rem"><span class="we-badge">Study Abroad</span><span class="we-badge">Visa Required</span></div>
+      </div>`).join('');
+  } else if(p==='airlines'){
+    document.getElementById('weAirGrid').innerHTML=d.airlines.map(a=>`
+      <div class="we-card">
+        <div class="we-card-head"><div class="we-card-icon">✈️</div><div><h4>${a.name}</h4><div class="we-sub">${a.type}</div></div></div>
+        <p><strong>Hub:</strong> ${a.hub}</p>
+        <p><strong>Coverage:</strong> ${a.coverage}</p>
+        <p style="margin-top:0.5rem">${a.note}</p>
+      </div>`).join('');
+  } else if(p==='hospitals'){
+    document.getElementById('weHospGrid').innerHTML=d.hospitals.map(h=>`
+      <div class="we-card">
+        <div class="we-card-head"><div class="we-card-icon">🏥</div><div><h4>${h.name}</h4><div class="we-sub">${h.location}</div></div></div>
+        <p><strong>Type:</strong> ${h.type}${h.beds?` | <strong>Beds:</strong> ${h.beds}`:''}</p>
+        <p style="margin-top:0.5rem">${h.note}</p>
+        <div style="margin-top:0.7rem"><span class="we-badge">Healthcare</span></div>
+      </div>`).join('');
+  } else if(p==='hotels'){
+    document.getElementById('weHotelGrid').innerHTML=d.hotels.map(h=>`
+      <div class="we-card">
+        <div class="we-card-head"><div class="we-card-icon">🏨</div><div><h4>${h.name}</h4><div class="we-sub">${h.location}</div></div></div>
+        <p>${h.stars} | <strong>Price:</strong> ${h.price}</p>
+        <p style="margin-top:0.5rem">${h.note}</p>
+      </div>`).join('');
+  } else if(p==='infrastructure'){
+    document.getElementById('weInfraGrid').innerHTML=d.infrastructure.map(i=>`
+      <div class="we-card">
+        <div class="we-card-head"><div class="we-card-icon">🏗️</div><div><h4>${i.name}</h4><div class="we-sub">${i.type}</div></div></div>
+        <p style="margin-top:0.3rem">${i.note}</p>
+      </div>`).join('');
+  } else if(p==='worldstatus'){
+    const s=d.worldstatus;
+    document.getElementById('weStatusGrid').innerHTML=`
+      <div class="we-card"><div class="we-card-head"><div class="we-card-icon">🛡️</div><div><h4>Safety</h4></div></div><p>${s.safety}</p></div>
+      <div class="we-card"><div class="we-card-head"><div class="we-card-icon">🏥</div><div><h4>Healthcare</h4></div></div><p>${s.healthcare}</p></div>
+      <div class="we-card"><div class="we-card-head"><div class="we-card-icon">💼</div><div><h4>Economy</h4></div></div><p>${s.economy}</p></div>
+      <div class="we-card"><div class="we-card-head"><div class="we-card-icon">🌤️</div><div><h4>Climate</h4></div></div><p>${s.climate}</p></div>
+      <div class="we-card"><div class="we-card-head"><div class="we-card-icon">💰</div><div><h4>Cost of Living</h4></div></div><p>${s.cost}</p></div>
+      <div class="we-card"><div class="we-card-head"><div class="we-card-icon">🛂</div><div><h4>Immigration</h4></div></div><p>${s.immigration}</p></div>`;
+  }
+}
+
+// Init World Explorer when page loads
+function initWorldExplorer(){
+  renderWeStats();
+  renderWePanel();
+}
+
+// Init blog on first render
+function initBlog(){
+  renderBlog();
+}
 </script>
 
 <!-- PWA Service Worker registration -->
