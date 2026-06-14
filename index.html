@@ -677,6 +677,7 @@ body.wc-active .mobile-menu{padding-top:46px}
     <li><a onclick="showPage('blog')" data-page="blog">📰 Blog</a></li>
     <li><a onclick="showPage('world')" data-page="world">🌍 World</a></li>
     <li><a onclick="showPage('tools')" data-page="tools">🤖 AI Tools</a></li>
+    <li><a onclick="showPage('invoice')" data-page="invoice">🧾 Invoice</a></li>
     <li><a onclick="showPage('search')" data-page="search">🔍 Search</a></li>
     <li><a onclick="showPage('apply')" data-page="apply" style="color:var(--gold)">📋 Apply Now</a></li>
     <li><a onclick="goAccount()" data-page="account" id="navAccountLink">👤 Login</a></li>
@@ -699,6 +700,7 @@ body.wc-active .mobile-menu{padding-top:46px}
   <a onclick="showPage('blog');toggleMenu()">📰 Blog</a>
   <a onclick="showPage('world');toggleMenu()">🌍 World</a>
   <a onclick="showPage('tools');toggleMenu()">🤖 AI Tools</a>
+  <a onclick="showPage('invoice');toggleMenu()">🧾 Invoice</a>
   <a onclick="showPage('apply');toggleMenu()" style="color:var(--gold)">📋 Apply Now</a>
   <a onclick="goAccount();toggleMenu()" id="mobAccountLink">👤 Login</a>
   <a onclick="showPage('search');toggleMenu()">🔍 Search</a>
@@ -1938,7 +1940,7 @@ body.wc-active .mobile-menu{padding-top:46px}
 <script>
 // PAGE ROUTING
 // Main journey order for Back/Next navigation
-const PAGE_ORDER = ['home','about','services','destinations','countries','world','blog','tools','apply','contact'];
+const PAGE_ORDER = ['home','about','services','destinations','countries','world','blog','tools','invoice','apply','contact'];
 const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',world:'World Explorer',blog:'Blog',tools:'AI Tools',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
 let _lastPage = null;
 
@@ -1957,6 +1959,7 @@ function showPage(page) {
   if (page === 'blog') initBlog();
   if (page === 'world') initWorldExplorer();
   if (page === 'tools') warmUpServer();
+  if (page === 'invoice') initInvoicePage();
   renderPageNav(page, target);
   setupCounters(target);
 }
@@ -4814,6 +4817,75 @@ updateAccountNav();
   </div>
 </div>
 
+<!-- ===== INVOICE GENERATOR PAGE ===== -->
+<div class="page" id="page-invoice">
+  <section style="padding:120px 5% 60px;background:linear-gradient(135deg,#fff,#f0f5ff);min-height:100vh">
+    <div class="text-center" style="margin-bottom:2.5rem">
+      <span class="section-tag">Professional & Printable</span>
+      <h2 class="section-title">Invoice <strong>Generator</strong></h2>
+      <p class="section-sub">Create a professional USD invoice for your clients in seconds. Print or save as PDF and send it directly.</p>
+    </div>
+
+    <div style="max-width:720px;margin:0 auto">
+      <!-- Invoice form -->
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:2rem">
+        <h3 style="margin:0 0 1.4rem;font-size:1.1rem;color:#1e293b">📋 Invoice Details</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <label style="font-size:0.8rem;font-weight:600;color:#64748b">Invoice Number *</label>
+            <input id="invNumber" type="text" placeholder="e.g. INV-2026-001" style="padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <label style="font-size:0.8rem;font-weight:600;color:#64748b">Invoice Date *</label>
+            <input id="invDate" type="date" style="padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <label style="font-size:0.8rem;font-weight:600;color:#64748b">Due Date</label>
+            <input id="invDue" type="date" style="padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <label style="font-size:0.8rem;font-weight:600;color:#64748b">Currency</label>
+            <select id="invCurrency" style="padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none;background:#fff">
+              <option value="USD">USD — US Dollar ($)</option>
+              <option value="GBP">GBP — British Pound (£)</option>
+              <option value="EUR">EUR — Euro (€)</option>
+              <option value="CAD">CAD — Canadian Dollar (C$)</option>
+            </select>
+          </div>
+        </div>
+
+        <hr style="margin:1.4rem 0;border:none;border-top:1px solid #f1f5f9">
+        <h3 style="margin:0 0 1rem;font-size:1rem;color:#1e293b">👤 Client (Bill To)</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <label style="font-size:0.8rem;font-weight:600;color:#64748b">Client Full Name *</label>
+            <input id="invClientName" type="text" placeholder="e.g. James Müller" style="padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <label style="font-size:0.8rem;font-weight:600;color:#64748b">Client Email *</label>
+            <input id="invClientEmail" type="email" placeholder="e.g. james@company.com" style="padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem;grid-column:1/-1">
+            <label style="font-size:0.8rem;font-weight:600;color:#64748b">Client Address / Company</label>
+            <input id="invClientAddr" type="text" placeholder="e.g. 14 Oak Street, Toronto, Canada" style="padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none">
+          </div>
+        </div>
+
+        <hr style="margin:1.4rem 0;border:none;border-top:1px solid #f1f5f9">
+        <h3 style="margin:0 0 1rem;font-size:1rem;color:#1e293b">🛎️ Services</h3>
+        <div id="invLineItems"></div>
+        <button onclick="addInvLine()" style="margin-top:0.6rem;background:none;border:1px dashed #b8860b;color:#b8860b;border-radius:8px;padding:8px 16px;font-size:0.85rem;cursor:pointer;width:100%">+ Add Service Line</button>
+
+        <hr style="margin:1.4rem 0;border:none;border-top:1px solid #f1f5f9">
+        <h3 style="margin:0 0 1rem;font-size:1rem;color:#1e293b">📝 Notes (optional)</h3>
+        <textarea id="invNotes" rows="3" placeholder="e.g. Thank you for choosing SkyGlobe Limited. Payment is due within 7 days." style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.88rem;outline:none;resize:vertical;box-sizing:border-box"></textarea>
+
+        <button onclick="buildInvoice()" class="btn-primary" style="margin-top:1.4rem;width:100%;font-size:1rem;padding:14px">🖨️ Preview &amp; Print Invoice</button>
+      </div>
+    </div>
+  </section>
+</div>
+
 <!-- ===== WORLD EXPLORER PAGE ===== -->
 <div class="page" id="page-world">
   <div id="worldPageNav-top"></div>
@@ -5922,15 +5994,16 @@ async function generateDoc() {
 
   try {
     let r, lastErr;
-    for (let attempt = 1; attempt <= 4; attempt++) {
+    const MAX_ATTEMPTS = 6;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
-        if (attempt > 1) progressMsg(`Waking up our server and retrying… (attempt ${attempt} of 4)`);
+        if (attempt > 1) progressMsg('Almost ready — finalising your document, just a moment…');
         r = await attemptFetch();
         break; // got an HTTP response (even if error) — stop retrying network
       } catch (err) {
         lastErr = err;
         // Network-level failure or abort → wait and retry (server may be cold-starting)
-        if (attempt < 4) { await sleep(attempt * 3000); continue; }
+        if (attempt < MAX_ATTEMPTS) { await sleep(attempt * 2500); continue; }
         throw lastErr;
       }
     }
@@ -5956,7 +6029,7 @@ async function generateDoc() {
   } catch (e) {
     const isNet = (e.name === 'AbortError' || e.name === 'TimeoutError' || e instanceof TypeError);
     const msg = isNet
-      ? 'Our server is waking up from sleep and the connection dropped. This is normal on the first try — please click "Try Again" and it will work within a few seconds.'
+      ? 'Connection hiccup — your document is ready to be generated. Please click "Try Again" and it will work right away.'
       : (e.message || 'Generation failed. Please try again or contact our team.');
     document.getElementById('docOutputArea').innerHTML = `
       <div style="background:#fff0f0;border:1px solid #fca5a5;border-radius:10px;padding:1.2rem;color:#c62828;font-size:0.88rem">
@@ -5995,6 +6068,7 @@ function printDoc() {
   const isSkyConf = selectedDocType === 'skyconference';
 
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const logoUrl = location.origin + '/logo.png';
 
   // Split into paragraphs for proper spacing
   const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim())
@@ -6063,7 +6137,8 @@ function printDoc() {
     * { box-sizing: border-box; }
     body { font-family: 'Georgia','Times New Roman',serif; color: #1a1a1a; font-size: 12pt; line-height: 1.75; margin: 0; padding: 40px; max-width: 800px; margin: 0 auto; }
     .letterhead { width:100%; border-collapse:collapse; border-bottom: 3px solid #b8860b; padding-bottom: 14px; margin-bottom: 28px; display:table; }
-    .lh-brand { display:table-cell; vertical-align:top; width:60%; font-family:'Georgia',serif; }
+    .lh-brand { display:table-cell; vertical-align:middle; width:60%; font-family:'Georgia',serif; }
+    .lh-logo { height: 70px; width:auto; display:block; margin-bottom:6px; }
     .lh-name { font-size: 20pt; font-weight: 700; letter-spacing: 0.5px; color:#0a1628; }
     .lh-name span { color:#b8860b; }
     .lh-tag { font-size: 8.5pt; color:#444; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
@@ -6094,13 +6169,14 @@ function printDoc() {
         ${isIssuerDoc
           ? `<div class="lh-name">${esc(issuerName)}</div>
              <div class="lh-tag">${selectedDocType === 'experience' ? 'Human Resources Department' : 'Office of the Organiser'}</div>`
-          : `<div class="lh-name">SKY<span>GLOBE</span> LIMITED</div>
+          : `<img src="${logoUrl}" alt="SkyGlobe Limited" class="lh-logo">
+             <div class="lh-name" style="font-size:15pt">SKY<span>GLOBE</span> LIMITED</div>
              <div class="lh-tag">Your Gateway to Global Opportunity</div>`}
       </div>
       <div class="lh-contact">
         ${isIssuerDoc
           ? issuerContact
-          : `<strong>skyglobegroup.com</strong><br>support@skyglobegroup.com<br>WhatsApp: +1 737-399-8522<br>Reg. No. 15497803`}
+          : `<strong>skyglobegroup.com</strong><br>support@skyglobegroup.com<br>WhatsApp: +1 737-399-8522`}
       </div>
     </div>
 
@@ -6134,9 +6210,26 @@ function printDoc() {
       This document was drafted with assistance from SkyGlobe Limited's AI tools and is intended as a professional draft.<br>
       For document review, visa processing, and admissions support, visit <strong>skyglobegroup.com</strong>
     </div>`}
+    <script>
+      (function(){
+        var done = false;
+        function go(){ if(done) return; done = true; window.focus(); window.print(); }
+        var imgs = Array.prototype.slice.call(document.images);
+        var pending = imgs.filter(function(i){ return !i.complete; }).length;
+        if (pending === 0) { setTimeout(go, 300); }
+        else {
+          imgs.forEach(function(i){
+            if (i.complete) return;
+            i.addEventListener('load', function(){ if(--pending<=0) go(); });
+            i.addEventListener('error', function(){ if(--pending<=0) go(); });
+          });
+        }
+        // Safety net: print anyway after 3s if an image never resolves
+        setTimeout(go, 3000);
+      })();
+    <\/script>
   </body></html>`);
   w.document.close();
-  setTimeout(() => w.print(), 350);
 }
 
 function resetDocGen() {
@@ -6162,6 +6255,194 @@ function resetDocGen() {
   document.getElementById('docGoals').value = '';
   document.getElementById('docExtra').value = '';
   document.getElementById('docGenForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ============================================================
+// INVOICE GENERATOR
+// ============================================================
+let invPageInitDone = false;
+function initInvoicePage() {
+  if (invPageInitDone) return;
+  invPageInitDone = true;
+  const today = new Date();
+  const due   = new Date(today); due.setDate(due.getDate() + 7);
+  const fmt   = d => d.toISOString().slice(0, 10);
+  document.getElementById('invDate').value = fmt(today);
+  document.getElementById('invDue').value  = fmt(due);
+  document.getElementById('invNumber').value = `INV-${today.getFullYear()}-001`;
+  addInvLine();
+}
+
+function addInvLine() {
+  const container = document.getElementById('invLineItems');
+  const idx = container.children.length;
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 80px 100px 28px;gap:0.5rem;align-items:center;margin-bottom:0.5rem';
+  row.innerHTML = `
+    <input type="text" placeholder="Service description, e.g. Visa Cover Letter" oninput="calcInvTotal()"
+      style="padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:0.85rem;outline:none">
+    <input type="number" placeholder="Qty" value="1" min="1" oninput="calcInvTotal()"
+      style="padding:9px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:0.85rem;outline:none;text-align:center">
+    <input type="number" placeholder="Unit price" min="0" step="0.01" oninput="calcInvTotal()"
+      style="padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:0.85rem;outline:none">
+    <button onclick="this.parentElement.remove();calcInvTotal()" title="Remove"
+      style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#94a3b8;line-height:1">×</button>`;
+  container.appendChild(row);
+  calcInvTotal();
+}
+
+function calcInvTotal() {
+  const rows = document.getElementById('invLineItems').children;
+  let total = 0;
+  for (const row of rows) {
+    const inputs = row.querySelectorAll('input');
+    const qty   = parseFloat(inputs[1]?.value) || 0;
+    const price = parseFloat(inputs[2]?.value) || 0;
+    total += qty * price;
+  }
+  const sym = { USD:'$', GBP:'£', EUR:'€', CAD:'C$' };
+  const cur = document.getElementById('invCurrency')?.value || 'USD';
+  const el  = document.getElementById('invTotalPreview');
+  if (el) el.textContent = `Total: ${sym[cur] || ''}${total.toFixed(2)} ${cur}`;
+}
+document.getElementById('invCurrency')?.addEventListener('change', calcInvTotal);
+
+function buildInvoice() {
+  const invNumber     = document.getElementById('invNumber').value.trim();
+  const invDate       = document.getElementById('invDate').value;
+  const invDue        = document.getElementById('invDue').value;
+  const invCurrency   = document.getElementById('invCurrency').value;
+  const invClientName = document.getElementById('invClientName').value.trim();
+  const invClientEmail= document.getElementById('invClientEmail').value.trim();
+  const invClientAddr = document.getElementById('invClientAddr').value.trim();
+  const invNotes      = document.getElementById('invNotes').value.trim();
+
+  if (!invNumber || !invDate || !invClientName || !invClientEmail) {
+    alert('Please fill in Invoice Number, Date, Client Name and Client Email.');
+    return;
+  }
+
+  const sym = { USD:'$', GBP:'£', EUR:'€', CAD:'C$' };
+  const S   = sym[invCurrency] || '$';
+
+  // Build line items
+  const rows  = document.getElementById('invLineItems').children;
+  let lineHTML = '', subtotal = 0;
+  for (const row of rows) {
+    const inputs = row.querySelectorAll('input');
+    const desc  = inputs[0]?.value.trim();
+    const qty   = parseFloat(inputs[1]?.value) || 0;
+    const price = parseFloat(inputs[2]?.value) || 0;
+    if (!desc) continue;
+    const amount = qty * price;
+    subtotal += amount;
+    lineHTML += `<tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9">${desc}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;text-align:center">${qty}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;text-align:right">${S}${price.toFixed(2)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;text-align:right">${S}${amount.toFixed(2)}</td>
+    </tr>`;
+  }
+  if (!lineHTML) { alert('Please add at least one service line.'); return; }
+
+  const fmtDate = d => { if (!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; };
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Invoice ${invNumber} — SkyGlobe Limited</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  body { font-family: 'Georgia', serif; color: #1e293b; margin: 0; padding: 0; font-size: 10pt; }
+  .lh { display: table; width: 100%; border-bottom: 3px solid #b8860b; padding-bottom: 14px; margin-bottom: 24px; border-collapse: collapse; }
+  .lh-brand { display: table-cell; vertical-align: top; width: 60%; }
+  .lh-contact { display: table-cell; vertical-align: top; width: 40%; text-align: right; font-size: 9pt; line-height: 1.8; }
+  .brand-name { font-size: 22pt; font-weight: bold; color: #b8860b; letter-spacing: 2px; }
+  .brand-tag { font-size: 8pt; color: #64748b; letter-spacing: 1.5px; text-transform: uppercase; }
+  .inv-title { font-size: 20pt; font-weight: bold; color: #b8860b; margin: 0 0 6px; }
+  .meta-row { display: flex; justify-content: space-between; margin-bottom: 20px; }
+  .meta-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; width: 47%; }
+  .meta-label { font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 4px; }
+  .meta-val { font-size: 10pt; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  thead th { background: #b8860b; color: #fff; padding: 10px 12px; font-size: 9pt; text-align: left; }
+  thead th:nth-child(2),thead th:nth-child(3),thead th:nth-child(4){ text-align: center; }
+  thead th:nth-child(3),thead th:nth-child(4){ text-align: right; }
+  .total-row td { padding: 12px; font-weight: bold; font-size: 12pt; border-top: 2px solid #b8860b; }
+  .notes { margin-top: 24px; background: #fffbea; border: 1px solid #f0c36d; border-radius: 6px; padding: 12px 16px; font-size: 9pt; }
+  .payment { margin-top: 20px; background: #f0f9f4; border: 1px solid #6ee7b7; border-radius: 6px; padding: 14px 16px; font-size: 9pt; line-height: 1.8; }
+  .footer { margin-top: 28px; text-align: center; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+
+<!-- LETTERHEAD -->
+<div class="lh">
+  <div class="lh-brand">
+    <img src="${location.origin}/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;display:block;margin-bottom:4px">
+    <div class="brand-name" style="font-size:16pt">SKYGLOBE LIMITED</div>
+    <div class="brand-tag">Global Immigration &amp; Education Consultancy</div>
+  </div>
+  <div class="lh-contact">
+    <strong>SkyGlobe Limited</strong><br>
+    support@skyglobegroup.com<br>
+    www.skyglobegroup.com<br>
+    +1 (647) 555-0192
+  </div>
+</div>
+
+<!-- INVOICE TITLE + META -->
+<div class="inv-title">INVOICE</div>
+<div class="meta-row">
+  <div class="meta-box">
+    <div class="meta-label">Bill To</div>
+    <div class="meta-val">${invClientName}</div>
+    <div>${invClientEmail}</div>
+    ${invClientAddr ? `<div>${invClientAddr}</div>` : ''}
+  </div>
+  <div class="meta-box" style="text-align:right">
+    <div class="meta-label">Invoice Details</div>
+    <div class="meta-val">${invNumber}</div>
+    <div>Date: ${fmtDate(invDate)}</div>
+    ${invDue ? `<div>Due: ${fmtDate(invDue)}</div>` : ''}
+    <div>Currency: ${invCurrency}</div>
+  </div>
+</div>
+
+<!-- LINE ITEMS -->
+<table>
+  <thead><tr>
+    <th>Description</th>
+    <th style="text-align:center;width:60px">Qty</th>
+    <th style="text-align:right;width:90px">Unit Price</th>
+    <th style="text-align:right;width:90px">Amount</th>
+  </tr></thead>
+  <tbody>${lineHTML}</tbody>
+  <tfoot>
+    <tr class="total-row">
+      <td colspan="3" style="text-align:right;border-bottom:none">TOTAL DUE</td>
+      <td style="text-align:right;color:#b8860b;border-bottom:none">${S}${subtotal.toFixed(2)} ${invCurrency}</td>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- PAYMENT INSTRUCTIONS -->
+<div class="payment">
+  <strong>💳 Payment Instructions</strong><br>
+  Please transfer the total amount above to our account using the details provided by our team.<br>
+  Reference: <strong>${invNumber}</strong> — ${invClientName}<br>
+  <em style="color:#64748b;font-size:8.5pt">Payment details will be provided by email upon receipt of this invoice.</em>
+</div>
+
+${invNotes ? `<div class="notes"><strong>📝 Notes:</strong><br>${invNotes}</div>` : ''}
+
+<div class="footer">
+  SkyGlobe Limited &nbsp;|&nbsp; support@skyglobegroup.com &nbsp;|&nbsp; www.skyglobegroup.com<br>
+  This invoice was generated by SkyGlobe Limited's secure client portal.
+</div>
+</body></html>`;
+
+  const printScript = `<scr`+`ipt>(function(){var done=false;function go(){if(done)return;done=true;window.focus();window.print();}var imgs=Array.prototype.slice.call(document.images);var pending=imgs.filter(function(i){return !i.complete;}).length;if(pending===0){setTimeout(go,300);}else{imgs.forEach(function(i){if(i.complete)return;i.addEventListener('load',function(){if(--pending<=0)go();});i.addEventListener('error',function(){if(--pending<=0)go();});});}setTimeout(go,3000);})();</scr`+`ipt>`;
+  const w = window.open('', '_blank', 'width=820,height=1100');
+  w.document.write(html.replace('</body></html>', printScript + '</body></html>'));
+  w.document.close();
 }
 
 // Init blog on first render
