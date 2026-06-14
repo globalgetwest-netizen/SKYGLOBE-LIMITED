@@ -553,6 +553,24 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .we-detail-val{color:#374151;line-height:1.55;flex:1}
 .we-detail-actions{margin-top:1.4rem;display:flex;gap:0.7rem;flex-wrap:wrap}
 
+/* ── DOCUMENT GENERATOR ──────────────────────────────────────── */
+.doc-type-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+.doc-type-card{background:#fff;border:2px solid rgba(0,0,0,0.1);border-radius:var(--radius-lg);padding:1.4rem 1.2rem;text-align:center;cursor:pointer;transition:var(--trans)}
+.doc-type-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.09)}
+.doc-type-card.selected{border-color:var(--gold);background:rgba(184,134,11,0.05);box-shadow:0 6px 20px rgba(184,134,11,0.15)}
+.doc-type-card .dt-icon{font-size:2rem;margin-bottom:0.6rem;display:block}
+.doc-type-card h4{font-size:0.95rem;font-weight:600;margin-bottom:0.3rem;color:#0a1628}
+.doc-type-card p{font-size:0.78rem;color:#64748b;line-height:1.4}
+.doc-output{background:#f8f9fb;border:1px solid rgba(0,0,0,0.1);border-radius:var(--radius-lg);padding:1.8rem;margin-top:1.5rem;white-space:pre-wrap;font-size:0.9rem;line-height:1.85;color:#374151;font-family:'Inter',sans-serif;min-height:200px;position:relative}
+.doc-output-actions{display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1rem}
+.doc-gen-progress{display:flex;align-items:center;gap:10px;padding:1.5rem;color:#64748b;font-size:0.9rem}
+.doc-gen-dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);animation:aiDot 1.2s ease infinite}
+.doc-gen-dots span:nth-child(2){animation-delay:0.2s}
+.doc-gen-dots span:nth-child(3){animation-delay:0.4s}
+.doc-step{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:var(--radius-lg);padding:1.8rem 2rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.doc-step h4{font-size:1rem;font-weight:600;color:#0a1628;margin-bottom:1.2rem;display:flex;align-items:center;gap:8px}
+.doc-step h4 span{width:26px;height:26px;background:var(--gold);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0}
+
 /* ── TESTIMONIAL TICKER ──────────────────────────────────────────── */
 .testi-track-wrap{overflow:hidden;mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
 .testi-track{display:flex;gap:1rem;width:max-content;animation:scrollLeft 40s linear infinite}
@@ -658,6 +676,7 @@ body.wc-active .mobile-menu{padding-top:46px}
     <li><a onclick="showPage('destinations')" data-page="destinations">Destinations</a></li>
     <li><a onclick="showPage('blog')" data-page="blog">📰 Blog</a></li>
     <li><a onclick="showPage('world')" data-page="world">🌍 World</a></li>
+    <li><a onclick="showPage('tools')" data-page="tools">🤖 AI Tools</a></li>
     <li><a onclick="showPage('search')" data-page="search">🔍 Search</a></li>
     <li><a onclick="showPage('apply')" data-page="apply" style="color:var(--gold)">📋 Apply Now</a></li>
     <li><a onclick="goAccount()" data-page="account" id="navAccountLink">👤 Login</a></li>
@@ -679,6 +698,7 @@ body.wc-active .mobile-menu{padding-top:46px}
   <a onclick="showPage('destinations');toggleMenu()">Destinations</a>
   <a onclick="showPage('blog');toggleMenu()">📰 Blog</a>
   <a onclick="showPage('world');toggleMenu()">🌍 World</a>
+  <a onclick="showPage('tools');toggleMenu()">🤖 AI Tools</a>
   <a onclick="showPage('apply');toggleMenu()" style="color:var(--gold)">📋 Apply Now</a>
   <a onclick="goAccount();toggleMenu()" id="mobAccountLink">👤 Login</a>
   <a onclick="showPage('search');toggleMenu()">🔍 Search</a>
@@ -1161,6 +1181,12 @@ body.wc-active .mobile-menu{padding-top:46px}
         <h3>Travel & Immigration Consultation</h3>
         <p>One-on-one expert consultation sessions to map out the best immigration pathway for your specific goals, timeline, and background — with a clear, actionable plan.</p>
         <span class="s-tag">Strategy → Success</span><span class="apply-hint">→ Book consultation</span>
+      </div>
+      <div class="service-full-card" onclick="showPage('tools')" style="border-color:rgba(184,134,11,0.25);background:linear-gradient(135deg,#fff,rgba(184,134,11,0.03))">
+        <div class="s-photo"><img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=500&q=80&auto=format&fit=crop" alt="AI Tools" loading="lazy"><span class="s-photo-icon">🤖</span></div>
+        <h3>AI Document Generator ✨ New</h3>
+        <p>Generate professional Statements of Purpose, cover letters, and visa letters in seconds using Gemini AI — then have our experts review before you submit.</p>
+        <span class="s-tag">AI → Documents</span><span class="apply-hint">→ Try free</span>
       </div>
       <div class="service-full-card" onclick="showSvcDetail('Flight Booking')">
         <div class="s-photo"><img src="https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=500&q=80&auto=format&fit=crop" alt="Flight Booking" loading="lazy"><span class="s-photo-icon">🎫</span></div>
@@ -1912,8 +1938,8 @@ body.wc-active .mobile-menu{padding-top:46px}
 <script>
 // PAGE ROUTING
 // Main journey order for Back/Next navigation
-const PAGE_ORDER = ['home','about','services','destinations','countries','world','blog','apply','contact'];
-const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',world:'World Explorer',blog:'Blog',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
+const PAGE_ORDER = ['home','about','services','destinations','countries','world','blog','tools','apply','contact'];
+const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',world:'World Explorer',blog:'Blog',tools:'AI Tools',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
 let _lastPage = null;
 
 function showPage(page) {
@@ -4560,6 +4586,132 @@ updateAccountNav();
   <div id="blogPageNav-bot"></div>
 </div>
 
+<!-- ===== AI TOOLS PAGE ===== -->
+<div class="page" id="page-tools">
+  <div id="toolsPageNav-top"></div>
+  <section style="padding:120px 5% 40px;background:linear-gradient(135deg,#fff,#f0f5ff)">
+    <div class="text-center">
+      <span class="section-tag">✨ Powered by Gemini AI</span>
+      <h2 class="section-title">AI <strong>Document Generator</strong></h2>
+      <p class="section-sub">Generate professional SOPs, cover letters, and visa letters in seconds. Reviewed by our experts before submission.</p>
+    </div>
+
+    <!-- Step 1: Choose document type -->
+    <div style="max-width:800px;margin:2.5rem auto 0" id="docGenForm">
+      <div class="doc-step">
+        <h4><span>1</span> What do you want to generate?</h4>
+        <div class="doc-type-grid">
+          <div class="doc-type-card" onclick="selectDocType('sop',this)">
+            <span class="dt-icon">🎓</span>
+            <h4>Statement of Purpose</h4>
+            <p>For university & postgraduate applications. Required by Oxford, MIT, Harvard and more.</p>
+          </div>
+          <div class="doc-type-card" onclick="selectDocType('coverletter',this)">
+            <span class="dt-icon">💼</span>
+            <h4>Job Cover Letter</h4>
+            <p>For international job applications in UK, Canada, Germany, Australia and more.</p>
+          </div>
+          <div class="doc-type-card" onclick="selectDocType('visaletter',this)">
+            <span class="dt-icon">🛂</span>
+            <h4>Visa Cover Letter</h4>
+            <p>Personal statement for visa applications — tourist, student, or work visa.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Fill details -->
+      <div class="doc-step" id="docStep2" style="display:none">
+        <h4><span>2</span> Tell us about yourself</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="docFullName" placeholder="e.g. Amara Nwosu">
+          </div>
+          <div class="form-group">
+            <label>Nationality</label>
+            <input type="text" id="docNationality" placeholder="e.g. Nigerian">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label id="docDestLabel">Destination Country *</label>
+            <input type="text" id="docDestination" placeholder="e.g. United Kingdom">
+          </div>
+          <div class="form-group">
+            <label id="docInstLabel">University / Company Name</label>
+            <input type="text" id="docInstitution" placeholder="e.g. University of Manchester">
+          </div>
+        </div>
+        <div class="form-group">
+          <label id="docProgramLabel">Programme / Job Title</label>
+          <input type="text" id="docProgram" placeholder="e.g. MSc Computer Science">
+        </div>
+        <div class="form-group">
+          <label>Academic Background</label>
+          <textarea id="docBackground" rows="3" placeholder="e.g. BSc Electrical Engineering, University of Lagos, 2022. CGPA 4.5/5.0. Relevant coursework: Digital Systems, Embedded Systems..."></textarea>
+        </div>
+        <div class="form-group">
+          <label id="docExpLabel">Work / Internship Experience</label>
+          <textarea id="docExperience" rows="3" placeholder="e.g. 2 years as Software Engineer at Flutterwave, Lagos. Built payment APIs serving 500k users. Led a team of 4..."></textarea>
+        </div>
+        <div class="form-group">
+          <label id="docWhyLabel">Why this university/company/country?</label>
+          <textarea id="docWhy" rows="3" placeholder="e.g. The University of Manchester's AI research lab is ranked #2 in the UK, and Professor Sarah Brown's work on explainable AI directly aligns with my research interests..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Future Career Goals</label>
+          <textarea id="docGoals" rows="3" placeholder="e.g. After completing the MSc, I plan to return to Nigeria and found an AI startup focused on healthcare diagnostics in underserved communities..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Additional Notes (optional)</label>
+          <textarea id="docExtra" rows="2" placeholder="Any awards, publications, special achievements, or extra context..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="generateDoc()" id="docGenBtn" style="width:100%;justify-content:center;font-size:1rem;padding:16px">
+          ✨ Generate My Document
+        </button>
+      </div>
+
+      <!-- Step 3: Output -->
+      <div class="doc-step" id="docStep3" style="display:none">
+        <h4><span>3</span> Your Generated Document</h4>
+        <div id="docOutputArea"></div>
+      </div>
+
+      <!-- Tip box -->
+      <div style="background:rgba(184,134,11,0.06);border:1px solid rgba(184,134,11,0.2);border-radius:12px;padding:1rem 1.3rem;margin-top:1rem;font-size:0.83rem;color:#64748b;line-height:1.6">
+        💡 <strong style="color:#0a1628">Pro tip:</strong> The more detail you provide, the stronger your document. After generating, our consultants can review and personalise it for you — <a onclick="showPage('contact')" style="color:var(--gold);cursor:pointer">book a free review here</a>.
+      </div>
+    </div>
+
+    <!-- Other tools coming soon -->
+    <div style="max-width:800px;margin:3rem auto 0">
+      <div class="text-center" style="margin-bottom:1.5rem">
+        <span class="section-tag">Coming Soon</span>
+        <h3 class="section-title" style="font-size:1.6rem">More <strong>AI Tools</strong></h3>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem">
+        <div class="we-card" style="opacity:0.75">
+          <div class="we-card-head"><div class="we-card-icon">📄</div><div><h4>CV / Resume Builder</h4><div class="we-sub">Coming soon</div></div></div>
+          <p>Build an ATS-optimised CV tailored to international job markets in UK, Canada & Europe.</p>
+        </div>
+        <div class="we-card" style="opacity:0.75">
+          <div class="we-card-head"><div class="we-card-icon">🎓</div><div><h4>Scholarship Finder</h4><div class="we-sub">Coming soon</div></div></div>
+          <p>AI-matched fully funded scholarships based on your profile, country, and field of study.</p>
+        </div>
+        <div class="we-card" style="opacity:0.75">
+          <div class="we-card-head"><div class="we-card-icon">💼</div><div><h4>Job Finder</h4><div class="we-sub">Coming soon</div></div></div>
+          <p>Visa-sponsored international job listings matched to your skills and target country.</p>
+        </div>
+        <div class="we-card" style="opacity:0.75">
+          <div class="we-card-head"><div class="we-card-icon">🎤</div><div><h4>Interview Prep AI</h4><div class="we-sub">Coming soon</div></div></div>
+          <p>Practice visa interviews and job interviews with AI-powered feedback and tips.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div id="toolsPageNav-bot"></div>
+</div>
+
 <!-- World Service Detail Modal -->
 <div class="we-detail-overlay" id="weDetailOverlay" onclick="if(event.target===this)closeWeDetail()">
   <div class="we-detail-panel" id="weDetailPanel">
@@ -5233,6 +5385,146 @@ function closeWeDetail(){
 function initWorldExplorer(){
   renderWeStats();
   renderWePanel();
+}
+
+// ═══════════════════════════════════════════════════════
+// AI DOCUMENT GENERATOR
+// ═══════════════════════════════════════════════════════
+let selectedDocType = '';
+
+function selectDocType(type, el) {
+  selectedDocType = type;
+  document.querySelectorAll('.doc-type-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+
+  // Update labels based on type
+  const labels = {
+    sop: {
+      dest: 'Destination Country *', inst: 'University Name', prog: 'Programme / Course *',
+      exp: 'Work / Research Experience', why: 'Why this university & programme?'
+    },
+    coverletter: {
+      dest: 'Target Country *', inst: 'Company Name', prog: 'Job Title / Position *',
+      exp: 'Work Experience & Skills', why: 'Why this company & role?'
+    },
+    visaletter: {
+      dest: 'Destination Country *', inst: 'Embassy / Consulate (optional)', prog: 'Purpose of Visit',
+      exp: 'Employment & Financial Background', why: 'Why are you travelling there?'
+    },
+  };
+  const l = labels[type];
+  document.getElementById('docDestLabel').textContent = l.dest;
+  document.getElementById('docInstLabel').textContent = l.inst;
+  document.getElementById('docProgramLabel').textContent = l.prog;
+  document.getElementById('docExpLabel').textContent = l.exp;
+  document.getElementById('docWhyLabel').textContent = l.why;
+
+  document.getElementById('docStep2').style.display = 'block';
+  document.getElementById('docStep2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function generateDoc() {
+  const fullName = document.getElementById('docFullName').value.trim();
+  const destination = document.getElementById('docDestination').value.trim();
+  if (!fullName || !destination) {
+    showToast('Please fill in your name and destination country.'); return;
+  }
+
+  const btn = document.getElementById('docGenBtn');
+  btn.disabled = true;
+  btn.textContent = '✨ Generating…';
+
+  document.getElementById('docStep3').style.display = 'block';
+  document.getElementById('docOutputArea').innerHTML = `
+    <div class="doc-gen-progress">
+      <div class="doc-gen-dots"><span></span><span></span><span></span></div>
+      <span>Gemini AI is writing your document… this takes 10–20 seconds</span>
+    </div>`;
+  document.getElementById('docStep3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  try {
+    const r = await fetch('/api/generate-doc', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        docType: selectedDocType,
+        fullName,
+        nationality: document.getElementById('docNationality').value.trim(),
+        destination,
+        institution: document.getElementById('docInstitution').value.trim(),
+        program: document.getElementById('docProgram').value.trim(),
+        background: document.getElementById('docBackground').value.trim(),
+        experience: document.getElementById('docExperience').value.trim(),
+        whyHere: document.getElementById('docWhy').value.trim(),
+        goals: document.getElementById('docGoals').value.trim(),
+        extraNotes: document.getElementById('docExtra').value.trim(),
+      })
+    });
+    const data = await r.json();
+    if (!r.ok || data.error) throw new Error(data.error || 'Generation failed');
+
+    const typeLabels = { sop: 'Statement of Purpose', coverletter: 'Cover Letter', visaletter: 'Visa Cover Letter' };
+    document.getElementById('docOutputArea').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+        <strong style="color:var(--gold)">${typeLabels[selectedDocType]} — ${fullName}</strong>
+        <div style="display:flex;gap:0.5rem">
+          <span style="font-size:0.75rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#16a34a;padding:3px 10px;border-radius:100px">✅ AI Generated</span>
+        </div>
+      </div>
+      <div class="doc-output" id="docText">${data.text.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+      <div class="doc-output-actions">
+        <button class="btn-primary" onclick="copyDoc()">📋 Copy to Clipboard</button>
+        <button class="btn-outline" onclick="printDoc()">🖨️ Print / Save as PDF</button>
+        <button class="btn-outline" onclick="showPage('contact')">✅ Book Expert Review</button>
+        <button class="btn-outline" onclick="resetDocGen()">🔄 Generate Another</button>
+      </div>
+      <p style="font-size:0.8rem;color:#94a3b8;margin-top:0.8rem">💡 This is an AI draft. For best results, have our consultants review and personalise it before submission.</p>`;
+  } catch (e) {
+    document.getElementById('docOutputArea').innerHTML = `
+      <div style="background:#fff0f0;border:1px solid #fca5a5;border-radius:10px;padding:1.2rem;color:#c62828;font-size:0.88rem">
+        ⚠️ ${e.message || 'Generation failed. Please try again or contact our team.'}
+        <br><br><button class="btn-outline" onclick="showPage('contact')" style="font-size:0.82rem;padding:8px 16px">Contact Support</button>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ Generate My Document';
+  }
+}
+
+function copyDoc() {
+  const text = document.getElementById('docText')?.innerText || '';
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard! ✅'));
+}
+
+function printDoc() {
+  const text = document.getElementById('docText')?.innerText || '';
+  const fullName = document.getElementById('docFullName')?.value || 'Document';
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>${fullName} — SkyGlobe</title>
+  <style>body{font-family:Georgia,serif;max-width:700px;margin:60px auto;font-size:13pt;line-height:1.85;color:#1a1a1a}
+  h1{font-size:14pt;color:#888;margin-bottom:2rem;font-weight:400}</style></head>
+  <body><h1>Generated by SkyGlobe Limited — skyglobegroup.com</h1>
+  <div style="white-space:pre-wrap">${text.replace(/</g,'&lt;')}</div></body></html>`);
+  w.document.close();
+  w.print();
+}
+
+function resetDocGen() {
+  selectedDocType = '';
+  document.querySelectorAll('.doc-type-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('docStep2').style.display = 'none';
+  document.getElementById('docStep3').style.display = 'none';
+  document.getElementById('docFullName').value = '';
+  document.getElementById('docNationality').value = '';
+  document.getElementById('docDestination').value = '';
+  document.getElementById('docInstitution').value = '';
+  document.getElementById('docProgram').value = '';
+  document.getElementById('docBackground').value = '';
+  document.getElementById('docExperience').value = '';
+  document.getElementById('docWhy').value = '';
+  document.getElementById('docGoals').value = '';
+  document.getElementById('docExtra').value = '';
+  document.getElementById('docGenForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // Init blog on first render
