@@ -1956,6 +1956,7 @@ function showPage(page) {
   if (page === 'countries') initCountryGrid();
   if (page === 'blog') initBlog();
   if (page === 'world') initWorldExplorer();
+  if (page === 'tools') warmUpServer();
   renderPageNav(page, target);
   setupCounters(target);
 }
@@ -5676,6 +5677,15 @@ function initWorldExplorer(){
 // ═══════════════════════════════════════════════════════
 let selectedDocType = '';
 
+// Wakes the (possibly sleeping) Render server the moment the user opens the AI Tools
+// page, so it is ready by the time they click Generate — avoids cold-start NetworkErrors.
+let serverWarmed = false;
+function warmUpServer() {
+  if (serverWarmed) return;
+  serverWarmed = true;
+  fetch('/api/health', { method: 'GET' }).catch(() => { serverWarmed = false; });
+}
+
 function selectDocType(type, el) {
   selectedDocType = type;
   document.querySelectorAll('.doc-type-card').forEach(c => c.classList.remove('selected'));
@@ -5870,34 +5880,60 @@ async function generateDoc() {
   btn.textContent = '✨ Generating…';
 
   document.getElementById('docStep3').style.display = 'block';
-  document.getElementById('docOutputArea').innerHTML = `
+  const progressMsg = (txt) => { document.getElementById('docOutputArea').innerHTML = `
     <div class="doc-gen-progress">
       <div class="doc-gen-dots"><span></span><span></span><span></span></div>
-      <span>Gemini AI is writing your document… this takes 10–20 seconds</span>
-    </div>`;
+      <span>${txt}</span>
+    </div>`; };
+  progressMsg('Gemini AI is writing your document… this takes 10–20 seconds');
   document.getElementById('docStep3').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+  const payload = JSON.stringify({
+    docType: selectedDocType,
+    fullName,
+    nationality: document.getElementById('docNationality').value.trim(),
+    email, phone, address, city,
+    visaPurpose: document.getElementById('docPurpose')?.value || '',
+    destination,
+    institution: document.getElementById('docInstitution').value.trim(),
+    program: document.getElementById('docProgram').value.trim(),
+    background: document.getElementById('docBackground').value.trim(),
+    experience: document.getElementById('docExperience').value.trim(),
+    whyHere: document.getElementById('docWhy').value.trim(),
+    goals: document.getElementById('docGoals').value.trim(),
+    extraNotes: document.getElementById('docExtra').value.trim(),
+  });
+
+  // Render's free tier sleeps and is slow to wake, which drops the first connection
+  // (Firefox: "NetworkError"). So we retry on network failure, warming the server.
+  const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+  const attemptFetch = async () => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 90000);
+    try {
+      return await fetch('/api/generate-doc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        signal: ctrl.signal,
+      });
+    } finally { clearTimeout(timer); }
+  };
+
   try {
-    const r = await fetch('/api/generate-doc', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        docType: selectedDocType,
-        fullName,
-        nationality: document.getElementById('docNationality').value.trim(),
-        email, phone, address, city,
-        visaPurpose: document.getElementById('docPurpose')?.value || '',
-        destination,
-        institution: document.getElementById('docInstitution').value.trim(),
-        program: document.getElementById('docProgram').value.trim(),
-        background: document.getElementById('docBackground').value.trim(),
-        experience: document.getElementById('docExperience').value.trim(),
-        whyHere: document.getElementById('docWhy').value.trim(),
-        goals: document.getElementById('docGoals').value.trim(),
-        extraNotes: document.getElementById('docExtra').value.trim(),
-      }),
-      signal: AbortSignal.timeout(58000)
-    });
+    let r, lastErr;
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      try {
+        if (attempt > 1) progressMsg(`Waking up our server and retrying… (attempt ${attempt} of 4)`);
+        r = await attemptFetch();
+        break; // got an HTTP response (even if error) — stop retrying network
+      } catch (err) {
+        lastErr = err;
+        // Network-level failure or abort → wait and retry (server may be cold-starting)
+        if (attempt < 4) { await sleep(attempt * 3000); continue; }
+        throw lastErr;
+      }
+    }
     const data = await r.json();
     if (!r.ok || data.error) throw new Error(data.error || 'Generation failed');
 
@@ -5918,10 +5954,14 @@ async function generateDoc() {
       </div>
       <p style="font-size:0.8rem;color:#94a3b8;margin-top:0.8rem">💡 This is an AI draft. For best results, have our consultants review and personalise it before submission.</p>`;
   } catch (e) {
+    const isNet = (e.name === 'AbortError' || e.name === 'TimeoutError' || e instanceof TypeError);
+    const msg = isNet
+      ? 'Our server is waking up from sleep and the connection dropped. This is normal on the first try — please click "Try Again" and it will work within a few seconds.'
+      : (e.message || 'Generation failed. Please try again or contact our team.');
     document.getElementById('docOutputArea').innerHTML = `
       <div style="background:#fff0f0;border:1px solid #fca5a5;border-radius:10px;padding:1.2rem;color:#c62828;font-size:0.88rem">
-        ⚠️ ${e.name === 'TimeoutError' ? 'The AI is taking longer than expected (server may be waking up). Please wait 10 seconds and try again.' : (e.message || 'Generation failed. Please try again or contact our team.')}
-        <br><br><button class="btn-primary" onclick="generateDoc()" style="font-size:0.82rem;padding:8px 16px">Try Again</button>
+        ⚠️ ${msg}
+        <br><br><button class="btn-primary" onclick="generateDoc()" style="font-size:0.82rem;padding:8px 16px">🔄 Try Again</button>
         &nbsp;<button class="btn-outline" onclick="showPage('contact')" style="font-size:0.82rem;padding:8px 16px">Contact Support</button>
       </div>`;
   } finally {
