@@ -193,6 +193,28 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 .wa-float{position:fixed;bottom:2rem;left:2rem;width:54px;height:54px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;z-index:998;box-shadow:0 4px 20px rgba(37,211,102,0.4);transition:var(--trans)}
 .wa-float:hover{transform:scale(1.1)}
 
+/* ── PAGE BACK/NEXT NAV ─────────────────────────────────────────── */
+.page-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;max-width:1200px;margin:2rem auto 3.5rem;padding:1.5rem 2rem;border-top:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
+.page-nav-btn{display:inline-flex;align-items:center;gap:0.5rem;background:#fff;border:1px solid rgba(184,134,11,0.35);color:#0a1628;padding:0.7rem 1.3rem;border-radius:100px;font-size:0.9rem;font-weight:500;cursor:pointer;transition:var(--trans);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.page-nav-btn:hover{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-color:transparent;transform:translateY(-2px);box-shadow:0 6px 18px rgba(184,134,11,0.3)}
+.page-nav-btn.disabled{opacity:0.35;pointer-events:none}
+.page-nav-btn small{display:block;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.6;font-weight:400}
+.page-nav-label{display:flex;flex-direction:column}
+.page-nav-next{text-align:right;align-items:flex-end}
+
+/* ── SCROLL TO TOP ──────────────────────────────────────────────── */
+.scroll-top{position:fixed;bottom:6.2rem;left:2rem;width:46px;height:46px;background:#0a1628;color:var(--gold);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;z-index:997;opacity:0;visibility:hidden;transition:var(--trans);box-shadow:0 4px 16px rgba(0,0,0,0.25)}
+.scroll-top.show{opacity:1;visibility:visible}
+.scroll-top:hover{background:var(--gold);color:#0a1628;transform:translateY(-3px)}
+
+/* ── COOKIE CONSENT ─────────────────────────────────────────────── */
+.cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9500;background:#0a1628;color:#e8eef7;padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:center;gap:1.2rem;flex-wrap:wrap;box-shadow:0 -4px 24px rgba(0,0,0,0.3);transform:translateY(100%);transition:transform 0.4s ease;border-top:1px solid rgba(201,168,76,0.3)}
+.cookie-banner.show{transform:translateY(0)}
+.cookie-banner p{font-size:0.85rem;max-width:640px;line-height:1.5;margin:0;color:#c5d2e6}
+.cookie-banner a{color:var(--gold-light);cursor:pointer;text-decoration:underline}
+.cookie-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:100px;font-weight:600;font-size:0.85rem;cursor:pointer;white-space:nowrap;transition:var(--trans)}
+.cookie-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(184,134,11,0.35)}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   .about-grid,.contact-grid{grid-template-columns:1fr}
@@ -1681,22 +1703,109 @@ body.wc-active .mobile-menu{padding-top:46px}
 <!-- WhatsApp Float -->
 <a href="https://wa.me/17373998522" class="wa-float" target="_blank" title="Chat on WhatsApp">💬</a>
 
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<!-- Cookie consent -->
+<div class="cookie-banner" id="cookieBanner">
+  <p>🍪 We use essential cookies and your browser's local storage to make SkyGlobe work (like saving your application reference). We don't use advertising trackers. See our <a onclick="showPage('privacy')">Privacy Policy</a>.</p>
+  <button class="cookie-btn" onclick="acceptCookies()">Got it</button>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast">✅ Consultation request submitted! We'll be in touch within 24 hours.</div>
 
 <script>
 // PAGE ROUTING
+// Main journey order for Back/Next navigation
+const PAGE_ORDER = ['home','about','services','destinations','countries','apply','contact'];
+const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
+let _lastPage = null;
+
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + page);
   if (!target) return;
+  if (_lastPage && _lastPage !== page) sessionStorage.setItem('sg_prevPage', _lastPage);
+  _lastPage = page;
   target.classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(a => {
     a.classList.toggle('active', a.dataset.page === page);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (page === 'countries') initCountryGrid();
+  renderPageNav(page, target);
+  setupCounters(target);
 }
+
+// Inject Back/Next bar into the active page
+function renderPageNav(page, target) {
+  let bar = target.querySelector('.page-nav');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.className = 'page-nav';
+    target.appendChild(bar);
+  }
+  const idx = PAGE_ORDER.indexOf(page);
+  // Back = previous in journey, or browsing history fallback
+  let backPage = idx > 0 ? PAGE_ORDER[idx - 1] : sessionStorage.getItem('sg_prevPage');
+  if (backPage === page) backPage = null;
+  const nextPage = (idx >= 0 && idx < PAGE_ORDER.length - 1) ? PAGE_ORDER[idx + 1] : null;
+
+  const backHtml = backPage
+    ? `<button class="page-nav-btn" onclick="showPage('${backPage}')">←<span class="page-nav-label"><small>Back</small>${PAGE_TITLES[backPage]||backPage}</span></button>`
+    : `<span class="page-nav-btn disabled">← Back</span>`;
+  const nextHtml = nextPage
+    ? `<button class="page-nav-btn page-nav-next" onclick="showPage('${nextPage}')"><span class="page-nav-label"><small>Next</small>${PAGE_TITLES[nextPage]||nextPage}</span>→</button>`
+    : `<button class="page-nav-btn page-nav-next" onclick="showPage('contact')"><span class="page-nav-label"><small>Ready?</small>Contact Us</span>→</button>`;
+  bar.innerHTML = backHtml + nextHtml;
+}
+
+// Animated number counters
+function setupCounters(scope) {
+  const nums = scope.querySelectorAll('.stat-num, .stat-number');
+  nums.forEach(el => {
+    if (el.dataset.counted) return;
+    const raw = el.textContent.trim();
+    const m = raw.match(/^([^\d]*)([\d,]+)(.*)$/);
+    if (!m) return;
+    const prefix = m[1], target = parseInt(m[2].replace(/,/g,''),10), suffix = m[3];
+    if (isNaN(target)) return;
+    el.dataset.counted = '1';
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        let cur = 0, steps = 40, inc = target/steps, i = 0;
+        const t = setInterval(() => {
+          i++; cur += inc;
+          if (i >= steps) { cur = target; clearInterval(t); }
+          el.textContent = prefix + Math.floor(cur).toLocaleString() + suffix;
+        }, 25);
+      });
+    }, {threshold:0.4});
+    obs.observe(el);
+  });
+}
+
+// Scroll-to-top visibility
+window.addEventListener('scroll', () => {
+  const st = document.getElementById('scrollTop');
+  if (st) st.classList.toggle('show', window.scrollY > 500);
+});
+
+// Cookie consent
+function acceptCookies() {
+  localStorage.setItem('sg_cookieOk','1');
+  document.getElementById('cookieBanner').classList.remove('show');
+}
+window.addEventListener('load', () => {
+  if (!localStorage.getItem('sg_cookieOk')) {
+    setTimeout(() => document.getElementById('cookieBanner').classList.add('show'), 1200);
+  }
+  const home = document.getElementById('page-home');
+  if (home) { renderPageNav('home', home); setupCounters(home); }
+});
 
 // NAV SCROLL
 window.addEventListener('scroll', () => {
@@ -4085,6 +4194,15 @@ else{window.addEventListener('load',initGlobe);}
     </div>
   </div>
 </div>
+
+<!-- PWA Service Worker registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+  });
+}
+</script>
 
 </body>
 </html>
