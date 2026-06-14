@@ -56,11 +56,13 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --navy:#0a1628;
+  --blue:#0A2E65;
+  --blue-light:#15418c;
   --navy-2:#f4f7fb;
   --navy-3:#e8eef6;
   --navy-light:#dce6f2;
-  --gold:#b8860b;
-  --gold-light:#d4a017;
+  --gold:#bf9a2e;
+  --gold-light:#D4AF37;
   --gold-pale:#fdf6e3;
   --white:#ffffff;
   --off-white:#f8f9fb;
@@ -120,6 +122,11 @@ nav.scrolled{background:#ffffff;backdrop-filter:blur(12px);border-bottom:1px sol
 .hero h1 em{font-style:italic;color:var(--gold)}
 .hero h1 strong{font-weight:600;color:#0a1628}
 .hero p{font-size:1.1rem;color:#4b5563;line-height:1.7;max-width:520px;margin-bottom:2.4rem;animation:fadeUp 0.6s 0.3s both}
+.hero-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(10,46,101,0.18);border-radius:14px;padding:6px 6px 6px 16px;max-width:540px;margin-bottom:1.6rem;box-shadow:0 8px 30px rgba(10,46,101,0.1);animation:fadeUp 0.6s 0.35s both}
+.hero-search-ico{font-size:1rem;opacity:0.6}
+.hero-search input{flex:1;border:none;outline:none;font-size:1rem;font-family:'Inter',sans-serif;color:#0a1628;background:transparent;min-width:0;padding:10px 4px}
+.hero-search button{background:linear-gradient(135deg,var(--blue),var(--blue-light));color:#fff;border:none;border-radius:10px;padding:12px 24px;font-weight:600;font-size:0.92rem;cursor:pointer;transition:var(--trans);white-space:nowrap}
+.hero-search button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(10,46,101,0.3)}
 .hero-btns{display:flex;gap:1rem;flex-wrap:wrap;animation:fadeUp 0.6s 0.4s both}
 .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#ffffff;padding:14px 32px;border-radius:10px;font-weight:600;font-size:0.95rem;text-decoration:none;border:none;cursor:pointer;transition:var(--trans);display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(184,134,11,0.25)}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(184,134,11,0.35)}
@@ -130,8 +137,18 @@ nav.scrolled{background:#ffffff;backdrop-filter:blur(12px);border-bottom:1px sol
 .stat-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;color:var(--gold);display:block}
 .stat-label{font-size:0.8rem;color:#64748b;text-transform:uppercase;letter-spacing:0.08em}
 
+/* POPULAR COUNTRIES */
+.popular-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
+.pop-card{background:#fff;border:1px solid rgba(10,46,101,0.1);border-radius:16px;padding:1.4rem 1rem;text-align:center;cursor:pointer;transition:var(--trans);display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
+.pop-card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 12px 28px rgba(10,46,101,0.12)}
+.pop-flag{font-size:2.4rem;line-height:1}
+.pop-name{font-weight:600;color:var(--blue);font-size:0.95rem;margin-top:4px}
+.pop-sub{font-size:0.74rem;color:#64748b}
+
 /* SECTIONS */
 section{padding:100px 5%}
+/* Premium screen balance — backgrounds stay full-width, content centers at max 1340px (Google/Facebook style) */
+section:not(.hero) > *{max-width:1340px;margin-left:auto;margin-right:auto}
 .section-tag{display:inline-block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.8rem}
 .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.2;margin-bottom:1.2rem;color:#0a1628}
 .section-title strong{font-weight:600;color:#0a1628}
@@ -266,6 +283,9 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .msg-empty{color:#94a3b8;font-size:0.85rem;text-align:center;margin:auto}
 
 /* RESPONSIVE */
+@media(max-width:1024px){
+  .popular-grid{grid-template-columns:repeat(3,1fr)}
+}
 @media(max-width:900px){
   .about-grid,.contact-grid{grid-template-columns:1fr}
   .about-img-frame{aspect-ratio:16/9}
@@ -274,11 +294,33 @@ body.wc-active .page-nav.page-nav-top{top:118px}
   .form-row{grid-template-columns:1fr}
   nav .nav-links{display:none}
   .hamburger{display:flex}
+  /* On tablet/phone the decorative globe sits behind, dimmed, so text stays readable */
+  #globeContainer{width:70%!important;right:-22%!important;opacity:0.35}
+  .hero-content{max-width:100%}
 }
 @media(max-width:600px){
-  .hero h1{font-size:2.4rem}
+  section{padding:60px 5%}
+  .hero{padding:96px 5% 50px;min-height:auto}
+  .hero h1{font-size:2.1rem;line-height:1.15}
+  .hero p{font-size:1rem;margin-bottom:1.6rem}
+  #globeContainer{width:90%!important;right:-15%!important;top:auto!important;bottom:0!important;transform:none!important;opacity:0.22}
   .footer-grid{grid-template-columns:1fr}
-  .hero-stats{flex-wrap:wrap;gap:1rem}
+  .hero-stats{flex-wrap:wrap;gap:1rem 2rem;margin-top:2.2rem}
+  .hero-stats .stat-item{flex:1 1 40%}
+  .stat-num{font-size:1.8rem}
+  /* Full-width stacked buttons read better on phones */
+  .hero-btns{flex-direction:column;align-items:stretch}
+  .hero-btns .btn-primary,.hero-btns .btn-outline{justify-content:center;width:100%}
+  .popular-grid{grid-template-columns:repeat(2,1fr);gap:0.7rem}
+  .pop-flag{font-size:2rem}
+  .pop-name{font-size:0.88rem}
+  .hero-search{padding:5px 5px 5px 12px}
+  .hero-search button{padding:11px 16px;font-size:0.85rem}
+  .section-title{font-size:1.7rem}
+}
+@media(max-width:380px){
+  .popular-grid{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:1.9rem}
 }
 
 /* SERVICES PAGE */
@@ -720,12 +762,17 @@ body.wc-active .mobile-menu{padding-top:46px}
     </div>
     <div class="hero-content">
       <div class="hero-badge">✦ Global Opportunity Awaits</div>
-      <h1>Your <em>Gateway</em> to<br><strong>Travel & Study Abroad</strong></h1>
-      <p>We bridge borders, open universities, and unlock careers across the world. From visa processing to university admissions — Skyglobe turns your global ambitions into reality.</p>
+      <h1>Travel, Study, Work<br>&amp; <em>Connect</em> <strong>Globally</strong></h1>
+      <p>Explore opportunities in every country from one trusted platform. From visa processing to university admissions — Skyglobe turns your global ambitions into reality.</p>
+      <form class="hero-search" onsubmit="heroSearch(event)">
+        <span class="hero-search-ico">🔍</span>
+        <input type="text" id="heroSearchInput" placeholder="Search any country — Canada, UK, Germany…" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
       <div class="hero-btns">
-        <button class="btn-primary" onclick="showPage('apply')">📋 Start Application</button>
-        <button class="btn-outline" onclick="showPage('services')">Explore Services →</button>
-        <button class="btn-outline" onclick="openElig()" style="border-color:rgba(100,180,255,0.4);color:#a0cfff">✦ Check My Eligibility</button>
+        <button class="btn-primary" onclick="showPage('countries')">🌍 Explore Countries</button>
+        <button class="btn-outline" onclick="showPage('apply')">📋 Apply Now</button>
+        <button class="btn-outline" onclick="openElig()" style="border-color:rgba(100,180,255,0.4);color:#15418c">✦ Check My Eligibility</button>
       </div>
       <div class="hero-stats">
         <div class="stat-item"><span class="stat-num">12K+</span><span class="stat-label">Visas Processed</span></div>
@@ -748,8 +795,29 @@ body.wc-active .mobile-menu{padding-top:46px}
     </div>
   </div>
 
+  <!-- POPULAR COUNTRIES -->
+  <section style="padding:70px 5% 30px">
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="text-center">
+        <span class="section-tag">Top Destinations</span>
+        <h2 class="section-title">Popular <strong>Countries</strong></h2>
+        <p class="section-sub" style="margin:0 auto 0">Tap any country to explore visas, universities, jobs and living costs.</p>
+      </div>
+      <div class="popular-grid">
+        <div class="pop-card" onclick="showCountryGuide(2)"><span class="pop-flag">🇨🇦</span><span class="pop-name">Canada</span><span class="pop-sub">Study · Work · PR</span></div>
+        <div class="pop-card" onclick="showCountryGuide(1)"><span class="pop-flag">🇺🇸</span><span class="pop-name">USA</span><span class="pop-sub">Study · Work · Travel</span></div>
+        <div class="pop-card" onclick="showCountryGuide(0)"><span class="pop-flag">🇬🇧</span><span class="pop-name">United Kingdom</span><span class="pop-sub">Study · Work · Visit</span></div>
+        <div class="pop-card" onclick="showCountryGuide(4)"><span class="pop-flag">🇦🇺</span><span class="pop-name">Australia</span><span class="pop-sub">Study · Work · Holiday</span></div>
+        <div class="pop-card" onclick="showCountryGuide(3)"><span class="pop-flag">🇩🇪</span><span class="pop-name">Germany</span><span class="pop-sub">Study · EU Blue Card</span></div>
+        <div class="pop-card" onclick="showCountryGuide(7)"><span class="pop-flag">🇦🇪</span><span class="pop-name">UAE / Dubai</span><span class="pop-sub">Work · Golden Visa</span></div>
+        <div class="pop-card" onclick="showCountryGuide(6)"><span class="pop-flag">🇵🇱</span><span class="pop-name">Poland</span><span class="pop-sub">EU Employment</span></div>
+        <div class="pop-card" onclick="showPage('countries')"><span class="pop-flag">🌍</span><span class="pop-name">All Countries</span><span class="pop-sub">View 47+ →</span></div>
+      </div>
+    </div>
+  </section>
+
   <!-- WORLD CUP 2026 PROMO SECTION -->
-  <section style="padding:70px 5%">
+  <section style="padding:40px 5% 70px">
     <div style="max-width:1100px;margin:0 auto;background:linear-gradient(135deg,#0a1628 0%,#132952 55%,#1e3a6e 100%);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-xl);padding:3rem;position:relative;overflow:hidden;box-shadow:0 20px 50px rgba(10,22,40,0.25)">
       <div style="position:absolute;top:-60px;right:-40px;font-size:14rem;opacity:0.07;pointer-events:none;line-height:1">🏆</div>
       <div style="position:absolute;bottom:-50px;left:-30px;width:260px;height:260px;background:rgba(201,168,76,0.08);border-radius:50%;filter:blur(50px);pointer-events:none"></div>
@@ -3890,6 +3958,17 @@ const COUNTRIES = [
     ]},
    ],svc:'Work Visa Processing'},
 ];
+
+function heroSearch(e) {
+  if (e) e.preventDefault();
+  const q = (document.getElementById('heroSearchInput')?.value || '').trim().toLowerCase();
+  if (!q) { showPage('countries'); return; }
+  // Try to match a country by name; open its guide if found
+  const idx = COUNTRIES.findIndex(c => c.name.toLowerCase().includes(q) || q.includes(c.name.toLowerCase()));
+  if (idx >= 0) { showCountryGuide(idx); return; }
+  // Otherwise jump to the World Explorer / countries page
+  showPage('countries');
+}
 
 function showCountryGuide(idx) {
   const c = COUNTRIES[idx];
