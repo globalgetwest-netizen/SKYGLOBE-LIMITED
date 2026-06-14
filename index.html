@@ -228,7 +228,10 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 
 /* ── PAGE BACK/NEXT NAV ─────────────────────────────────────────── */
 .page-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;max-width:1200px;margin:2rem auto 3.5rem;padding:1.5rem 2rem;border-top:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
-.page-nav.page-nav-top{margin:0 auto 0;padding:0.5rem 1.5rem;border-top:none;border-bottom:1px solid rgba(0,0,0,0.08);position:sticky;top:72px;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);z-index:90;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.page-nav.page-nav-top{margin:0 auto 0;padding:0.5rem 1.5rem;border-top:none;border-bottom:1px solid rgba(0,0,0,0.08);position:sticky;top:72px;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);z-index:80;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+body.wc-active .page-nav.page-nav-top{top:118px}
+@media(max-width:760px){body.wc-active .page-nav.page-nav-top{top:132px}}
+@media(max-width:480px){body.wc-active .page-nav.page-nav-top{top:124px}}
 .page-nav-btn{display:inline-flex;align-items:center;gap:0.4rem;background:#fff;border:1px solid rgba(184,134,11,0.35);color:#0a1628;padding:0.45rem 1rem;border-radius:100px;font-size:0.82rem;font-weight:500;cursor:pointer;transition:var(--trans);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 .page-nav-btn:hover{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-color:transparent;transform:translateY(-2px);box-shadow:0 6px 18px rgba(184,134,11,0.3)}
 .page-nav-btn.disabled{opacity:0.35;pointer-events:none}
@@ -4620,20 +4623,64 @@ updateAccountNav();
 (function(){
   const proofs=[
     {av:'🇳🇬',text:'<strong>Ahmed O.</strong> from Lagos just started a <strong>UK Visa application</strong>'},
-    {av:'🇬🇭',text:'<strong>Priya M.</strong> from Accra received her <strong>Canada Study Permit</strong> ✅'},
-    {av:'🇰🇪',text:'<strong>Carlos A.</strong> from Nairobi booked a <strong>Germany Work Visa</strong> consultation'},
+    {av:'🇬🇭',text:'<strong>Kwame A.</strong> from Accra received his <strong>Canada Study Permit</strong> ✅'},
+    {av:'🇰🇪',text:'<strong>Wanjiru M.</strong> from Nairobi booked a <strong>Germany Work Visa</strong> consultation'},
     {av:'🇿🇦',text:'<strong>Fatima S.</strong> from Johannesburg got her <strong>UK Student Visa</strong> approved 🎉'},
-    {av:'🇪🇹',text:'<strong>David K.</strong> from Addis Ababa started <strong>EU Direct Employment</strong>'},
-    {av:'🇹🇿',text:'<strong>Amara N.</strong> from Dar es Salaam applied for <strong>Australia Skilled Visa</strong>'},
+    {av:'🇪🇹',text:'<strong>Dawit K.</strong> from Addis Ababa started <strong>EU Direct Employment</strong>'},
+    {av:'🇹🇿',text:'<strong>Amara N.</strong> from Dar es Salaam applied for the <strong>Australia Skilled Visa</strong>'},
     {av:'🇺🇬',text:'<strong>Blessing O.</strong> from Kampala received her <strong>USA Tourist Visa</strong> 🇺🇸'},
-    {av:'🇸🇳',text:'<strong>Omar B.</strong> from Dakar is exploring <strong>Polish Work Permit</strong> options'},
+    {av:'🇸🇳',text:'<strong>Omar B.</strong> from Dakar is exploring <strong>Poland Work Permit</strong> options'},
     {av:'🇨🇲',text:'<strong>Ifeoma C.</strong> from Yaoundé submitted her <strong>Canada PR application</strong>'},
-    {av:'🇮🇳',text:'<strong>Rahul P.</strong> from Hyderabad booked <strong>UK Skilled Worker Visa</strong>'},
+    {av:'🇮🇳',text:'<strong>Rahul P.</strong> from Hyderabad booked the <strong>UK Skilled Worker Visa</strong>'},
+    {av:'🇵🇰',text:'<strong>Ayesha K.</strong> from Karachi started her <strong>Germany Student Visa</strong>'},
+    {av:'🇧🇩',text:'<strong>Tahmid R.</strong> from Dhaka got his <strong>Australia Study Permit</strong> approved 🎓'},
+    {av:'🇵🇭',text:'<strong>Maria L.</strong> from Manila secured a <strong>Canada Caregiver Visa</strong> ✅'},
+    {av:'🇬🇭',text:'<strong>Abena D.</strong> from Kumasi booked a <strong>University Admission</strong> consultation'},
+    {av:'🇳🇬',text:'<strong>Chidi E.</strong> from Abuja received his <strong>USA F-1 Student Visa</strong> 🎉'},
+    {av:'🇿🇼',text:'<strong>Tariro M.</strong> from Harare applied for <strong>EU Direct Employment</strong>'},
+    {av:'🇲🇦',text:'<strong>Youssef A.</strong> from Casablanca started his <strong>France Work Visa</strong>'},
+    {av:'🇪🇬',text:'<strong>Layla H.</strong> from Cairo booked a <strong>Dubai Golden Visa</strong> consultation'},
+    {av:'🇱🇰',text:'<strong>Nimal P.</strong> from Colombo received his <strong>UK Graduate Visa</strong> ✅'},
+    {av:'🇻🇳',text:'<strong>Linh N.</strong> from Hanoi got her <strong>Australia Student Visa</strong> approved 🎓'},
+    {av:'🇳🇬',text:'<strong>Tunde A.</strong> from Ibadan started his <strong>Canada Express Entry</strong>'},
+    {av:'🇰🇪',text:'<strong>Otieno J.</strong> from Mombasa booked <strong>Flight & Hotel</strong> documentation'},
+    {av:'🇬🇲',text:'<strong>Fatou C.</strong> from Banjul applied for the <strong>Portugal Work Visa</strong>'},
+    {av:'🇸🇩',text:'<strong>Mohammed I.</strong> from Khartoum received his <strong>UAE Employment Visa</strong> ✅'},
+    {av:'🇷🇼',text:'<strong>Aline U.</strong> from Kigali started her <strong>UK Health & Care Visa</strong>'},
+    {av:'🇿🇲',text:'<strong>Chanda B.</strong> from Lusaka booked a <strong>Scholarship</strong> consultation 🎓'},
+    {av:'🇮🇳',text:'<strong>Priya S.</strong> from Mumbai got her <strong>Canada Study Permit</strong> approved 🎉'},
+    {av:'🇵🇰',text:'<strong>Bilal M.</strong> from Lahore applied for the <strong>UK Skilled Worker Visa</strong>'},
+    {av:'🇳🇵',text:'<strong>Sita G.</strong> from Kathmandu received her <strong>Australia Student Visa</strong> ✅'},
+    {av:'🇬🇭',text:'<strong>Kofi M.</strong> from Tamale started <strong>EU Direct Employment</strong>'},
+    {av:'🇳🇬',text:'<strong>Ngozi A.</strong> from Enugu booked a <strong>USA Visitor Visa</strong> consultation'},
+    {av:'🇨🇩',text:'<strong>Patrice K.</strong> from Kinshasa applied for the <strong>Belgium Work Visa</strong>'},
+    {av:'🇨🇮',text:'<strong>Aya D.</strong> from Abidjan received her <strong>France Student Visa</strong> 🎓'},
+    {av:'🇪🇹',text:'<strong>Selam T.</strong> from Addis Ababa got her <strong>Italy Work Visa</strong> approved ✅'},
+    {av:'🇰🇪',text:'<strong>Brian K.</strong> from Nakuru started his <strong>Germany Job Seeker Visa</strong>'},
+    {av:'🇿🇦',text:'<strong>Thabo M.</strong> from Cape Town booked <strong>Travel Insurance</strong> services'},
+    {av:'🇳🇬',text:'<strong>Aisha B.</strong> from Kano received her <strong>UK Student Visa</strong> 🎉'},
+    {av:'🇧🇼',text:'<strong>Kagiso S.</strong> from Gaborone applied for the <strong>Netherlands Work Visa</strong>'},
+    {av:'🇲🇼',text:'<strong>Grace P.</strong> from Lilongwe started her <strong>UK Health & Care Visa</strong>'},
+    {av:'🇵🇭',text:'<strong>Jericho R.</strong> from Cebu got his <strong>New Zealand Work Visa</strong> approved ✅'},
+    {av:'🇮🇳',text:'<strong>Arjun V.</strong> from Bangalore booked a <strong>USA H-1B</strong> consultation'},
+    {av:'🇳🇬',text:'<strong>Emeka O.</strong> from Port Harcourt received his <strong>Canada Work Permit</strong> 🎉'},
+    {av:'🇸🇳',text:'<strong>Mariama F.</strong> from Thiès started the <strong>Spain Work Visa</strong> process'},
+    {av:'🇹🇬',text:'<strong>Kossi A.</strong> from Lomé applied for <strong>EU Direct Employment</strong>'},
+    {av:'🇧🇫',text:'<strong>Salif O.</strong> from Ouagadougou booked a <strong>University Admission</strong> 🎓'},
+    {av:'🇿🇼',text:'<strong>Nyasha C.</strong> from Bulawayo received her <strong>Australia Skilled Visa</strong> ✅'},
+    {av:'🇰🇪',text:'<strong>Achieng O.</strong> from Kisumu started her <strong>UK Graduate Visa</strong>'},
+    {av:'🇬🇭',text:'<strong>Yaw B.</strong> from Takoradi booked a <strong>Germany Work Visa</strong> consultation'},
+    {av:'🇳🇬',text:'<strong>Hauwa S.</strong> from Kaduna received her <strong>USA F-1 Student Visa</strong> 🎓'},
+    {av:'🇱🇷',text:'<strong>James T.</strong> from Monrovia applied for the <strong>Canada Study Permit</strong> ✅'},
   ];
-  const times=['Just now','2 min ago','5 min ago','8 min ago','12 min ago','3 min ago','1 min ago'];
+  // Fisher–Yates shuffle so all 50 show before any repeats
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  let queue=shuffle(proofs.slice());
   let idx=0;
+  const times=['Just now','1 min ago','2 min ago','3 min ago','4 min ago','6 min ago','8 min ago','11 min ago','15 min ago'];
   function showProof(){
-    const p=proofs[idx%proofs.length];
+    if(idx>=queue.length){queue=shuffle(proofs.slice());idx=0;}
+    const p=queue[idx];
     const popup=document.getElementById('spPopup');
     document.getElementById('spAv').textContent=p.av;
     document.getElementById('spText').innerHTML=p.text;
