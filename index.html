@@ -195,6 +195,7 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 
 /* ── PAGE BACK/NEXT NAV ─────────────────────────────────────────── */
 .page-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;max-width:1200px;margin:2rem auto 3.5rem;padding:1.5rem 2rem;border-top:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
+.page-nav.page-nav-top{margin:0 auto 0;padding:1rem 2rem;border-top:none;border-bottom:1px solid rgba(0,0,0,0.08);position:sticky;top:72px;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);z-index:90;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
 .page-nav-btn{display:inline-flex;align-items:center;gap:0.5rem;background:#fff;border:1px solid rgba(184,134,11,0.35);color:#0a1628;padding:0.7rem 1.3rem;border-radius:100px;font-size:0.9rem;font-weight:500;cursor:pointer;transition:var(--trans);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 .page-nav-btn:hover{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-color:transparent;transform:translateY(-2px);box-shadow:0 6px 18px rgba(184,134,11,0.3)}
 .page-nav-btn.disabled{opacity:0.35;pointer-events:none}
@@ -214,6 +215,19 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 .cookie-banner a{color:var(--gold-light);cursor:pointer;text-decoration:underline}
 .cookie-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:100px;font-weight:600;font-size:0.85rem;cursor:pointer;white-space:nowrap;transition:var(--trans)}
 .cookie-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(184,134,11,0.35)}
+
+/* ── CLIENT PORTAL ──────────────────────────────────────────────── */
+.auth-tab{flex:1;border:none;background:transparent;padding:0.7rem;border-radius:100px;font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:600;color:#64748b;cursor:pointer;transition:var(--trans)}
+.auth-tab.active{background:#fff;color:#0a1628;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.dash-app-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:1.1rem 1.3rem;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.dash-app-card .ref{font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--gold);font-size:1.05rem}
+.dash-app-card .st{display:inline-block;font-size:0.72rem;padding:3px 12px;border-radius:100px;font-weight:600;color:#fff}
+.msg-thread{background:#f1f5f9;border:1px solid rgba(0,0,0,0.08);border-radius:14px;padding:1rem;height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:0.6rem}
+.msg-bubble{max-width:80%;padding:0.7rem 1rem;border-radius:14px;font-size:0.88rem;line-height:1.5;word-wrap:break-word}
+.msg-bubble.client{align-self:flex-end;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-bottom-right-radius:4px}
+.msg-bubble.admin{align-self:flex-start;background:#fff;color:#0a1628;border:1px solid rgba(0,0,0,0.08);border-bottom-left-radius:4px}
+.msg-bubble .msg-time{display:block;font-size:0.65rem;opacity:0.6;margin-top:4px}
+.msg-empty{color:#94a3b8;font-size:0.85rem;text-align:center;margin:auto}
 
 /* RESPONSIVE */
 @media(max-width:900px){
@@ -524,6 +538,7 @@ body.wc-active .mobile-menu{padding-top:46px}
     <li><a onclick="showPage('destinations')" data-page="destinations">Destinations</a></li>
     <li><a onclick="showPage('search')" data-page="search">🔍 Search</a></li>
     <li><a onclick="showPage('apply')" data-page="apply" style="color:var(--gold)">📋 Apply Now</a></li>
+    <li><a onclick="goAccount()" data-page="account" id="navAccountLink">👤 Login</a></li>
     <li><a onclick="showPage('contact')" class="nav-cta" data-page="contact">Free Consult</a></li>
   </ul>
   <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu">
@@ -541,6 +556,7 @@ body.wc-active .mobile-menu{padding-top:46px}
   <a onclick="showPage('services');toggleMenu()">Services</a>
   <a onclick="showPage('destinations');toggleMenu()">Destinations</a>
   <a onclick="showPage('apply');toggleMenu()" style="color:var(--gold)">📋 Apply Now</a>
+  <a onclick="goAccount();toggleMenu()" id="mobAccountLink">👤 Login</a>
   <a onclick="showPage('search');toggleMenu()">🔍 Search</a>
   <a onclick="showPage('contact');toggleMenu()">Contact</a>
 </div>
@@ -1502,6 +1518,59 @@ body.wc-active .mobile-menu{padding-top:46px}
   </section>
 </div>
 
+<!-- ============ LOGIN / SIGN UP PAGE ============ -->
+<div class="page" id="page-account">
+  <section style="padding-top:130px;max-width:480px;margin:0 auto">
+
+    <!-- LOGGED OUT: login / signup -->
+    <div id="authBox">
+      <div class="text-center">
+        <div class="section-tag">Client Portal</div>
+        <h1 class="section-title">Your <strong>Account</strong></h1>
+        <p class="section-sub">Log in to track your applications and message our team directly — all in one place.</p>
+      </div>
+      <div style="display:flex;gap:0.5rem;margin:1.5rem 0;background:#f1f5f9;padding:5px;border-radius:100px">
+        <button id="tabLogin" class="auth-tab active" onclick="switchAuthTab('login')">Log In</button>
+        <button id="tabSignup" class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+
+      <form id="loginForm" onsubmit="doLogin(event)">
+        <div class="form-group"><label>Email</label><input type="email" id="loginEmail" required placeholder="you@email.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="loginPassword" required placeholder="Your password"></div>
+        <button type="submit" class="btn-primary" style="width:100%">Log In →</button>
+      </form>
+
+      <form id="signupForm" onsubmit="doSignup(event)" style="display:none">
+        <div class="form-group"><label>Full Name</label><input type="text" id="signupName" placeholder="Your name"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="signupEmail" required placeholder="you@email.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="signupPassword" required placeholder="At least 6 characters"></div>
+        <button type="submit" class="btn-primary" style="width:100%">Create Account →</button>
+      </form>
+      <p id="authMsg" style="margin-top:1rem;font-size:0.85rem;text-align:center"></p>
+      <p style="margin-top:1.5rem;font-size:0.82rem;color:#64748b;text-align:center">No account needed to track an application — just use your reference number on the <a onclick="showPage('apply')" style="color:var(--gold);cursor:pointer">Apply / Track</a> page.</p>
+    </div>
+
+    <!-- LOGGED IN: dashboard -->
+    <div id="dashBox" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
+        <div><div class="section-tag">Welcome back</div><h1 class="section-title" style="margin:0" id="dashName">Your Account</h1></div>
+        <button class="btn-outline" onclick="doLogout()">Log Out</button>
+      </div>
+
+      <h3 style="font-size:1.1rem;margin:1.5rem 0 0.8rem;color:#0a1628">📋 My Applications</h3>
+      <div id="dashApps" style="display:flex;flex-direction:column;gap:0.8rem"><p style="color:#64748b;font-size:0.88rem">Loading…</p></div>
+
+      <h3 style="font-size:1.1rem;margin:2rem 0 0.8rem;color:#0a1628">💬 Messages with our team</h3>
+      <div id="msgThread" class="msg-thread"></div>
+      <form onsubmit="sendMsg(event)" style="display:flex;gap:0.6rem;margin-top:0.8rem">
+        <input type="text" id="msgInput" placeholder="Type a message…" style="flex:1;background:#f9fafb;border:1px solid rgba(0,0,0,0.12);border-radius:100px;padding:12px 18px;font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none">
+        <button type="submit" class="btn-primary" style="padding:12px 22px">Send</button>
+      </form>
+    </div>
+
+  </section>
+</div>
+
 <!-- FOOTER (shown on all pages) -->
 <footer>
   <div class="footer-grid">
@@ -1740,25 +1809,36 @@ function showPage(page) {
 
 // Inject Back/Next bar into the active page
 function renderPageNav(page, target) {
-  let bar = target.querySelector('.page-nav');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.className = 'page-nav';
-    target.appendChild(bar);
-  }
   const idx = PAGE_ORDER.indexOf(page);
-  // Back = previous in journey, or browsing history fallback
   let backPage = idx > 0 ? PAGE_ORDER[idx - 1] : sessionStorage.getItem('sg_prevPage');
   if (backPage === page) backPage = null;
   const nextPage = (idx >= 0 && idx < PAGE_ORDER.length - 1) ? PAGE_ORDER[idx + 1] : null;
 
   const backHtml = backPage
-    ? `<button class="page-nav-btn" onclick="showPage('${backPage}')">←<span class="page-nav-label"><small>Back</small>${PAGE_TITLES[backPage]||backPage}</span></button>`
+    ? `<button class="page-nav-btn" onclick="showPage('${backPage}')">← <span class="page-nav-label"><small>Back</small>${PAGE_TITLES[backPage]||backPage}</span></button>`
     : `<span class="page-nav-btn disabled">← Back</span>`;
   const nextHtml = nextPage
-    ? `<button class="page-nav-btn page-nav-next" onclick="showPage('${nextPage}')"><span class="page-nav-label"><small>Next</small>${PAGE_TITLES[nextPage]||nextPage}</span>→</button>`
-    : `<button class="page-nav-btn page-nav-next" onclick="showPage('contact')"><span class="page-nav-label"><small>Ready?</small>Contact Us</span>→</button>`;
-  bar.innerHTML = backHtml + nextHtml;
+    ? `<button class="page-nav-btn page-nav-next" onclick="showPage('${nextPage}')"><span class="page-nav-label"><small>Next</small>${PAGE_TITLES[nextPage]||nextPage}</span> →</button>`
+    : `<button class="page-nav-btn page-nav-next" onclick="showPage('contact')"><span class="page-nav-label"><small>Ready?</small>Contact Us</span> →</button>`;
+  const html = backHtml + nextHtml;
+
+  // Top bar — sticky just below navbar
+  let topBar = target.querySelector('.page-nav-top');
+  if (!topBar) {
+    topBar = document.createElement('div');
+    topBar.className = 'page-nav page-nav-top';
+    target.insertBefore(topBar, target.firstChild);
+  }
+  topBar.innerHTML = html;
+
+  // Bottom bar — after all content
+  let botBar = target.querySelector('.page-nav:not(.page-nav-top)');
+  if (!botBar) {
+    botBar = document.createElement('div');
+    botBar.className = 'page-nav';
+    target.appendChild(botBar);
+  }
+  botBar.innerHTML = html;
 }
 
 // Animated number counters
@@ -4194,6 +4274,150 @@ else{window.addEventListener('load',initGlobe);}
     </div>
   </div>
 </div>
+
+<!-- CLIENT PORTAL (login + messaging) -->
+<script>
+function authHeaders() {
+  const t = localStorage.getItem('sg_token');
+  return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
+function isLoggedIn() { return !!localStorage.getItem('sg_token'); }
+
+function updateAccountNav() {
+  const name = localStorage.getItem('sg_name') || '';
+  const label = isLoggedIn() ? ('👤 ' + (name ? name.split(' ')[0] : 'Account')) : '👤 Login';
+  const a = document.getElementById('navAccountLink'); if (a) a.textContent = label;
+  const m = document.getElementById('mobAccountLink'); if (m) m.textContent = label;
+}
+
+function goAccount() {
+  showPage('account');
+  if (isLoggedIn()) { showDashboard(); } else { showAuth(); }
+}
+function showAuth() {
+  document.getElementById('authBox').style.display = 'block';
+  document.getElementById('dashBox').style.display = 'none';
+}
+function showDashboard() {
+  document.getElementById('authBox').style.display = 'none';
+  document.getElementById('dashBox').style.display = 'block';
+  document.getElementById('dashName').textContent = 'Hello, ' + ((localStorage.getItem('sg_name')||'').split(' ')[0] || 'there') + ' 👋';
+  loadDashApps();
+  loadMessages();
+}
+
+function switchAuthTab(tab) {
+  const login = tab === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', login);
+  document.getElementById('tabSignup').classList.toggle('active', !login);
+  document.getElementById('loginForm').style.display = login ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = login ? 'none' : 'block';
+  document.getElementById('authMsg').textContent = '';
+}
+
+function setAuthMsg(text, isError) {
+  const el = document.getElementById('authMsg');
+  el.textContent = text;
+  el.style.color = isError ? '#c62828' : '#2e7d32';
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  setAuthMsg('Logging in…', false);
+  try {
+    const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value }) });
+    const d = await r.json();
+    if (!r.ok) return setAuthMsg(d.error || 'Login failed.', true);
+    saveSession(d); showDashboard();
+  } catch { setAuthMsg('Network error. Please try again.', true); }
+}
+
+async function doSignup(e) {
+  e.preventDefault();
+  setAuthMsg('Creating account…', false);
+  try {
+    const r = await fetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: document.getElementById('signupName').value, email: document.getElementById('signupEmail').value, password: document.getElementById('signupPassword').value }) });
+    const d = await r.json();
+    if (!r.ok) return setAuthMsg(d.error || 'Sign up failed.', true);
+    saveSession(d); showDashboard();
+  } catch { setAuthMsg('Network error. Please try again.', true); }
+}
+
+function saveSession(d) {
+  localStorage.setItem('sg_token', d.token);
+  localStorage.setItem('sg_email', d.email);
+  localStorage.setItem('sg_name', d.name || '');
+  updateAccountNav();
+}
+function doLogout() {
+  localStorage.removeItem('sg_token'); localStorage.removeItem('sg_email'); localStorage.removeItem('sg_name');
+  updateAccountNav(); showAuth();
+}
+
+async function loadDashApps() {
+  const box = document.getElementById('dashApps');
+  const email = localStorage.getItem('sg_email');
+  try {
+    const r = await fetch('/api/apply?email=' + encodeURIComponent(email));
+    const apps = await r.json();
+    if (!Array.isArray(apps) || !apps.length) {
+      box.innerHTML = '<p style="color:#64748b;font-size:0.88rem">No applications yet. <a onclick="showPage(\'apply\')" style="color:var(--gold);cursor:pointer">Start one →</a></p>';
+      return;
+    }
+    const colors = {'Received':'#1976d2','In Review':'#f57c00','Approved':'#2e7d32','Completed':'#2e7d32','Needs More Info':'#c62828','Rejected':'#c62828'};
+    box.innerHTML = apps.map(a => `
+      <div class="dash-app-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+          <div><span class="ref">${a.ref}</span><div style="font-size:0.85rem;color:#475569;margin-top:2px">${a.service||''}</div></div>
+          <span class="st" style="background:${colors[a.status]||'#1976d2'}">${a.status||'Received'}</span>
+        </div>
+      </div>`).join('');
+  } catch { box.innerHTML = '<p style="color:#c62828;font-size:0.85rem">Could not load applications.</p>'; }
+}
+
+async function loadMessages() {
+  const thread = document.getElementById('msgThread');
+  try {
+    const r = await fetch('/api/messages', { headers: authHeaders() });
+    if (r.status === 401) { doLogout(); return; }
+    const msgs = await r.json();
+    if (!Array.isArray(msgs) || !msgs.length) {
+      thread.innerHTML = '<p class="msg-empty">No messages yet. Say hello — our team replies fast! 👋</p>';
+      return;
+    }
+    thread.innerHTML = msgs.map(m => `
+      <div class="msg-bubble ${m.sender === 'admin' ? 'admin' : 'client'}">
+        ${m.body.replace(/</g,'&lt;').replace(/\n/g,'<br>')}
+        <span class="msg-time">${m.sender === 'admin' ? 'SkyGlobe' : 'You'} · ${new Date(m.created_at).toLocaleString()}</span>
+      </div>`).join('');
+    thread.scrollTop = thread.scrollHeight;
+  } catch { thread.innerHTML = '<p class="msg-empty">Could not load messages.</p>'; }
+}
+
+async function sendMsg(e) {
+  e.preventDefault();
+  const input = document.getElementById('msgInput');
+  const body = input.value.trim();
+  if (!body) return;
+  input.value = '';
+  try {
+    const r = await fetch('/api/messages', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ body }) });
+    if (r.status === 401) { doLogout(); return; }
+    loadMessages();
+  } catch { input.value = body; }
+}
+
+// Poll for new messages while viewing the dashboard
+setInterval(() => {
+  if (isLoggedIn() && document.getElementById('page-account').classList.contains('active') && document.getElementById('dashBox').style.display !== 'none') {
+    loadMessages();
+  }
+}, 15000);
+
+updateAccountNav();
+</script>
 
 <!-- PWA Service Worker registration -->
 <script>
