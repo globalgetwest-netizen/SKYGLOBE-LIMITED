@@ -4624,7 +4624,12 @@ updateAccountNav();
           <div class="doc-type-card" onclick="selectDocType('invitation',this)">
             <span class="dt-icon">✉️</span>
             <h4>Conference Invitation</h4>
-            <p>An invitation letter for an organisation to invite a guest to a conference, meeting or event.</p>
+            <p>Your organisation invites a guest to a conference, meeting or event — printed on your company letterhead.</p>
+          </div>
+          <div class="doc-type-card" onclick="selectDocType('skyconference',this)">
+            <span class="dt-icon">🌐</span>
+            <h4>SkyGlobe Conference Invite</h4>
+            <p>Official invitation letter <strong>issued by SkyGlobe Limited</strong> — supports your visa application to attend our international events.</p>
           </div>
         </div>
       </div>
@@ -4637,31 +4642,31 @@ updateAccountNav();
         <div class="form-row">
           <div class="form-group">
             <label id="docNameLabel">Full Name *</label>
-            <input type="text" id="docFullName" placeholder="e.g. Amara Nwosu">
+            <input type="text" id="docFullName" placeholder="e.g. Daniel Müller / Sophie Tremblay">
           </div>
           <div class="form-group">
             <label id="docNatLabel">Nationality</label>
-            <input type="text" id="docNationality" placeholder="e.g. Nigerian">
+            <input type="text" id="docNationality" placeholder="e.g. German / Canadian / British">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label id="docEmailLabel">Your Email Address *</label>
-            <input type="email" id="docEmail" placeholder="e.g. amara.nwosu@gmail.com">
+            <input type="email" id="docEmail" placeholder="e.g. daniel.mueller@gmail.com">
           </div>
           <div class="form-group">
             <label id="docPhoneLabel">Your Phone Number *</label>
-            <input type="tel" id="docPhone" placeholder="e.g. +234 801 234 5678">
+            <input type="tel" id="docPhone" placeholder="e.g. +49 170 123 4567 / +1 416 555 0123">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label id="docAddrLabel">Your Address *</label>
-            <input type="text" id="docAddress" placeholder="e.g. 12 Marina Road, Lagos Island">
+            <input type="text" id="docAddress" placeholder="e.g. 14 Hauptstraße / 22 Maple Avenue">
           </div>
           <div class="form-group">
             <label id="docCityLabel">City &amp; Country *</label>
-            <input type="text" id="docCity" placeholder="e.g. Lagos, Nigeria">
+            <input type="text" id="docCity" placeholder="e.g. Berlin, Germany / Toronto, Canada">
           </div>
         </div>
         <div class="form-row">
@@ -4696,11 +4701,11 @@ updateAccountNav();
         </div>
         <div class="form-group">
           <label id="docBgLabel">Academic Background</label>
-          <textarea id="docBackground" rows="3" placeholder="e.g. BSc Electrical Engineering, University of Lagos, 2022. CGPA 4.5/5.0. Relevant coursework: Digital Systems, Embedded Systems..."></textarea>
+          <textarea id="docBackground" rows="3" placeholder="e.g. BSc Mechanical Engineering, Technical University of Munich, 2022. GPA 3.8/4.0. Relevant coursework: Thermodynamics, CAD Design..."></textarea>
         </div>
         <div class="form-group">
           <label id="docExpLabel">Work / Internship Experience</label>
-          <textarea id="docExperience" rows="3" placeholder="e.g. 2 years as Software Engineer at Flutterwave, Lagos. Built payment APIs serving 500k users. Led a team of 4..."></textarea>
+          <textarea id="docExperience" rows="3" placeholder="e.g. 3 years as Software Engineer at SAP SE, Walldorf, Germany. Built enterprise APIs serving 200k users. Led a cross-functional team of 5..."></textarea>
         </div>
         <div class="form-group">
           <label id="docWhyLabel">Why this university/company/country?</label>
@@ -4708,7 +4713,7 @@ updateAccountNav();
         </div>
         <div class="form-group">
           <label id="docGoalsLabel">Future Career Goals</label>
-          <textarea id="docGoals" rows="3" placeholder="e.g. After completing the MSc, I plan to return to Nigeria and found an AI startup focused on healthcare diagnostics in underserved communities..."></textarea>
+          <textarea id="docGoals" rows="3" placeholder="e.g. After completing the MSc, I plan to join a leading engineering firm in Europe and contribute to sustainable infrastructure projects..."></textarea>
         </div>
         <div class="form-group">
           <label>Additional Notes (optional)</label>
@@ -5713,12 +5718,20 @@ function selectDocType(type, el) {
     },
     invitation: {
       heading: 'Host organisation & guest details',
-      hint: 'This generates a conference/event invitation letter issued BY the inviting organisation.',
+      hint: 'This generates a conference/event invitation letter issued BY your organisation. Fill in your company\'s contact details and the guest\'s information.',
       notice: '✉️ <strong>Important:</strong> This invitation must be printed on the host organisation\'s <strong>official letterhead</strong> and <strong>signed &amp; stamped by an authorised officer</strong>. It is issued by the inviting body, not by SkyGlobe.',
       contact: { name:'Guest / Invitee Full Name *', nat:'Guest Nationality', email:'Host Organisation Email *', phone:'Host Organisation Phone *', addr:'Host Organisation Address *', city:'Host City & Country *' },
       dest: 'Guest\'s Home Country', inst: 'Host Organisation Name *', prog: 'Conference / Event Name *',
       bg: 'Event Dates & Venue *', exp: 'Purpose & Agenda of the Event *',
       why: 'Guest\'s Role at the Event (speaker, delegate…)', goals: 'Who Covers Costs & Accommodation'
+    },
+    skyconference: {
+      heading: 'Your personal details (the attendee)',
+      hint: 'SkyGlobe Limited will issue this conference invitation letter on your behalf. Fill in YOUR details as the attendee.',
+      notice: '🌐 <strong>SkyGlobe-Issued Invitation:</strong> This letter is issued by <strong>SkyGlobe Limited</strong> on its own official letterhead and signed by our authorised officer. It is a genuine invitation letter valid for visa purposes. Our team will review and countersign before you submit.',
+      dest: 'Country of the Conference *', inst: 'Conference / Event Name *', prog: 'Your Role (delegate, speaker, attendee…)',
+      bg: 'Conference Dates & Venue', exp: 'Your Professional Background',
+      why: 'Why you are attending this event', goals: 'Your ties to home country & return plans'
     },
   };
   const l = labels[type];
@@ -5769,7 +5782,7 @@ function onVisaPurposeChange() {
       hint: 'Mention your travel dates, where you will stay, who is funding the trip, and strong reasons you will return home.'
     },
     'Visiting Family or Friends': {
-      progLabel: 'Who You Are Visiting (name & relationship)', progPh: 'e.g. My sister, Mrs. Jane Doe, a permanent resident',
+      progLabel: 'Who You Are Visiting (name & relationship)', progPh: 'e.g. My brother, Mr. Hans Becker, a permanent resident in Germany',
       whyLabel: 'Purpose & details of the visit', goalsLabel: 'Proof you will return home (job, family, property)',
       hint: 'Mention your host\'s name, status and address, who is paying, your travel dates, and your ties to home.'
     },
@@ -5830,11 +5843,15 @@ async function generateDoc() {
   const institution = document.getElementById('docInstitution').value.trim();
   const program = document.getElementById('docProgram').value.trim();
   const isIssuerDoc = selectedDocType === 'experience' || selectedDocType === 'invitation';
+  const isSkyConf = selectedDocType === 'skyconference';
   if (!fullName) {
     showToast('Please fill in the full name.'); return;
   }
-  if (!isIssuerDoc && !destination) {
+  if (!isIssuerDoc && !isSkyConf && !destination) {
     showToast('Please fill in your destination country.'); return;
+  }
+  if (isSkyConf && (!institution || !destination)) {
+    showToast('Please fill in the conference name and the country where it is held.'); return;
   }
   if (isIssuerDoc && (!institution || !program)) {
     showToast(selectedDocType === 'experience'
@@ -5878,12 +5895,13 @@ async function generateDoc() {
         whyHere: document.getElementById('docWhy').value.trim(),
         goals: document.getElementById('docGoals').value.trim(),
         extraNotes: document.getElementById('docExtra').value.trim(),
-      })
+      }),
+      signal: AbortSignal.timeout(58000)
     });
     const data = await r.json();
     if (!r.ok || data.error) throw new Error(data.error || 'Generation failed');
 
-    const typeLabels = { sop: 'Statement of Purpose', coverletter: 'Cover Letter', visaletter: 'Visa Cover Letter', experience: 'Experience Certificate (Draft)', invitation: 'Conference Invitation' };
+    const typeLabels = { sop: 'Statement of Purpose', coverletter: 'Cover Letter', visaletter: 'Visa Cover Letter', experience: 'Experience Certificate (Draft)', invitation: 'Conference Invitation', skyconference: 'SkyGlobe Conference Invitation' };
     document.getElementById('docOutputArea').innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
         <strong style="color:var(--gold)">${typeLabels[selectedDocType]} — ${fullName}</strong>
@@ -5902,8 +5920,9 @@ async function generateDoc() {
   } catch (e) {
     document.getElementById('docOutputArea').innerHTML = `
       <div style="background:#fff0f0;border:1px solid #fca5a5;border-radius:10px;padding:1.2rem;color:#c62828;font-size:0.88rem">
-        ⚠️ ${e.message || 'Generation failed. Please try again or contact our team.'}
-        <br><br><button class="btn-outline" onclick="showPage('contact')" style="font-size:0.82rem;padding:8px 16px">Contact Support</button>
+        ⚠️ ${e.name === 'TimeoutError' ? 'The AI is taking longer than expected (server may be waking up). Please wait 10 seconds and try again.' : (e.message || 'Generation failed. Please try again or contact our team.')}
+        <br><br><button class="btn-primary" onclick="generateDoc()" style="font-size:0.82rem;padding:8px 16px">Try Again</button>
+        &nbsp;<button class="btn-outline" onclick="showPage('contact')" style="font-size:0.82rem;padding:8px 16px">Contact Support</button>
       </div>`;
   } finally {
     btn.disabled = false;
@@ -5930,9 +5949,10 @@ function printDoc() {
   const visaPurpose = document.getElementById('docPurpose')?.value || '';
   const esc = s => (s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  const typeLabels = { sop: 'STATEMENT OF PURPOSE', coverletter: 'COVER LETTER', visaletter: 'VISA COVER LETTER', experience: 'EXPERIENCE CERTIFICATE', invitation: 'LETTER OF INVITATION' };
+  const typeLabels = { sop: 'STATEMENT OF PURPOSE', coverletter: 'COVER LETTER', visaletter: 'VISA COVER LETTER', experience: 'EXPERIENCE CERTIFICATE', invitation: 'LETTER OF INVITATION', skyconference: 'LETTER OF INVITATION TO INTERNATIONAL CONFERENCE' };
   const docTitle = typeLabels[selectedDocType] || 'DOCUMENT';
   const isIssuerDoc = selectedDocType === 'experience' || selectedDocType === 'invitation';
+  const isSkyConf = selectedDocType === 'skyconference';
 
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -5941,7 +5961,7 @@ function printDoc() {
     .map(p => `<p>${p.trim().replace(/</g, '&lt;').replace(/\n/g, ' ')}</p>`).join('');
 
   // Letters (cover/visa) get a date + recipient line; SOP is a titled essay
-  const isLetter = selectedDocType === 'coverletter' || selectedDocType === 'visaletter';
+  const isLetter = selectedDocType === 'coverletter' || selectedDocType === 'visaletter' || isSkyConf;
   const senderBlock = isLetter
     ? `<div class="doc-sender"><strong>${esc(fullName)}</strong><br>${address ? esc(address) + '<br>' : ''}${city ? esc(city) + '<br>' : ''}${phone ? esc(phone) + '<br>' : ''}${email ? esc(email) : ''}</div>`
     : '';
@@ -6040,7 +6060,7 @@ function printDoc() {
       <div class="lh-contact">
         ${isIssuerDoc
           ? issuerContact
-          : `<strong>skyglobegroup.com</strong><br>support@skyglobegroup.com<br>WhatsApp: +1 737-399-8522`}
+          : `<strong>skyglobegroup.com</strong><br>support@skyglobegroup.com<br>WhatsApp: +1 737-399-8522<br>Reg. No. 15497803`}
       </div>
     </div>
 
@@ -6055,7 +6075,15 @@ function printDoc() {
 
     <div class="doc-body">${paragraphs}</div>
 
-    ${isIssuerDoc ? issuerSignoff : `<div class="doc-signoff">
+    ${isIssuerDoc ? issuerSignoff : isSkyConf ? `<div class="doc-signoff">
+      Yours faithfully,
+      <div class="sig-space"></div>
+      <div class="sig-rule"></div>
+      <div class="sig-name">Authorised Signatory — SkyGlobe Limited</div>
+      <div class="sig-detail">Name: ______________________ &nbsp; Designation: ______________________</div>
+      <div class="sig-detail">Date: ______________________ &nbsp;&nbsp; Company Stamp:</div>
+      <div class="stamp-box">SkyGlobe Limited<br>Official Stamp</div>
+    </div>` : `<div class="doc-signoff">
       ${isLetter ? 'Yours faithfully,' : 'Respectfully submitted,'}
       <div class="sig-name">${esc(fullName)}</div>
       ${nationality ? `<div class="sig-detail">${esc(nationality)} National</div>` : ''}
