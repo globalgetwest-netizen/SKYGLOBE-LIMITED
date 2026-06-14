@@ -4593,7 +4593,7 @@ updateAccountNav();
     <div class="text-center">
       <span class="section-tag">✨ Powered by Gemini AI</span>
       <h2 class="section-title">AI <strong>Document Generator</strong></h2>
-      <p class="section-sub">Generate professional SOPs, cover letters, and visa letters in seconds. Reviewed by our experts before submission.</p>
+      <p class="section-sub">Generate professional SOPs, cover letters, visa letters, experience certificates &amp; conference invitations in seconds. Reviewed by our experts before submission.</p>
     </div>
 
     <!-- Step 1: Choose document type -->
@@ -4614,22 +4614,54 @@ updateAccountNav();
           <div class="doc-type-card" onclick="selectDocType('visaletter',this)">
             <span class="dt-icon">🛂</span>
             <h4>Visa Cover Letter</h4>
-            <p>Personal statement for visa applications — tourist, student, or work visa.</p>
+            <p>Personal statement for visa applications — tourism, family visit, work, study, business, conference & more.</p>
+          </div>
+          <div class="doc-type-card" onclick="selectDocType('experience',this)">
+            <span class="dt-icon">📜</span>
+            <h4>Experience Certificate</h4>
+            <p>A professional work-experience certificate <strong>draft</strong> — to be signed &amp; stamped by your real employer.</p>
+          </div>
+          <div class="doc-type-card" onclick="selectDocType('invitation',this)">
+            <span class="dt-icon">✉️</span>
+            <h4>Conference Invitation</h4>
+            <p>An invitation letter for an organisation to invite a guest to a conference, meeting or event.</p>
           </div>
         </div>
       </div>
 
       <!-- Step 2: Fill details -->
       <div class="doc-step" id="docStep2" style="display:none">
-        <h4><span>2</span> Tell us about yourself</h4>
+        <h4><span>2</span> <span id="docStep2Heading">Tell us about yourself</span></h4>
+        <p id="docStep2Hint" style="margin:-6px 0 16px;font-size:0.85rem;color:var(--muted,#8a94a6)">Fill in your details accurately — your document will be generated complete and ready to print, with no blanks to fill.</p>
+        <div id="docIssuerNotice" style="display:none;background:#fff7e6;border:1px solid #f0c36d;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:0.85rem;color:#7a5b00;line-height:1.5"></div>
         <div class="form-row">
           <div class="form-group">
-            <label>Full Name *</label>
+            <label id="docNameLabel">Full Name *</label>
             <input type="text" id="docFullName" placeholder="e.g. Amara Nwosu">
           </div>
           <div class="form-group">
-            <label>Nationality</label>
+            <label id="docNatLabel">Nationality</label>
             <input type="text" id="docNationality" placeholder="e.g. Nigerian">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label id="docEmailLabel">Your Email Address *</label>
+            <input type="email" id="docEmail" placeholder="e.g. amara.nwosu@gmail.com">
+          </div>
+          <div class="form-group">
+            <label id="docPhoneLabel">Your Phone Number *</label>
+            <input type="tel" id="docPhone" placeholder="e.g. +234 801 234 5678">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label id="docAddrLabel">Your Address *</label>
+            <input type="text" id="docAddress" placeholder="e.g. 12 Marina Road, Lagos Island">
+          </div>
+          <div class="form-group">
+            <label id="docCityLabel">City &amp; Country *</label>
+            <input type="text" id="docCity" placeholder="e.g. Lagos, Nigeria">
           </div>
         </div>
         <div class="form-row">
@@ -4642,12 +4674,28 @@ updateAccountNav();
             <input type="text" id="docInstitution" placeholder="e.g. University of Manchester">
           </div>
         </div>
+        <div class="form-group" id="docPurposeGroup" style="display:none">
+          <label>Type of Visa / Purpose of Travel *</label>
+          <select id="docPurpose" onchange="onVisaPurposeChange()">
+            <option value="">— Select the reason for your trip —</option>
+            <option value="Tourism / Holiday">🏖️ Tourism / Holiday</option>
+            <option value="Visiting Family or Friends">👨‍👩‍👧 Visiting Family or Friends</option>
+            <option value="Business Trip">💼 Business / Meetings / Conference</option>
+            <option value="Work / Employment">🛠️ Work / Employment</option>
+            <option value="Study">🎓 Study</option>
+            <option value="Medical Treatment">🏥 Medical Treatment</option>
+            <option value="Transit">✈️ Transit</option>
+            <option value="Religious / Pilgrimage">🕌 Religious / Pilgrimage</option>
+            <option value="Other">📝 Other</option>
+          </select>
+          <p id="docPurposeHint" style="margin:6px 0 0;font-size:0.8rem;color:var(--muted,#8a94a6)"></p>
+        </div>
         <div class="form-group">
           <label id="docProgramLabel">Programme / Job Title</label>
           <input type="text" id="docProgram" placeholder="e.g. MSc Computer Science">
         </div>
         <div class="form-group">
-          <label>Academic Background</label>
+          <label id="docBgLabel">Academic Background</label>
           <textarea id="docBackground" rows="3" placeholder="e.g. BSc Electrical Engineering, University of Lagos, 2022. CGPA 4.5/5.0. Relevant coursework: Digital Systems, Embedded Systems..."></textarea>
         </div>
         <div class="form-group">
@@ -4659,7 +4707,7 @@ updateAccountNav();
           <textarea id="docWhy" rows="3" placeholder="e.g. The University of Manchester's AI research lab is ranked #2 in the UK, and Professor Sarah Brown's work on explainable AI directly aligns with my research interests..."></textarea>
         </div>
         <div class="form-group">
-          <label>Future Career Goals</label>
+          <label id="docGoalsLabel">Future Career Goals</label>
           <textarea id="docGoals" rows="3" placeholder="e.g. After completing the MSc, I plan to return to Nigeria and found an AI startup focused on healthcare diagnostics in underserved communities..."></textarea>
         </div>
         <div class="form-group">
@@ -4680,6 +4728,38 @@ updateAccountNav();
       <!-- Tip box -->
       <div style="background:rgba(184,134,11,0.06);border:1px solid rgba(184,134,11,0.2);border-radius:12px;padding:1rem 1.3rem;margin-top:1rem;font-size:0.83rem;color:#64748b;line-height:1.6">
         💡 <strong style="color:#0a1628">Pro tip:</strong> The more detail you provide, the stronger your document. After generating, our consultants can review and personalise it for you — <a onclick="showPage('contact')" style="color:var(--gold);cursor:pointer">book a free review here</a>.
+      </div>
+    </div>
+
+    <!-- Earn a Real, Legal Certificate -->
+    <div style="max-width:800px;margin:3rem auto 0">
+      <div class="text-center" style="margin-bottom:1.2rem">
+        <span class="section-tag">100% Legal &amp; Verifiable</span>
+        <h3 class="section-title" style="font-size:1.6rem">Earn a <strong>Real Certificate</strong></h3>
+        <p class="section-sub" style="max-width:640px;margin:0.6rem auto 0">A certificate is only accepted by institutions, employers and embassies when it is genuinely earned and verifiable. Here is how to get one the right way — no fakes, no risk of a visa ban.</p>
+      </div>
+
+      <div style="background:#fff7e6;border:1px solid #f0c36d;border-radius:12px;padding:1rem 1.3rem;margin-bottom:1.4rem;font-size:0.85rem;color:#7a5b00;line-height:1.6">
+        ⚠️ <strong>Important:</strong> SkyGlobe never sells or fakes work-experience or academic certificates. A forged certificate is easily verified and can lead to a permanent visa ban or job termination. The routes below give you a <strong>genuine, verifiable</strong> certificate accepted anywhere.
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem">
+        <div class="we-card">
+          <div class="we-card-head"><div class="we-card-icon">📜</div><div><h4>Work Experience Certificate</h4><div class="we-sub">From your real employer</div></div></div>
+          <p>Use our <strong>Experience Certificate</strong> generator above to create a polished draft, then ask your current/former employer's HR or manager to issue it on the company's <strong>official letterhead with a signature &amp; stamp</strong>. That makes it legally valid and verifiable.</p>
+        </div>
+        <div class="we-card">
+          <div class="we-card-head"><div class="we-card-icon">🎓</div><div><h4>Accredited Online Courses</h4><div class="we-sub">Globally recognised</div></div></div>
+          <p>Genuinely earn a certificate from accredited platforms — <strong>Coursera</strong>, <strong>edX</strong>, <strong>Google Career Certificates</strong>, <strong>Microsoft Learn</strong> and <strong>LinkedIn Learning</strong>. Many are free to study (you pay only for the certificate) and are recognised by employers worldwide.</p>
+        </div>
+        <div class="we-card">
+          <div class="we-card-head"><div class="we-card-icon">🏅</div><div><h4>Professional Bodies</h4><div class="we-sub">Industry-standard</div></div></div>
+          <p>For regulated fields, earn certification from the official body — e.g. <strong>PMP</strong> (project management), <strong>ACCA/CPA</strong> (finance), <strong>CompTIA/AWS/Cisco</strong> (IT), <strong>IELTS/TOEFL</strong> (English). These are the gold standard for visas and skilled migration.</p>
+        </div>
+        <div class="we-card">
+          <div class="we-card-head"><div class="we-card-icon">🤝</div><div><h4>Need Guidance?</h4><div class="we-sub">We'll help you choose</div></div></div>
+          <p>Not sure which certificate strengthens your visa or job application? <a onclick="showPage('contact')" style="color:var(--gold);cursor:pointer;font-weight:600">Book a free consultation</a> and our advisors will map the exact, legal certificates your destination and goal require.</p>
+        </div>
       </div>
     </div>
 
@@ -5596,37 +5676,176 @@ function selectDocType(type, el) {
   document.querySelectorAll('.doc-type-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
 
-  // Update labels based on type
+  // Default contact-field labels (the applicant is the sender).
+  const APPLICANT_CONTACT = { name:'Full Name *', nat:'Nationality', email:'Your Email Address *', phone:'Your Phone Number *', addr:'Your Address *', city:'City & Country *' };
+
+  // Update the whole form so it matches exactly the document the applicant chose.
   const labels = {
     sop: {
+      heading: 'Your academic profile',
+      hint: 'For your Statement of Purpose — tell us about your studies, ambitions and the programme you are applying to. Your document will be complete and ready to print.',
       dest: 'Destination Country *', inst: 'University Name', prog: 'Programme / Course *',
-      exp: 'Work / Research Experience', why: 'Why this university & programme?'
+      bg: 'Academic Background', exp: 'Work / Research Experience',
+      why: 'Why this university & programme?', goals: 'Future Career Goals'
     },
     coverletter: {
+      heading: 'Your professional profile',
+      hint: 'For your Cover Letter — tell us about the job, your skills and achievements. Your letter will be complete and ready to send.',
       dest: 'Target Country *', inst: 'Company Name', prog: 'Job Title / Position *',
-      exp: 'Work Experience & Skills', why: 'Why this company & role?'
+      bg: 'Education & Qualifications', exp: 'Work Experience & Skills',
+      why: 'Why this company & role?', goals: 'Career Objectives'
     },
     visaletter: {
+      heading: 'Your travel & background details',
+      hint: 'For your Visa Cover Letter — tell us about your trip, your ties to home and your financial standing. Your letter will be complete and ready for the embassy.',
       dest: 'Destination Country *', inst: 'Embassy / Consulate (optional)', prog: 'Purpose of Visit',
-      exp: 'Employment & Financial Background', why: 'Why are you travelling there?'
+      bg: 'Education & Employment', exp: 'Employment & Financial Background',
+      why: 'Why are you travelling there?', goals: 'Ties to Home Country & Return Plans'
+    },
+    experience: {
+      heading: 'Employer & employee details',
+      hint: 'This generates a DRAFT experience certificate. Enter the employer (issuer) details and the employee\'s service record.',
+      notice: '📜 <strong>Important — how to make this legal &amp; accepted:</strong> This is a DRAFT only. To be valid and accepted by any institution, company or embassy, it must be printed on your employer\'s <strong>official letterhead</strong> and <strong>signed &amp; stamped by an authorised officer</strong> (HR/Manager). SkyGlobe does not certify employment it did not witness — the real employer must issue it.',
+      contact: { name:'Employee Full Name *', nat:'Employee Nationality / ID (optional)', email:'Issuing Company Email *', phone:'Issuing Company Phone *', addr:'Company Address *', city:'Company City & Country *' },
+      dest: 'Country (optional)', inst: 'Company / Employer Name *', prog: 'Job Title / Position Held *',
+      bg: 'Employment Period (from – to) *', exp: 'Key Duties & Responsibilities *',
+      why: 'Key Achievements (optional)', goals: 'Conduct & Reason for Leaving (optional)'
+    },
+    invitation: {
+      heading: 'Host organisation & guest details',
+      hint: 'This generates a conference/event invitation letter issued BY the inviting organisation.',
+      notice: '✉️ <strong>Important:</strong> This invitation must be printed on the host organisation\'s <strong>official letterhead</strong> and <strong>signed &amp; stamped by an authorised officer</strong>. It is issued by the inviting body, not by SkyGlobe.',
+      contact: { name:'Guest / Invitee Full Name *', nat:'Guest Nationality', email:'Host Organisation Email *', phone:'Host Organisation Phone *', addr:'Host Organisation Address *', city:'Host City & Country *' },
+      dest: 'Guest\'s Home Country', inst: 'Host Organisation Name *', prog: 'Conference / Event Name *',
+      bg: 'Event Dates & Venue *', exp: 'Purpose & Agenda of the Event *',
+      why: 'Guest\'s Role at the Event (speaker, delegate…)', goals: 'Who Covers Costs & Accommodation'
     },
   };
   const l = labels[type];
+  const c = l.contact || APPLICANT_CONTACT;
+  document.getElementById('docStep2Heading').textContent = l.heading;
+  document.getElementById('docStep2Hint').textContent = l.hint;
+  document.getElementById('docNameLabel').textContent = c.name;
+  document.getElementById('docNatLabel').textContent = c.nat;
+  document.getElementById('docEmailLabel').textContent = c.email;
+  document.getElementById('docPhoneLabel').textContent = c.phone;
+  document.getElementById('docAddrLabel').textContent = c.addr;
+  document.getElementById('docCityLabel').textContent = c.city;
   document.getElementById('docDestLabel').textContent = l.dest;
   document.getElementById('docInstLabel').textContent = l.inst;
   document.getElementById('docProgramLabel').textContent = l.prog;
+  document.getElementById('docBgLabel').textContent = l.bg;
   document.getElementById('docExpLabel').textContent = l.exp;
   document.getElementById('docWhyLabel').textContent = l.why;
+  document.getElementById('docGoalsLabel').textContent = l.goals;
+
+  const notice = document.getElementById('docIssuerNotice');
+  if (l.notice) { notice.innerHTML = l.notice; notice.style.display = 'block'; }
+  else { notice.style.display = 'none'; }
+
+  // The visa purpose selector only applies to visa letters — it tells the AI
+  // whether this is a tourist, work, study, business, medical (etc.) visa.
+  const purposeGroup = document.getElementById('docPurposeGroup');
+  if (type === 'visaletter') {
+    purposeGroup.style.display = 'block';
+    document.getElementById('docPurpose').value = '';
+    document.getElementById('docPurposeHint').textContent = '';
+    onVisaPurposeChange();
+  } else {
+    purposeGroup.style.display = 'none';
+  }
 
   document.getElementById('docStep2').style.display = 'block';
   document.getElementById('docStep2').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// Tailors the visa-letter fields and guidance to the specific purpose of travel.
+function onVisaPurposeChange() {
+  const p = document.getElementById('docPurpose').value;
+  const cfg = {
+    'Tourism / Holiday': {
+      progLabel: 'Places You Plan to Visit', progPh: 'e.g. London, Edinburgh & the Lake District — 10-day holiday',
+      whyLabel: 'What you want to see & do', goalsLabel: 'Proof you will return home (job, family, property)',
+      hint: 'Mention your travel dates, where you will stay, who is funding the trip, and strong reasons you will return home.'
+    },
+    'Visiting Family or Friends': {
+      progLabel: 'Who You Are Visiting (name & relationship)', progPh: 'e.g. My sister, Mrs. Jane Doe, a permanent resident',
+      whyLabel: 'Purpose & details of the visit', goalsLabel: 'Proof you will return home (job, family, property)',
+      hint: 'Mention your host\'s name, status and address, who is paying, your travel dates, and your ties to home.'
+    },
+    'Business Trip': {
+      progLabel: 'Company / Event You Are Attending', progPh: 'e.g. Tech Summit 2026, hosted by Acme Corp',
+      whyLabel: 'Purpose of the business trip', goalsLabel: 'Your role & ties to your home employer',
+      hint: 'Mention the inviting company, the event/meetings, who covers costs, and that your job awaits you back home.'
+    },
+    'Work / Employment': {
+      progLabel: 'Job Title & Employer Abroad', progPh: 'e.g. Registered Nurse at St. Mary\'s Hospital',
+      whyLabel: 'About the job offer & employer', goalsLabel: 'Your qualifications & work permit details',
+      hint: 'Mention your job offer, employer, contract/permit reference, and your qualifications for the role.'
+    },
+    'Study': {
+      progLabel: 'Course & Institution', progPh: 'e.g. MSc Public Health, University of Toronto',
+      whyLabel: 'Why this course & institution', goalsLabel: 'Plans after studies & ties to home',
+      hint: 'Mention your admission/offer letter, course duration, funding/tuition, and plans to return after studies.'
+    },
+    'Medical Treatment': {
+      progLabel: 'Treatment & Hospital', progPh: 'e.g. Cardiac surgery at Cleveland Clinic',
+      whyLabel: 'Details of the medical treatment', goalsLabel: 'How treatment is funded & ties to home',
+      hint: 'Mention the hospital, the treatment, the appointment/letter, how it is funded, and your return plans.'
+    },
+    'Transit': {
+      progLabel: 'Final Destination', progPh: 'e.g. Connecting flight to Canada via this country',
+      whyLabel: 'Details of your transit', goalsLabel: 'Onward travel & ties to home',
+      hint: 'Mention your final destination, connecting flight details, and that you will not leave the transit area / will travel onward.'
+    },
+    'Religious / Pilgrimage': {
+      progLabel: 'Event / Place of Worship', progPh: 'e.g. Hajj pilgrimage / church conference',
+      whyLabel: 'Purpose of the religious visit', goalsLabel: 'Proof you will return home',
+      hint: 'Mention the event, organisers, travel dates, who is funding it, and your ties to home.'
+    },
+    'Other': {
+      progLabel: 'Purpose of Visit', progPh: 'e.g. Describe the reason for your trip',
+      whyLabel: 'Why are you travelling there?', goalsLabel: 'Ties to home country & return plans',
+      hint: 'Be specific about your purpose, your travel dates, funding, and reasons you will return home.'
+    },
+  };
+  const c = cfg[p];
+  const hintEl = document.getElementById('docPurposeHint');
+  const prog = document.getElementById('docProgram');
+  if (!c) { if (hintEl) hintEl.textContent = ''; return; }
+  document.getElementById('docProgramLabel').textContent = c.progLabel;
+  prog.placeholder = c.progPh;
+  document.getElementById('docWhyLabel').textContent = c.whyLabel;
+  document.getElementById('docGoalsLabel').textContent = c.goalsLabel;
+  hintEl.textContent = '💡 ' + c.hint;
+}
+
 async function generateDoc() {
   const fullName = document.getElementById('docFullName').value.trim();
   const destination = document.getElementById('docDestination').value.trim();
-  if (!fullName || !destination) {
-    showToast('Please fill in your name and destination country.'); return;
+  const email = document.getElementById('docEmail').value.trim();
+  const phone = document.getElementById('docPhone').value.trim();
+  const address = document.getElementById('docAddress').value.trim();
+  const city = document.getElementById('docCity').value.trim();
+  const institution = document.getElementById('docInstitution').value.trim();
+  const program = document.getElementById('docProgram').value.trim();
+  const isIssuerDoc = selectedDocType === 'experience' || selectedDocType === 'invitation';
+  if (!fullName) {
+    showToast('Please fill in the full name.'); return;
+  }
+  if (!isIssuerDoc && !destination) {
+    showToast('Please fill in your destination country.'); return;
+  }
+  if (isIssuerDoc && (!institution || !program)) {
+    showToast(selectedDocType === 'experience'
+      ? 'Please fill in the company name and job title.'
+      : 'Please fill in the host organisation and event name.'); return;
+  }
+  if (!email || !phone || !address || !city) {
+    showToast('Please fill in all the required contact details so your document is complete and professional.'); return;
+  }
+  if (selectedDocType === 'visaletter' && !document.getElementById('docPurpose').value) {
+    showToast('Please select the type of visa / purpose of your travel so we can write the right letter.'); return;
   }
 
   const btn = document.getElementById('docGenBtn');
@@ -5649,6 +5868,8 @@ async function generateDoc() {
         docType: selectedDocType,
         fullName,
         nationality: document.getElementById('docNationality').value.trim(),
+        email, phone, address, city,
+        visaPurpose: document.getElementById('docPurpose')?.value || '',
         destination,
         institution: document.getElementById('docInstitution').value.trim(),
         program: document.getElementById('docProgram').value.trim(),
@@ -5662,7 +5883,7 @@ async function generateDoc() {
     const data = await r.json();
     if (!r.ok || data.error) throw new Error(data.error || 'Generation failed');
 
-    const typeLabels = { sop: 'Statement of Purpose', coverletter: 'Cover Letter', visaletter: 'Visa Cover Letter' };
+    const typeLabels = { sop: 'Statement of Purpose', coverletter: 'Cover Letter', visaletter: 'Visa Cover Letter', experience: 'Experience Certificate (Draft)', invitation: 'Conference Invitation' };
     document.getElementById('docOutputArea').innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
         <strong style="color:var(--gold)">${typeLabels[selectedDocType]} — ${fullName}</strong>
@@ -5699,12 +5920,19 @@ function printDoc() {
   const text = document.getElementById('docText')?.innerText || '';
   const fullName = document.getElementById('docFullName')?.value.trim() || 'Applicant';
   const nationality = document.getElementById('docNationality')?.value.trim() || '';
+  const email = document.getElementById('docEmail')?.value.trim() || '';
+  const phone = document.getElementById('docPhone')?.value.trim() || '';
+  const address = document.getElementById('docAddress')?.value.trim() || '';
+  const city = document.getElementById('docCity')?.value.trim() || '';
   const destination = document.getElementById('docDestination')?.value.trim() || '';
   const institution = document.getElementById('docInstitution')?.value.trim() || '';
   const program = document.getElementById('docProgram')?.value.trim() || '';
+  const visaPurpose = document.getElementById('docPurpose')?.value || '';
+  const esc = s => (s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  const typeLabels = { sop: 'STATEMENT OF PURPOSE', coverletter: 'COVER LETTER', visaletter: 'VISA COVER LETTER' };
+  const typeLabels = { sop: 'STATEMENT OF PURPOSE', coverletter: 'COVER LETTER', visaletter: 'VISA COVER LETTER', experience: 'EXPERIENCE CERTIFICATE', invitation: 'LETTER OF INVITATION' };
   const docTitle = typeLabels[selectedDocType] || 'DOCUMENT';
+  const isIssuerDoc = selectedDocType === 'experience' || selectedDocType === 'invitation';
 
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -5714,6 +5942,9 @@ function printDoc() {
 
   // Letters (cover/visa) get a date + recipient line; SOP is a titled essay
   const isLetter = selectedDocType === 'coverletter' || selectedDocType === 'visaletter';
+  const senderBlock = isLetter
+    ? `<div class="doc-sender"><strong>${esc(fullName)}</strong><br>${address ? esc(address) + '<br>' : ''}${city ? esc(city) + '<br>' : ''}${phone ? esc(phone) + '<br>' : ''}${email ? esc(email) : ''}</div>`
+    : '';
   const dateBlock = isLetter
     ? `<div class="doc-date">${today}</div>`
     : '';
@@ -5722,13 +5953,47 @@ function printDoc() {
         ? `The Visa Officer<br>${destination ? 'Embassy / Consulate of ' + destination : 'Embassy / Consulate'}`
         : `The Hiring Manager${institution ? '<br>' + institution : ''}${destination ? '<br>' + destination : ''}`}</div>`
     : '';
-  const subjectLine = isLetter && program
-    ? `<div class="doc-subject"><strong>RE: ${program}${institution && selectedDocType==='coverletter' ? ' — ' + institution : ''}</strong></div>`
+  const visaSubject = selectedDocType === 'visaletter' && visaPurpose
+    ? `${visaPurpose} Visa Application${destination ? ' — ' + destination : ''}${program ? ' (' + program + ')' : ''}`
+    : '';
+  const subjectText = selectedDocType === 'visaletter'
+    ? visaSubject
+    : (program ? program + (institution && selectedDocType==='coverletter' ? ' — ' + institution : '') : '');
+  const subjectLine = isLetter && subjectText
+    ? `<div class="doc-subject"><strong>RE: ${esc(subjectText)}</strong></div>`
     : '';
 
-  const titleBlock = !isLetter
+  const titleBlock = (!isLetter && !isIssuerDoc)
     ? `<h1 class="doc-essay-title">${docTitle}</h1>
        <div class="doc-essay-sub">${program ? program : ''}${program && institution ? ' · ' : ''}${institution ? institution : ''}${destination ? ((program||institution)?' · ':'') + destination : ''}</div>`
+    : '';
+
+  // For employer/organiser-issued documents the letterhead is the ISSUER's, not SkyGlobe's.
+  const issuerName = institution || (selectedDocType === 'experience' ? 'Company Name' : 'Host Organisation');
+  const issuerContact = `${address ? esc(address) + '<br>' : ''}${city ? esc(city) + '<br>' : ''}${phone ? 'Tel: ' + esc(phone) + '<br>' : ''}${email ? esc(email) : ''}`;
+  const issuerTitleBlock = isIssuerDoc
+    ? `<h1 class="doc-essay-title">${docTitle}</h1>
+       <div class="doc-essay-sub">${selectedDocType === 'experience' ? 'TO WHOM IT MAY CONCERN' : 'Letter of Invitation'}</div>`
+    : '';
+  const issuerDateBlock = isIssuerDoc ? `<div class="doc-date">${today}</div>` : '';
+  const issuerSignoff = isIssuerDoc
+    ? `<div class="doc-signoff">
+         Yours faithfully,
+         <div class="sig-space"></div>
+         <div class="sig-rule"></div>
+         <div class="sig-name">Authorised Signatory</div>
+         <div class="sig-detail">For and on behalf of <strong>${esc(issuerName)}</strong></div>
+         <div class="sig-detail">Name: ______________________ &nbsp; Designation: ______________________</div>
+         <div class="sig-detail">Date: ______________________</div>
+         <div class="stamp-box">Official Company Stamp</div>
+       </div>`
+    : '';
+  const issuerFooter = isIssuerDoc
+    ? `<div class="doc-footer draft-note">
+         <strong>DRAFT — NOT YET VALID.</strong> To be accepted by any institution, company or embassy, this document must be reproduced on the
+         <strong>official letterhead of ${esc(issuerName)}</strong> and <strong>signed &amp; stamped by an authorised officer</strong>.<br>
+         Prepared with assistance from SkyGlobe Limited's AI tools · skyglobegroup.com
+       </div>`
     : '';
 
   const w = window.open('', '_blank');
@@ -5744,6 +6009,8 @@ function printDoc() {
     .lh-tag { font-size: 8.5pt; color:#444; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
     .lh-contact { display:table-cell; vertical-align:top; width:40%; text-align:right; font-size: 9pt; color:#222; line-height:1.8; font-family:'Georgia',serif; }
     .lh-contact strong { color:#0a1628; }
+    .doc-sender { font-size: 10.5pt; color:#222; line-height:1.5; margin-bottom: 18px; }
+    .doc-sender strong { color:#0a1628; font-size:11pt; }
     .doc-date { text-align:right; font-size: 11pt; color:#333; margin-bottom: 22px; }
     .doc-recipient { font-size: 11pt; color:#222; margin-bottom: 20px; line-height:1.5; }
     .doc-subject { font-size: 11.5pt; margin-bottom: 20px; color:#0a1628; }
@@ -5755,39 +6022,50 @@ function printDoc() {
     .doc-signoff .sig-name { font-weight: 700; margin-top: 4px; color:#0a1628; }
     .doc-signoff .sig-detail { font-size: 10pt; color:#555; }
     .doc-footer { margin-top: 44px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 8pt; color:#999; text-align:center; line-height:1.5; }
+    .sig-space { height: 38px; }
+    .sig-rule { width: 230px; border-bottom: 1px solid #333; margin-bottom: 4px; }
+    .stamp-box { margin-top: 22px; width: 170px; height: 80px; border: 1.5px dashed #b8860b; border-radius: 6px; display:flex; align-items:center; justify-content:center; font-size: 8.5pt; color:#b8860b; text-align:center; }
+    .draft-note { color:#7a5b00; border-top:1px solid #f0c36d; text-align:left; font-size:8.5pt; }
     @media print { body { padding: 0; } .no-print { display:none; } }
   </style></head>
   <body>
     <div class="letterhead">
       <div class="lh-brand">
-        <div class="lh-name">SKY<span>GLOBE</span> LIMITED</div>
-        <div class="lh-tag">Your Gateway to Global Opportunity</div>
+        ${isIssuerDoc
+          ? `<div class="lh-name">${esc(issuerName)}</div>
+             <div class="lh-tag">${selectedDocType === 'experience' ? 'Human Resources Department' : 'Office of the Organiser'}</div>`
+          : `<div class="lh-name">SKY<span>GLOBE</span> LIMITED</div>
+             <div class="lh-tag">Your Gateway to Global Opportunity</div>`}
       </div>
       <div class="lh-contact">
-        <strong>skyglobegroup.com</strong><br>
-        support@skyglobegroup.com<br>
-        WhatsApp: +1 737-399-8522
+        ${isIssuerDoc
+          ? issuerContact
+          : `<strong>skyglobegroup.com</strong><br>support@skyglobegroup.com<br>WhatsApp: +1 737-399-8522`}
       </div>
     </div>
 
     ${titleBlock}
-    ${!isLetter ? `<div class="doc-applicant"><strong>Applicant:</strong> ${fullName}${nationality ? ' &nbsp;·&nbsp; <strong>Nationality:</strong> ' + nationality : ''}</div>` : ''}
+    ${issuerTitleBlock}
+    ${issuerDateBlock}
+    ${(!isLetter && !isIssuerDoc) ? `<div class="doc-applicant"><strong>Applicant:</strong> ${fullName}${nationality ? ' &nbsp;·&nbsp; <strong>Nationality:</strong> ' + nationality : ''}</div>` : ''}
+    ${senderBlock}
     ${dateBlock}
     ${recipientBlock}
     ${subjectLine}
 
     <div class="doc-body">${paragraphs}</div>
 
-    <div class="doc-signoff">
+    ${isIssuerDoc ? issuerSignoff : `<div class="doc-signoff">
       ${isLetter ? 'Yours faithfully,' : 'Respectfully submitted,'}
-      <div class="sig-name">${fullName}</div>
-      ${nationality ? `<div class="sig-detail">${nationality} National</div>` : ''}
-    </div>
+      <div class="sig-name">${esc(fullName)}</div>
+      ${nationality ? `<div class="sig-detail">${esc(nationality)} National</div>` : ''}
+      ${isLetter && (phone || email) ? `<div class="sig-detail">${[phone, email].filter(Boolean).map(esc).join(' &nbsp;·&nbsp; ')}</div>` : ''}
+    </div>`}
 
-    <div class="doc-footer">
+    ${isIssuerDoc ? issuerFooter : `<div class="doc-footer">
       This document was drafted with assistance from SkyGlobe Limited's AI tools and is intended as a professional draft.<br>
       For document review, visa processing, and admissions support, visit <strong>skyglobegroup.com</strong>
-    </div>
+    </div>`}
   </body></html>`);
   w.document.close();
   setTimeout(() => w.print(), 350);
@@ -5800,6 +6078,13 @@ function resetDocGen() {
   document.getElementById('docStep3').style.display = 'none';
   document.getElementById('docFullName').value = '';
   document.getElementById('docNationality').value = '';
+  document.getElementById('docEmail').value = '';
+  document.getElementById('docPhone').value = '';
+  document.getElementById('docAddress').value = '';
+  document.getElementById('docCity').value = '';
+  document.getElementById('docPurpose').value = '';
+  document.getElementById('docPurposeGroup').style.display = 'none';
+  document.getElementById('docIssuerNotice').style.display = 'none';
   document.getElementById('docDestination').value = '';
   document.getElementById('docInstitution').value = '';
   document.getElementById('docProgram').value = '';
