@@ -707,9 +707,12 @@ CRITICAL FORMATTING RULES:
 - Output plain text only: no markdown, no asterisks, no headings in brackets.`;
 
   const isIssuerDoc = docType === 'experience' || docType === 'invitation';
+  const isSkyConf = docType === 'skyconference';
   if (!docType || !fullName)
     return res.status(400).json({ error: 'Missing required fields.' });
-  if (!isIssuerDoc && !destination)
+  if (!isIssuerDoc && !isSkyConf && !destination)
+    return res.status(400).json({ error: 'Missing required fields.' });
+  if (isSkyConf && (!institution || !destination))
     return res.status(400).json({ error: 'Missing required fields.' });
   if (isIssuerDoc && (!institution || !program))
     return res.status(400).json({ error: 'Missing required fields.' });
@@ -815,6 +818,29 @@ Write a formal experience certificate body (180-280 words) that:
 3. Comments positively and professionally on conduct, skills and contribution
 4. Closes with a line wishing the employee success in future endeavours
 Write in the third person, from the company's point of view. This is an official, factual document — be measured and professional, do NOT exaggerate. Do NOT write the signature line, date, or company letterhead (these are added separately).
+${NO_PLACEHOLDERS}`,
+
+    skyconference: `You are the official communications officer of SkyGlobe Limited, an international travel and immigration consultancy based in the United Kingdom. Write a formal Letter of Invitation issued BY SkyGlobe Limited inviting an individual to attend one of our international events.
+Details:
+- Invitee / Attendee Name: ${fullName}
+- Nationality / Home Country: ${nationality || 'Not specified'}
+- Conference / Event Name: ${institution}
+- Event Dates & Venue: ${background || 'To be confirmed'}
+- Conference Country / Destination: ${destination}
+- Attendee's Role: ${program || 'Delegate / Attendee'}
+- Attendee's Background: ${experience || 'Not provided'}
+- Purpose of the event: ${whyHere || 'International conference on travel, immigration, and global opportunities'}
+- Accommodation / cost arrangements: ${goals || 'Attendee responsible for own travel and accommodation unless otherwise stated'}
+- Additional Notes: ${extraNotes || 'None'}
+
+Write a formal invitation letter body (220-300 words) that:
+1. Opens "To the Visa Officer," — since this letter supports the invitee's visa application
+2. Formally introduces SkyGlobe Limited (registered immigration and travel consultancy, UK) and confirms we are inviting ${fullName} to ${institution}
+3. States the event dates, venue, and the attendee's role
+4. Confirms the professional or educational purpose of the event
+5. States accommodation/cost arrangements
+6. Requests that the visa officer grant the necessary visa and offers to provide further information
+Write in formal third person, from SkyGlobe Limited's point of view. Do NOT write the signature block or letterhead (added by system). Do NOT use placeholders.
 ${NO_PLACEHOLDERS}`,
 
     invitation: `You are a corporate protocol officer. Write the BODY of a formal Letter of Invitation issued BY a host organisation inviting a guest to a conference / event.
