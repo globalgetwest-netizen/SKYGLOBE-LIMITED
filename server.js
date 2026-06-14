@@ -692,6 +692,9 @@ app.post('/api/admin/messages', async (req, res) => {
 });
 
 // ── DOCUMENT GENERATOR (SOP / Cover Letter / Visa Letter) ────────────────────
+// Lightweight endpoint the front-end pings to wake the server from sleep.
+app.get('/api/health', (req, res) => res.json({ ok: true, t: Date.now() }));
+
 app.post('/api/generate-doc', async (req, res) => {
   const { docType, fullName, nationality, email, phone, address, city,
           visaPurpose, destination, institution, program,
@@ -867,6 +870,10 @@ ${NO_PLACEHOLDERS}`,
   const prompt = prompts[docType];
   if (!prompt) return res.status(400).json({ error: 'Invalid document type.' });
 
+  // Abort the Gemini call if it hangs, so we always return a clean JSON error
+  // rather than letting the client connection time out (which shows as a NetworkError).
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 55000);
   try {
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -877,6 +884,7 @@ ${NO_PLACEHOLDERS}`,
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           generationConfig: { maxOutputTokens: 2048, temperature: 0.72 },
         }),
+        signal: ctrl.signal,
       }
     );
     const data = await r.json();
@@ -886,7 +894,14 @@ ${NO_PLACEHOLDERS}`,
     res.json({ text });
   } catch (e) {
     console.error('Doc gen error:', e.message);
-    res.status(500).json({ error: 'Document generation failed. Please try again.' });
+    const aborted = e.name === 'AbortError';
+    res.status(aborted ? 504 : 500).json({
+      error: aborted
+        ? 'The AI took too long to respond. Please try again.'
+        : 'Document generation failed. Please try again.'
+    });
+  } finally {
+    clearTimeout(timer);
   }
 });
 
