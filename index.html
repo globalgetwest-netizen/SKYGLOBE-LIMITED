@@ -4747,26 +4747,225 @@ updateAccountNav();
     </div>
     <!-- Country Selector (shared) -->
     <select class="we-country-select" id="weCountrySelect" onchange="onWeCountryChange()">
-      <option value="GB">🇬🇧 United Kingdom</option>
-      <option value="US">🇺🇸 United States</option>
-      <option value="CA">🇨🇦 Canada</option>
-      <option value="DE">🇩🇪 Germany</option>
-      <option value="AU">🇦🇺 Australia</option>
-      <option value="PL">🇵🇱 Poland</option>
-      <option value="PT">🇵🇹 Portugal</option>
-      <option value="LV">🇱🇻 Latvia</option>
-      <option value="JP">🇯🇵 Japan</option>
-      <option value="KR">🇰🇷 South Korea</option>
-      <option value="AE">🇦🇪 UAE</option>
-      <option value="FR">🇫🇷 France</option>
-      <option value="NL">🇳🇱 Netherlands</option>
-      <option value="BE">🇧🇪 Belgium</option>
-      <option value="IT">🇮🇹 Italy</option>
-      <option value="ES">🇪🇸 Spain</option>
-      <option value="SG">🇸🇬 Singapore</option>
-      <option value="NO">🇳🇴 Norway</option>
-      <option value="FI">🇫🇮 Finland</option>
-      <option value="NG">🇳🇬 Nigeria</option>
+      <optgroup label="🌍 Popular Destinations">
+        <option value="GB">🇬🇧 United Kingdom</option>
+        <option value="US">🇺🇸 United States</option>
+        <option value="CA">🇨🇦 Canada</option>
+        <option value="AU">🇦🇺 Australia</option>
+        <option value="DE">🇩🇪 Germany</option>
+        <option value="FR">🇫🇷 France</option>
+        <option value="AE">🇦🇪 UAE</option>
+        <option value="SG">🇸🇬 Singapore</option>
+        <option value="JP">🇯🇵 Japan</option>
+        <option value="NL">🇳🇱 Netherlands</option>
+      </optgroup>
+      <optgroup label="🌍 Africa">
+        <option value="DZ">🇩🇿 Algeria</option>
+        <option value="AO">🇦🇴 Angola</option>
+        <option value="BJ">🇧🇯 Benin</option>
+        <option value="BW">🇧🇼 Botswana</option>
+        <option value="BF">🇧🇫 Burkina Faso</option>
+        <option value="BI">🇧🇮 Burundi</option>
+        <option value="CV">🇨🇻 Cape Verde</option>
+        <option value="CM">🇨🇲 Cameroon</option>
+        <option value="CF">🇨🇫 Central African Republic</option>
+        <option value="TD">🇹🇩 Chad</option>
+        <option value="KM">🇰🇲 Comoros</option>
+        <option value="CG">🇨🇬 Congo</option>
+        <option value="CD">🇨🇩 DR Congo</option>
+        <option value="CI">🇨🇮 Côte d'Ivoire</option>
+        <option value="DJ">🇩🇯 Djibouti</option>
+        <option value="EG">🇪🇬 Egypt</option>
+        <option value="GQ">🇬🇶 Equatorial Guinea</option>
+        <option value="ER">🇪🇷 Eritrea</option>
+        <option value="ET">🇪🇹 Ethiopia</option>
+        <option value="GA">🇬🇦 Gabon</option>
+        <option value="GM">🇬🇲 Gambia</option>
+        <option value="GH">🇬🇭 Ghana</option>
+        <option value="GN">🇬🇳 Guinea</option>
+        <option value="GW">🇬🇼 Guinea-Bissau</option>
+        <option value="KE">🇰🇪 Kenya</option>
+        <option value="LS">🇱🇸 Lesotho</option>
+        <option value="LR">🇱🇷 Liberia</option>
+        <option value="LY">🇱🇾 Libya</option>
+        <option value="MG">🇲🇬 Madagascar</option>
+        <option value="MW">🇲🇼 Malawi</option>
+        <option value="ML">🇲🇱 Mali</option>
+        <option value="MR">🇲🇷 Mauritania</option>
+        <option value="MU">🇲🇺 Mauritius</option>
+        <option value="MA">🇲🇦 Morocco</option>
+        <option value="MZ">🇲🇿 Mozambique</option>
+        <option value="NA">🇳🇦 Namibia</option>
+        <option value="NE">🇳🇪 Niger</option>
+        <option value="NG">🇳🇬 Nigeria</option>
+        <option value="RW">🇷🇼 Rwanda</option>
+        <option value="ST">🇸🇹 São Tomé and Príncipe</option>
+        <option value="SN">🇸🇳 Senegal</option>
+        <option value="SC">🇸🇨 Seychelles</option>
+        <option value="SL">🇸🇱 Sierra Leone</option>
+        <option value="SO">🇸🇴 Somalia</option>
+        <option value="ZA">🇿🇦 South Africa</option>
+        <option value="SS">🇸🇸 South Sudan</option>
+        <option value="SD">🇸🇩 Sudan</option>
+        <option value="SZ">🇸🇿 Eswatini</option>
+        <option value="TZ">🇹🇿 Tanzania</option>
+        <option value="TG">🇹🇬 Togo</option>
+        <option value="TN">🇹🇳 Tunisia</option>
+        <option value="UG">🇺🇬 Uganda</option>
+        <option value="ZM">🇿🇲 Zambia</option>
+        <option value="ZW">🇿🇼 Zimbabwe</option>
+      </optgroup>
+      <optgroup label="🌎 Americas">
+        <option value="AG">🇦🇬 Antigua and Barbuda</option>
+        <option value="AR">🇦🇷 Argentina</option>
+        <option value="BS">🇧🇸 Bahamas</option>
+        <option value="BB">🇧🇧 Barbados</option>
+        <option value="BZ">🇧🇿 Belize</option>
+        <option value="BO">🇧🇴 Bolivia</option>
+        <option value="BR">🇧🇷 Brazil</option>
+        <option value="CA">🇨🇦 Canada</option>
+        <option value="CL">🇨🇱 Chile</option>
+        <option value="CO">🇨🇴 Colombia</option>
+        <option value="CR">🇨🇷 Costa Rica</option>
+        <option value="CU">🇨🇺 Cuba</option>
+        <option value="DM">🇩🇲 Dominica</option>
+        <option value="DO">🇩🇴 Dominican Republic</option>
+        <option value="EC">🇪🇨 Ecuador</option>
+        <option value="SV">🇸🇻 El Salvador</option>
+        <option value="GD">🇬🇩 Grenada</option>
+        <option value="GT">🇬🇹 Guatemala</option>
+        <option value="GY">🇬🇾 Guyana</option>
+        <option value="HT">🇭🇹 Haiti</option>
+        <option value="HN">🇭🇳 Honduras</option>
+        <option value="JM">🇯🇲 Jamaica</option>
+        <option value="MX">🇲🇽 Mexico</option>
+        <option value="NI">🇳🇮 Nicaragua</option>
+        <option value="PA">🇵🇦 Panama</option>
+        <option value="PY">🇵🇾 Paraguay</option>
+        <option value="PE">🇵🇪 Peru</option>
+        <option value="KN">🇰🇳 Saint Kitts and Nevis</option>
+        <option value="LC">🇱🇨 Saint Lucia</option>
+        <option value="VC">🇻🇨 Saint Vincent and the Grenadines</option>
+        <option value="SR">🇸🇷 Suriname</option>
+        <option value="TT">🇹🇹 Trinidad and Tobago</option>
+        <option value="US">🇺🇸 United States</option>
+        <option value="UY">🇺🇾 Uruguay</option>
+        <option value="VE">🇻🇪 Venezuela</option>
+      </optgroup>
+      <optgroup label="🌏 Asia">
+        <option value="AF">🇦🇫 Afghanistan</option>
+        <option value="AM">🇦🇲 Armenia</option>
+        <option value="AZ">🇦🇿 Azerbaijan</option>
+        <option value="BH">🇧🇭 Bahrain</option>
+        <option value="BD">🇧🇩 Bangladesh</option>
+        <option value="BT">🇧🇹 Bhutan</option>
+        <option value="BN">🇧🇳 Brunei</option>
+        <option value="KH">🇰🇭 Cambodia</option>
+        <option value="CN">🇨🇳 China</option>
+        <option value="CY">🇨🇾 Cyprus</option>
+        <option value="GE">🇬🇪 Georgia</option>
+        <option value="IN">🇮🇳 India</option>
+        <option value="ID">🇮🇩 Indonesia</option>
+        <option value="IR">🇮🇷 Iran</option>
+        <option value="IQ">🇮🇶 Iraq</option>
+        <option value="IL">🇮🇱 Israel</option>
+        <option value="JP">🇯🇵 Japan</option>
+        <option value="JO">🇯🇴 Jordan</option>
+        <option value="KZ">🇰🇿 Kazakhstan</option>
+        <option value="KW">🇰🇼 Kuwait</option>
+        <option value="KG">🇰🇬 Kyrgyzstan</option>
+        <option value="LA">🇱🇦 Laos</option>
+        <option value="LB">🇱🇧 Lebanon</option>
+        <option value="MY">🇲🇾 Malaysia</option>
+        <option value="MV">🇲🇻 Maldives</option>
+        <option value="MN">🇲🇳 Mongolia</option>
+        <option value="MM">🇲🇲 Myanmar</option>
+        <option value="NP">🇳🇵 Nepal</option>
+        <option value="KP">🇰🇵 North Korea</option>
+        <option value="OM">🇴🇲 Oman</option>
+        <option value="PK">🇵🇰 Pakistan</option>
+        <option value="PS">🇵🇸 Palestine</option>
+        <option value="PH">🇵🇭 Philippines</option>
+        <option value="QA">🇶🇦 Qatar</option>
+        <option value="SA">🇸🇦 Saudi Arabia</option>
+        <option value="SG">🇸🇬 Singapore</option>
+        <option value="KR">🇰🇷 South Korea</option>
+        <option value="LK">🇱🇰 Sri Lanka</option>
+        <option value="SY">🇸🇾 Syria</option>
+        <option value="TW">🇹🇼 Taiwan</option>
+        <option value="TJ">🇹🇯 Tajikistan</option>
+        <option value="TH">🇹🇭 Thailand</option>
+        <option value="TL">🇹🇱 Timor-Leste</option>
+        <option value="TM">🇹🇲 Turkmenistan</option>
+        <option value="AE">🇦🇪 UAE</option>
+        <option value="UZ">🇺🇿 Uzbekistan</option>
+        <option value="VN">🇻🇳 Vietnam</option>
+        <option value="YE">🇾🇪 Yemen</option>
+      </optgroup>
+      <optgroup label="🌍 Europe">
+        <option value="AL">🇦🇱 Albania</option>
+        <option value="AD">🇦🇩 Andorra</option>
+        <option value="AT">🇦🇹 Austria</option>
+        <option value="BY">🇧🇾 Belarus</option>
+        <option value="BE">🇧🇪 Belgium</option>
+        <option value="BA">🇧🇦 Bosnia and Herzegovina</option>
+        <option value="BG">🇧🇬 Bulgaria</option>
+        <option value="HR">🇭🇷 Croatia</option>
+        <option value="CZ">🇨🇿 Czech Republic</option>
+        <option value="DK">🇩🇰 Denmark</option>
+        <option value="EE">🇪🇪 Estonia</option>
+        <option value="FI">🇫🇮 Finland</option>
+        <option value="FR">🇫🇷 France</option>
+        <option value="DE">🇩🇪 Germany</option>
+        <option value="GR">🇬🇷 Greece</option>
+        <option value="HU">🇭🇺 Hungary</option>
+        <option value="IS">🇮🇸 Iceland</option>
+        <option value="IE">🇮🇪 Ireland</option>
+        <option value="IT">🇮🇹 Italy</option>
+        <option value="XK">🇽🇰 Kosovo</option>
+        <option value="LV">🇱🇻 Latvia</option>
+        <option value="LI">🇱🇮 Liechtenstein</option>
+        <option value="LT">🇱🇹 Lithuania</option>
+        <option value="LU">🇱🇺 Luxembourg</option>
+        <option value="MT">🇲🇹 Malta</option>
+        <option value="MD">🇲🇩 Moldova</option>
+        <option value="MC">🇲🇨 Monaco</option>
+        <option value="ME">🇲🇪 Montenegro</option>
+        <option value="NL">🇳🇱 Netherlands</option>
+        <option value="MK">🇲🇰 North Macedonia</option>
+        <option value="NO">🇳🇴 Norway</option>
+        <option value="PL">🇵🇱 Poland</option>
+        <option value="PT">🇵🇹 Portugal</option>
+        <option value="RO">🇷🇴 Romania</option>
+        <option value="RU">🇷🇺 Russia</option>
+        <option value="SM">🇸🇲 San Marino</option>
+        <option value="RS">🇷🇸 Serbia</option>
+        <option value="SK">🇸🇰 Slovakia</option>
+        <option value="SI">🇸🇮 Slovenia</option>
+        <option value="ES">🇪🇸 Spain</option>
+        <option value="SE">🇸🇪 Sweden</option>
+        <option value="CH">🇨🇭 Switzerland</option>
+        <option value="TR">🇹🇷 Turkey</option>
+        <option value="UA">🇺🇦 Ukraine</option>
+        <option value="GB">🇬🇧 United Kingdom</option>
+        <option value="VA">🇻🇦 Vatican City</option>
+      </optgroup>
+      <optgroup label="🌏 Oceania">
+        <option value="AU">🇦🇺 Australia</option>
+        <option value="FJ">🇫🇯 Fiji</option>
+        <option value="KI">🇰🇮 Kiribati</option>
+        <option value="MH">🇲🇭 Marshall Islands</option>
+        <option value="FM">🇫🇲 Micronesia</option>
+        <option value="NR">🇳🇷 Nauru</option>
+        <option value="NZ">🇳🇿 New Zealand</option>
+        <option value="PW">🇵🇼 Palau</option>
+        <option value="PG">🇵🇬 Papua New Guinea</option>
+        <option value="WS">🇼🇸 Samoa</option>
+        <option value="SB">🇸🇧 Solomon Islands</option>
+        <option value="TO">🇹🇴 Tonga</option>
+        <option value="TV">🇹🇻 Tuvalu</option>
+        <option value="VU">🇻🇺 Vanuatu</option>
+      </optgroup>
     </select>
     <!-- Country Stats bar -->
     <div class="we-stat-row" id="weStatRow"></div>
@@ -5498,15 +5697,100 @@ function copyDoc() {
 
 function printDoc() {
   const text = document.getElementById('docText')?.innerText || '';
-  const fullName = document.getElementById('docFullName')?.value || 'Document';
+  const fullName = document.getElementById('docFullName')?.value.trim() || 'Applicant';
+  const nationality = document.getElementById('docNationality')?.value.trim() || '';
+  const destination = document.getElementById('docDestination')?.value.trim() || '';
+  const institution = document.getElementById('docInstitution')?.value.trim() || '';
+  const program = document.getElementById('docProgram')?.value.trim() || '';
+
+  const typeLabels = { sop: 'STATEMENT OF PURPOSE', coverletter: 'COVER LETTER', visaletter: 'VISA COVER LETTER' };
+  const docTitle = typeLabels[selectedDocType] || 'DOCUMENT';
+
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Split into paragraphs for proper spacing
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim())
+    .map(p => `<p>${p.trim().replace(/</g, '&lt;').replace(/\n/g, ' ')}</p>`).join('');
+
+  // Letters (cover/visa) get a date + recipient line; SOP is a titled essay
+  const isLetter = selectedDocType === 'coverletter' || selectedDocType === 'visaletter';
+  const dateBlock = isLetter
+    ? `<div class="doc-date">${today}</div>`
+    : '';
+  const recipientBlock = isLetter
+    ? `<div class="doc-recipient">${selectedDocType === 'visaletter'
+        ? `The Visa Officer<br>${destination ? 'Embassy / Consulate of ' + destination : 'Embassy / Consulate'}`
+        : `The Hiring Manager${institution ? '<br>' + institution : ''}${destination ? '<br>' + destination : ''}`}</div>`
+    : '';
+  const subjectLine = isLetter && program
+    ? `<div class="doc-subject"><strong>RE: ${program}${institution && selectedDocType==='coverletter' ? ' — ' + institution : ''}</strong></div>`
+    : '';
+
+  const titleBlock = !isLetter
+    ? `<h1 class="doc-essay-title">${docTitle}</h1>
+       <div class="doc-essay-sub">${program ? program : ''}${program && institution ? ' · ' : ''}${institution ? institution : ''}${destination ? ((program||institution)?' · ':'') + destination : ''}</div>`
+    : '';
+
   const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html><head><title>${fullName} — SkyGlobe</title>
-  <style>body{font-family:Georgia,serif;max-width:700px;margin:60px auto;font-size:13pt;line-height:1.85;color:#1a1a1a}
-  h1{font-size:14pt;color:#888;margin-bottom:2rem;font-weight:400}</style></head>
-  <body><h1>Generated by SkyGlobe Limited — skyglobegroup.com</h1>
-  <div style="white-space:pre-wrap">${text.replace(/</g,'&lt;')}</div></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${fullName} — ${docTitle}</title>
+  <style>
+    @page { margin: 22mm 20mm; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Georgia','Times New Roman',serif; color: #1a1a1a; font-size: 12pt; line-height: 1.75; margin: 0; padding: 40px; max-width: 800px; margin: 0 auto; }
+    .letterhead { width:100%; border-collapse:collapse; border-bottom: 3px solid #b8860b; padding-bottom: 14px; margin-bottom: 28px; display:table; }
+    .lh-brand { display:table-cell; vertical-align:top; width:60%; font-family:'Georgia',serif; }
+    .lh-name { font-size: 20pt; font-weight: 700; letter-spacing: 0.5px; color:#0a1628; }
+    .lh-name span { color:#b8860b; }
+    .lh-tag { font-size: 8.5pt; color:#444; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
+    .lh-contact { display:table-cell; vertical-align:top; width:40%; text-align:right; font-size: 9pt; color:#222; line-height:1.8; font-family:'Georgia',serif; }
+    .lh-contact strong { color:#0a1628; }
+    .doc-date { text-align:right; font-size: 11pt; color:#333; margin-bottom: 22px; }
+    .doc-recipient { font-size: 11pt; color:#222; margin-bottom: 20px; line-height:1.5; }
+    .doc-subject { font-size: 11.5pt; margin-bottom: 20px; color:#0a1628; }
+    .doc-essay-title { font-size: 17pt; text-align:center; letter-spacing: 1px; color:#0a1628; margin: 6px 0 6px; font-weight:700; }
+    .doc-essay-sub { text-align:center; font-size: 10.5pt; color:#777; font-style: italic; margin-bottom: 30px; padding-bottom:16px; border-bottom:1px solid #e5e5e5; }
+    .doc-applicant { text-align:center; font-size:11pt; color:#444; margin-bottom: 26px; }
+    .doc-body p { margin: 0 0 14px; text-align: justify; text-justify: inter-word; }
+    .doc-signoff { margin-top: 30px; font-size: 11.5pt; }
+    .doc-signoff .sig-name { font-weight: 700; margin-top: 4px; color:#0a1628; }
+    .doc-signoff .sig-detail { font-size: 10pt; color:#555; }
+    .doc-footer { margin-top: 44px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 8pt; color:#999; text-align:center; line-height:1.5; }
+    @media print { body { padding: 0; } .no-print { display:none; } }
+  </style></head>
+  <body>
+    <div class="letterhead">
+      <div class="lh-brand">
+        <div class="lh-name">SKY<span>GLOBE</span> LIMITED</div>
+        <div class="lh-tag">Your Gateway to Global Opportunity</div>
+      </div>
+      <div class="lh-contact">
+        <strong>skyglobegroup.com</strong><br>
+        support@skyglobegroup.com<br>
+        WhatsApp: +1 737-399-8522
+      </div>
+    </div>
+
+    ${titleBlock}
+    ${!isLetter ? `<div class="doc-applicant"><strong>Applicant:</strong> ${fullName}${nationality ? ' &nbsp;·&nbsp; <strong>Nationality:</strong> ' + nationality : ''}</div>` : ''}
+    ${dateBlock}
+    ${recipientBlock}
+    ${subjectLine}
+
+    <div class="doc-body">${paragraphs}</div>
+
+    <div class="doc-signoff">
+      ${isLetter ? 'Yours faithfully,' : 'Respectfully submitted,'}
+      <div class="sig-name">${fullName}</div>
+      ${nationality ? `<div class="sig-detail">${nationality} National</div>` : ''}
+    </div>
+
+    <div class="doc-footer">
+      This document was drafted with assistance from SkyGlobe Limited's AI tools and is intended as a professional draft.<br>
+      For document review, visa processing, and admissions support, visit <strong>skyglobegroup.com</strong>
+    </div>
+  </body></html>`);
   w.document.close();
-  w.print();
+  setTimeout(() => w.print(), 350);
 }
 
 function resetDocGen() {
