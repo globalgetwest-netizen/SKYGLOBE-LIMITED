@@ -909,3 +909,14 @@ app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`SkyGlobe server running on port ${PORT}`));
+
+// ---- Keep-alive self-ping (prevents Render free-tier cold starts) ----
+// Render sleeps the service after ~15 min with no inbound HTTP traffic.
+// We ping our own /api/health every 13 minutes so the service stays awake,
+// which means users never hit the "server is waking up" delay.
+const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+setInterval(() => {
+  fetch(`${SELF_URL}/api/health`)
+    .then(() => console.log('[keep-alive] ping ok', new Date().toISOString()))
+    .catch((e) => console.log('[keep-alive] ping failed', e.message));
+}, 13 * 60 * 1000);
