@@ -531,6 +531,166 @@ app.get('/api/test', async (req, res) => {
   } catch (err) { res.json({ ok: false, error: err.message }); }
 });
 
+// ════════════════════════════════════════════════════════════════════════════
+//  CLIENT ACCOUNTS (login) + IN-APP MESSAGING
+//  Reference-number tracking still works without an account — this is additive.
+//  Required Supabase tables: clients, messages  (see SETUP SQL in README)
+// ════════════════════════════════════════════════════════════════════════════
+const crypto = require('crypto');
+const SESSION_SECRET = process.env.SESSION_SECRET || process.env.SUPABASE_KEY || 'skyglobe-dev-secret';
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+function verifyPassword(password, stored) {
+  if (!stored || !stored.includes(':')) return false;
+  const [salt, hash] = stored.split(':');
+  const test = crypto.scryptSync(password, salt, 64).toString('hex');
+  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(test));
+}
+function signToken(email) {
+  const payload = Buffer.from(JSON.stringify({ email, iat: Date.now() })).toString('base64url');
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
+  return `${payload}.${sig}`;
+}
+function verifyToken(token) {
+  if (!token || !token.includes('.')) return null;
+  const [payload, sig] = token.split('.');
+  const expected = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
+  if (sig !== expected) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    // 30-day expiry
+    if (Date.now() - data.iat > 30 * 24 * 60 * 60 * 1000) return null;
+    return data.email;
+  } catch { return null; }
+}
+function clientAuth(req) {
+  const h = req.headers['authorization'] || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : '';
+  return verifyToken(token);
+}
+
+async function getClientByEmail(email) {
+  const rows = await dbQuery('GET', 'clients', null, { email: `eq.${email}`, limit: 1 });
+  return rows[0] || null;
+}
+
+// ── SIGN UP ───────────────────────────────────────────────────────────────────
+app.post('/api/auth/signup', async (req, res) => {
+  let { name, email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
+  email = String(email).trim().toLowerCase();
+  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  try {
+    const existing = await getClientByEmail(email);
+    if (existing) return res.status(409).json({ error: 'An account with this email already exists. Please log in.' });
+    await dbQuery('POST', 'clients', { email, name: name || '', password_hash: hashPassword(password) });
+    const token = signToken(email);
+    res.json({ success: true, token, email, name: name || '' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── LOG IN ──────────────────────────────────────────────────────────────────────
+app.post('/api/auth/login', async (req, res) => {
+  let { email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
+  email = String(email).trim().toLowerCase();
+  try {
+    const client = await getClientByEmail(email);
+    if (!client || !verifyPassword(password, client.password_hash))
+      return res.status(401).json({ error: 'Wrong email or password.' });
+    const token = signToken(email);
+    res.json({ success: true, token, email, name: client.name || '' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── WHO AM I ──────────────────────────────────────────────────────────────────
+app.get('/api/auth/me', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const client = await getClientByEmail(email);
+    if (!client) return res.status(401).json({ error: 'Account not found.' });
+    res.json({ email: client.email, name: client.name || '' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── CLIENT: GET MY MESSAGES ─────────────────────────────────────────────────────
+app.get('/api/messages', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const msgs = await dbQuery('GET', 'messages', null, { client_email: `eq.${email}`, order: 'created_at.asc', limit: 500 });
+    // mark admin messages as read
+    res.json(msgs);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── CLIENT: SEND A MESSAGE ──────────────────────────────────────────────────────
+app.post('/api/messages', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  const { body } = req.body || {};
+  if (!body || !String(body).trim()) return res.status(400).json({ error: 'Message cannot be empty.' });
+  try {
+    const rows = await dbQuery('POST', 'messages', { client_email: email, sender: 'client', body: String(body).trim(), read: false });
+    // Notify the team by email
+    try {
+      const recipientEmail = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
+      await sendEmail(recipientEmail, `💬 New client message from ${email}`,
+        `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:#0a1628;padding:20px;border-radius:8px 8px 0 0"><h2 style="color:#c9a84c;margin:0">New In-App Message</h2></div>
+          <div style="background:#f9f9f9;padding:20px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px">
+            <p style="color:#555;margin:0 0 8px"><strong>From:</strong> ${email}</p>
+            <div style="background:#fff;border-left:4px solid #c9a84c;padding:14px;border-radius:4px;color:#333;line-height:1.6">${String(body).trim().replace(/\n/g,'<br>')}</div>
+            <p style="color:#888;font-size:0.8rem;margin-top:14px">Reply from the Admin dashboard → Messages, or email them directly.</p>
+          </div>
+        </div>`, email);
+    } catch (e) { console.error('Message notify email failed:', e.message); }
+    res.json({ success: true, message: Array.isArray(rows) ? rows[0] : rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── ADMIN: LIST ALL MESSAGE THREADS ─────────────────────────────────────────────
+app.get('/api/admin/messages', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const all = await dbQuery('GET', 'messages', null, { order: 'created_at.asc', limit: 1000 });
+    res.json(all);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── ADMIN: REPLY TO A CLIENT ─────────────────────────────────────────────────────
+app.post('/api/admin/messages', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  const { client_email, body } = req.body || {};
+  if (!client_email || !body || !String(body).trim())
+    return res.status(400).json({ error: 'client_email and body are required.' });
+  try {
+    const rows = await dbQuery('POST', 'messages', { client_email: String(client_email).toLowerCase(), sender: 'admin', body: String(body).trim(), read: false });
+    // Email the client that they have a reply
+    try {
+      await sendEmail(client_email, 'You have a new message from SkyGlobe Limited',
+        `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0;text-align:center">
+            <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe" style="height:56px;border-radius:10px"><br>
+            <h2 style="color:#c9a84c;margin:10px 0 0">New Message</h2>
+          </div>
+          <div style="background:#f9f9f9;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px">
+            <p style="color:#333">Our team has replied to you:</p>
+            <div style="background:#fff;border-left:4px solid #c9a84c;padding:16px;border-radius:4px;color:#333;line-height:1.6">${String(body).trim().replace(/\n/g,'<br>')}</div>
+            <p style="color:#555;margin-top:16px">Log in at <a href="https://skyglobegroup.com">skyglobegroup.com</a> to reply.</p>
+          </div>
+        </div>`);
+    } catch (e) { console.error('Admin reply email failed:', e.message); }
+    res.json({ success: true, message: Array.isArray(rows) ? rows[0] : rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
