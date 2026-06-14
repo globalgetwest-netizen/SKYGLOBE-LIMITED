@@ -693,15 +693,43 @@ app.post('/api/admin/messages', async (req, res) => {
 
 // ── DOCUMENT GENERATOR (SOP / Cover Letter / Visa Letter) ────────────────────
 app.post('/api/generate-doc', async (req, res) => {
-  const { docType, fullName, nationality, destination, institution, program,
+  const { docType, fullName, nationality, email, phone, address, city,
+          visaPurpose, destination, institution, program,
           background, experience, whyHere, goals, extraNotes } = req.body || {};
 
-  if (!docType || !fullName || !destination)
+  // Global rule applied to every document so the AI never leaves blanks for the user to fill.
+  const NO_PLACEHOLDERS = `
+CRITICAL FORMATTING RULES:
+- NEVER use bracketed placeholders such as [Your Name], [Your Address], [Date], [Company Name], [Phone Number], or [Email]. The document must be 100% complete and ready to print as-is.
+- Do NOT write a sender address block, a date line, or a letterhead. These are added automatically by our system. Begin directly with the salutation (for letters) or the first paragraph (for statements).
+- If a specific detail was not provided, write naturally around it — do NOT invent fake institutions, fake grades, or fake names, and do NOT leave a blank or a placeholder.
+- Use only the real applicant details supplied below. Applicant's full name is "${fullName}"${city ? `, based in ${city}` : ''}.
+- Output plain text only: no markdown, no asterisks, no headings in brackets.`;
+
+  const isIssuerDoc = docType === 'experience' || docType === 'invitation';
+  if (!docType || !fullName)
+    return res.status(400).json({ error: 'Missing required fields.' });
+  if (!isIssuerDoc && !destination)
+    return res.status(400).json({ error: 'Missing required fields.' });
+  if (isIssuerDoc && (!institution || !program))
     return res.status(400).json({ error: 'Missing required fields.' });
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey)
     return res.status(500).json({ error: 'AI not configured. Please contact support.' });
+
+  // Purpose-specific guidance so the AI writes the right kind of visa letter.
+  const visaGuidance = {
+    'Tourism / Holiday': '- Emphasise this is a temporary leisure trip. Mention itinerary/places to visit, accommodation, travel dates, and how the trip is funded. Stress strong ties to home (job, family, property) proving the applicant will return.',
+    'Visiting Family or Friends': '- State who is being visited, their relationship, immigration status and address. Mention who is funding/hosting, the duration, and the applicant\'s ties to home that guarantee return.',
+    'Business Trip': '- Mention the inviting company/organisation, the meetings/conference/event, who covers the costs, and that the applicant has ongoing employment and obligations to return to.',
+    'Work / Employment': '- Reference the job offer, employer name, role, contract or work permit details, and the applicant\'s qualifications. Confirm intent to comply with visa conditions.',
+    'Study': '- Reference the admission/offer letter, institution, course and duration, how tuition and living costs are funded, and plans to return home after studies.',
+    'Medical Treatment': '- State the hospital/clinic, the treatment needed, the appointment confirmation, how it is financed, and strong ties to home and intent to return after treatment.',
+    'Transit': '- State the final destination, connecting flight details and dates, and confirm the applicant will only transit and travel onward, not stay.',
+    'Religious / Pilgrimage': '- State the religious event/pilgrimage, the organising body, travel dates, funding, and ties to home guaranteeing return.',
+    'Other': '- Clearly explain the specific purpose, travel dates, funding, and strong ties to the home country proving the applicant will return.',
+  };
 
   const prompts = {
     sop: `You are an expert academic writer. Write a compelling, professional Statement of Purpose (SOP) for a university application.
@@ -722,7 +750,8 @@ Write a 4-5 paragraph SOP (600-800 words) that:
 3. Explains why this specific program and institution
 4. Describes their future career goals
 5. Closes with a strong statement of intent
-Use formal, professional academic language. Write in first person as the applicant.`,
+Use formal, professional academic language. Write in first person as the applicant.
+${NO_PLACEHOLDERS}`,
 
     coverletter: `You are an expert career coach and professional writer. Write a compelling job cover letter.
 Details:
@@ -741,25 +770,72 @@ Write a professional 3-4 paragraph cover letter (350-500 words) that:
 2. Highlights 2-3 key achievements from their background
 3. Shows why they are the perfect fit for this company
 4. Closes with a clear call to action
-Use confident, engaging professional language. Write in first person as the applicant.`,
+Use confident, engaging professional language. Write in first person as the applicant.
+${NO_PLACEHOLDERS}`,
 
     visaletter: `You are an immigration document specialist. Write a professional visa cover letter / personal statement for a visa application.
 Details:
 - Applicant Name: ${fullName}
 - Nationality: ${nationality || 'Not specified'}
 - Destination Country: ${destination}
-- Purpose of Travel/Study: ${program || 'Visit / Study / Work'}
+- TYPE OF VISA / PURPOSE OF TRAVEL: ${visaPurpose || program || 'General visit'}
+- Specific details (place/host/employer/course): ${program || 'Not provided'}
 - Background: ${background || 'Not provided'}
-- Why travelling to this country: ${whyHere || 'Not provided'}
+- About the trip: ${whyHere || 'Not provided'}
 - Ties to home country / return plans: ${goals || 'Not provided'}
 - Additional Notes: ${extraNotes || 'None'}
 
+This is a "${visaPurpose || 'general'}" visa letter. Tailor the ENTIRE letter to this exact purpose:
+${visaGuidance[visaPurpose] || '- Clearly state the purpose of travel, the dates, who is funding the trip, and strong ties to the home country proving the applicant will return.'}
+
 Write a professional visa cover letter (300-400 words) that:
-1. Clearly states the purpose of the visa application
-2. Explains their background and financial stability (reference that documents are enclosed)
-3. Shows genuine ties to their home country and intent to return
-4. Politely requests the visa and thanks the officer
-Use formal, respectful language. Write in first person as the applicant.`,
+1. Opens by clearly stating it is a "${visaPurpose || 'visit'}" visa application and the purpose of travel
+2. Gives the specific details relevant to this purpose
+3. Explains financial stability (reference that supporting documents are enclosed)
+4. Shows genuine ties to the home country and intent to return
+5. Politely requests the visa and thanks the officer
+Use formal, respectful language. Write in first person as the applicant.
+${NO_PLACEHOLDERS}`,
+
+    experience: `You are an HR documentation specialist. Write the BODY of a formal Work Experience Certificate that an employer issues about a former or current employee.
+Details:
+- Employee Name: ${fullName}
+- Employee ID / Nationality: ${nationality || 'Not specified'}
+- Issuing Company / Employer: ${institution}
+- Job Title / Position Held: ${program}
+- Employment Period (from – to): ${background || 'Not provided'}
+- Key Duties & Responsibilities: ${experience || 'Not provided'}
+- Key Achievements: ${whyHere || 'None provided'}
+- Conduct & Reason for Leaving: ${goals || 'Not provided'}
+- Additional Notes: ${extraNotes || 'None'}
+
+Write a formal experience certificate body (180-280 words) that:
+1. Begins with "This is to certify that ${fullName} was employed at ${institution} as ${program}..."
+2. States the employment period and summarises the duties and responsibilities
+3. Comments positively and professionally on conduct, skills and contribution
+4. Closes with a line wishing the employee success in future endeavours
+Write in the third person, from the company's point of view. This is an official, factual document — be measured and professional, do NOT exaggerate. Do NOT write the signature line, date, or company letterhead (these are added separately).
+${NO_PLACEHOLDERS}`,
+
+    invitation: `You are a corporate protocol officer. Write the BODY of a formal Letter of Invitation issued BY a host organisation inviting a guest to a conference / event.
+Details:
+- Guest / Invitee Name: ${fullName}
+- Guest Nationality / Home Country: ${nationality || destination || 'Not specified'}
+- Host Organisation: ${institution}
+- Conference / Event Name: ${program}
+- Event Dates & Venue: ${background || 'Not provided'}
+- Purpose & Agenda of the Event: ${experience || 'Not provided'}
+- Guest's Role (speaker, delegate, etc.): ${whyHere || 'Attendee'}
+- Who Covers Costs & Accommodation: ${goals || 'Not provided'}
+- Additional Notes: ${extraNotes || 'None'}
+
+Write a formal invitation letter body (200-300 words) that:
+1. Opens with a salutation to the visa/consular officer (e.g. "To the Visa Officer," ) since this letter supports a visa application
+2. Formally invites ${fullName} to ${program}, stating the dates, venue and purpose
+3. States the guest's role and confirms the financial/accommodation arrangements
+4. Confirms the organisation's support and requests the officer to grant the necessary visa
+Write in the third person, from the host organisation's point of view. Do NOT write the signature line, date, or letterhead (these are added separately).
+${NO_PLACEHOLDERS}`,
   };
 
   const prompt = prompts[docType];
