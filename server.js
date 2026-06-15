@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-app.use(express.json({ limit: '15mb' }));
+app.use(express.json({ limit: '15mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(cors());
 app.use(express.static(path.join(__dirname)));
 
@@ -447,6 +447,7 @@ app.delete('/api/documents/:id', async (req, res) => {
 
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/staff', (req, res) => res.sendFile(path.join(__dirname, 'staff.html')));
+app.get('/letterhead', (req, res) => res.sendFile(path.join(__dirname, 'letterhead.html')));
 
 // ── AI CHAT ───────────────────────────────────────────────────────────────────
 const SKYGLOBE_SYSTEM = `You are the AI assistant for SkyGlobe Group, a premium global travel and immigration consultancy. You are knowledgeable, professional, warm, and concise.
@@ -982,6 +983,69 @@ ${NO_PLACEHOLDERS}`,
   }
 });
 
+// ---- Official Letterhead AI writer (CEO / authorised staff only) ----
+// Writes the BODY of an official SkyGlobe Group letter. Auth required so the
+// public can never generate company correspondence. The signature/stamp are
+// added on the letterhead page, governed by role (staff cannot sign as CEO).
+app.post('/api/letterhead-draft', async (req, res) => {
+  const who = getRole(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { recipient, subject, instruction, tone } = req.body || {};
+  if (!instruction || !String(instruction).trim())
+    return res.status(400).json({ error: 'Please describe what the letter should say.' });
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured. Please contact support.' });
+
+  const prompt = `You are the official correspondence writer for SkyGlobe Group, a premium global travel, immigration and education consultancy (website skyglobegroup.com, email support@skyglobegroup.com).
+Write the BODY of a formal, professional company letter on behalf of SkyGlobe Group.
+
+${recipient ? `Recipient: ${recipient}` : 'Recipient: not specified — open with a suitable salutation such as "Dear Sir/Madam,"'}
+${subject ? `Subject of the letter: ${subject}` : ''}
+Desired tone: ${tone || 'formal, warm and professional'}
+
+What the letter must communicate:
+${instruction}
+
+STRICT RULES:
+- Write ONLY the letter body. Begin with the salutation (e.g. "Dear ...,") and end with a closing line such as "Yours sincerely," — do NOT write the sender block, date, reference number, signature name, job title, company letterhead or stamp. Those are added automatically by our system.
+- Write in the first person plural from the company's voice ("we", "SkyGlobe Group").
+- NEVER invent facts, figures, registration numbers, certifications, guarantees, or commitments that were not given in the instruction above. If a detail is missing, write around it gracefully — do NOT use bracketed placeholders like [Name] or [Date].
+- Do NOT fabricate any qualification, employment, enrolment or immigration outcome. SkyGlobe never certifies anything it did not witness.
+- Output plain text only: no markdown, asterisks, or headings. Separate paragraphs with a blank line. Keep it concise and well-structured (3-5 short paragraphs).`;
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 55000);
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 1600, temperature: 0.6 },
+        }),
+        signal: ctrl.signal,
+      }
+    );
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error?.message || `API error ${r.status}`);
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!text) throw new Error('Empty response from AI');
+    res.json({ text, by: who.name, role: who.role });
+  } catch (e) {
+    console.error('Letterhead draft error:', e.message);
+    const aborted = e.name === 'AbortError';
+    res.status(aborted ? 504 : 500).json({
+      error: aborted ? 'The AI took too long to respond. Please try again.' : 'Letter generation failed. Please try again.'
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+});
+
 // ---- Country AI Research endpoint ----
 app.post('/api/country-info', async (req, res) => {
   const { country, capital, region, langs, currency } = req.body || {};
@@ -1144,7 +1208,11 @@ Give exactly 5 personalised, actionable tips. Respond with ONLY a JSON array, no
 
 // ---- AI Interview Prep endpoint ----
 app.post('/api/interview-prep', async (req, res) => {
-  const { type = 'visa', target = '', nationality = '', background = '' } = req.body || {};
+  const { type = 'visa', target = '', nationality = '', background = '', payToken = '' } = req.body || {};
+  // Optional paywall: set PAYWALL_INTERVIEW=on in Render to require payment.
+  // Off by default so the current free experience is unchanged.
+  if (process.env.PAYWALL_INTERVIEW === 'on' && !verifyUnlock(payToken, 'interview_prep'))
+    return res.status(402).json({ error: 'Payment required', pay: { product: 'interview_prep' } });
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(503).json({ error: 'AI unavailable' });
 
@@ -1171,21 +1239,579 @@ Generate a comprehensive personalised interview preparation guide. Respond with 
 }`;
 
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 30000);
+  const timer = setTimeout(() => ctrl.abort(), 45000);
   try {
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       { method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 2048, temperature: 0.7 } }),
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: 4096,
+            temperature: 0.7,
+            responseMimeType: 'application/json',
+            thinkingConfig: { thinkingBudget: 0 }
+          }
+        }),
         signal: ctrl.signal }
     );
     clearTimeout(timer);
     const data = await r.json();
+    if (!r.ok) {
+      console.error('Interview prep API error:', JSON.stringify(data.error || data));
+      return res.status(502).json({ error: 'AI service error. Please try again.' });
+    }
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const match = text.replace(/```json|```/g, '').trim().match(/\{[\s\S]*\}/);
-    if (match) return res.json(JSON.parse(match[0]));
-    res.status(500).json({ error: 'Parse error' });
-  } catch(e) { clearTimeout(timer); res.status(500).json({ error: e.message }); }
+    if (match) {
+      try { return res.json(JSON.parse(match[0])); }
+      catch { return res.status(500).json({ error: 'The guide came back malformed. Please try again.' }); }
+    }
+    console.error('Interview prep empty/unparseable. finishReason:', data.candidates?.[0]?.finishReason);
+    res.status(500).json({ error: 'No guide was generated. Please try again.' });
+  } catch(e) {
+    clearTimeout(timer);
+    const aborted = e.name === 'AbortError';
+    res.status(aborted ? 504 : 500).json({ error: aborted ? 'The AI took too long. Please try again.' : 'Could not generate the guide. Please try again.' });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PAYMENTS + CONFERENCE SOURCING
+// ────────────────────────────────────────────────────────────────────────────
+// Provider-agnostic engine. Paystack, Stripe and Flutterwave are all supported.
+// Activate a provider simply by adding its secret/public keys to Render env vars.
+// Nothing breaks while keys are missing — that provider is just "not available".
+//
+//   PAYSTACK_SECRET_KEY / PAYSTACK_PUBLIC_KEY      (sk_..., pk_...)
+//   STRIPE_SECRET_KEY   / STRIPE_PUBLIC_KEY        (sk_..., pk_...)
+//   FLUTTERWAVE_SECRET_KEY / FLUTTERWAVE_PUBLIC_KEY
+//
+// Supabase tables required (see PAYMENTS_SETUP.md for the exact SQL):
+//   payments     — every payment attempt + its status
+//   conferences  — the curated conferences shown on /conferences (CEO-managed)
+// ════════════════════════════════════════════════════════════════════════════
+
+// Server-authoritative pricing. The client NEVER sends the amount — we look it
+// up here so prices can't be tampered with. Edit these to your real prices.
+// Amounts are in MAJOR units (₦, $, £). Add/remove currencies freely per product.
+const PRICING = {
+  interview_prep:        { label: 'AI Interview Prep Guide',                    instant: true,  NGN: 5000,  USD: 7,   GBP: 5  },
+  conference_invitation: { label: 'Conference Invitation Letter (CEO-stamped)', instant: false, NGN: 35000, USD: 45,  GBP: 35 },
+  conference_sourcing:   { label: 'Conference Sourcing — we source & verify the genuine document', instant: false, NGN: 120000, USD: 150, GBP: 120 },
+  official_letter:       { label: 'Official Company Letter (stamped)',          instant: false, NGN: 25000,  USD: 35,  GBP: 25  },
+  // ── Work Permit & Migration packages ──────────────────────────────────────
+  work_permit_standard:  { label: 'Europe Work Permit — Standard (Full Application Service)',  instant: false, NGN: 350000, USD: 450, GBP: 380 },
+  work_permit_express:   { label: 'Europe Work Permit — Express (Priority + Dedicated Agent)', instant: false, NGN: 550000, USD: 700, GBP: 600 },
+  migration_premium:     { label: 'Premium Migration Package (Permit + Relocation Support)',   instant: false, NGN: 900000, USD: 1200, GBP: 1000 },
+  travel_prep_europe:    { label: 'Premium Travel Preparation — Europe',                       instant: false, NGN: 150000, USD: 200, GBP: 165 },
+  travel_prep_global:    { label: 'Premium Travel Preparation — Global (any destination)',     instant: false, NGN: 200000, USD: 260, GBP: 215 },
+};
+
+const PAY = {
+  paystack:    { secret: process.env.PAYSTACK_SECRET_KEY,    pub: process.env.PAYSTACK_PUBLIC_KEY,    currencies: ['NGN','USD','GHS','ZAR','KES'] },
+  stripe:      { secret: process.env.STRIPE_SECRET_KEY,      pub: process.env.STRIPE_PUBLIC_KEY,      currencies: ['USD','GBP','EUR','NGN'] },
+  flutterwave: { secret: process.env.FLUTTERWAVE_SECRET_KEY, pub: process.env.FLUTTERWAVE_PUBLIC_KEY, currencies: ['NGN','USD','GBP','GHS','KES','ZAR'] },
+};
+
+function activeProviders() {
+  return Object.entries(PAY)
+    .filter(([, c]) => c.secret)
+    .map(([name, c]) => ({ name, public: c.pub || null, currencies: c.currencies }));
+}
+
+function baseUrl(req) {
+  return process.env.RENDER_EXTERNAL_URL || `${req.protocol}://${req.get('host')}`;
+}
+
+function genPayRef() {
+  return `PAY-${new Date().getFullYear()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+}
+
+// ── payments table helpers ───────────────────────────────────────────────────
+async function insertPayment(p) {
+  const rows = await dbQuery('POST', 'payments', p);
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+async function getPayment(reference) {
+  const rows = await dbQuery('GET', 'payments', null, { reference: `eq.${reference}`, limit: 1 });
+  return rows[0] || null;
+}
+async function updatePayment(reference, patch) {
+  const rows = await dbQuery('PATCH', 'payments', patch, { reference: `eq.${reference}` });
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+
+// ── provider dispatch: initialise a checkout ─────────────────────────────────
+// Returns { authorization_url } the browser should be redirected to.
+async function providerInit(provider, { reference, amount, currency, email, label, callbackUrl }) {
+  if (provider === 'paystack') {
+    const r = await fetch('https://api.paystack.co/transaction/initialize', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${PAY.paystack.secret}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email, amount: Math.round(amount * 100), currency, reference,
+        callback_url: callbackUrl, metadata: { label },
+      }),
+    });
+    const d = await r.json();
+    if (!d.status) throw new Error(d.message || 'Paystack init failed');
+    return { authorization_url: d.data.authorization_url };
+  }
+
+  if (provider === 'stripe') {
+    const form = new URLSearchParams();
+    form.set('mode', 'payment');
+    form.set('success_url', `${callbackUrl}?reference=${reference}`);
+    form.set('cancel_url', `${callbackUrl}?reference=${reference}&cancelled=1`);
+    form.set('customer_email', email);
+    form.set('client_reference_id', reference);
+    form.set('metadata[reference]', reference);
+    form.set('line_items[0][quantity]', '1');
+    form.set('line_items[0][price_data][currency]', currency.toLowerCase());
+    form.set('line_items[0][price_data][unit_amount]', String(Math.round(amount * 100)));
+    form.set('line_items[0][price_data][product_data][name]', label);
+    const r = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${PAY.stripe.secret}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form,
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message || 'Stripe init failed');
+    // remember the stripe session id so we can verify later
+    await updatePayment(reference, { provider_ref: d.id });
+    return { authorization_url: d.url };
+  }
+
+  if (provider === 'flutterwave') {
+    const r = await fetch('https://api.flutterwave.com/v3/payments', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${PAY.flutterwave.secret}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tx_ref: reference, amount, currency,
+        redirect_url: callbackUrl, customer: { email },
+        customizations: { title: 'SKYGLOBE LIMITED', description: label },
+      }),
+    });
+    const d = await r.json();
+    if (d.status !== 'success') throw new Error(d.message || 'Flutterwave init failed');
+    return { authorization_url: d.data.link };
+  }
+
+  throw new Error('Unknown payment provider');
+}
+
+// ── provider dispatch: verify a payment really succeeded ─────────────────────
+async function providerVerify(provider, payment) {
+  if (provider === 'paystack') {
+    const r = await fetch(`https://api.paystack.co/transaction/verify/${payment.reference}`, {
+      headers: { Authorization: `Bearer ${PAY.paystack.secret}` },
+    });
+    const d = await r.json();
+    return d.status && d.data && d.data.status === 'success';
+  }
+  if (provider === 'stripe') {
+    const sid = payment.provider_ref;
+    if (!sid) return false;
+    const r = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sid}`, {
+      headers: { Authorization: `Bearer ${PAY.stripe.secret}` },
+    });
+    const d = await r.json();
+    return d.payment_status === 'paid';
+  }
+  if (provider === 'flutterwave') {
+    const r = await fetch(`https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${encodeURIComponent(payment.reference)}`, {
+      headers: { Authorization: `Bearer ${PAY.flutterwave.secret}` },
+    });
+    const d = await r.json();
+    return d.status === 'success' && d.data && d.data.status === 'successful';
+  }
+  return false;
+}
+
+// When a payment is confirmed, unlock whatever it paid for.
+async function fulfilPayment(payment) {
+  if (payment.app_ref) {
+    try {
+      const app_ = await getAppByRef(payment.app_ref);
+      if (app_) {
+        const newStatus = payment.product === 'conference_sourcing'
+          ? 'Paid — Sourcing in Progress'
+          : 'Paid — Pending CEO Review';
+        const responses = app_.responses || [];
+        responses.push({ by: 'System', message: `Payment received (${payment.currency} ${payment.amount}). Your request is now in our team's queue.`, date: new Date().toISOString() });
+        await updateApp(payment.app_ref, { status: newStatus, paid: true, responses });
+        // tell the CEO/team there is paid work waiting
+        const team = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
+        try {
+          await sendEmail(team, `💰 PAID request ${payment.app_ref} — ${PRICING[payment.product]?.label || payment.product}`,
+            `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+              <h2 style="color:#c9a84c">Paid request needs action</h2>
+              <p><strong>Reference:</strong> ${payment.app_ref}</p>
+              <p><strong>Service:</strong> ${PRICING[payment.product]?.label || payment.product}</p>
+              <p><strong>Client:</strong> ${app_.fname} ${app_.lname || ''} — ${app_.email}</p>
+              <p><strong>Amount:</strong> ${payment.currency} ${payment.amount} via ${payment.provider}</p>
+              <p>Open the CEO portal to source/verify and deliver the document.</p>
+            </div>`);
+        } catch (e) { console.error('Paid-work email failed:', e.message); }
+      }
+    } catch (e) { console.error('fulfilPayment app update failed:', e.message); }
+  }
+}
+
+// ── public: what can the browser use? ────────────────────────────────────────
+app.get('/api/pay/config', (_req, res) => {
+  res.json({ providers: activeProviders(), pricing: PRICING });
+});
+
+// ── initialise a payment ─────────────────────────────────────────────────────
+// body: { product, provider, email, currency, app_ref?, meta? }
+app.post('/api/pay/init', async (req, res) => {
+  try {
+    const { product, provider, email, currency, app_ref, meta } = req.body || {};
+    const prod = PRICING[product];
+    if (!prod) return res.status(400).json({ error: 'Unknown product.' });
+    if (!email) return res.status(400).json({ error: 'Email is required.' });
+    if (!PAY[provider] || !PAY[provider].secret)
+      return res.status(400).json({ error: `Payment provider "${provider}" is not available yet. Please choose another or contact us on WhatsApp.` });
+    const cur = (currency || 'NGN').toUpperCase();
+    const amount = prod[cur];
+    if (amount == null) return res.status(400).json({ error: `${prod.label} is not priced in ${cur}.` });
+    if (!PAY[provider].currencies.includes(cur))
+      return res.status(400).json({ error: `${provider} does not support ${cur}.` });
+
+    const reference = genPayRef();
+    await insertPayment({
+      reference, product, provider, currency: cur, amount,
+      email, app_ref: app_ref || null, status: 'pending', meta: meta || {},
+    });
+
+    const callbackUrl = `${baseUrl(req)}/pay/callback`;
+    const { authorization_url } = await providerInit(provider, {
+      reference, amount, currency: cur, email, label: prod.label, callbackUrl,
+    });
+    res.json({ success: true, reference, provider, authorization_url });
+  } catch (e) {
+    console.error('pay/init error:', e.message);
+    res.status(500).json({ error: 'Could not start payment. Please try again or contact us on WhatsApp.' });
+  }
+});
+
+// ── verify a payment (called by the callback page) ───────────────────────────
+app.get('/api/pay/verify/:reference', async (req, res) => {
+  try {
+    const payment = await getPayment(req.params.reference);
+    if (!payment) return res.status(404).json({ error: 'Payment not found.' });
+    if (payment.status === 'paid')
+      return res.json({ paid: true, product: payment.product, app_ref: payment.app_ref, instant: !!PRICING[payment.product]?.instant });
+
+    const ok = await providerVerify(payment.provider, payment);
+    if (!ok) return res.json({ paid: false });
+
+    await updatePayment(payment.reference, { status: 'paid', paid_at: new Date().toISOString() });
+    await fulfilPayment(payment);
+
+    let unlock = null;
+    if (PRICING[payment.product]?.instant) unlock = signUnlock(payment.reference, payment.product);
+    res.json({ paid: true, product: payment.product, app_ref: payment.app_ref, instant: !!PRICING[payment.product]?.instant, unlock });
+  } catch (e) {
+    console.error('pay/verify error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Short signed token proving an instant product was paid for (HMAC, 24h).
+function signUnlock(reference, product) {
+  const exp = Date.now() + 24 * 3600 * 1000;
+  const payload = `${reference}.${product}.${exp}`;
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
+  return Buffer.from(`${payload}.${sig}`).toString('base64url');
+}
+function verifyUnlock(token, product) {
+  try {
+    const [reference, prod, exp, sig] = Buffer.from(token, 'base64url').toString().split('.');
+    if (prod !== product || Date.now() > Number(exp)) return false;
+    const expected = crypto.createHmac('sha256', SESSION_SECRET).update(`${reference}.${prod}.${exp}`).digest('base64url');
+    return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+  } catch { return false; }
+}
+
+// ── Paystack webhook (server-to-server confirmation, the reliable path) ───────
+app.post('/api/pay/webhook/paystack', async (req, res) => {
+  try {
+    const secret = PAY.paystack.secret;
+    if (!secret) return res.sendStatus(200);
+    const sig = req.headers['x-paystack-signature'];
+    const hash = crypto.createHmac('sha512', secret).update(req.rawBody || Buffer.from('')).digest('hex');
+    if (hash !== sig) return res.sendStatus(401);
+    const evt = req.body;
+    if (evt.event === 'charge.success') {
+      const reference = evt.data.reference;
+      const payment = await getPayment(reference);
+      if (payment && payment.status !== 'paid') {
+        await updatePayment(reference, { status: 'paid', paid_at: new Date().toISOString() });
+        await fulfilPayment(payment);
+      }
+    }
+    res.sendStatus(200);
+  } catch (e) {
+    console.error('paystack webhook error:', e.message);
+    res.sendStatus(200);
+  }
+});
+
+// ── admin: list payments ─────────────────────────────────────────────────────
+app.get('/api/admin/payments', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try { res.json(await dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 500 })); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// CONFERENCE SOURCING
+// ────────────────────────────────────────────────────────────────────────────
+// We publish curated conferences. A client picks one, fills the form and pays a
+// SERVICE FEE. Behind the scenes we contact the REAL organiser, obtain the
+// GENUINE invitation/admission document, verify it, add our "Facilitated &
+// Verified by SKYGLOBE LIMITED" stamp (NOT an issuing stamp) and deliver it.
+// We never fabricate a document or impersonate an institution.
+// ════════════════════════════════════════════════════════════════════════════
+
+// Public: list conferences shown on /conferences
+app.get('/api/conferences', async (_req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'conferences', null, { active: 'eq.true', order: 'date.asc', limit: 200 });
+    res.json(rows);
+  } catch (e) {
+    // If the table doesn't exist yet, return an empty list instead of erroring.
+    res.json([]);
+  }
+});
+
+// CEO: add / update a conference
+app.post('/api/admin/conferences', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    const { id, title, organization, country, city, date, field, summary, source_url, active } = req.body || {};
+    if (!title || !country) return res.status(400).json({ error: 'title and country are required.' });
+    const row = {
+      title, organization: organization || '', country, city: city || '',
+      date: date || null, field: field || '', summary: summary || '',
+      source_url: source_url || '', active: active !== false,
+    };
+    if (id) {
+      const updated = await dbQuery('PATCH', 'conferences', row, { id: `eq.${id}` });
+      return res.json({ success: true, conference: Array.isArray(updated) ? updated[0] : updated });
+    }
+    const created = await dbQuery('POST', 'conferences', row);
+    res.json({ success: true, conference: Array.isArray(created) ? created[0] : created });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// CEO: remove a conference
+app.delete('/api/admin/conferences/:id', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    await dbQuery('DELETE', 'conferences', null, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Public: client submits a sourcing request, then we hand back a payment link.
+// body: { product?, provider, currency, fname, lname, email, phone, country,
+//         institution, conference, conferenceId?, travelDate, notes }
+app.post('/api/conference/request', async (req, res) => {
+  try {
+    const b = req.body || {};
+    const product = b.product === 'conference_invitation' ? 'conference_invitation' : 'conference_sourcing';
+    if (!b.fname || !b.email) return res.status(400).json({ error: 'Name and email are required.' });
+
+    const ref = genRef();
+    const application = {
+      ref,
+      service: PRICING[product].label,
+      fname: b.fname, lname: b.lname || '', email: b.email, phone: b.phone || '',
+      nationality: b.nationality || '',
+      destination: b.country || '', travel_date: b.travelDate || '',
+      institution: b.institution || b.conference || '',
+      purpose: b.conference ? `Conference: ${b.conference}` : 'Conference sourcing',
+      notes: b.notes || '',
+      status: 'Awaiting Payment', paid: false, responses: [],
+    };
+    try { await insertApp(application); }
+    catch (e) { console.error('conference request insert failed:', e.message); return res.status(500).json({ error: 'Could not save your request. Please try again.' }); }
+
+    // Hand straight off to payment if a provider was chosen and is live.
+    const provider = b.provider;
+    const cur = (b.currency || 'NGN').toUpperCase();
+    if (provider && PAY[provider] && PAY[provider].secret) {
+      const reference = genPayRef();
+      const amount = PRICING[product][cur];
+      if (amount != null && PAY[provider].currencies.includes(cur)) {
+        await insertPayment({ reference, product, provider, currency: cur, amount, email: b.email, app_ref: ref, status: 'pending', meta: { conference: b.conference || '' } });
+        try {
+          const { authorization_url } = await providerInit(provider, {
+            reference, amount, currency: cur, email: b.email,
+            label: `${PRICING[product].label} — ${ref}`, callbackUrl: `${baseUrl(req)}/pay/callback`,
+          });
+          return res.json({ success: true, ref, payment: { reference, authorization_url } });
+        } catch (e) {
+          console.error('conference pay init failed:', e.message);
+          return res.json({ success: true, ref, paymentError: 'Request saved, but payment could not start. We will email you a payment link.' });
+        }
+      }
+    }
+    res.json({ success: true, ref });
+  } catch (e) {
+    console.error('conference/request error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Pretty routes for the new pages
+app.get('/conferences', (_req, res) => res.sendFile(path.join(__dirname, 'conferences.html')));
+app.get('/pay/callback', (_req, res) => res.sendFile(path.join(__dirname, 'payment-callback.html')));
+app.get('/work-permit', (_req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));
+app.get('/packages', (_req, res) => res.sendFile(path.join(__dirname, 'packages.html')));
+
+// ════════════════════════════════════════════════════════════════════════════
+// WORK PERMIT & MIGRATION SERVICE
+// ────────────────────────────────────────────────────────────────────────────
+// Document checklist per destination country.
+// Client self-certifies which documents they hold → we assess → they pay.
+// We prepare and submit the genuine application to the real authority.
+// Processing times are government official times, not guarantees.
+// ════════════════════════════════════════════════════════════════════════════
+
+const WORK_PERMIT_DOCS = {
+  DE: { name:'Germany', flag:'🇩🇪', processingWeeks:'8–12', docs:[
+    'Valid passport (at least 12 months validity remaining)',
+    'University degree / vocational qualification (translated & notarised if not in German)',
+    'Job offer or employment contract from a German employer',
+    'Proof of German language proficiency OR employer attestation of English sufficiency',
+    'CV / Resume (up to date)',
+    'Police clearance certificate (from country of residence)',
+    'Passport-size photographs',
+    'Health insurance proof or eligibility letter',
+  ]},
+  NL: { name:'Netherlands', flag:'🇳🇱', processingWeeks:'4–8', docs:[
+    'Valid passport (at least 6 months validity beyond intended stay)',
+    'Recognised degree / diploma (NUFFIC evaluation may be required)',
+    'Employment contract or signed job offer from a Dutch employer (Highly Skilled Migrant sponsor)',
+    'Salary meets Dutch HSM minimum threshold',
+    'CV / Resume',
+    'Biometric photograph',
+  ]},
+  PT: { name:'Portugal', flag:'🇵🇹', processingWeeks:'6–12', docs:[
+    'Valid passport',
+    'Educational certificates (Bachelor\'s or higher recommended)',
+    'Employment contract or freelance income evidence',
+    'Proof of accommodation in Portugal',
+    'Criminal record certificate',
+    'Health insurance valid in Portugal',
+    'Passport-size photographs',
+    'Bank statements (last 3 months)',
+  ]},
+  PL: { name:'Poland', flag:'🇵🇱', processingWeeks:'4–8', docs:[
+    'Valid passport (min 15 months validity)',
+    'Completed work permit application form',
+    'Job offer or contract from a Polish employer',
+    'Educational or professional qualification documents',
+    'Accommodation proof in Poland',
+    'Passport photographs',
+  ]},
+  IE: { name:'Ireland', flag:'🇮🇪', processingWeeks:'4–6', docs:[
+    'Valid passport',
+    'Critical Skills or General Employment Permit eligibility (salary thresholds apply)',
+    'Employment contract from an Irish employer',
+    'Educational qualifications and professional credentials',
+    'CV / Resume',
+    'Police clearance',
+  ]},
+  CA: { name:'Canada', flag:'🇨🇦', processingWeeks:'8–16', docs:[
+    'Valid passport',
+    'Educational Credential Assessment (ECA) if degree is from outside Canada',
+    'IELTS or TEF language test results',
+    'Employment record / reference letters',
+    'Proof of funds (minimum savings threshold)',
+    'Police clearance certificate',
+    'Medical exam results (IRCC designated physician)',
+  ]},
+  AE: { name:'UAE / Dubai', flag:'🇦🇪', processingWeeks:'2–4', docs:[
+    'Valid passport (min 6 months validity)',
+    'Educational certificates (attested)',
+    'Employment offer from a UAE employer or freelance permit application',
+    'Passport photographs',
+    'Medical fitness certificate (done in UAE)',
+    'Emirates ID registration documents',
+  ]},
+};
+
+app.get('/api/work-permit/requirements', (req, res) => {
+  const code = (req.query.country || '').toUpperCase();
+  if (code && WORK_PERMIT_DOCS[code]) return res.json(WORK_PERMIT_DOCS[code]);
+  // Return all
+  res.json(WORK_PERMIT_DOCS);
+});
+
+// Client submits eligibility + requests a work permit / migration service
+// body: { product, provider, currency, fname, lname, email, phone, nationality,
+//         destination_country, docs_confirmed (array), notes, package? }
+app.post('/api/work-permit/apply', async (req, res) => {
+  try {
+    const b = req.body || {};
+    const product = PRICING[b.product] ? b.product : 'work_permit_standard';
+    if (!b.fname || !b.email) return res.status(400).json({ error: 'Name and email are required.' });
+    if (!b.docs_confirmed || b.docs_confirmed.length === 0)
+      return res.status(400).json({ error: 'Please confirm which documents you hold before proceeding.' });
+
+    const country = (b.destination_country || '').toUpperCase();
+    const countryInfo = WORK_PERMIT_DOCS[country] || {};
+    const ref = genRef();
+    const application = {
+      ref,
+      service: PRICING[product].label,
+      fname: b.fname, lname: b.lname || '', email: b.email, phone: b.phone || '',
+      nationality: b.nationality || '',
+      destination: countryInfo.name || b.destination_country || '',
+      travel_date: b.travel_date || '',
+      purpose: `Work Permit / Migration — ${countryInfo.name || b.destination_country || 'Europe'}`,
+      notes: [
+        b.notes ? `Client notes: ${b.notes}` : '',
+        `Documents confirmed: ${(b.docs_confirmed || []).join(' | ')}`,
+        `Package: ${PRICING[product].label}`,
+        countryInfo.processingWeeks ? `Official processing estimate: ${countryInfo.processingWeeks} weeks` : '',
+      ].filter(Boolean).join('\n\n'),
+      status: 'Awaiting Payment', paid: false, responses: [],
+    };
+
+    try { await insertApp(application); }
+    catch (e) { console.error('work-permit insert failed:', e.message); return res.status(500).json({ error: 'Could not save your application. Please try again.' }); }
+
+    const provider = b.provider;
+    const cur = (b.currency || 'NGN').toUpperCase();
+    if (provider && PAY[provider] && PAY[provider].secret) {
+      const amount = PRICING[product][cur];
+      if (amount != null && PAY[provider].currencies.includes(cur)) {
+        const reference = genPayRef();
+        await insertPayment({ reference, product, provider, currency: cur, amount, email: b.email, app_ref: ref, status: 'pending', meta: { country, docs: b.docs_confirmed } });
+        try {
+          const { authorization_url } = await providerInit(provider, {
+            reference, amount, currency: cur, email: b.email,
+            label: `${PRICING[product].label} — ${ref}`, callbackUrl: `${baseUrl(req)}/pay/callback`,
+          });
+          return res.json({ success: true, ref, processingWeeks: countryInfo.processingWeeks, payment: { reference, authorization_url } });
+        } catch (e) {
+          console.error('work-permit pay init failed:', e.message);
+          return res.json({ success: true, ref, processingWeeks: countryInfo.processingWeeks, paymentError: 'Application saved but payment could not start. We will send you a payment link.' });
+        }
+      }
+    }
+    res.json({ success: true, ref, processingWeeks: countryInfo.processingWeeks });
+  } catch (e) {
+    console.error('work-permit/apply error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
