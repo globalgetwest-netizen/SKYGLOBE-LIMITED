@@ -1,53 +1,55 @@
-// SkyGlobe Limited — Service Worker
+/* SkyGlobe Group — Service Worker
+   Network-first for navigation & API (always fresh content),
+   cache-first for static assets (fast repeat loads, offline-friendly). */
 const CACHE = 'skyglobe-v1';
-const CORE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/logo.png'
-];
+const STATIC_ASSETS = ['/', '/index.html', '/logo.png', '/manifest.json'];
 
-// Install: pre-cache core assets
 self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(CORE)).catch(() => {})
-  );
   self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(STATIC_ASSETS).catch(() => {})));
 });
 
-// Activate: clean old caches
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch: network-first for API, cache-first for everything else
 self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
 
-  // Never cache API calls — always go to network
+  // Never cache API calls — always go to network.
   if (url.pathname.startsWith('/api/')) {
-    e.respondWith(fetch(e.request).catch(() => new Response('{"error":"offline"}', { headers: { 'Content-Type': 'application/json' } })));
+    e.respondWith(fetch(req).catch(() => new Response('{"error":"offline"}', { headers: { 'Content-Type': 'application/json' } })));
     return;
   }
 
-  // Cache-first with background update for same-origin GET requests
-  if (e.request.method === 'GET' && url.origin === location.origin) {
+  // Navigation requests: network-first, fall back to cached shell when offline.
+  if (req.mode === 'navigate') {
     e.respondWith(
-      caches.match(e.request).then((cached) => {
-        const network = fetch(e.request).then((res) => {
-          if (res && res.status === 200) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(e.request, copy));
-          }
-          return res;
-        }).catch(() => cached);
-        return cached || network;
-      })
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put('/index.html', copy));
+        return res;
+      }).catch(() => caches.match('/index.html'))
     );
+    return;
   }
+
+  // Static assets: cache-first, then network (and cache it).
+  e.respondWith(
+    caches.match(req).then((hit) =>
+      hit || fetch(req).then((res) => {
+        if (res.ok && (url.origin === location.origin)) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
+        return res;
+      }).catch(() => hit)
+    )
+  );
 });
