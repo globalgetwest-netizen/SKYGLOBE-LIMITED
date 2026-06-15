@@ -333,6 +333,40 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .dash-app-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:1.1rem 1.3rem;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
 .dash-app-card .ref{font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--gold);font-size:1.05rem}
 .dash-app-card .st{display:inline-block;font-size:0.72rem;padding:3px 12px;border-radius:100px;font-weight:600;color:#fff}
+/* ---- DASHBOARD UPGRADE ---- */
+.dash-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.8rem;margin-bottom:1.8rem}
+.dash-stat-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:14px;padding:1rem 0.8rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;transition:var(--trans)}
+.dash-stat-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.dash-stat-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700;color:var(--gold);line-height:1}
+.dash-stat-label{font-size:0.72rem;color:#64748b;margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.dash-tabs{display:flex;gap:0;border-bottom:2px solid rgba(0,0,0,0.07);margin-bottom:1.5rem;overflow-x:auto;scrollbar-width:none}
+.dash-tabs::-webkit-scrollbar{display:none}
+.dash-tab{border:none;background:transparent;padding:0.75rem 0.95rem;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;color:#94a3b8;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:var(--trans)}
+.dash-tab.active,.dash-tab:hover{color:var(--blue);border-bottom-color:var(--gold)}
+.dash-panel{display:none;animation:fadeIn 0.2s ease}
+.dash-panel.active{display:block}
+.dash-quick-actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.7rem;margin-bottom:1.6rem}
+.dash-qa{background:#fff;border:1px solid rgba(0,0,0,0.09);border-radius:12px;padding:0.85rem 0.9rem;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;color:#1e293b;cursor:pointer;text-align:left;transition:var(--trans);display:flex;align-items:center;gap:7px}
+.dash-qa:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,0.07)}
+.dash-saved-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem;margin-bottom:1.3rem}
+.dash-saved-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:1rem;position:relative;transition:var(--trans)}
+.dash-saved-card:hover{border-color:rgba(191,154,46,0.4);box-shadow:0 4px 12px rgba(0,0,0,0.07)}
+.ds-remove{position:absolute;top:8px;right:8px;background:transparent;border:none;cursor:pointer;font-size:1rem;opacity:0.35;transition:0.2s;line-height:1;padding:2px}
+.ds-remove:hover{opacity:1;color:#c62828}
+.dash-add-form{background:#f8fafc;border:1px solid rgba(0,0,0,0.06);border-radius:14px;padding:1.2rem;margin-top:1rem}
+.dash-add-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem}
+@media(max-width:480px){.dash-add-form-grid{grid-template-columns:1fr}}
+.dash-add-form input,.dash-add-form select{padding:10px 14px;border:1px solid rgba(0,0,0,0.1);border-radius:8px;background:#fff;font-family:'Inter',sans-serif;font-size:0.86rem;color:#374151;width:100%;box-sizing:border-box}
+.doc-vault-item{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.6rem}
+.dv-badge{font-size:0.68rem;padding:3px 10px;border-radius:100px;font-weight:600;white-space:nowrap}
+.dv-ready{background:#e8f5e9;color:#2e7d32}.dv-pending{background:#fff8e1;color:#f57c00}.dv-expiring{background:#fff3e0;color:#e65100}.dv-expired{background:#ffebee;color:#c62828}
+.dir-card-save{position:absolute;top:8px;right:8px;background:transparent;border:none;cursor:pointer;font-size:1.05rem;opacity:0.4;transition:0.2s;padding:2px;line-height:1}
+.dir-card-save:hover,.dir-card-save.saved{opacity:1}
+.dir-card{position:relative}
+.ai-tip-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.8rem;border-left:3px solid var(--gold)}
+.ai-tip-card h4{margin:0 0 4px;font-size:0.9rem;color:#0a1628}
+.ai-tip-card p{margin:0;font-size:0.83rem;color:#475569;line-height:1.55}
+.overview-recent h4{font-size:0.85rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.8rem}
 .msg-thread{background:#f1f5f9;border:1px solid rgba(0,0,0,0.08);border-radius:14px;padding:1rem;height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:0.6rem}
 .msg-bubble{max-width:80%;padding:0.7rem 1rem;border-radius:14px;font-size:0.88rem;line-height:1.5;word-wrap:break-word}
 .msg-bubble.client{align-self:flex-end;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-bottom-right-radius:4px}
@@ -1833,7 +1867,7 @@ body.wc-active .mobile-menu{padding-top:46px}
 
 <!-- ============ LOGIN / SIGN UP PAGE ============ -->
 <div class="page" id="page-account">
-  <section style="padding-top:130px;max-width:480px;margin:0 auto">
+  <section style="padding-top:130px;max-width:900px;margin:0 auto">
 
     <!-- LOGGED OUT: login / signup -->
     <div id="authBox">
@@ -1865,20 +1899,117 @@ body.wc-active .mobile-menu{padding-top:46px}
 
     <!-- LOGGED IN: dashboard -->
     <div id="dashBox" style="display:none">
+      <!-- Header -->
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
         <div><div class="section-tag">Welcome back</div><h1 class="section-title" style="margin:0" id="dashName">Your Account</h1></div>
         <button class="btn-outline" onclick="doLogout()">Log Out</button>
       </div>
 
-      <h3 style="font-size:1.1rem;margin:1.5rem 0 0.8rem;color:#0a1628">📋 My Applications</h3>
-      <div id="dashApps" style="display:flex;flex-direction:column;gap:0.8rem"><p style="color:#64748b;font-size:0.88rem">Loading…</p></div>
+      <!-- Stats bar -->
+      <div class="dash-stats" id="dashStats"></div>
 
-      <h3 style="font-size:1.1rem;margin:2rem 0 0.8rem;color:#0a1628">💬 Messages with our team</h3>
-      <div id="msgThread" class="msg-thread"></div>
-      <form onsubmit="sendMsg(event)" style="display:flex;gap:0.6rem;margin-top:0.8rem">
-        <input type="text" id="msgInput" placeholder="Type a message…" style="flex:1;background:#f9fafb;border:1px solid rgba(0,0,0,0.12);border-radius:100px;padding:12px 18px;font-family:'Inter',sans-serif;font-size:0.9rem;outline:none">
-        <button type="submit" class="btn-primary" style="padding:12px 22px">Send</button>
-      </form>
+      <!-- Tab bar -->
+      <div class="dash-tabs">
+        <button class="dash-tab active" onclick="switchDashTab('overview',this)">📊 Overview</button>
+        <button class="dash-tab" onclick="switchDashTab('apps',this)">📋 Applications</button>
+        <button class="dash-tab" onclick="switchDashTab('countries',this)">🌍 Saved Countries</button>
+        <button class="dash-tab" onclick="switchDashTab('universities',this)">🏫 Universities</button>
+        <button class="dash-tab" onclick="switchDashTab('docs',this)">📁 Documents</button>
+        <button class="dash-tab" onclick="switchDashTab('messages',this)">💬 Messages</button>
+        <button class="dash-tab" onclick="switchDashTab('ai',this)">🤖 AI Tips</button>
+      </div>
+
+      <!-- OVERVIEW panel -->
+      <div class="dash-panel active" id="dp-overview">
+        <div class="dash-quick-actions">
+          <button class="dash-qa" onclick="showPage('apply')">➕ New Application</button>
+          <button class="dash-qa" onclick="showPage('countries')">🌍 Explore Countries</button>
+          <button class="dash-qa" onclick="showPage('tools')">✨ AI Documents</button>
+          <button class="dash-qa" onclick="switchDashTab('messages',document.querySelectorAll('.dash-tab')[5])">💬 Message Team</button>
+          <button class="dash-qa" onclick="showPage('contact')">📅 Book Consultation</button>
+          <button class="dash-qa" onclick="showPage('invoice')">🧾 Get Invoice</button>
+        </div>
+        <div class="overview-recent" id="overviewRecent"></div>
+      </div>
+
+      <!-- APPLICATIONS panel -->
+      <div class="dash-panel" id="dp-apps">
+        <div id="dashApps" style="display:flex;flex-direction:column;gap:0.8rem"><p style="color:#64748b;font-size:0.88rem">Loading…</p></div>
+        <div style="margin-top:1.2rem"><button class="btn-outline" onclick="showPage('apply')">➕ Start New Application</button></div>
+      </div>
+
+      <!-- SAVED COUNTRIES panel -->
+      <div class="dash-panel" id="dp-countries">
+        <p style="font-size:0.85rem;color:#64748b;margin-bottom:1.2rem">Countries you've saved. Browse <a onclick="showPage('countries')" style="color:var(--gold);cursor:pointer">the directory</a> and click the bookmark icon on any card.</p>
+        <div class="dash-saved-grid" id="savedCountriesGrid"></div>
+      </div>
+
+      <!-- UNIVERSITIES panel -->
+      <div class="dash-panel" id="dp-universities">
+        <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem">Track universities you are interested in.</p>
+        <div class="dash-saved-grid" id="savedUnisGrid"></div>
+        <div class="dash-add-form">
+          <p style="margin:0 0 0.8rem;font-size:0.82rem;font-weight:600;color:#374151">+ Add University</p>
+          <div class="dash-add-form-grid">
+            <input type="text" id="uniName" placeholder="University name">
+            <input type="text" id="uniCountry" placeholder="Country">
+            <input type="text" id="uniProgram" placeholder="Program / Course">
+            <input type="text" id="uniDeadline" placeholder="Deadline / Intake (e.g. Sep 2026)">
+            <input type="text" id="uniNotes" placeholder="Notes (tuition, requirements…)" style="grid-column:1/-1">
+          </div>
+          <button class="btn-primary" style="width:100%;margin-top:0.7rem" onclick="addSavedUni()">Save University</button>
+        </div>
+      </div>
+
+      <!-- DOCUMENTS panel -->
+      <div class="dash-panel" id="dp-docs">
+        <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem">Track which documents you have ready for your application.</p>
+        <div id="docVaultList"></div>
+        <div class="dash-add-form">
+          <p style="margin:0 0 0.8rem;font-size:0.82rem;font-weight:600;color:#374151">+ Add Document</p>
+          <div class="dash-add-form-grid">
+            <input type="text" id="docVaultName" placeholder="Document name (e.g. Passport, Bank Statement…)" style="grid-column:1/-1">
+            <select id="docVaultType" style="grid-column:1/-1">
+              <option value="">Select category…</option>
+              <option>Identity (Passport / National ID)</option>
+              <option>Financial (Bank Statement / Payslip)</option>
+              <option>Education (Degree / Transcript)</option>
+              <option>Employment (Letter / Contract)</option>
+              <option>Medical / Health</option>
+              <option>Travel (Itinerary / Booking)</option>
+              <option>Visa / Immigration</option>
+              <option>Reference / Recommendation</option>
+              <option>Other</option>
+            </select>
+            <select id="docVaultStatus">
+              <option value="Ready">✅ Ready</option>
+              <option value="Pending">⏳ Pending — to obtain</option>
+              <option value="Expiring Soon">⚠️ Expiring Soon</option>
+              <option value="Expired">❌ Expired</option>
+            </select>
+            <input type="text" id="docVaultExpiry" placeholder="Expiry date (optional)">
+          </div>
+          <button class="btn-primary" style="width:100%;margin-top:0.7rem" onclick="addDocVault()">Add to Vault</button>
+        </div>
+      </div>
+
+      <!-- MESSAGES panel -->
+      <div class="dash-panel" id="dp-messages">
+        <div id="msgThread" class="msg-thread"></div>
+        <form onsubmit="sendMsg(event)" style="display:flex;gap:0.6rem;margin-top:0.8rem">
+          <input type="text" id="msgInput" placeholder="Type a message…" style="flex:1;background:#f9fafb;border:1px solid rgba(0,0,0,0.12);border-radius:100px;padding:12px 18px;font-family:'Inter',sans-serif;font-size:0.9rem;outline:none">
+          <button type="submit" class="btn-primary" style="padding:12px 22px">Send</button>
+        </form>
+      </div>
+
+      <!-- AI TIPS panel -->
+      <div class="dash-panel" id="dp-ai">
+        <div id="aiTipsContent"><p style="color:#64748b;font-size:0.9rem">Your personalised AI tips will appear here based on your saved countries and applications.</p></div>
+        <div style="margin-top:1.2rem;display:flex;gap:0.8rem;flex-wrap:wrap">
+          <button class="btn-primary" onclick="loadAiTips()">✨ Generate My Tips</button>
+          <button class="btn-outline" onclick="loadAiTips()">🔄 Refresh</button>
+        </div>
+      </div>
     </div>
 
   </section>
@@ -4673,9 +4804,226 @@ function showDashboard() {
   document.getElementById('authBox').style.display = 'none';
   document.getElementById('dashBox').style.display = 'block';
   document.getElementById('dashName').textContent = 'Hello, ' + ((localStorage.getItem('sg_name')||'').split(' ')[0] || 'there') + ' 👋';
+  loadDashStats();
   loadDashApps();
   loadMessages();
+  loadSavedCountriesPanel();
+  loadSavedUnisPanel();
+  loadDocVaultPanel();
+  loadOverviewRecent();
 }
+
+/* ---- Dashboard tabs ---- */
+function switchDashTab(name, btn) {
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const panel = document.getElementById('dp-' + name);
+  if (panel) panel.classList.add('active');
+  if (name === 'messages') loadMessages();
+  if (name === 'ai') loadAiTips();
+}
+
+/* ---- Stats ---- */
+function loadDashStats() {
+  const apps = Object.keys(localStorage).filter(k => k.startsWith('skyapp_')).length;
+  const countries = getSavedCountries().length;
+  const unis = getSavedUnis().length;
+  const docs = getDocVault().length;
+  const el = document.getElementById('dashStats');
+  if (!el) return;
+  el.innerHTML = [
+    ['📋', apps, 'Applications', "switchDashTab('apps',document.querySelectorAll('.dash-tab')[1])"],
+    ['🌍', countries, 'Saved Countries', "switchDashTab('countries',document.querySelectorAll('.dash-tab')[2])"],
+    ['🏫', unis, 'Universities', "switchDashTab('universities',document.querySelectorAll('.dash-tab')[3])"],
+    ['📁', docs, 'Documents', "switchDashTab('docs',document.querySelectorAll('.dash-tab')[4])"],
+  ].map(([icon,n,label,fn]) => `<div class="dash-stat-card" onclick="${fn}"><div class="dash-stat-num">${n}</div><div class="dash-stat-label">${icon} ${label}</div></div>`).join('');
+}
+
+/* ---- Overview recent ---- */
+function loadOverviewRecent() {
+  const el = document.getElementById('overviewRecent');
+  if (!el) return;
+  const countries = getSavedCountries();
+  const unis = getSavedUnis();
+  let html = '';
+  if (countries.length) {
+    html += `<div class="overview-recent"><h4>🌍 Saved Countries (${countries.length})</h4><div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem">${countries.slice(0,8).map(n=>{const c=ALL_COUNTRIES.find(x=>x.name===n);return`<span style="background:#fff;border:1px solid rgba(0,0,0,0.09);border-radius:100px;padding:4px 14px;font-size:0.8rem;font-weight:600;color:#0a1628">${c?c.flag:''} ${n}</span>`;}).join('')}${countries.length>8?`<span style="font-size:0.8rem;color:#94a3b8;align-self:center">+${countries.length-8} more</span>`:''}</div></div>`;
+  }
+  if (unis.length) {
+    html += `<div class="overview-recent"><h4>🏫 Saved Universities (${unis.length})</h4><div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1.5rem">${unis.slice(0,4).map(u=>`<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:9px;padding:8px 14px;font-size:0.83rem;color:#1e293b"><strong>${u.name}</strong>${u.country?` · ${u.country}`:''}${u.program?` <span style="color:#94a3b8">· ${u.program}</span>`:''}</div>`).join('')}</div></div>`;
+  }
+  if (!html) html = `<p style="color:#94a3b8;font-size:0.85rem">No saved items yet. Explore <a onclick="showPage('countries')" style="color:var(--gold);cursor:pointer">countries</a> and save your favourites.</p>`;
+  el.innerHTML = html;
+}
+
+/* ---- Saved Countries ---- */
+function getSavedCountries() {
+  try { return JSON.parse(localStorage.getItem('sg_saved_countries')||'[]'); } catch { return []; }
+}
+function setSavedCountries(arr) { localStorage.setItem('sg_saved_countries', JSON.stringify(arr)); }
+
+function toggleSaveCountry(name, btn) {
+  let saved = getSavedCountries();
+  const idx = saved.indexOf(name);
+  if (idx === -1) { saved.push(name); btn.classList.add('saved'); btn.title='Remove from saved'; showToast('🔖 '+name+' saved to your dashboard!'); }
+  else { saved.splice(idx,1); btn.classList.remove('saved'); btn.title='Save country'; showToast('Removed '+name+' from saved.'); }
+  setSavedCountries(saved);
+  loadDashStats();
+  if (document.getElementById('dp-countries')?.classList.contains('active')) loadSavedCountriesPanel();
+}
+
+function loadSavedCountriesPanel() {
+  const el = document.getElementById('savedCountriesGrid');
+  if (!el) return;
+  const saved = getSavedCountries();
+  if (!saved.length) { el.innerHTML='<p style="color:#94a3b8;font-size:0.85rem;grid-column:1/-1">No countries saved yet. Go to the <a onclick="showPage(\'countries\')" style="color:var(--gold);cursor:pointer">Country Directory</a> and click 🔖 on any card.</p>'; return; }
+  el.innerHTML = saved.map(name => {
+    const c = ALL_COUNTRIES.find(x=>x.name===name) || {flag:'🌍',name,capital:'',langs:'',currency:''};
+    return `<div class="dash-saved-card">
+      <button class="ds-remove" onclick="removeSavedCountry('${name.replace(/'/g,"\\'")}','${name.replace(/'/g,"\\'")}')">✕</button>
+      <div style="font-size:1.8rem;line-height:1;margin-bottom:6px">${c.flag}</div>
+      <div style="font-weight:700;font-size:0.9rem;color:#0a1628">${c.name}</div>
+      <div style="font-size:0.75rem;color:#94a3b8;margin-top:2px">${c.capital||''}</div>
+      <div style="font-size:0.72rem;color:#64748b;margin-top:6px">${c.currency||''}</div>
+      <button onclick="showCountryDetail('${name.replace(/'/g,"\\'")}');showPage('countries')" style="margin-top:10px;font-size:0.75rem;background:transparent;border:1px solid rgba(0,0,0,0.1);border-radius:8px;padding:5px 12px;cursor:pointer;font-family:'Inter',sans-serif;color:#1e293b;transition:0.2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(0,0,0,0.1)'">View Details →</button>
+    </div>`;
+  }).join('');
+}
+
+function removeSavedCountry(name) {
+  let saved = getSavedCountries();
+  setSavedCountries(saved.filter(n=>n!==name));
+  loadSavedCountriesPanel(); loadDashStats(); loadOverviewRecent(); renderAllCountries();
+  showToast('Removed '+name+' from saved.');
+}
+
+/* ---- Saved Universities ---- */
+function getSavedUnis() { try { return JSON.parse(localStorage.getItem('sg_saved_unis')||'[]'); } catch { return []; } }
+function setSavedUnis(arr) { localStorage.setItem('sg_saved_unis', JSON.stringify(arr)); }
+
+function addSavedUni() {
+  const name = document.getElementById('uniName')?.value.trim();
+  if (!name) { showToast('Please enter a university name.'); return; }
+  const uni = {
+    id: Date.now(),
+    name,
+    country: document.getElementById('uniCountry')?.value.trim()||'',
+    program: document.getElementById('uniProgram')?.value.trim()||'',
+    deadline: document.getElementById('uniDeadline')?.value.trim()||'',
+    notes: document.getElementById('uniNotes')?.value.trim()||'',
+    added: new Date().toISOString().split('T')[0]
+  };
+  const unis = getSavedUnis();
+  unis.unshift(uni);
+  setSavedUnis(unis);
+  ['uniName','uniCountry','uniProgram','uniDeadline','uniNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  loadSavedUnisPanel(); loadDashStats(); loadOverviewRecent();
+  showToast('🏫 University saved!');
+}
+
+function removeSavedUni(id) {
+  setSavedUnis(getSavedUnis().filter(u=>u.id!==id));
+  loadSavedUnisPanel(); loadDashStats(); loadOverviewRecent();
+}
+
+function loadSavedUnisPanel() {
+  const el = document.getElementById('savedUnisGrid');
+  if (!el) return;
+  const unis = getSavedUnis();
+  if (!unis.length) { el.innerHTML='<p style="color:#94a3b8;font-size:0.85rem;grid-column:1/-1">No universities saved yet. Use the form below to add one.</p>'; return; }
+  el.innerHTML = unis.map(u=>`<div class="dash-saved-card">
+    <button class="ds-remove" onclick="removeSavedUni(${u.id})">✕</button>
+    <div style="font-size:0.75rem;background:rgba(10,46,101,0.07);color:var(--blue);border-radius:6px;padding:3px 9px;display:inline-block;font-weight:600;margin-bottom:6px">${u.country||'International'}</div>
+    <div style="font-weight:700;font-size:0.9rem;color:#0a1628;line-height:1.3">${u.name}</div>
+    ${u.program?`<div style="font-size:0.78rem;color:#64748b;margin-top:4px">📚 ${u.program}</div>`:''}
+    ${u.deadline?`<div style="font-size:0.76rem;color:#f57c00;margin-top:3px">🗓 ${u.deadline}</div>`:''}
+    ${u.notes?`<div style="font-size:0.74rem;color:#94a3b8;margin-top:4px;line-height:1.4">${u.notes}</div>`:''}
+    <div style="font-size:0.67rem;color:#cbd5e1;margin-top:6px">Added ${u.added}</div>
+  </div>`).join('');
+}
+
+/* ---- Document Vault ---- */
+function getDocVault() { try { return JSON.parse(localStorage.getItem('sg_doc_vault')||'[]'); } catch { return []; } }
+function setDocVault(arr) { localStorage.setItem('sg_doc_vault', JSON.stringify(arr)); }
+
+function addDocVault() {
+  const name = document.getElementById('docVaultName')?.value.trim();
+  const type = document.getElementById('docVaultType')?.value||'Other';
+  if (!name) { showToast('Please enter a document name.'); return; }
+  const doc = {
+    id: Date.now(),
+    name,
+    type,
+    status: document.getElementById('docVaultStatus')?.value||'Ready',
+    expiry: document.getElementById('docVaultExpiry')?.value.trim()||'',
+    added: new Date().toISOString().split('T')[0]
+  };
+  const vault = getDocVault();
+  vault.unshift(doc);
+  setDocVault(vault);
+  ['docVaultName','docVaultExpiry'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const dt=document.getElementById('docVaultType');if(dt)dt.value='';
+  loadDocVaultPanel(); loadDashStats();
+  showToast('📁 Document added to vault!');
+}
+
+function removeDocVault(id) {
+  setDocVault(getDocVault().filter(d=>d.id!==id));
+  loadDocVaultPanel(); loadDashStats();
+}
+
+function loadDocVaultPanel() {
+  const el = document.getElementById('docVaultList');
+  if (!el) return;
+  const vault = getDocVault();
+  if (!vault.length) { el.innerHTML='<p style="color:#94a3b8;font-size:0.85rem">No documents yet. Use the form below to track your documents.</p>'; return; }
+  const badgeClass = s => s==='Ready'?'dv-ready':s==='Pending'?'dv-pending':s==='Expiring Soon'?'dv-expiring':'dv-expired';
+  el.innerHTML = vault.map(d=>`<div class="doc-vault-item">
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:600;font-size:0.88rem;color:#0a1628">${d.name}</div>
+      <div style="font-size:0.73rem;color:#94a3b8;margin-top:2px">${d.type||''}${d.expiry?` · Expires: ${d.expiry}`:''}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <span class="dv-badge ${badgeClass(d.status)}">${d.status}</span>
+      <button onclick="removeDocVault(${d.id})" style="background:transparent;border:none;cursor:pointer;font-size:0.9rem;opacity:0.35;transition:0.2s;padding:2px" onmouseover="this.style.opacity=1;this.style.color='#c62828'" onmouseout="this.style.opacity=0.35;this.style.color=''">✕</button>
+    </div>
+  </div>`).join('');
+}
+
+/* ---- AI Tips ---- */
+async function loadAiTips() {
+  const el = document.getElementById('aiTipsContent');
+  if (!el) return;
+  el.innerHTML = '<p style="color:#64748b;font-size:0.9rem">✨ Generating your personalised tips…</p>';
+  const countries = getSavedCountries();
+  const unis = getSavedUnis();
+  const appCount = Object.keys(localStorage).filter(k=>k.startsWith('skyapp_')).length;
+  try {
+    const r = await fetch('/api/ai-tips', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ countries, universities: unis, appCount }) });
+    const d = await r.json();
+    if (d.tips && d.tips.length) {
+      el.innerHTML = d.tips.map(t=>`<div class="ai-tip-card"><h4>${t.title||'Tip'}</h4><p>${t.tip||''}</p></div>`).join('');
+    } else {
+      el.innerHTML = _fallbackAiTips(countries);
+    }
+  } catch {
+    el.innerHTML = _fallbackAiTips(countries);
+  }
+}
+
+function _fallbackAiTips(countries) {
+  const tips = [
+    {title:'📄 Start with your documents', tip:'The most common reason for application delays is incomplete paperwork. Build your document checklist early and aim to have everything ready at least 2 months before your target date.'},
+    {title:'🏦 Prove your finances', tip:'Embassies and universities require clear evidence of financial capacity. Maintain a steady bank statement for at least 3–6 months before applying.'},
+    {title:'🎓 Write a compelling SOP', tip:'A strong Statement of Purpose addresses why this country, why this institution, and what you plan to do afterwards. Use our AI Document Generator to draft one.'},
+    {title:'🗓 Apply well in advance', tip:'Processing times vary widely — student visas can take 4–12 weeks. Start your application at least 3 months before your intended travel date.'},
+    {title:'💬 Talk to a consultant', tip:'Our team has guided thousands of clients. A 30-minute free consultation can save you months of confusion and reduce rejection risk significantly.'},
+  ];
+  return tips.map(t=>`<div class="ai-tip-card"><h4>${t.title}</h4><p>${t.tip}</p></div>`).join('');
+}
+
 
 function switchAuthTab(tab) {
   const login = tab === 'login';
@@ -4780,10 +5128,10 @@ async function sendMsg(e) {
   } catch { input.value = body; }
 }
 
-// Poll for new messages while viewing the dashboard
+// Poll for new messages while viewing dashboard messages tab
 setInterval(() => {
   if (isLoggedIn() && document.getElementById('page-account').classList.contains('active') && document.getElementById('dashBox').style.display !== 'none') {
-    loadMessages();
+    if (document.getElementById('dp-messages')?.classList.contains('active')) loadMessages();
   }
 }, 15000);
 
@@ -6976,13 +7324,18 @@ function renderAllCountries() {
   });
   const countEl = document.getElementById('dirCount');
   if (countEl) countEl.textContent = `${list.length} ${list.length === 1 ? 'country' : 'countries'}`;
-  grid.innerHTML = list.map(c => `
-    <div class="dir-card" onclick="showCountryDetail('${c.name.replace(/'/g,"\\'")}')">
+  const saved = getSavedCountries();
+  grid.innerHTML = list.map(c => {
+    const isSaved = saved.includes(c.name);
+    const safeName = c.name.replace(/'/g,"\\'");
+    return `<div class="dir-card" onclick="showCountryDetail('${safeName}')">
+      <button class="dir-card-save ${isSaved?'saved':''}" title="${isSaved?'Remove from saved':'Save country'}" onclick="event.stopPropagation();toggleSaveCountry('${safeName}',this)">${isSaved?'🔖':'🔖'}</button>
       <div class="df">${c.flag}</div>
       <div class="dn">${c.name}</div>
       <div class="dr">${REGION_NAMES[c.region]} · ${c.capital}</div>
       ${c.top ? '<span class="dstar">⭐ Top Destination</span>' : ''}
-    </div>`).join('') || `<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem">No countries match "${q}".</div>`;
+    </div>`;
+  }).join('') || `<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem">No countries match "${q}".</div>`;
 }
 
 // Region-based honest overview text (guidance, not fabricated specifics)
