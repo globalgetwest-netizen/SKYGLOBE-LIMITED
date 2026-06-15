@@ -1065,6 +1065,52 @@ Give exactly 5 personalised, actionable tips. Respond with ONLY a JSON array, no
   } catch { clearTimeout(timer); res.json({ tips: null }); }
 });
 
+// ---- AI Interview Prep endpoint ----
+app.post('/api/interview-prep', async (req, res) => {
+  const { type = 'visa', target = '', nationality = '', background = '' } = req.body || {};
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.status(503).json({ error: 'AI unavailable' });
+
+  const typeLabels = { visa: 'embassy/consulate visa', job: 'international job', university: 'university admissions' };
+  const typeLabel = typeLabels[type] || 'visa';
+
+  const prompt = `You are a world-class ${typeLabel} interview coach at SkyGlobe Group, with 15+ years helping applicants succeed.
+
+Client profile:
+- Interview type: ${typeLabel} interview
+- Target: ${target || 'not specified'}
+- Applicant nationality: ${nationality || 'not specified'}
+- Background summary: ${background || 'not provided'}
+
+Generate a comprehensive personalised interview preparation guide. Respond with ONLY valid JSON, no markdown, no extra text:
+{
+  "overview": "2–3 sentence paragraph describing what to expect in this specific interview — tone, format, typical duration, what the interviewer is really assessing",
+  "questions": [
+    {"q": "The interview question exactly as asked", "hint": "Coaching note: what the interviewer is really testing, what to emphasise in your answer, what to avoid"},
+    ... (10 questions total, ordered from most likely to specialised)
+  ],
+  "tips": ["Practical tip 1", "Practical tip 2", ... (6 tips — appearance, documents, mindset, body language, timing)],
+  "redFlags": ["Things that trigger rejection 1", "Things that trigger rejection 2", ... (4 red flags to avoid saying or doing)]
+}`;
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 30000);
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 2048, temperature: 0.7 } }),
+        signal: ctrl.signal }
+    );
+    clearTimeout(timer);
+    const data = await r.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const match = text.replace(/```json|```/g, '').trim().match(/\{[\s\S]*\}/);
+    if (match) return res.json(JSON.parse(match[0]));
+    res.status(500).json({ error: 'Parse error' });
+  } catch(e) { clearTimeout(timer); res.status(500).json({ error: e.message }); }
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
