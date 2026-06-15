@@ -75,7 +75,7 @@ function storagePublicUrl(filePath) {
 // ── RESEND EMAIL ──────────────────────────────────────────────────────────────
 async function sendEmail(to, subject, html, replyTo) {
   const body = {
-    from: 'SkyGlobe Limited <support@skyglobegroup.com>',
+    from: 'SkyGlobe Group <support@skyglobegroup.com>',
     to: Array.isArray(to) ? to : [to],
     subject,
     html,
@@ -109,7 +109,7 @@ app.post('/api/contact', async (req, res) => {
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0">
-        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
+        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h2 style="color:#c9a84c;margin:0">New Consultation Request</h2>
       </div>
       <div style="background:#f9f9f9;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
@@ -173,7 +173,7 @@ app.post('/api/apply', async (req, res) => {
   const adminHtml = `
     <div style="font-family:sans-serif;max-width:660px;margin:0 auto">
       <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0">
-        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
+        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h2 style="color:#c9a84c;margin:0">New Application — <span style="color:#fff">${ref}</span></h2>
       </div>
       <div style="background:#f9f9f9;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
@@ -210,9 +210,9 @@ app.post('/api/apply', async (req, res) => {
   const userHtml = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#0a1628;padding:32px;border-radius:8px 8px 0 0;text-align:center">
-        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
+        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h1 style="color:#c9a84c;margin:0 0 8px;font-size:1.6rem">Application Received ✅</h1>
-        <p style="color:#8899bb;margin:0">SKYGLOBE LIMITED</p>
+        <p style="color:#8899bb;margin:0">SKYGLOBE GROUP</p>
       </div>
       <div style="background:#f9f9f9;padding:32px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0;text-align:center">
         <p style="color:#333;font-size:1rem;margin:0 0 20px">Dear <strong>${fname}</strong>, your application has been successfully submitted.</p>
@@ -232,14 +232,14 @@ app.post('/api/apply', async (req, res) => {
         <a href="https://wa.me/17373998522?text=Hi, my application reference is ${ref}" style="display:inline-block;background:#25D366;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:12px">💬 WhatsApp Us About This Application</a>
       </div>
       <div style="padding:20px;text-align:center;color:#999;font-size:0.8rem">
-        Skyglobe Limited · support@skyglobegroup.com
+        SkyGlobe Group · support@skyglobegroup.com
       </div>
     </div>`;
 
   try { await sendEmail(recipientEmail, `New Application [${ref}] — ${service}`, adminHtml, email); }
   catch (e) { console.error('Admin email failed:', e.message); }
 
-  try { await sendEmail(email, `Application Confirmed [${ref}] — Skyglobe Limited`, userHtml); }
+  try { await sendEmail(email, `Application Confirmed [${ref}] — SkyGlobe Group`, userHtml); }
   catch (e) { console.error('User email failed:', e.message); }
 
   res.json({ success: true, ref, status: 'Received' });
@@ -312,9 +312,9 @@ app.post('/api/admin/update', async (req, res) => {
       const html = `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <div style="background:#0a1628;padding:28px;border-radius:8px 8px 0 0;text-align:center">
-            <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
+            <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
             <h1 style="color:#c9a84c;margin:0;font-size:1.4rem">Application Update</h1>
-            <p style="color:#8899bb;margin:6px 0 0">SKYGLOBE LIMITED</p>
+            <p style="color:#8899bb;margin:6px 0 0">SKYGLOBE GROUP</p>
           </div>
           <div style="background:#f9f9f9;padding:28px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
             <p style="color:#333">Dear <strong>${app_.fname}</strong>, there is an update on your application <strong>${app_.ref}</strong> (${app_.service}):</p>
@@ -418,7 +418,7 @@ app.delete('/api/documents/:id', async (req, res) => {
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 // ── AI CHAT ───────────────────────────────────────────────────────────────────
-const SKYGLOBE_SYSTEM = `You are the AI assistant for SkyGlobe Limited, a premium global travel and immigration consultancy. You are knowledgeable, professional, warm, and concise.
+const SKYGLOBE_SYSTEM = `You are the AI assistant for SkyGlobe Group, a premium global travel and immigration consultancy. You are knowledgeable, professional, warm, and concise.
 
 Company facts:
 - Founded 2016, based in New York City
@@ -674,7 +674,7 @@ app.post('/api/admin/messages', async (req, res) => {
     const rows = await dbQuery('POST', 'messages', { client_email: String(client_email).toLowerCase(), sender: 'admin', body: String(body).trim(), read: false });
     // Email the client that they have a reply
     try {
-      await sendEmail(client_email, 'You have a new message from SkyGlobe Limited',
+      await sendEmail(client_email, 'You have a new message from SkyGlobe Group',
         `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0;text-align:center">
             <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe" style="height:56px;border-radius:10px"><br>
@@ -823,7 +823,7 @@ Write a formal experience certificate body (180-280 words) that:
 Write in the third person, from the company's point of view. This is an official, factual document — be measured and professional, do NOT exaggerate. Do NOT write the signature line, date, or company letterhead (these are added separately).
 ${NO_PLACEHOLDERS}`,
 
-    skyconference: `You are the official communications officer of SkyGlobe Limited, an international travel and immigration consultancy based in the United Kingdom. Write a formal Letter of Invitation issued BY SkyGlobe Limited inviting an individual to attend one of our international events.
+    skyconference: `You are the official communications officer of SkyGlobe Group, an international travel and immigration consultancy based in the United Kingdom. Write a formal Letter of Invitation issued BY SkyGlobe Group inviting an individual to attend one of our international events.
 Details:
 - Invitee / Attendee Name: ${fullName}
 - Nationality / Home Country: ${nationality || 'Not specified'}
@@ -838,12 +838,12 @@ Details:
 
 Write a formal invitation letter body (220-300 words) that:
 1. Opens "To the Visa Officer," — since this letter supports the invitee's visa application
-2. Formally introduces SkyGlobe Limited (registered immigration and travel consultancy, UK) and confirms we are inviting ${fullName} to ${institution}
+2. Formally introduces SkyGlobe Group (registered immigration and travel consultancy, UK) and confirms we are inviting ${fullName} to ${institution}
 3. States the event dates, venue, and the attendee's role
 4. Confirms the professional or educational purpose of the event
 5. States accommodation/cost arrangements
 6. Requests that the visa officer grant the necessary visa and offers to provide further information
-Write in formal third person, from SkyGlobe Limited's point of view. Do NOT write the signature block or letterhead (added by system). Do NOT use placeholders.
+Write in formal third person, from SkyGlobe Group's point of view. Do NOT write the signature block or letterhead (added by system). Do NOT use placeholders.
 ${NO_PLACEHOLDERS}`,
 
     invitation: `You are a corporate protocol officer. Write the BODY of a formal Letter of Invitation issued BY a host organisation inviting a guest to a conference / event.
@@ -903,6 +903,133 @@ ${NO_PLACEHOLDERS}`,
   } finally {
     clearTimeout(timer);
   }
+});
+
+// ---- Country AI Research endpoint ----
+app.post('/api/country-info', async (req, res) => {
+  const { country, capital, region, langs, currency } = req.body || {};
+  if (!country) return res.status(400).json({ error: 'country required' });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.json({ html: null });
+
+  const prompt = `You are an expert international immigration and education consultant. Provide comprehensive, accurate information about ${country} for someone considering studying, working, or immigrating there. The capital is ${capital}, region is ${region}, main languages are ${langs}, currency is ${currency}.
+
+Write ONLY raw HTML (no markdown, no code fences, no explanation). Use these exact HTML classes:
+- Wrap each section in: <div class="cd-section"><div class="cd-section-head"><h4>EMOJI Title</h4></div><div class="cd-section-body">CONTENT</div></div>
+- Use <ul><li> for lists inside .cd-section-body
+- Use <div class="cd-chips"><span class="cd-chip">item</span></div> for tags/chips
+- Use <div class="cd-stat-row"><div class="cd-stat"><div class="n">VALUE</div><div class="l">LABEL</div></div></div> for key stats
+- Use <div class="cd-chips"><span class="cd-chip gold">item</span></div> for highlighted items (top universities, visa types)
+
+Write these 6 sections in this exact order:
+
+1. 🛂 Visa & Entry Requirements
+- Common visa types (tourist, student, work) and requirements
+- Key documents typically needed
+- Processing times and fees (approximate)
+- Visa-free nationalities if applicable
+
+2. 🎓 Universities & Education
+- 3-5 notable universities with their reputation/specialisation
+- Popular study programs for international students
+- Tuition fee range (approximate, in local currency or USD)
+- Academic year/intake dates
+- Student visa specifics
+
+3. 💼 Jobs & Work
+- Top industries and in-demand job sectors
+- Average salary ranges for popular roles (in local currency)
+- Work permit/visa requirements for skilled workers
+- Job search tips for international applicants
+
+4. 🏠 Cost of Living
+- Monthly budget breakdown: rent (single room in city vs suburbs), food, transport, utilities
+- Overall cost comparison (budget / moderate / comfortable lifestyle)
+- Cheapest and most expensive cities
+
+5. 🌟 Quality of Life
+- Safety, healthcare quality, climate overview
+- International-friendliness and English usage
+- Notable attractions and lifestyle highlights
+- 3-4 interesting quick facts as cd-chip gold items
+
+6. 🛣️ Immigration Pathways
+- Main legal routes: student-to-work, skilled worker, PR/citizenship
+- Approximate timeline for residency/PR
+- Key requirements (language, points, sponsorship, investment)
+- SkyGlobe tip: specific advice for someone wanting to settle here
+
+Be specific with real numbers and real university names. Keep each section concise — 3-6 bullet points or 2 short paragraphs max. Use the HTML classes exactly as specified above.`;
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 35000);
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 2048, temperature: 0.5 } }),
+        signal: ctrl.signal }
+    );
+    clearTimeout(timer);
+    const data = await r.json();
+    let html = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Strip any accidental code fences
+    html = html.replace(/```html?/gi,'').replace(/```/g,'').trim();
+    if (html) return res.json({ html });
+    res.json({ html: null });
+  } catch (e) { clearTimeout(timer); res.json({ html: null }); }
+});
+
+// ---- Country Comparison endpoint ----
+app.post('/api/country-compare', async (req, res) => {
+  const { countries = [] } = req.body || {};
+  if (!Array.isArray(countries) || countries.length < 2)
+    return res.status(400).json({ error: 'Provide at least 2 countries.' });
+  const list = countries.slice(0, 3);
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.json({ rows: null });
+
+  const prompt = `You are an expert international immigration and education consultant. Compare these countries for someone deciding where to study, work, or immigrate: ${list.join(', ')}.
+
+Return ONLY a JSON object (no markdown, no code fences) with this exact shape:
+{
+  "rows": [
+    {"label":"Top Universities","icon":"🎓","type":"text","values":[ "<for country1>", "<country2>", ... ]},
+    {"label":"Tuition (intl, /year)","icon":"💵","type":"text","values":[ ... ]},
+    {"label":"In-demand Jobs","icon":"💼","type":"text","values":[ ... ]},
+    {"label":"Avg Salary","icon":"💰","type":"text","values":[ ... ]},
+    {"label":"Cost of Living /mo","icon":"🏠","type":"text","values":[ ... ]},
+    {"label":"Work Visa Ease","icon":"🛂","type":"rating","values":[ <0-5 number per country> ]},
+    {"label":"PR / Citizenship Ease","icon":"🛣️","type":"rating","values":[ <0-5> ]},
+    {"label":"Quality of Life","icon":"🌟","type":"rating","values":[ <0-5> ]},
+    {"label":"Safety","icon":"🛡️","type":"rating","values":[ <0-5> ]},
+    {"label":"English Friendliness","icon":"🗣️","type":"rating","values":[ <0-5> ]},
+    {"label":"Best For","icon":"✅","type":"text","values":[ "<one short phrase>", ... ]}
+  ]
+}
+
+The "values" array MUST have exactly ${list.length} items, in the same order as: ${list.join(', ')}.
+For "text" rows keep each value short (max ~8 words, real specifics: real university names, real currency figures). For "rating" rows give an integer 0-5. Be accurate and realistic.`;
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 35000);
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 2048, temperature: 0.45 } }),
+        signal: ctrl.signal }
+    );
+    clearTimeout(timer);
+    const data = await r.json();
+    let text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').replace(/```json|```/g, '').trim();
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      if (parsed.rows) return res.json({ rows: parsed.rows });
+    }
+    res.json({ rows: null });
+  } catch (e) { clearTimeout(timer); res.json({ rows: null }); }
 });
 
 // ---- AI Tips endpoint ----
