@@ -724,7 +724,51 @@ app.post('/api/admin/messages', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── DOCUMENT GENERATOR (SOP / Cover Letter / Visa Letter) ────────────────────
+// ── INTERNAL: STAFF NOTES ON AN APPLICATION ─────────────────────────────────────
+// Private notes between CEO & staff, attached to an application. Never shown to client.
+// Requires Supabase column:  ALTER TABLE applications ADD COLUMN IF NOT EXISTS staff_notes jsonb DEFAULT '[]'::jsonb;
+app.post('/api/admin/note', async (req, res) => {
+  const r = getRole(req);
+  if (!r) return res.status(401).json({ error: 'Unauthorized' });
+  const { ref, note } = req.body || {};
+  if (!ref || !note || !String(note).trim()) return res.status(400).json({ error: 'ref and note are required.' });
+  try {
+    const app_ = await getAppByRef(String(ref).toUpperCase());
+    if (!app_) return res.status(404).json({ error: 'Application not found.' });
+    const notes = Array.isArray(app_.staff_notes) ? app_.staff_notes : [];
+    notes.push({ by: r.name, role: r.role, message: String(note).trim(), date: new Date().toISOString() });
+    await updateApp(String(ref).toUpperCase(), { staff_notes: notes });
+    res.json({ success: true, notes });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── INTERNAL: TEAM CHAT (CEO ↔ STAFF) ───────────────────────────────────────────
+// A shared private channel for the whole team. Clients never see this.
+// Requires Supabase table:
+//   create table if not exists team_messages (
+//     id bigserial primary key, author text, role text, body text,
+//     created_at timestamptz default now()
+//   );
+app.get('/api/team/messages', async (req, res) => {
+  if (!getRole(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'team_messages', null, { order: 'created_at.asc', limit: 500 });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/team/messages', async (req, res) => {
+  const r = getRole(req);
+  if (!r) return res.status(401).json({ error: 'Unauthorized' });
+  const { body } = req.body || {};
+  if (!body || !String(body).trim()) return res.status(400).json({ error: 'Message body is required.' });
+  try {
+    const rows = await dbQuery('POST', 'team_messages', { author: r.name, role: r.role, body: String(body).trim() });
+    res.json({ success: true, message: Array.isArray(rows) ? rows[0] : rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+
 // Lightweight endpoint the front-end pings to wake the server from sleep.
 app.get('/api/health', (req, res) => res.json({ ok: true, t: Date.now() }));
 
