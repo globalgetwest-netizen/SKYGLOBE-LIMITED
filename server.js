@@ -905,6 +905,39 @@ ${NO_PLACEHOLDERS}`,
   }
 });
 
+// ---- AI Tips endpoint ----
+app.post('/api/ai-tips', async (req, res) => {
+  const { countries = [], universities = [], appCount = 0 } = req.body || {};
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.json({ tips: null }); // fallback to client-side tips
+
+  const prompt = `You are a senior international immigration and education consultant at SkyGlobe Group.
+A client has the following profile:
+- Countries of interest: ${countries.join(', ') || 'not specified'}
+- University targets: ${universities.map(u => u.name + (u.country ? ' (' + u.country + ')' : '')).join(', ') || 'not specified'}
+- Active applications: ${appCount}
+
+Give exactly 5 personalised, actionable tips. Respond with ONLY a JSON array, no markdown, no extra text:
+[{"title":"...","tip":"..."},...]`;
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 20000);
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 1024, temperature: 0.7 } }),
+        signal: ctrl.signal }
+    );
+    clearTimeout(timer);
+    const data = await r.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const match = text.replace(/```json|```/g, '').trim().match(/\[[\s\S]*\]/);
+    if (match) return res.json({ tips: JSON.parse(match[0]) });
+    res.json({ tips: null });
+  } catch { clearTimeout(timer); res.json({ tips: null }); }
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
