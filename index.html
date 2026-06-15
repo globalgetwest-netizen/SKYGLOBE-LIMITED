@@ -948,6 +948,8 @@ body.wc-active .mobile-menu{padding-top:46px}
       <a class="nav-more-btn" onclick="toggleNavMore(event)">More ▾</a>
       <div class="nav-more-drop" id="navMoreDrop">
         <a onclick="showPage('about');closeNavMore()">About Us</a>
+        <a onclick="showPage('recruitment');closeNavMore()">🌍 Recruitment & Jobs</a>
+        <a onclick="showPage('careers');closeNavMore()">💼 Careers at SkyGlobe</a>
         <a onclick="showPage('compare');closeNavMore()">⚖️ Compare Countries</a>
         <a onclick="showPage('invoice');closeNavMore()">🧾 Invoice</a>
         <a onclick="showPage('apply');closeNavMore()">📋 Apply Now</a>
@@ -980,6 +982,8 @@ body.wc-active .mobile-menu{padding-top:46px}
   <a onclick="showPage('destinations');toggleMenu()">Work Abroad</a>
   <a onclick="showPage('world');toggleMenu()">Travel</a>
   <a onclick="showPage('blog');toggleMenu()">Scholarships</a>
+  <a onclick="showPage('recruitment');toggleMenu()">🌍 Recruitment & Jobs</a>
+  <a onclick="showPage('careers');toggleMenu()">💼 Careers at SkyGlobe</a>
   <a onclick="showPage('tools');toggleMenu()">🤖 AI Assistant</a>
   <a onclick="goAccount();toggleMenu()" id="mobAccountLink">📊 Dashboard</a>
   <a onclick="showPage('apply');toggleMenu()" style="color:var(--gold)">📋 Apply Now</a>
@@ -1837,6 +1841,132 @@ body.wc-active .mobile-menu{padding-top:46px}
   </section>
 </div>
 
+<!-- ============ RECRUITMENT & JOBS PAGE ============ -->
+<div class="page" id="page-recruitment">
+  <section style="padding-top:140px">
+    <div class="section-tag">Recruitment &amp; Overseas Jobs</div>
+    <h1 class="section-title">Work Abroad with a <strong>Trusted Partner</strong></h1>
+    <p class="section-sub">SkyGlobe Group connects skilled and semi-skilled workers with genuine, verified employers across Europe, the Gulf, and beyond — complete with work permit and visa support. No fake offers, no shortcuts: only legitimate placements.</p>
+
+    <!-- Highlights -->
+    <div class="services-full-grid" style="margin-bottom:2.5rem">
+      <div class="service-full-card" style="cursor:default">
+        <div style="font-size:2rem;margin-bottom:0.6rem">🇪🇺</div>
+        <h3>EU Direct Employment</h3>
+        <p>Full job placement + work permit + visa across 17 European countries including Poland, Portugal, Lithuania, Spain, Norway and more. Typical timeline: 8–20 weeks.</p>
+        <span class="s-tag">Europe → Hired</span>
+      </div>
+      <div class="service-full-card" style="cursor:default">
+        <div style="font-size:2rem;margin-bottom:0.6rem">🔧</div>
+        <h3>Sectors We Place</h3>
+        <p>Construction, warehouse &amp; logistics, manufacturing, hospitality, healthcare &amp; caregiving, drivers, welders, farm work, and skilled trades.</p>
+        <span class="s-tag">Many → Roles</span>
+      </div>
+      <div class="service-full-card" style="cursor:default">
+        <div style="font-size:2rem;margin-bottom:0.6rem">✅</div>
+        <h3>100% Verified Employers</h3>
+        <p>Every job is checked and confirmed before we present it. We never charge for jobs that don't exist, and we never fabricate offers or documents.</p>
+        <span class="s-tag">Genuine → Always</span>
+      </div>
+    </div>
+
+    <!-- Two audiences -->
+    <div class="contact-grid">
+      <!-- Job seekers -->
+      <div class="contact-form">
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;margin-bottom:0.4rem">👤 Job Seekers — <strong>Register</strong></h3>
+        <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.4rem">Tell us your skills and where you'd like to work. Our team reviews your profile and matches you with suitable verified openings.</p>
+        <div class="form-row">
+          <div class="form-group"><label>First Name *</label><input type="text" placeholder="John" id="rc_fname"></div>
+          <div class="form-group"><label>Last Name *</label><input type="text" placeholder="Doe" id="rc_lname"></div>
+        </div>
+        <div class="form-group"><label>Email Address *</label><input type="email" placeholder="john.doe@email.com" id="rc_email"></div>
+        <div class="form-group"><label>Phone / WhatsApp *</label><input type="tel" placeholder="+1 000 000 0000" id="rc_phone"></div>
+        <div class="form-group"><label>Your Profession / Skill *</label><input type="text" placeholder="e.g. Welder, Driver, Caregiver, Warehouse" id="rc_field"></div>
+        <div class="form-group"><label>Preferred Country</label><input type="text" placeholder="e.g. Poland, Portugal, Germany" id="rc_country"></div>
+        <div class="form-group"><label>Experience &amp; Notes</label><textarea placeholder="Years of experience, languages spoken, availability, passport status…" id="rc_message"></textarea></div>
+        <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitRecruitment()">✦ Register My Profile</button>
+        <p style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:1rem">🔒 Your details are confidential and used only for job matching.</p>
+      </div>
+
+      <!-- Employers -->
+      <div class="contact-info">
+        <div style="padding:1.6rem;background:rgba(201,168,76,0.08);border:1px solid var(--border);border-radius:var(--radius);border-left:3px solid var(--gold);margin-bottom:1.4rem">
+          <h4 style="color:var(--gold-light);margin-bottom:0.6rem">🏢 Employers — Hire Verified Workers</h4>
+          <p style="font-size:0.9rem;color:var(--text-body);line-height:1.7">Need reliable staff? SkyGlobe sources, screens, and prepares candidates with full documentation and work-permit handling. Tell us your requirements and we'll present qualified, ready-to-relocate candidates.</p>
+        </div>
+        <a href="https://wa.me/17373998522?text=Hello%20SkyGlobe%2C%20I%20am%20an%20employer%20looking%20to%20hire%20workers." class="wa-btn" target="_blank">💬 Employers: Request Staff on WhatsApp</a>
+        <div class="contact-detail" style="margin-top:1.4rem">
+          <div class="contact-icon">📧</div>
+          <div><h4>Recruitment Desk</h4><a href="#" onclick="showPage('contact');return false;">support@skyglobegroup.com</a></div>
+        </div>
+        <div style="margin-top:1.2rem;padding:1.3rem;background:rgba(198,40,40,0.06);border:1px solid rgba(198,40,40,0.2);border-radius:var(--radius);border-left:3px solid #c62828">
+          <p style="font-size:0.84rem;color:var(--text-body);line-height:1.7"><strong style="color:#e57373">⚠️ Beware of scams.</strong> SkyGlobe never guarantees a visa in exchange for large upfront cash, and never asks you to pay agents outside our official channels. All payments are receipted.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ CAREERS PAGE ============ -->
+<div class="page" id="page-careers">
+  <section style="padding-top:140px">
+    <div class="section-tag">Careers at SkyGlobe Group</div>
+    <h1 class="section-title">Build Your Career <strong>With Us</strong></h1>
+    <p class="section-sub">We're a growing global mobility company helping people achieve their international dreams. If you're driven, detail-oriented, and passionate about helping others, we'd love to hear from you.</p>
+
+    <!-- Why join -->
+    <div class="services-full-grid" style="margin-bottom:2.5rem">
+      <div class="service-full-card" style="cursor:default"><div style="font-size:2rem;margin-bottom:0.6rem">🌍</div><h3>Meaningful Work</h3><p>Change lives every day by helping clients study, work, and travel across the world.</p></div>
+      <div class="service-full-card" style="cursor:default"><div style="font-size:2rem;margin-bottom:0.6rem">🚀</div><h3>Growth &amp; Training</h3><p>Learn immigration, sales, and operations with mentorship and real responsibility from day one.</p></div>
+      <div class="service-full-card" style="cursor:default"><div style="font-size:2rem;margin-bottom:0.6rem">💻</div><h3>Remote-Friendly</h3><p>Many roles can be done remotely with flexible hours. We value results over clock-watching.</p></div>
+    </div>
+
+    <!-- Open roles -->
+    <h2 class="section-title" style="font-size:1.8rem;margin-bottom:1.2rem">Open <strong>Positions</strong></h2>
+    <div class="services-full-grid" style="margin-bottom:2.5rem">
+      <div class="service-full-card" onclick="applyRole('Visa &amp; Immigration Consultant')"><h3>Visa &amp; Immigration Consultant</h3><p>Guide clients through visa applications and documentation. Experience in immigration or strong research skills preferred.</p><span class="apply-hint">→ Apply for this role</span></div>
+      <div class="service-full-card" onclick="applyRole('Client Relationship Officer')"><h3>Client Relationship Officer</h3><p>Be the friendly first point of contact — handle enquiries, follow up leads, and keep clients happy across WhatsApp, email and calls.</p><span class="apply-hint">→ Apply for this role</span></div>
+      <div class="service-full-card" onclick="applyRole('Social Media &amp; Marketing Executive')"><h3>Social Media &amp; Marketing Executive</h3><p>Grow our TikTok, Instagram &amp; YouTube. Create content, run campaigns, and build the SkyGlobe brand online.</p><span class="apply-hint">→ Apply for this role</span></div>
+      <div class="service-full-card" onclick="applyRole('Recruitment / Placement Agent')"><h3>Recruitment / Placement Agent</h3><p>Source candidates and liaise with overseas employers for our job-placement programme. Networking skills a plus.</p><span class="apply-hint">→ Apply for this role</span></div>
+    </div>
+
+    <!-- Application form -->
+    <div class="contact-grid">
+      <div class="contact-form">
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;margin-bottom:1.2rem">Apply to <strong>Join Our Team</strong></h3>
+        <div class="form-row">
+          <div class="form-group"><label>First Name *</label><input type="text" placeholder="John" id="cr_fname"></div>
+          <div class="form-group"><label>Last Name *</label><input type="text" placeholder="Doe" id="cr_lname"></div>
+        </div>
+        <div class="form-group"><label>Email Address *</label><input type="email" placeholder="john.doe@email.com" id="cr_email"></div>
+        <div class="form-group"><label>Phone / WhatsApp *</label><input type="tel" placeholder="+1 000 000 0000" id="cr_phone"></div>
+        <div class="form-group">
+          <label>Role You're Applying For *</label>
+          <select id="cr_role">
+            <option value="">— Select a role —</option>
+            <option>Visa &amp; Immigration Consultant</option>
+            <option>Client Relationship Officer</option>
+            <option>Social Media &amp; Marketing Executive</option>
+            <option>Recruitment / Placement Agent</option>
+            <option>Other / General Application</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Tell Us About Yourself *</label><textarea placeholder="Your experience, skills, why you want to join SkyGlobe, and a link to your CV/LinkedIn if available…" id="cr_message"></textarea></div>
+        <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitCareer()">✦ Submit Application</button>
+        <p style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:1rem">📎 To attach a CV, email it to <strong>support@skyglobegroup.com</strong> with your name &amp; role.</p>
+      </div>
+      <div class="contact-info">
+        <div style="padding:1.6rem;background:rgba(201,168,76,0.08);border:1px solid var(--border);border-radius:var(--radius);border-left:3px solid var(--gold)">
+          <h4 style="color:var(--gold-light);margin-bottom:0.6rem">💡 Don't see your role?</h4>
+          <p style="font-size:0.9rem;color:var(--text-body);line-height:1.7">We're always looking for talented people. Submit a general application and tell us how you can add value — we keep promising candidates on file.</p>
+        </div>
+        <a href="https://wa.me/17373998522?text=Hello%20SkyGlobe%2C%20I%20am%20interested%20in%20a%20career%20opportunity." class="wa-btn" target="_blank" style="margin-top:1.4rem">💬 Ask About Careers on WhatsApp</a>
+      </div>
+    </div>
+  </section>
+</div>
+
 <!-- ============ SEARCH PAGE ============ -->
 <div class="page" id="page-search">
   <div class="search-hero">
@@ -2445,8 +2575,8 @@ body.wc-active .mobile-menu{padding-top:46px}
 <script>
 // PAGE ROUTING
 // Main journey order for Back/Next navigation
-const PAGE_ORDER = ['home','about','services','destinations','countries','compare','world','blog','tools','invoice','apply','contact'];
-const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',compare:'Compare Countries',world:'World Explorer',blog:'Blog',tools:'AI Tools',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
+const PAGE_ORDER = ['home','about','services','destinations','countries','compare','world','blog','tools','recruitment','careers','invoice','apply','contact'];
+const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',compare:'Compare Countries',world:'World Explorer',blog:'Blog',tools:'AI Tools',recruitment:'Recruitment & Jobs',careers:'Careers',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
 let _lastPage = null;
 // Browser-style history: one back/forward control for the whole site
 let navHistory = [];   // pages visited before the current one
@@ -2609,6 +2739,84 @@ async function submitForm() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '✦ Submit Consultation Request';
+  }
+}
+
+// ── RECRUITMENT: job-seeker registration ──
+async function submitRecruitment() {
+  const fname = document.getElementById('rc_fname').value.trim();
+  const lname = document.getElementById('rc_lname').value.trim();
+  const email = document.getElementById('rc_email').value.trim();
+  const phone = document.getElementById('rc_phone').value.trim();
+  const field = document.getElementById('rc_field').value.trim();
+  const country = document.getElementById('rc_country').value.trim();
+  const notes = document.getElementById('rc_message').value.trim();
+  if (!fname || !email || !phone || !field) {
+    showToast('⚠️ Please fill in your name, email, phone and profession.', true);
+    return;
+  }
+  const btn = document.querySelector('#page-recruitment .btn-primary');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
+    const res = await fetch(API_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fname, lname, email, phone, service: 'Recruitment — Job Seeker (' + field + ')', destination: country, message: 'PROFESSION: ' + field + '\nPREFERRED COUNTRY: ' + (country || '—') + '\n\n' + notes }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+    showToast('✅ Profile registered! Our recruitment team will contact you soon.');
+    ['rc_fname','rc_lname','rc_email','rc_phone','rc_field','rc_country','rc_message'].forEach(id => { document.getElementById(id).value = ''; });
+  } catch (err) {
+    showToast('⚠️ ' + (err.name === 'AbortError' ? 'Server is slow — try WhatsApp instead.' : (err.message || 'Failed') + '. Try WhatsApp instead.'), true);
+  } finally {
+    btn.disabled = false; btn.innerHTML = '✦ Register My Profile';
+  }
+}
+
+// ── CAREERS: apply to work for SkyGlobe ──
+function applyRole(role) {
+  showPage('careers');
+  setTimeout(() => {
+    const sel = document.getElementById('cr_role');
+    if (sel) { const clean = role.replace(/&amp;/g, '&'); for (const o of sel.options) { if (o.value === clean) { sel.value = clean; break; } } }
+    document.getElementById('cr_fname')?.focus();
+    document.querySelector('#page-careers .contact-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 120);
+}
+async function submitCareer() {
+  const fname = document.getElementById('cr_fname').value.trim();
+  const lname = document.getElementById('cr_lname').value.trim();
+  const email = document.getElementById('cr_email').value.trim();
+  const phone = document.getElementById('cr_phone').value.trim();
+  const role = document.getElementById('cr_role').value;
+  const message = document.getElementById('cr_message').value.trim();
+  if (!fname || !email || !phone || !role || !message) {
+    showToast('⚠️ Please complete all required fields, including the role and your message.', true);
+    return;
+  }
+  const btn = document.querySelector('#page-careers .btn-primary');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
+    const res = await fetch(API_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fname, lname, email, phone, service: 'Career Application — ' + role, message }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+    showToast('✅ Application sent! We review every application and will reach out if there\'s a fit.');
+    ['cr_fname','cr_lname','cr_email','cr_phone','cr_role','cr_message'].forEach(id => { document.getElementById(id).value = ''; });
+  } catch (err) {
+    showToast('⚠️ ' + (err.name === 'AbortError' ? 'Server is slow — try emailing us instead.' : (err.message || 'Failed') + '. Try emailing us instead.'), true);
+  } finally {
+    btn.disabled = false; btn.innerHTML = '✦ Submit Application';
   }
 }
 
