@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SKYGLOBE LIMITED — Your Gateway to Global Opportunity</title>
+<title>SkyGlobe Group — One World. Unlimited Opportunities.</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
 <link rel="manifest" href="/manifest.json">
@@ -11,23 +11,23 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SkyGlobe">
-<meta name="description" content="Skyglobe Limited is a premium global travel and study-abroad consultancy. Visas, university admissions, work relocation, and travel documentation.">
+<meta name="description" content="SkyGlobe Group is a premium global travel and study-abroad consultancy. Visas, university admissions, work relocation, and travel documentation.">
 <!-- SEO + Open Graph + Twitter Card -->
 <meta name="keywords" content="visa processing, study abroad, UK visa, Canada visa, university admissions, EU employment, travel consultancy, work permit, student visa, Skyglobe">
 <meta name="robots" content="index, follow">
-<meta name="author" content="SkyGlobe Limited">
+<meta name="author" content="SkyGlobe Group">
 <link rel="canonical" href="https://skyglobegroup.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skyglobegroup.com/">
-<meta property="og:title" content="SkyGlobe Limited — Your Gateway to Global Opportunity">
+<meta property="og:title" content="SkyGlobe Group — Your Gateway to Global Opportunity">
 <meta property="og:description" content="Premium visa processing, university admissions, EU employment & travel consultancy. 12,000+ visas approved. 98% success rate. Start your global journey today.">
 <meta property="og:image" content="https://skyglobegroup.com/logo.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:site_name" content="SkyGlobe Limited">
+<meta property="og:site_name" content="SkyGlobe Group">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SkyGlobe Limited — Your Gateway to Global Opportunity">
+<meta name="twitter:title" content="SkyGlobe Group — Your Gateway to Global Opportunity">
 <meta name="twitter:description" content="Premium visa processing, university admissions & EU employment. 12,000+ visas approved. 98% success rate.">
 <meta name="twitter:image" content="https://skyglobegroup.com/logo.png">
 <!-- JSON-LD Structured Data -->
@@ -35,7 +35,7 @@
 {
   "@context":"https://schema.org",
   "@type":"TravelAgency",
-  "name":"SkyGlobe Limited",
+  "name":"SkyGlobe Group",
   "url":"https://skyglobegroup.com",
   "logo":"https://skyglobegroup.com/logo.png",
   "description":"Premium visa processing, university admissions, work relocation and travel documentation services.",
@@ -196,12 +196,19 @@ nav.scrolled{backdrop-filter:blur(12px);box-shadow:0 2px 16px rgba(0,0,0,0.1)}
 .cd-weather .wtemp{font-size:1.6rem;font-weight:700;color:var(--blue)}
 
 /* POPULAR COUNTRIES */
-.popular-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
-.pop-card{background:#fff;border:1px solid rgba(10,46,101,0.1);border-radius:16px;padding:1.4rem 1rem;text-align:center;cursor:pointer;transition:var(--trans);display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
-.pop-card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 12px 28px rgba(10,46,101,0.12)}
-.pop-flag{font-size:2.4rem;line-height:1}
-.pop-name{font-weight:600;color:var(--blue);font-size:0.95rem;margin-top:4px}
-.pop-sub{font-size:0.74rem;color:#64748b}
+.popular-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2rem}
+.pop-card{position:relative;border-radius:16px;overflow:hidden;cursor:pointer;height:170px;box-shadow:0 3px 14px rgba(10,46,101,0.08);transition:var(--trans);border:1px solid rgba(10,46,101,0.08)}
+.pop-card:hover{transform:translateY(-5px);box-shadow:0 16px 34px rgba(10,46,101,0.2)}
+.pop-fallback{position:absolute;inset:0;background:linear-gradient(135deg,#0A2E65,#15418c);display:flex;align-items:center;justify-content:center;font-size:3.2rem}
+.pop-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease;z-index:1}
+.pop-card:hover img{transform:scale(1.09)}
+.pop-overlay{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(7,16,34,0.9) 4%,rgba(7,16,34,0.35) 48%,rgba(7,16,34,0.08) 100%)}
+.pop-body{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0.85rem 1rem;text-align:left}
+.pop-flag{font-size:1.5rem;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5))}
+.pop-name{display:block;font-weight:700;color:#fff;font-size:1rem;margin-top:2px;text-shadow:0 1px 8px rgba(0,0,0,0.55)}
+.pop-sub{display:block;font-size:0.72rem;color:#e2e8f5;margin-top:1px;text-shadow:0 1px 6px rgba(0,0,0,0.55)}
+.pop-explore{position:absolute;top:10px;right:10px;z-index:3;background:rgba(255,255,255,0.92);color:var(--blue);font-size:0.66rem;font-weight:700;padding:3px 9px;border-radius:100px;opacity:0;transform:translateY(-4px);transition:0.25s}
+.pop-card:hover .pop-explore{opacity:1;transform:translateY(0)}
 
 /* SECTIONS */
 section{padding:100px 5%}
@@ -298,8 +305,11 @@ footer{background:#0a1628;border-top:1px solid rgba(255,255,255,0.08);padding:60
 .faq-item.open .faq-q span{transform:rotate(45deg)}
 .faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 22px;font-size:0.88rem;color:#4b5563;line-height:1.7}
 .faq-item.open .faq-a{max-height:300px;padding:0 22px 18px}
-.wa-float{position:fixed;bottom:2rem;left:2rem;width:54px;height:54px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;z-index:998;box-shadow:0 4px 20px rgba(37,211,102,0.4);transition:var(--trans)}
+/* LEFT-side stack (bottom→up): back/forward arrows · WhatsApp · Install chip.
+   Right side is reserved for the AI chat FAB + panel, so nothing overlaps. */
+.wa-float{position:fixed;bottom:82px;left:20px;width:52px;height:52px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.45rem;text-decoration:none;z-index:998;box-shadow:0 4px 20px rgba(37,211,102,0.4);transition:var(--trans)}
 .wa-float:hover{transform:scale(1.1)}
+@media(max-width:600px){.wa-float{bottom:70px;left:14px;width:46px;height:46px;font-size:1.3rem}}
 
 /* ── PAGE BACK/NEXT NAV ─────────────────────────────────────────── */
 .page-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;max-width:1200px;margin:2rem auto 3.5rem;padding:1.5rem 2rem;border-top:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
@@ -367,6 +377,25 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .ai-tip-card h4{margin:0 0 4px;font-size:0.9rem;color:#0a1628}
 .ai-tip-card p{margin:0;font-size:0.83rem;color:#475569;line-height:1.55}
 .overview-recent h4{font-size:0.85rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.8rem}
+/* Country AI research */
+.cd-ai-loading{text-align:center;padding:2.5rem 1rem}
+.cd-ai-spinner{width:36px;height:36px;border:3px solid rgba(191,154,46,0.2);border-top-color:var(--gold);border-radius:50%;margin:0 auto;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cd-section{margin-bottom:1.2rem;border:1px solid rgba(0,0,0,0.07);border-radius:14px;overflow:hidden}
+.cd-section-head{background:linear-gradient(135deg,rgba(10,46,101,0.05),rgba(10,46,101,0.02));padding:0.9rem 1.2rem;display:flex;align-items:center;gap:0.6rem;border-bottom:1px solid rgba(0,0,0,0.06)}
+.cd-section-head h4{margin:0;font-size:0.92rem;font-weight:700;color:#0a1628}
+.cd-section-body{padding:1rem 1.2rem;background:#fff}
+.cd-section-body p{margin:0 0 0.5rem;font-size:0.86rem;color:#374151;line-height:1.6}
+.cd-section-body p:last-child{margin:0}
+.cd-section-body ul{margin:0;padding-left:1.2rem}
+.cd-section-body li{font-size:0.85rem;color:#374151;line-height:1.7}
+.cd-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.7rem}
+.cd-chip{background:rgba(10,46,101,0.07);color:var(--blue);border-radius:100px;padding:3px 12px;font-size:0.75rem;font-weight:600}
+.cd-chip.gold{background:rgba(191,154,46,0.1);color:#8a6e1e}
+.cd-stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.6rem;margin-top:0.7rem}
+.cd-stat{background:rgba(10,46,101,0.04);border-radius:10px;padding:0.6rem 0.8rem;text-align:center}
+.cd-stat .n{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--gold);line-height:1}
+.cd-stat .l{font-size:0.67rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px}
 .msg-thread{background:#f1f5f9;border:1px solid rgba(0,0,0,0.08);border-radius:14px;padding:1rem;height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:0.6rem}
 .msg-bubble{max-width:80%;padding:0.7rem 1rem;border-radius:14px;font-size:0.88rem;line-height:1.5;word-wrap:break-word}
 .msg-bubble.client{align-self:flex-end;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-bottom-right-radius:4px}
@@ -413,8 +442,9 @@ body.wc-active .page-nav.page-nav-top{top:118px}
   .hero-btns{flex-direction:column;align-items:stretch}
   .hero-btns .btn-primary,.hero-btns .btn-outline{justify-content:center;width:100%}
   .popular-grid{grid-template-columns:repeat(2,1fr);gap:0.7rem}
-  .pop-flag{font-size:2rem}
-  .pop-name{font-size:0.88rem}
+  .pop-card{height:140px}
+  .pop-flag{font-size:1.3rem}
+  .pop-name{font-size:0.9rem}
   .hero-search{padding:5px 5px 5px 12px}
   .hero-search button{padding:11px 16px;font-size:0.85rem}
   .section-title{font-size:1.7rem}
@@ -524,6 +554,68 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .status-approved{background:rgba(0,150,80,0.1);border:1px solid #00a060;color:#005c32}
 .status-rejected{background:rgba(200,50,50,0.1);border:1px solid #c83232;color:#991b1b}
 @media(max-width:600px){.apply-steps::before{display:none}.step-label{display:none}.service-select-grid{grid-template-columns:1fr 1fr}}
+
+/* ═══ COUNTRY COMPARISON ═══════════════════════════════════════════ */
+.cmp-pickers{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;max-width:880px;margin:2rem auto 0}
+.cmp-picker{position:relative}
+.cmp-input{width:100%;box-sizing:border-box;background:#fff;border:1.5px solid rgba(10,46,101,0.15);border-radius:12px;padding:13px 16px;font-family:'Inter',sans-serif;font-size:0.9rem;color:#0a1628;outline:none;transition:var(--trans)}
+.cmp-input:focus{border-color:var(--gold)}
+.cmp-ac{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,0.14);z-index:30;overflow:hidden;display:none;max-height:280px;overflow-y:auto}
+.cmp-ac.open{display:block}
+.cmp-ac .ci{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:0.88rem;color:#0a1628}
+.cmp-ac .ci:hover,.cmp-ac .ci.sel{background:rgba(212,175,55,0.12)}
+.cmp-ac .ci .cf{font-size:1.2rem}
+.cmp-table-wrap{overflow-x:auto;border:1px solid rgba(0,0,0,0.08);border-radius:var(--radius-xl);box-shadow:0 6px 24px rgba(10,46,101,0.07)}
+.cmp-table{width:100%;border-collapse:collapse;min-width:560px;background:#fff}
+.cmp-table th,.cmp-table td{padding:14px 16px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.06);font-size:0.86rem;vertical-align:top}
+.cmp-table thead th{background:linear-gradient(135deg,#0a1628,#15418c);color:#fff;font-weight:600;position:sticky;top:0}
+.cmp-table thead th .cf{font-size:1.6rem;display:block;margin-bottom:3px}
+.cmp-table tbody tr:nth-child(even){background:rgba(10,46,101,0.025)}
+.cmp-table td:first-child,.cmp-table th:first-child{font-weight:600;color:var(--blue);background:rgba(10,46,101,0.04);position:sticky;left:0;white-space:nowrap}
+.cmp-row-label{display:flex;align-items:center;gap:7px}
+.cmp-loading{text-align:center;padding:3rem 1rem}
+.cmp-rate{display:inline-flex;gap:2px;color:var(--gold);font-size:0.8rem}
+.cmp-rate .off{color:#d7dce5}
+@media(max-width:680px){.cmp-pickers{grid-template-columns:1fr}}
+
+/* ═══ INSTALL APP CHIP (PWA) ═══════════════════════════════════════ */
+#installAppBtn{position:fixed;left:20px;bottom:146px;z-index:950;display:none;align-items:center;gap:8px;background:linear-gradient(135deg,#0a1628,#15418c);color:#fff;border:1px solid rgba(191,154,46,0.5);border-radius:100px;padding:10px 16px;font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(10,22,40,0.35);animation:iaPop 0.4s ease}
+#installAppBtn.show{display:inline-flex}
+#installAppBtn:hover{border-color:var(--gold)}
+#installAppBtn .ia-x{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.15);font-size:0.9rem;line-height:1;margin-left:2px}
+#installAppBtn .ia-x:hover{background:rgba(255,255,255,0.3)}
+@keyframes iaPop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){#installAppBtn{bottom:124px;left:14px;padding:9px 13px;font-size:0.76rem}}
+
+/* ═══ REUSABLE STEP NAVIGATION COMPONENT ═══════════════════════════ */
+.step-nav{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.6rem;width:100%}
+.step-nav-btn{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Inter',sans-serif;font-size:0.92rem;font-weight:600;padding:13px 26px;border-radius:100px;cursor:pointer;border:none;transition:var(--trans);white-space:nowrap;position:relative;user-select:none}
+.step-nav-btn:focus-visible{outline:3px solid rgba(191,154,46,0.45);outline-offset:2px}
+/* Back (left) */
+.step-nav-back{background:transparent;border:1.5px solid rgba(10,46,101,0.22);color:var(--blue)}
+.step-nav-back:hover{border-color:var(--blue);background:rgba(10,46,101,0.04);transform:translateX(-2px)}
+.step-nav-back .sn-arrow{font-size:1.15rem;line-height:1;transition:transform 0.2s}
+.step-nav-back:hover .sn-arrow{transform:translateX(-3px)}
+/* Next / Continue / Submit (right) */
+.step-nav-next{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;box-shadow:0 4px 16px rgba(191,154,46,0.32)}
+.step-nav-next:hover{transform:translateX(2px) translateY(-1px);box-shadow:0 8px 24px rgba(191,154,46,0.42)}
+.step-nav-next .sn-arrow{font-size:1.15rem;line-height:1;transition:transform 0.2s}
+.step-nav-next:hover .sn-arrow{transform:translateX(3px)}
+.step-nav-next.is-submit{background:linear-gradient(135deg,#0a8043,#0fae5c);box-shadow:0 4px 16px rgba(15,174,92,0.32)}
+.step-nav-next.is-submit:hover{box-shadow:0 8px 24px rgba(15,174,92,0.42)}
+/* Disabled */
+.step-nav-btn.disabled,.step-nav-btn:disabled{opacity:0.4;pointer-events:none;cursor:not-allowed;box-shadow:none;transform:none}
+/* Hidden (first step back) — keep space so Next stays right-aligned */
+.step-nav-back.hidden{visibility:hidden}
+/* Loading state */
+.step-nav-next.loading{pointer-events:none;color:transparent}
+.step-nav-next.loading::after{content:'';position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+/* Optional step counter in the middle */
+.step-nav-count{font-size:0.78rem;color:#94a3b8;font-weight:600;white-space:nowrap}
+@media(max-width:480px){
+  .step-nav-btn{padding:12px 18px;font-size:0.85rem;flex:1;justify-content:center}
+  .step-nav-count{display:none}
+}
 
 /* ── APPLICATION PROGRESS BAR ────────────────────────────────────── */
 .app-progress{display:flex;align-items:flex-start;margin:0.8rem 0 1.2rem;position:relative}
@@ -721,14 +813,14 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 @keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes scrollRight{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
 .testi-track-wrap:hover .testi-track,.testi-track-wrap:hover .testi-track-rev{animation-play-state:paused}
-.testi-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1.4rem 1.6rem;width:300px;flex-shrink:0;transition:transform 0.3s,border-color 0.3s}
-.testi-card:hover{transform:translateY(-4px);border-color:rgba(184,134,11,0.5)}
-.testi-stars{color:#b8860b;font-size:0.9rem;margin-bottom:0.7rem;letter-spacing:2px}
-.testi-card p{font-size:0.85rem;color:#cdd8ee;line-height:1.65;font-style:italic;margin-bottom:1rem}
-.testi-author{display:flex;align-items:center;gap:10px}
-.testi-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#b8860b,#d4a017);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.9rem;flex-shrink:0}
-.testi-author strong{display:block;font-size:0.83rem;font-weight:600;color:#fff}
-.testi-author span{font-size:0.72rem;color:#8899bb}
+.testi-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:1rem 1.2rem;width:262px;flex-shrink:0;transition:transform 0.3s,border-color 0.3s}
+.testi-card:hover{transform:translateY(-3px);border-color:rgba(184,134,11,0.5)}
+.testi-stars{color:#b8860b;font-size:0.78rem;margin-bottom:0.5rem;letter-spacing:1.5px}
+.testi-card p{font-size:0.8rem;color:#cdd8ee;line-height:1.55;font-style:italic;margin-bottom:0.8rem}
+.testi-author{display:flex;align-items:center;gap:9px}
+.testi-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#b8860b,#d4a017);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.8rem;flex-shrink:0}
+.testi-author strong{display:block;font-size:0.78rem;font-weight:600;color:#fff}
+.testi-author span{font-size:0.68rem;color:#8899bb}
 
 /* ── ELIGIBILITY CHECKER ─────────────────────────────────────────── */
 .elig-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px}
@@ -832,6 +924,7 @@ body.wc-active .mobile-menu{padding-top:46px}
       <a class="nav-more-btn" onclick="toggleNavMore(event)">More ▾</a>
       <div class="nav-more-drop" id="navMoreDrop">
         <a onclick="showPage('about');closeNavMore()">About Us</a>
+        <a onclick="showPage('compare');closeNavMore()">⚖️ Compare Countries</a>
         <a onclick="showPage('invoice');closeNavMore()">🧾 Invoice</a>
         <a onclick="showPage('apply');closeNavMore()">📋 Apply Now</a>
         <a onclick="showPage('contact');closeNavMore()">Contact</a>
@@ -857,6 +950,7 @@ body.wc-active .mobile-menu{padding-top:46px}
   </form>
   <a onclick="showPage('home');toggleMenu()">Home</a>
   <a onclick="showPage('countries');toggleMenu()">Countries</a>
+  <a onclick="showPage('compare');toggleMenu()">⚖️ Compare Countries</a>
   <a onclick="showPage('services');toggleMenu()">Study Abroad</a>
   <a onclick="showPage('destinations');toggleMenu()">Work Abroad</a>
   <a onclick="showPage('world');toggleMenu()">Travel</a>
@@ -901,10 +995,10 @@ body.wc-active .mobile-menu{padding-top:46px}
         <button class="btn-outline" onclick="openElig()" style="border-color:rgba(100,180,255,0.4);color:#15418c">✦ Check My Eligibility</button>
       </div>
       <div class="hero-stats">
-        <div class="stat-item"><span class="stat-num">12K+</span><span class="stat-label">Visas Processed</span></div>
-        <div class="stat-item"><span class="stat-num">98%</span><span class="stat-label">Success Rate</span></div>
-        <div class="stat-item"><span class="stat-num">47</span><span class="stat-label">Countries Served</span></div>
-        <div class="stat-item"><span class="stat-num">8yr</span><span class="stat-label">Experience</span></div>
+        <div class="stat-item"><span class="stat-num count-up" data-count="12" data-suffix="K+">0</span><span class="stat-label">Visas Processed</span></div>
+        <div class="stat-item"><span class="stat-num count-up" data-count="98" data-suffix="%">0</span><span class="stat-label">Success Rate</span></div>
+        <div class="stat-item"><span class="stat-num count-up" data-count="47" data-suffix="">0</span><span class="stat-label">Countries Served</span></div>
+        <div class="stat-item"><span class="stat-num count-up" data-count="8" data-suffix="yr">0</span><span class="stat-label">Experience</span></div>
       </div>
     </div>
   </section>
@@ -927,17 +1021,57 @@ body.wc-active .mobile-menu{padding-top:46px}
       <div class="text-center">
         <span class="section-tag">Top Destinations</span>
         <h2 class="section-title">Popular <strong>Countries</strong></h2>
-        <p class="section-sub" style="margin:0 auto 0">Tap any country to explore visas, universities, jobs and living costs.</p>
+        <p class="section-sub" style="margin:0 auto 0">Tap any country — we instantly pull together its visas, universities, jobs and living costs for you.</p>
       </div>
       <div class="popular-grid">
-        <div class="pop-card" onclick="showCountryGuide(2)"><span class="pop-flag">🇨🇦</span><span class="pop-name">Canada</span><span class="pop-sub">Study · Work · PR</span></div>
-        <div class="pop-card" onclick="showCountryGuide(1)"><span class="pop-flag">🇺🇸</span><span class="pop-name">USA</span><span class="pop-sub">Study · Work · Travel</span></div>
-        <div class="pop-card" onclick="showCountryGuide(0)"><span class="pop-flag">🇬🇧</span><span class="pop-name">United Kingdom</span><span class="pop-sub">Study · Work · Visit</span></div>
-        <div class="pop-card" onclick="showCountryGuide(4)"><span class="pop-flag">🇦🇺</span><span class="pop-name">Australia</span><span class="pop-sub">Study · Work · Holiday</span></div>
-        <div class="pop-card" onclick="showCountryGuide(3)"><span class="pop-flag">🇩🇪</span><span class="pop-name">Germany</span><span class="pop-sub">Study · EU Blue Card</span></div>
-        <div class="pop-card" onclick="showCountryGuide(7)"><span class="pop-flag">🇦🇪</span><span class="pop-name">UAE / Dubai</span><span class="pop-sub">Work · Golden Visa</span></div>
-        <div class="pop-card" onclick="showCountryGuide(6)"><span class="pop-flag">🇵🇱</span><span class="pop-name">Poland</span><span class="pop-sub">EU Employment</span></div>
-        <div class="pop-card" onclick="showPage('countries')"><span class="pop-flag">🌍</span><span class="pop-name">All Countries</span><span class="pop-sub">View 47+ →</span></div>
+        <div class="pop-card" onclick="showCountryDetail('Canada')">
+          <div class="pop-fallback">🇨🇦</div>
+          <img src="https://images.unsplash.com/photo-1517935706615-2717063c2225?w=500&q=80&auto=format&fit=crop" alt="Canada" loading="lazy" onerror="this.style.display='none'">
+          <div class="pop-overlay"></div><span class="pop-explore">Explore →</span>
+          <div class="pop-body"><span class="pop-flag">🇨🇦</span><span class="pop-name">Canada</span><span class="pop-sub">Study · Work · PR</span></div>
+        </div>
+        <div class="pop-card" onclick="showCountryDetail('United States')">
+          <div class="pop-fallback">🇺🇸</div>
+          <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=500&q=80&auto=format&fit=crop" alt="USA" loading="lazy" onerror="this.style.display='none'">
+          <div class="pop-overlay"></div><span class="pop-explore">Explore →</span>
+          <div class="pop-body"><span class="pop-flag">🇺🇸</span><span class="pop-name">USA</span><span class="pop-sub">Study · Work · Travel</span></div>
+        </div>
+        <div class="pop-card" onclick="showCountryDetail('United Kingdom')">
+          <div class="pop-fallback">🇬🇧</div>
+          <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=500&q=80&auto=format&fit=crop" alt="United Kingdom" loading="lazy" onerror="this.style.display='none'">
+          <div class="pop-overlay"></div><span class="pop-explore">Explore →</span>
+          <div class="pop-body"><span class="pop-flag">🇬🇧</span><span class="pop-name">United Kingdom</span><span class="pop-sub">Study · Work · Visit</span></div>
+        </div>
+        <div class="pop-card" onclick="showCountryDetail('Australia')">
+          <div class="pop-fallback">🇦🇺</div>
+          <img src="https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=500&q=80&auto=format&fit=crop" alt="Australia" loading="lazy" onerror="this.style.display='none'">
+          <div class="pop-overlay"></div><span class="pop-explore">Explore →</span>
+          <div class="pop-body"><span class="pop-flag">🇦🇺</span><span class="pop-name">Australia</span><span class="pop-sub">Study · Work · Holiday</span></div>
+        </div>
+        <div class="pop-card" onclick="showCountryDetail('Germany')">
+          <div class="pop-fallback">🇩🇪</div>
+          <img src="https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=500&q=80&auto=format&fit=crop" alt="Germany" loading="lazy" onerror="this.style.display='none'">
+          <div class="pop-overlay"></div><span class="pop-explore">Explore →</span>
+          <div class="pop-body"><span class="pop-flag">🇩🇪</span><span class="pop-name">Germany</span><span class="pop-sub">Study · EU Blue Card</span></div>
+        </div>
+        <div class="pop-card" onclick="showCountryDetail('United Arab Emirates')">
+          <div class="pop-fallback">🇦🇪</div>
+          <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=500&q=80&auto=format&fit=crop" alt="UAE Dubai" loading="lazy" onerror="this.style.display='none'">
+          <div class="pop-overlay"></div><span class="pop-explore">Explore →</span>
+          <div class="pop-body"><span class="pop-flag">🇦🇪</span><span class="pop-name">UAE / Dubai</span><span class="pop-sub">Work · Golden Visa</span></div>
+        </div>
+        <div class="pop-card" onclick="showCountryDetail('Poland')">
+          <div class="pop-fallback">🇵🇱</div>
+          <img src="https://images.unsplash.com/photo-1519197924294-4ba991a11128?w=500&q=80&auto=format&fit=crop" alt="Poland" loading="lazy" onerror="this.style.display='none'">
+          <div class="pop-overlay"></div><span class="pop-explore">Explore →</span>
+          <div class="pop-body"><span class="pop-flag">🇵🇱</span><span class="pop-name">Poland</span><span class="pop-sub">EU Employment</span></div>
+        </div>
+        <div class="pop-card" onclick="showPage('countries')">
+          <div class="pop-fallback">🌍</div>
+          <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=500&q=80&auto=format&fit=crop" alt="All countries" loading="lazy" onerror="this.style.display='none'">
+          <div class="pop-overlay"></div><span class="pop-explore">Browse →</span>
+          <div class="pop-body"><span class="pop-flag">🌍</span><span class="pop-name">All 195 Countries</span><span class="pop-sub">Open the directory →</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -1160,11 +1294,11 @@ body.wc-active .mobile-menu{padding-top:46px}
   <div class="section-divider"></div>
 
   <!-- TESTIMONIALS -->
-  <section style="background:#0a1628;padding:80px 5%;overflow:hidden">
-    <div style="text-align:center;margin-bottom:3rem">
-      <div style="display:inline-block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.8rem">Client Stories</div>
-      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.2;margin-bottom:0.5rem;color:#ffffff">What Our <strong style="font-weight:600">Clients Say</strong></h2>
-      <p style="color:#8899bb;font-size:0.95rem">Real stories from clients across 47 countries</p>
+  <section style="background:#0a1628;padding:46px 5%;overflow:hidden">
+    <div style="text-align:center;margin-bottom:1.7rem">
+      <div style="display:inline-block;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.5rem">Client Stories</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:300;line-height:1.2;margin-bottom:0.3rem;color:#ffffff">What Our <strong style="font-weight:600">Clients Say</strong></h2>
+      <p style="color:#8899bb;font-size:0.85rem">Real stories from clients across 47 countries</p>
     </div>
 
     <!-- Scrolling ticker row 1 (left→right) -->
@@ -1215,7 +1349,7 @@ body.wc-active .mobile-menu{padding-top:46px}
       <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How does the EU Direct Employment programme work?<span>+</span></button><div class="faq-a">We match your CV with verified employers in 14 European countries. Once an employer selects you, they issue a job offer letter, and we process your work permit and national visa. The full journey typically takes 8–20 weeks. You need a valid passport, a clean criminal record, and relevant work experience.</div></div>
       <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How do I track my application?<span>+</span></button><div class="faq-a">Every application receives a unique reference number (e.g. SKY-2026-XXXX). Enter it in the Track Application section of our website to see your live status, messages from our team, and any documents we've issued to you — 24/7.</div></div>
       <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How do I send you my documents?<span>+</span></button><div class="faq-a">Securely through our website. After applying, open your application with your reference number and use the Documents section to upload passport copies, certificates, and photos. We deliver your finished documents (visas, letters, tickets) the same way.</div></div>
-      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Are you a registered company?<span>+</span></button><div class="faq-a">Yes — SkyGlobe Limited is a registered travel and immigration consultancy. We operate transparently: every application gets a written reference, documented communication, and printable official records on our company letterhead.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Are you a registered company?<span>+</span></button><div class="faq-a">Yes — SkyGlobe Group is a registered travel and immigration consultancy. We operate transparently: every application gets a written reference, documented communication, and printable official records on our company letterhead.</div></div>
       <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I pay in instalments?<span>+</span></button><div class="faq-a">For longer processes such as student visas and EU employment placements, staged payments tied to milestones are available. Discuss your situation during the free consultation and we'll agree a plan that works for you.</div></div>
     </div>
   </section>
@@ -1243,7 +1377,7 @@ body.wc-active .mobile-menu{padding-top:46px}
   <section style="padding-top:140px">
     <div class="section-tag">Our Story</div>
     <h1 class="section-title">Skyglobe is a <em style="font-family:'Cormorant Garamond',serif;color:var(--gold);font-weight:300">Gateway</em><br>to <strong>Global Opportunity</strong></h1>
-    <p class="section-sub" style="max-width:640px">Founded in 2016 in New York City, Skyglobe Limited was born from a simple belief: every person deserves the chance to pursue their dreams — wherever in the world those dreams live.</p>
+    <p class="section-sub" style="max-width:640px">Founded in 2016 in New York City, SkyGlobe Group was born from a simple belief: every person deserves the chance to pursue their dreams — wherever in the world those dreams live.</p>
     
     <div class="about-mission">
       <div class="mission-card">
@@ -1755,9 +1889,6 @@ body.wc-active .mobile-menu{padding-top:46px}
         <div class="svc-card" onclick="selectService('Flight Booking',this)"><span class="sc-icon">🎫</span><h4>Flight Booking</h4><p>Ticket purchase & booking</p></div>
         <div class="svc-card" onclick="selectService('EU Direct Employment',this)"><span class="sc-icon">🇪🇺</span><h4>EU Direct Employment</h4><p>Jobs in Europe + work permit</p></div>
       </div>
-      <div style="margin-top:1.5rem;text-align:right">
-        <button class="btn-primary" onclick="goStep(2)" id="step1Next" disabled style="opacity:0.4">Next: Personal Details →</button>
-      </div>
     </div>
 
     <!-- STEP 2: Personal Information -->
@@ -1772,10 +1903,6 @@ body.wc-active .mobile-menu{padding-top:46px}
         <div class="form-group"><label>Nationality / Country of Origin *</label><input type="text" id="ap_nationality" placeholder="e.g. Nigerian, Indian, Brazilian"></div>
         <div class="form-group"><label>Passport Number</label><input type="text" id="ap_passport" placeholder="A12345678 (optional)"></div>
         <div class="form-group"><label>Passport Expiry Date</label><input type="date" id="ap_passportExpiry"></div>
-      </div>
-      <div style="margin-top:1rem;display:flex;gap:1rem;justify-content:space-between">
-        <button class="btn-outline" onclick="goStep(1)">← Back</button>
-        <button class="btn-primary" onclick="goStep(3)">Next: Travel Details →</button>
       </div>
     </div>
 
@@ -1817,10 +1944,6 @@ body.wc-active .mobile-menu{padding-top:46px}
         <label>Additional Notes / Special Requirements</label>
         <textarea id="ap_notes" placeholder="Any additional information we should know — previous visa refusals, specific requirements, timeline urgency, etc." style="min-height:100px;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--white);font-family:'Inter',sans-serif;font-size:0.9rem;outline:none;resize:vertical"></textarea>
       </div>
-      <div style="margin-top:1rem;display:flex;gap:1rem;justify-content:space-between">
-        <button class="btn-outline" onclick="goStep(2)">← Back</button>
-        <button class="btn-primary" onclick="goStep(4)">Review Application →</button>
-      </div>
     </div>
 
     <!-- STEP 4: Review & Submit -->
@@ -1828,13 +1951,12 @@ body.wc-active .mobile-menu{padding-top:46px}
       <h3 style="margin-bottom:1rem">Review Your Application</h3>
       <div id="reviewSummary" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.5rem;font-size:0.9rem;color:var(--text-body);line-height:2"></div>
       <div style="padding:1rem;background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem">
-        <p style="font-size:0.85rem;color:var(--text-body)">✅ By submitting, you agree that Skyglobe Limited may contact you about your application via email or phone. Your data is kept securely and used only to process your request. You will receive a reference number for tracking.</p>
-      </div>
-      <div style="display:flex;gap:1rem;justify-content:space-between;align-items:center">
-        <button class="btn-outline" onclick="goStep(3)">← Back</button>
-        <button class="btn-primary" style="padding:14px 40px;font-size:1rem" onclick="submitApplication()" id="submitAppBtn">✦ Submit Application</button>
+        <p style="font-size:0.85rem;color:var(--text-body)">✅ By submitting, you agree that SkyGlobe Group may contact you about your application via email or phone. Your data is kept securely and used only to process your request. You will receive a reference number for tracking.</p>
       </div>
     </div>
+
+    <!-- Reusable Step Navigation (drives all 4 steps) -->
+    <div id="applyStepNav"></div>
 
     <!-- SUCCESS STATE -->
     <div class="form-step" id="applySuccess">
@@ -2020,7 +2142,7 @@ body.wc-active .mobile-menu{padding-top:46px}
   <div class="footer-grid">
     <div class="footer-brand">
       <div class="nav-logo" style="cursor:default">
-        <img src="logo.png" alt="SkyGlobe Limited" style="height:72px;width:auto;border-radius:12px">
+        <img src="logo.png" alt="SkyGlobe Group" style="height:72px;width:auto;border-radius:12px">
       </div>
       <p>Your trusted partner for global travel, immigration, and education. Turning international ambitions into lived realities since 2016.</p>
       <div style="display:flex;gap:10px;margin-top:1.2rem;flex-wrap:wrap">
@@ -2070,7 +2192,7 @@ body.wc-active .mobile-menu{padding-top:46px}
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 Skyglobe Limited. All rights reserved.</span>
+    <span>© 2026 SkyGlobe Group. All rights reserved.</span>
     <div style="display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap;justify-content:center">
       <a onclick="showPage('privacy')" style="color:var(--muted);font-size:0.78rem;cursor:pointer;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
       <span style="color:var(--border-strong)">·</span>
@@ -2112,6 +2234,43 @@ body.wc-active .mobile-menu{padding-top:46px}
   </section>
 </div>
 
+<!-- ============ COUNTRY COMPARISON PAGE ============ -->
+<div class="page" id="page-compare">
+  <section style="padding-top:130px">
+    <div class="text-center">
+      <div class="section-tag">Decision Tool</div>
+      <h1 class="section-title">Compare Countries <strong>Side by Side</strong></h1>
+      <p class="section-sub" style="margin:0 auto">Pick up to three countries and we'll line up education, jobs, salaries, cost of living, immigration difficulty and quality of life — so you can choose with confidence.</p>
+    </div>
+
+    <div class="cmp-pickers" id="cmpPickers">
+      <div class="cmp-picker" data-slot="0">
+        <input type="text" class="cmp-input" placeholder="🔍 Country 1 (e.g. Canada)" oninput="cmpAc(0)" onkeydown="cmpAcKey(event,0)" autocomplete="off">
+        <div class="cmp-ac" data-drop="0"></div>
+      </div>
+      <div class="cmp-picker" data-slot="1">
+        <input type="text" class="cmp-input" placeholder="🔍 Country 2 (e.g. Australia)" oninput="cmpAc(1)" onkeydown="cmpAcKey(event,1)" autocomplete="off">
+        <div class="cmp-ac" data-drop="1"></div>
+      </div>
+      <div class="cmp-picker" data-slot="2">
+        <input type="text" class="cmp-input" placeholder="🔍 Country 3 (optional)" oninput="cmpAc(2)" onkeydown="cmpAcKey(event,2)" autocomplete="off">
+        <div class="cmp-ac" data-drop="2"></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:1.2rem">
+      <button class="btn-primary" onclick="runCompare()" id="cmpRunBtn">⚖️ Compare Now</button>
+      <button class="btn-outline" onclick="clearCompare()" style="margin-left:0.6rem">Clear</button>
+    </div>
+
+    <div id="cmpResult" style="margin-top:2rem"></div>
+
+    <div style="margin-top:2.5rem;padding:1.6rem;background:rgba(212,175,55,0.06);border:1px solid var(--border);border-radius:var(--radius-xl);text-align:center;max-width:800px;margin-left:auto;margin-right:auto">
+      <p style="color:var(--text-body);font-size:0.9rem;margin-bottom:1rem">Still unsure which country is right for you? Our consultants give personalised, honest advice based on your goals and budget.</p>
+      <button class="btn-primary" onclick="showPage('contact')">📋 Book a Free Consultation</button>
+    </div>
+  </section>
+</div>
+
 <!-- ============ PRIVACY POLICY PAGE ============ -->
 <div class="page" id="page-privacy">
   <section style="padding-top:140px">
@@ -2137,7 +2296,7 @@ body.wc-active .mobile-menu{padding-top:46px}
       <h3>5. Your Rights</h3>
       <p>You have the right to access, correct, or request deletion of your personal data at any time. To exercise these rights, contact us at <a href="#" onclick="showPage('contact');return false;" style="color:var(--gold)">support@skyglobegroup.com</a> with your application reference number.</p>
       <h3>6. Contact</h3>
-      <p>For any privacy enquiries: <a href="#" onclick="showPage('contact');return false;" style="color:var(--gold)">support@skyglobegroup.com</a><br>SkyGlobe Limited, 123 Fifth Avenue, Suite 450, New York, NY 10011, USA.</p>
+      <p>For any privacy enquiries: <a href="#" onclick="showPage('contact');return false;" style="color:var(--gold)">support@skyglobegroup.com</a><br>SkyGlobe Group, 123 Fifth Avenue, Suite 450, New York, NY 10011, USA.</p>
     </div>
     <button class="btn-outline" onclick="history.back()||showPage('home')" style="margin-top:1rem">← Back</button>
   </section>
@@ -2151,7 +2310,7 @@ body.wc-active .mobile-menu{padding-top:46px}
     <div class="policy-body">
       <p><strong style="color:var(--white)">Last updated: June 2026</strong></p>
       <h3>1. Services</h3>
-      <p>SkyGlobe Limited provides visa consultancy, university admission assistance, travel documentation, and employment placement services. We act as a consultancy and intermediary — final visa decisions are made by the relevant government authority or institution, not by SkyGlobe.</p>
+      <p>SkyGlobe Group provides visa consultancy, university admission assistance, travel documentation, and employment placement services. We act as a consultancy and intermediary — final visa decisions are made by the relevant government authority or institution, not by SkyGlobe.</p>
       <h3>2. Fees & Payment</h3>
       <p>Our service fees are separate from and in addition to all government, embassy, and institutional fees. All fees are communicated transparently before you commit. Fees paid for services rendered are non-refundable unless a specific refund commitment was made in writing.</p>
       <h3>3. No Guarantee of Outcome</h3>
@@ -2159,13 +2318,13 @@ body.wc-active .mobile-menu{padding-top:46px}
       <h3>4. Client Responsibilities</h3>
       <p>Clients are responsible for providing accurate, truthful, and complete information. Submitting false documents or misrepresenting information is illegal and will result in immediate termination of services without refund.</p>
       <h3>5. Intellectual Property</h3>
-      <p>All content on this website including text, graphics, and code is the property of SkyGlobe Limited and may not be reproduced without written permission.</p>
+      <p>All content on this website including text, graphics, and code is the property of SkyGlobe Group and may not be reproduced without written permission.</p>
       <h3>6. Limitation of Liability</h3>
-      <p>SkyGlobe Limited's liability is limited to the service fees paid. We are not liable for consequential damages including lost travel costs, lost income, or personal inconvenience resulting from visa refusals or delays beyond our control.</p>
+      <p>SkyGlobe Group's liability is limited to the service fees paid. We are not liable for consequential damages including lost travel costs, lost income, or personal inconvenience resulting from visa refusals or delays beyond our control.</p>
       <h3>7. Governing Law</h3>
       <p>These terms are governed by the laws of the State of New York, USA. Any disputes shall be resolved through binding arbitration in New York City.</p>
       <h3>8. Contact</h3>
-      <p><a href="#" onclick="showPage('contact');return false;" style="color:var(--gold)">support@skyglobegroup.com</a> — SkyGlobe Limited, 123 Fifth Avenue, New York, NY 10011.</p>
+      <p><a href="#" onclick="showPage('contact');return false;" style="color:var(--gold)">support@skyglobegroup.com</a> — SkyGlobe Group, 123 Fifth Avenue, New York, NY 10011.</p>
     </div>
     <button class="btn-outline" onclick="showPage('home')" style="margin-top:1rem">← Back to Home</button>
   </section>
@@ -2178,7 +2337,7 @@ body.wc-active .mobile-menu{padding-top:46px}
     <h1 class="section-title">Anti-Fraud <strong>Policy</strong></h1>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:2rem">
       <div style="font-size:1.3rem;margin-bottom:0.5rem">⚠️ <strong style="color:#f87171">Warning: Protect Yourself from Fraud</strong></div>
-      <p style="color:var(--text-body);font-size:0.9rem;line-height:1.7">Fraudsters sometimes impersonate legitimate agencies. Please verify you are dealing with the real SkyGlobe Limited before making any payment.</p>
+      <p style="color:var(--text-body);font-size:0.9rem;line-height:1.7">Fraudsters sometimes impersonate legitimate agencies. Please verify you are dealing with the real SkyGlobe Group before making any payment.</p>
     </div>
     <div class="policy-body">
       <h3>Our Official Channels Only</h3>
@@ -2204,7 +2363,7 @@ body.wc-active .mobile-menu{padding-top:46px}
         <li>If in doubt, contact us directly via WhatsApp: +1 737-399-8522</li>
       </ul>
       <h3>Report a Scam</h3>
-      <p>If you believe someone is impersonating SkyGlobe Limited or has defrauded you, please contact us immediately at <a href="#" onclick="showPage('contact');return false;" style="color:var(--gold)">support@skyglobegroup.com</a> and report to your local authorities.</p>
+      <p>If you believe someone is impersonating SkyGlobe Group or has defrauded you, please contact us immediately at <a href="#" onclick="showPage('contact');return false;" style="color:var(--gold)">support@skyglobegroup.com</a> and report to your local authorities.</p>
     </div>
     <button class="btn-outline" onclick="showPage('home')" style="margin-top:1rem">← Back to Home</button>
   </section>
@@ -2230,6 +2389,13 @@ body.wc-active .mobile-menu{padding-top:46px}
 <!-- WhatsApp Float -->
 <a href="https://wa.me/17373998522" class="wa-float" target="_blank" title="Chat on WhatsApp">💬</a>
 
+<!-- Install App chip (PWA) -->
+<button id="installAppBtn" onclick="triggerInstall()" title="Install SkyGlobe app">
+  <span style="font-size:1.05rem">⬇️</span>
+  <span>Install App</span>
+  <span class="ia-x" onclick="dismissInstall(event)" title="Dismiss">×</span>
+</button>
+
 <!-- Scroll to top -->
 <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
 
@@ -2245,8 +2411,8 @@ body.wc-active .mobile-menu{padding-top:46px}
 <script>
 // PAGE ROUTING
 // Main journey order for Back/Next navigation
-const PAGE_ORDER = ['home','about','services','destinations','countries','world','blog','tools','invoice','apply','contact'];
-const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',world:'World Explorer',blog:'Blog',tools:'AI Tools',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
+const PAGE_ORDER = ['home','about','services','destinations','countries','compare','world','blog','tools','invoice','apply','contact'];
+const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',compare:'Compare Countries',world:'World Explorer',blog:'Blog',tools:'AI Tools',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
 let _lastPage = null;
 // Browser-style history: one back/forward control for the whole site
 let navHistory = [];   // pages visited before the current one
@@ -3463,46 +3629,161 @@ function applyForService(name) {
     c.classList.remove('selected');
     if (c.getAttribute('onclick') && c.getAttribute('onclick').includes("'" + name + "'")) c.classList.add('selected');
   });
-  const btn = document.getElementById('step1Next');
-  btn.disabled = false; btn.style.opacity = '1';
-  goStep(2);
+  if (window.applyNav) { applyNav.show(); applyNav.goto(2); }
 }
 
 function selectService(name, el) {
   selectedService = name;
   document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
-  const btn = document.getElementById('step1Next');
-  btn.disabled = false;
-  btn.style.opacity = '1';
+  if (window.applyNav) applyNav.update();   // live-enable the Continue button
 }
 
-function goStep(n) {
-  if (n === 2) {
-    if (!selectedService) { showToast('⚠️ Please select a service first.', true); return; }
+/* ═══ Reusable StepNav component — usable anywhere on the platform ═══
+   Usage:
+     const nav = new StepNav({
+       mount:'elementId', total:4, current:1,
+       labels:{ back:'Back', next:'Continue', submit:'Submit' },
+       validate:(step)=>true|false,          // gate the Next/Submit button
+       onChange:(step,dir)=>{ ...render... }, // step changed
+       onSubmit:async()=>{ ...final step... },// Next on last step
+       storageKey:'apply'                     // auto-saves current step
+     });
+*/
+class StepNav {
+  constructor(opts) {
+    this.el = typeof opts.mount === 'string' ? document.getElementById(opts.mount) : opts.mount;
+    this.total = opts.total || 1;
+    this.current = opts.current || 1;
+    this.labels = Object.assign({ back: 'Back', next: 'Continue', submit: 'Submit' }, opts.labels || {});
+    this.backIcon = opts.backIcon || '←';
+    this.nextIcon = opts.nextIcon || '→';
+    this.validate = opts.validate || (() => true);
+    this.onChange = opts.onChange || (() => {});
+    this.onSubmit = opts.onSubmit || (() => {});
+    this.showCount = opts.showCount !== false;
+    this.storageKey = opts.storageKey || null;
+    this._render();
+    this._bindKeys();
+    this.update();
   }
-  if (n === 3) {
-    const fname = document.getElementById('ap_fname').value.trim();
-    const email = document.getElementById('ap_email').value.trim();
-    const phone = document.getElementById('ap_phone').value.trim();
-    const nationality = document.getElementById('ap_nationality').value.trim();
-    if (!fname || !email || !phone || !nationality) { showToast('⚠️ Please fill in all required fields.', true); return; }
-    document.getElementById('selectedServiceLabel').textContent = selectedService;
-    showServiceFields();
+  _render() {
+    this.el.classList.add('step-nav');
+    this.el.innerHTML =
+      `<button type="button" class="step-nav-btn step-nav-back"><span class="sn-arrow">${this.backIcon}</span><span class="sn-label">${this.labels.back}</span></button>` +
+      (this.showCount ? `<span class="step-nav-count"></span>` : '') +
+      `<button type="button" class="step-nav-btn step-nav-next"><span class="sn-label"></span><span class="sn-arrow">${this.nextIcon}</span></button>`;
+    this.backBtn = this.el.querySelector('.step-nav-back');
+    this.nextBtn = this.el.querySelector('.step-nav-next');
+    this.countEl = this.el.querySelector('.step-nav-count');
+    this.backBtn.addEventListener('click', () => this.back());
+    this.nextBtn.addEventListener('click', () => this.next());
   }
-  if (n === 4) {
-    buildReview();
+  _bindKeys() {
+    this._keyHandler = (e) => {
+      if (!this.el || this.el.offsetParent === null) return;       // only when visible
+      const tag = (e.target.tagName || '').toLowerCase();
+      const typing = tag === 'input' || tag === 'textarea' || tag === 'select';
+      if (typing) return;                                          // don't hijack typing/selects
+      if (e.key === 'ArrowRight') { e.preventDefault(); this.next(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); this.back(); }
+    };
+    document.addEventListener('keydown', this._keyHandler);
   }
+  isFirst() { return this.current <= 1; }
+  isLast() { return this.current >= this.total; }
+  update() {
+    this.backBtn.classList.toggle('hidden', this.isFirst());
+    const last = this.isLast();
+    this.nextBtn.querySelector('.sn-label').textContent = last ? this.labels.submit : this.labels.next;
+    this.nextBtn.classList.toggle('is-submit', last);
+    this.nextBtn.querySelector('.sn-arrow').style.display = last ? 'none' : '';
+    const ok = !!this.validate(this.current);
+    this.nextBtn.disabled = !ok;
+    this.nextBtn.classList.toggle('disabled', !ok);
+    if (this.countEl) this.countEl.textContent = `Step ${this.current} of ${this.total}`;
+    if (this.storageKey) { try { localStorage.setItem(this.storageKey + '_step', this.current); } catch (e) {} }
+  }
+  async next() {
+    if (this.nextBtn.disabled || this.nextBtn.classList.contains('loading')) return;
+    if (!this.validate(this.current)) { this.update(); return; }
+    if (this.isLast()) {
+      this.setLoading(true);
+      try { await this.onSubmit(); } finally { this.setLoading(false); }
+      return;
+    }
+    this.current++;
+    this.onChange(this.current, 'next');
+    this.update();
+  }
+  back() {
+    if (this.isFirst()) return;
+    this.current--;
+    this.onChange(this.current, 'back');
+    this.update();
+  }
+  goto(step) {
+    this.current = Math.min(Math.max(1, step), this.total);
+    this.onChange(this.current, 'goto');
+    this.update();
+  }
+  setLoading(b) { this.nextBtn.classList.toggle('loading', b); }
+  show() { this.el.style.display = ''; }
+  hide() { this.el.style.display = 'none'; }
+  destroy() { document.removeEventListener('keydown', this._keyHandler); }
+}
+window.StepNav = StepNav;
+
+/* Render a given apply step + run its side-effects (no validation — StepNav gates that) */
+function renderApplyStep(n) {
+  if (n === 3) { document.getElementById('selectedServiceLabel').textContent = selectedService; showServiceFields(); }
+  if (n === 4) { buildReview(); }
   currentAppStep = n;
   document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
   document.getElementById('applyStep' + n).classList.add('active');
   document.querySelectorAll('.apply-step').forEach((s, i) => {
-    s.classList.remove('active','done');
+    s.classList.remove('active', 'done');
     if (i + 1 < n) s.classList.add('done');
     if (i + 1 === n) s.classList.add('active');
   });
-  window.scrollTo({top: document.getElementById('page-apply').offsetTop - 80, behavior:'smooth'});
+  window.scrollTo({ top: document.getElementById('page-apply').offsetTop - 80, behavior: 'smooth' });
 }
+
+/* Per-step validation for the apply flow */
+function validateApplyStep(step) {
+  if (step === 1) return !!selectedService;
+  if (step === 2) {
+    return ['ap_fname','ap_email','ap_phone','ap_nationality']
+      .every(id => (document.getElementById(id)?.value || '').trim().length > 0);
+  }
+  return true; // steps 3 & 4 have no hard-required fields
+}
+
+/* Backwards-compatible helper in case anything still calls goStep(n) */
+function goStep(n) { if (window.applyNav) applyNav.goto(n); }
+
+/* Build the apply form's StepNav once the DOM is ready */
+let applyNav = null;
+function initApplyNav() {
+  const mount = document.getElementById('applyStepNav');
+  if (!mount || applyNav) return;
+  applyNav = new StepNav({
+    mount, total: 4, current: 1,
+    labels: { back: 'Back', next: 'Continue', submit: 'Submit Application' },
+    validate: validateApplyStep,
+    onChange: (step) => renderApplyStep(step),
+    onSubmit: submitApplication,
+    storageKey: 'sg_apply'
+  });
+  window.applyNav = applyNav;
+  // Live-enable Continue as the user fills required fields
+  ['ap_fname','ap_email','ap_phone','ap_nationality'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => applyNav.update());
+  });
+}
+if (document.readyState !== 'loading') initApplyNav();
+else document.addEventListener('DOMContentLoaded', initApplyNav);
 
 function showServiceFields() {
   const show = serviceFields[selectedService] || [];
@@ -3539,9 +3820,6 @@ function buildReview() {
 }
 
 async function submitApplication() {
-  const btn = document.getElementById('submitAppBtn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting…';
   const payload = {
     service: selectedService,
     fname: document.getElementById('ap_fname').value.trim(),
@@ -3595,6 +3873,8 @@ async function submitApplication() {
     document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
     document.getElementById('applySuccess').classList.add('active');
     document.querySelectorAll('.apply-step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+    if (window.applyNav) applyNav.hide();          // hide step nav on the success screen
+    try { localStorage.removeItem('sg_apply_step'); } catch(e){}
     window.scrollTo({top: document.getElementById('page-apply').offsetTop - 80, behavior:'smooth'});
   } catch(err) {
     if (err.name === 'AbortError') {
@@ -3603,9 +3883,7 @@ async function submitApplication() {
       showToast('⚠️ ' + (err.message || 'Failed to submit') + '. Please try WhatsApp.', true);
     }
     console.error(err);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '✦ Submit Application';
+    // StepNav's finally{} clears the loading state automatically
   }
 }
 
@@ -3620,8 +3898,7 @@ function resetApplyForm() {
   document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
   document.getElementById('applyStep1').classList.add('active');
   document.querySelectorAll('.apply-step').forEach((s,i) => { s.classList.remove('active','done'); if(i===0) s.classList.add('active'); });
-  const btn = document.getElementById('step1Next');
-  btn.disabled = true; btn.style.opacity = '0.4';
+  if (window.applyNav) { applyNav.show(); applyNav.current = 1; applyNav.update(); }
 }
 
 function showTracker() {
@@ -4506,7 +4783,7 @@ function printApp(cardId) {
   const row = (label, val) => val ? `<tr><td>${label}</td><td>${esc(val)}</td></tr>` : '';
   const logo = location.origin + '/logo.png';
   const w = window.open('', '_blank', 'width=860,height=760');
-  w.document.write(`<!DOCTYPE html><html><head><title>SkyGlobe Limited — Official Application Document</title>
+  w.document.write(`<!DOCTYPE html><html><head><title>SkyGlobe Group — Official Application Document</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -4559,7 +4836,7 @@ function printApp(cardId) {
     <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
     <div class="watermark"><img src="${logo}" alt=""></div>
     <div class="lh-header">
-      <img src="${logo}" alt="SkyGlobe Limited">
+      <img src="${logo}" alt="SkyGlobe Group">
       <div class="co">
         <div class="name">SKY<span>GLOBE</span> LIMITED</div>
         <div class="tag">Global Travel · Immigration · Education</div>
@@ -4600,7 +4877,7 @@ function printApp(cardId) {
       </table>
       ${app.notes ? `<div class="notes-box"><strong style="font-size:0.72rem;color:#8a6f2a;text-transform:uppercase;letter-spacing:0.08em">Notes</strong><br>${esc(app.notes)}</div>` : ''}
       ${responses && responses.length ? `<div class="msg-title">Messages From Our Team</div>` + responses.map(r => `<div class="msg"><div class="d">${r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</div>${esc(r.message).replace(/\\n/g, '<br>')}</div>`).join('') : ''}
-      <p style="margin-top:20px;font-size:0.76rem;color:#777;line-height:1.7">This is an official record issued by SkyGlobe Limited confirming the above application. Please quote your reference number in all correspondence. For enquiries contact us using the details below.</p>
+      <p style="margin-top:20px;font-size:0.76rem;color:#777;line-height:1.7">This is an official record issued by SkyGlobe Group confirming the above application. Please quote your reference number in all correspondence. For enquiries contact us using the details below.</p>
     </div>
     <div class="lh-footer">
       <div class="motto">“Turning international ambitions into lived realities”</div>
@@ -5195,7 +5472,7 @@ updateAccountNav();
           <div class="doc-type-card" onclick="selectDocType('skyconference',this)">
             <span class="dt-icon">🌐</span>
             <h4>SkyGlobe Conference Invite</h4>
-            <p>Official invitation letter <strong>issued by SkyGlobe Limited</strong> — supports your visa application to attend our international events.</p>
+            <p>Official invitation letter <strong>issued by SkyGlobe Group</strong> — supports your visa application to attend our international events.</p>
           </div>
         </div>
       </div>
@@ -5440,7 +5717,7 @@ updateAccountNav();
 
         <hr style="margin:1.4rem 0;border:none;border-top:1px solid #f1f5f9">
         <h3 style="margin:0 0 1rem;font-size:1rem;color:#1e293b">📝 Notes (optional)</h3>
-        <textarea id="invNotes" rows="3" placeholder="e.g. Thank you for choosing SkyGlobe Limited. Payment is due within 7 days." style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.88rem;outline:none;resize:vertical;box-sizing:border-box"></textarea>
+        <textarea id="invNotes" rows="3" placeholder="e.g. Thank you for choosing SkyGlobe Group. Payment is due within 7 days." style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.88rem;outline:none;resize:vertical;box-sizing:border-box"></textarea>
 
         <button onclick="buildInvoice()" class="btn-primary" style="margin-top:1.4rem;width:100%;font-size:1rem;padding:14px">🖨️ Preview &amp; Print Invoice</button>
       </div>
@@ -6371,8 +6648,8 @@ function selectDocType(type, el) {
     },
     skyconference: {
       heading: 'Your personal details (the attendee)',
-      hint: 'SkyGlobe Limited will issue this conference invitation letter on your behalf. Fill in YOUR details as the attendee.',
-      notice: '🌐 <strong>SkyGlobe-Issued Invitation:</strong> This letter is issued by <strong>SkyGlobe Limited</strong> on its own official letterhead and signed by our authorised officer. It is a genuine invitation letter valid for visa purposes. Our team will review and countersign before you submit.',
+      hint: 'SkyGlobe Group will issue this conference invitation letter on your behalf. Fill in YOUR details as the attendee.',
+      notice: '🌐 <strong>SkyGlobe-Issued Invitation:</strong> This letter is issued by <strong>SkyGlobe Group</strong> on its own official letterhead and signed by our authorised officer. It is a genuine invitation letter valid for visa purposes. Our team will review and countersign before you submit.',
       dest: 'Country of the Conference *', inst: 'Conference / Event Name *', prog: 'Your Role (delegate, speaker, attendee…)',
       bg: 'Conference Dates & Venue', exp: 'Your Professional Background',
       why: 'Why you are attending this event', goals: 'Your ties to home country & return plans'
@@ -6688,7 +6965,7 @@ function printDoc() {
     ? `<div class="doc-footer draft-note">
          <strong>DRAFT — NOT YET VALID.</strong> To be accepted by any institution, company or embassy, this document must be reproduced on the
          <strong>official letterhead of ${esc(issuerName)}</strong> and <strong>signed &amp; stamped by an authorised officer</strong>.<br>
-         Prepared with assistance from SkyGlobe Limited's AI tools · skyglobegroup.com
+         Prepared with assistance from SkyGlobe Group's AI tools · skyglobegroup.com
        </div>`
     : '';
 
@@ -6731,7 +7008,7 @@ function printDoc() {
         ${isIssuerDoc
           ? `<div class="lh-name">${esc(issuerName)}</div>
              <div class="lh-tag">${selectedDocType === 'experience' ? 'Human Resources Department' : 'Office of the Organiser'}</div>`
-          : `<img src="${logoUrl}" alt="SkyGlobe Limited" class="lh-logo">
+          : `<img src="${logoUrl}" alt="SkyGlobe Group" class="lh-logo">
              <div class="lh-name" style="font-size:15pt">SKY<span>GLOBE</span> LIMITED</div>
              <div class="lh-tag">Your Gateway to Global Opportunity</div>`}
       </div>
@@ -6757,10 +7034,10 @@ function printDoc() {
       Yours faithfully,
       <div class="sig-space"></div>
       <div class="sig-rule"></div>
-      <div class="sig-name">Authorised Signatory — SkyGlobe Limited</div>
+      <div class="sig-name">Authorised Signatory — SkyGlobe Group</div>
       <div class="sig-detail">Name: ______________________ &nbsp; Designation: ______________________</div>
       <div class="sig-detail">Date: ______________________ &nbsp;&nbsp; Company Stamp:</div>
-      <div class="stamp-box">SkyGlobe Limited<br>Official Stamp</div>
+      <div class="stamp-box">SkyGlobe Group<br>Official Stamp</div>
     </div>` : `<div class="doc-signoff">
       ${isLetter ? 'Yours faithfully,' : 'Respectfully submitted,'}
       <div class="sig-name">${esc(fullName)}</div>
@@ -6769,7 +7046,7 @@ function printDoc() {
     </div>`}
 
     ${isIssuerDoc ? issuerFooter : `<div class="doc-footer">
-      This document was drafted with assistance from SkyGlobe Limited's AI tools and is intended as a professional draft.<br>
+      This document was drafted with assistance from SkyGlobe Group's AI tools and is intended as a professional draft.<br>
       For document review, visa processing, and admissions support, visit <strong>skyglobegroup.com</strong>
     </div>`}
     <script>
@@ -6910,7 +7187,7 @@ function buildInvoice() {
   const fmtDate = d => { if (!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; };
 
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>Invoice ${invNumber} — SkyGlobe Limited</title>
+<title>Invoice ${invNumber} — SkyGlobe Group</title>
 <style>
   @page { size: A4; margin: 20mm 18mm; }
   body { font-family: 'Georgia', serif; color: #1e293b; margin: 0; padding: 0; font-size: 10pt; }
@@ -6938,12 +7215,12 @@ function buildInvoice() {
 <!-- LETTERHEAD -->
 <div class="lh">
   <div class="lh-brand">
-    <img src="${location.origin}/logo.png" alt="SkyGlobe Limited" style="height:64px;width:auto;display:block;margin-bottom:4px">
-    <div class="brand-name" style="font-size:16pt">SKYGLOBE LIMITED</div>
+    <img src="${location.origin}/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;display:block;margin-bottom:4px">
+    <div class="brand-name" style="font-size:16pt">SKYGLOBE GROUP</div>
     <div class="brand-tag">Global Immigration &amp; Education Consultancy</div>
   </div>
   <div class="lh-contact">
-    <strong>SkyGlobe Limited</strong><br>
+    <strong>SkyGlobe Group</strong><br>
     support@skyglobegroup.com<br>
     www.skyglobegroup.com<br>
     +1 (647) 555-0192
@@ -6996,8 +7273,8 @@ function buildInvoice() {
 ${invNotes ? `<div class="notes"><strong>📝 Notes:</strong><br>${invNotes}</div>` : ''}
 
 <div class="footer">
-  SkyGlobe Limited &nbsp;|&nbsp; support@skyglobegroup.com &nbsp;|&nbsp; www.skyglobegroup.com<br>
-  This invoice was generated by SkyGlobe Limited's secure client portal.
+  SkyGlobe Group &nbsp;|&nbsp; support@skyglobegroup.com &nbsp;|&nbsp; www.skyglobegroup.com<br>
+  This invoice was generated by SkyGlobe Group's secure client portal.
 </div>
 </body></html>`;
 
@@ -7376,14 +7653,20 @@ async function _loadWeather(c, elId) {
 function showCountryDetail(name) {
   const c = ALL_COUNTRIES.find(x => x.name === name);
   if (!c) return;
-  const ov = _overviewFor(c);
   const guideIdx = GUIDE_MAP[c.name];
   const wId = 'cdWeather';
+  const isSaved = getSavedCountries().includes(c.name);
+
   document.getElementById('countryGuideContent').innerHTML = `
-    <div class="cd-hero"><div class="cd-flag">${c.flag}</div></div>
-    <div style="padding-top:1.2rem">
-      <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;margin:0">${c.name}</h2>
-      <div style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em">${REGION_NAMES[c.region]} · Capital: ${c.capital}</div>
+    <div class="cd-hero" style="background:linear-gradient(135deg,#0A2E65,#15418c)">
+      <div style="font-size:5rem;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.4))">${c.flag}</div>
+    </div>
+    <div style="padding-top:1.2rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.8rem">
+      <div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;margin:0">${c.name}</h2>
+        <div style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em">${REGION_NAMES[c.region]} · Capital: ${c.capital}</div>
+      </div>
+      <button id="cdSaveBtn" onclick="toggleSaveCountry('${c.name.replace(/'/g,"\\'")}', this)" style="background:${isSaved?'rgba(191,154,46,0.12)':'transparent'};border:1px solid ${isSaved?'var(--gold)':'rgba(0,0,0,0.12)'};border-radius:100px;padding:7px 16px;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;color:${isSaved?'var(--gold)':'#64748b'};transition:0.2s">${isSaved?'🔖 Saved':'🔖 Save'}</button>
     </div>
     <div class="cd-facts">
       <div class="cd-fact"><div class="l">Capital</div><div class="v">${c.capital}</div></div>
@@ -7391,21 +7674,150 @@ function showCountryDetail(name) {
       <div class="cd-fact"><div class="l">Languages</div><div class="v">${c.langs}</div></div>
       <div class="cd-fact"><div class="l">Currency</div><div class="v">${c.currency}</div></div>
     </div>
-    <div class="cd-weather" id="${wId}"><span class="wt">⏳</span><div style="font-size:0.82rem;color:#64748b">Loading live weather…</div></div>
-    <div class="cd-block"><h4>🛂 Visa Information</h4><p>${ov.visa}</p></div>
-    <div class="cd-block"><h4>🎓 Study Abroad</h4><p>${ov.study}</p></div>
-    <div class="cd-block"><h4>💼 Work & Jobs</h4><p>${ov.work}</p></div>
-    <div class="cd-block"><h4>🏠 Cost of Living & Housing</h4><p>Living costs and rent vary by city — capital and major cities are typically the most expensive. We provide budgeting guidance and student-accommodation tips during your consultation.</p></div>
-    <div class="cd-block"><h4>🛣️ Immigration Pathways</h4><p>Routes may include study-to-work transitions, skilled migration, family sponsorship and (in some countries) investment or residency-by-investment programmes. We map the best legal pathway for your profile.</p></div>
+    <div class="cd-weather" id="${wId}"><span class="wt">⏳</span><div style="font-size:0.82rem;color:#64748b">Loading live weather in ${c.capital}…</div></div>
+    <div id="cdAiContent" style="margin-top:1rem">
+      <div class="cd-ai-loading">
+        <div class="cd-ai-spinner"></div>
+        <p style="color:#64748b;font-size:0.88rem;margin:0.6rem 0 0">Researching ${c.name} — visa rules, universities, jobs, cost of living…</p>
+      </div>
+    </div>
     <div style="display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1.6rem">
       ${guideIdx !== undefined ? `<button class="btn-primary" onclick="closeCountryGuide();showCountryGuide(${guideIdx})">📘 Full Detailed Guide</button>` : ''}
       <button class="${guideIdx!==undefined?'btn-outline':'btn-primary'}" onclick="closeCountryGuide();showPage('contact')">📋 Book Free Consultation</button>
-      <button class="btn-outline" onclick="closeCountryGuide();showPage('tools')">🤖 Ask AI Assistant</button>
+      <button class="btn-outline" onclick="closeCountryGuide();showPage('tools')">✨ AI Document Generator</button>
     </div>
-    <p style="font-size:0.76rem;color:#94a3b8;margin-top:1rem">ℹ️ Visa rules change frequently and depend on your nationality. Always confirm specifics with our consultants or the official embassy before travelling.</p>`;
+    <p style="font-size:0.76rem;color:#94a3b8;margin-top:1rem">ℹ️ Visa rules change frequently. Always confirm with our consultants or the official embassy before travelling.</p>`;
+
   document.getElementById('countryGuideOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   _loadWeather(c, wId);
+  _loadCountryAI(c);
+}
+
+async function _loadCountryAI(c) {
+  const el = document.getElementById('cdAiContent');
+  if (!el) return;
+
+  // Check cache (1 week TTL)
+  const cacheKey = 'sg_cai_' + c.name.replace(/[^a-z]/gi,'').toLowerCase();
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (cached && cached.ts && Date.now() - cached.ts < 7 * 24 * 60 * 60 * 1000) {
+      el.innerHTML = cached.html;
+      return;
+    }
+  } catch {}
+
+  try {
+    const r = await fetch('/api/country-info', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ country: c.name, capital: c.capital, region: REGION_NAMES[c.region], langs: c.langs, currency: c.currency })
+    });
+    const d = await r.json();
+    if (d.html) {
+      el.innerHTML = d.html;
+      try { localStorage.setItem(cacheKey, JSON.stringify({ html: d.html, ts: Date.now() })); } catch {}
+    } else {
+      el.innerHTML = _countryFallbackHtml(c);
+    }
+  } catch {
+    el.innerHTML = _countryFallbackHtml(c);
+  }
+}
+
+function _countryFallbackHtml(c) {
+  const ov = _overviewFor(c);
+  return `
+    <div class="cd-block"><h4>🛂 Visa & Entry</h4><p>${ov.visa}</p></div>
+    <div class="cd-block"><h4>🎓 Study Abroad</h4><p>${ov.study}</p></div>
+    <div class="cd-block"><h4>💼 Work & Jobs</h4><p>${ov.work}</p></div>
+    <div class="cd-block"><h4>🏠 Cost of Living</h4><p>Living costs vary by city. Our consultants provide tailored budgeting guidance during your consultation.</p></div>
+    <div class="cd-block"><h4>🛣️ Immigration Pathways</h4><p>Routes may include study-to-work transitions, skilled migration, family sponsorship and investment programmes. We map the best legal pathway for your profile.</p></div>`;
+}
+
+
+/* ═══════════ COUNTRY COMPARISON TOOL ═══════════ */
+let _cmpSel = [null, null, null];   // chosen country names per slot
+let _cmpAcIdx = -1;
+
+function cmpAc(slot) {
+  const picker = document.querySelector(`.cmp-picker[data-slot="${slot}"]`);
+  const input = picker.querySelector('.cmp-input');
+  const drop = picker.querySelector('.cmp-ac');
+  const q = input.value.trim().toLowerCase();
+  _cmpSel[slot] = null;
+  _cmpAcIdx = -1;
+  if (!q) { drop.classList.remove('open'); return; }
+  const matches = ALL_COUNTRIES.filter(c => c.name.toLowerCase().includes(q) || c.capital.toLowerCase().includes(q)).slice(0, 8);
+  if (!matches.length) { drop.classList.remove('open'); return; }
+  drop.innerHTML = matches.map(c =>
+    `<div class="ci" onmousedown="cmpPick(${slot},'${c.name.replace(/'/g,"\\'")}')"><span class="cf">${c.flag}</span><span>${c.name}</span></div>`).join('');
+  drop.classList.add('open');
+}
+function cmpAcKey(e, slot) {
+  const drop = document.querySelector(`.cmp-picker[data-slot="${slot}"] .cmp-ac`);
+  if (!drop || !drop.classList.contains('open')) return;
+  const items = [...drop.querySelectorAll('.ci')];
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); _cmpAcIdx = Math.min(_cmpAcIdx + 1, items.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); _cmpAcIdx = Math.max(_cmpAcIdx - 1, 0); }
+  else if (e.key === 'Enter' && _cmpAcIdx >= 0) { e.preventDefault(); items[_cmpAcIdx].dispatchEvent(new MouseEvent('mousedown')); return; }
+  else return;
+  items.forEach((it, i) => it.classList.toggle('sel', i === _cmpAcIdx));
+}
+function cmpPick(slot, name) {
+  _cmpSel[slot] = name;
+  const picker = document.querySelector(`.cmp-picker[data-slot="${slot}"]`);
+  picker.querySelector('.cmp-input').value = name;
+  picker.querySelector('.cmp-ac').classList.remove('open');
+}
+function clearCompare() {
+  _cmpSel = [null, null, null];
+  document.querySelectorAll('.cmp-input').forEach(i => i.value = '');
+  document.getElementById('cmpResult').innerHTML = '';
+}
+function _cmpRating(n) {
+  n = Math.max(0, Math.min(5, Math.round(n || 0)));
+  return `<span class="cmp-rate">${'★'.repeat(n)}<span class="off">${'★'.repeat(5 - n)}</span></span>`;
+}
+async function runCompare() {
+  const names = _cmpSel.filter(Boolean);
+  if (names.length < 2) { showToast('⚠️ Pick at least 2 countries to compare.', true); return; }
+  const btn = document.getElementById('cmpRunBtn');
+  const out = document.getElementById('cmpResult');
+  btn.disabled = true; btn.textContent = 'Comparing…';
+  out.innerHTML = `<div class="cmp-loading"><div class="cd-ai-spinner"></div><p style="color:#64748b;font-size:0.88rem;margin-top:0.8rem">Analysing ${names.join(', ')}…</p></div>`;
+  try {
+    const r = await fetch('/api/country-compare', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ countries: names })
+    });
+    const d = await r.json();
+    if (d.rows && d.rows.length) renderCompare(names, d.rows);
+    else out.innerHTML = `<p style="text-align:center;color:#94a3b8">Could not generate a comparison right now. Please try again, or book a consultation for expert guidance.</p>`;
+  } catch {
+    out.innerHTML = `<p style="text-align:center;color:#94a3b8">Comparison is temporarily unavailable. Please try again shortly.</p>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '⚖️ Compare Now';
+  }
+}
+function renderCompare(names, rows) {
+  const cs = names.map(n => ALL_COUNTRIES.find(c => c.name === n) || { flag: '🌍', name: n });
+  const head = `<tr><th>Criteria</th>${cs.map(c => `<th><span class="cf">${c.flag}</span>${c.name}</th>`).join('')}</tr>`;
+  const body = rows.map(row => {
+    const cells = (row.values || []).map(v => {
+      if (row.type === 'rating') return `<td>${_cmpRating(v)}</td>`;
+      return `<td>${(v == null ? '—' : v)}</td>`;
+    }).join('');
+    return `<tr><td><span class="cmp-row-label">${row.icon || ''} ${row.label}</span></td>${cells}</tr>`;
+  }).join('');
+  document.getElementById('cmpResult').innerHTML =
+    `<div class="cmp-table-wrap"><table class="cmp-table"><thead>${head}</thead><tbody>${body}</tbody></table></div>
+     <p style="font-size:0.74rem;color:#94a3b8;margin-top:0.9rem;text-align:center">ℹ️ AI-generated overview for guidance. Figures are approximate and change over time — confirm specifics with our consultants before deciding.</p>
+     <div style="text-align:center;margin-top:1rem">
+       <button class="btn-outline" onclick="showCountryDetail('${cs[0].name.replace(/'/g,"\\'")}')">📘 Full details: ${cs[0].name}</button>
+     </div>`;
 }
 
 /* ---------- Live autocomplete (Google-style) for nav + hero search ---------- */
@@ -7454,16 +7866,72 @@ function acKey(e, inputId, dropId) {
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.nav-search')) document.getElementById('navAcDrop')?.classList.remove('open');
   if (!e.target.closest('.hero-search')) document.getElementById('heroAcDrop')?.classList.remove('open');
+  if (!e.target.closest('.cmp-picker')) document.querySelectorAll('.cmp-ac.open').forEach(d => d.classList.remove('open'));
 });
 </script>
 
-<!-- PWA Service Worker registration -->
+<!-- PWA Service Worker registration + Install prompt -->
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
   });
 }
+// Custom "Install app" experience
+let _deferredInstall = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _deferredInstall = e;
+  const btn = document.getElementById('installAppBtn');
+  if (btn && !localStorage.getItem('sg_install_dismissed')) btn.classList.add('show');
+});
+async function triggerInstall() {
+  const btn = document.getElementById('installAppBtn');
+  if (!_deferredInstall) { if (btn) btn.classList.remove('show'); return; }
+  _deferredInstall.prompt();
+  try { await _deferredInstall.userChoice; } catch (e) {}
+  _deferredInstall = null;
+  if (btn) btn.classList.remove('show');
+}
+function dismissInstall(ev) {
+  if (ev) ev.stopPropagation();
+  localStorage.setItem('sg_install_dismissed', '1');
+  const btn = document.getElementById('installAppBtn');
+  if (btn) btn.classList.remove('show');
+}
+window.addEventListener('appinstalled', () => { const b=document.getElementById('installAppBtn'); if(b) b.classList.remove('show'); });
+
+// ── Animated count-up stats (runs when they scroll into view) ──
+function _animateCount(el) {
+  const target = parseFloat(el.dataset.count) || 0;
+  const suffix = el.dataset.suffix || '';
+  const dur = 1400, start = performance.now();
+  function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);          // ease-out cubic
+    el.textContent = Math.round(target * eased) + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = target + suffix;
+  }
+  requestAnimationFrame(tick);
+}
+function initCountUps() {
+  const els = document.querySelectorAll('.count-up');
+  if (!els.length) return;
+  if (!('IntersectionObserver' in window)) { els.forEach(_animateCount); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting && !e.target._counted) {
+        e.target._counted = true;
+        _animateCount(e.target);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  els.forEach((el) => io.observe(el));
+}
+if (document.readyState !== 'loading') initCountUps();
+else document.addEventListener('DOMContentLoaded', initCountUps);
 </script>
 
 </body>
