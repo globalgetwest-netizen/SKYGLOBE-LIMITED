@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Staff Portal — SkyGlobe Group</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0a1628; --navy2:#111f38; --navy3:#0d1a30; --line:#233452; --line2:#1a2c4a;
+    --gold:#c9a84c; --gold2:#dbbe6a; --gold-soft:#c9a84c22;
+    --txt:#e8eaf0; --muted:#8899bb; --muted2:#64759b;
+    --green:#2e7d32; --red:#c62828; --blue:#1565c0; --orange:#ef6c00;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--navy);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased}
+  .gold{color:var(--gold)}
+  .serif{font-family:'Cormorant Garamond',serif}
+  button{font-family:inherit}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+  /* ── LOGIN ── */
+  #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(circle at 30% 20%,#13284e,#0a1628 60%)}
+  .login-box{background:var(--navy2);border:1px solid var(--line);border-radius:20px;padding:44px 40px;width:100%;max-width:400px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.4)}
+  .login-box img{height:86px;width:auto;border-radius:18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+  .login-box h1{font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px}
+  .login-box .pill{display:inline-block;background:var(--gold-soft);color:var(--gold);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:26px}
+  .login-box input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:1rem;margin-bottom:14px;transition:border-color .2s}
+  .login-box input:focus{outline:none;border-color:var(--gold)}
+  .btn{background:var(--gold);color:var(--navy);border:none;padding:13px 28px;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;transition:.2s}
+  .btn:hover{background:var(--gold2);transform:translateY(-1px)}
+  .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .btn-sm{padding:9px 16px;font-size:0.83rem;border-radius:8px}
+  .btn-ghost{background:var(--line);color:var(--txt)}
+  .btn-ghost:hover{background:#2c4063}
+  .err{color:#ff7b7b;font-size:0.85rem;margin-top:10px;min-height:1.2em}
+
+  /* ── LAYOUT ── */
+  #app{display:none;min-height:100vh}
+  .layout{display:flex;min-height:100vh}
+  .sidebar{width:248px;background:var(--navy3);border-right:1px solid var(--line);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:50;transition:transform .25s}
+  .sb-brand{display:flex;align-items:center;gap:11px;padding:20px 20px;border-bottom:1px solid var(--line)}
+  .sb-brand img{height:42px;width:42px;border-radius:11px}
+  .sb-brand .t{font-weight:800;font-size:1.02rem;line-height:1.1}
+  .sb-brand .t small{display:block;font-size:0.62rem;font-weight:600;color:var(--gold);letter-spacing:0.14em;text-transform:uppercase;margin-top:2px}
+  .sb-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:4px}
+  .sb-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;cursor:pointer;color:var(--muted);font-weight:600;font-size:0.9rem;border:none;background:none;text-align:left;width:100%;transition:.15s}
+  .sb-link .ic{font-size:1.05rem;width:20px;text-align:center}
+  .sb-link:hover{background:var(--navy2);color:var(--txt)}
+  .sb-link.active{background:linear-gradient(90deg,var(--gold-soft),transparent);color:var(--gold)}
+  .sb-link .badge-n{margin-left:auto;background:var(--red);color:#fff;font-size:0.66rem;font-weight:700;padding:1px 8px;border-radius:100px;display:none}
+  .sb-link .badge-n.show{display:inline-block}
+  .sb-foot{padding:14px;border-top:1px solid var(--line)}
+  .sb-user{font-size:0.78rem;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .sb-user .av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem}
+
+  .main{flex:1;margin-left:248px;min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid var(--line);background:var(--navy);position:sticky;top:0;z-index:40}
+  .hamburger{display:none;background:none;border:1px solid var(--line);color:var(--txt);border-radius:8px;width:40px;height:40px;font-size:1.2rem;cursor:pointer}
+  .topbar h2{font-size:1.2rem;font-weight:700}
+  .topbar .spacer{flex:1}
+  .content{padding:28px;max-width:1300px;width:100%}
+
+  .view{display:none}
+  .view.active{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* Quick stat strip (counts only — no revenue/analytics) */
+  .stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+  .stat{background:var(--navy2);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .stat .num{font-size:1.7rem;font-weight:800;color:#fff;line-height:1}
+  .stat .lbl{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:6px;font-weight:600}
+  .stat.g .num{color:var(--gold)}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .toolbar input,.toolbar select{padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.9rem}
+  .toolbar input{flex:1;min-width:200px}
+  .toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--gold)}
+
+  .table-wrap{background:var(--navy2);border:1px solid var(--line);border-radius:14px;overflow:hidden;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:560px}
+  th,td{padding:13px 16px;text-align:left;font-size:0.87rem;border-bottom:1px solid var(--line2)}
+  th{background:var(--navy3);color:var(--muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;font-weight:700}
+  tr:last-child td{border-bottom:none}
+  tr.app-row{cursor:pointer;transition:background .12s}
+  tr.app-row:hover{background:#16264a}
+  .badge{display:inline-block;padding:4px 12px;border-radius:100px;font-size:0.72rem;font-weight:700;white-space:nowrap}
+  .b-Received{background:#1565c033;color:#7cb6f7}
+  .b-InReview{background:#ef6c0033;color:#ffb74d}
+  .b-Approved,.b-Completed{background:#2e7d3233;color:#86d98a}
+  .b-NeedsMoreInfo,.b-Rejected{background:#c6282833;color:#ef9a9a}
+  .empty{text-align:center;color:var(--muted);padding:46px}
+
+  #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:100;overflow-y:auto;padding:28px 14px}
+  .modal-box{background:var(--navy2);border:1px solid var(--line);border-radius:18px;max-width:700px;margin:0 auto;padding:30px}
+  .modal-box h2{font-size:1.15rem;margin-bottom:4px}
+  .modal-box .sub{color:var(--muted);font-size:0.85rem;margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .close-x{float:right;background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer;line-height:1}
+  .detail-table{width:100%;margin-bottom:18px}
+  .detail-table td{padding:8px 0;border-bottom:1px solid var(--line2);font-size:0.86rem;vertical-align:top}
+  .detail-table td:first-child{color:var(--muted);width:170px;font-weight:600}
+  .box{background:var(--navy3);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  .box label{display:block;font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;font-weight:700}
+  .box select,.box textarea,.box input[type=text]{width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.9rem;margin-bottom:12px}
+  .box textarea{min-height:90px;resize:vertical;font-family:inherit}
+  .resp-item{background:var(--navy3);border-left:3px solid var(--gold);padding:10px 14px;border-radius:6px;margin-bottom:8px;font-size:0.85rem}
+  .resp-item .meta{color:var(--muted);font-size:0.7rem;margin-bottom:4px}
+  .ok-msg{font-size:0.85rem;margin-top:8px;min-height:1.2em}
+  .docrow{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--navy3);border:1px solid var(--line);border-radius:9px;padding:9px 13px;margin-bottom:7px}
+  .docrow a{color:var(--gold2);text-decoration:none;font-weight:500;word-break:break-all}
+
+  .thread{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:11px;background:var(--navy3)}
+  .thread .head{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .thread .head strong{color:#fff;font-size:0.92rem}
+  .chat{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin:12px 0}
+  .msg{max-width:78%;padding:9px 13px;border-radius:12px;font-size:0.85rem;line-height:1.4}
+  .msg.admin{align-self:flex-end;background:var(--gold);color:var(--navy)}
+  .msg.client{align-self:flex-start;background:#1a2c4a;color:var(--txt)}
+  .msg .ts{font-size:0.62rem;opacity:.7;margin-top:3px}
+  .chat-input{display:flex;gap:7px}
+  .chat-input input{flex:1;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff}
+  .tag-new{background:var(--red);color:#fff;font-size:0.62rem;font-weight:700;padding:2px 9px;border-radius:100px;margin-left:8px}
+
+  .skeleton{color:var(--muted);text-align:center;padding:40px}
+  .note{background:var(--navy2);border:1px solid var(--line);border-radius:14px;padding:18px 20px;color:var(--muted);font-size:0.88rem;line-height:1.7}
+
+  @media(max-width:760px){
+    .sidebar{transform:translateX(-100%)}
+    .sidebar.open{transform:translateX(0)}
+    .main{margin-left:0}
+    .hamburger{display:block}
+    .content{padding:18px}
+    .sb-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:45}
+    .sb-backdrop.show{display:block}
+  }
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <img src="icon.svg" alt="SkyGlobe Group" onerror="this.src='icon-512.png'">
+    <h1>SkyGlobe <span class="gold">Group</span></h1>
+    <div class="pill">Staff Workspace</div>
+    <input type="password" id="pwInput" placeholder="Enter your staff password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn" style="width:100%" onclick="doLogin()" id="loginBtn">Sign In</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app">
+  <div class="sb-backdrop" id="sbBackdrop" onclick="toggleSidebar(false)"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-brand">
+        <img src="icon.svg" alt="" onerror="this.src='icon-192.png'">
+        <div class="t">SkyGlobe<small>Staff Portal</small></div>
+      </div>
+      <nav class="sb-nav">
+        <button class="sb-link active" data-view="queue" onclick="switchView('queue')"><span class="ic">📋</span> Work Queue <span class="badge-n" id="navAppsBadge"></span></button>
+        <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
+        <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Tools</button>
+      </nav>
+      <div class="sb-foot">
+        <div class="sb-user"><span class="av" id="userAv">S</span><div><div style="color:var(--txt);font-weight:600" id="userName">staff</div><div style="font-size:0.7rem" id="userRole">Staff member</div></div></div>
+        <button class="btn btn-sm btn-ghost" style="width:100%" onclick="logout()">Log out</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="topbar">
+        <button class="hamburger" onclick="toggleSidebar(true)">☰</button>
+        <h2 id="viewTitle">Work Queue</h2>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-ghost" onclick="loadAll()">⟳ Refresh</button>
+      </div>
+
+      <div class="content">
+        <!-- WORK QUEUE -->
+        <section class="view active" id="view-queue">
+          <div class="stat-strip" id="statStrip"></div>
+          <div class="toolbar">
+            <input type="text" id="searchBox" placeholder="🔍 Search name, email, reference…" oninput="renderTable()">
+            <select id="statusFilter" onchange="renderTable()">
+              <option value="">All statuses</option>
+              <option>Received</option><option>In Review</option><option>Approved</option>
+              <option>Needs More Info</option><option>Completed</option><option>Rejected</option>
+            </select>
+            <select id="serviceFilter" onchange="renderTable()"><option value="">All services</option></select>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Reference</th><th>Name</th><th>Service</th><th>Submitted</th><th>Status</th></tr></thead>
+            <tbody id="tbody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table>
+          </div>
+        </section>
+
+        <!-- MESSAGES -->
+        <section class="view" id="view-messages">
+          <div id="threadsArea"><div class="skeleton">Loading messages…</div></div>
+        </section>
+
+        <!-- TOOLS -->
+        <section class="view" id="view-tools">
+          <div class="stat-strip">
+            <a class="stat g" href="letterhead.html" target="_blank" style="text-decoration:none;cursor:pointer">
+              <div class="num" style="font-size:1.2rem">📄 Letterhead</div><div class="lbl">Open editable letterhead</div>
+            </a>
+            <a class="stat" href="/" target="_blank" style="text-decoration:none;cursor:pointer">
+              <div class="num" style="font-size:1.2rem">🌐 Website</div><div class="lbl">View public site</div>
+            </a>
+            <a class="stat" href="/#tools" target="_blank" style="text-decoration:none;cursor:pointer">
+              <div class="num" style="font-size:1.2rem">✨ AI Documents</div><div class="lbl">Generate SOP, letters…</div>
+            </a>
+          </div>
+          <div class="note">
+            <strong style="color:var(--txt)">👋 Welcome to your Staff Workspace.</strong><br><br>
+            From here you can review client applications, update their status (which automatically emails the client), upload approval letters &amp; documents, and reply to client messages.<br><br>
+            This is a staff-level workspace. Business analytics, revenue reports and data exports are reserved for the CEO portal. If you need anything beyond what you see here, please contact management.
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" id="modalContent"></div>
+</div>
+
+<script>
+const API = location.origin;
+let KEY = sessionStorage.getItem('skystaff_key') || '';
+let APPS = [];
+let MSGS = [];
+
+if (KEY) showApp();
+
+/* ── AUTH ── */
+async function doLogin(){
+  const pw=document.getElementById('pwInput').value;
+  const errEl=document.getElementById('loginErr');
+  const btn=document.getElementById('loginBtn');
+  errEl.textContent=''; btn.disabled=true; btn.textContent='Signing in…';
+  try{
+    const r=await fetch(API+'/api/staff/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    const d=await r.json();
+    if(!r.ok){errEl.textContent=d.error||'Login failed.';btn.disabled=false;btn.textContent='Sign In';return;}
+    KEY=pw; sessionStorage.setItem('skystaff_key',pw);
+    sessionStorage.setItem('skystaff_name',d.name||'Staff');
+    sessionStorage.setItem('skystaff_role',d.role||'staff');
+    showApp();
+  }catch(e){errEl.textContent='Network error — try again.';btn.disabled=false;btn.textContent='Sign In';}
+}
+function logout(){ sessionStorage.removeItem('skystaff_key'); location.reload(); }
+function showApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  const n=sessionStorage.getItem('skystaff_name')||'Staff';
+  const role=sessionStorage.getItem('skystaff_role')||'staff';
+  document.getElementById('userName').textContent=n;
+  document.getElementById('userRole').textContent=role==='ceo'?'CEO (full access)':'Staff member';
+  document.getElementById('userAv').textContent=(n[0]||'S').toUpperCase();
+  loadAll();
+}
+
+/* ── NAV ── */
+function switchView(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  const titles={queue:'Work Queue',messages:'Client Messages',tools:'Tools'};
+  document.getElementById('viewTitle').textContent=titles[v]||v;
+  if(v==='messages') loadMessages();
+  toggleSidebar(false);
+}
+function toggleSidebar(open){
+  document.getElementById('sidebar').classList.toggle('open',open);
+  document.getElementById('sbBackdrop').classList.toggle('show',open);
+}
+
+/* ── LOAD ── */
+async function loadAll(){ await loadApps(); await loadMessages(true); }
+
+async function loadApps(){
+  try{
+    const r=await fetch(API+'/api/admin/applications',{headers:{'x-admin-key':KEY}});
+    if(r.status===401){logout();return;}
+    APPS=await r.json();
+    if(!Array.isArray(APPS)) APPS=[];
+  }catch(e){APPS=[];}
+  renderStats(); renderServiceFilter(); renderTable();
+}
+
+const STATUS_LIST=['Received','In Review','Approved','Needs More Info','Completed','Rejected'];
+
+/* ── STATS (counts only) ── */
+function renderStats(){
+  const count=s=>APPS.filter(a=>a.status===s).length;
+  const newN=count('Received');
+  const active=count('In Review')+count('Needs More Info');
+  const done=count('Approved')+count('Completed');
+  document.getElementById('statStrip').innerHTML=`
+    ${statCard(APPS.length,'Total','g')}
+    ${statCard(newN,'New / Unread')}
+    ${statCard(active,'In Progress')}
+    ${statCard(done,'Approved / Done')}`;
+}
+function statCard(num,lbl,cls=''){return `<div class="stat ${cls}"><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;}
+
+/* ── TABLE ── */
+function renderServiceFilter(){
+  const sel=document.getElementById('serviceFilter'); const cur=sel.value;
+  const services=[...new Set(APPS.map(a=>a.service).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">All services</option>'+services.map(s=>`<option${s===cur?' selected':''}>${esc(s)}</option>`).join('');
+}
+function rowHtml(a){
+  return `<tr class="app-row" onclick="openApp('${esc(a.ref)}')">
+    <td class="gold" style="font-weight:700">${esc(a.ref)}</td>
+    <td>${esc((a.fname||'')+' '+(a.lname||''))}</td>
+    <td>${esc(a.service||'—')}</td>
+    <td>${a.timestamp?new Date(a.timestamp).toLocaleDateString():'—'}</td>
+    <td>${badge(a.status)}</td></tr>`;
+}
+function renderTable(){
+  const q=(document.getElementById('searchBox').value||'').toLowerCase();
+  const st=document.getElementById('statusFilter').value;
+  const sv=document.getElementById('serviceFilter').value;
+  const rows=APPS.filter(a=>(!st||a.status===st)&&(!sv||a.service===sv)&&(!q||((a.fname||'')+' '+(a.lname||'')+' '+(a.email||'')+' '+(a.ref||'')).toLowerCase().includes(q)))
+    .sort((a,b)=>new Date(b.timestamp||0)-new Date(a.timestamp||0));
+  document.getElementById('tbody').innerHTML=rows.length?rows.map(a=>rowHtml(a)).join(''):'<tr><td colspan="5" class="empty">No applications found.</td></tr>';
+  const newN=APPS.filter(a=>a.status==='Received').length;
+  const b=document.getElementById('navAppsBadge'); b.textContent=newN; b.classList.toggle('show',newN>0);
+}
+
+/* ── HELPERS ── */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function badge(s){return `<span class="badge b-${(s||'Received').replace(/\s/g,'')}">${esc(s||'Received')}</span>`;}
+
+/* ── DETAIL MODAL ── */
+function openApp(ref){
+  const a=APPS.find(x=>x.ref===ref); if(!a)return;
+  const row=(k,v)=>v?`<tr><td>${k}</td><td>${esc(v)}</td></tr>`:'';
+  const history=(a.responses||[]).map(r=>`<div class="resp-item"><div class="meta">${esc(r.by)} · ${new Date(r.date).toLocaleString()}</div>${esc(r.message)}</div>`).join('');
+  document.getElementById('modalContent').innerHTML=`
+    <button class="close-x" onclick="closeModal()">✕</button>
+    <h2 class="gold">${esc(a.ref)}</h2>
+    <div class="sub">${esc(a.service||'')} ${badge(a.status)}</div>
+    <table class="detail-table">
+      ${row('Name',((a.fname||'')+' '+(a.lname||'')).trim())}
+      ${row('Email',a.email)}${row('Phone',a.phone)}
+      ${row('Nationality',a.nationality)}${row('Date of Birth',a.dob)}
+      ${row('Passport',a.passport)}${row('Passport Expiry',a.passportExpiry)}
+      ${row('Destination',a.destination)}${row('Travel Date',a.travelDate)}
+      ${row('Duration',a.duration)}${row('Purpose',a.purpose)}
+      ${row('Institution',a.institution)}${row('Employer',a.employer)}
+      ${row('Hotel City',a.hotelCity)}${row('Check-in',a.checkin)}${row('Check-out',a.checkout)}
+      ${row('Coverage',a.coverage)}${row('Document Type',a.docType)}
+      ${row('Scholarship',a.scholarship)}${row('Notes',a.notes)}
+      ${row('Submitted',a.timestamp?new Date(a.timestamp).toLocaleString():'')}
+    </table>
+    ${history?'<label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;font-weight:700">Previous responses</label><div style="margin:8px 0 16px">'+history+'</div>':''}
+    <div class="box">
+      <label>📎 Documents</label>
+      <div id="adminDocs" style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">Loading…</div>
+      <input type="text" id="adminDocLabel" placeholder="Document name (e.g. Visa Approval Letter)">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input type="file" id="adminDocFile" style="font-size:0.82rem;color:var(--muted);flex:1;min-width:0">
+        <button class="btn btn-sm" id="adminDocBtn" onclick="adminUploadDoc('${esc(a.ref)}')">⬆️ Upload</button>
+      </div>
+    </div>
+    <div class="box">
+      <label>Update status</label>
+      <select id="newStatus">${STATUS_LIST.map(s=>`<option${s===a.status?' selected':''}>${s}</option>`).join('')}</select>
+      <label>Message to applicant (optional — sent by email)</label>
+      <textarea id="respMsg" placeholder="e.g. Your visa appointment is booked for June 20th. Please bring your passport…"></textarea>
+      <button class="btn" onclick="sendUpdate('${esc(a.ref)}')">📧 Send Update to ${esc(a.fname||'applicant')}</button>
+      <div class="ok-msg" id="updateMsg"></div>
+    </div>`;
+  document.getElementById('modal').style.display='block';
+  loadAdminDocs(ref);
+}
+function closeModal(){document.getElementById('modal').style.display='none';}
+
+async function loadAdminDocs(ref){
+  const el=document.getElementById('adminDocs'); if(!el)return;
+  try{
+    const r=await fetch(API+'/api/documents/'+encodeURIComponent(ref));
+    const docs=await r.json(); if(!r.ok)throw new Error();
+    if(!docs.length){el.innerHTML='No documents yet.';return;}
+    el.innerHTML=docs.map(d=>`<div class="docrow">
+      <div style="min-width:0"><a href="${d.url}" target="_blank">📄 ${esc(d.filename)}</a>
+      <div style="font-size:0.68rem;color:var(--muted)">${String(d.uploaded_by||'').startsWith('admin')?'✅ '+esc(d.uploaded_by):'From applicant'}${d.created_at?' · '+new Date(d.created_at).toLocaleString():''}</div></div>
+      <button onclick="adminDeleteDoc(${d.id},'${esc(ref)}')" style="background:none;border:1px solid var(--red);color:#ef9a9a;border-radius:6px;padding:4px 10px;font-size:0.7rem;cursor:pointer;white-space:nowrap">🗑 Delete</button>
+    </div>`).join('');
+  }catch(e){el.innerHTML='Could not load documents.';}
+}
+async function adminUploadDoc(ref){
+  const input=document.getElementById('adminDocFile'),labelEl=document.getElementById('adminDocLabel'),btn=document.getElementById('adminDocBtn');
+  const file=input&&input.files&&input.files[0];
+  if(!file){alert('Choose a file first.');return;}
+  if(file.size>8*1024*1024){alert('File too large — maximum 8 MB.');return;}
+  const label=(labelEl&&labelEl.value.trim())||file.name;
+  const ext=file.name.includes('.')?'.'+file.name.split('.').pop():'';
+  const displayName=label.endsWith(ext)?label:label+ext;
+  btn.disabled=true;btn.textContent='⏳ Uploading…';
+  try{
+    const data=await new Promise((ok,err)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=err;r.readAsDataURL(file);});
+    const r=await fetch(API+'/api/documents',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({ref,filename:displayName,contentType:file.type,data})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Upload failed');
+    input.value='';if(labelEl)labelEl.value=''; loadAdminDocs(ref);
+  }catch(e){alert('Upload failed: '+e.message);}
+  btn.disabled=false;btn.textContent='⬆️ Upload';
+}
+async function adminDeleteDoc(id,ref){
+  if(!confirm('Delete this document permanently?'))return;
+  try{
+    const r=await fetch(API+'/api/documents/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Delete failed');
+    loadAdminDocs(ref);
+  }catch(e){alert('Delete failed: '+e.message);}
+}
+async function sendUpdate(ref){
+  const status=document.getElementById('newStatus').value;
+  const response=document.getElementById('respMsg').value.trim();
+  const msgEl=document.getElementById('updateMsg');
+  msgEl.style.color='var(--muted)';msgEl.textContent='Sending…';
+  try{
+    const r=await fetch(API+'/api/admin/update',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({ref,status,response})});
+    const d=await r.json();
+    if(!r.ok){msgEl.style.color='#ff7b7b';msgEl.textContent=d.error||'Update failed.';return;}
+    msgEl.style.color=d.emailed?'#86d98a':'#ffb74d';
+    msgEl.textContent=d.emailed?'✅ Status updated and email sent to applicant.':'⚠️ Status updated. '+(d.emailError||'Email could not be sent.');
+    await loadApps();
+  }catch(e){msgEl.style.color='#ff7b7b';msgEl.textContent='Network error.';}
+}
+
+/* ── MESSAGES ── */
+async function loadMessages(silent){
+  try{
+    const r=await fetch(API+'/api/admin/messages',{headers:{'x-admin-key':KEY}});
+    MSGS=await r.json(); if(!Array.isArray(MSGS))MSGS=[];
+  }catch{MSGS=[];}
+  const unread=MSGS.filter(m=>m.sender==='client'&&!m.read).length;
+  const b=document.getElementById('navMsgBadge');b.textContent=unread;b.classList.toggle('show',unread>0);
+  if(!silent) renderThreads();
+}
+function renderThreads(){
+  const byClient={};
+  MSGS.forEach(m=>{(byClient[m.client_email]=byClient[m.client_email]||[]).push(m);});
+  const emails=Object.keys(byClient).sort((a,b)=>byClient[b][byClient[b].length-1].created_at.localeCompare(byClient[a][byClient[a].length-1].created_at));
+  const area=document.getElementById('threadsArea');
+  if(!emails.length){area.innerHTML='<div class="note">No client messages yet.</div>';return;}
+  area.innerHTML=emails.map(email=>{
+    const thread=byClient[email];const last=thread[thread.length-1];
+    const unread=thread.some(m=>m.sender==='client'&&!m.read);
+    return `<div class="thread">
+      <div class="head" onclick="toggleThread('${esc(email)}')">
+        <strong>${esc(email)}${unread?'<span class="tag-new">NEW</span>':''}</strong>
+        <span style="color:var(--muted);font-size:0.74rem">${new Date(last.created_at).toLocaleString()}</span>
+      </div>
+      <div id="thread-${esc(email)}" style="display:none">
+        <div class="chat">${thread.map(m=>`<div class="msg ${m.sender==='admin'?'admin':'client'}">${esc(m.body).replace(/\n/g,'<br>')}<div class="ts">${m.sender==='admin'?'You':'Client'} · ${new Date(m.created_at).toLocaleTimeString()}</div></div>`).join('')}</div>
+        <div class="chat-input">
+          <input type="text" id="reply-${esc(email)}" placeholder="Type a reply…" onkeydown="if(event.key==='Enter')sendReply('${esc(email)}')">
+          <button class="btn btn-sm" onclick="sendReply('${esc(email)}')">Send</button>
+        </div>
+      </div></div>`;
+  }).join('');
+}
+function toggleThread(email){const el=document.getElementById('thread-'+email);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+async function sendReply(email){
+  const input=document.getElementById('reply-'+email);const body=input.value.trim();if(!body)return;input.value='';
+  try{
+    const r=await fetch(API+'/api/admin/messages',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({client_email:email,body})});
+    if(!r.ok){alert('Failed to send.');input.value=body;return;}
+    await loadMessages(); renderThreads(); toggleThread(email);
+  }catch{alert('Network error.');input.value=body;}
+}
+</script>
+</body>
+</html>
