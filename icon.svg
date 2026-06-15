@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Rich deep navy — premium, not flat black -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e2550"/>
+      <stop offset="1" stop-color="#060e24"/>
+    </linearGradient>
+    <!-- Globe fill — slightly lighter so globe reads as a sphere -->
+    <radialGradient id="globe" cx="38%" cy="35%" r="65%">
+      <stop offset="0" stop-color="#1a4080"/>
+      <stop offset="1" stop-color="#0a2248"/>
+    </radialGradient>
+    <!-- Gold — rich, layered, not flat yellow -->
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"    stop-color="#faeea0"/>
+      <stop offset="0.35" stop-color="#d4af37"/>
+      <stop offset="1"    stop-color="#8a6510"/>
+    </linearGradient>
+    <!-- S-stroke gold — slightly brighter on the entry -->
+    <linearGradient id="goldS" x1="0.05" y1="0" x2="0.95" y2="1">
+      <stop offset="0"   stop-color="#faf0b0"/>
+      <stop offset="0.4" stop-color="#e0be48"/>
+      <stop offset="1"   stop-color="#9a7018"/>
+    </linearGradient>
+    <clipPath id="gc"><circle cx="256" cy="256" r="136"/></clipPath>
+    <!-- soft drop shadow for plane -->
+    <filter id="planeShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- App tile background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Globe sphere -->
+  <circle cx="256" cy="256" r="136" fill="url(#globe)"/>
+
+  <!-- Grid lines clipped to globe -->
+  <g clip-path="url(#gc)" stroke="url(#gold)" fill="none" opacity="0.78">
+    <!-- Horizontals -->
+    <line x1="120" y1="256" x2="392" y2="256" stroke-width="4.5"/>
+    <path d="M120 205 Q256 182 392 205"  stroke-width="3.5"/>
+    <path d="M120 307 Q256 330 392 307"  stroke-width="3.5"/>
+    <path d="M148 168 Q256 150 364 168"  stroke-width="2.5" opacity="0.6"/>
+    <path d="M148 344 Q256 362 364 344"  stroke-width="2.5" opacity="0.6"/>
+    <!-- Verticals -->
+    <line x1="256" y1="120" x2="256" y2="392" stroke-width="4.5"/>
+    <ellipse cx="256" cy="256" rx="48"  ry="136" stroke-width="3.5"/>
+    <ellipse cx="256" cy="256" rx="100" ry="136" stroke-width="3"/>
+  </g>
+  <!-- Globe rim -->
+  <circle cx="256" cy="256" r="136" fill="none" stroke="url(#gold)" stroke-width="4.5" opacity="0.5"/>
+
+  <!-- ═══ THE S CURVE — balanced, flows through the globe centre ═══ -->
+  <!-- shadow pass for depth -->
+  <path d="M350 164
+           C 318 108, 222 106, 176 150
+           C 130 194, 192 246, 256 260
+           C 320 274, 380 328, 334 372
+           C 288 416, 194 408, 162 354"
+        fill="none" stroke="#000" stroke-width="38" stroke-linecap="round" opacity="0.22"/>
+  <!-- main gold S -->
+  <path d="M350 164
+           C 318 108, 222 106, 176 150
+           C 130 194, 192 246, 256 260
+           C 320 274, 380 328, 334 372
+           C 288 416, 194 408, 162 354"
+        fill="none" stroke="url(#goldS)" stroke-width="30" stroke-linecap="round"/>
+
+  <!-- ═══ CLEAN TOP-DOWN AIRPLANE at the start of the S (top) ═══ -->
+  <!-- Positioned at (350,164), rotated so nose points up-right along the S entry -->
+  <g transform="translate(350,164) rotate(38)" filter="url(#planeShadow)">
+    <!-- Fuselage — long slim body -->
+    <ellipse cx="0" cy="0" rx="7" ry="46" fill="url(#gold)"/>
+    <!-- Main wings — classic swept shape -->
+    <path d="M-5,-8 L-52,22 L-46,32 L-3,14 Z" fill="url(#gold)"/>
+    <path d="M 5,-8 L 52,22 L 46,32 L  3,14 Z" fill="url(#gold)"/>
+    <!-- Tail fins -->
+    <path d="M-3,32 L-22,46 L-18,52 L-2,40 Z" fill="url(#gold)"/>
+    <path d="M 3,32 L 22,46 L 18,52 L  2,40 Z" fill="url(#gold)"/>
+    <!-- Nose highlight -->
+    <ellipse cx="0" cy="-40" rx="4" ry="6" fill="#fdf5c8" opacity="0.7"/>
+  </g>
+</svg>
