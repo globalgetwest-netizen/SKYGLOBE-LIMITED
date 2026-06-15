@@ -202,6 +202,7 @@
         <button class="sb-link active" data-view="dashboard" onclick="switchView('dashboard')"><span class="ic">📊</span> Dashboard</button>
         <button class="sb-link" data-view="applications" onclick="switchView('applications')"><span class="ic">📋</span> Applications <span class="badge-n" id="navAppsBadge"></span></button>
         <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
+        <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
       </nav>
       <div class="sb-foot">
@@ -266,6 +267,18 @@
         <!-- MESSAGES -->
         <section class="view" id="view-messages">
           <div id="threadsArea"><div class="skeleton">Loading messages…</div></div>
+        </section>
+
+        <!-- TEAM CHAT -->
+        <section class="view" id="view-team">
+          <div class="panel" style="margin-bottom:16px"><p style="color:var(--muted);font-size:0.9rem">💬 <strong style="color:var(--txt)">Internal team channel</strong> — private to you and your staff. Clients never see this. Use it to give instructions, share updates, and coordinate with your team.</p></div>
+          <div class="panel">
+            <div class="chat" id="teamChat" style="max-height:52vh">Loading…</div>
+            <div class="chat-input">
+              <input type="text" id="teamInput" placeholder="Message your team…" onkeydown="if(event.key==='Enter')sendTeam()">
+              <button class="btn btn-sm" onclick="sendTeam()">Send</button>
+            </div>
+          </div>
         </section>
 
         <!-- TOOLS -->
@@ -333,9 +346,10 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
+  if(v==='team') loadTeam();
   toggleSidebar(false);
 }
 function toggleSidebar(open){
@@ -344,7 +358,7 @@ function toggleSidebar(open){
 }
 
 /* ── LOAD ── */
-async function loadAll(){ await loadApps(); await loadMessages(true); }
+async function loadAll(){ await loadApps(); await loadMessages(true); await pollTeamBadge(); }
 
 async function loadApps(){
   try{
@@ -476,6 +490,12 @@ function openApp(ref){
       </div>
     </div>
     <div class="box">
+      <label>🗒️ Internal staff notes (client never sees these)</label>
+      <div id="staffNotes" style="margin-bottom:12px">${renderNotes(a.staff_notes)}</div>
+      <input type="text" id="noteInput" placeholder="Add a private note for the team…" onkeydown="if(event.key==='Enter')addNote('${esc(a.ref)}')">
+      <button class="btn btn-sm" onclick="addNote('${esc(a.ref)}')">➕ Add Note</button>
+    </div>
+    <div class="box">
       <label>Update status</label>
       <select id="newStatus">${STATUS_LIST.map(s=>`<option${s===a.status?' selected':''}>${s}</option>`).join('')}</select>
       <label>Message to applicant (optional — sent by email)</label>
@@ -583,6 +603,78 @@ async function sendReply(email){
     await loadMessages(); renderThreads(); toggleThread(email);
   }catch{alert('Network error.');input.value=body;}
 }
+
+/* ── STAFF NOTES (on an application) ── */
+function renderNotes(notes){
+  if(!Array.isArray(notes)||!notes.length) return '<div style="color:var(--muted);font-size:0.82rem">No notes yet.</div>';
+  return notes.map(n=>`<div class="resp-item"><div class="meta">${esc(n.by)}${n.role==='ceo'?' (CEO)':''} · ${new Date(n.date).toLocaleString()}</div>${esc(n.message)}</div>`).join('');
+}
+async function addNote(ref){
+  const input=document.getElementById('noteInput');const note=input.value.trim();if(!note)return;
+  input.disabled=true;
+  try{
+    const r=await fetch(API+'/api/admin/note',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({ref,note})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Failed');
+    const app_=APPS.find(x=>x.ref===ref); if(app_)app_.staff_notes=d.notes;
+    document.getElementById('staffNotes').innerHTML=renderNotes(d.notes);
+    input.value='';
+  }catch(e){alert('Could not add note: '+e.message);}
+  input.disabled=false;input.focus();
+}
+
+/* ── TEAM CHAT (CEO ↔ Staff) — live badge + auto-refresh ── */
+let TEAM=[];
+let teamLiveTimer=null;
+function teamMe(){return sessionStorage.getItem('skyadmin_name')||'';}
+async function fetchTeam(){
+  try{
+    const r=await fetch(API+'/api/team/messages',{headers:{'x-admin-key':KEY}});
+    const d=await r.json(); TEAM=Array.isArray(d)?d:[];
+  }catch{ /* keep last */ }
+  return TEAM;
+}
+function teamUnseen(){
+  const seen=parseInt(localStorage.getItem('sg_team_seen')||'0',10);
+  // count messages from others beyond what we've seen
+  return TEAM.filter((m,i)=>i>=seen && m.author!==teamMe()).length;
+}
+function refreshTeamBadge(){
+  const n=teamUnseen();const b=document.getElementById('navTeamBadge');
+  if(b){b.textContent=n;b.classList.toggle('show',n>0);}
+}
+async function pollTeamBadge(){ await fetchTeam(); refreshTeamBadge(); }
+function renderTeam(){
+  const el=document.getElementById('teamChat');const me=teamMe();
+  if(!TEAM.length){el.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px">No team messages yet. Say hello 👋</div>';return;}
+  el.innerHTML=TEAM.map(m=>{
+    const mine=m.author===me;
+    return `<div class="msg ${mine?'admin':'client'}">${esc(m.body).replace(/\n/g,'<br>')}<div class="ts">${esc(m.author)}${m.role==='ceo'?' (CEO)':''} · ${m.created_at?new Date(m.created_at).toLocaleString():''}</div></div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+async function loadTeam(){
+  await fetchTeam(); renderTeam();
+  localStorage.setItem('sg_team_seen',String(TEAM.length)); // mark all as read
+  refreshTeamBadge();
+  // live auto-refresh while viewing this tab
+  if(teamLiveTimer)clearInterval(teamLiveTimer);
+  teamLiveTimer=setInterval(async()=>{
+    if(!document.getElementById('view-team').classList.contains('active')){clearInterval(teamLiveTimer);teamLiveTimer=null;return;}
+    const before=TEAM.length; await fetchTeam();
+    if(TEAM.length!==before){renderTeam();localStorage.setItem('sg_team_seen',String(TEAM.length));}
+    refreshTeamBadge();
+  },12000);
+}
+async function sendTeam(){
+  const input=document.getElementById('teamInput');const body=input.value.trim();if(!body)return;input.value='';
+  try{
+    const r=await fetch(API+'/api/team/messages',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({body})});
+    if(!r.ok){alert('Failed to send.');input.value=body;return;}
+    await fetchTeam(); renderTeam(); localStorage.setItem('sg_team_seen',String(TEAM.length)); refreshTeamBadge();
+  }catch{alert('Network error.');input.value=body;}
+}
+// Background badge polling (every 25s) so new team messages surface anywhere in the portal
+setInterval(()=>{ if(KEY) pollTeamBadge(); }, 25000);
 </script>
 </body>
 </html>
