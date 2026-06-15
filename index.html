@@ -159,6 +159,42 @@ nav.scrolled{backdrop-filter:blur(12px);box-shadow:0 2px 16px rgba(0,0,0,0.1)}
 .nav-arrow.disabled{opacity:0;pointer-events:none;transform:scale(0.8)}
 @media(max-width:600px){.nav-arrows{left:12px;bottom:16px}.nav-arrow{width:42px;height:42px;font-size:1.5rem}}
 
+/* GLOBAL COUNTRY DIRECTORY */
+.dir-search{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(10,46,101,0.18);border-radius:14px;padding:4px 16px;box-shadow:0 6px 24px rgba(10,46,101,0.08)}
+.dir-search input{flex:1;border:none;outline:none;font-size:1rem;font-family:'Inter',sans-serif;padding:14px 4px;background:transparent;color:#0a1628}
+.dir-tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:1.2rem}
+.dir-tab{background:#fff;border:1px solid rgba(10,46,101,0.14);color:#475569;border-radius:100px;padding:7px 16px;font-size:0.82rem;font-weight:500;cursor:pointer;transition:var(--trans)}
+.dir-tab:hover{border-color:var(--blue);color:var(--blue)}
+.dir-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:0.9rem;margin-top:1.2rem;max-width:1340px;margin-left:auto;margin-right:auto}
+.dir-card{background:#fff;border:1px solid rgba(10,46,101,0.1);border-radius:14px;padding:1.1rem;cursor:pointer;transition:var(--trans);box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.dir-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 10px 26px rgba(10,46,101,0.12)}
+.dir-card .df{font-size:2rem;line-height:1}
+.dir-card .dn{font-weight:600;color:var(--blue);font-size:0.92rem;margin-top:6px}
+.dir-card .dr{font-size:0.72rem;color:#94a3b8;margin-top:2px}
+.dir-card .dstar{display:inline-block;font-size:0.62rem;background:rgba(212,175,55,0.15);color:#a07d10;border:1px solid rgba(212,175,55,0.4);padding:1px 7px;border-radius:100px;margin-top:7px;font-weight:600}
+/* Autocomplete dropdown (nav + hero search) */
+.ac-drop{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,0.16);z-index:1100;max-height:340px;overflow-y:auto;display:none}
+.ac-drop.open{display:block}
+.ac-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:0.9rem;color:#1e293b;transition:background 0.12s}
+.ac-item:hover,.ac-item.sel{background:#f4f7fb}
+.ac-item .acf{font-size:1.3rem}
+.ac-item .acr{margin-left:auto;font-size:0.72rem;color:#94a3b8}
+.ac-empty{padding:14px 16px;color:#94a3b8;font-size:0.85rem}
+/* Country detail view */
+.cd-hero{position:relative;height:170px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;overflow:hidden;margin:-2.4rem -2.4rem 0;background:linear-gradient(135deg,var(--blue),#15418c);display:flex;align-items:center;justify-content:center}
+.cd-hero .cd-flag{font-size:4.5rem;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3))}
+.cd-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.7rem;margin:1.4rem 0}
+.cd-fact{background:#f4f7fb;border-radius:12px;padding:0.8rem 1rem}
+.cd-fact .l{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin-bottom:3px}
+.cd-fact .v{font-size:0.9rem;font-weight:600;color:var(--blue)}
+.cd-block{margin-top:1.2rem}
+.cd-block h4{font-size:0.95rem;color:var(--blue);margin:0 0 0.5rem;display:flex;align-items:center;gap:7px}
+.cd-block p{font-size:0.86rem;color:#475569;line-height:1.6;margin:0}
+.cd-weather{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#eaf2ff,#f4f7fb);border-radius:14px;padding:1rem 1.3rem;margin:1.2rem 0}
+.cd-weather .wt{font-size:2.2rem}
+.cd-weather .wtemp{font-size:1.6rem;font-weight:700;color:var(--blue)}
+
 /* POPULAR COUNTRIES */
 .popular-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
 .pop-card{background:#fff;border:1px solid rgba(10,46,101,0.1);border-radius:16px;padding:1.4rem 1rem;text-align:center;cursor:pointer;transition:var(--trans);display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
@@ -743,10 +779,11 @@ body.wc-active .mobile-menu{padding-top:46px}
   </div>
 
   <!-- Global search bar — always visible, like Google -->
-  <form class="nav-search" onsubmit="navSearch(event)">
+  <form class="nav-search" style="position:relative" onsubmit="navSearch(event)">
     <span style="font-size:0.85rem;opacity:0.45;margin-left:2px">🔍</span>
-    <input type="text" id="navSearchInput" placeholder="Search countries, visas, scholarships…" autocomplete="off">
+    <input type="text" id="navSearchInput" placeholder="Search countries, visas, scholarships…" autocomplete="off" oninput="acInput('navSearchInput','navAcDrop')" onkeydown="acKey(event,'navSearchInput','navAcDrop')">
     <button type="submit" aria-label="Search">→</button>
+    <div class="ac-drop" id="navAcDrop"></div>
   </form>
 
   <ul class="nav-links">
@@ -818,10 +855,11 @@ body.wc-active .mobile-menu{padding-top:46px}
       <div class="hero-badge">✦ One World. Unlimited Opportunities.</div>
       <h1>Travel, Study, Work<br>&amp; <em>Connect</em> <strong>Globally</strong></h1>
       <p>Explore every country, discover universities, find jobs, and unlock immigration pathways — all from one trusted global platform.</p>
-      <form class="hero-search" onsubmit="heroSearch(event)">
+      <form class="hero-search" style="position:relative" onsubmit="heroSearch(event)">
         <span class="hero-search-ico">🔍</span>
-        <input type="text" id="heroSearchInput" placeholder="Search any country — Canada, UK, Germany…" autocomplete="off">
+        <input type="text" id="heroSearchInput" placeholder="Search any country — Canada, UK, Germany…" autocomplete="off" oninput="acInput('heroSearchInput','heroAcDrop')" onkeydown="acKey(event,'heroSearchInput','heroAcDrop')">
         <button type="submit">Search</button>
+        <div class="ac-drop" id="heroAcDrop"></div>
       </form>
       <div class="hero-btns">
         <button class="btn-primary" onclick="showPage('countries')">🌍 Explore Countries</button>
@@ -1915,15 +1953,29 @@ body.wc-active .mobile-menu{padding-top:46px}
 
 <!-- ============ COUNTRY GUIDES PAGE ============ -->
 <div class="page" id="page-countries">
-  <section style="padding-top:140px">
-    <div class="section-tag">Country Guides</div>
-    <h1 class="section-title">Where Do You Want<br>to <strong>Go?</strong></h1>
-    <p class="section-sub">Select a destination to see visa types, costs, processing times, and how we can help you get there.</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-top:2.5rem" id="countryGrid"></div>
-    <div style="margin-top:3rem;padding:2rem;background:rgba(201,168,76,0.05);border:1px solid var(--border);border-radius:var(--radius-xl);text-align:center">
-      <div class="section-tag">Don't see your country?</div>
-      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;margin:0.5rem 0">We Cover 47+ Countries</h3>
-      <p style="color:var(--text-body);font-size:0.9rem;margin-bottom:1.5rem">Our consultants have processed applications for destinations worldwide. Book a free consultation for a personalised assessment.</p>
+  <section style="padding-top:130px">
+    <div class="text-center">
+      <div class="section-tag">Global Country Directory</div>
+      <h1 class="section-title">Explore Every<br><strong>Country on Earth</strong></h1>
+      <p class="section-sub" style="margin:0 auto">Search 195 countries — visas, universities, scholarships, jobs, cost of living, languages and live weather. One world, unlimited opportunities.</p>
+    </div>
+
+    <!-- Directory search + region filter -->
+    <div style="max-width:760px;margin:2rem auto 0">
+      <div class="dir-search">
+        <span style="opacity:0.5">🔍</span>
+        <input type="text" id="dirSearchInput" placeholder="Search any country — e.g. Japan, Brazil, Kenya…" oninput="renderAllCountries()" autocomplete="off">
+      </div>
+      <div class="dir-tabs" id="dirTabs"></div>
+    </div>
+
+    <div id="dirCount" style="text-align:center;color:#64748b;font-size:0.82rem;margin:1.4rem 0 0"></div>
+    <div class="dir-grid" id="allCountryGrid"></div>
+
+    <div style="margin-top:3rem;padding:2rem;background:rgba(212,175,55,0.06);border:1px solid var(--border);border-radius:var(--radius-xl);text-align:center;max-width:900px;margin-left:auto;margin-right:auto">
+      <div class="section-tag">Need expert help?</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;margin:0.5rem 0">Personalised Country Assessment</h3>
+      <p style="color:var(--text-body);font-size:0.9rem;margin-bottom:1.5rem">Our consultants have processed applications worldwide. Book a free consultation for a tailored plan to your chosen destination.</p>
       <button class="btn-primary" onclick="showPage('contact')">📋 Book Free Consultation</button>
     </div>
   </section>
@@ -2087,7 +2139,7 @@ function showPage(page, mode) {
     a.classList.toggle('active', a.dataset.page === page);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (page === 'countries') initCountryGrid();
+  if (page === 'countries') renderAllCountries();
   if (page === 'blog') initBlog();
   if (page === 'world') initWorldExplorer();
   if (page === 'tools') warmUpServer();
@@ -4021,12 +4073,15 @@ const COUNTRIES = [
 function navSearch(e) {
   if (e) e.preventDefault();
   const q = (document.getElementById('navSearchInput')?.value || document.getElementById('mobSearchInput')?.value || '').trim().toLowerCase();
-  if (!q) return;
-  // Try to match a country directly
-  const idx = COUNTRIES.findIndex(c => c.name.toLowerCase().includes(q) || q.includes(c.name.toLowerCase().split(' ')[0]));
-  if (idx >= 0) { showCountryGuide(idx); return; }
-  // Fall back to world explorer / countries
+  document.getElementById('navAcDrop')?.classList.remove('open');
+  if (!q) { showPage('countries'); return; }
+  // Exact-ish match → open the rich country detail directly
+  const hit = ALL_COUNTRIES.find(c => c.name.toLowerCase() === q)
+           || ALL_COUNTRIES.find(c => c.name.toLowerCase().includes(q) || c.capital.toLowerCase().includes(q));
+  if (hit) { if (document.getElementById('navSearchInput')) document.getElementById('navSearchInput').value=''; showCountryDetail(hit.name); return; }
+  // Otherwise open the directory pre-filtered to the query
   showPage('countries');
+  const di = document.getElementById('dirSearchInput'); if (di) { di.value = q; renderAllCountries(); }
 }
 function toggleNavMore(e) {
   e.stopPropagation();
@@ -4041,12 +4096,13 @@ document.addEventListener('click', () => closeNavMore());
 function heroSearch(e) {
   if (e) e.preventDefault();
   const q = (document.getElementById('heroSearchInput')?.value || '').trim().toLowerCase();
+  document.getElementById('heroAcDrop')?.classList.remove('open');
   if (!q) { showPage('countries'); return; }
-  // Try to match a country by name; open its guide if found
-  const idx = COUNTRIES.findIndex(c => c.name.toLowerCase().includes(q) || q.includes(c.name.toLowerCase()));
-  if (idx >= 0) { showCountryGuide(idx); return; }
-  // Otherwise jump to the World Explorer / countries page
+  const hit = ALL_COUNTRIES.find(c => c.name.toLowerCase() === q)
+           || ALL_COUNTRIES.find(c => c.name.toLowerCase().includes(q) || c.capital.toLowerCase().includes(q));
+  if (hit) { document.getElementById('heroSearchInput').value=''; showCountryDetail(hit.name); return; }
   showPage('countries');
+  const di = document.getElementById('dirSearchInput'); if (di) { di.value = q; renderAllCountries(); }
 }
 
 function showCountryGuide(idx) {
@@ -6676,6 +6732,375 @@ function handleSearchKey(e){
 // Close dropdown when clicking outside
 document.addEventListener('click',e=>{
   if(!e.target.closest('.search-box'))closeLiveSearch();
+});
+</script>
+
+<!-- ============ GLOBAL COUNTRY DIRECTORY ENGINE ============ -->
+<script>
+/* Dataset: flag | name | capital | region | languages | currency
+   region codes: AF Africa · AM Americas · AS Asia · EU Europe · OC Oceania */
+const _COUNTRY_DATA = `
+🇦🇫|Afghanistan|Kabul|AS|Dari, Pashto|Afghani (AFN)
+🇦🇱|Albania|Tirana|EU|Albanian|Lek (ALL)
+🇩🇿|Algeria|Algiers|AF|Arabic, Berber|Dinar (DZD)
+🇦🇩|Andorra|Andorra la Vella|EU|Catalan|Euro (EUR)
+🇦🇴|Angola|Luanda|AF|Portuguese|Kwanza (AOA)
+🇦🇬|Antigua and Barbuda|Saint John's|AM|English|EC Dollar (XCD)
+🇦🇷|Argentina|Buenos Aires|AM|Spanish|Peso (ARS)
+🇦🇲|Armenia|Yerevan|AS|Armenian|Dram (AMD)
+🇦🇺|Australia|Canberra|OC|English|AU Dollar (AUD)
+🇦🇹|Austria|Vienna|EU|German|Euro (EUR)
+🇦🇿|Azerbaijan|Baku|AS|Azerbaijani|Manat (AZN)
+🇧🇸|Bahamas|Nassau|AM|English|BS Dollar (BSD)
+🇧🇭|Bahrain|Manama|AS|Arabic|Dinar (BHD)
+🇧🇩|Bangladesh|Dhaka|AS|Bengali|Taka (BDT)
+🇧🇧|Barbados|Bridgetown|AM|English|BB Dollar (BBD)
+🇧🇾|Belarus|Minsk|EU|Belarusian, Russian|Ruble (BYN)
+🇧🇪|Belgium|Brussels|EU|Dutch, French, German|Euro (EUR)
+🇧🇿|Belize|Belmopan|AM|English|BZ Dollar (BZD)
+🇧🇯|Benin|Porto-Novo|AF|French|CFA Franc (XOF)
+🇧🇹|Bhutan|Thimphu|AS|Dzongkha|Ngultrum (BTN)
+🇧🇴|Bolivia|Sucre|AM|Spanish|Boliviano (BOB)
+🇧🇦|Bosnia and Herzegovina|Sarajevo|EU|Bosnian, Croatian, Serbian|Mark (BAM)
+🇧🇼|Botswana|Gaborone|AF|English, Tswana|Pula (BWP)
+🇧🇷|Brazil|Brasília|AM|Portuguese|Real (BRL)
+🇧🇳|Brunei|Bandar Seri Begawan|AS|Malay|BN Dollar (BND)
+🇧🇬|Bulgaria|Sofia|EU|Bulgarian|Lev (BGN)
+🇧🇫|Burkina Faso|Ouagadougou|AF|French|CFA Franc (XOF)
+🇧🇮|Burundi|Gitega|AF|Kirundi, French|Franc (BIF)
+🇰🇭|Cambodia|Phnom Penh|AS|Khmer|Riel (KHR)
+🇨🇲|Cameroon|Yaoundé|AF|French, English|CFA Franc (XAF)
+🇨🇦|Canada|Ottawa|AM|English, French|CA Dollar (CAD)
+🇨🇻|Cape Verde|Praia|AF|Portuguese|Escudo (CVE)
+🇨🇫|Central African Republic|Bangui|AF|French, Sango|CFA Franc (XAF)
+🇹🇩|Chad|N'Djamena|AF|French, Arabic|CFA Franc (XAF)
+🇨🇱|Chile|Santiago|AM|Spanish|Peso (CLP)
+🇨🇳|China|Beijing|AS|Mandarin Chinese|Yuan (CNY)
+🇨🇴|Colombia|Bogotá|AM|Spanish|Peso (COP)
+🇰🇲|Comoros|Moroni|AF|Comorian, Arabic, French|Franc (KMF)
+🇨🇬|Congo (Republic)|Brazzaville|AF|French|CFA Franc (XAF)
+🇨🇩|Congo (DR)|Kinshasa|AF|French|Franc (CDF)
+🇨🇷|Costa Rica|San José|AM|Spanish|Colón (CRC)
+🇨🇮|Côte d'Ivoire|Yamoussoukro|AF|French|CFA Franc (XOF)
+🇭🇷|Croatia|Zagreb|EU|Croatian|Euro (EUR)
+🇨🇺|Cuba|Havana|AM|Spanish|Peso (CUP)
+🇨🇾|Cyprus|Nicosia|EU|Greek, Turkish|Euro (EUR)
+🇨🇿|Czech Republic|Prague|EU|Czech|Koruna (CZK)
+🇩🇰|Denmark|Copenhagen|EU|Danish|Krone (DKK)
+🇩🇯|Djibouti|Djibouti|AF|French, Arabic|Franc (DJF)
+🇩🇲|Dominica|Roseau|AM|English|EC Dollar (XCD)
+🇩🇴|Dominican Republic|Santo Domingo|AM|Spanish|Peso (DOP)
+🇪🇨|Ecuador|Quito|AM|Spanish|US Dollar (USD)
+🇪🇬|Egypt|Cairo|AF|Arabic|Pound (EGP)
+🇸🇻|El Salvador|San Salvador|AM|Spanish|US Dollar (USD)
+🇬🇶|Equatorial Guinea|Malabo|AF|Spanish, French|CFA Franc (XAF)
+🇪🇷|Eritrea|Asmara|AF|Tigrinya, Arabic|Nakfa (ERN)
+🇪🇪|Estonia|Tallinn|EU|Estonian|Euro (EUR)
+🇸🇿|Eswatini|Mbabane|AF|Swazi, English|Lilangeni (SZL)
+🇪🇹|Ethiopia|Addis Ababa|AF|Amharic|Birr (ETB)
+🇫🇯|Fiji|Suva|OC|English, Fijian, Hindi|FJ Dollar (FJD)
+🇫🇮|Finland|Helsinki|EU|Finnish, Swedish|Euro (EUR)
+🇫🇷|France|Paris|EU|French|Euro (EUR)
+🇬🇦|Gabon|Libreville|AF|French|CFA Franc (XAF)
+🇬🇲|Gambia|Banjul|AF|English|Dalasi (GMD)
+🇬🇪|Georgia|Tbilisi|AS|Georgian|Lari (GEL)
+🇩🇪|Germany|Berlin|EU|German|Euro (EUR)
+🇬🇭|Ghana|Accra|AF|English|Cedi (GHS)
+🇬🇷|Greece|Athens|EU|Greek|Euro (EUR)
+🇬🇩|Grenada|Saint George's|AM|English|EC Dollar (XCD)
+🇬🇹|Guatemala|Guatemala City|AM|Spanish|Quetzal (GTQ)
+🇬🇳|Guinea|Conakry|AF|French|Franc (GNF)
+🇬🇼|Guinea-Bissau|Bissau|AF|Portuguese|CFA Franc (XOF)
+🇬🇾|Guyana|Georgetown|AM|English|GY Dollar (GYD)
+🇭🇹|Haiti|Port-au-Prince|AM|French, Creole|Gourde (HTG)
+🇭🇳|Honduras|Tegucigalpa|AM|Spanish|Lempira (HNL)
+🇭🇺|Hungary|Budapest|EU|Hungarian|Forint (HUF)
+🇮🇸|Iceland|Reykjavík|EU|Icelandic|Króna (ISK)
+🇮🇳|India|New Delhi|AS|Hindi, English|Rupee (INR)
+🇮🇩|Indonesia|Jakarta|AS|Indonesian|Rupiah (IDR)
+🇮🇷|Iran|Tehran|AS|Persian|Rial (IRR)
+🇮🇶|Iraq|Baghdad|AS|Arabic, Kurdish|Dinar (IQD)
+🇮🇪|Ireland|Dublin|EU|English, Irish|Euro (EUR)
+🇮🇱|Israel|Jerusalem|AS|Hebrew, Arabic|Shekel (ILS)
+🇮🇹|Italy|Rome|EU|Italian|Euro (EUR)
+🇯🇲|Jamaica|Kingston|AM|English|JM Dollar (JMD)
+🇯🇵|Japan|Tokyo|AS|Japanese|Yen (JPY)
+🇯🇴|Jordan|Amman|AS|Arabic|Dinar (JOD)
+🇰🇿|Kazakhstan|Astana|AS|Kazakh, Russian|Tenge (KZT)
+🇰🇪|Kenya|Nairobi|AF|Swahili, English|Shilling (KES)
+🇰🇮|Kiribati|Tarawa|OC|English, Gilbertese|AU Dollar (AUD)
+🇰🇼|Kuwait|Kuwait City|AS|Arabic|Dinar (KWD)
+🇰🇬|Kyrgyzstan|Bishkek|AS|Kyrgyz, Russian|Som (KGS)
+🇱🇦|Laos|Vientiane|AS|Lao|Kip (LAK)
+🇱🇻|Latvia|Riga|EU|Latvian|Euro (EUR)
+🇱🇧|Lebanon|Beirut|AS|Arabic|Pound (LBP)
+🇱🇸|Lesotho|Maseru|AF|Sesotho, English|Loti (LSL)
+🇱🇷|Liberia|Monrovia|AF|English|LR Dollar (LRD)
+🇱🇾|Libya|Tripoli|AF|Arabic|Dinar (LYD)
+🇱🇮|Liechtenstein|Vaduz|EU|German|Swiss Franc (CHF)
+🇱🇹|Lithuania|Vilnius|EU|Lithuanian|Euro (EUR)
+🇱🇺|Luxembourg|Luxembourg|EU|Luxembourgish, French, German|Euro (EUR)
+🇲🇬|Madagascar|Antananarivo|AF|Malagasy, French|Ariary (MGA)
+🇲🇼|Malawi|Lilongwe|AF|English, Chichewa|Kwacha (MWK)
+🇲🇾|Malaysia|Kuala Lumpur|AS|Malay|Ringgit (MYR)
+🇲🇻|Maldives|Malé|AS|Dhivehi|Rufiyaa (MVR)
+🇲🇱|Mali|Bamako|AF|French|CFA Franc (XOF)
+🇲🇹|Malta|Valletta|EU|Maltese, English|Euro (EUR)
+🇲🇭|Marshall Islands|Majuro|OC|Marshallese, English|US Dollar (USD)
+🇲🇷|Mauritania|Nouakchott|AF|Arabic|Ouguiya (MRU)
+🇲🇺|Mauritius|Port Louis|AF|English, French|Rupee (MUR)
+🇲🇽|Mexico|Mexico City|AM|Spanish|Peso (MXN)
+🇫🇲|Micronesia|Palikir|OC|English|US Dollar (USD)
+🇲🇩|Moldova|Chișinău|EU|Romanian|Leu (MDL)
+🇲🇨|Monaco|Monaco|EU|French|Euro (EUR)
+🇲🇳|Mongolia|Ulaanbaatar|AS|Mongolian|Tögrög (MNT)
+🇲🇪|Montenegro|Podgorica|EU|Montenegrin|Euro (EUR)
+🇲🇦|Morocco|Rabat|AF|Arabic, Berber|Dirham (MAD)
+🇲🇿|Mozambique|Maputo|AF|Portuguese|Metical (MZN)
+🇲🇲|Myanmar|Naypyidaw|AS|Burmese|Kyat (MMK)
+🇳🇦|Namibia|Windhoek|AF|English|NA Dollar (NAD)
+🇳🇷|Nauru|Yaren|OC|Nauruan, English|AU Dollar (AUD)
+🇳🇵|Nepal|Kathmandu|AS|Nepali|Rupee (NPR)
+🇳🇱|Netherlands|Amsterdam|EU|Dutch|Euro (EUR)
+🇳🇿|New Zealand|Wellington|OC|English, Māori|NZ Dollar (NZD)
+🇳🇮|Nicaragua|Managua|AM|Spanish|Córdoba (NIO)
+🇳🇪|Niger|Niamey|AF|French|CFA Franc (XOF)
+🇳🇬|Nigeria|Abuja|AF|English|Naira (NGN)
+🇰🇵|North Korea|Pyongyang|AS|Korean|Won (KPW)
+🇲🇰|North Macedonia|Skopje|EU|Macedonian|Denar (MKD)
+🇳🇴|Norway|Oslo|EU|Norwegian|Krone (NOK)
+🇴🇲|Oman|Muscat|AS|Arabic|Rial (OMR)
+🇵🇰|Pakistan|Islamabad|AS|Urdu, English|Rupee (PKR)
+🇵🇼|Palau|Ngerulmud|OC|Palauan, English|US Dollar (USD)
+🇵🇸|Palestine|Ramallah|AS|Arabic|Shekel (ILS)
+🇵🇦|Panama|Panama City|AM|Spanish|Balboa (PAB)
+🇵🇬|Papua New Guinea|Port Moresby|OC|English, Tok Pisin|Kina (PGK)
+🇵🇾|Paraguay|Asunción|AM|Spanish, Guaraní|Guaraní (PYG)
+🇵🇪|Peru|Lima|AM|Spanish|Sol (PEN)
+🇵🇭|Philippines|Manila|AS|Filipino, English|Peso (PHP)
+🇵🇱|Poland|Warsaw|EU|Polish|Złoty (PLN)
+🇵🇹|Portugal|Lisbon|EU|Portuguese|Euro (EUR)
+🇶🇦|Qatar|Doha|AS|Arabic|Riyal (QAR)
+🇷🇴|Romania|Bucharest|EU|Romanian|Leu (RON)
+🇷🇺|Russia|Moscow|EU|Russian|Ruble (RUB)
+🇷🇼|Rwanda|Kigali|AF|Kinyarwanda, English, French|Franc (RWF)
+🇰🇳|Saint Kitts and Nevis|Basseterre|AM|English|EC Dollar (XCD)
+🇱🇨|Saint Lucia|Castries|AM|English|EC Dollar (XCD)
+🇻🇨|Saint Vincent and the Grenadines|Kingstown|AM|English|EC Dollar (XCD)
+🇼🇸|Samoa|Apia|OC|Samoan, English|Tala (WST)
+🇸🇲|San Marino|San Marino|EU|Italian|Euro (EUR)
+🇸🇹|São Tomé and Príncipe|São Tomé|AF|Portuguese|Dobra (STN)
+🇸🇦|Saudi Arabia|Riyadh|AS|Arabic|Riyal (SAR)
+🇸🇳|Senegal|Dakar|AF|French|CFA Franc (XOF)
+🇷🇸|Serbia|Belgrade|EU|Serbian|Dinar (RSD)
+🇸🇨|Seychelles|Victoria|AF|English, French, Creole|Rupee (SCR)
+🇸🇱|Sierra Leone|Freetown|AF|English|Leone (SLE)
+🇸🇬|Singapore|Singapore|AS|English, Malay, Mandarin, Tamil|SG Dollar (SGD)
+🇸🇰|Slovakia|Bratislava|EU|Slovak|Euro (EUR)
+🇸🇮|Slovenia|Ljubljana|EU|Slovene|Euro (EUR)
+🇸🇧|Solomon Islands|Honiara|OC|English|SB Dollar (SBD)
+🇸🇴|Somalia|Mogadishu|AF|Somali, Arabic|Shilling (SOS)
+🇿🇦|South Africa|Pretoria|AF|11 official (Zulu, English…)|Rand (ZAR)
+🇰🇷|South Korea|Seoul|AS|Korean|Won (KRW)
+🇸🇸|South Sudan|Juba|AF|English|Pound (SSP)
+🇪🇸|Spain|Madrid|EU|Spanish|Euro (EUR)
+🇱🇰|Sri Lanka|Colombo|AS|Sinhala, Tamil|Rupee (LKR)
+🇸🇩|Sudan|Khartoum|AF|Arabic, English|Pound (SDG)
+🇸🇷|Suriname|Paramaribo|AM|Dutch|SR Dollar (SRD)
+🇸🇪|Sweden|Stockholm|EU|Swedish|Krona (SEK)
+🇨🇭|Switzerland|Bern|EU|German, French, Italian|Swiss Franc (CHF)
+🇸🇾|Syria|Damascus|AS|Arabic|Pound (SYP)
+🇹🇼|Taiwan|Taipei|AS|Mandarin Chinese|TW Dollar (TWD)
+🇹🇯|Tajikistan|Dushanbe|AS|Tajik|Somoni (TJS)
+🇹🇿|Tanzania|Dodoma|AF|Swahili, English|Shilling (TZS)
+🇹🇭|Thailand|Bangkok|AS|Thai|Baht (THB)
+🇹🇱|Timor-Leste|Dili|AS|Tetum, Portuguese|US Dollar (USD)
+🇹🇬|Togo|Lomé|AF|French|CFA Franc (XOF)
+🇹🇴|Tonga|Nukuʻalofa|OC|Tongan, English|Paʻanga (TOP)
+🇹🇹|Trinidad and Tobago|Port of Spain|AM|English|TT Dollar (TTD)
+🇹🇳|Tunisia|Tunis|AF|Arabic|Dinar (TND)
+🇹🇷|Turkey|Ankara|AS|Turkish|Lira (TRY)
+🇹🇲|Turkmenistan|Ashgabat|AS|Turkmen|Manat (TMT)
+🇹🇻|Tuvalu|Funafuti|OC|Tuvaluan, English|AU Dollar (AUD)
+🇺🇬|Uganda|Kampala|AF|English, Swahili|Shilling (UGX)
+🇺🇦|Ukraine|Kyiv|EU|Ukrainian|Hryvnia (UAH)
+🇦🇪|United Arab Emirates|Abu Dhabi|AS|Arabic|Dirham (AED)
+🇬🇧|United Kingdom|London|EU|English|Pound (GBP)
+🇺🇸|United States|Washington, D.C.|AM|English|US Dollar (USD)
+🇺🇾|Uruguay|Montevideo|AM|Spanish|Peso (UYU)
+🇺🇿|Uzbekistan|Tashkent|AS|Uzbek|Som (UZS)
+🇻🇺|Vanuatu|Port Vila|OC|Bislama, English, French|Vatu (VUV)
+🇻🇦|Vatican City|Vatican City|EU|Italian, Latin|Euro (EUR)
+🇻🇪|Venezuela|Caracas|AM|Spanish|Bolívar (VES)
+🇻🇳|Vietnam|Hanoi|AS|Vietnamese|Đồng (VND)
+🇾🇪|Yemen|Sana'a|AS|Arabic|Rial (YER)
+🇿🇲|Zambia|Lusaka|AF|English|Kwacha (ZMW)
+🇿🇼|Zimbabwe|Harare|AF|English, Shona, Ndebele|ZiG (ZWG)
+`.trim();
+
+const REGION_NAMES = { AF:'Africa', AM:'Americas', AS:'Asia', EU:'Europe', OC:'Oceania' };
+// Countries we have full detailed guides for → map to COUNTRIES[] index
+const GUIDE_MAP = { 'United Kingdom':0, 'United States':1, 'Canada':2, 'Germany':3, 'Australia':4, 'Poland':6, 'United Arab Emirates':7 };
+// "Premium opportunity" countries to highlight with a ★ badge
+const TOP_DEST = new Set(['Canada','United States','United Kingdom','Australia','Germany','New Zealand','Ireland','Netherlands','Sweden','Norway','Switzerland','United Arab Emirates','Singapore','France','Italy','Spain','Poland','Portugal','Japan','South Korea','Finland','Denmark','Austria','Belgium']);
+
+const ALL_COUNTRIES = _COUNTRY_DATA.split('\n').map(line => {
+  const [flag, name, capital, region, langs, currency] = line.split('|');
+  return { flag, name, capital, region, langs, currency, top: TOP_DEST.has(name) };
+});
+
+let _dirRegion = 'ALL';
+
+function initDirTabs() {
+  const tabs = document.getElementById('dirTabs');
+  if (!tabs || tabs.dataset.ready) return;
+  tabs.dataset.ready = '1';
+  const opts = [['ALL','🌍 All'],['top','⭐ Top Destinations'],['AF','Africa'],['AM','Americas'],['AS','Asia'],['EU','Europe'],['OC','Oceania']];
+  tabs.innerHTML = opts.map(([k,l]) =>
+    `<button class="dir-tab${k==='ALL'?' active':''}" data-region="${k}" onclick="setDirRegion('${k}')">${l}</button>`).join('');
+}
+function setDirRegion(r) {
+  _dirRegion = r;
+  document.querySelectorAll('.dir-tab').forEach(t => t.classList.toggle('active', t.dataset.region === r));
+  renderAllCountries();
+}
+function renderAllCountries() {
+  initDirTabs();
+  const grid = document.getElementById('allCountryGrid');
+  if (!grid) return;
+  const q = (document.getElementById('dirSearchInput')?.value || '').trim().toLowerCase();
+  let list = ALL_COUNTRIES.filter(c => {
+    const matchRegion = _dirRegion === 'ALL' ? true : (_dirRegion === 'top' ? c.top : c.region === _dirRegion);
+    const matchQ = !q || c.name.toLowerCase().includes(q) || c.capital.toLowerCase().includes(q);
+    return matchRegion && matchQ;
+  });
+  const countEl = document.getElementById('dirCount');
+  if (countEl) countEl.textContent = `${list.length} ${list.length === 1 ? 'country' : 'countries'}`;
+  grid.innerHTML = list.map(c => `
+    <div class="dir-card" onclick="showCountryDetail('${c.name.replace(/'/g,"\\'")}')">
+      <div class="df">${c.flag}</div>
+      <div class="dn">${c.name}</div>
+      <div class="dr">${REGION_NAMES[c.region]} · ${c.capital}</div>
+      ${c.top ? '<span class="dstar">⭐ Top Destination</span>' : ''}
+    </div>`).join('') || `<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem">No countries match "${q}".</div>`;
+}
+
+// Region-based honest overview text (guidance, not fabricated specifics)
+function _overviewFor(c) {
+  const eu = c.region === 'EU';
+  const visa = eu
+    ? `Most travellers need a Schengen or national visa depending on the country. Students apply for a national study visa; workers typically need an EU work permit or Blue Card. Citizens of many countries can visit visa-free for up to 90 days.`
+    : `Visa requirements vary by your nationality and purpose (tourism, study, work). Common routes include visitor/tourist visas, student visas, and employer-sponsored work permits. Our consultants confirm the exact visa for your passport.`;
+  const study = `${c.name} hosts universities and colleges welcoming international students. Programmes are offered in ${c.langs.split(',')[0]}${/English/i.test(c.langs)?'':' (with English-taught options at many institutions)'}. We help with admission, statements of purpose and student-visa documentation.`;
+  const work = c.top
+    ? `${c.name} actively recruits skilled international talent across healthcare, IT, engineering, hospitality and trades. Employer sponsorship and skilled-migration pathways are available.`
+    : `Employment for foreigners is usually through employer sponsorship in sectors with local shortages. We advise on realistic, legal work routes for ${c.name}.`;
+  return { visa, study, work };
+}
+
+let _weatherCache = {};
+async function _loadWeather(c, elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  try {
+    let coords = _weatherCache[c.name];
+    if (!coords) {
+      const g = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(c.capital)}&count=1`).then(r => r.json());
+      if (!g.results || !g.results[0]) throw new Error('no geo');
+      coords = { lat: g.results[0].latitude, lon: g.results[0].longitude };
+      _weatherCache[c.name] = coords;
+    }
+    const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,weather_code`).then(r => r.json());
+    const t = Math.round(w.current.temperature_2m);
+    const code = w.current.weather_code;
+    const icon = code === 0 ? '☀️' : code < 4 ? '🌤️' : code < 50 ? '☁️' : code < 70 ? '🌧️' : code < 80 ? '❄️' : '⛈️';
+    el.innerHTML = `<span class="wt">${icon}</span><div><div class="wtemp">${t}°C</div><div style="font-size:0.78rem;color:#64748b">Live weather in ${c.capital}</div></div>`;
+  } catch (e) {
+    el.innerHTML = `<span class="wt">🌍</span><div style="font-size:0.82rem;color:#64748b">Live weather for ${c.capital} is unavailable right now.</div>`;
+  }
+}
+
+function showCountryDetail(name) {
+  const c = ALL_COUNTRIES.find(x => x.name === name);
+  if (!c) return;
+  const ov = _overviewFor(c);
+  const guideIdx = GUIDE_MAP[c.name];
+  const wId = 'cdWeather';
+  document.getElementById('countryGuideContent').innerHTML = `
+    <div class="cd-hero"><div class="cd-flag">${c.flag}</div></div>
+    <div style="padding-top:1.2rem">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;margin:0">${c.name}</h2>
+      <div style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em">${REGION_NAMES[c.region]} · Capital: ${c.capital}</div>
+    </div>
+    <div class="cd-facts">
+      <div class="cd-fact"><div class="l">Capital</div><div class="v">${c.capital}</div></div>
+      <div class="cd-fact"><div class="l">Region</div><div class="v">${REGION_NAMES[c.region]}</div></div>
+      <div class="cd-fact"><div class="l">Languages</div><div class="v">${c.langs}</div></div>
+      <div class="cd-fact"><div class="l">Currency</div><div class="v">${c.currency}</div></div>
+    </div>
+    <div class="cd-weather" id="${wId}"><span class="wt">⏳</span><div style="font-size:0.82rem;color:#64748b">Loading live weather…</div></div>
+    <div class="cd-block"><h4>🛂 Visa Information</h4><p>${ov.visa}</p></div>
+    <div class="cd-block"><h4>🎓 Study Abroad</h4><p>${ov.study}</p></div>
+    <div class="cd-block"><h4>💼 Work & Jobs</h4><p>${ov.work}</p></div>
+    <div class="cd-block"><h4>🏠 Cost of Living & Housing</h4><p>Living costs and rent vary by city — capital and major cities are typically the most expensive. We provide budgeting guidance and student-accommodation tips during your consultation.</p></div>
+    <div class="cd-block"><h4>🛣️ Immigration Pathways</h4><p>Routes may include study-to-work transitions, skilled migration, family sponsorship and (in some countries) investment or residency-by-investment programmes. We map the best legal pathway for your profile.</p></div>
+    <div style="display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1.6rem">
+      ${guideIdx !== undefined ? `<button class="btn-primary" onclick="closeCountryGuide();showCountryGuide(${guideIdx})">📘 Full Detailed Guide</button>` : ''}
+      <button class="${guideIdx!==undefined?'btn-outline':'btn-primary'}" onclick="closeCountryGuide();showPage('contact')">📋 Book Free Consultation</button>
+      <button class="btn-outline" onclick="closeCountryGuide();showPage('tools')">🤖 Ask AI Assistant</button>
+    </div>
+    <p style="font-size:0.76rem;color:#94a3b8;margin-top:1rem">ℹ️ Visa rules change frequently and depend on your nationality. Always confirm specifics with our consultants or the official embassy before travelling.</p>`;
+  document.getElementById('countryGuideOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  _loadWeather(c, wId);
+}
+
+/* ---------- Live autocomplete (Google-style) for nav + hero search ---------- */
+let _acIndex = -1;
+function acInput(inputId, dropId) {
+  const input = document.getElementById(inputId);
+  const drop = document.getElementById(dropId);
+  if (!input || !drop) return;
+  const q = input.value.trim().toLowerCase();
+  _acIndex = -1;
+  if (!q) { drop.classList.remove('open'); return; }
+  const matches = ALL_COUNTRIES.filter(c =>
+    c.name.toLowerCase().includes(q) || c.capital.toLowerCase().includes(q)
+  ).slice(0, 8);
+  if (!matches.length) {
+    drop.innerHTML = `<div class="ac-empty">No match. Press Enter to browse all countries.</div>`;
+    drop.classList.add('open');
+    return;
+  }
+  drop.innerHTML = matches.map(c =>
+    `<div class="ac-item" onmousedown="acPick('${c.name.replace(/'/g,"\\'")}','${dropId}','${inputId}')">
+      <span class="acf">${c.flag}</span>
+      <span>${c.name}</span>
+      <span class="acr">${REGION_NAMES[c.region]}</span>
+    </div>`).join('');
+  drop.classList.add('open');
+}
+function acPick(name, dropId, inputId) {
+  document.getElementById(dropId)?.classList.remove('open');
+  const input = document.getElementById(inputId);
+  if (input) input.value = '';
+  showCountryDetail(name);
+}
+function acKey(e, inputId, dropId) {
+  const drop = document.getElementById(dropId);
+  if (!drop || !drop.classList.contains('open')) return;
+  const items = [...drop.querySelectorAll('.ac-item')];
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); _acIndex = Math.min(_acIndex + 1, items.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); _acIndex = Math.max(_acIndex - 1, 0); }
+  else if (e.key === 'Enter' && _acIndex >= 0) { e.preventDefault(); items[_acIndex].dispatchEvent(new MouseEvent('mousedown')); return; }
+  else return;
+  items.forEach((it, i) => it.classList.toggle('sel', i === _acIndex));
+}
+// Close autocomplete on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.nav-search')) document.getElementById('navAcDrop')?.classList.remove('open');
+  if (!e.target.closest('.hero-search')) document.getElementById('heroAcDrop')?.classList.remove('open');
 });
 </script>
 
