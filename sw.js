@@ -1,8 +1,8 @@
 /* SkyGlobe Group — Service Worker
    Network-first for navigation & API (always fresh content),
    cache-first for static assets (fast repeat loads, offline-friendly). */
-const CACHE = 'skyglobe-v1';
-const STATIC_ASSETS = ['/', '/index.html', '/logo.png', '/manifest.json'];
+const CACHE = 'skyglobe-v2';
+const STATIC_ASSETS = ['/', '/index.html', '/logo.png', '/icon.svg', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/favicon-32.png', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
