@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conference Sourcing — SKYGLOBE LIMITED</title>
+<meta name="description" content="We source genuine conference invitations and admission documents from real organisers worldwide, verify them, and deliver to you.">
+<link rel="icon" href="/favicon-32.png">
+<style>
+  :root{--navy:#0a1628;--navy2:#10203a;--gold:#c9a84c;--ink:#1a2233;--muted:#6b7689;--line:#e6e9ef;--ok:#2e7d32}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;color:var(--ink);background:#f4f6fa;line-height:1.6}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  header{background:var(--navy);color:#fff;padding:14px 0}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.04em}
+  .brand img{height:38px;width:38px;border-radius:8px}
+  .brand small{display:block;color:var(--gold);font-size:.66rem;letter-spacing:.18em;font-weight:600}
+  header a.home{color:#cdd6e6;text-decoration:none;font-size:.9rem}
+  .hero{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#fff;padding:54px 0 60px;text-align:center}
+  .hero h1{font-size:2.1rem;font-family:Georgia,serif}
+  .hero h1 span{color:var(--gold)}
+  .hero p{max-width:680px;margin:14px auto 0;color:#c3cee0}
+  .trust{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+  .trust span{background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.4);color:#f0e3bd;padding:6px 14px;border-radius:30px;font-size:.8rem}
+  .section{padding:44px 0}
+  .section h2{font-family:Georgia,serif;font-size:1.5rem;margin-bottom:6px}
+  .section .sub{color:var(--muted);margin-bottom:26px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column}
+  .card .field{display:inline-block;background:#eef2f9;color:#3a4a66;font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:20px;align-self:flex-start;margin-bottom:10px}
+  .card h3{font-size:1.06rem;margin-bottom:6px}
+  .card .org{color:var(--gold);font-weight:600;font-size:.9rem}
+  .card .meta{color:var(--muted);font-size:.85rem;margin:8px 0}
+  .card p.sum{font-size:.9rem;color:#3c465a;flex:1}
+  .btn{background:var(--gold);color:#1a1300;border:none;padding:11px 18px;border-radius:9px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+  .btn:hover{filter:brightness(1.06)}
+  .btn.block{width:100%;margin-top:14px}
+  .btn.ghost{background:transparent;border:1px solid var(--gold);color:var(--navy)}
+  .empty{background:#fff;border:1px dashed var(--line);border-radius:14px;padding:40px;text-align:center;color:var(--muted)}
+  .how{background:#fff;border-radius:16px;border:1px solid var(--line);padding:28px;margin-top:10px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:10px}
+  .step{padding:16px;border-left:3px solid var(--gold);background:#fafbfd;border-radius:0 8px 8px 0}
+  .step b{display:block;color:var(--navy);margin-bottom:4px}
+  .note{background:#fff8e6;border:1px solid #ead9a6;border-radius:12px;padding:16px 18px;color:#5a4a16;font-size:.9rem;margin-top:22px}
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(8,15,30,.6);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+  .modal.open{display:flex}
+  .box{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:92vh;overflow:auto;padding:26px}
+  .box h3{font-family:Georgia,serif;margin-bottom:4px}
+  .box .for{color:var(--gold);font-weight:600;font-size:.9rem;margin-bottom:16px}
+  label{display:block;font-size:.82rem;font-weight:600;color:#3a4760;margin:12px 0 4px}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;background:#fff}
+  textarea{min-height:70px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .pricebar{background:#0a1628;color:#fff;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin:16px 0 4px}
+  .pricebar b{color:var(--gold);font-size:1.25rem}
+  .msg{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:.9rem;display:none}
+  .msg.err{background:#fdecec;color:#a02020;display:block}
+  .msg.ok{background:#e9f6ea;color:var(--ok);display:block}
+  .close{float:right;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#99a}
+  footer{background:var(--navy);color:#9fb0c9;text-align:center;padding:26px;font-size:.85rem;margin-top:40px}
+  @media(max-width:520px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand"><img src="/icon-192.png" alt="">SKYGLOBE<small>LIMITED</small></div>
+  <a class="home" href="/">← Back to main site</a>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <h1>Conference <span>Sourcing &amp; Verification</span></h1>
+  <p>Attending a conference abroad? We contact the <strong>real organising institution</strong> on your behalf, obtain the <strong>genuine invitation / admission document</strong>, verify it, and deliver it to you — fully facilitated by SKYGLOBE LIMITED.</p>
+  <div class="trust">
+    <span>✔ Genuine documents from real organisers</span>
+    <span>✔ Verified &amp; facilitated by SKYGLOBE</span>
+    <span>✔ Secure online payment</span>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <h2>Available Conferences</h2>
+  <div class="sub">Pick a conference below, or request sourcing for any conference you already have in mind.</div>
+  <div id="list" class="grid"><div class="empty">Loading conferences…</div></div>
+
+  <div style="text-align:center;margin-top:26px">
+    <button class="btn ghost" onclick="openForm('conference_sourcing','')">Don't see yours? Request sourcing for any conference →</button>
+  </div>
+
+  <div class="how">
+    <h2 style="font-size:1.25rem">How it works</h2>
+    <div class="steps">
+      <div class="step"><b>1. Request &amp; pay</b>Choose a conference, fill the short form and pay the service fee securely.</div>
+      <div class="step"><b>2. We source it</b>Our team contacts the real organiser and obtains the genuine document for you.</div>
+      <div class="step"><b>3. We verify &amp; stamp</b>We confirm authenticity and add our "Facilitated &amp; Verified by SKYGLOBE LIMITED" mark.</div>
+      <div class="step"><b>4. We deliver</b>You receive the document by email and in your tracking portal.</div>
+    </div>
+    <div class="note"><strong>Our promise:</strong> SKYGLOBE LIMITED only delivers <strong>genuine</strong> documents obtained from the real organising institution. We never fabricate invitations or impersonate any institution — our stamp certifies that we sourced and verified the document on your behalf.</div>
+  </div>
+</div></section>
+
+<!-- Request modal -->
+<div class="modal" id="modal"><div class="box">
+  <button class="close" onclick="closeForm()">×</button>
+  <h3>Request Sourcing</h3>
+  <div class="for" id="forLabel">Conference</div>
+  <form id="reqForm">
+    <input type="hidden" id="product" value="conference_sourcing">
+    <div class="row">
+      <div><label>First name *</label><input id="fname" required></div>
+      <div><label>Last name</label><input id="lname"></div>
+    </div>
+    <div class="row">
+      <div><label>Email *</label><input id="email" type="email" required></div>
+      <div><label>Phone / WhatsApp</label><input id="phone"></div>
+    </div>
+    <div class="row">
+      <div><label>Your nationality</label><input id="nationality"></div>
+      <div><label>Conference country</label><input id="country"></div>
+    </div>
+    <label>Conference / institution</label>
+    <input id="conference" placeholder="e.g. World Health Summit 2026, Berlin">
+    <label>Intended travel date</label>
+    <input id="travelDate" type="date">
+    <label>Anything else we should know?</label>
+    <textarea id="notes" placeholder="Field of interest, special requests, deadlines…"></textarea>
+
+    <div class="row">
+      <div><label>Currency</label><select id="currency"></select></div>
+      <div><label>Pay with</label><select id="provider"></select></div>
+    </div>
+    <div class="pricebar"><span id="priceLabel">Service fee</span><b id="priceAmt">—</b></div>
+
+    <div class="msg" id="msg"></div>
+    <button class="btn block" type="submit" id="submitBtn">Continue to secure payment →</button>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:10px;text-align:center">You'll be redirected to a secure payment page. Your request is saved either way.</p>
+  </form>
+</div></div>
+
+<footer>SKYGLOBE LIMITED · Conference Sourcing &amp; Verification · <a href="https://wa.me/17373998522" style="color:var(--gold)">WhatsApp us</a></footer>
+
+<script>
+let CFG = { providers: [], pricing: {} };
+
+async function load() {
+  // payment config + conferences in parallel
+  const [cfgR, confR] = await Promise.all([
+    fetch('/api/pay/config').then(r=>r.json()).catch(()=>({providers:[],pricing:{}})),
+    fetch('/api/conferences').then(r=>r.json()).catch(()=>[])
+  ]);
+  CFG = cfgR;
+  renderConferences(confR);
+}
+
+function renderConferences(list){
+  const el = document.getElementById('list');
+  if(!list || !list.length){
+    el.innerHTML = '<div class="empty">No conferences are listed yet. Use the button below to request sourcing for <strong>any</strong> conference you have in mind.</div>';
+    return;
+  }
+  el.innerHTML = list.map(c=>`
+    <div class="card">
+      ${c.field?`<span class="field">${esc(c.field)}</span>`:''}
+      <h3>${esc(c.title)}</h3>
+      ${c.organization?`<div class="org">${esc(c.organization)}</div>`:''}
+      <div class="meta">📍 ${esc([c.city,c.country].filter(Boolean).join(', '))} ${c.date?'· 📅 '+esc(c.date):''}</div>
+      <p class="sum">${esc(c.summary||'')}</p>
+      <button class="btn block" onclick='openForm("conference_sourcing", ${JSON.stringify((c.title||'')+(c.country?(", "+c.country):""))})'>Request &amp; Pay →</button>
+    </div>`).join('');
+}
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+
+function openForm(product, conf){
+  document.getElementById('product').value = product;
+  document.getElementById('forLabel').textContent = conf || 'Any conference';
+  if(conf) document.getElementById('conference').value = conf;
+  // currencies available across active providers
+  const curs = [...new Set(CFG.providers.flatMap(p=>p.currencies))].filter(c=>CFG.pricing[product] && CFG.pricing[product][c]!=null);
+  const curSel = document.getElementById('currency');
+  curSel.innerHTML = curs.length ? curs.map(c=>`<option>${c}</option>`).join('') : '<option>NGN</option>';
+  refreshProviders(); refreshPrice();
+  document.getElementById('msg').className='msg';
+  document.getElementById('modal').classList.add('open');
+}
+function closeForm(){document.getElementById('modal').classList.remove('open');}
+
+function refreshProviders(){
+  const cur = document.getElementById('currency').value;
+  const provs = CFG.providers.filter(p=>p.currencies.includes(cur));
+  const sel = document.getElementById('provider');
+  const nice = {paystack:'Card / Bank Transfer (Paystack)',stripe:'Card (Stripe)',flutterwave:'Card / Mobile Money (Flutterwave)'};
+  sel.innerHTML = provs.length ? provs.map(p=>`<option value="${p.name}">${nice[p.name]||p.name}</option>`).join('')
+    : '<option value="">No payment method available yet</option>';
+}
+function refreshPrice(){
+  const product = document.getElementById('product').value;
+  const cur = document.getElementById('currency').value;
+  const amt = CFG.pricing[product] ? CFG.pricing[product][cur] : null;
+  document.getElementById('priceLabel').textContent = (CFG.pricing[product]?.label)||'Service fee';
+  document.getElementById('priceAmt').textContent = amt!=null ? `${cur} ${Number(amt).toLocaleString()}` : '—';
+}
+document.getElementById('currency').addEventListener('change',()=>{refreshProviders();refreshPrice();});
+
+document.getElementById('reqForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const btn=document.getElementById('submitBtn'), msg=document.getElementById('msg');
+  const provider=document.getElementById('provider').value;
+  if(!provider){ msg.className='msg err'; msg.textContent='Online payment is not set up yet. Please WhatsApp us to complete your request.'; return; }
+  btn.disabled=true; btn.textContent='Starting secure payment…'; msg.className='msg';
+  const body={
+    product:document.getElementById('product').value, provider,
+    currency:document.getElementById('currency').value,
+    fname:val('fname'),lname:val('lname'),email:val('email'),phone:val('phone'),
+    nationality:val('nationality'),country:val('country'),
+    conference:val('conference'),travelDate:val('travelDate'),notes:val('notes')
+  };
+  try{
+    const r=await fetch('/api/conference/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!r.ok){throw new Error(d.error||'Something went wrong.');}
+    if(d.payment && d.payment.authorization_url){
+      sessionStorage.setItem('sky_last_ref', d.ref);
+      window.location.href=d.payment.authorization_url; return;
+    }
+    msg.className='msg ok';
+    msg.textContent=`Request saved (Ref ${d.ref}). ${d.paymentError||'We will email you a secure payment link shortly.'}`;
+    btn.textContent='Request saved ✓';
+  }catch(err){
+    msg.className='msg err'; msg.textContent=err.message;
+    btn.disabled=false; btn.textContent='Continue to secure payment →';
+  }
+});
+function val(id){return document.getElementById(id).value.trim();}
+load();
+</script>
+</body>
+</html>
