@@ -109,7 +109,7 @@ app.post('/api/contact', async (req, res) => {
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0">
-        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
+        <img src="https://skyglobegroup.com/icon-512.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h2 style="color:#c9a84c;margin:0">New Consultation Request</h2>
       </div>
       <div style="background:#f9f9f9;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
@@ -173,7 +173,7 @@ app.post('/api/apply', async (req, res) => {
   const adminHtml = `
     <div style="font-family:sans-serif;max-width:660px;margin:0 auto">
       <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0">
-        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
+        <img src="https://skyglobegroup.com/icon-512.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h2 style="color:#c9a84c;margin:0">New Application — <span style="color:#fff">${ref}</span></h2>
       </div>
       <div style="background:#f9f9f9;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
@@ -210,7 +210,7 @@ app.post('/api/apply', async (req, res) => {
   const userHtml = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#0a1628;padding:32px;border-radius:8px 8px 0 0;text-align:center">
-        <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
+        <img src="https://skyglobegroup.com/icon-512.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
         <h1 style="color:#c9a84c;margin:0 0 8px;font-size:1.6rem">Application Received ✅</h1>
         <p style="color:#8899bb;margin:0">SKYGLOBE GROUP</p>
       </div>
@@ -265,33 +265,63 @@ app.get('/api/apply', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── ADMIN ─────────────────────────────────────────────────────────────────────
-function checkAdmin(req) {
-  const raw = process.env.ADMIN_PASSWORDS || process.env.ADMIN_PASSWORD || '';
-  if (!raw) return null;
+// ── AUTH (role-based) ────────────────────────────────────────────────────────
+// ADMIN_PASSWORDS  → CEO-level access (full portal: analytics, exports, everything)
+// STAFF_PASSWORDS  → Staff-level access (work queue only: applications, messages, docs)
+// Format for both: "Name:password,Name2:password2"  (name optional)
+// Returns { role:'ceo'|'staff', name } or null
+function getRole(req) {
   const supplied = req.headers['x-admin-key'] || '';
-  for (const entry of raw.split(',').map(s => s.trim()).filter(Boolean)) {
+  if (!supplied) return null;
+  const ceoRaw = process.env.ADMIN_PASSWORDS || process.env.ADMIN_PASSWORD || '';
+  for (const entry of ceoRaw.split(',').map(s => s.trim()).filter(Boolean)) {
     const [a, b] = entry.includes(':') ? entry.split(':') : [null, entry];
-    if (supplied === b) return a || 'admin';
+    if (supplied === b) return { role: 'ceo', name: a || 'CEO' };
+  }
+  const staffRaw = process.env.STAFF_PASSWORDS || '';
+  for (const entry of staffRaw.split(',').map(s => s.trim()).filter(Boolean)) {
+    const [a, b] = entry.includes(':') ? entry.split(':') : [null, entry];
+    if (supplied === b) return { role: 'staff', name: a || 'Staff' };
   }
   return null;
 }
 
+// CEO only — for sensitive CEO-only endpoints/portal
+function checkAdmin(req) {
+  const r = getRole(req);
+  return r && r.role === 'ceo' ? r.name : null;
+}
+
+// CEO or Staff — for shared day-to-day work endpoints
+function checkStaffOrAdmin(req) {
+  const r = getRole(req);
+  return r ? r.name : null;
+}
+
+// CEO portal login — rejects staff passwords (CEO portal is CEO-only)
 app.post('/api/admin/login', (req, res) => {
   const fakeReq = { headers: { 'x-admin-key': (req.body && req.body.password) || '' } };
   const who = checkAdmin(fakeReq);
   if (!who) return res.status(401).json({ error: 'Wrong password.' });
-  res.json({ success: true, name: who });
+  res.json({ success: true, name: who, role: 'ceo' });
+});
+
+// Staff portal login — accepts staff OR CEO passwords
+app.post('/api/staff/login', (req, res) => {
+  const fakeReq = { headers: { 'x-admin-key': (req.body && req.body.password) || '' } };
+  const r = getRole(fakeReq);
+  if (!r) return res.status(401).json({ error: 'Wrong password.' });
+  res.json({ success: true, name: r.name, role: r.role });
 });
 
 app.get('/api/admin/applications', async (req, res) => {
-  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
   try { res.json(await getAllApps()); }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/admin/update', async (req, res) => {
-  const who = checkAdmin(req);
+  const who = checkStaffOrAdmin(req);
   if (!who) return res.status(401).json({ error: 'Unauthorized' });
 
   const { ref, status, response } = req.body;
@@ -312,7 +342,7 @@ app.post('/api/admin/update', async (req, res) => {
       const html = `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <div style="background:#0a1628;padding:28px;border-radius:8px 8px 0 0;text-align:center">
-            <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
+            <img src="https://skyglobegroup.com/icon-512.png" alt="SkyGlobe Group" style="height:64px;width:auto;border-radius:10px;margin-bottom:10px"><br>
             <h1 style="color:#c9a84c;margin:0;font-size:1.4rem">Application Update</h1>
             <p style="color:#8899bb;margin:6px 0 0">SKYGLOBE GROUP</p>
           </div>
@@ -359,7 +389,7 @@ app.post('/api/documents', async (req, res) => {
   if (!ref || !filename || !data)
     return res.status(400).json({ error: 'ref, filename and data are required.' });
 
-  const who = checkAdmin(req); // null = regular applicant
+  const who = checkStaffOrAdmin(req); // null = regular applicant
   const cleanRef = String(ref).toUpperCase().trim();
 
   try {
@@ -416,6 +446,7 @@ app.delete('/api/documents/:id', async (req, res) => {
 });
 
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/staff', (req, res) => res.sendFile(path.join(__dirname, 'staff.html')));
 
 // ── AI CHAT ───────────────────────────────────────────────────────────────────
 const SKYGLOBE_SYSTEM = `You are the AI assistant for SkyGlobe Group, a premium global travel and immigration consultancy. You are knowledgeable, professional, warm, and concise.
@@ -426,7 +457,9 @@ Company facts:
 - Phone/WhatsApp: +1 737-399-8522
 - Email: support@skyglobegroup.com
 - Website: https://skyglobegroup.com
-- TikTok: @skyglobe_limited (https://www.tiktok.com/@skyglobe_limited)
+- TikTok: @skyglobegroup (https://www.tiktok.com/@skyglobegroup)
+- YouTube: @skyglobegroup (https://www.youtube.com/@skyglobegroup)
+- Instagram: @skyglobegroup (https://www.instagram.com/skyglobegroup)
 
 Services offered:
 - Student Visas: UK (Tier 4/Student Route), USA (F-1), Canada (Study Permit), Australia (Subclass 500), Germany, Schengen and more
@@ -656,7 +689,7 @@ app.post('/api/messages', async (req, res) => {
 
 // ── ADMIN: LIST ALL MESSAGE THREADS ─────────────────────────────────────────────
 app.get('/api/admin/messages', async (req, res) => {
-  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const all = await dbQuery('GET', 'messages', null, { order: 'created_at.asc', limit: 1000 });
     res.json(all);
@@ -665,7 +698,7 @@ app.get('/api/admin/messages', async (req, res) => {
 
 // ── ADMIN: REPLY TO A CLIENT ─────────────────────────────────────────────────────
 app.post('/api/admin/messages', async (req, res) => {
-  const who = checkAdmin(req);
+  const who = checkStaffOrAdmin(req);
   if (!who) return res.status(401).json({ error: 'Unauthorized' });
   const { client_email, body } = req.body || {};
   if (!client_email || !body || !String(body).trim())
@@ -677,7 +710,7 @@ app.post('/api/admin/messages', async (req, res) => {
       await sendEmail(client_email, 'You have a new message from SkyGlobe Group',
         `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <div style="background:#0a1628;padding:24px;border-radius:8px 8px 0 0;text-align:center">
-            <img src="https://skyglobegroup.com/logo.png" alt="SkyGlobe" style="height:56px;border-radius:10px"><br>
+            <img src="https://skyglobegroup.com/icon-512.png" alt="SkyGlobe" style="height:56px;border-radius:10px"><br>
             <h2 style="color:#c9a84c;margin:10px 0 0">New Message</h2>
           </div>
           <div style="background:#f9f9f9;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px">
