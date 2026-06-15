@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SkyGlobe Group — One World. Unlimited Opportunities.</title>
-<link rel="icon" type="image/png" href="logo.png">
-<link rel="apple-touch-icon" href="logo.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0a1628">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -806,6 +807,25 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .doc-step h4{font-size:1rem;font-weight:600;color:#0a1628;margin-bottom:1.2rem;display:flex;align-items:center;gap:8px}
 .doc-step h4 span{width:26px;height:26px;background:var(--gold);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0}
 
+/* ── INTERVIEW PREP ──────────────────────────────────────────────── */
+.ip-overview{background:linear-gradient(135deg,#0a1628,#1a3a6e);color:#fff;border-radius:14px;padding:1.4rem 1.6rem;margin-bottom:1.4rem;line-height:1.65;font-size:0.92rem}
+.ip-overview strong{color:var(--gold-light)}
+.ip-qs-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:0 0 0.8rem}
+.ip-q-card{background:#f8faff;border:1px solid rgba(10,46,101,0.1);border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:0.8rem;cursor:pointer;transition:0.2s}
+.ip-q-card:hover{border-color:var(--gold);background:#fffdf5}
+.ip-q-card.open{border-color:var(--gold);background:#fffdf5}
+.ip-q-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;font-size:0.7rem;font-weight:700;margin-right:8px;flex-shrink:0;vertical-align:middle}
+.ip-q-text{font-weight:600;font-size:0.92rem;color:#0a1628}
+.ip-q-hint{display:none;margin-top:0.8rem;padding:0.8rem 1rem;background:#fff;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;font-size:0.83rem;color:#4b5563;line-height:1.6}
+.ip-q-card.open .ip-q-hint{display:block}
+.ip-tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.7rem;margin-top:0.6rem}
+.ip-tip{background:#f0f7f0;border:1px solid rgba(22,163,74,0.2);border-radius:10px;padding:0.7rem 0.9rem;font-size:0.82rem;color:#166534;line-height:1.5}
+.ip-tip::before{content:'✓ ';font-weight:700}
+.ip-red-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.7rem;margin-top:0.6rem}
+.ip-red{background:#fff5f5;border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:0.7rem 0.9rem;font-size:0.82rem;color:#991b1b;line-height:1.5}
+.ip-red::before{content:'✗ ';font-weight:700}
+.ip-practice-bar{display:flex;align-items:center;gap:0.8rem;background:linear-gradient(135deg,rgba(184,134,11,0.08),rgba(10,46,101,0.05));border:1px solid rgba(184,134,11,0.2);border-radius:12px;padding:1rem 1.3rem;margin-top:1.4rem;flex-wrap:wrap}
+.ip-practice-bar p{flex:1;font-size:0.85rem;color:#1e293b;margin:0;min-width:160px}
 /* ── TESTIMONIAL TICKER ──────────────────────────────────────────── */
 .testi-track-wrap{overflow:hidden;mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
 .testi-track{display:flex;gap:1rem;width:max-content;animation:scrollLeft 40s linear infinite}
@@ -3160,25 +3180,25 @@ const KB = [
 ];
 
 let activeFilter = 'all';
-let ALL_COUNTRIES = [];
+let WORLD_COUNTRIES = [];
 let countriesLoaded = false;
 
-// Load all world countries from REST Countries API
+// Load all world countries from REST Countries API (used only on the world-search page)
 async function loadAllCountries() {
   if (countriesLoaded) return;
   try {
     const res = await fetch('https://restcountries.com/v3.1/all?fields=name,capital,population,currencies,languages,flags,flag,region,subregion,area,timezones,tld,car');
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    ALL_COUNTRIES = await res.json();
+    WORLD_COUNTRIES = await res.json();
     countriesLoaded = true;
     const q = document.getElementById('searchInput').value.trim();
     if (q) doSearch();
   } catch(e) {
     console.warn('Countries API failed:', e.message);
-    countriesLoaded = true; // prevent infinite loading spinner
-    ALL_COUNTRIES = [];
+    countriesLoaded = true;
+    WORLD_COUNTRIES = [];
     const q = document.getElementById('searchInput').value.trim();
-    if (q) doSearch(); // re-run so KB results still show
+    if (q) doSearch();
   }
 }
 
@@ -3295,7 +3315,7 @@ function doSearch() {
       loadAllCountries(); // trigger loading in background
       countriesStillLoading = true; // show loading note but DON'T block KB results
     } else {
-      countryResults = ALL_COUNTRIES.filter(c => {
+      countryResults = WORLD_COUNTRIES.filter(c => {
         const name = (c.name?.common || '').toLowerCase();
         const official = (c.name?.official || '').toLowerCase();
         const capital = (c.capital?.[0] || '').toLowerCase();
@@ -5611,6 +5631,67 @@ updateAccountNav();
       </div>
     </div>
 
+    <!-- ===== AI INTERVIEW PREP ===== -->
+    <div style="max-width:800px;margin:3.5rem auto 0" id="interviewPrepSection">
+      <div class="text-center" style="margin-bottom:2rem">
+        <span class="section-tag">🎤 AI Powered — Live</span>
+        <h3 class="section-title" style="font-size:1.6rem">Interview Prep <strong>Coach</strong></h3>
+        <p class="section-sub" style="max-width:620px;margin:0.6rem auto 0">Practice visa, job &amp; university interviews with personalised AI-generated questions, coaching hints, and expert tips — tailored to your exact target.</p>
+      </div>
+
+      <!-- Step 1: Interview type -->
+      <div class="doc-step" id="ipStep1">
+        <h4><span>1</span> What interview are you preparing for?</h4>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.9rem;margin-top:1rem">
+          <div class="doc-type-card" id="ipCard-visa" onclick="selectIpType('visa',this)">
+            <span class="dt-icon">🛂</span>
+            <h4>Visa Interview</h4>
+            <p>Embassy / consulate interview for tourist, study, work or immigration visas.</p>
+          </div>
+          <div class="doc-type-card" id="ipCard-job" onclick="selectIpType('job',this)">
+            <span class="dt-icon">💼</span>
+            <h4>Job Interview</h4>
+            <p>International job interviews — UK, Canada, Germany, UAE, Australia & more.</p>
+          </div>
+          <div class="doc-type-card" id="ipCard-university" onclick="selectIpType('university',this)">
+            <span class="dt-icon">🎓</span>
+            <h4>University Admission</h4>
+            <p>Postgraduate, scholarship, and competitive undergraduate admission interviews.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Details -->
+      <div class="doc-step" id="ipStep2" style="display:none">
+        <h4><span>2</span> <span id="ipStep2Heading">Tell us about your interview</span></h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label id="ipTargetLabel">Target Country / Embassy *</label>
+            <input type="text" id="ipTarget" placeholder="e.g. United Kingdom, Canada, Germany">
+          </div>
+          <div class="form-group">
+            <label>Your Nationality *</label>
+            <input type="text" id="ipNationality" placeholder="e.g. Nigerian, Indian, Ghanaian">
+          </div>
+        </div>
+        <div class="form-group">
+          <label id="ipContextLabel">Additional context (optional)</label>
+          <textarea id="ipBackground" rows="3" id="ipBackground" placeholder="e.g. Applying for UK Student Visa for MSc Data Science at UCL, I have a BSc in Computer Science, IELTS 7.0, sufficient funds..."></textarea>
+        </div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:0.4rem">
+          <button class="btn-outline" onclick="ipBack()" style="padding:12px 22px">← Back</button>
+          <button class="btn-primary" id="ipGenBtn" onclick="generateInterviewPrep()" style="flex:1;justify-content:center;padding:14px">🎤 Generate My Interview Guide</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Results -->
+      <div class="doc-step" id="ipStep3" style="display:none">
+        <h4><span>3</span> Your Personalised Interview Guide</h4>
+        <div id="ipOutput"></div>
+        <button class="btn-outline" onclick="ipReset()" style="margin-top:1.4rem;padding:11px 24px">← Start Over</button>
+      </div>
+    </div>
+
     <!-- Other tools coming soon -->
     <div style="max-width:800px;margin:3rem auto 0">
       <div class="text-center" style="margin-bottom:1.5rem">
@@ -5629,10 +5710,6 @@ updateAccountNav();
         <div class="we-card" style="opacity:0.75">
           <div class="we-card-head"><div class="we-card-icon">💼</div><div><h4>Job Finder</h4><div class="we-sub">Coming soon</div></div></div>
           <p>Visa-sponsored international job listings matched to your skills and target country.</p>
-        </div>
-        <div class="we-card" style="opacity:0.75">
-          <div class="we-card-head"><div class="we-card-icon">🎤</div><div><h4>Interview Prep AI</h4><div class="we-sub">Coming soon</div></div></div>
-          <p>Practice visa interviews and job interviews with AI-powered feedback and tips.</p>
         </div>
       </div>
     </div>
@@ -7094,6 +7171,121 @@ function resetDocGen() {
   document.getElementById('docGoals').value = '';
   document.getElementById('docExtra').value = '';
   document.getElementById('docGenForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ============================================================
+// AI INTERVIEW PREP
+// ============================================================
+let _ipType = '';
+
+function selectIpType(type, el) {
+  _ipType = type;
+  document.querySelectorAll('[id^="ipCard-"]').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const labels = {
+    visa:       { heading:'Visa Interview Details', target:'Target Country / Embassy *', ctx:'Visa type, your nationality, purpose, any past refusals (optional)' },
+    job:        { heading:'Job Interview Details',  target:'Company & Country *',        ctx:'Job title, your field, years of experience, key skills (optional)' },
+    university: { heading:'University Interview Details', target:'University & Programme *', ctx:'Programme name, your academic background, scholarship applying for (optional)' }
+  };
+  const lbl = labels[type];
+  document.getElementById('ipStep2Heading').textContent = lbl.heading;
+  document.getElementById('ipTargetLabel').textContent  = lbl.target;
+  document.getElementById('ipContextLabel').textContent = lbl.ctx;
+  document.getElementById('ipTarget').placeholder = type === 'visa'
+    ? 'e.g. United Kingdom, Canada, Schengen (Germany)'
+    : type === 'job' ? 'e.g. Google, London UK / Siemens, Munich Germany'
+    : 'e.g. University of Toronto — MSc Computer Science';
+  document.getElementById('ipBackground').placeholder = type === 'visa'
+    ? 'e.g. Nigerian applicant, UK Student Visa for MSc at UCL, BSc holder, IELTS 7.0, sufficient funds…'
+    : type === 'job' ? 'e.g. 4 years software engineering, Python/React, applying for Senior Dev role…'
+    : 'e.g. BSc Electrical Engineering 3.9 GPA, research in renewable energy, applying for fully-funded PhD…';
+
+  document.getElementById('ipStep1').style.display = 'none';
+  document.getElementById('ipStep2').style.display = '';
+}
+
+function ipBack() {
+  document.getElementById('ipStep2').style.display = 'none';
+  document.getElementById('ipStep1').style.display = '';
+}
+
+function ipReset() {
+  document.querySelectorAll('[id^="ipCard-"]').forEach(c => c.classList.remove('selected'));
+  document.getElementById('ipStep3').style.display = 'none';
+  document.getElementById('ipStep2').style.display = 'none';
+  document.getElementById('ipStep1').style.display = '';
+  document.getElementById('ipTarget').value = '';
+  document.getElementById('ipNationality').value = '';
+  document.getElementById('ipBackground').value = '';
+  _ipType = '';
+}
+
+function toggleIpQ(card) {
+  card.classList.toggle('open');
+}
+
+async function generateInterviewPrep() {
+  const target     = document.getElementById('ipTarget').value.trim();
+  const nationality= document.getElementById('ipNationality').value.trim();
+  const background = document.getElementById('ipBackground').value.trim();
+
+  if (!target) { showToast('Please enter your target country / company / university.', true); return; }
+  if (!nationality) { showToast('Please enter your nationality.', true); return; }
+
+  const btn = document.getElementById('ipGenBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating your guide…';
+
+  try {
+    const res = await fetch('/api/interview-prep', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type: _ipType, target, nationality, background })
+    });
+    if (!res.ok) throw new Error('Server error');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    _renderInterviewPrep(data, target);
+  } catch(e) {
+    showToast('Could not generate guide: ' + e.message + '. Please try again.', true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🎤 Generate My Interview Guide';
+  }
+}
+
+function _renderInterviewPrep(data, target) {
+  const typeLabel = { visa:'Visa', job:'Job', university:'University Admission' }[_ipType] || 'Interview';
+  const qs = (data.questions || []).map((item, i) => `
+    <div class="ip-q-card" onclick="this.classList.toggle('open')">
+      <div><span class="ip-q-num">${i+1}</span><span class="ip-q-text">${item.q || ''}</span></div>
+      <div class="ip-q-hint">💡 <strong>Coaching tip:</strong> ${item.hint || ''}</div>
+    </div>`).join('');
+
+  const tips = (data.tips || []).map(t => `<div class="ip-tip">${t}</div>`).join('');
+  const reds = (data.redFlags || []).map(r => `<div class="ip-red">${r}</div>`).join('');
+
+  document.getElementById('ipOutput').innerHTML = `
+    <div class="ip-overview">
+      <strong>🎯 ${typeLabel} Interview — ${target}</strong><br><br>
+      ${data.overview || ''}
+    </div>
+
+    <p class="ip-qs-label">Likely Interview Questions (tap any to reveal coaching tip)</p>
+    ${qs}
+
+    ${tips ? `<p class="ip-qs-label" style="margin-top:1.4rem">Expert Tips — What to Do</p><div class="ip-tips-grid">${tips}</div>` : ''}
+    ${reds ? `<p class="ip-qs-label" style="margin-top:1.2rem">Red Flags — What to Avoid</p><div class="ip-red-grid">${reds}</div>` : ''}
+
+    <div class="ip-practice-bar">
+      <p>📋 <strong>Pro tip:</strong> Print or screenshot this guide and practice answering each question out loud. Our consultants can do a live mock interview with you before your real one.</p>
+      <button class="btn-primary" onclick="showPage('contact')" style="font-size:0.83rem;padding:10px 18px;white-space:nowrap">Book Mock Interview</button>
+    </div>`;
+
+  document.getElementById('ipStep2').style.display = 'none';
+  document.getElementById('ipStep3').style.display = '';
+  document.getElementById('ipStep3').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ============================================================
