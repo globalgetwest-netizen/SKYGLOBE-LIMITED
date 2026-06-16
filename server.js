@@ -656,6 +656,24 @@ app.get('/api/auth/me', async (req, res) => {
 });
 
 // ── CLIENT: GET MY MESSAGES ─────────────────────────────────────────────────────
+// ── CLIENT: MY DOCUMENTS FROM SKYGLOBE ────────────────────────────────────────
+app.get('/api/client/documents', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const apps = await dbQuery('GET', 'applications', null, { email: `eq.${email}`, select: 'ref', limit: 100 });
+    if (!apps.length) return res.json([]);
+    const allDocs = [];
+    for (const app of apps) {
+      const docs = await dbQuery('GET', 'documents', null, { application_ref: `eq.${app.ref}`, order: 'created_at.desc', limit: 50 });
+      const staffDocs = docs.filter(d => d.uploaded_by && (String(d.uploaded_by).startsWith('admin') || String(d.uploaded_by).startsWith('staff')));
+      staffDocs.forEach(d => allDocs.push({ ...d, application_ref: app.ref }));
+    }
+    allDocs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    res.json(allDocs);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/messages', async (req, res) => {
   const email = clientAuth(req);
   if (!email) return res.status(401).json({ error: 'Not logged in.' });
