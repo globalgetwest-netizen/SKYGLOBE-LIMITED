@@ -221,6 +221,17 @@
     </div>
   </div>
 
+  <!-- Recipient watermark -->
+  <div class="panel" style="border-left:3px solid #c9a84c">
+    <h2>🔏 Document Security — Recipient Watermark</h2>
+    <div class="desc">Enter the client's name and email below. These are burned into the document as a diagonal watermark on every page. If the document is copied or shared without authorisation, it traces directly back to the recipient.</div>
+    <div class="row">
+      <div class="field"><label>Recipient full name *</label><input id="wmName" placeholder="e.g. John Adebayo Smith" oninput="updateWatermark()"></div>
+      <div class="field"><label>Recipient email *</label><input id="wmEmail" placeholder="e.g. john@email.com" oninput="updateWatermark()"></div>
+    </div>
+    <div style="font-size:.76rem;color:#64748b;margin-top:6px">⚠️ Always fill these before printing. The watermark is invisible to the eye at normal viewing distance but clearly visible when copied or photographed.</div>
+  </div>
+
   <!-- Document type selector -->
   <div class="panel">
     <h2>📋 Document Type</h2>
@@ -318,10 +329,10 @@
 
   <!-- Watermarks -->
   <div class="watermark"><img src="icon.svg" onerror="this.src='icon-512.png'" alt=""></div>
-  <div class="watermark-text">
-    <span style="top:16%; left:-8%">SKYGLOBE LIMITED · OFFICIAL · SKYGLOBE LIMITED · OFFICIAL</span>
-    <span style="top:43%; left:-14%">SKYGLOBE LIMITED · OFFICIAL · SKYGLOBE LIMITED · OFFICIAL</span>
-    <span style="top:70%; left:-6%">SKYGLOBE LIMITED · OFFICIAL · SKYGLOBE LIMITED · OFFICIAL</span>
+  <div class="watermark-text" id="wmTextBlock">
+    <span style="top:16%; left:-8%" id="wmt1">SKYGLOBE GROUP · OFFICIAL · SKYGLOBE GROUP · OFFICIAL</span>
+    <span style="top:43%; left:-14%" id="wmt2">SKYGLOBE GROUP · OFFICIAL · SKYGLOBE GROUP · OFFICIAL</span>
+    <span style="top:70%; left:-6%" id="wmt3">SKYGLOBE GROUP · OFFICIAL · SKYGLOBE GROUP · OFFICIAL</span>
   </div>
   <div class="draftmark"><span>DRAFT</span></div>
 
@@ -396,7 +407,7 @@
       <span><strong>🌐</strong> skyglobegroup.com</span>
       <span><strong>💬</strong> WhatsApp: +1 737-399-8522</span>
     </div>
-    <div class="reg">SKYGLOBE LIMITED · Registered in England &amp; Wales · This document is issued on official SKYGLOBE LIMITED letterhead and is subject to our terms of service.</div>
+    <div class="reg" id="legalFooter">SKYGLOBE GROUP · Registered in England &amp; Wales · This document is confidential and issued solely to the named recipient. Unauthorised reproduction, distribution or misuse of this document may constitute a criminal offence under applicable law. SkyGlobe Group accepts no liability for any use of this document other than its stated purpose.</div>
   </div>
 </div>
 
@@ -496,6 +507,19 @@
   }
 
   /* ── Reference number ── */
+  function updateWatermark(){
+    const name  = (document.getElementById('wmName')?.value  || '').trim();
+    const email = (document.getElementById('wmEmail')?.value || '').trim();
+    const base  = name || email ? `ISSUED TO: ${name}${email?' · '+email:''} · CONFIDENTIAL · SKYGLOBE GROUP · ` : 'SKYGLOBE GROUP · OFFICIAL · CONFIDENTIAL · SKYGLOBE GROUP · OFFICIAL · ';
+    const text  = base.repeat(5);
+    ['wmt1','wmt2','wmt3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=text; });
+    // Update legal footer
+    const lf = document.getElementById('legalFooter');
+    if(lf && name){
+      lf.textContent = `SKYGLOBE GROUP · Registered in England & Wales · This document is confidential and issued solely to ${name}${email?' ('+email+')':''}. Unauthorised reproduction, distribution or misuse of this document may constitute a criminal offence under applicable law.`;
+    }
+  }
+
   function newRef(){
     const type = document.getElementById('docType')?.value || 'letter';
     const prefix = DOC_TYPES[type]?.prefix || 'SGL';
