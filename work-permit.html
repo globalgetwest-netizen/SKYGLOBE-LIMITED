@@ -331,8 +331,8 @@ footer .brand-footer{font-family:Georgia,serif;font-size:1.1rem;color:#c5d0e0;ma
             <div>
               <label>Currency</label>
               <select id="s4currency" onchange="refreshPay()">
-                <option value="NGN">NGN — Nigerian Naira</option>
                 <option value="USD">USD — US Dollar</option>
+                <option value="EUR">EUR — Euro</option>
                 <option value="GBP">GBP — British Pound</option>
               </select>
             </div>
@@ -384,7 +384,7 @@ footer .brand-footer{font-family:Georgia,serif;font-size:1.1rem;color:#c5d0e0;ma
           <li><span class="ck">✔</span>Progress updates via portal</li>
           <li><span class="ck">✔</span>Permit delivery to you</li>
         </ul>
-        <div class="price-row"><span class="cur">from</span><span class="amt">₦350,000</span><small>/ £380</small></div>
+        <div class="price-row"><span class="cur">from</span><span class="amt">$499</span><small>/ €459 · £399</small></div>
         <button class="btn-pkg" onclick="selectPackage('work_permit_standard')">Apply Standard →</button>
       </div>
       <div class="pkg featured">
@@ -398,7 +398,7 @@ footer .brand-footer{font-family:Georgia,serif;font-size:1.1rem;color:#c5d0e0;ma
           <li><span class="ck">✔</span>WhatsApp direct agent access</li>
           <li><span class="ck">✔</span>Employer liaison support</li>
         </ul>
-        <div class="price-row"><span class="cur">from</span><span class="amt">₦550,000</span><small>/ £600</small></div>
+        <div class="price-row"><span class="cur">from</span><span class="amt">$749</span><small>/ €699 · £599</small></div>
         <button class="btn-pkg" onclick="selectPackage('work_permit_express')">Apply Express →</button>
       </div>
       <div class="pkg">
@@ -412,7 +412,7 @@ footer .brand-footer{font-family:Georgia,serif;font-size:1.1rem;color:#c5d0e0;ma
           <li><span class="ck">✔</span>Banking &amp; NIN/NI setup guidance</li>
           <li><span class="ck">✔</span>90-day post-arrival support</li>
         </ul>
-        <div class="price-row"><span class="cur">from</span><span class="amt">₦900,000</span><small>/ £1,000</small></div>
+        <div class="price-row"><span class="cur">from</span><span class="amt">$1,299</span><small>/ €1,199 · £1,049</small></div>
         <button class="btn-pkg" onclick="selectPackage('migration_premium')">Apply Premium →</button>
       </div>
     </div>
@@ -539,7 +539,7 @@ function updateProgress(have, total) {
 }
 
 function refreshPay() {
-  const cur = document.getElementById('s4currency')?.value || 'NGN';
+  const cur = document.getElementById('s4currency')?.value || 'USD';
   const pkg = document.getElementById('s1package')?.value || 'work_permit_standard';
   const pricingEntry = CFG.pricing[pkg];
   const amt = pricingEntry ? pricingEntry[cur] : null;
