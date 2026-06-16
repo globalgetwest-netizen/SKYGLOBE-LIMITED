@@ -954,7 +954,6 @@ body.wc-active .mobile-menu{padding-top:46px}
         <a href="/work-permit">🇪🇺 Europe Work Permit</a>
         <a href="/packages">💼 Premium Packages</a>
         <a href="/conferences">🎟️ Conference Sourcing</a>
-        <a onclick="showPage('invoice');closeNavMore()">🧾 Invoice</a>
         <a onclick="showPage('apply');closeNavMore()">📋 Apply Now</a>
         <a onclick="showPage('contact');closeNavMore()">Contact</a>
         <a onclick="showPage('antiFraud');closeNavMore()">⚠️ Anti-Fraud</a>
@@ -2210,7 +2209,6 @@ body.wc-active .mobile-menu{padding-top:46px}
           <button class="dash-qa" onclick="showPage('tools')">✨ AI Documents</button>
           <button class="dash-qa" onclick="switchDashTab('messages',document.querySelectorAll('.dash-tab')[5])">💬 Message Team</button>
           <button class="dash-qa" onclick="showPage('contact')">📅 Book Consultation</button>
-          <button class="dash-qa" onclick="showPage('invoice')">🧾 Get Invoice</button>
         </div>
         <div class="overview-recent" id="overviewRecent"></div>
       </div>
@@ -2688,6 +2686,11 @@ window.addEventListener('load', () => {
   if (home) { setupCounters(home); }
   try { history.replaceState({ page: 'home' }, '', '#home'); } catch (e) {}
   updateNavArrows();
+  // Honour an incoming hash (e.g. opened as /#tools or /#invoice from the portals)
+  const hash = (location.hash || '').replace('#', '').trim();
+  if (hash && hash !== 'home' && document.getElementById('page-' + hash)) {
+    showPage(hash);
+  }
 });
 
 // NAV SCROLL
