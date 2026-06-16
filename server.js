@@ -22,7 +22,7 @@ async function dbQuery(method, table, body, params) {
     'apikey': SUPA_KEY,
     'Authorization': `Bearer ${SUPA_KEY}`,
     'Content-Type': 'application/json',
-    'Prefer': method === 'POST' ? 'return=representation' : 'return=representation',
+    'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal',
   };
   const r = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text();
@@ -430,16 +430,19 @@ app.get('/api/documents/:ref', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Admin: delete a document
+// CEO or staff can delete documents
 app.delete('/api/documents/:id', async (req, res) => {
-  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const rows = await dbQuery('GET', 'documents', null, { id: `eq.${req.params.id}`, limit: 1 });
     if (!rows[0]) return res.status(404).json({ error: 'Document not found.' });
-    await fetch(`${SUPA_URL}/storage/v1/object/documents/${rows[0].path}`, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` },
-    });
+    try {
+      const sr = await fetch(`${SUPA_URL}/storage/v1/object/documents/${rows[0].path}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` },
+      });
+      if (!sr.ok) console.error('Storage delete warning:', await sr.text());
+    } catch (storErr) { console.error('Storage delete error (continuing):', storErr.message); }
     await dbQuery('DELETE', 'documents', null, { id: `eq.${req.params.id}` });
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
