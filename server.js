@@ -411,7 +411,6 @@ app.post('/api/documents', async (req, res) => {
       filename: safeName,
       path: filePath,
       uploaded_by: who ? `admin:${who}` : 'applicant',
-      application_ref: cleanRef,
     });
     const doc = Array.isArray(rows) ? rows[0] : rows;
 
@@ -542,7 +541,6 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // ── SECURE DOCUMENT TOKENS ────────────────────────────────────────────────────
-const crypto = require('crypto');
 
 function genSecureToken() {
   return crypto.randomBytes(32).toString('hex');
@@ -746,7 +744,7 @@ app.get('/api/client/documents', async (req, res) => {
     if (!apps.length) return res.json([]);
     const allDocs = [];
     for (const app of apps) {
-      const docs = await dbQuery('GET', 'documents', null, { application_ref: `eq.${app.ref}`, order: 'created_at.desc', limit: 50 });
+      const docs = await dbQuery('GET', 'documents', null, { ref: `eq.${app.ref}`, order: 'created_at.desc', limit: 50 });
       const staffDocs = docs.filter(d => d.uploaded_by && (String(d.uploaded_by).startsWith('admin') || String(d.uploaded_by).startsWith('staff')));
       for (const d of staffDocs) {
         // look up secure token for this doc
