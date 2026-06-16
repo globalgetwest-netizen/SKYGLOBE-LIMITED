@@ -131,7 +131,7 @@ const PACKAGES = [
     title:'Europe Work Permit — Standard',
     tagline:'Full professional application service',
     features:['Document eligibility assessment','Complete application preparation','Submission to government authority','Progress updates via SKYGLOBE portal','Permit delivery to you'],
-    ngnAmt:'350,000', gbpAmt:'380', usdAmt:'450',
+    usdAmt:'499', eurAmt:'459', gbpAmt:'399',
     href:'/work-permit',
     premium:false
   },
@@ -141,7 +141,7 @@ const PACKAGES = [
     title:'Europe Work Permit — Express',
     tagline:'Priority handling + dedicated personal agent',
     features:['Everything in Standard','Dedicated personal agent assigned','Priority queue submission','WhatsApp direct agent access','Employer liaison & support letters'],
-    ngnAmt:'550,000', gbpAmt:'600', usdAmt:'700',
+    usdAmt:'749', eurAmt:'699', gbpAmt:'599',
     href:'/work-permit',
     premium:true
   },
@@ -151,7 +151,7 @@ const PACKAGES = [
     title:'Premium Migration Package',
     tagline:'Complete relocation support — permit to settlement',
     features:['Everything in Work Permit Express','Accommodation sourcing guidance','Banking & NIN/NI setup guidance','School & healthcare registration help','90-day post-arrival support'],
-    ngnAmt:'900,000', gbpAmt:'1,000', usdAmt:'1,200',
+    usdAmt:'1,299', eurAmt:'1,199', gbpAmt:'1,049',
     href:'/work-permit',
     premium:true
   },
@@ -161,7 +161,7 @@ const PACKAGES = [
     title:'Conference Sourcing & Verification',
     tagline:'We obtain the genuine invitation from the real organiser',
     features:['You select any conference worldwide','We contact the real organising institution','Obtain genuine invitation/admission document','Verified & facilitated by SKYGLOBE','Delivered to your portal'],
-    ngnAmt:'120,000', gbpAmt:'120', usdAmt:'150',
+    usdAmt:'159', eurAmt:'149', gbpAmt:'129',
     href:'/conferences',
     premium:false
   },
@@ -171,7 +171,7 @@ const PACKAGES = [
     title:'Conference Invitation Letter',
     tagline:'CEO-stamped official invitation letter from SKYGLOBE',
     features:['Official SKYGLOBE CEO-signed letter','Custom conference/event details','Company stamp & signature','Delivered digitally in your portal','Used for visa applications'],
-    ngnAmt:'35,000', gbpAmt:'35', usdAmt:'45',
+    usdAmt:'49', eurAmt:'45', gbpAmt:'39',
     href:'/conferences',
     premium:false
   },
@@ -181,7 +181,7 @@ const PACKAGES = [
     title:'Premium Europe Travel Preparation',
     tagline:'Full travel readiness package for Europe',
     features:['Visa strategy & checklist','Flight booking guidance','Travel document review','Itinerary planning support','Emergency contacts & insurance tips'],
-    ngnAmt:'150,000', gbpAmt:'165', usdAmt:'200',
+    usdAmt:'199', eurAmt:'189', gbpAmt:'169',
     href:'/?apply=travel',
     premium:false
   },
@@ -191,7 +191,7 @@ const PACKAGES = [
     title:'Premium Travel Preparation — Global',
     tagline:'For any top destination: USA, Canada, UAE, Australia & more',
     features:['Destination-specific visa guidance','Document preparation checklist','Flight & accommodation strategy','Country-specific entry requirements','24h pre-travel support call'],
-    ngnAmt:'200,000', gbpAmt:'215', usdAmt:'260',
+    usdAmt:'259', eurAmt:'239', gbpAmt:'209',
     href:'/?apply=travel',
     premium:false
   },
@@ -201,7 +201,7 @@ const PACKAGES = [
     title:'Official Company Letter',
     tagline:'CEO-stamped official letter on SKYGLOBE letterhead',
     features:['Custom content drafted to your needs','Official SKYGLOBE letterhead','CEO signature & company stamp','Digital delivery (PDF)','Physical copy available on request'],
-    ngnAmt:'25,000', gbpAmt:'25', usdAmt:'35',
+    usdAmt:'39', eurAmt:'35', gbpAmt:'29',
     href:'/?apply=letter',
     premium:false
   },
@@ -227,8 +227,8 @@ function render() {
       <ul>${p.features.map(f=>`<li><span class="ck">✔</span>${f}</li>`).join('')}</ul>
       <div class="price-block">
         <div class="from">from</div>
-        <div class="amt">₦${p.ngnAmt}</div>
-        <small>/ £${p.gbpAmt} &nbsp;·&nbsp; $${p.usdAmt}</small>
+        <div class="amt">$${p.usdAmt}</div>
+        <small>€${p.eurAmt} &nbsp;·&nbsp; £${p.gbpAmt}</small>
       </div>
       <button class="btn-apply" onclick="location.href='${p.href}'">Apply Now →</button>
     </div>`).join('');
