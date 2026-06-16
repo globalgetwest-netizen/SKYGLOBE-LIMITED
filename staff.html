@@ -128,6 +128,41 @@
   .skeleton{color:var(--muted);text-align:center;padding:40px}
   .note{background:var(--navy2);border:1px solid var(--line);border-radius:14px;padding:18px 20px;color:var(--muted);font-size:0.88rem;line-height:1.7}
 
+  /* ── DEPT CHANNELS (staff) ── */
+  .chan-main{background:var(--navy2);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column}
+  .chan-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .chan-head .ch-icon{font-size:1.2rem}
+  .chan-head h3{font-size:0.92rem;font-weight:700}
+  .chan-head .ch-sub{font-size:0.72rem;color:var(--muted);margin-left:auto}
+  .chan-msgs{overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;min-height:400px;max-height:54vh}
+  .chan-msg{display:flex;flex-direction:column;max-width:75%}
+  .chan-msg.mine{align-self:flex-end;align-items:flex-end}
+  .chan-msg.theirs{align-self:flex-start}
+  .chan-msg .cm-meta{font-size:0.64rem;color:var(--muted);margin-bottom:3px}
+  .chan-msg .cm-meta .cm-author{font-weight:700;color:var(--txt)}
+  .chan-msg .cm-meta .cm-role{color:var(--gold);font-size:0.62rem;margin-left:4px}
+  .chan-msg .cm-body{padding:10px 14px;border-radius:12px;font-size:0.85rem;line-height:1.4;word-break:break-word}
+  .chan-msg.mine .cm-body{background:var(--gold);color:var(--navy);border-bottom-right-radius:4px}
+  .chan-msg.theirs .cm-body{background:#1a2c4a;color:var(--txt);border-bottom-left-radius:4px}
+  .chan-msg .cm-time{font-size:0.62rem;color:var(--muted);margin-top:3px}
+  .chan-input{padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
+  .chan-input input{flex:1;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem;font-family:inherit}
+  .chan-input input:focus{outline:none;border-color:var(--gold)}
+  /* ── TASKS (staff) ── */
+  .stask-card{background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:10px;transition:.15s}
+  .stask-card:hover{border-color:rgba(201,168,76,.3)}
+  .stask-card .stk-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .stask-card .stk-title{font-weight:700;font-size:0.92rem;color:#fff;flex:1}
+  .stask-card .stk-meta{display:flex;gap:6px;flex-wrap:wrap;font-size:0.7rem;margin-bottom:10px}
+  .tk-pri{padding:2px 8px;border-radius:100px;font-size:0.64rem;font-weight:700}
+  .pri-urgent{background:#c6282822;color:#ef9a9a}
+  .pri-high{background:#ef6c0022;color:#ffb74d}
+  .pri-normal{background:#1565c022;color:#7cb6f7}
+  .pri-low{background:var(--line);color:var(--muted)}
+  .stask-card .stk-actions{display:flex;gap:6px}
+  .stk-btn{padding:6px 14px;border-radius:7px;font-size:0.76rem;font-weight:700;cursor:pointer;border:1px solid var(--line);background:var(--navy3);color:var(--muted);font-family:inherit;transition:.15s}
+  .stk-btn:hover{border-color:var(--gold);color:var(--gold)}
+  .stk-btn.done{background:#2e7d3222;border-color:#2e7d32;color:#86d98a}
   /* ── ORG CHART ── */
   .org-wrap{overflow-x:auto;padding:10px 0 20px}
   .org-tree{display:flex;flex-direction:column;align-items:center;gap:0;min-width:600px}
@@ -210,6 +245,8 @@
         <button class="sb-link active" data-view="queue" onclick="switchView('queue')"><span class="ic">📋</span> Work Queue <span class="badge-n" id="navAppsBadge"></span></button>
         <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
         <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
+        <button class="sb-link" data-view="mychannel" onclick="switchView('mychannel')"><span class="ic">💬</span> My Channel <span class="badge-n" id="navChanBadge"></span></button>
+        <button class="sb-link" data-view="mytasks" onclick="switchView('mytasks')"><span class="ic">📋</span> My Tasks <span class="badge-n" id="navTaskBadge"></span></button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Tools</button>
         <button class="sb-link" data-view="org" onclick="switchView('org')"><span class="ic">🏢</span> Org Structure</button>
       </nav>
@@ -261,6 +298,28 @@
               <button class="btn btn-sm" onclick="sendTeam()">Send</button>
             </div>
           </div>
+        </section>
+
+        <!-- MY DEPT CHANNEL -->
+        <section class="view" id="view-mychannel">
+          <div class="chan-main">
+            <div class="chan-head">
+              <span class="ch-icon" id="staffChanIcon">💬</span>
+              <h3 id="staffChanTitle">Department Channel</h3>
+              <span class="ch-sub" id="staffChanSub">Your department · staff &amp; director</span>
+            </div>
+            <div class="chan-msgs" id="staffChanMsgs"><div style="color:var(--muted);text-align:center;padding:40px">Loading your channel…</div></div>
+            <div class="chan-input">
+              <input type="text" id="staffChanInput" placeholder="Message your department…" onkeydown="if(event.key==='Enter')sendStaffChanMsg()">
+              <button class="btn btn-sm" onclick="sendStaffChanMsg()">Send</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- MY TASKS -->
+        <section class="view" id="view-mytasks">
+          <div class="stat-strip" id="myTaskStats"></div>
+          <div id="myTasksList"><div class="skeleton">Loading your tasks…</div></div>
         </section>
 
         <!-- ORG STRUCTURE -->
@@ -570,10 +629,12 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={queue:'Work Queue',messages:'Client Messages',team:'Team Chat',tools:'Tools',org:'Org Structure'};
+  const titles={queue:'Work Queue',messages:'Client Messages',team:'Team Chat',mychannel:'My Department Channel',mytasks:'My Tasks',tools:'Tools',org:'Org Structure'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
+  if(v==='mychannel') loadStaffChannel();
+  if(v==='mytasks') loadMyTasks();
   toggleSidebar(false);
 }
 function toggleSidebar(open){
@@ -854,6 +915,145 @@ async function sendTeam(){
   }catch{alert('Network error.');input.value=body;}
 }
 setInterval(()=>{ if(KEY) pollTeamBadge(); }, 25000);
+
+/* ══════════════════════════════════════════════════════
+   DEPT CHANNEL (staff — own dept only)
+══════════════════════════════════════════════════════ */
+let STAFF_DEPT = null;
+let STAFF_CHAN_MSGS = [];
+let staffChanTimer = null;
+const CHAN_META_S = {
+  immigration:{icon:'🛂',label:'Immigration Channel',sub:'Immigration & Visa Services'},
+  operations:{icon:'⚙️',label:'Operations Channel',sub:'Operations & Conference'},
+  finance:{icon:'💰',label:'Finance Channel',sub:'Finance & Accounts'},
+  client_relations:{icon:'🤝',label:'Client Relations Channel',sub:'Client Relations & Support'},
+  legal:{icon:'🔐',label:'Legal Channel',sub:'Legal & Compliance'},
+  general:{icon:'📢',label:'General Channel',sub:'All departments'},
+};
+
+async function resolveStaffDept(){
+  if(STAFF_DEPT) return STAFF_DEPT;
+  const name = sessionStorage.getItem('skystaff_name')||'';
+  if(!name) return 'general';
+  try{
+    const r = await fetch(API+'/api/staff/profile',{headers:{'x-admin-key':KEY,'x-staff-name':name}});
+    const p = r.ok ? await r.json() : null;
+    STAFF_DEPT = (p&&p.department) || 'general';
+  }catch{ STAFF_DEPT='general'; }
+  return STAFF_DEPT;
+}
+
+async function loadStaffChannel(){
+  const dept = await resolveStaffDept();
+  const meta = CHAN_META_S[dept]||{icon:'💬',label:'Department Channel',sub:''};
+  document.getElementById('staffChanIcon').textContent=meta.icon;
+  document.getElementById('staffChanTitle').textContent=meta.label;
+  document.getElementById('staffChanSub').textContent=meta.sub;
+  document.getElementById('staffChanInput').placeholder=`Message ${meta.label}…`;
+  await fetchStaffChanMsgs(dept);
+  if(staffChanTimer)clearInterval(staffChanTimer);
+  staffChanTimer=setInterval(async()=>{
+    if(!document.getElementById('view-mychannel').classList.contains('active')){clearInterval(staffChanTimer);staffChanTimer=null;return;}
+    await fetchStaffChanMsgs(dept);
+  },12000);
+}
+
+async function fetchStaffChanMsgs(dept){
+  try{
+    const r=await fetch(API+'/api/dept/messages?dept='+dept,{headers:{'x-admin-key':KEY}});
+    STAFF_CHAN_MSGS=r.ok?(await r.json()):[];
+  }catch{}
+  const el=document.getElementById('staffChanMsgs'); if(!el)return;
+  const me=sessionStorage.getItem('skystaff_name')||'';
+  if(!STAFF_CHAN_MSGS.length){el.innerHTML='<div style="color:var(--muted);text-align:center;padding:40px">No messages yet. Say hello to your team 👋</div>';return;}
+  el.innerHTML=STAFF_CHAN_MSGS.map(m=>{
+    const mine=m.author===me;
+    return `<div class="chan-msg ${mine?'mine':'theirs'}">
+      <div class="cm-meta"><span class="cm-author">${esc(m.author)}</span><span class="cm-role">${m.author_role==='ceo'?' · CEO':m.author_role==='director'?' · Director':''}</span></div>
+      <div class="cm-body">${esc(m.body).replace(/\n/g,'<br>')}</div>
+      <div class="cm-time">${m.created_at?new Date(m.created_at).toLocaleString():''}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+async function sendStaffChanMsg(){
+  const input=document.getElementById('staffChanInput');
+  const body=input.value.trim(); if(!body)return;
+  const dept=await resolveStaffDept();
+  const me=sessionStorage.getItem('skystaff_name')||'Staff';
+  input.value='';
+  try{
+    const r=await fetch(API+'/api/dept/messages',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({department:dept,body,author:me,author_role:'staff'})});
+    if(!r.ok){input.value=body;return;}
+    await fetchStaffChanMsgs(dept);
+  }catch{input.value=body;}
+}
+
+/* ══════════════════════════════════════════════════════
+   MY TASKS (staff)
+══════════════════════════════════════════════════════ */
+let MY_TASKS=[];
+
+async function loadMyTasks(){
+  const me=sessionStorage.getItem('skystaff_name')||'';
+  try{
+    const r=await fetch(API+'/api/staff/tasks',{headers:{'x-admin-key':KEY,'x-staff-name':me}});
+    MY_TASKS=r.ok?(await r.json()):[];
+    if(!Array.isArray(MY_TASKS))MY_TASKS=[];
+  }catch{MY_TASKS=[];}
+  renderMyTasks();
+}
+
+function renderMyTasks(){
+  const pending=MY_TASKS.filter(t=>t.status==='pending').length;
+  const inprog=MY_TASKS.filter(t=>t.status==='in_progress').length;
+  const done=MY_TASKS.filter(t=>t.status==='done').length;
+  document.getElementById('myTaskStats').innerHTML=`
+    ${statCard(MY_TASKS.length,'Total Tasks')}
+    ${statCard(pending,'Pending')}
+    ${statCard(inprog,'In Progress','g')}
+    ${statCard(done,'Completed')}`;
+  const el=document.getElementById('myTasksList');
+  if(!MY_TASKS.length){el.innerHTML='<div class="note" style="margin-top:16px">✅ <strong style="color:var(--txt)">No tasks assigned to you yet.</strong> Your director will assign tasks here when needed.</div>';return;}
+  const order={urgent:0,high:1,normal:2,low:3};
+  const sorted=[...MY_TASKS].filter(t=>t.status!=='done'&&t.status!=='cancelled').sort((a,b)=>(order[a.priority||'normal']||2)-(order[b.priority||'normal']||2));
+  const finished=MY_TASKS.filter(t=>t.status==='done'||t.status==='cancelled');
+  const priColors={urgent:'#ef9a9a',high:'#ffb74d',normal:'#7cb6f7',low:'var(--muted)'};
+  function taskCard(t){
+    return `<div class="stask-card">
+      <div class="stk-head">
+        <div class="stk-title">${esc(t.title)}</div>
+      </div>
+      <div class="stk-meta">
+        <span class="tk-pri pri-${esc(t.priority||'normal')}">${(t.priority||'normal').toUpperCase()}</span>
+        ${t.department?`<span style="font-size:0.7rem;color:var(--muted)">${esc(t.department.replace('_',' '))}</span>`:''}
+        ${t.due_date?`<span style="font-size:0.7rem;color:var(--muted)">📅 Due ${t.due_date}</span>`:''}
+        <span style="font-size:0.7rem;color:var(--muted)">From: ${esc(t.assigned_by||'CEO')}</span>
+      </div>
+      ${t.description?`<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px">${esc(t.description)}</div>`:''}
+      <div class="stk-actions">
+        ${t.status==='pending'?`<button class="stk-btn" onclick="updateMyTask(${t.id},'in_progress')">▶ Start</button>`:''}
+        ${t.status==='in_progress'?`<button class="stk-btn done" onclick="updateMyTask(${t.id},'done')">✅ Mark Done</button>`:''}
+        ${t.status==='done'||t.status==='cancelled'?`<span style="font-size:0.78rem;color:#86d98a;font-weight:600">${t.status==='done'?'✅ Completed':'❌ Cancelled'}</span>`:''}
+      </div>
+    </div>`;
+  }
+  el.innerHTML=(sorted.length?sorted.map(taskCard).join(''):'')
+    +(finished.length?`<div style="margin-top:18px;margin-bottom:10px;font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Completed / Cancelled</div>`+finished.map(taskCard).join(''):'');
+  const nb=document.getElementById('navTaskBadge');
+  if(nb){const u=MY_TASKS.filter(t=>t.status==='pending').length;nb.textContent=u;nb.classList.toggle('show',u>0);}
+}
+
+async function updateMyTask(id,status){
+  const me=sessionStorage.getItem('skystaff_name')||'';
+  try{
+    const r=await fetch(API+'/api/staff/tasks/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY,'x-staff-name':me},body:JSON.stringify({status})});
+    if(!r.ok)throw new Error('Failed');
+    await loadMyTasks();
+  }catch(e){alert('Could not update task: '+e.message);}
+}
 
 /* ── ORG TABS ── */
 function orgTab(id, btn){
