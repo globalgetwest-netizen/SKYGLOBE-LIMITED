@@ -1961,6 +1961,145 @@ app.delete('/api/admin/payroll/:id', checkAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── STAFF DIRECTORY ───────────────────────────────────────────────────────────
+app.get('/api/admin/staff', checkAdmin, async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'staff_members', null, { order: 'created_at.asc', limit: 200 });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/staff', checkAdmin, async (req, res) => {
+  const { name, role, department, whatsapp, email, notes } = req.body || {};
+  if (!name || !department) return res.status(400).json({ error: 'Name and department are required.' });
+  try {
+    const rows = await dbQuery('POST', 'staff_members', {
+      name: name.trim(), role: (role || '').trim(), department: department.trim(),
+      whatsapp: (whatsapp || '').trim(), email: (email || '').trim(),
+      notes: (notes || '').trim(), status: 'active', created_at: new Date().toISOString(),
+    });
+    res.json(Array.isArray(rows) ? rows[0] : rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/staff/:id', checkAdmin, async (req, res) => {
+  const patch = {};
+  ['name','role','department','whatsapp','email','status','notes'].forEach(k => {
+    if (req.body[k] !== undefined) patch[k] = req.body[k];
+  });
+  try {
+    await dbQuery('PATCH', 'staff_members', patch, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/staff/:id', checkAdmin, async (req, res) => {
+  try {
+    await dbQuery('DELETE', 'staff_members', null, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Staff: get own profile (to find their department)
+app.get('/api/staff/profile', checkStaffOrAdmin, async (req, res) => {
+  const name = req.headers['x-staff-name'] || '';
+  try {
+    const rows = await dbQuery('GET', 'staff_members', null, { name: `eq.${name}`, limit: 1 });
+    res.json(rows[0] || null);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── DEPARTMENT CHANNELS ───────────────────────────────────────────────────────
+const VALID_DEPTS = ['immigration','operations','finance','client_relations','legal','general'];
+
+app.get('/api/dept/messages', checkStaffOrAdmin, async (req, res) => {
+  const dept = req.query.dept;
+  if (!dept) return res.status(400).json({ error: 'dept required' });
+  if (!VALID_DEPTS.includes(dept)) return res.status(400).json({ error: 'Invalid department' });
+  try {
+    const rows = await dbQuery('GET', 'dept_messages', null, {
+      department: `eq.${dept}`, order: 'created_at.asc', limit: 200,
+    });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/dept/messages', checkStaffOrAdmin, async (req, res) => {
+  const { department, body, author, author_role } = req.body || {};
+  if (!department || !body || !author) return res.status(400).json({ error: 'department, body, author required' });
+  if (!VALID_DEPTS.includes(department)) return res.status(400).json({ error: 'Invalid department' });
+  try {
+    const rows = await dbQuery('POST', 'dept_messages', {
+      department, body: body.trim(), author: author.trim(),
+      author_role: author_role || 'staff', created_at: new Date().toISOString(),
+    });
+    res.json(Array.isArray(rows) ? rows[0] : rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── TASK BOARD ────────────────────────────────────────────────────────────────
+app.get('/api/admin/tasks', checkAdmin, async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'tasks', null, { order: 'created_at.desc', limit: 300 });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/tasks', checkAdmin, async (req, res) => {
+  const { title, description, department, assigned_to, priority, due_date } = req.body || {};
+  if (!title) return res.status(400).json({ error: 'Title is required.' });
+  const name = req.headers['x-staff-name'] || 'CEO';
+  try {
+    const rows = await dbQuery('POST', 'tasks', {
+      title: title.trim(), description: (description || '').trim(),
+      department: (department || '').trim(), assigned_to: (assigned_to || '').trim(),
+      assigned_by: name, priority: priority || 'normal',
+      status: 'pending', due_date: due_date || null,
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+    });
+    res.json(Array.isArray(rows) ? rows[0] : rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/tasks/:id', checkAdmin, async (req, res) => {
+  const patch = { updated_at: new Date().toISOString() };
+  ['title','description','department','assigned_to','priority','status','due_date'].forEach(k => {
+    if (req.body[k] !== undefined) patch[k] = req.body[k];
+  });
+  try {
+    await dbQuery('PATCH', 'tasks', patch, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/tasks/:id', checkAdmin, async (req, res) => {
+  try {
+    await dbQuery('DELETE', 'tasks', null, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Staff: get tasks assigned to me
+app.get('/api/staff/tasks', checkStaffOrAdmin, async (req, res) => {
+  const name = req.headers['x-staff-name'] || '';
+  try {
+    const rows = await dbQuery('GET', 'tasks', null, {
+      assigned_to: `eq.${name}`, order: 'created_at.desc', limit: 100,
+    });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Staff: update own task status
+app.patch('/api/staff/tasks/:id', checkStaffOrAdmin, async (req, res) => {
+  const { status } = req.body || {};
+  if (!status) return res.status(400).json({ error: 'status required' });
+  try {
+    await dbQuery('PATCH', 'tasks', { status, updated_at: new Date().toISOString() }, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
