@@ -411,9 +411,17 @@ app.post('/api/documents', async (req, res) => {
       filename: safeName,
       path: filePath,
       uploaded_by: who ? `admin:${who}` : 'applicant',
+      application_ref: cleanRef,
     });
+    const doc = Array.isArray(rows) ? rows[0] : rows;
 
-    res.json({ success: true, document: Array.isArray(rows) ? rows[0] : rows, url: storagePublicUrl(filePath) });
+    // If uploaded by staff/admin, auto-generate a secure viewer token
+    let viewToken = null;
+    if (who && doc?.id) {
+      viewToken = await createDocToken(doc.id, filePath, safeName, app_?.email || '', cleanRef);
+    }
+
+    res.json({ success: true, document: doc, url: storagePublicUrl(filePath), viewToken, viewUrl: viewToken ? `${baseUrl(req)}/view/${viewToken}` : null });
   } catch (e) {
     console.error('Document upload failed:', e.message);
     res.status(500).json({ error: 'Could not upload document. Please try again.' });
@@ -533,7 +541,80 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// ── TEST ──────────────────────────────────────────────────────────────────────
+// ── SECURE DOCUMENT TOKENS ────────────────────────────────────────────────────
+const crypto = require('crypto');
+
+function genSecureToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+async function createDocToken(docId, docPath, filename, clientEmail, appRef) {
+  const token = genSecureToken();
+  const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(); // 72 hours
+  try {
+    await dbQuery('POST', 'document_tokens', {
+      token, document_id: docId, document_path: docPath, filename,
+      client_email: clientEmail, application_ref: appRef,
+      expires_at: expiresAt, created_at: new Date().toISOString(),
+    });
+  } catch (e) { console.error('Token create warning:', e.message); }
+  return token;
+}
+
+// Secure document viewer page
+app.get('/view/:token', (req, res) => {
+  res.sendFile(path.join(__dirname, 'secure-viewer.html'));
+});
+
+// API: validate token and return doc metadata (no raw URL exposed)
+app.get('/api/view/:token', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'document_tokens', null, { token: `eq.${req.params.token}`, limit: 1 });
+    if (!rows[0]) return res.status(404).json({ error: 'Invalid or expired link.' });
+    const tok = rows[0];
+    if (new Date(tok.expires_at) < new Date()) return res.status(410).json({ error: 'This document link has expired. Please contact SkyGlobe Group for a new link.' });
+    // record access time
+    await dbQuery('PATCH', 'document_tokens', { accessed_at: new Date().toISOString() }, { token: `eq.${req.params.token}` }).catch(() => {});
+    res.json({ filename: tok.filename, client_email: tok.client_email, application_ref: tok.application_ref, expires_at: tok.expires_at });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// API: proxy document content through our server (hides real storage URL)
+app.get('/api/view/:token/content', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'document_tokens', null, { token: `eq.${req.params.token}`, limit: 1 });
+    if (!rows[0]) return res.status(404).send('Not found.');
+    const tok = rows[0];
+    if (new Date(tok.expires_at) < new Date()) return res.status(410).send('This link has expired.');
+    const fileUrl = storagePublicUrl(tok.document_path);
+    const upstream = await fetch(fileUrl);
+    if (!upstream.ok) return res.status(404).send('Document not found.');
+    const contentType = upstream.headers.get('content-type') || 'application/octet-stream';
+    res.set('Content-Type', contentType);
+    res.set('Content-Disposition', 'inline'); // inline = display, not download
+    res.set('Cache-Control', 'no-store');
+    res.set('X-Frame-Options', 'SAMEORIGIN');
+    upstream.body.pipe(res);
+  } catch (e) { res.status(500).send('Error loading document.'); }
+});
+
+// Admin: regenerate token for a document
+app.post('/api/admin/documents/:id/new-token', checkAdmin, async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'documents', null, { id: `eq.${req.params.id}`, limit: 1 });
+    if (!rows[0]) return res.status(404).json({ error: 'Document not found.' });
+    const doc = rows[0];
+    // get application email
+    const apps = await dbQuery('GET', 'applications', null, { ref: `eq.${doc.ref}`, limit: 1 });
+    const email = apps[0]?.email || '';
+    // delete old token
+    await dbQuery('DELETE', 'document_tokens', null, { document_id: `eq.${doc.id}` }).catch(() => {});
+    const token = await createDocToken(doc.id, doc.path, doc.filename, email, doc.ref);
+    res.json({ success: true, token, viewUrl: `${baseUrl(req)}/view/${token}` });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+
 app.get('/api/test-ai', async (req, res) => {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.json({ ok: false, error: 'GEMINI_API_KEY is NOT set on Render. Please add it in Environment settings.' });
@@ -667,7 +748,13 @@ app.get('/api/client/documents', async (req, res) => {
     for (const app of apps) {
       const docs = await dbQuery('GET', 'documents', null, { application_ref: `eq.${app.ref}`, order: 'created_at.desc', limit: 50 });
       const staffDocs = docs.filter(d => d.uploaded_by && (String(d.uploaded_by).startsWith('admin') || String(d.uploaded_by).startsWith('staff')));
-      staffDocs.forEach(d => allDocs.push({ ...d, application_ref: app.ref }));
+      for (const d of staffDocs) {
+        // look up secure token for this doc
+        const trows = await dbQuery('GET', 'document_tokens', null, { document_id: `eq.${d.id}`, limit: 1 }).catch(() => []);
+        const tok = trows[0];
+        const expired = tok && new Date(tok.expires_at) < new Date();
+        allDocs.push({ ...d, application_ref: app.ref, view_token: tok && !expired ? tok.token : null, token_expires: tok?.expires_at || null });
+      }
     }
     allDocs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     res.json(allDocs);
