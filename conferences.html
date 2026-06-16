@@ -180,7 +180,7 @@ function openForm(product, conf){
   // currencies available across active providers
   const curs = [...new Set(CFG.providers.flatMap(p=>p.currencies))].filter(c=>CFG.pricing[product] && CFG.pricing[product][c]!=null);
   const curSel = document.getElementById('currency');
-  curSel.innerHTML = curs.length ? curs.map(c=>`<option>${c}</option>`).join('') : '<option>NGN</option>';
+  curSel.innerHTML = curs.length ? curs.map(c=>`<option>${c}</option>`).join('') : '<option>USD</option>';
   refreshProviders(); refreshPrice();
   document.getElementById('msg').className='msg';
   document.getElementById('modal').classList.add('open');
