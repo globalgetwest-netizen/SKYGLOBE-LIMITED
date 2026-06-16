@@ -203,6 +203,7 @@
         <button class="sb-link" data-view="applications" onclick="switchView('applications')"><span class="ic">📋</span> Applications <span class="badge-n" id="navAppsBadge"></span></button>
         <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
         <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
+        <button class="sb-link" data-view="payments" onclick="switchView('payments')"><span class="ic">💳</span> Payments</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
       </nav>
       <div class="sb-foot">
@@ -281,6 +282,19 @@
           </div>
         </section>
 
+        <!-- PAYMENTS -->
+        <section class="view" id="view-payments">
+          <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <h3 style="margin:0">💳 Payment Records</h3>
+              <button onclick="loadPayments()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
+            </div>
+            <div id="paymentsTable" style="overflow-x:auto">
+              <p style="color:var(--muted);font-size:0.9rem">Loading payments…</p>
+            </div>
+          </div>
+        </section>
+
         <!-- TOOLS -->
         <section class="view" id="view-tools">
           <div class="kpis">
@@ -349,10 +363,11 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
+  if(v==='payments') loadPayments();
   toggleSidebar(false);
 }
 function toggleSidebar(open){
@@ -362,6 +377,38 @@ function toggleSidebar(open){
 
 /* ── LOAD ── */
 async function loadAll(){ await loadApps(); await loadMessages(true); await pollTeamBadge(); }
+
+async function loadPayments(){
+  const el=document.getElementById('paymentsTable');
+  if(!el)return;
+  try{
+    const r=await fetch(API+'/api/admin/payments',{headers:{'x-admin-key':KEY}});
+    if(r.status===401){el.innerHTML='<p style="color:#e57373">Unauthorized.</p>';return;}
+    const rows=await r.json();
+    if(!Array.isArray(rows)||!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No payments yet.</p>';return;}
+    const statusColor={paid:'#2e7d32',pending:'#f57c00',failed:'#c62828'};
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+      <thead><tr style="background:#f0f4ff;border-bottom:2px solid var(--line)">
+        <th style="padding:10px 8px;text-align:left">Reference</th>
+        <th style="padding:10px 8px;text-align:left">Service</th>
+        <th style="padding:10px 8px;text-align:left">Client</th>
+        <th style="padding:10px 8px;text-align:left">Amount</th>
+        <th style="padding:10px 8px;text-align:left">Provider</th>
+        <th style="padding:10px 8px;text-align:left">Status</th>
+        <th style="padding:10px 8px;text-align:left">Date</th>
+      </tr></thead>
+      <tbody>${rows.map((p,i)=>`<tr style="border-bottom:1px solid var(--line);background:${i%2?'#fafbff':'#fff'}">
+        <td style="padding:9px 8px;font-family:monospace;font-size:0.8rem">${p.reference||'—'}</td>
+        <td style="padding:9px 8px">${(p.product||'').replace(/_/g,' ')}</td>
+        <td style="padding:9px 8px">${p.email||'—'}</td>
+        <td style="padding:9px 8px;font-weight:700">${p.currency||''} ${p.amount!=null?Number(p.amount).toLocaleString():'—'}</td>
+        <td style="padding:9px 8px">${p.provider||'—'}</td>
+        <td style="padding:9px 8px"><span style="background:${statusColor[p.status]||'#999'};color:#fff;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:700">${p.status||'—'}</span></td>
+        <td style="padding:9px 8px;color:var(--muted)">${p.created_at?new Date(p.created_at).toLocaleDateString():''}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }catch(e){el.innerHTML='<p style="color:#e57373">Could not load payments: '+e.message+'</p>';}
+}
 
 async function loadApps(){
   try{
