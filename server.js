@@ -1294,24 +1294,25 @@ Generate a comprehensive personalised interview preparation guide. Respond with 
 
 // Server-authoritative pricing. The client NEVER sends the amount — we look it
 // up here so prices can't be tampered with. Edit these to your real prices.
-// Amounts are in MAJOR units (₦, $, £). Add/remove currencies freely per product.
+// Amounts are in MAJOR units. We charge in USD / EUR / GBP only — premium,
+// international, professional. (No local currency.) USD is the default.
 const PRICING = {
-  interview_prep:        { label: 'AI Interview Prep Guide',                    instant: true,  NGN: 5000,  USD: 7,   GBP: 5  },
-  conference_invitation: { label: 'Conference Invitation Letter (CEO-stamped)', instant: false, NGN: 35000, USD: 45,  GBP: 35 },
-  conference_sourcing:   { label: 'Conference Sourcing — we source & verify the genuine document', instant: false, NGN: 120000, USD: 150, GBP: 120 },
-  official_letter:       { label: 'Official Company Letter (stamped)',          instant: false, NGN: 25000,  USD: 35,  GBP: 25  },
+  interview_prep:        { label: 'AI Interview Prep Guide',                    instant: true,  USD: 9,    EUR: 9,    GBP: 7   },
+  conference_invitation: { label: 'Conference Invitation Letter (CEO-stamped)', instant: false, USD: 49,   EUR: 45,   GBP: 39  },
+  conference_sourcing:   { label: 'Conference Sourcing — we source & verify the genuine document', instant: false, USD: 159, EUR: 149, GBP: 129 },
+  official_letter:       { label: 'Official Company Letter (stamped)',          instant: false, USD: 39,   EUR: 35,   GBP: 29  },
   // ── Work Permit & Migration packages ──────────────────────────────────────
-  work_permit_standard:  { label: 'Europe Work Permit — Standard (Full Application Service)',  instant: false, NGN: 350000, USD: 450, GBP: 380 },
-  work_permit_express:   { label: 'Europe Work Permit — Express (Priority + Dedicated Agent)', instant: false, NGN: 550000, USD: 700, GBP: 600 },
-  migration_premium:     { label: 'Premium Migration Package (Permit + Relocation Support)',   instant: false, NGN: 900000, USD: 1200, GBP: 1000 },
-  travel_prep_europe:    { label: 'Premium Travel Preparation — Europe',                       instant: false, NGN: 150000, USD: 200, GBP: 165 },
-  travel_prep_global:    { label: 'Premium Travel Preparation — Global (any destination)',     instant: false, NGN: 200000, USD: 260, GBP: 215 },
+  work_permit_standard:  { label: 'Europe Work Permit — Standard (Full Application Service)',  instant: false, USD: 499,  EUR: 459,  GBP: 399  },
+  work_permit_express:   { label: 'Europe Work Permit — Express (Priority + Dedicated Agent)', instant: false, USD: 749,  EUR: 699,  GBP: 599  },
+  migration_premium:     { label: 'Premium Migration Package (Permit + Relocation Support)',   instant: false, USD: 1299, EUR: 1199, GBP: 1049 },
+  travel_prep_europe:    { label: 'Premium Travel Preparation — Europe',                       instant: false, USD: 199,  EUR: 189,  GBP: 169  },
+  travel_prep_global:    { label: 'Premium Travel Preparation — Global (any destination)',     instant: false, USD: 259,  EUR: 239,  GBP: 209  },
 };
 
 const PAY = {
-  paystack:    { secret: process.env.PAYSTACK_SECRET_KEY,    pub: process.env.PAYSTACK_PUBLIC_KEY,    currencies: ['NGN','USD','GHS','ZAR','KES'] },
-  stripe:      { secret: process.env.STRIPE_SECRET_KEY,      pub: process.env.STRIPE_PUBLIC_KEY,      currencies: ['USD','GBP','EUR','NGN'] },
-  flutterwave: { secret: process.env.FLUTTERWAVE_SECRET_KEY, pub: process.env.FLUTTERWAVE_PUBLIC_KEY, currencies: ['NGN','USD','GBP','GHS','KES','ZAR'] },
+  paystack:    { secret: process.env.PAYSTACK_SECRET_KEY,    pub: process.env.PAYSTACK_PUBLIC_KEY,    currencies: ['USD'] },
+  stripe:      { secret: process.env.STRIPE_SECRET_KEY,      pub: process.env.STRIPE_PUBLIC_KEY,      currencies: ['USD','EUR','GBP'] },
+  flutterwave: { secret: process.env.FLUTTERWAVE_SECRET_KEY, pub: process.env.FLUTTERWAVE_PUBLIC_KEY, currencies: ['USD','EUR','GBP'] },
 };
 
 function activeProviders() {
@@ -1474,7 +1475,7 @@ app.post('/api/pay/init', async (req, res) => {
     if (!email) return res.status(400).json({ error: 'Email is required.' });
     if (!PAY[provider] || !PAY[provider].secret)
       return res.status(400).json({ error: `Payment provider "${provider}" is not available yet. Please choose another or contact us on WhatsApp.` });
-    const cur = (currency || 'NGN').toUpperCase();
+    const cur = (currency || 'USD').toUpperCase();
     const amount = prod[cur];
     if (amount == null) return res.status(400).json({ error: `${prod.label} is not priced in ${cur}.` });
     if (!PAY[provider].currencies.includes(cur))
@@ -1643,7 +1644,7 @@ app.post('/api/conference/request', async (req, res) => {
 
     // Hand straight off to payment if a provider was chosen and is live.
     const provider = b.provider;
-    const cur = (b.currency || 'NGN').toUpperCase();
+    const cur = (b.currency || 'USD').toUpperCase();
     if (provider && PAY[provider] && PAY[provider].secret) {
       const reference = genPayRef();
       const amount = PRICING[product][cur];
@@ -1789,7 +1790,7 @@ app.post('/api/work-permit/apply', async (req, res) => {
     catch (e) { console.error('work-permit insert failed:', e.message); return res.status(500).json({ error: 'Could not save your application. Please try again.' }); }
 
     const provider = b.provider;
-    const cur = (b.currency || 'NGN').toUpperCase();
+    const cur = (b.currency || 'USD').toUpperCase();
     if (provider && PAY[provider] && PAY[provider].secret) {
       const amount = PRICING[product][cur];
       if (amount != null && PAY[provider].currencies.includes(cur)) {
