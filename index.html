@@ -943,7 +943,6 @@ body.wc-active .mobile-menu{padding-top:46px}
     <li><a onclick="showPage('destinations')" data-page="destinations">Work Abroad</a></li>
     <li><a onclick="showPage('world')" data-page="world">Travel</a></li>
     <li><a onclick="showPage('blog')" data-page="blog">Scholarships</a></li>
-    <li><a onclick="showPage('tools')" data-page="tools">AI Assistant</a></li>
     <li class="nav-more-wrap">
       <a class="nav-more-btn" onclick="toggleNavMore(event)">More ▾</a>
       <div class="nav-more-drop" id="navMoreDrop">
@@ -989,7 +988,6 @@ body.wc-active .mobile-menu{padding-top:46px}
   <a href="/conferences">🎟️ Conference Sourcing</a>
   <a onclick="showPage('recruitment');toggleMenu()">🌍 Recruitment & Jobs</a>
   <a onclick="showPage('careers');toggleMenu()">💼 Careers at SkyGlobe</a>
-  <a onclick="showPage('tools');toggleMenu()">🤖 AI Assistant</a>
   <a onclick="goAccount();toggleMenu()" id="mobAccountLink">📊 Dashboard</a>
   <a onclick="showPage('apply');toggleMenu()" style="color:var(--gold)">📋 Apply Now</a>
   <a onclick="showPage('contact');toggleMenu()">Contact</a>
@@ -1546,7 +1544,7 @@ body.wc-active .mobile-menu{padding-top:46px}
         <p>One-on-one expert consultation sessions to map out the best immigration pathway for your specific goals, timeline, and background — with a clear, actionable plan.</p>
         <span class="s-tag">Strategy → Success</span><span class="apply-hint">→ Book consultation</span>
       </div>
-      <div class="service-full-card" onclick="showPage('tools')" style="border-color:rgba(184,134,11,0.25);background:linear-gradient(135deg,#fff,rgba(184,134,11,0.03))">
+      <div class="service-full-card" onclick="showPage('tools')" style="display:none;border-color:rgba(184,134,11,0.25);background:linear-gradient(135deg,#fff,rgba(184,134,11,0.03))">
         <div class="s-photo"><img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=500&q=80&auto=format&fit=crop" alt="AI Tools" loading="lazy"><span class="s-photo-icon">🤖</span></div>
         <h3>AI Document Generator ✨ New</h3>
         <p>Generate professional Statements of Purpose, cover letters, and visa letters in seconds using Gemini AI — then have our experts review before you submit.</p>
@@ -2206,7 +2204,6 @@ body.wc-active .mobile-menu{padding-top:46px}
         <div class="dash-quick-actions">
           <button class="dash-qa" onclick="showPage('apply')">➕ New Application</button>
           <button class="dash-qa" onclick="showPage('countries')">🌍 Explore Countries</button>
-          <button class="dash-qa" onclick="showPage('tools')">✨ AI Documents</button>
           <button class="dash-qa" onclick="switchDashTab('messages',document.querySelectorAll('.dash-tab')[5])">💬 Message Team</button>
           <button class="dash-qa" onclick="showPage('contact')">📅 Book Consultation</button>
         </div>
@@ -2579,7 +2576,7 @@ body.wc-active .mobile-menu{padding-top:46px}
 <script>
 // PAGE ROUTING
 // Main journey order for Back/Next navigation
-const PAGE_ORDER = ['home','about','services','destinations','countries','compare','world','blog','tools','recruitment','careers','apply','contact'];
+const PAGE_ORDER = ['home','about','services','destinations','countries','compare','world','blog','recruitment','careers','apply','contact'];
 const PAGE_TITLES = {home:'Home',about:'About Us',services:'Services',destinations:'Destinations',countries:'Country Guides',compare:'Compare Countries',world:'World Explorer',blog:'Blog',tools:'AI Tools',recruitment:'Recruitment & Jobs',careers:'Careers',apply:'Apply',contact:'Contact',search:'Search',privacy:'Privacy Policy',terms:'Terms',antiFraud:'Anti-Fraud'};
 let _lastPage = null;
 // Browser-style history: one back/forward control for the whole site
@@ -2607,7 +2604,7 @@ function showPage(page, mode) {
   if (page === 'countries') renderAllCountries();
   if (page === 'blog') initBlog();
   if (page === 'world') initWorldExplorer();
-  if (page === 'tools') warmUpServer();
+  if (page === 'tools') { warmUpServer(); showToolsGateIfNeeded(); }
   if (page === 'invoice') initInvoicePage();
   updateNavArrows();
   setupCounters(target);
@@ -5684,6 +5681,20 @@ updateAccountNav();
 <!-- ===== AI TOOLS PAGE ===== -->
 <div class="page" id="page-tools">
   <div id="toolsPageNav-top"></div>
+
+  <!-- Staff/CEO gate — hidden once authenticated -->
+  <div id="toolsGate" style="display:none;position:fixed;inset:0;z-index:900;background:linear-gradient(160deg,#07112b,#0e1f42);align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:20px;padding:44px 38px;width:100%;max-width:380px;text-align:center;box-shadow:0 40px 100px rgba(0,0,0,.5)">
+      <img src="icon.svg" style="height:64px;width:64px;border-radius:14px;margin-bottom:14px" onerror="this.style.display='none'">
+      <h2 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.7rem;color:#07112b">SKYGLOBE <span style="color:#c9a84c">LIMITED</span></h2>
+      <p style="font-size:.72rem;color:#64748b;letter-spacing:.2em;text-transform:uppercase;margin:8px 0 24px">Staff &amp; CEO Access Only</p>
+      <input type="password" id="toolsGatePw" placeholder="Enter your staff or CEO password" style="width:100%;padding:13px 15px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.93rem;margin-bottom:12px" onkeydown="if(event.key==='Enter')toolsGateLogin()">
+      <button onclick="toolsGateLogin()" style="width:100%;padding:13px;background:#c9a84c;color:#07112b;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.93rem">Access AI Tools</button>
+      <div id="toolsGateErr" style="color:#dc2626;font-size:.8rem;min-height:18px;margin-top:10px"></div>
+      <p style="font-size:.7rem;color:#94a3b8;margin-top:16px">🔒 This tool is for internal staff use only. Not for public access.</p>
+    </div>
+  </div>
+
   <section style="padding:120px 5% 40px;background:linear-gradient(135deg,#fff,#f0f5ff)">
     <div class="text-center">
       <span class="section-tag">✨ Powered by Gemini AI</span>
@@ -6904,6 +6915,34 @@ function warmUpServer() {
   if (serverWarmed) return;
   serverWarmed = true;
   fetch('/api/health', { method: 'GET' }).catch(() => { serverWarmed = false; });
+}
+
+/* ── Tools page staff/CEO gate ── */
+function showToolsGateIfNeeded() {
+  if (sessionStorage.getItem('sg_tools_auth')) return; // already authenticated this session
+  const gate = document.getElementById('toolsGate');
+  if (gate) { gate.style.display = 'flex'; setTimeout(() => { const i = document.getElementById('toolsGatePw'); if(i) i.focus(); }, 100); }
+}
+async function toolsGateLogin() {
+  const pw = (document.getElementById('toolsGatePw').value || '').trim();
+  const err = document.getElementById('toolsGateErr');
+  if (!pw) { err.textContent = 'Please enter your password.'; return; }
+  err.textContent = 'Checking…';
+  try {
+    // try staff login first, then CEO
+    let ok = false;
+    const r = await fetch('/api/staff/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: pw }) });
+    if (r.ok) ok = true;
+    if (!ok) {
+      const r2 = await fetch('/api/admin/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: pw }) });
+      if (r2.ok) ok = true;
+    }
+    if (!ok) { err.textContent = 'Wrong password. Staff or CEO password required.'; document.getElementById('toolsGatePw').value = ''; return; }
+    sessionStorage.setItem('sg_tools_auth', '1');
+    const gate = document.getElementById('toolsGate');
+    if (gate) gate.style.display = 'none';
+    err.textContent = '';
+  } catch(e) { err.textContent = 'Network error — try again.'; }
 }
 
 function selectDocType(type, el) {
