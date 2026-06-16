@@ -5666,14 +5666,21 @@ async function loadInboxDocs() {
       </div>`;
       return;
     }
-    el.innerHTML = docs.map(d => `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 18px">
+    el.innerHTML = docs.map(d => {
+      const hasToken = !!d.view_token;
+      const expDate = d.token_expires ? new Date(d.token_expires).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 18px">
         <div style="min-width:0">
           <div style="font-weight:600;font-size:0.9rem;color:var(--white);margin-bottom:3px">📄 ${esc(d.filename)}</div>
           <div style="font-size:0.74rem;color:#64748b">Ref: ${esc(d.application_ref||'—')} · ${d.created_at?new Date(d.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
+          ${hasToken?`<div style="font-size:0.7rem;color:#c9a84c;margin-top:3px">🔏 Secure link · expires ${expDate}</div>`:`<div style="font-size:0.7rem;color:#64748b;margin-top:3px">⚠ Link expired — contact us for a new link</div>`}
         </div>
-        <a href="${esc(d.url)}" target="_blank" style="flex-shrink:0;background:var(--gold);color:#1a1300;font-size:0.8rem;font-weight:700;padding:8px 16px;border-radius:8px;text-decoration:none;white-space:nowrap">⬇ Download</a>
-      </div>`).join('');
+        ${hasToken
+          ? `<a href="/view/${esc(d.view_token)}" target="_blank" style="flex-shrink:0;background:var(--gold);color:#1a1300;font-size:0.8rem;font-weight:700;padding:8px 16px;border-radius:8px;text-decoration:none;white-space:nowrap">🔒 View Document</a>`
+          : `<a href="https://wa.me/17373998522" target="_blank" style="flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#8899bb;font-size:0.8rem;font-weight:600;padding:8px 16px;border-radius:8px;text-decoration:none;white-space:nowrap">💬 Request New Link</a>`
+        }
+      </div>`;
+    }).join('');
   } catch(e) { el.innerHTML = '<p style="color:#e57373;font-size:0.88rem">Error loading files.</p>'; }
 }
 
