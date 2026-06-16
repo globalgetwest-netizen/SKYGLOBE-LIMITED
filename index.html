@@ -2209,6 +2209,7 @@ body.wc-active .mobile-menu{padding-top:46px}
         <button class="dash-tab" onclick="switchDashTab('countries',this)">🌍 Saved Countries</button>
         <button class="dash-tab" onclick="switchDashTab('universities',this)">🏫 Universities</button>
         <button class="dash-tab" onclick="switchDashTab('docs',this)">📁 Documents</button>
+        <button class="dash-tab" onclick="switchDashTab('inbox',this)">📥 My Files from SkyGlobe</button>
         <button class="dash-tab" onclick="switchDashTab('messages',this)">💬 Messages</button>
         <button class="dash-tab" onclick="switchDashTab('ai',this)">🤖 AI Tips</button>
       </div>
@@ -2286,6 +2287,17 @@ body.wc-active .mobile-menu{padding-top:46px}
       </div>
 
       <!-- MESSAGES panel -->
+      <!-- MY FILES FROM SKYGLOBE panel -->
+      <div class="dash-panel" id="dp-inbox">
+        <div style="margin-bottom:1.2rem">
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px">📥 Files Delivered to You by SkyGlobe Group</h3>
+          <p style="font-size:0.84rem;color:#64748b">When our team completes and approves a document for you — visa letters, official letters, work permits, conference invitations — they appear here for download.</p>
+        </div>
+        <div id="inboxDocs" style="display:flex;flex-direction:column;gap:10px">
+          <p style="color:#94a3b8;font-size:0.88rem">Loading your files…</p>
+        </div>
+      </div>
+
       <div class="dash-panel" id="dp-messages">
         <div id="msgThread" class="msg-thread"></div>
         <form onsubmit="sendMsg(event)" style="display:flex;gap:0.6rem;margin-top:0.8rem">
@@ -5363,6 +5375,7 @@ function switchDashTab(name, btn) {
   if (panel) panel.classList.add('active');
   if (name === 'messages') loadMessages();
   if (name === 'ai') loadAiTips();
+  if (name === 'inbox') loadInboxDocs();
 }
 
 /* ---- Stats ---- */
@@ -5635,6 +5648,33 @@ async function loadDashApps() {
         </div>
       </div>`).join('');
   } catch { box.innerHTML = '<p style="color:#c62828;font-size:0.85rem">Could not load applications.</p>'; }
+}
+
+async function loadInboxDocs() {
+  const el = document.getElementById('inboxDocs');
+  if (!el) return;
+  el.innerHTML = '<p style="color:#94a3b8;font-size:0.88rem">Loading…</p>';
+  try {
+    const r = await fetch('/api/client/documents', { headers: authHeaders() });
+    if (!r.ok) { el.innerHTML = '<p style="color:#94a3b8;font-size:0.88rem">Could not load files.</p>'; return; }
+    const docs = await r.json();
+    if (!Array.isArray(docs) || !docs.length) {
+      el.innerHTML = `<div style="text-align:center;padding:36px 20px;background:rgba(201,168,76,0.04);border:1px dashed rgba(201,168,76,0.25);border-radius:14px">
+        <div style="font-size:2rem;margin-bottom:10px">📭</div>
+        <p style="font-weight:600;margin-bottom:6px;color:var(--white)">No files yet</p>
+        <p style="font-size:0.83rem;color:#64748b">When our team delivers a completed document to you it will appear here instantly — available to download anytime.</p>
+      </div>`;
+      return;
+    }
+    el.innerHTML = docs.map(d => `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 18px">
+        <div style="min-width:0">
+          <div style="font-weight:600;font-size:0.9rem;color:var(--white);margin-bottom:3px">📄 ${esc(d.filename)}</div>
+          <div style="font-size:0.74rem;color:#64748b">Ref: ${esc(d.application_ref||'—')} · ${d.created_at?new Date(d.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
+        </div>
+        <a href="${esc(d.url)}" target="_blank" style="flex-shrink:0;background:var(--gold);color:#1a1300;font-size:0.8rem;font-weight:700;padding:8px 16px;border-radius:8px;text-decoration:none;white-space:nowrap">⬇ Download</a>
+      </div>`).join('');
+  } catch(e) { el.innerHTML = '<p style="color:#e57373;font-size:0.88rem">Error loading files.</p>'; }
 }
 
 async function loadMessages() {
