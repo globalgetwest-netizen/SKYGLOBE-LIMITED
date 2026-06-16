@@ -1818,6 +1818,46 @@ app.post('/api/work-permit/apply', async (req, res) => {
   }
 });
 
+// ── PAYROLL ──────────────────────────────────────────────────────────────────
+app.get('/api/admin/payroll', checkAdmin, async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'payroll', null, { order: 'created_at.desc', limit: 200 });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/payroll', checkAdmin, async (req, res) => {
+  const { name, role, amount, currency, period, notes } = req.body;
+  if (!name || !amount) return res.status(400).json({ error: 'name and amount required' });
+  try {
+    const rows = await dbQuery('POST', 'payroll', {
+      name: name.trim(), role: (role || '').trim(), amount: Number(amount),
+      currency: currency || 'USD', period: (period || '').trim(),
+      notes: (notes || '').trim(), status: 'pending', created_at: new Date().toISOString(),
+    });
+    res.json(Array.isArray(rows) ? rows[0] : rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/payroll/:id', checkAdmin, async (req, res) => {
+  const { id } = req.params;
+  const patch = {};
+  if (req.body.status) patch.status = req.body.status;
+  if (req.body.notes !== undefined) patch.notes = req.body.notes;
+  if (req.body.paid_date !== undefined) patch.paid_date = req.body.paid_date;
+  try {
+    await dbQuery('PATCH', 'payroll', patch, { id: `eq.${id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/payroll/:id', checkAdmin, async (req, res) => {
+  try {
+    await dbQuery('DELETE', 'payroll', null, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
