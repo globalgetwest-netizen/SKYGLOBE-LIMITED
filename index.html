@@ -2684,12 +2684,13 @@ window.addEventListener('load', () => {
   }
   const home = document.getElementById('page-home');
   if (home) { setupCounters(home); }
+  // Read the incoming hash BEFORE replaceState overwrites it
+  const incomingHash = (location.hash || '').replace('#', '').trim();
   try { history.replaceState({ page: 'home' }, '', '#home'); } catch (e) {}
   updateNavArrows();
-  // Honour an incoming hash (e.g. opened as /#tools or /#invoice from the portals)
-  const hash = (location.hash || '').replace('#', '').trim();
-  if (hash && hash !== 'home' && document.getElementById('page-' + hash)) {
-    showPage(hash);
+  // If opened with /#tools or /#invoice etc. (e.g. from the CEO/staff portals), go there
+  if (incomingHash && incomingHash !== 'home' && document.getElementById('page-' + incomingHash)) {
+    showPage(incomingHash);
   }
 });
 
