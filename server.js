@@ -282,6 +282,19 @@ async function refreshStaffCache() {
   } catch (e) { console.error('[staff-cache] refresh failed:', e.message); }
 }
 
+// ── ACTIVITY / AUDIT LOG ────────────────────────────────────────────────────
+// Records every meaningful action so the CEO has one timeline of everything.
+// Fire-and-forget: logging never blocks or breaks the main action.
+async function logActivity(actor, actor_role, action, detail, target) {
+  try {
+    await dbQuery('POST', 'activity_log', {
+      actor: actor || 'system', actor_role: actor_role || 'system',
+      action: action || '', detail: detail || '', target: target || '',
+      created_at: new Date().toISOString(),
+    });
+  } catch (e) { console.error('[activity] log failed:', e.message); }
+}
+
 function getRole(req) {
   const supplied = req.headers['x-admin-key'] || '';
   if (!supplied) return null;
@@ -323,6 +336,7 @@ app.post('/api/admin/login', (req, res) => {
   const fakeReq = { headers: { 'x-admin-key': (req.body && req.body.password) || '' } };
   const who = checkAdmin(fakeReq);
   if (!who) return res.status(401).json({ error: 'Wrong password.' });
+  logActivity(who, 'ceo', 'login', 'Signed in to the CEO portal');
   res.json({ success: true, name: who, role: 'ceo' });
 });
 
@@ -331,6 +345,7 @@ app.post('/api/staff/login', (req, res) => {
   const fakeReq = { headers: { 'x-admin-key': (req.body && req.body.password) || '' } };
   const r = getRole(fakeReq);
   if (!r) return res.status(401).json({ error: 'Wrong password.' });
+  logActivity(r.name, r.role, 'login', `Signed in to the staff portal${r.department ? ' · ' + r.department : ''}`);
   res.json({ success: true, name: r.name, role: r.role, department: r.department || '' });
 });
 
@@ -397,6 +412,7 @@ app.post('/api/admin/update', async (req, res) => {
       } catch (e2) { console.error('Fallback email also failed:', e2.message); }
     }
 
+    logActivity(who, getRole(req)?.role || 'staff', 'application_update', `Set ${ref.toUpperCase()} → ${status}${response ? ' (with message to applicant)' : ''}`, ref.toUpperCase());
     res.json({ success: true, emailed, emailError: emailed ? null : 'Could not email applicant directly — a fallback notification was sent to your admin email. To fix permanently, verify a domain on Resend.' });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -440,6 +456,7 @@ app.post('/api/documents', async (req, res) => {
       viewToken = await createDocToken(doc.id, filePath, safeName, app_?.email || '', cleanRef);
     }
 
+    if (who) logActivity(who, getRole(req)?.role || 'staff', 'document_upload', `Uploaded "${safeName}" to ${cleanRef}`, cleanRef);
     res.json({ success: true, document: doc, url: storagePublicUrl(filePath), viewToken, viewUrl: viewToken ? `${baseUrl(req)}/view/${viewToken}` : null });
   } catch (e) {
     console.error('Document upload failed:', e.message);
@@ -2007,6 +2024,7 @@ app.post('/api/admin/staff', checkAdmin, async (req, res) => {
       status: 'active', created_at: new Date().toISOString(),
     });
     await refreshStaffCache();
+    logActivity(req._who, 'ceo', 'staff_create', `Added staff: ${name.trim()} (${department.trim()})${password ? ' · with login' : ''}`);
     res.json(publicStaff(Array.isArray(rows) ? rows[0] : rows));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2025,6 +2043,9 @@ app.patch('/api/admin/staff/:id', checkAdmin, async (req, res) => {
   try {
     await dbQuery('PATCH', 'staff_members', patch, { id: `eq.${req.params.id}` });
     await refreshStaffCache();
+    const what = req.body.password !== undefined ? (patch.password ? 'Set/reset login password' : 'Removed login access')
+      : patch.status ? `Set status → ${patch.status}` : 'Updated staff details';
+    logActivity(req._who, 'ceo', 'staff_update', `${what}${patch.name ? ' for ' + patch.name : ''} (#${req.params.id})`);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2033,6 +2054,7 @@ app.delete('/api/admin/staff/:id', checkAdmin, async (req, res) => {
   try {
     await dbQuery('DELETE', 'staff_members', null, { id: `eq.${req.params.id}` });
     await refreshStaffCache();
+    logActivity(req._who, 'ceo', 'staff_delete', `Removed staff member #${req.params.id}`);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2070,6 +2092,7 @@ app.post('/api/dept/messages', checkStaffOrAdmin, async (req, res) => {
       department, body: body.trim(), author: author.trim(),
       author_role: author_role || 'staff', created_at: new Date().toISOString(),
     });
+    logActivity(author.trim(), author_role || 'staff', 'channel_message', `Posted in #${department}: "${body.trim().slice(0, 60)}${body.trim().length > 60 ? '…' : ''}"`, department);
     res.json(Array.isArray(rows) ? rows[0] : rows);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2094,6 +2117,7 @@ app.post('/api/admin/tasks', checkAdmin, async (req, res) => {
       status: 'pending', due_date: due_date || null,
       created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     });
+    logActivity(req._who, 'ceo', 'task_create', `Assigned task "${title.trim()}"${assigned_to ? ' → ' + assigned_to : ''}${priority && priority !== 'normal' ? ' [' + priority + ']' : ''}`);
     res.json(Array.isArray(rows) ? rows[0] : rows);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2105,6 +2129,7 @@ app.patch('/api/admin/tasks/:id', checkAdmin, async (req, res) => {
   });
   try {
     await dbQuery('PATCH', 'tasks', patch, { id: `eq.${req.params.id}` });
+    logActivity(req._who, 'ceo', 'task_update', `Updated task #${req.params.id}${patch.status ? ' → ' + patch.status : ''}`);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2112,6 +2137,7 @@ app.patch('/api/admin/tasks/:id', checkAdmin, async (req, res) => {
 app.delete('/api/admin/tasks/:id', checkAdmin, async (req, res) => {
   try {
     await dbQuery('DELETE', 'tasks', null, { id: `eq.${req.params.id}` });
+    logActivity(req._who, 'ceo', 'task_delete', `Deleted task #${req.params.id}`);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2133,7 +2159,18 @@ app.patch('/api/staff/tasks/:id', checkStaffOrAdmin, async (req, res) => {
   if (!status) return res.status(400).json({ error: 'status required' });
   try {
     await dbQuery('PATCH', 'tasks', { status, updated_at: new Date().toISOString() }, { id: `eq.${req.params.id}` });
+    logActivity(req._who, req._role || 'staff', 'task_progress', `Marked task #${req.params.id} → ${status}`);
     res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── ACTIVITY LOG (CEO only) ─────────────────────────────────────────────────
+app.get('/api/admin/activity', checkAdmin, async (req, res) => {
+  try {
+    const q = { order: 'created_at.desc', limit: req.query.limit || 200 };
+    if (req.query.action) q.action = `eq.${req.query.action}`;
+    const rows = await dbQuery('GET', 'activity_log', null, q);
+    res.json(Array.isArray(rows) ? rows : []);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
