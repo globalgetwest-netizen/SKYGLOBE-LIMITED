@@ -330,6 +330,7 @@
         <button class="sb-link" data-view="directory" onclick="switchView('directory')"><span class="ic">👤</span> Staff Directory</button>
         <button class="sb-link" data-view="channels" onclick="switchView('channels')"><span class="ic">💬</span> Dept Channels</button>
         <button class="sb-link" data-view="tasks" onclick="switchView('tasks')"><span class="ic">📋</span> Task Board</button>
+        <button class="sb-link" data-view="attendance" onclick="switchView('attendance')"><span class="ic">🕐</span> Attendance</button>
         <button class="sb-link" data-view="activity" onclick="switchView('activity')"><span class="ic">🛰️</span> Activity Log</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
       </nav>
@@ -788,6 +789,23 @@
           <div class="task-cols" id="taskCols"></div>
         </section>
 
+        <!-- ATTENDANCE & PERFORMANCE -->
+        <section class="view" id="view-attendance">
+          <div class="dept-hero" style="margin-bottom:18px">
+            <div style="font-size:1.6rem">🕐 Attendance &amp; Performance</div>
+            <div class="cd-sub" style="margin-top:6px">Who showed up, when, and how punctually — plus on-time task delivery per staff member. Official start: 8:00 AM.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+            <input type="date" id="attDate" onchange="loadAttendanceAdmin()" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.88rem">
+            <button onclick="document.getElementById('attDate').value='';loadAttendanceAdmin()" class="btn btn-sm btn-ghost">Today</button>
+            <button onclick="loadAttendanceAdmin()" class="btn btn-sm btn-ghost">↻ Refresh</button>
+          </div>
+          <h3 style="font-size:1rem;margin-bottom:10px">📅 Attendance</h3>
+          <div id="attTable" style="margin-bottom:28px"></div>
+          <h3 style="font-size:1rem;margin-bottom:10px">🎯 Performance Scorecards <span style="font-size:0.78rem;color:var(--muted);font-weight:400">· on-time task delivery</span></h3>
+          <div id="perfGrid" class="dir-grid"></div>
+        </section>
+
         <!-- ACTIVITY LOG -->
         <section class="view" id="view-activity">
           <div class="dept-hero" style="margin-bottom:18px">
@@ -891,6 +909,7 @@ function switchView(v){
   if(v==='directory') loadDirectory();
   if(v==='channels'){ loadChanMsgs(ACTIVE_CHAN); startChanPoll(); }
   if(v==='tasks') loadTasks();
+  if(v==='attendance') loadAttendanceAdmin();
   if(v==='activity') loadActivity();
   toggleSidebar(false);
 }
@@ -900,10 +919,83 @@ function toggleSidebar(open){
 }
 
 /* ══════════════════════════════════════════════════════
+   ATTENDANCE & PERFORMANCE (CEO)
+══════════════════════════════════════════════════════ */
+async function loadAttendanceAdmin(){
+  const tbl=document.getElementById('attTable'); if(!tbl)return;
+  const date=document.getElementById('attDate').value;
+  tbl.innerHTML='<div style="color:var(--muted);padding:20px">Loading…</div>';
+  try{
+    const url=API+'/api/admin/attendance'+(date?('?date='+date):'');
+    const r=await fetch(url,{headers:{'x-admin-key':KEY}});
+    const d=r.ok?(await r.json()):{rows:[],today:''};
+    const shownDate=date||d.today;
+    const rows=(d.rows||[]).filter(x=>x.work_date===shownDate);
+    if(!rows.length){tbl.innerHTML=`<div style="color:var(--muted);padding:20px;background:var(--navy2);border:1px solid var(--line);border-radius:12px">No one has clocked in for ${shownDate}.</div>`;}
+    else{
+      tbl.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+rows.map(a=>{
+        const ti=a.clock_in?new Date(a.clock_in).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'—';
+        const to=a.clock_out?new Date(a.clock_out).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'<span style="color:#7cb6f7">still in</span>';
+        const tag=a.late?'<span style="background:#ef6c0022;color:#ffb74d;padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:700">🟡 LATE</span>':'<span style="background:#2e7d3222;color:#86d98a;padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:700">🟢 ON TIME</span>';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 15px;background:var(--navy2);border:1px solid var(--line);border-radius:11px;flex-wrap:wrap">
+          <div style="min-width:140px"><strong>${esc(a.staff_name)}</strong><div style="font-size:0.72rem;color:var(--muted)">${esc(DEPT_LABELS[a.department]||a.department||'—')}</div></div>
+          <span style="color:var(--muted);font-size:0.85rem">In ${ti} · Out ${to}</span>
+          ${tag}
+          <span style="color:var(--gold2);font-weight:700;min-width:40px;text-align:right">${a.hours?a.hours+'h':''}</span>
+        </div>`;
+      }).join('')+'</div>';
+    }
+  }catch(e){tbl.innerHTML='<div style="color:#ef9a9a;padding:20px">Could not load attendance.</div>';}
+  loadPerformance();
+}
+async function loadPerformance(){
+  const grid=document.getElementById('perfGrid'); if(!grid)return;
+  try{
+    const r=await fetch(API+'/api/admin/tasks',{headers:{'x-admin-key':KEY}});
+    const tasks=r.ok?(await r.json()):[];
+    const by={};
+    tasks.forEach(t=>{
+      const who=t.assigned_to||''; if(!who)return;
+      by[who]=by[who]||{name:who,total:0,done:0,onTime:0,late:0,active:0,overdue:0};
+      const s=by[who]; s.total++;
+      const due=t.due_date?new Date(t.due_date+'T23:59:59'):null;
+      if(t.status==='done'){
+        s.done++;
+        const fin=t.updated_at?new Date(t.updated_at):null;
+        if(due&&fin){ (fin<=due)?s.onTime++:s.late++; } else { s.onTime++; }
+      }else if(t.status!=='cancelled'){
+        s.active++;
+        if(due&&new Date()>due)s.overdue++;
+      }
+    });
+    const cards=Object.values(by);
+    if(!cards.length){grid.innerHTML='<div style="color:var(--muted);padding:16px">No tasks assigned yet — assign tasks in the Task Board to start measuring performance.</div>';return;}
+    grid.innerHTML=cards.map(s=>{
+      const rate=s.done?Math.round(s.onTime/s.done*100):0;
+      const col=rate>=80?'#86d98a':rate>=50?'#ffb74d':'#ef9a9a';
+      return `<div class="dir-card">
+        <div class="dc-head"><div class="dc-av">${(s.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+          <div><div class="dc-name">${esc(s.name)}</div><div class="dc-role">${s.done}/${s.total} tasks done</div></div></div>
+        <div style="margin:10px 0"><div style="height:8px;background:var(--navy);border-radius:100px;overflow:hidden"><div style="height:100%;width:${rate}%;background:${col}"></div></div>
+          <div style="font-size:0.74rem;color:var(--muted);margin-top:5px">On-time delivery: <strong style="color:${col}">${rate}%</strong></div></div>
+        <div class="dc-meta">
+          <span>✅ On time: <strong>${s.onTime}</strong></span>
+          <span>🟡 Late: <strong>${s.late}</strong></span>
+          <span>⏳ Active: <strong>${s.active}</strong></span>
+          ${s.overdue?`<span style="color:#ef9a9a">🔴 Overdue: <strong>${s.overdue}</strong></span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){grid.innerHTML='<div style="color:#ef9a9a;padding:16px">Could not load performance.</div>';}
+}
+
+/* ══════════════════════════════════════════════════════
    ACTIVITY LOG (CEO command centre)
 ══════════════════════════════════════════════════════ */
 const ACT_META={
   login:{icon:'🔑',color:'#7cb6f7',label:'Login'},
+  clock_in:{icon:'🟢',color:'#86d98a',label:'Clock in'},
+  clock_out:{icon:'🔴',color:'#ce93d8',label:'Clock out'},
   application_update:{icon:'📋',color:'#ffb74d',label:'Application'},
   document_upload:{icon:'📎',color:'#86d98a',label:'Document'},
   task_create:{icon:'✅',color:'#c9a84c',label:'Task'},
