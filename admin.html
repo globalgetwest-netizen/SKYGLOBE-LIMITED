@@ -330,6 +330,7 @@
         <button class="sb-link" data-view="directory" onclick="switchView('directory')"><span class="ic">👤</span> Staff Directory</button>
         <button class="sb-link" data-view="channels" onclick="switchView('channels')"><span class="ic">💬</span> Dept Channels</button>
         <button class="sb-link" data-view="tasks" onclick="switchView('tasks')"><span class="ic">📋</span> Task Board</button>
+        <button class="sb-link" data-view="activity" onclick="switchView('activity')"><span class="ic">🛰️</span> Activity Log</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
       </nav>
       <div class="sb-foot">
@@ -787,6 +788,30 @@
           <div class="task-cols" id="taskCols"></div>
         </section>
 
+        <!-- ACTIVITY LOG -->
+        <section class="view" id="view-activity">
+          <div class="dept-hero" style="margin-bottom:18px">
+            <div style="font-size:1.6rem">🛰️ Command Centre · Activity Log</div>
+            <div class="cd-sub" style="margin-top:6px">Every login, status change, task, document, and message across all departments — one live timeline, visible only to you.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+            <select id="actFilter" onchange="loadActivity()" style="padding:10px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.88rem">
+              <option value="">All activity</option>
+              <option value="login">🔑 Logins</option>
+              <option value="application_update">📋 Application updates</option>
+              <option value="document_upload">📎 Document uploads</option>
+              <option value="task_create">✅ Tasks created</option>
+              <option value="task_progress">⏳ Task progress</option>
+              <option value="channel_message">💬 Channel messages</option>
+              <option value="staff_create">👤 Staff added</option>
+              <option value="staff_update">✏️ Staff changes</option>
+            </select>
+            <button onclick="loadActivity()" class="btn btn-sm btn-ghost">↻ Refresh</button>
+            <span id="actCount" style="color:var(--muted);font-size:0.82rem"></span>
+          </div>
+          <div id="activityFeed" style="display:flex;flex-direction:column;gap:2px"></div>
+        </section>
+
         <!-- TOOLS -->
         <section class="view" id="view-tools">
           <div class="kpis">
@@ -856,7 +881,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',activity:'Activity Log',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
@@ -866,11 +891,64 @@ function switchView(v){
   if(v==='directory') loadDirectory();
   if(v==='channels'){ loadChanMsgs(ACTIVE_CHAN); startChanPoll(); }
   if(v==='tasks') loadTasks();
+  if(v==='activity') loadActivity();
   toggleSidebar(false);
 }
 function toggleSidebar(open){
   document.getElementById('sidebar').classList.toggle('open',open);
   document.getElementById('sbBackdrop').classList.toggle('show',open);
+}
+
+/* ══════════════════════════════════════════════════════
+   ACTIVITY LOG (CEO command centre)
+══════════════════════════════════════════════════════ */
+const ACT_META={
+  login:{icon:'🔑',color:'#7cb6f7',label:'Login'},
+  application_update:{icon:'📋',color:'#ffb74d',label:'Application'},
+  document_upload:{icon:'📎',color:'#86d98a',label:'Document'},
+  task_create:{icon:'✅',color:'#c9a84c',label:'Task'},
+  task_update:{icon:'✏️',color:'#c9a84c',label:'Task'},
+  task_progress:{icon:'⏳',color:'#ce93d8',label:'Task'},
+  task_delete:{icon:'🗑',color:'#ef9a9a',label:'Task'},
+  channel_message:{icon:'💬',color:'#7cb6f7',label:'Channel'},
+  staff_create:{icon:'👤',color:'#86d98a',label:'Staff'},
+  staff_update:{icon:'✏️',color:'#ffb74d',label:'Staff'},
+  staff_delete:{icon:'🗑',color:'#ef9a9a',label:'Staff'},
+};
+function timeAgo(d){
+  const s=Math.floor((Date.now()-new Date(d).getTime())/1000);
+  if(s<60)return 'just now';
+  if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';
+  if(s<604800)return Math.floor(s/86400)+'d ago';
+  return new Date(d).toLocaleDateString();
+}
+async function loadActivity(){
+  const feed=document.getElementById('activityFeed'); if(!feed)return;
+  const filter=document.getElementById('actFilter').value;
+  feed.innerHTML='<div style="color:var(--muted);text-align:center;padding:40px">Loading activity…</div>';
+  try{
+    const url=API+'/api/admin/activity'+(filter?('?action='+filter):'');
+    const r=await fetch(url,{headers:{'x-admin-key':KEY}});
+    const rows=r.ok?(await r.json()):[];
+    document.getElementById('actCount').textContent=rows.length?`${rows.length} event${rows.length>1?'s':''}`:'';
+    if(!rows.length){feed.innerHTML='<div style="color:var(--muted);text-align:center;padding:40px">No activity recorded yet. Actions will appear here as you and your team work.</div>';return;}
+    let lastDay='';
+    feed.innerHTML=rows.map(a=>{
+      const m=ACT_META[a.action]||{icon:'•',color:'var(--muted)',label:a.action};
+      const day=new Date(a.created_at).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+      let header='';
+      if(day!==lastDay){lastDay=day;header=`<div style="color:var(--muted);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 6px">${day}</div>`;}
+      const roleTag=a.actor_role==='ceo'?'<span style="color:var(--gold);font-weight:700">CEO</span>':esc(a.actor_role||'staff');
+      return header+`<div style="display:flex;gap:12px;align-items:flex-start;padding:11px 14px;background:var(--navy2);border:1px solid var(--line);border-left:3px solid ${m.color};border-radius:10px">
+        <span style="font-size:1.05rem;flex-shrink:0">${m.icon}</span>
+        <div style="min-width:0;flex:1">
+          <div style="font-size:0.88rem;color:var(--txt)">${esc(a.detail||m.label)}</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:3px"><strong style="color:#aab8d8">${esc(a.actor||'system')}</strong> · ${roleTag} · ${timeAgo(a.created_at)}${a.target?' · '+esc(a.target):''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){feed.innerHTML='<div style="color:#ef9a9a;text-align:center;padding:40px">Could not load activity log.</div>';}
 }
 
 /* ── LOAD ── */
