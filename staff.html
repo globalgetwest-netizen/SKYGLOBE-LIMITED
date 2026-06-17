@@ -247,6 +247,7 @@
         <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
         <button class="sb-link" data-view="mychannel" onclick="switchView('mychannel')"><span class="ic">💬</span> My Channel <span class="badge-n" id="navChanBadge"></span></button>
         <button class="sb-link" data-view="mytasks" onclick="switchView('mytasks')"><span class="ic">📋</span> My Tasks <span class="badge-n" id="navTaskBadge"></span></button>
+        <button class="sb-link" data-view="attendance" onclick="switchView('attendance')"><span class="ic">🕐</span> Attendance</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Tools</button>
         <button class="sb-link" data-view="org" onclick="switchView('org')"><span class="ic">🏢</span> Org Structure</button>
       </nav>
@@ -321,6 +322,22 @@
         <section class="view" id="view-mytasks">
           <div class="stat-strip" id="myTaskStats"></div>
           <div id="myTasksList"><div class="skeleton">Loading your tasks…</div></div>
+        </section>
+
+        <!-- ATTENDANCE -->
+        <section class="view" id="view-attendance">
+          <div id="clockCard" style="background:linear-gradient(135deg,var(--navy2),var(--navy3));border:1px solid var(--line);border-radius:18px;padding:30px;text-align:center;margin-bottom:22px">
+            <div style="font-size:2.6rem;font-weight:800;letter-spacing:1px" id="clockTime">--:--</div>
+            <div id="clockDate" style="color:var(--muted);font-size:0.9rem;margin-bottom:6px"></div>
+            <div id="clockStatus" style="font-size:0.92rem;margin:14px 0;color:var(--muted)">Loading…</div>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+              <button class="btn" id="clockInBtn" onclick="doClock('in')" style="min-width:140px">🟢 Clock In</button>
+              <button class="btn btn-ghost" id="clockOutBtn" onclick="doClock('out')" style="min-width:140px">🔴 Clock Out</button>
+            </div>
+            <div id="clockMsg" style="font-size:0.84rem;margin-top:12px;min-height:18px"></div>
+          </div>
+          <h3 style="font-size:1rem;margin-bottom:12px">📅 My Recent Attendance</h3>
+          <div id="attHistory"><div class="skeleton">Loading…</div></div>
         </section>
 
         <!-- ORG STRUCTURE -->
@@ -632,17 +649,80 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={queue:'Work Queue',messages:'Client Messages',team:'Team Chat',mychannel:'My Department Channel',mytasks:'My Tasks',tools:'Tools',org:'Org Structure'};
+  const titles={queue:'Work Queue',messages:'Client Messages',team:'Team Chat',mychannel:'My Department Channel',mytasks:'My Tasks',attendance:'Attendance',tools:'Tools',org:'Org Structure'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
   if(v==='mychannel') loadStaffChannel();
   if(v==='mytasks') loadMyTasks();
+  if(v==='attendance') loadAttendance();
   toggleSidebar(false);
 }
 function toggleSidebar(open){
   document.getElementById('sidebar').classList.toggle('open',open);
   document.getElementById('sbBackdrop').classList.toggle('show',open);
+}
+
+/* ══════════════════════════════════════════════════════
+   ATTENDANCE — staff clock in / out
+══════════════════════════════════════════════════════ */
+let clockTimer=null;
+function tickClock(){
+  const el=document.getElementById('clockTime'); if(!el)return;
+  const now=new Date();
+  el.textContent=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d=document.getElementById('clockDate'); if(d)d.textContent=now.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+async function loadAttendance(){
+  tickClock();
+  if(clockTimer)clearInterval(clockTimer);
+  clockTimer=setInterval(()=>{ if(document.getElementById('view-attendance').classList.contains('active'))tickClock(); else {clearInterval(clockTimer);clockTimer=null;} },1000);
+  const hist=document.getElementById('attHistory');
+  try{
+    const r=await fetch(API+'/api/staff/attendance',{headers:{'x-admin-key':KEY}});
+    const d=r.ok?(await r.json()):{rows:[],today:''};
+    const rows=d.rows||[];
+    const todayRow=rows.find(x=>x.work_date===d.today);
+    const st=document.getElementById('clockStatus');
+    const inBtn=document.getElementById('clockInBtn'),outBtn=document.getElementById('clockOutBtn');
+    if(!todayRow||!todayRow.clock_in){
+      st.innerHTML='⚪ You have not clocked in today.';
+      inBtn.disabled=false; outBtn.disabled=true;
+    }else if(!todayRow.clock_out){
+      const t=new Date(todayRow.clock_in).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      st.innerHTML=`🟢 Clocked in at <strong>${t}</strong> ${todayRow.late?'<span style="color:#ffb74d">· Late</span>':'<span style="color:#86d98a">· On time</span>'}`;
+      inBtn.disabled=true; outBtn.disabled=false;
+    }else{
+      const ti=new Date(todayRow.clock_in).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      const to=new Date(todayRow.clock_out).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      st.innerHTML=`✅ Today complete · In ${ti} → Out ${to} · <strong>${todayRow.hours||0}h</strong>`;
+      inBtn.disabled=true; outBtn.disabled=true;
+    }
+    if(!rows.length){hist.innerHTML='<div class="note">No attendance records yet.</div>';return;}
+    hist.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+rows.map(a=>{
+      const day=new Date(a.work_date+'T00:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+      const ti=a.clock_in?new Date(a.clock_in).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'—';
+      const to=a.clock_out?new Date(a.clock_out).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'—';
+      const tag=a.late?'<span style="color:#ffb74d;font-weight:700">Late</span>':'<span style="color:#86d98a;font-weight:700">On time</span>';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;background:var(--navy2);border:1px solid var(--line);border-radius:10px;font-size:0.85rem;flex-wrap:wrap">
+        <strong style="min-width:90px">${day}</strong>
+        <span style="color:var(--muted)">In ${ti} · Out ${to}</span>
+        <span>${tag}</span>
+        <span style="color:var(--gold2);font-weight:700">${a.hours?a.hours+'h':''}</span>
+      </div>`;
+    }).join('')+'</div>';
+  }catch(e){hist.innerHTML='<div class="note">Could not load attendance.</div>';}
+}
+async function doClock(action){
+  const msg=document.getElementById('clockMsg');
+  msg.style.color='var(--muted)';msg.textContent='Recording…';
+  try{
+    const r=await fetch(API+'/api/staff/clock',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({action})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Failed');
+    msg.style.color='#86d98a';
+    msg.textContent=action==='in'?(d.late?'🟡 Clocked in — marked late.':'🟢 Clocked in — on time!'):`✅ Clocked out — ${d.hours}h worked today.`;
+    await loadAttendance();
+  }catch(e){msg.style.color='#ef9a9a';msg.textContent='Error: '+e.message;}
 }
 
 /* ── LOAD ── */
