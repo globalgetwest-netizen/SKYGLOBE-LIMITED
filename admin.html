@@ -693,8 +693,10 @@
               </div>
               <div><label class="form-lbl">WhatsApp Number</label><input type="text" id="sdWa" placeholder="+1 737 000 0000"></div>
               <div><label class="form-lbl">Email Address</label><input type="text" id="sdEmail" placeholder="amina@skyglobegroup.com"></div>
+              <div><label class="form-lbl">🔑 Login Password</label><input type="text" id="sdPassword" placeholder="Sets their staff portal login"></div>
               <div><label class="form-lbl">Notes</label><input type="text" id="sdNotes" placeholder="Director-level · Part-time…"></div>
             </div>
+            <p style="font-size:0.76rem;color:var(--muted);margin-top:10px;line-height:1.5">🔑 <strong style="color:var(--gold)">Set a login password</strong> to give this person access to the Staff Portal at <strong style="color:var(--txt)">/staff</strong>. Leave it blank for directory-only (no login). They sign in with this password — their tasks &amp; department channel are linked automatically.</p>
             <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
               <button class="btn" onclick="addStaffMember()">➕ Add to Directory</button>
               <div id="sdMsg" style="font-size:0.85rem;color:var(--muted)"></div>
@@ -1248,11 +1250,13 @@ async function loadDirectory(){
       </div>
       <div><span class="dc-dept dept-${esc(s.department||'general')}">${esc(DEPT_LABELS[s.department]||s.department||'General')}</span></div>
       <div class="dc-meta">
+        <span>${s.has_login?'🟢 <span style="color:#86d98a;font-weight:600">Can log in</span>':'⚪ <span style="color:var(--muted)">No login (directory only)</span>'}</span>
         ${s.whatsapp?`<span>📱 <a href="https://wa.me/${s.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:var(--gold2);text-decoration:none">${esc(s.whatsapp)}</a></span>`:''}
         ${s.email?`<span>📧 ${esc(s.email)}</span>`:''}
         ${s.notes?`<span>📝 ${esc(s.notes)}</span>`:''}
       </div>
       <div class="dc-actions">
+        <button class="dc-btn" onclick="setStaffPassword(${s.id},'${esc(s.name)}',${s.has_login})">🔑 ${s.has_login?'Reset':'Set'} Password</button>
         ${inactive?`<button class="dc-btn" onclick="toggleStaffStatus(${s.id},'active')">✅ Activate</button>`:`<button class="dc-btn" onclick="toggleStaffStatus(${s.id},'inactive')">⏸ Deactivate</button>`}
         <button class="dc-btn danger" onclick="deleteStaffMember(${s.id},'${esc(s.name)}')">🗑 Remove</button>
       </div>
@@ -1273,18 +1277,32 @@ async function addStaffMember(){
   const dept=document.getElementById('sdDept').value;
   const wa=document.getElementById('sdWa').value.trim();
   const email=document.getElementById('sdEmail').value.trim();
+  const password=document.getElementById('sdPassword').value.trim();
   const notes=document.getElementById('sdNotes').value.trim();
   const msg=document.getElementById('sdMsg');
   if(!name||!dept){msg.style.color='#ef9a9a';msg.textContent='Name and department are required.';return;}
   msg.style.color='var(--muted)';msg.textContent='Saving…';
   try{
-    const r=await fetch(API+'/api/admin/staff',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({name,role,department:dept,whatsapp:wa,email,notes})});
+    const r=await fetch(API+'/api/admin/staff',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({name,role,department:dept,whatsapp:wa,email,notes,password})});
     const d=await r.json(); if(!r.ok)throw new Error(d.error||'Failed');
-    msg.style.color='#86d98a';msg.textContent='✅ Staff member added!';
-    ['sdName','sdRole','sdWa','sdEmail','sdNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    msg.style.color='#86d98a';msg.textContent=password?'✅ Staff member added with login access!':'✅ Staff member added (directory only).';
+    ['sdName','sdRole','sdWa','sdEmail','sdPassword','sdNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('sdDept').value='';
     await loadDirectory();
   }catch(e){msg.style.color='#ef9a9a';msg.textContent='Error: '+e.message;}
+}
+
+async function setStaffPassword(id,name,hasLogin){
+  const pw=prompt(`${hasLogin?'Reset':'Set'} login password for ${name}.\n\nThey'll use this to sign in at /staff.\nLeave blank and press OK to remove login access.`, '');
+  if(pw===null)return; // cancelled
+  const trimmed=pw.trim();
+  if(trimmed && trimmed.length<4){alert('Password must be at least 4 characters.');return;}
+  try{
+    const r=await fetch(API+'/api/admin/staff/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({password:trimmed})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Failed');
+    alert(trimmed?`✅ ${name} can now log in at /staff with that password.`:`⚪ Login access removed for ${name}.`);
+    await loadDirectory();
+  }catch(e){alert('Error: '+e.message);}
 }
 
 async function toggleStaffStatus(id,status){
