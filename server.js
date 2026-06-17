@@ -267,9 +267,21 @@ app.get('/api/apply', async (req, res) => {
 
 // ── AUTH (role-based) ────────────────────────────────────────────────────────
 // ADMIN_PASSWORDS  → CEO-level access (full portal: analytics, exports, everything)
-// STAFF_PASSWORDS  → Staff-level access (work queue only: applications, messages, docs)
-// Format for both: "Name:password,Name2:password2"  (name optional)
-// Returns { role:'ceo'|'staff', name } or null
+// STAFF_PASSWORDS  → Staff-level access (legacy env-var staff accounts)
+// Staff Directory  → Staff accounts created from the CEO portal (the modern way).
+//                    Cached in memory so getRole stays synchronous & fast.
+// Format for env vars: "Name:password,Name2:password2"  (name optional)
+// Returns { role:'ceo'|'staff', name, department? } or null
+let STAFF_CACHE = [];
+async function refreshStaffCache() {
+  try {
+    const rows = await dbQuery('GET', 'staff_members', null, { status: `eq.active`, limit: 500 });
+    STAFF_CACHE = (Array.isArray(rows) ? rows : [])
+      .filter(s => s.password)
+      .map(s => ({ name: s.name, password: s.password, department: s.department, role: 'staff' }));
+  } catch (e) { console.error('[staff-cache] refresh failed:', e.message); }
+}
+
 function getRole(req) {
   const supplied = req.headers['x-admin-key'] || '';
   if (!supplied) return null;
@@ -277,6 +289,10 @@ function getRole(req) {
   for (const entry of ceoRaw.split(',').map(s => s.trim()).filter(Boolean)) {
     const [a, b] = entry.includes(':') ? entry.split(':') : [null, entry];
     if (supplied === b) return { role: 'ceo', name: a || 'CEO' };
+  }
+  // Staff accounts created from the CEO portal (Staff Directory)
+  for (const s of STAFF_CACHE) {
+    if (supplied === s.password) return { role: 'staff', name: s.name, department: s.department };
   }
   const staffRaw = process.env.STAFF_PASSWORDS || '';
   for (const entry of staffRaw.split(',').map(s => s.trim()).filter(Boolean)) {
@@ -315,7 +331,7 @@ app.post('/api/staff/login', (req, res) => {
   const fakeReq = { headers: { 'x-admin-key': (req.body && req.body.password) || '' } };
   const r = getRole(fakeReq);
   if (!r) return res.status(401).json({ error: 'Wrong password.' });
-  res.json({ success: true, name: r.name, role: r.role });
+  res.json({ success: true, name: r.name, role: r.role, department: r.department || '' });
 });
 
 app.get('/api/admin/applications', async (req, res) => {
@@ -1966,23 +1982,32 @@ app.delete('/api/admin/payroll/:id', checkAdmin, async (req, res) => {
 });
 
 // ── STAFF DIRECTORY ───────────────────────────────────────────────────────────
+// Never expose the raw password; instead report whether the account can log in.
+function publicStaff(s) {
+  const { password, ...rest } = s;
+  return { ...rest, has_login: !!password };
+}
+
 app.get('/api/admin/staff', checkAdmin, async (req, res) => {
   try {
     const rows = await dbQuery('GET', 'staff_members', null, { order: 'created_at.asc', limit: 200 });
-    res.json(Array.isArray(rows) ? rows : []);
+    res.json((Array.isArray(rows) ? rows : []).map(publicStaff));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/admin/staff', checkAdmin, async (req, res) => {
-  const { name, role, department, whatsapp, email, notes } = req.body || {};
+  const { name, role, department, whatsapp, email, notes, password } = req.body || {};
   if (!name || !department) return res.status(400).json({ error: 'Name and department are required.' });
+  if (password && String(password).length < 4) return res.status(400).json({ error: 'Login password must be at least 4 characters.' });
   try {
     const rows = await dbQuery('POST', 'staff_members', {
       name: name.trim(), role: (role || '').trim(), department: department.trim(),
       whatsapp: (whatsapp || '').trim(), email: (email || '').trim(),
-      notes: (notes || '').trim(), status: 'active', created_at: new Date().toISOString(),
+      notes: (notes || '').trim(), password: (password || '').trim() || null,
+      status: 'active', created_at: new Date().toISOString(),
     });
-    res.json(Array.isArray(rows) ? rows[0] : rows);
+    await refreshStaffCache();
+    res.json(publicStaff(Array.isArray(rows) ? rows[0] : rows));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1991,8 +2016,15 @@ app.patch('/api/admin/staff/:id', checkAdmin, async (req, res) => {
   ['name','role','department','whatsapp','email','status','notes'].forEach(k => {
     if (req.body[k] !== undefined) patch[k] = req.body[k];
   });
+  // Password update (set or reset). Empty string clears login access.
+  if (req.body.password !== undefined) {
+    const pw = String(req.body.password).trim();
+    if (pw && pw.length < 4) return res.status(400).json({ error: 'Login password must be at least 4 characters.' });
+    patch.password = pw || null;
+  }
   try {
     await dbQuery('PATCH', 'staff_members', patch, { id: `eq.${req.params.id}` });
+    await refreshStaffCache();
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2000,6 +2032,7 @@ app.patch('/api/admin/staff/:id', checkAdmin, async (req, res) => {
 app.delete('/api/admin/staff/:id', checkAdmin, async (req, res) => {
   try {
     await dbQuery('DELETE', 'staff_members', null, { id: `eq.${req.params.id}` });
+    await refreshStaffCache();
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2107,7 +2140,12 @@ app.patch('/api/staff/tasks/:id', checkStaffOrAdmin, async (req, res) => {
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`SkyGlobe server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`SkyGlobe server running on port ${PORT}`);
+  refreshStaffCache(); // load CEO-portal staff accounts into memory
+});
+// Keep the staff-account cache fresh (in case of direct DB edits)
+setInterval(refreshStaffCache, 5 * 60 * 1000);
 
 // ---- Keep-alive self-ping (prevents Render free-tier cold starts) ----
 // Render sleeps the service after ~15 min with no inbound HTTP traffic.
