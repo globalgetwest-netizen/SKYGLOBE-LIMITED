@@ -1363,6 +1363,7 @@ async function loadDirectory(){
         ${s.notes?`<span>📝 ${esc(s.notes)}</span>`:''}
       </div>
       <div class="dc-actions">
+        <button class="dc-btn" onclick='editStaffMember(${JSON.stringify(s)})'>✏️ Edit</button>
         <button class="dc-btn" onclick="setStaffPassword(${s.id},'${esc(s.name)}',${s.has_login})">🔑 ${s.has_login?'Reset':'Set'} Password</button>
         ${inactive?`<button class="dc-btn" onclick="toggleStaffStatus(${s.id},'active')">✅ Activate</button>`:`<button class="dc-btn" onclick="toggleStaffStatus(${s.id},'inactive')">⏸ Deactivate</button>`}
         <button class="dc-btn danger" onclick="deleteStaffMember(${s.id},'${esc(s.name)}')">🗑 Remove</button>
@@ -1396,6 +1397,50 @@ async function addStaffMember(){
     ['sdName','sdRole','sdWa','sdEmail','sdPassword','sdNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('sdDept').value='';
     await loadDirectory();
+  }catch(e){msg.style.color='#ef9a9a';msg.textContent='Error: '+e.message;}
+}
+
+function editStaffMember(s){
+  const depts=[['immigration','🛂 Immigration & Visa Services'],['operations','⚙️ Operations & Conference'],['finance','💰 Finance & Accounts'],['client_relations','🤝 Client Relations & Support'],['legal','🔐 Legal & Compliance']];
+  document.getElementById('modalContent').innerHTML=`
+    <button class="close-x" onclick="closeModal()">✕</button>
+    <h2 class="gold">✏️ Edit Staff Member</h2>
+    <div class="sub">${esc(s.name)}</div>
+    <div class="box">
+      <label>Full Name</label>
+      <input type="text" id="edName" value="${esc(s.name||'')}" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.9rem;margin-bottom:12px">
+      <label>Role / Title</label>
+      <input type="text" id="edRole" value="${esc(s.role||'')}" placeholder="e.g. Director of Finance & Accounts" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.9rem;margin-bottom:12px">
+      <label>Department</label>
+      <select id="edDept" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.9rem;margin-bottom:12px">
+        ${depts.map(([v,l])=>`<option value="${v}"${s.department===v?' selected':''}>${l}</option>`).join('')}
+      </select>
+      <label>WhatsApp</label>
+      <input type="text" id="edWa" value="${esc(s.whatsapp||'')}" placeholder="+234…" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.9rem;margin-bottom:12px">
+      <label>Email</label>
+      <input type="text" id="edEmail" value="${esc(s.email||'')}" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.9rem;margin-bottom:12px">
+      <button class="btn" onclick="saveStaffEdit(${s.id})">💾 Save Changes</button>
+      <div id="edMsg" style="font-size:0.82rem;margin-top:8px;color:var(--muted)"></div>
+    </div>`;
+  document.getElementById('modal').style.display='block';
+}
+async function saveStaffEdit(id){
+  const patch={
+    name:document.getElementById('edName').value.trim(),
+    role:document.getElementById('edRole').value.trim(),
+    department:document.getElementById('edDept').value,
+    whatsapp:document.getElementById('edWa').value.trim(),
+    email:document.getElementById('edEmail').value.trim(),
+  };
+  const msg=document.getElementById('edMsg');
+  if(!patch.name||!patch.department){msg.style.color='#ef9a9a';msg.textContent='Name and department are required.';return;}
+  msg.style.color='var(--muted)';msg.textContent='Saving…';
+  try{
+    const r=await fetch(API+'/api/admin/staff/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify(patch)});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Failed');
+    msg.style.color='#86d98a';msg.textContent='✅ Saved!';
+    await loadDirectory();
+    setTimeout(closeModal,700);
   }catch(e){msg.style.color='#ef9a9a';msg.textContent='Error: '+e.message;}
 }
 
