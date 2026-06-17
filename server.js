@@ -2277,6 +2277,8 @@ app.delete('/api/admin/brand-assets/:id', checkAdmin, async (req, res) => {
 });
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`SkyGlobe server running on port ${PORT}`);
   refreshStaffCache(); // load CEO-portal staff accounts into memory
