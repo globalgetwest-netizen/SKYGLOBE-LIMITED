@@ -287,15 +287,19 @@ function getRole(req) {
 }
 
 // CEO only — for sensitive CEO-only endpoints/portal
-function checkAdmin(req) {
+function checkAdmin(req, res, next) {
   const r = getRole(req);
-  return r && r.role === 'ceo' ? r.name : null;
+  if (r && r.role === 'ceo') { req._who = r.name; if(next) next(); return r.name; }
+  if (res && !res.headersSent) return res.status(401).json({ error: 'Unauthorized' });
+  return null;
 }
 
 // CEO or Staff — for shared day-to-day work endpoints
-function checkStaffOrAdmin(req) {
+function checkStaffOrAdmin(req, res, next) {
   const r = getRole(req);
-  return r ? r.name : null;
+  if (r) { req._who = r.name; req._role = r.role; if(next) next(); return r.name; }
+  if (res && !res.headersSent) return res.status(401).json({ error: 'Unauthorized' });
+  return null;
 }
 
 // CEO portal login — rejects staff passwords (CEO portal is CEO-only)
