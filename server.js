@@ -2235,6 +2235,47 @@ app.get('/api/admin/attendance', checkAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── BRAND & IP REGISTRY (CEO only) ───────────────────────────────────────────
+app.get('/api/admin/brand-assets', checkAdmin, async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'brand_assets', null, { order: 'created_at.asc', limit: 200 });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/brand-assets', checkAdmin, async (req, res) => {
+  const { name, type, category, owner, linked_to, usage, status, notes, registered_date } = req.body || {};
+  if (!name || !type) return res.status(400).json({ error: 'name and type required' });
+  try {
+    const rows = await dbQuery('POST', 'brand_assets', {
+      name: name.trim(), type: type.trim(), category: (category||'').trim(),
+      owner: (owner||'SKYGLOBE GROUP').trim(), linked_to: (linked_to||'').trim(),
+      usage: (usage||'').trim(), status: (status||'Active/Protected').trim(),
+      notes: (notes||'').trim(), registered_date: registered_date || new Date().toISOString().slice(0,10),
+    });
+    logActivity(req._who, 'ceo', 'brand_asset', `Added IP asset: ${name.trim()}`);
+    res.json(Array.isArray(rows) ? rows[0] : rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/brand-assets/:id', checkAdmin, async (req, res) => {
+  const patch = {};
+  ['name','type','category','owner','linked_to','usage','status','notes','registered_date'].forEach(k => {
+    if (req.body[k] !== undefined) patch[k] = req.body[k];
+  });
+  try {
+    await dbQuery('PATCH', 'brand_assets', patch, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/brand-assets/:id', checkAdmin, async (req, res) => {
+  try {
+    await dbQuery('DELETE', 'brand_assets', null, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.listen(PORT, () => {
   console.log(`SkyGlobe server running on port ${PORT}`);
