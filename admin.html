@@ -332,6 +332,7 @@
         <button class="sb-link" data-view="tasks" onclick="switchView('tasks')"><span class="ic">📋</span> Task Board</button>
         <button class="sb-link" data-view="attendance" onclick="switchView('attendance')"><span class="ic">🕐</span> Attendance</button>
         <button class="sb-link" data-view="activity" onclick="switchView('activity')"><span class="ic">🛰️</span> Activity Log</button>
+        <button class="sb-link" data-view="ipregistry" onclick="switchView('ipregistry')"><span class="ic">🛡️</span> IP Registry</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
       </nav>
       <div class="sb-foot">
@@ -830,6 +831,77 @@
           <div id="activityFeed" style="display:flex;flex-direction:column;gap:2px"></div>
         </section>
 
+        <!-- IP REGISTRY -->
+        <section class="view" id="view-ipregistry">
+          <div class="dept-hero" style="margin-bottom:18px">
+            <div style="font-size:1.6rem">🛡️ Brand &amp; IP Registry</div>
+            <div class="cd-sub" style="margin-top:6px">Official internal register of all SkyGlobe Group intellectual property, brand assets, and system layers. CEO-controlled and dated.</div>
+          </div>
+
+          <!-- OWNERSHIP DECLARATION -->
+          <div style="background:linear-gradient(135deg,#0a1628,#111f38);border:2px solid var(--gold);border-radius:16px;padding:24px 28px;margin-bottom:24px">
+            <div style="color:var(--gold);font-size:0.7rem;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px">⚖️ Ownership Declaration — Governance Rule</div>
+            <div style="color:var(--txt);font-size:0.92rem;line-height:1.7">All brand assets, marks, systems and modules (including S, CORE, APP and any future derivatives) are exclusively owned and controlled by <strong style="color:var(--gold)">SKYGLOBE GROUP</strong> under the master domain <strong style="color:var(--gold)">SKYGLOBEGROUP.COM</strong>. No asset may be independently reassigned, sublicensed, or transferred without written CEO authorisation.</div>
+            <div style="margin-top:14px;display:flex;gap:28px;flex-wrap:wrap;font-size:0.8rem;color:var(--muted)">
+              <span>👑 <strong style="color:var(--txt)">SKYGLOBE GROUP</strong> = Master Owner</span>
+              <span>🔷 <strong style="color:var(--txt)">S</strong> = Identity Layer / Symbol of Ownership</span>
+              <span>⚙️ <strong style="color:var(--txt)">CORE</strong> = Operating Engine</span>
+              <span>🌐 <strong style="color:var(--txt)">APP</strong> = Platform Layer</span>
+            </div>
+          </div>
+
+          <!-- SYSTEM ARCHITECTURE -->
+          <div style="background:var(--navy2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin-bottom:24px">
+            <div style="color:var(--gold);font-size:0.7rem;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px">🏗️ Domain Architecture</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;gap:14px;align-items:center;padding:10px 14px;background:var(--navy3);border:1px solid var(--line);border-radius:9px;flex-wrap:wrap">
+                <code style="color:var(--gold);font-size:0.85rem;font-weight:700;min-width:260px">skyglobegroup.com</code>
+                <span style="color:var(--muted);font-size:0.82rem">Master Domain · Public-facing website · Brand root</span>
+              </div>
+              <div style="display:flex;gap:14px;align-items:center;padding:10px 14px;background:var(--navy3);border:1px solid var(--line);border-radius:9px;flex-wrap:wrap">
+                <code style="color:var(--gold);font-size:0.85rem;font-weight:700;min-width:260px">app.skyglobegroup.com</code>
+                <span style="color:var(--muted);font-size:0.82rem">Platform Layer · CEO &amp; Staff portals · Client portal</span>
+              </div>
+              <div style="display:flex;gap:14px;align-items:center;padding:10px 14px;background:var(--navy3);border:1px solid var(--line);border-radius:9px;flex-wrap:wrap">
+                <code style="color:var(--gold);font-size:0.85rem;font-weight:700;min-width:260px">core.skyglobegroup.com</code>
+                <span style="color:var(--muted);font-size:0.82rem">Engine Layer · Backend API · AI &amp; data processing</span>
+              </div>
+              <div style="display:flex;gap:14px;align-items:center;padding:10px 14px;background:var(--navy3);border:1px solid var(--line);border-radius:9px;flex-wrap:wrap">
+                <code style="color:var(--gold);font-size:0.85rem;font-weight:700;min-width:260px">s.skyglobegroup.com</code>
+                <span style="color:var(--muted);font-size:0.82rem">Identity Layer · Brand mark · Signature icon &amp; visual identity</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTIONS -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+            <button class="btn" onclick="exportIPPDF()">📄 Export Registry (PDF)</button>
+            <button class="btn btn-ghost" onclick="showAddAsset()">➕ Add Asset</button>
+            <button class="btn btn-ghost" onclick="loadIPRegistry()">↻ Refresh</button>
+          </div>
+
+          <!-- ADD FORM (hidden by default) -->
+          <div id="addAssetForm" style="display:none;background:var(--navy2);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:20px">
+            <h3 style="font-size:0.95rem;margin-bottom:14px;color:var(--gold)">➕ Register New Asset</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div><label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:5px">Asset Name *</label><input id="ipName" type="text" placeholder="e.g. SKYGLOBE AWARDS" style="width:100%;padding:10px 13px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem"></div>
+              <div><label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:5px">Type *</label><select id="ipType" style="width:100%;padding:10px 13px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem"><option>Parent Brand</option><option>Signature Mark</option><option>Infrastructure Layer</option><option>Platform Layer</option><option>Sub-brand</option><option>Product</option><option>Domain</option><option>Trademark</option></select></div>
+              <div><label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:5px">Category</label><input id="ipCat" type="text" placeholder="e.g. Visual Identity" style="width:100%;padding:10px 13px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem"></div>
+              <div><label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:5px">Linked To</label><input id="ipLinked" type="text" placeholder="e.g. SKYGLOBE GROUP" style="width:100%;padding:10px 13px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem"></div>
+              <div style="grid-column:1/-1"><label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:5px">Usage</label><input id="ipUsage" type="text" placeholder="e.g. App icon, favicon, system mark" style="width:100%;padding:10px 13px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem"></div>
+              <div style="grid-column:1/-1"><label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:5px">Notes</label><input id="ipNotes" type="text" placeholder="Additional notes" style="width:100%;padding:10px 13px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem"></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
+              <button class="btn" onclick="addIPAsset()">💾 Register Asset</button>
+              <button class="btn btn-ghost" onclick="document.getElementById('addAssetForm').style.display='none'">Cancel</button>
+              <span id="ipMsg" style="font-size:0.82rem;color:var(--muted)"></span>
+            </div>
+          </div>
+
+          <!-- ASSET TABLE -->
+          <div id="ipTable"></div>
+        </section>
+
         <!-- TOOLS -->
         <section class="view" id="view-tools">
           <div class="kpis">
@@ -899,7 +971,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',activity:'Activity Log',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',ipregistry:'Brand & IP Registry',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
@@ -911,6 +983,7 @@ function switchView(v){
   if(v==='tasks') loadTasks();
   if(v==='attendance') loadAttendanceAdmin();
   if(v==='activity') loadActivity();
+  if(v==='ipregistry') loadIPRegistry();
   toggleSidebar(false);
 }
 function toggleSidebar(open){
@@ -2002,6 +2075,104 @@ function exportPayrollCSV(){
   const blob=new Blob([head+'\n'+body],{type:'text/csv'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download='skyglobe_payroll_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+}
+
+/* ══════════════════════════════════════════════════════
+   BRAND & IP REGISTRY
+══════════════════════════════════════════════════════ */
+const IP_TYPE_COLORS={'Parent Brand':'#c9a84c','Signature Mark':'#7cb6f7','Infrastructure Layer':'#86d98a','Platform Layer':'#ce93d8','Sub-brand':'#ffb74d','Product':'#f48fb1','Domain':'#80deea','Trademark':'#ef9a9a'};
+let IP_ASSETS=[];
+const SEED_ASSETS=[
+  {name:'SKYGLOBE GROUP',type:'Parent Brand',category:'Corporate Identity',owner:'SKYGLOBE GROUP',linked_to:'',usage:'Master brand — all services, communications, and legal entity',status:'Active/Protected',registered_date:new Date().toISOString().slice(0,10)},
+  {name:'S',type:'Signature Mark',category:'Visual Identity',owner:'SKYGLOBE GROUP',linked_to:'SKYGLOBE GROUP',usage:'App icon, favicon, system mark, signature identity across all platforms — s.skyglobegroup.com',status:'Active/Protected',registered_date:new Date().toISOString().slice(0,10)},
+  {name:'CORE',type:'Infrastructure Layer',category:'Technology System',owner:'SKYGLOBE GROUP',linked_to:'SKYGLOBE GROUP',usage:'AI engine, backend processing, platform operating system — core.skyglobegroup.com',status:'Active/Protected',registered_date:new Date().toISOString().slice(0,10)},
+  {name:'APP',type:'Platform Layer',category:'Technology System',owner:'SKYGLOBE GROUP',linked_to:'SKYGLOBE GROUP',usage:'CEO portal, staff portal, client portal — app.skyglobegroup.com',status:'Active/Protected',registered_date:new Date().toISOString().slice(0,10)},
+];
+async function loadIPRegistry(){
+  const tbl=document.getElementById('ipTable'); if(!tbl)return;
+  tbl.innerHTML='<div style="color:var(--muted);padding:16px">Loading registry…</div>';
+  try{
+    const r=await fetch(API+'/api/admin/brand-assets',{headers:{'x-admin-key':KEY}});
+    IP_ASSETS=r.ok?(await r.json()):[];
+    if(!Array.isArray(IP_ASSETS))IP_ASSETS=[];
+    if(!IP_ASSETS.length){
+      for(const a of SEED_ASSETS){
+        await fetch(API+'/api/admin/brand-assets',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify(a)});
+      }
+      const r2=await fetch(API+'/api/admin/brand-assets',{headers:{'x-admin-key':KEY}});
+      IP_ASSETS=r2.ok?(await r2.json()):[];
+    }
+  }catch{IP_ASSETS=[];}
+  renderIPTable();
+}
+function renderIPTable(){
+  const tbl=document.getElementById('ipTable'); if(!tbl)return;
+  if(!IP_ASSETS.length){tbl.innerHTML='<div style="color:var(--muted);padding:16px">No assets registered yet.</div>';return;}
+  tbl.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+IP_ASSETS.map(a=>{
+    const col=IP_TYPE_COLORS[a.type]||'var(--muted)';
+    return `<div style="background:var(--navy2);border:1px solid var(--line);border-left:4px solid ${col};border-radius:12px;padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--txt);letter-spacing:0.04em">${esc(a.name)}</div>
+          <div style="margin-top:5px;display:flex;gap:8px;flex-wrap:wrap">
+            <span style="background:${col}22;color:${col};padding:3px 10px;border-radius:100px;font-size:0.7rem;font-weight:700">${esc(a.type)}</span>
+            ${a.category?`<span style="background:var(--navy3);color:var(--muted);padding:3px 10px;border-radius:100px;font-size:0.7rem">${esc(a.category)}</span>`:''}
+            <span style="background:#2e7d3222;color:#86d98a;padding:3px 10px;border-radius:100px;font-size:0.7rem;font-weight:700">${esc(a.status||'Active/Protected')}</span>
+          </div>
+        </div>
+        <div style="text-align:right;font-size:0.72rem;color:var(--muted)">
+          <div>Owner: <strong style="color:var(--gold)">${esc(a.owner||'SKYGLOBE GROUP')}</strong></div>
+          ${a.linked_to?`<div>Linked to: ${esc(a.linked_to)}</div>`:''}
+          <div>Registered: ${esc(a.registered_date||'')}</div>
+        </div>
+      </div>
+      ${a.usage?`<div style="margin-top:10px;font-size:0.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:8px">📌 ${esc(a.usage)}</div>`:''}
+      ${a.notes?`<div style="font-size:0.78rem;color:var(--muted2);margin-top:6px">📝 ${esc(a.notes)}</div>`:''}
+      <div style="margin-top:10px"><button onclick="deleteIPAsset(${a.id},'${esc(a.name)}')" style="background:none;border:1px solid var(--line);color:#ef9a9a;border-radius:6px;padding:4px 12px;font-size:0.72rem;cursor:pointer">🗑 Remove</button></div>
+    </div>`;
+  }).join('')+'</div>';
+}
+function showAddAsset(){ document.getElementById('addAssetForm').style.display='block'; }
+async function addIPAsset(){
+  const msg=document.getElementById('ipMsg');
+  const name=document.getElementById('ipName').value.trim();
+  const type=document.getElementById('ipType').value;
+  if(!name){msg.style.color='#ef9a9a';msg.textContent='Name is required.';return;}
+  msg.style.color='var(--muted)';msg.textContent='Saving…';
+  try{
+    const r=await fetch(API+'/api/admin/brand-assets',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({name,type,category:document.getElementById('ipCat').value.trim(),linked_to:document.getElementById('ipLinked').value.trim(),usage:document.getElementById('ipUsage').value.trim(),notes:document.getElementById('ipNotes').value.trim()})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Failed');
+    msg.style.color='#86d98a';msg.textContent='✅ Asset registered.';
+    ['ipName','ipCat','ipLinked','ipUsage','ipNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('addAssetForm').style.display='none';
+    await loadIPRegistry();
+  }catch(e){msg.style.color='#ef9a9a';msg.textContent='Error: '+e.message;}
+}
+async function deleteIPAsset(id,name){
+  if(!confirm(`Remove "${name}" from the IP Registry?`))return;
+  try{ await fetch(API+'/api/admin/brand-assets/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}}); await loadIPRegistry(); }catch(e){alert('Error: '+e.message);}
+}
+function exportIPPDF(){
+  const win=window.open('','_blank');
+  const today=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+  const rows=IP_ASSETS.map(a=>`<tr>
+    <td style="padding:10px 12px;border-bottom:1px solid #e0e0e0;font-weight:700">${a.name}</td>
+    <td style="padding:10px 12px;border-bottom:1px solid #e0e0e0">${a.type}</td>
+    <td style="padding:10px 12px;border-bottom:1px solid #e0e0e0">${a.category||'—'}</td>
+    <td style="padding:10px 12px;border-bottom:1px solid #e0e0e0">${a.owner||'SKYGLOBE GROUP'}</td>
+    <td style="padding:10px 12px;border-bottom:1px solid #e0e0e0">${a.status||'Active/Protected'}</td>
+    <td style="padding:10px 12px;border-bottom:1px solid #e0e0e0">${a.registered_date||'—'}</td>
+  </tr>${a.usage?`<tr><td colspan="6" style="padding:2px 12px 10px;border-bottom:1px solid #e0e0e0;font-size:0.8rem;color:#555">📌 ${a.usage}</td></tr>`:''}`).join('');
+  win.document.write(`<!DOCTYPE html><html><head><title>SkyGlobe Group — IP Registry</title>
+  <style>body{font-family:Georgia,serif;max-width:900px;margin:0 auto;padding:40px;color:#111}h1{color:#c9a84c;font-size:1.7rem;margin-bottom:2px}.sub{color:#555;font-size:0.88rem;margin-bottom:20px}.decl{background:#fdf8ee;border-left:4px solid #c9a84c;padding:14px 18px;border-radius:4px;font-size:0.88rem;line-height:1.7;margin-bottom:28px}table{width:100%;border-collapse:collapse;font-size:0.88rem}th{background:#0a1628;color:#c9a84c;padding:10px 12px;text-align:left;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.08em}.footer{margin-top:36px;font-size:0.76rem;color:#888;border-top:1px solid #ddd;padding-top:14px}@media print{.noprint{display:none}}</style></head><body>
+  <h1>SKYGLOBE GROUP</h1>
+  <div class="sub">Brand &amp; Intellectual Property Registry &nbsp;·&nbsp; Generated ${today} &nbsp;·&nbsp; CONFIDENTIAL</div>
+  <div class="decl"><strong>Ownership Declaration:</strong> All brand assets, marks, systems and modules (including S, CORE, APP and any future derivatives) are exclusively owned and controlled by <strong>SKYGLOBE GROUP</strong> under the master domain <strong>SKYGLOBEGROUP.COM</strong>. No asset may be independently reassigned, sublicensed, or transferred without written CEO authorisation.</div>
+  <table><thead><tr><th>Asset Name</th><th>Type</th><th>Category</th><th>Owner</th><th>Status</th><th>Date Registered</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="footer">This document is an internal brand asset register of SKYGLOBE GROUP. It does not constitute a filed trademark or legal certificate of IP ownership. For full legal protection, submit to your national IP / trademark office with the support of a qualified trademark attorney. Document reference: SGG-IPR-${new Date().getFullYear()}.</div>
+  <br><button class="noprint" onclick="window.print()" style="background:#c9a84c;color:#fff;border:none;padding:11px 26px;border-radius:7px;font-size:0.95rem;cursor:pointer">🖨️ Print / Save as PDF</button>
+  </body></html>`);
+  win.document.close();
 }
 </script>
 </body>
