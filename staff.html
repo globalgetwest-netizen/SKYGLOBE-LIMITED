@@ -609,6 +609,7 @@ async function doLogin(){
     KEY=pw; sessionStorage.setItem('skystaff_key',pw);
     sessionStorage.setItem('skystaff_name',d.name||'Staff');
     sessionStorage.setItem('skystaff_role',d.role||'staff');
+    sessionStorage.setItem('skystaff_dept',d.department||'');
     showApp();
   }catch(e){errEl.textContent='Network error — try again.';btn.disabled=false;btn.textContent='Sign In';}
 }
@@ -933,6 +934,10 @@ const CHAN_META_S = {
 
 async function resolveStaffDept(){
   if(STAFF_DEPT) return STAFF_DEPT;
+  // Department comes directly from the login response (unified accounts)
+  const fromLogin = sessionStorage.getItem('skystaff_dept')||'';
+  if(fromLogin){ STAFF_DEPT=fromLogin; return STAFF_DEPT; }
+  // Fallback: look up by name (legacy env-var staff accounts)
   const name = sessionStorage.getItem('skystaff_name')||'';
   if(!name) return 'general';
   try{
