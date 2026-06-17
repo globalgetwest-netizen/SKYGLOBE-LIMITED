@@ -308,6 +308,7 @@
               <h3 id="staffChanTitle">Department Channel</h3>
               <span class="ch-sub" id="staffChanSub">Your department · staff &amp; director</span>
             </div>
+            <div id="staffChanTabs" style="display:flex;gap:8px;padding:0 0 12px;flex-wrap:wrap"></div>
             <div class="chan-msgs" id="staffChanMsgs"><div style="color:var(--muted);text-align:center;padding:40px">Loading your channel…</div></div>
             <div class="chan-input">
               <input type="text" id="staffChanInput" placeholder="Message your department…" onkeydown="if(event.key==='Enter')sendStaffChanMsg()">
@@ -976,19 +977,45 @@ async function resolveStaffDept(){
   return STAFF_DEPT;
 }
 
+let STAFF_ACTIVE_CHAN='general';
 async function loadStaffChannel(){
   const dept = await resolveStaffDept();
-  const meta = CHAN_META_S[dept]||{icon:'💬',label:'Department Channel',sub:''};
+  // Channels this staff member can see: always General + their own department
+  const myChans = (dept && dept!=='general') ? ['general',dept] : ['general'];
+  // Default to the staff member's own department (so they land where CEO messages them)
+  if(!myChans.includes(STAFF_ACTIVE_CHAN)) STAFF_ACTIVE_CHAN = (dept && dept!=='general') ? dept : 'general';
+  renderStaffChanTabs(myChans);
+  applyStaffChanHead(STAFF_ACTIVE_CHAN);
+  await fetchStaffChanMsgs(STAFF_ACTIVE_CHAN);
+  if(staffChanTimer)clearInterval(staffChanTimer);
+  staffChanTimer=setInterval(async()=>{
+    if(!document.getElementById('view-mychannel').classList.contains('active')){clearInterval(staffChanTimer);staffChanTimer=null;return;}
+    await fetchStaffChanMsgs(STAFF_ACTIVE_CHAN);
+  },12000);
+}
+function renderStaffChanTabs(chans){
+  const el=document.getElementById('staffChanTabs'); if(!el)return;
+  if(chans.length<=1){ el.innerHTML=''; return; }
+  el.innerHTML=chans.map(c=>{
+    const m=CHAN_META_S[c]||{icon:'💬',label:c};
+    const active=c===STAFF_ACTIVE_CHAN;
+    return `<button onclick="switchStaffChannel('${c}')" style="background:${active?'var(--gold-soft)':'none'};border:1px solid ${active?'var(--gold)':'var(--line)'};color:${active?'var(--gold)':'var(--muted)'};border-radius:100px;padding:6px 16px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit">${m.icon} ${esc(m.label.replace(' Channel',''))}</button>`;
+  }).join('');
+}
+function applyStaffChanHead(chan){
+  const meta = CHAN_META_S[chan]||{icon:'💬',label:'Department Channel',sub:''};
   document.getElementById('staffChanIcon').textContent=meta.icon;
   document.getElementById('staffChanTitle').textContent=meta.label;
   document.getElementById('staffChanSub').textContent=meta.sub;
   document.getElementById('staffChanInput').placeholder=`Message ${meta.label}…`;
-  await fetchStaffChanMsgs(dept);
-  if(staffChanTimer)clearInterval(staffChanTimer);
-  staffChanTimer=setInterval(async()=>{
-    if(!document.getElementById('view-mychannel').classList.contains('active')){clearInterval(staffChanTimer);staffChanTimer=null;return;}
-    await fetchStaffChanMsgs(dept);
-  },12000);
+}
+async function switchStaffChannel(chan){
+  STAFF_ACTIVE_CHAN=chan;
+  const dept = await resolveStaffDept();
+  const myChans = (dept && dept!=='general') ? ['general',dept] : ['general'];
+  renderStaffChanTabs(myChans);
+  applyStaffChanHead(chan);
+  await fetchStaffChanMsgs(chan);
 }
 
 async function fetchStaffChanMsgs(dept){
@@ -1013,7 +1040,7 @@ async function fetchStaffChanMsgs(dept){
 async function sendStaffChanMsg(){
   const input=document.getElementById('staffChanInput');
   const body=input.value.trim(); if(!body)return;
-  const dept=await resolveStaffDept();
+  const dept=STAFF_ACTIVE_CHAN||await resolveStaffDept();
   const me=sessionStorage.getItem('skystaff_name')||'Staff';
   input.value='';
   try{
