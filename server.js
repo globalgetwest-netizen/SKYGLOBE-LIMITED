@@ -2174,9 +2174,68 @@ app.get('/api/admin/activity', checkAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+// ── ATTENDANCE / PUNCTUALITY ────────────────────────────────────────────────
+// Staff clock in/out themselves. Lateness is judged against an 8:00 AM start
+// in the company's local timezone (WORK_TZ_OFFSET hours from UTC, default +1).
+const WORK_TZ_OFFSET = Number(process.env.WORK_TZ_OFFSET || 1); // West Africa = +1
+const WORK_START_MIN = Number(process.env.WORK_START_MIN || 8 * 60); // 08:00
+function localParts() {
+  const d = new Date(Date.now() + WORK_TZ_OFFSET * 3600 * 1000);
+  return { date: d.toISOString().slice(0, 10), mins: d.getUTCHours() * 60 + d.getUTCMinutes() };
+}
 
-const PORT = process.env.PORT || 3000;
+app.post('/api/staff/clock', checkStaffOrAdmin, async (req, res) => {
+  const r = getRole(req);
+  if (!r) return res.status(401).json({ error: 'Unauthorized' });
+  const action = (req.body && req.body.action) || '';
+  const { date, mins } = localParts();
+  try {
+    const existing = await dbQuery('GET', 'attendance', null, { staff_name: `eq.${r.name}`, work_date: `eq.${date}`, limit: 1 });
+    const row = Array.isArray(existing) ? existing[0] : null;
+    if (action === 'in') {
+      if (row && row.clock_in) return res.status(400).json({ error: 'Already clocked in today.' });
+      const late = mins > WORK_START_MIN;
+      const nowIso = new Date().toISOString();
+      if (row) await dbQuery('PATCH', 'attendance', { clock_in: nowIso, late }, { id: `eq.${row.id}` });
+      else await dbQuery('POST', 'attendance', { staff_name: r.name, department: r.department || '', work_date: date, clock_in: nowIso, late });
+      logActivity(r.name, r.role, 'clock_in', `Clocked in${late ? ' (late)' : ' on time'}`, r.department || '');
+      return res.json({ success: true, clocked: 'in', late });
+    }
+    if (action === 'out') {
+      if (!row || !row.clock_in) return res.status(400).json({ error: 'You must clock in first.' });
+      if (row.clock_out) return res.status(400).json({ error: 'Already clocked out today.' });
+      const nowIso = new Date().toISOString();
+      const hours = Math.round((new Date(nowIso) - new Date(row.clock_in)) / 36000) / 100; // 2dp
+      await dbQuery('PATCH', 'attendance', { clock_out: nowIso, hours }, { id: `eq.${row.id}` });
+      logActivity(r.name, r.role, 'clock_out', `Clocked out · ${hours}h worked`, r.department || '');
+      return res.json({ success: true, clocked: 'out', hours });
+    }
+    res.status(400).json({ error: 'action must be "in" or "out"' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Staff: own attendance (today + recent history)
+app.get('/api/staff/attendance', checkStaffOrAdmin, async (req, res) => {
+  const r = getRole(req);
+  if (!r) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'attendance', null, { staff_name: `eq.${r.name}`, order: 'work_date.desc', limit: 30 });
+    res.json({ today: localParts().date, rows: Array.isArray(rows) ? rows : [] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// CEO: all attendance (optionally filter by date or department)
+app.get('/api/admin/attendance', checkAdmin, async (req, res) => {
+  try {
+    const q = { order: 'clock_in.desc', limit: req.query.limit || 300 };
+    if (req.query.date) q.work_date = `eq.${req.query.date}`;
+    if (req.query.dept) q.department = `eq.${req.query.dept}`;
+    const rows = await dbQuery('GET', 'attendance', null, q);
+    res.json({ today: localParts().date, rows: Array.isArray(rows) ? rows : [] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.listen(PORT, () => {
   console.log(`SkyGlobe server running on port ${PORT}`);
   refreshStaffCache(); // load CEO-portal staff accounts into memory
