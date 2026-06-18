@@ -1684,8 +1684,7 @@ Generate a comprehensive personalised interview preparation guide. Respond with 
           generationConfig: {
             maxOutputTokens: 4096,
             temperature: 0.7,
-            responseMimeType: 'application/json',
-            thinkingConfig: { thinkingBudget: 0 }
+            responseMimeType: 'application/json'
           }
         }),
         signal: ctrl.signal }
@@ -2790,85 +2789,102 @@ async function getAcademyRoster() {
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
 async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
-  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash-latest'];
   let lastError = null;
   for (const model of models) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: systemPrompt }] },
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 4096, temperature: 0.7, thinkingConfig: { thinkingBudget: 0 } }
-          }),
-          signal: AbortSignal.timeout(30000)
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) return text;
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemPrompt }] },
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: { maxOutputTokens: 4096, temperature: 0.7 }
+            }),
+            signal: AbortSignal.timeout(35000)
+          }
+        );
+        const data = await res.json();
+        if (!res.ok) {
+          lastError = data?.error?.message || `${model} returned ${res.status}`;
+          if (res.status === 429 || res.status === 503 || res.status === 500) {
+            if (attempt < maxRetries) { await new Promise(r => setTimeout(r, 1200 * (attempt + 1))); continue; }
+          }
+          break; // try next model
         }
-        const status = res.status;
-        if (status === 429 || status === 503 || status === 500) {
-          lastError = `Model ${model} returned ${status}`;
-          if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
-          continue; // retry same model
-        }
-        // Non-retryable error on this model, try next model
-        lastError = `Model ${model} returned ${status}`;
-        break;
+        const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
+        if (text) return text;
+        lastError = `${model} returned empty content`;
+        break; // try next model
       } catch (e) {
         lastError = e.message;
-        if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1200 * (attempt + 1)));
       }
     }
   }
-  throw new Error('AI temporarily unavailable. Please try again in a moment.');
+  throw new Error('SKYGLOBE CORE is temporarily unavailable. Please try again in a moment.');
 }
 
 // Free Gemini call with model fallback chain (reused by the AI teachers).
 // Supports multi-turn `contents`; retries transient errors (429/500/503) per model.
-async function academyAskGemini(systemPrompt, contents, maxTokens = 1024) {
+async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
-  const models = [process.env.GEMINI_MODEL || 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
-  const body = JSON.stringify({
-    systemInstruction: { parts: [{ text: systemPrompt }] },
-    contents,
-    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.6, thinkingConfig: { thinkingBudget: 0 } },
-    safetySettings: [
-      { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_LOW_AND_ABOVE' },
-      { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_LOW_AND_ABOVE' },
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_LOW_AND_ABOVE' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_LOW_AND_ABOVE' },
-    ],
-  });
-  let data, ok, lastError = null;
-  const maxRetries = 2;
-  outer:
+  // gemini-2.0-flash is primary: no thinking overhead, fast, reliable for education
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash-latest'];
+  // BLOCK_ONLY_HIGH lets all educational content through (history, science, body,
+  // shapes, maths problems) while still blocking genuinely harmful material.
+  const safetySettings = [
+    { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_ONLY_HIGH' },
+    { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_ONLY_HIGH' },
+    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+  ];
+  let lastError = null;
   for (const model of models) {
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const body = JSON.stringify({
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents,
+      generationConfig: { maxOutputTokens: maxTokens, temperature: 0.6 },
+      safetySettings,
+    });
+    for (let attempt = 0; attempt <= 2; attempt++) {
       try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
-          { method: 'POST', headers: { 'content-type': 'application/json' }, body, signal: AbortSignal.timeout(30000) });
-        data = await r.json(); ok = r.ok;
-        if (r.ok) break outer;
-        lastError = data?.error?.message || `Model ${model} returned ${r.status}`;
-        if (r.status === 429 || r.status === 503 || r.status === 500) {
-          if (attempt < maxRetries) { await new Promise(rs => setTimeout(rs, 1000 * (attempt + 1))); continue; }
-          break; // exhausted retries, try next model
+        const r = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+          { method: 'POST', headers: { 'content-type': 'application/json' }, body, signal: AbortSignal.timeout(35000) }
+        );
+        const data = await r.json();
+        if (!r.ok) {
+          lastError = data?.error?.message || `${model} returned ${r.status}`;
+          if (r.status === 429 || r.status === 503 || r.status === 500) {
+            if (attempt < 2) { await new Promise(rs => setTimeout(rs, 1200 * (attempt + 1))); continue; }
+          }
+          break; // try next model
         }
-        break; // non-retryable, try next model
+        // Extract text — collect ALL parts (model may return multiple)
+        const candidate = data.candidates?.[0];
+        const finishReason = candidate?.finishReason;
+        if (finishReason === 'SAFETY') {
+          // Safety block — try next model with same contents
+          lastError = 'Safety block on ' + model;
+          break;
+        }
+        const text = (candidate?.content?.parts || []).map(p => p.text || '').join('').trim();
+        if (text) return text;
+        // Empty text but no error — try next model
+        lastError = `${model} returned empty content (finishReason: ${finishReason})`;
+        break;
       } catch (e) {
         lastError = e.message;
-        if (attempt < maxRetries) await new Promise(rs => setTimeout(rs, 1000 * (attempt + 1)));
+        if (attempt < 2) await new Promise(rs => setTimeout(rs, 1200 * (attempt + 1)));
       }
     }
   }
-  if (!ok) throw new Error(lastError || 'AI teacher is busy. Please try again.');
-  return data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+  throw new Error(lastError || 'AI teacher is busy. Please try again in a moment.');
 }
 
 // Parent auth — reuses the signed-token system
@@ -3021,7 +3037,17 @@ SAFETY RULES (very important — children use this):
 - If the child seems upset or mentions something worrying, gently encourage them to talk to their parent or teacher.
 - Use simple, clear language with no slang.
 
-FORMAT: Plain, friendly text. You may use simple emoji occasionally to be warm. Keep it short and spoken-friendly (it may be read aloud by voice).`
+VISUAL TEACHING (very important — use this when it helps):
+When a student asks to SEE something (a shape, diagram, number line, clock, chart, pattern, etc.), you MUST draw it using SVG.
+- Wrap your SVG in <svg>...</svg> tags inside your reply.
+- Keep SVGs simple: width="300" height="200", use basic shapes (circle, rect, line, polygon, text).
+- Example — a circle: <svg width="200" height="200"><circle cx="100" cy="100" r="80" fill="#4DA3FF" stroke="#1A2E4A" stroke-width="3"/><text x="100" y="108" text-anchor="middle" font-size="22" fill="white">Circle</text></svg>
+- Example — a triangle: <svg width="200" height="180"><polygon points="100,20 20,160 180,160" fill="#FFC542" stroke="#1A2E4A" stroke-width="3"/></svg>
+- For number lines, clocks, charts — draw them with SVG shapes and <text> labels.
+- After the SVG, write a short friendly explanation in words.
+- If you cannot draw something with simple SVG, describe it clearly in words instead.
+
+FORMAT: Friendly text with SVG visuals where helpful. You may use simple emoji. Keep text short and spoken-friendly.`
     + (lang !== 'en'
       ? `\n\nCRITICAL LANGUAGE RULE: ${student.name} speaks ${langName}. You MUST write EVERY word of your reply in ${langName} only — do not use any English. Use simple, warm ${langName} vocabulary that a child can understand. This is essential.`
       : '');
@@ -3033,9 +3059,15 @@ FORMAT: Plain, friendly text. You may use simple emoji occasionally to be warm. 
           contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(m.content || '') }] });
       }
     }
-    contents.push({ role: 'user', parts: [{ text: String(message).trim() }] });
+    // Append the language tag directly to the user's message so Gemini
+    // sees it as the most recent instruction and follows it even when
+    // the conversation history is in a different language.
+    const userText = lang !== 'en'
+      ? `${String(message).trim()}\n\n[Answer in ${langName} only — every single word must be in ${langName}]`
+      : String(message).trim();
+    contents.push({ role: 'user', parts: [{ text: userText }] });
 
-    const reply = await academyAskGemini(systemPrompt, contents, 1500) || `Hi ${student.name}! Let's try that again together.`;
+    const reply = await academyAskGemini(systemPrompt, contents) || `Hi ${student.name}! Let's try that again together.`;
 
     // Award points + update streak (best-effort), and log session memory
     const today = new Date().toISOString().slice(0, 10);
