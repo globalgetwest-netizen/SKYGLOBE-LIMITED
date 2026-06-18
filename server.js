@@ -2754,6 +2754,310 @@ app.delete('/api/admin/brand-assets/:id', checkAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// SKYGLOBE KIDS ACADEMY — AI TEACHERS (Phase 1: parent accounts + Math tutor "Numa")
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Each subject has its own named AI teacher persona (distinct identity per subject).
+// These are the DEFAULT names — the CEO can rename any teacher from the admin portal,
+// and those overrides are stored in the academy_teachers table.
+const ACADEMY_TEACHERS = {
+  mathematics: { name: 'Numa',   subject: 'Mathematics',        emoji: '🔢', color: '#3B82F6' },
+  science:     { name: 'Nova',   subject: 'Science',            emoji: '🔬', color: '#10B981' },
+  reading:     { name: 'Lexi',   subject: 'Reading & Language', emoji: '📚', color: '#F59E0B' },
+  coding:      { name: 'Cody',   subject: 'Coding & Robotics',  emoji: '🤖', color: '#8B5CF6' },
+  history:     { name: 'Atlas',  subject: 'History & Geography',emoji: '🗺️', color: '#EF4444' },
+  arts:        { name: 'Melody', subject: 'Arts & Music',       emoji: '🎨', color: '#EC4899' },
+  finance:     { name: 'Penny',  subject: 'Financial Literacy', emoji: '💰', color: '#14B8A6' },
+  health:      { name: 'Vita',   subject: 'Health & Well-being',emoji: '🌟', color: '#06B6D4' },
+};
+// Phase 1 launches Mathematics; others reserved for upcoming phases.
+const ACADEMY_LIVE_SUBJECTS = ['mathematics'];
+
+// Returns the teacher for a subject, applying any CEO rename saved in the DB.
+async function getAcademyTeacher(subjKey) {
+  const base = ACADEMY_TEACHERS[subjKey];
+  if (!base) return null;
+  try {
+    const rows = await dbQuery('GET', 'academy_teachers', null, { subject_key: `eq.${subjKey}`, limit: 1 });
+    if (rows && rows[0]) {
+      return {
+        ...base,
+        name: (rows[0].name || '').trim() || base.name,
+        emoji: (rows[0].emoji || '').trim() || base.emoji,
+      };
+    }
+  } catch { /* table may not exist yet — fall back to defaults */ }
+  return base;
+}
+
+// Full roster with overrides applied (for admin UI + learn page)
+async function getAcademyRoster() {
+  let overrides = {};
+  try {
+    const rows = await dbQuery('GET', 'academy_teachers', null, { limit: 100 });
+    for (const r of (rows || [])) overrides[r.subject_key] = r;
+  } catch { /* defaults only */ }
+  return Object.entries(ACADEMY_TEACHERS).map(([key, t]) => ({
+    key,
+    name: (overrides[key]?.name || '').trim() || t.name,
+    emoji: (overrides[key]?.emoji || '').trim() || t.emoji,
+    subject: t.subject,
+    color: t.color,
+    defaultName: t.name,
+    live: ACADEMY_LIVE_SUBJECTS.includes(key),
+  }));
+}
+
+// Free Gemini call with model fallback chain (reused by the AI teachers)
+async function academyAskGemini(systemPrompt, contents, maxTokens = 1024) {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
+  const models = [process.env.GEMINI_MODEL || 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    contents,
+    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.6 },
+    safetySettings: [
+      { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_LOW_AND_ABOVE' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_LOW_AND_ABOVE' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_LOW_AND_ABOVE' },
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_LOW_AND_ABOVE' },
+    ],
+  });
+  let data, ok;
+  for (const model of models) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+      { method: 'POST', headers: { 'content-type': 'application/json' }, body });
+    data = await r.json(); ok = r.ok;
+    if (r.ok) break;
+    if (r.status !== 429 && r.status !== 503) break;
+  }
+  if (!ok) throw new Error(data?.error?.message || 'AI teacher is busy. Please try again.');
+  return data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+}
+
+// Parent auth — reuses the signed-token system
+function parentAuth(req) {
+  const h = req.headers['authorization'] || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : '';
+  return verifyToken(token);
+}
+async function getParentByEmail(email) {
+  const rows = await dbQuery('GET', 'academy_parents', null, { email: `eq.${email}`, limit: 1 });
+  return rows[0] || null;
+}
+async function getStudentForParent(studentId, parentEmail) {
+  const rows = await dbQuery('GET', 'academy_students', null, { id: `eq.${studentId}`, parent_email: `eq.${parentEmail}`, limit: 1 });
+  return rows[0] || null;
+}
+
+// ── PARENT: SIGN UP ───────────────────────────────────────────────────────────
+app.post('/api/academy/parent/signup', async (req, res) => {
+  let { name, email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
+  email = String(email).trim().toLowerCase();
+  if (String(password).length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  try {
+    if (await getParentByEmail(email)) return res.status(409).json({ error: 'An account with this email already exists. Please log in.' });
+    await dbQuery('POST', 'academy_parents', { email, name: name || '', password_hash: hashPassword(password) });
+    res.json({ success: true, token: signToken(email), email, name: name || '' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── PARENT: LOG IN ────────────────────────────────────────────────────────────
+app.post('/api/academy/parent/login', async (req, res) => {
+  let { email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
+  email = String(email).trim().toLowerCase();
+  try {
+    const parent = await getParentByEmail(email);
+    if (!parent || !verifyPassword(password, parent.password_hash))
+      return res.status(401).json({ error: 'Wrong email or password.' });
+    res.json({ success: true, token: signToken(email), email, name: parent.name || '' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── PARENT: ADD A CHILD ───────────────────────────────────────────────────────
+app.post('/api/academy/student', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  let { name, age, grade, avatar } = req.body || {};
+  if (!name || !String(name).trim()) return res.status(400).json({ error: "Child's name is required." });
+  age = parseInt(age, 10);
+  if (!age || age < 3 || age > 18) return res.status(400).json({ error: 'Please enter an age between 3 and 18.' });
+  try {
+    const rows = await dbQuery('POST', 'academy_students', {
+      parent_email: email,
+      name: String(name).trim(),
+      age,
+      grade: (grade || '').toString().trim() || null,
+      avatar: (avatar || '🧒').toString().slice(0, 4),
+      points: 0, streak: 0, badges: [],
+    });
+    res.json({ success: true, student: Array.isArray(rows) ? rows[0] : rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── PARENT: LIST MY CHILDREN ──────────────────────────────────────────────────
+app.get('/api/academy/students', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const rows = await dbQuery('GET', 'academy_students', null, { parent_email: `eq.${email}`, order: 'created_at.asc' });
+    res.json(rows || []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── PARENT: CHILD PROGRESS (dashboard) ────────────────────────────────────────
+app.get('/api/academy/progress/:studentId', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const student = await getStudentForParent(req.params.studentId, email);
+    if (!student) return res.status(404).json({ error: 'Child not found.' });
+    const sessions = await dbQuery('GET', 'academy_sessions', null,
+      { student_id: `eq.${student.id}`, order: 'created_at.desc', limit: 50 }).catch(() => []);
+    res.json({ student, sessions });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── AI TEACHER — the tutoring brain ───────────────────────────────────────────
+app.post('/api/academy/tutor', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  const { studentId, subject, message, history } = req.body || {};
+  const subjKey = String(subject || 'mathematics').toLowerCase();
+  const teacher = await getAcademyTeacher(subjKey);
+  if (!teacher) return res.status(400).json({ error: 'Unknown subject.' });
+  if (!ACADEMY_LIVE_SUBJECTS.includes(subjKey))
+    return res.status(403).json({ error: `${teacher.name} (${teacher.subject}) is coming soon. Mathematics with Numa is available now.` });
+  if (!message || !String(message).trim()) return res.status(400).json({ error: 'Message is required.' });
+
+  try {
+    const student = await getStudentForParent(studentId, email);
+    if (!student) return res.status(404).json({ error: 'Child not found.' });
+
+    // Load recent session memory for continuity
+    const past = await dbQuery('GET', 'academy_sessions', null,
+      { student_id: `eq.${student.id}`, subject: `eq.${subjKey}`, order: 'created_at.desc', limit: 5 }).catch(() => []);
+    const memory = past.length
+      ? past.map(s => `- ${(s.created_at || '').slice(0, 10)}: ${s.summary || 'practiced ' + teacher.subject}`).join('\n')
+      : '(This is your first lesson together.)';
+
+    const age = student.age;
+    const ageBand = age <= 6 ? 'Ages 4-6 (Discover): very simple words, playful, lots of encouragement, short sentences, use stories and pictures-in-words.'
+      : age <= 10 ? 'Ages 7-10 (Explore): friendly and clear, use small examples and quick questions, light challenges.'
+      : age <= 14 ? 'Ages 11-14 (Build): encourage reasoning and "why", give richer problems, build critical thinking.'
+      : 'Ages 15-18 (Create): treat as a capable young adult, connect maths to real life, careers and projects.';
+
+    const systemPrompt = `You are ${teacher.name}, the friendly AI ${teacher.subject} teacher at SkyGlobe Kids Academy. You are warm, patient, encouraging, and never condescending. You teach ONE child named ${student.name}, age ${age}${student.grade ? `, grade ${student.grade}` : ''}.
+
+YOUR IDENTITY:
+- Your name is ${teacher.name}. Always refer to yourself as ${teacher.name}. Never say you are an AI language model.
+- You teach only ${teacher.subject}. If asked about other subjects, gently say that another SkyGlobe teacher covers that, and steer back to maths.
+
+LEARNING LEVEL: ${ageBand}
+
+WHAT YOU REMEMBER ABOUT ${student.name}'S RECENT LESSONS:
+${memory}
+
+HOW YOU TEACH (proven methods — use them):
+1. ADAPTIVE: Match difficulty to ${student.name}. If they get it, go a little harder; if they struggle, slow down and re-explain simply.
+2. MICROLEARNING: Keep each reply short (3-6 short sentences). One idea at a time.
+3. ACTIVE RECALL: End most replies with ONE small question so the child keeps thinking.
+4. INSTANT FEEDBACK: If they answer, say clearly if it's right or not, and ALWAYS explain WHY in simple terms.
+5. ENCOURAGEMENT: Praise effort warmly ("Great thinking!", "You're so close!"). Never make the child feel bad.
+6. STEP BY STEP: For maths problems, walk through the solution one step at a time.
+
+SAFETY RULES (very important — children use this):
+- Always be kind, safe, age-appropriate, and positive.
+- Never discuss anything unsafe, scary, adult, or unrelated to learning.
+- If the child seems upset or mentions something worrying, gently encourage them to talk to their parent or teacher.
+- Use simple, clear language with no slang.
+
+FORMAT: Plain, friendly text. You may use simple emoji occasionally to be warm. Keep it short and spoken-friendly (it may be read aloud by voice).`;
+
+    const contents = [];
+    if (Array.isArray(history)) {
+      for (const m of history.slice(-10)) {
+        if (m.role === 'user' || m.role === 'assistant')
+          contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(m.content || '') }] });
+      }
+    }
+    contents.push({ role: 'user', parts: [{ text: String(message).trim() }] });
+
+    const reply = await academyAskGemini(systemPrompt, contents, 800) || `Hi ${student.name}! Let's try that again together.`;
+
+    // Award points + update streak (best-effort), and log session memory
+    const today = new Date().toISOString().slice(0, 10);
+    const lastDay = (student.last_active || '').slice(0, 10);
+    let streak = student.streak || 0;
+    if (lastDay !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      streak = lastDay === yesterday ? streak + 1 : 1;
+    }
+    const points = (student.points || 0) + 5;
+    dbQuery('PATCH', 'academy_students', { points, streak, last_active: new Date().toISOString() },
+      { id: `eq.${student.id}` }).catch(() => {});
+    dbQuery('POST', 'academy_sessions', {
+      student_id: student.id, subject: subjKey, teacher: teacher.name,
+      summary: String(message).trim().slice(0, 140),
+    }).catch(() => {});
+
+    res.json({ reply, teacher: teacher.name, points, streak });
+  } catch (e) {
+    console.error('AI teacher error:', e.message);
+    res.status(500).json({ error: 'Your teacher is taking a short break. Please try again in a moment.' });
+  }
+});
+
+// ── PUBLIC ROSTER (faculty hall — names reflect CEO renames) ──────────────────
+app.get('/api/academy/roster', async (req, res) => {
+  try {
+    const roster = await getAcademyRoster();
+    res.json(roster.map(t => ({ key: t.key, name: t.name, emoji: t.emoji, subject: t.subject, color: t.color, live: t.live })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── TEACHER INFO (for the learn page header — reflects CEO renames) ────────────
+app.get('/api/academy/teacher/:subject', async (req, res) => {
+  const t = await getAcademyTeacher(String(req.params.subject || '').toLowerCase());
+  if (!t) return res.status(404).json({ error: 'Unknown subject.' });
+  res.json({ name: t.name, emoji: t.emoji, subject: t.subject, color: t.color });
+});
+
+// ── CEO: VIEW FULL TEACHER ROSTER ─────────────────────────────────────────────
+app.get('/api/admin/academy/teachers', checkAdmin, async (req, res) => {
+  try { res.json(await getAcademyRoster()); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── CEO: RENAME A TEACHER ─────────────────────────────────────────────────────
+app.patch('/api/admin/academy/teachers/:key', checkAdmin, async (req, res) => {
+  const key = String(req.params.key || '').toLowerCase();
+  if (!ACADEMY_TEACHERS[key]) return res.status(404).json({ error: 'Unknown teacher.' });
+  let { name, emoji } = req.body || {};
+  name = (name || '').toString().trim();
+  emoji = (emoji || '').toString().trim().slice(0, 4);
+  if (!name) return res.status(400).json({ error: 'Teacher name is required.' });
+  if (name.length > 40) return res.status(400).json({ error: 'Name is too long.' });
+  try {
+    // Upsert the override row (delete + insert keeps it simple and table-light)
+    await dbQuery('DELETE', 'academy_teachers', null, { subject_key: `eq.${key}` }).catch(() => {});
+    await dbQuery('POST', 'academy_teachers', {
+      subject_key: key, name, emoji: emoji || ACADEMY_TEACHERS[key].emoji,
+    });
+    if (typeof logActivity === 'function')
+      logActivity(req._who, 'ceo', 'academy_rename', `Renamed ${ACADEMY_TEACHERS[key].subject} teacher to "${name}"`);
+    res.json({ success: true, key, name, emoji: emoji || ACADEMY_TEACHERS[key].emoji });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Academy page routes
+app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'academy-portal.html')));
+app.get('/academy/learn', (req, res) => res.sendFile(path.join(__dirname, 'academy-learn.html')));
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
