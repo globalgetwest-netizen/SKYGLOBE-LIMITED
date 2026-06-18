@@ -733,6 +733,36 @@ app.get('/api/test-ai', async (req, res) => {
   res.json(out);
 });
 
+// Diagnostic: test exact Gemini call used by CEO + Kids — visit /api/test-gemini in browser
+app.get('/api/test-gemini', async (req, res) => {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return res.json({ error: 'GEMINI_API_KEY is NOT set on this server. Set it in Render environment variables.' });
+  const results = [];
+  for (const model of ['gemini-2.0-flash', 'gemini-2.5-flash']) {
+    try {
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: 'You are a helpful assistant.' }] },
+            contents: [{ role: 'user', parts: [{ text: 'Reply with exactly: WORKING' }] }],
+            generationConfig: { maxOutputTokens: 20, temperature: 0 }
+          }),
+          signal: AbortSignal.timeout(20000)
+        }
+      );
+      const data = await r.json();
+      const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
+      results.push({ model, status: r.status, ok: r.ok, text: text || null, finishReason: data.candidates?.[0]?.finishReason, error: data.error?.message || null });
+    } catch (e) {
+      results.push({ model, ok: false, error: e.message });
+    }
+  }
+  res.json({ key_set: true, key_preview: key.slice(0, 8) + '...', results });
+});
+
 app.get('/api/test', async (req, res) => {
   const key = process.env.RESEND_API_KEY;
   const to  = process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com';
@@ -2685,7 +2715,7 @@ INSTRUCTIONS:
     res.json({ reply });
   } catch (e) {
     console.error('CEO AI Assistant error:', e.message);
-    res.status(500).json({ error: 'CEO AI Assistant encountered an error: ' + e.message });
+    res.status(500).json({ error: e.message });
   }
 });
 
@@ -2789,8 +2819,9 @@ async function getAcademyRoster() {
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
 async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
-  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
-  let lastError = null;
+  // Only use confirmed-valid current model names. No guessing.
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+  let lastError = 'No models responded';
   for (const model of models) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -2809,23 +2840,28 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
         );
         const data = await res.json();
         if (!res.ok) {
-          lastError = data?.error?.message || `${model} returned ${res.status}`;
+          lastError = `[${model}] ${data?.error?.message || 'HTTP ' + res.status}`;
+          console.error('Gemini error:', lastError);
           if (res.status === 429 || res.status === 503 || res.status === 500) {
-            if (attempt < maxRetries) { await new Promise(r => setTimeout(r, 1200 * (attempt + 1))); continue; }
+            if (attempt < maxRetries) { await new Promise(r => setTimeout(r, 1500 * (attempt + 1))); continue; }
           }
-          break; // try next model
+          break; // non-retryable — try next model
         }
-        const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        const text = parts.map(p => p.text || '').join('').trim();
         if (text) return text;
-        lastError = `${model} returned empty content`;
+        const reason = data.candidates?.[0]?.finishReason || 'unknown';
+        lastError = `[${model}] empty response, finishReason=${reason}`;
+        console.error('Gemini empty:', lastError);
         break; // try next model
       } catch (e) {
-        lastError = e.message;
-        if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1200 * (attempt + 1)));
+        lastError = `[${model}] ${e.message}`;
+        console.error('Gemini exception:', lastError);
+        if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
       }
     }
   }
-  throw new Error('SKYGLOBE CORE is temporarily unavailable. Please try again in a moment.');
+  throw new Error(lastError);
 }
 
 // Free Gemini call with model fallback chain (reused by the AI teachers).
@@ -2834,9 +2870,10 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
   // gemini-2.0-flash is primary: no thinking overhead, fast, reliable for education
-  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
-  // BLOCK_ONLY_HIGH lets all educational content through (history, science, body,
-  // shapes, maths problems) while still blocking genuinely harmful material.
+  // Only confirmed-valid current model names.
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+  // BLOCK_ONLY_HIGH lets all educational content through while still blocking
+  // genuinely harmful material.
   const safetySettings = [
     { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_ONLY_HIGH' },
     { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_ONLY_HIGH' },
@@ -2846,7 +2883,7 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
   let lastError = null;
   for (const model of models) {
     const body = JSON.stringify({
-      systemInstruction: { parts: [{ text: systemPrompt }] },
+      system_instruction: { parts: [{ text: systemPrompt }] },
       contents,
       generationConfig: { maxOutputTokens: maxTokens, temperature: 0.6 },
       safetySettings,
