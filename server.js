@@ -1342,6 +1342,75 @@ app.post('/api/legal-docs/generate', async (req, res) => {
   }
 });
 
+// ── ADMIN: Legal Documents order desk (CEO / staff) ──────────────────────────
+// Lists every AI-generated legal document, enriched with its secure token info
+// (client email, link, whether it has been opened). The CEO reviews and can
+// resend the secure link or regenerate an expired token.
+app.get('/api/admin/legal-docs', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const docs = await dbQuery('GET', 'documents', null,
+      { uploaded_by: 'eq.ai:legal-docs', order: 'created_at.desc', limit: 500 }).catch(() => []);
+    const out = [];
+    for (const d of docs) {
+      const toks = await dbQuery('GET', 'document_tokens', null,
+        { document_id: `eq.${d.id}`, order: 'created_at.desc', limit: 1 }).catch(() => []);
+      const tok = toks[0] || null;
+      const typeId = String(d.filename || '').split('_')[0];
+      const meta = LEGAL_DOC_INDEX[typeId];
+      out.push({
+        id: d.id, ref: d.ref, filename: d.filename, created_at: d.created_at,
+        doc_type: meta ? meta.name : typeId, group: meta ? meta.group : '',
+        client_email: tok?.client_email || '',
+        token: tok?.token || null,
+        expires_at: tok?.expires_at || null,
+        accessed_at: tok?.accessed_at || null,
+        expired: tok ? new Date(tok.expires_at) < new Date() : true,
+        viewUrl: tok ? `${baseUrl(req)}/view/${tok.token}` : null,
+      });
+    }
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Resend (and refresh if expired) the secure link to the client by email.
+app.post('/api/admin/legal-docs/:id/resend', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'documents', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const doc = rows[0];
+    if (!doc) return res.status(404).json({ error: 'Document not found.' });
+    let toks = await dbQuery('GET', 'document_tokens', null,
+      { document_id: `eq.${doc.id}`, order: 'created_at.desc', limit: 1 }).catch(() => []);
+    let tok = toks[0];
+    const email = (req.body && req.body.email) || tok?.client_email || '';
+    if (!email) return res.status(400).json({ error: 'No client email on file. Provide one to send the link.' });
+    // Refresh token if missing or expired.
+    if (!tok || new Date(tok.expires_at) < new Date()) {
+      await dbQuery('DELETE', 'document_tokens', null, { document_id: `eq.${doc.id}` }).catch(() => {});
+      const newTok = await createDocToken(doc.id, doc.path, doc.filename, email, doc.ref);
+      tok = { token: newTok };
+    }
+    const viewUrl = `${baseUrl(req)}/view/${tok.token}`;
+    const typeId = String(doc.filename || '').split('_')[0];
+    const docName = LEGAL_DOC_INDEX[typeId]?.name || 'Your document';
+    try {
+      await sendEmail(email, `Your SkyGlobe document is ready — ${doc.ref}`,
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
+          <h2 style="color:#a87016;font-family:Georgia,serif">Your document is ready</h2>
+          <p>Dear Client,</p>
+          <p>Your <strong>${docName}</strong> (Ref: <strong>${doc.ref}</strong>) has been prepared and verified by SkyGlobe Group.</p>
+          <p style="margin:22px 0"><a href="${viewUrl}" style="background:#D4A73A;color:#1a1300;text-decoration:none;font-weight:700;padding:13px 26px;border-radius:30px">Open your secure document</a></p>
+          <p style="font-size:13px;color:#6b7689">This is a private, encrypted and access-logged link. It expires in 72 hours — contact us if you need it refreshed.</p>
+          <p style="font-size:13px;color:#6b7689">Facilitated &amp; Verified by SkyGlobe Group · Global Operations · One World. One Mission.</p>
+        </div>`);
+    } catch (mailErr) {
+      return res.status(502).json({ error: 'Could not send email: ' + mailErr.message, viewUrl });
+    }
+    res.json({ success: true, viewUrl, email });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ---- Official Letterhead AI writer (CEO / authorised staff only) ----
 // Writes the BODY of an official SkyGlobe Group letter. Auth required so the
 // public can never generate company correspondence. The signature/stamp are
