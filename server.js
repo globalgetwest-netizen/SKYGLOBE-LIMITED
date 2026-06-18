@@ -566,6 +566,7 @@ app.get('/conferences', (req, res) => res.sendFile(path.join(__dirname, 'confere
 app.get('/packages', (req, res) => res.sendFile(path.join(__dirname, 'packages.html')));
 app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));
 app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));
+app.get('/legal-documents', (req, res) => res.sendFile(path.join(__dirname, 'legal-documents.html')));
 
 // ── AI CHAT ───────────────────────────────────────────────────────────────────
 const SKYGLOBE_SYSTEM = `You are the AI assistant for SkyGlobe Group, a premium global travel and immigration consultancy. You are knowledgeable, professional, warm, and concise.
@@ -1162,6 +1163,185 @@ ${NO_PLACEHOLDERS}`,
   }
 });
 
+// ════════════════════════════════════════════════════════════════════════════
+//  LEGAL DIGITAL DOCUMENTATION  (Digitalization division — flagship service)
+//  Flow:  pick document → pick tier → pay → AI generates → secure delivery.
+//  Every document is AI-assisted, encrypted at rest, audit-logged, and carries
+//  the "Facilitated & Verified by SkyGlobe Group" stamp. We never fabricate
+//  instruments, impersonate authorities, or issue what we did not witness.
+// ════════════════════════════════════════════════════════════════════════════
+
+// Service tiers — what each price level includes (pricing lives in PRICING).
+const LEGAL_TIERS = [
+  { id: 'legal_doc_standard', name: 'Standard', product: 'legal_doc_standard',
+    blurb: 'AI-drafted, professionally formatted and verified — delivered securely.',
+    perks: ['AI-assisted drafting', 'Professional formatting', 'SkyGlobe verification stamp', 'Secure encrypted delivery'] },
+  { id: 'legal_doc_premium', name: 'Premium', product: 'legal_doc_premium',
+    blurb: 'Everything in Standard, refined with deeper detail and one revision.',
+    perks: ['Everything in Standard', 'Enhanced detail & tone control', 'One free revision', 'Priority queue'] },
+  { id: 'legal_doc_priority', name: 'Priority', product: 'legal_doc_priority',
+    blurb: 'Our highest service — complex documents, express handling, unlimited revisions.',
+    perks: ['Everything in Premium', 'Complex / high-value documents', 'Express handling', 'Unlimited revisions (7 days)'] },
+];
+
+// Catalogue of document types grouped by family. `kind` selects the prompt.
+const LEGAL_DOC_TYPES = {
+  'Invitation & Sponsorship': [
+    { id: 'visa_invitation',     name: 'Visa Invitation Letter',        desc: 'A host or organisation formally invites a visitor and supports their visa.' },
+    { id: 'sponsorship_decl',    name: 'Sponsorship Declaration',       desc: 'A sponsor declares they will fund and support an applicant\'s trip or stay.' },
+    { id: 'host_accommodation',  name: 'Host / Accommodation Letter',   desc: 'A host confirms accommodation arrangements for a visiting guest.' },
+  ],
+  'Affidavits & Declarations': [
+    { id: 'affidavit_support',   name: 'Affidavit of Support',          desc: 'A sworn statement undertaking to financially support a named person.' },
+    { id: 'statutory_decl',      name: 'Statutory Declaration',         desc: 'A formal declaration of facts, made solemnly and in writing.' },
+    { id: 'identity_decl',       name: 'Name / Identity Declaration',   desc: 'Declares a name variation or confirms identity details across documents.' },
+  ],
+  'Business & Employment': [
+    { id: 'employment_verify',   name: 'Employment Verification Letter', desc: 'Confirms a person\'s role, tenure and standing with an employer.' },
+    { id: 'business_intro',      name: 'Business Introduction Letter',   desc: 'Introduces a company, its services and intent to a partner or authority.' },
+    { id: 'proof_of_funds',      name: 'Proof of Funds Cover Letter',    desc: 'A cover letter explaining and contextualising financial evidence.' },
+  ],
+  'Travel Cover Letters': [
+    { id: 'visa_cover',          name: 'Visa Application Cover Letter',  desc: 'A personal statement to the visa officer explaining the application.' },
+    { id: 'itinerary_explain',   name: 'Itinerary Explanation Letter',   desc: 'Explains a travel itinerary, routing and purpose for a consulate.' },
+    { id: 'travel_purpose',      name: 'Travel Purpose Statement',       desc: 'A concise statement of the purpose and plan of a trip.' },
+  ],
+};
+
+// Flat lookup id → {name, kind(group)}
+const LEGAL_DOC_INDEX = (() => {
+  const idx = {};
+  for (const [group, items] of Object.entries(LEGAL_DOC_TYPES))
+    for (const it of items) idx[it.id] = { ...it, group };
+  return idx;
+})();
+
+// Per-document guidance steering the AI for accuracy and the right register.
+const LEGAL_DOC_GUIDANCE = {
+  visa_invitation:    'Write the BODY of a formal Letter of Invitation, in the third person from the host\'s point of view, opening "To the Visa Officer,". State who is invited, the relationship/purpose, dates, accommodation and cost arrangements, and request the officer grant the visa.',
+  sponsorship_decl:   'Write a formal Sponsorship Declaration in the first person from the sponsor. State the sponsor\'s identity and capacity, the person sponsored, exactly what is being funded (travel, tuition, living costs), the period covered, and a clear undertaking of responsibility.',
+  host_accommodation: 'Write a formal Accommodation/Host Letter in the first person from the host, confirming the guest\'s name, the accommodation address arrangement, the dates of stay, and that the host welcomes and accommodates the guest.',
+  affidavit_support:  'Write the BODY of an Affidavit of Support as a solemn first-person sworn statement ("I, NAME, do solemnly affirm..."). State the deponent, the person supported, the nature and extent of financial support undertaken, and the duration. Keep it formal and legally measured.',
+  statutory_decl:     'Write the BODY of a Statutory Declaration as a solemn first-person declaration of facts ("I, NAME, do solemnly and sincerely declare that..."). State the declared facts plainly and end with the standard truthfulness affirmation.',
+  identity_decl:      'Write the BODY of a Name / Identity Declaration in the first person, declaring that the named variations refer to one and the same person, or confirming the correct identity details, stating the documents affected.',
+  employment_verify:  'Write a formal Employment Verification Letter in the third person from the employer. Confirm the employee\'s full name, job title, employment dates/tenure, employment status, and (if provided) salary band and conduct. Be factual and measured.',
+  business_intro:     'Write a formal Business Introduction Letter in the first person plural from the company. Introduce the business, its core services, its standing, and the purpose of the introduction to the recipient.',
+  proof_of_funds:     'Write a Proof of Funds Cover Letter in the first person, contextualising the applicant\'s financial evidence (without inventing figures) — what the funds are, their source, their sufficiency for the stated purpose, and that statements are enclosed.',
+  visa_cover:         'Write a Visa Application Cover Letter in the first person to the visa officer. State the visa type/purpose, the travel plan and dates, funding, ties to the home country and intent to return, and politely request the visa.',
+  itinerary_explain:  'Write an Itinerary Explanation Letter in the first person to the consulate, explaining the routing, stops, dates and the reason for the chosen itinerary.',
+  travel_purpose:     'Write a concise Travel Purpose Statement in the first person, clearly setting out the purpose of the trip, the plan and dates, and intent to return.',
+};
+
+function buildLegalPrompt(docId, fields) {
+  const meta = LEGAL_DOC_INDEX[docId];
+  const guidance = LEGAL_DOC_GUIDANCE[docId];
+  const f = fields || {};
+  return `You are a senior legal documentation specialist at SkyGlobe Group. ${guidance}
+
+Use ONLY these real details supplied by the client — never invent names, institutions, figures, registration numbers, dates or facts that are not provided:
+- Full name of the principal person: ${f.fullName || 'Not provided'}
+- Nationality / country: ${f.nationality || 'Not provided'}
+- Other party (host / employer / sponsor / organisation / recipient): ${f.counterparty || 'Not provided'}
+- Relevant dates / period: ${f.dates || 'Not provided'}
+- Place / destination / address: ${f.location || 'Not provided'}
+- Specific facts and details for this document: ${f.details || 'Not provided'}
+
+STRICT RULES:
+- NEVER use bracketed placeholders such as [Name], [Date], [Address]. The body must read as complete prose.
+- Do NOT write a sender address block, date line, letterhead, reference number, signature name or job title — these are added automatically by our system. Begin directly with the salutation or opening line.
+- Do NOT fabricate any qualification, employment, enrolment, financial figure or official outcome that was not supplied. If a detail is missing, write gracefully around it.
+- Never claim that SkyGlobe Group issues, certifies or guarantees the instrument — SkyGlobe only facilitates and verifies the document.
+- Output plain text only: no markdown, asterisks or headings. Separate paragraphs with a blank line. Keep it formal, precise and well-structured.`;
+}
+
+// Branded, verified HTML wrapper rendered into the secure viewer.
+function wrapLegalDoc(title, bodyText, ref) {
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const paras = String(bodyText).trim().split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</p>`).join('\n');
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title} — SkyGlobe Group</title>
+<style>
+  body{font-family:"Georgia","Times New Roman",serif;color:#1a2233;background:#fff;margin:0;padding:48px 56px;line-height:1.7;max-width:820px;margin:0 auto}
+  .lh{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #D4A73A;padding-bottom:16px;margin-bottom:8px}
+  .lh .b{font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;color:#041022;font-size:1.3rem}
+  .lh .b small{display:block;color:#a87016;font-size:.6rem;letter-spacing:.24em;font-weight:600}
+  .lh .meta{text-align:right;font-family:Arial,sans-serif;font-size:.72rem;color:#6b7689;line-height:1.5}
+  h1{font-size:1.2rem;text-transform:uppercase;letter-spacing:.06em;color:#041022;margin:26px 0 18px;font-family:Arial,sans-serif}
+  p{margin:0 0 14px}
+  .stamp{margin-top:46px;border-top:1px solid #e6e9ef;padding-top:18px;display:flex;align-items:center;gap:14px}
+  .seal{width:64px;height:64px;border-radius:50%;border:2px solid #D4A73A;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Arial,sans-serif;font-size:.52rem;font-weight:700;color:#a87016;letter-spacing:.04em;line-height:1.25;flex:none}
+  .stamp .t{font-family:Arial,sans-serif;font-size:.78rem;color:#3c465a}
+  .stamp .t strong{color:#041022}
+  .foot{margin-top:30px;font-family:Arial,sans-serif;font-size:.66rem;color:#9aa3b2;border-top:1px solid #eef1f6;padding-top:12px}
+  @media print{body{padding:24px}}
+</style></head><body>
+  <div class="lh">
+    <div class="b">SKYGLOBE<small>GROUP</small></div>
+    <div class="meta">Ref: ${ref}<br>${today}<br>Global Operations</div>
+  </div>
+  <h1>${title}</h1>
+  ${paras}
+  <div class="stamp">
+    <div class="seal">FACILITATED &amp; VERIFIED · SKYGLOBE GROUP</div>
+    <div class="t"><strong>Facilitated &amp; Verified by SkyGlobe Group</strong><br>This document was prepared and verified by SkyGlobe Group. SkyGlobe does not issue or certify instruments it did not witness.</div>
+  </div>
+  <div class="foot">© ${new Date().getFullYear()} SkyGlobe Group · Global Operations · support@skyglobegroup.com · One World. One Mission.</div>
+</body></html>`;
+}
+
+// Public catalogue for the front-end (document types + tiers + live prices).
+app.get('/api/legal-docs/catalog', (_req, res) => {
+  const tiers = LEGAL_TIERS.map(t => ({
+    id: t.id, name: t.name, product: t.product, blurb: t.blurb, perks: t.perks,
+    price: { USD: PRICING[t.product].USD, EUR: PRICING[t.product].EUR, GBP: PRICING[t.product].GBP },
+  }));
+  res.json({ groups: LEGAL_DOC_TYPES, tiers });
+});
+
+// Generate a paid legal document. Requires a valid instant-unlock token proving
+// the matching tier was paid for, then AI-drafts, wraps, stores and secures it.
+app.post('/api/legal-docs/generate', async (req, res) => {
+  try {
+    const { unlock, product, docId, fields } = req.body || {};
+    const tier = LEGAL_TIERS.find(t => t.product === product);
+    if (!tier) return res.status(400).json({ error: 'Invalid service tier.' });
+    if (!unlock || !verifyUnlock(unlock, product))
+      return res.status(402).json({ error: 'Payment required', pay: { product } });
+    const meta = LEGAL_DOC_INDEX[docId];
+    if (!meta) return res.status(400).json({ error: 'Unknown document type.' });
+    const f = fields || {};
+    if (!f.fullName || !f.details)
+      return res.status(400).json({ error: 'Full name and document details are required.' });
+    if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY)
+      return res.status(500).json({ error: 'AI not configured. Please contact support.' });
+
+    const body = await generateText(buildLegalPrompt(docId, f), { maxTokens: 2048, temperature: 0.55 });
+    const ref = 'SGL-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    const html = wrapLegalDoc(meta.name, body, ref);
+
+    // Store as an encrypted-at-rest HTML artifact and gate it behind a token.
+    const safeName = `${meta.id}_${ref}.html`;
+    const filePath = `legal/${ref}/${safeName}`;
+    let viewUrl = null, viewToken = null;
+    try {
+      await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8');
+      const rows = await dbQuery('POST', 'documents', {
+        ref, filename: safeName, path: filePath, uploaded_by: 'ai:legal-docs',
+      }).catch(() => null);
+      const docRow = Array.isArray(rows) ? rows[0] : rows;
+      viewToken = await createDocToken(docRow?.id || ref, filePath, safeName, f.email || '', ref);
+      viewUrl = `${baseUrl(req)}/view/${viewToken}`;
+    } catch (storeErr) {
+      console.error('Legal doc store warning:', storeErr.message);
+    }
+
+    res.json({ success: true, ref, title: meta.name, tier: tier.name, html, viewUrl, viewToken });
+  } catch (e) {
+    console.error('Legal doc generate error:', e.message);
+    res.status(500).json({ error: 'Document generation is temporarily unavailable. Please try again in a moment.' });
+  }
+});
+
 // ---- Official Letterhead AI writer (CEO / authorised staff only) ----
 // Writes the BODY of an official SkyGlobe Group letter. Auth required so the
 // public can never generate company correspondence. The signature/stamp are
@@ -1486,6 +1666,12 @@ const PRICING = {
   migration_premium:     { label: 'Premium Migration Package (Permit + Relocation Support)',   instant: false, USD: 1299, EUR: 1199, GBP: 1049 },
   travel_prep_europe:    { label: 'Premium Travel Preparation — Europe',                       instant: false, USD: 199,  EUR: 189,  GBP: 169  },
   travel_prep_global:    { label: 'Premium Travel Preparation — Global (any destination)',     instant: false, USD: 259,  EUR: 239,  GBP: 209  },
+  // ── Legal Digital Documentation (Digitalization division) ──────────────────
+  // AI-generated, encrypted, audit-logged, delivered through the secure viewer.
+  // Three service tiers; document type is chosen by the client at checkout.
+  legal_doc_standard:    { label: 'Legal Document — Standard', instant: true, kind: 'legal', USD: 29, EUR: 27, GBP: 24 },
+  legal_doc_premium:     { label: 'Legal Document — Premium',  instant: true, kind: 'legal', USD: 59, EUR: 55, GBP: 49 },
+  legal_doc_priority:    { label: 'Legal Document — Priority', instant: true, kind: 'legal', USD: 99, EUR: 92, GBP: 79 },
 };
 
 const PAY = {
