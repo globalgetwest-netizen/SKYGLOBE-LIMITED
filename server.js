@@ -2538,13 +2538,14 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
 
   try {
     // Pull live ecosystem snapshot from Supabase
-    const [apps, payments, staff, tasks, activity, conferences] = await Promise.all([
+    const [apps, payments, staff, tasks, activity, conferences, legalDocs] = await Promise.all([
       dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 200 }).catch(() => []),
       dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 200 }).catch(() => []),
       dbQuery('GET', 'staff_members', null, { limit: 100 }).catch(() => []),
       dbQuery('GET', 'tasks', null, { order: 'created_at.desc', limit: 100 }).catch(() => []),
       dbQuery('GET', 'activity_log', null, { order: 'created_at.desc', limit: 50 }).catch(() => []),
       dbQuery('GET', 'conferences', null, { order: 'date.desc', limit: 50 }).catch(() => []),
+      dbQuery('GET', 'documents', null, { uploaded_by: 'eq.ai:legal-docs', order: 'created_at.desc', limit: 100 }).catch(() => []),
     ]);
 
     // Build concise snapshot text
@@ -2558,6 +2559,8 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
     const overdueTasks = tasks.filter(t => t.status !== 'done' && t.due_date && t.due_date < todayStr);
     const pendingTasks = tasks.filter(t => t.status === 'pending');
     const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
+    const legalToday = legalDocs.filter(d => (d.created_at || '').slice(0, 10) === todayStr);
+    const legalTypeName = (fn) => (LEGAL_DOC_INDEX[String(fn || '').split('_')[0]]?.name) || 'Legal document';
 
     const ecosystemSnapshot = `
 LIVE ECOSYSTEM SNAPSHOT — ${now.toUTCString()}
@@ -2583,6 +2586,9 @@ TASKS:
 CONFERENCES (${conferences.length} total):
   ${conferences.slice(0,6).map(c=>`${c.title||'Untitled'} — ${c.country||''}${c.city?', '+c.city:''} — ${c.date||'date TBC'} — ${c.active===false?'inactive':'active'}`).join('\n  ') || '(none)'}
 
+LEGAL DIGITAL DOCUMENTS (${legalDocs.length} total · ${legalToday.length} today):
+  ${legalDocs.slice(0,8).map(d=>`${d.ref} — ${legalTypeName(d.filename)} — ${(d.created_at||'').slice(0,16)}`).join('\n  ') || '(none yet)'}
+
 RECENT ACTIVITY (last 10 events):
   ${activity.slice(0,10).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} — ${a.action} — ${a.detail||''}`).join('\n  ') || '(none)'}
 `;
@@ -2592,7 +2598,8 @@ RECENT ACTIVITY (last 10 events):
 Your role: monitor, analyse, and report on the entire SkyGlobe Group ecosystem. You have direct access to live operational data. You execute CEO commands accurately, think strategically, and speak with the precision and authority the CEO expects.
 
 ABOUT SKYGLOBE GROUP:
-- Global organisation — immigration facilitation, work permits, conference management, travel services
+- Global organisation across 5 active divisions: Global Mobility, Travel Services, Events & Conferences, Knowledge Hub (incl. SkyGlobe Kids Academy), and Digitalization
+- Digitalization's flagship is Legal Digital Documentation — AI-generated, encrypted, verified legal documents sold per-document in 3 tiers (Standard/Premium/Priority), delivered via secure token links
 - Anchors: CONSTRUCT · TRUST · INTELLIGENCE · POWER
 - Motto: One World. One Mission.
 - The CEO is Saleh Shuaibu — Founder & Chief Executive Officer
