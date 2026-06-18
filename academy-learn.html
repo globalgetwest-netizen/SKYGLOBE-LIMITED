@@ -60,6 +60,10 @@
   .send:disabled{opacity:.5}
   .gate{flex:1;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;flex-direction:column;gap:14px}
   .gate a{background:var(--gold);color:#3a2a00;padding:13px 28px;border-radius:30px;font-family:var(--head);font-weight:600;text-decoration:none}
+  /* SVG visual blocks inside teacher bubbles */
+  .bot .bubble svg{border-radius:10px;background:#fff}
+  .bot .bubble p{margin:0 0 6px}
+  #langSel option{color:#22324a;background:#fff;font-weight:600}
 </style>
 </head>
 <body>
@@ -142,6 +146,35 @@ if(!TOKEN||!STUDENT){
 function authHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN};}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
+// Render teacher reply: extract embedded SVG, sanitize it, display inline.
+// Text around the SVG is shown as normal chat text.
+function renderBotContent(b, text) {
+  const svgRx = /<svg[\s\S]*?<\/svg>/gi;
+  const svgs = text.match(svgRx) || [];
+  if (!svgs.length) { b.textContent = text; return; }
+  // Split text by SVG blocks
+  const parts = text.split(svgRx);
+  parts.forEach((part, i) => {
+    if (part.trim()) {
+      const t = document.createElement('p');
+      t.style.cssText = 'margin:0 0 8px;white-space:pre-wrap;word-break:break-word';
+      t.textContent = part.trim();
+      b.appendChild(t);
+    }
+    if (svgs[i]) {
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'margin:8px 0;overflow:auto;max-width:100%;border-radius:12px;background:#f4f8ff;padding:10px;display:inline-block';
+      // Sanitize: only allow SVG elements (no scripts/links/foreignObject)
+      const clean = svgs[i].replace(/<(script|a|foreignObject|use|image)[^>]*>[\s\S]*?<\/\1>/gi, '')
+                            .replace(/on\w+="[^"]*"/g, '').replace(/href\s*=/gi, 'data-href=');
+      wrapper.innerHTML = clean;
+      const svgEl = wrapper.querySelector('svg');
+      if (svgEl) { svgEl.style.maxWidth = '100%'; svgEl.setAttribute('aria-hidden','true'); }
+      b.appendChild(wrapper);
+    }
+  });
+}
+
 function addMsg(role,text,typing){
   const feed=document.getElementById('feed');
   const id='m'+Date.now()+Math.random().toString(36).slice(2);
@@ -150,10 +183,14 @@ function addMsg(role,text,typing){
   const av=document.createElement('div');av.className='av-s';av.textContent=me?'🧒':TEACHER.emoji;
   const wrap=document.createElement('div');
   const b=document.createElement('div');b.className='bubble';
-  if(typing){b.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';}else b.textContent=text;
+  if(typing){b.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';}
+  else if(me){b.textContent=text;}
+  else{renderBotContent(b,text);}
   wrap.appendChild(b);
   if(!me&&!typing&&text&&'speechSynthesis'in window){
-    const lb=document.createElement('button');lb.className='listen';lb.textContent='🔊 Listen';lb.onclick=()=>speak(text,lb);wrap.appendChild(lb);
+    // Strip SVG tags from text spoken aloud
+    const speakText=text.replace(/<svg[\s\S]*?<\/svg>/gi,'[visual shown]').replace(/<[^>]+>/g,'').trim();
+    const lb=document.createElement('button');lb.className='listen';lb.textContent='🔊 Listen';lb.onclick=()=>speak(speakText,lb);wrap.appendChild(lb);
   }
   row.appendChild(av);row.appendChild(wrap);feed.appendChild(row);feed.scrollTop=feed.scrollHeight;return id;
 }
