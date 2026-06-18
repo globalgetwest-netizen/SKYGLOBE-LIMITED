@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyGlobe Kids Academy — Family Campus</title>
+<meta name="theme-color" content="#041022">
+<link rel="icon" href="/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* SkyGlobe heritage */
+    --navy:#041022; --navy2:#0a1f44; --gold:#D4A73A; --gold-hi:#F4D77A;
+    /* Sky · Earth · Nature accents */
+    --sky:#4DA3FF; --sky-soft:#DCEBFF;
+    --earth:#E8A24A; --earth-soft:#FBEBD2;
+    --leaf:#3FBF7F; --leaf-soft:#D9F5E6;
+    --sun:#FFC542; --sun-soft:#FFF2CF;
+    --berry:#F06CA8; --berry-soft:#FCE0EE;
+    /* neutrals */
+    --ink:#22324a; --muted:#7488a3; --line:#e7ecf3; --bg:#f4f8ff; --card:#ffffff;
+    --head:'Fredoka',system-ui,sans-serif; --body:'Nunito',system-ui,sans-serif;
+    --r:22px; --shadow:0 14px 40px rgba(10,31,68,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:
+      radial-gradient(1100px 460px at 85% -8%, var(--sky-soft), transparent 60%),
+      radial-gradient(900px 420px at 5% 8%, var(--leaf-soft), transparent 55%),
+      var(--bg);
+    color:var(--ink);min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* ── HEADER (consistent across the campus) ── */
+  header{background:linear-gradient(120deg,var(--navy),var(--navy2));color:#fff;position:sticky;top:0;z-index:40;
+    box-shadow:0 6px 24px rgba(4,16,34,.25)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 20px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand img{height:40px;width:40px;border-radius:11px;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+  .brand .t{font-family:var(--head);font-weight:700;font-size:1.08rem;line-height:1}
+  .brand small{display:block;color:var(--gold-hi);font-size:.6rem;letter-spacing:.2em;font-weight:600;margin-top:3px}
+  .navlinks{display:flex;align-items:center;gap:8px}
+  .navlinks a,.navlinks button{color:#cfe0f5;font-size:.86rem;font-weight:600;background:none;border:none;cursor:pointer;font-family:var(--body);padding:8px 10px;border-radius:10px}
+  .navlinks a:hover,.navlinks button:hover{background:rgba(255,255,255,.08);color:#fff}
+
+  /* ── AUTH ── */
+  .authview{padding:30px 0 60px}
+  .hero-line{text-align:center;max-width:640px;margin:8px auto 26px}
+  .hero-line .pill{display:inline-block;background:rgba(212,167,58,.16);color:var(--gold);border:1px solid rgba(212,167,58,.4);
+    font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:6px 16px;border-radius:30px;margin-bottom:14px}
+  .hero-line h1{font-family:var(--head);font-size:clamp(1.7rem,4.5vw,2.6rem);color:var(--navy);line-height:1.12}
+  .hero-line h1 span{color:var(--gold)}
+  .hero-line p{color:var(--muted);margin-top:10px;font-size:1rem}
+
+  .auth{max-width:440px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:26px;padding:30px 28px;box-shadow:var(--shadow)}
+  .tabs{display:flex;background:var(--bg);border-radius:14px;padding:5px;margin-bottom:20px}
+  .tabs button{flex:1;background:none;border:none;color:var(--muted);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-family:var(--body);font-size:.92rem}
+  .tabs button.active{background:#fff;color:var(--navy);box-shadow:0 3px 10px rgba(10,31,68,.1)}
+  label{display:block;font-size:.8rem;color:var(--ink);margin:14px 0 6px;font-weight:700}
+  input,select{width:100%;padding:13px 15px;border-radius:13px;border:2px solid var(--line);background:#fbfdff;color:var(--ink);font-size:.96rem;font-family:var(--body);font-weight:600}
+  input:focus,select:focus{outline:none;border-color:var(--sky)}
+  .btn{width:100%;margin-top:22px;padding:15px;border:none;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;
+    background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#3a2a00;font-family:var(--head);letter-spacing:.02em;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 22px rgba(212,167,58,.35)}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(212,167,58,.45)}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .btn.sky{background:linear-gradient(135deg,#7BBEFF,var(--sky));color:#06294f;box-shadow:0 8px 22px rgba(77,163,255,.35)}
+  .msg{margin-top:14px;font-size:.86rem;text-align:center;min-height:18px;font-weight:600}
+  .msg.err{color:#e0566a}.msg.ok{color:#1f9d57}
+
+  /* faculty preview on auth */
+  .faculty-mini{max-width:760px;margin:34px auto 0;text-align:center}
+  .faculty-mini h3{font-family:var(--head);color:var(--navy);font-size:1.15rem;margin-bottom:4px}
+  .faculty-mini p{color:var(--muted);font-size:.86rem;margin-bottom:18px}
+  .fac-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .fac-chip{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 18px rgba(10,31,68,.06);min-width:160px}
+  .fac-chip .em{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;color:#fff;flex-shrink:0}
+  .fac-chip .nm{font-family:var(--head);font-weight:600;font-size:.98rem;line-height:1}
+  .fac-chip .sb{font-size:.72rem;color:var(--muted);margin-top:3px}
+  .fac-chip .soon{font-size:.62rem;color:var(--earth);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+
+  /* trust strip */
+  .trust{max-width:760px;margin:30px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .trust div{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;font-size:.8rem;color:var(--ink);font-weight:600}
+  .trust .ic{font-size:1.4rem;display:block;margin-bottom:6px}
+
+  /* ── DASHBOARD ── */
+  .dash{padding:26px 0 70px;display:none}
+  .dash.show{display:block}
+  .welcome{background:linear-gradient(120deg,var(--navy),var(--navy2));color:#fff;border-radius:var(--r);padding:26px 28px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-bottom:26px}
+  .welcome:before{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,.25),transparent 70%)}
+  .welcome h1{font-family:var(--head);font-size:1.6rem}
+  .welcome p{color:#bcd0ec;margin-top:6px;font-size:.92rem;max-width:560px}
+  .welcome .logout{position:absolute;top:18px;right:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:22px;cursor:pointer;font-size:.82rem;font-weight:700;font-family:var(--body)}
+
+  .sec-head{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 16px}
+  .sec-head h2{font-family:var(--head);color:var(--navy);font-size:1.3rem}
+  .sec-head .hint{color:var(--muted);font-size:.82rem}
+
+  .kids{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:18px}
+  .kid{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);transition:transform .2s;position:relative;overflow:hidden}
+  .kid:hover{transform:translateY(-5px)}
+  .kid .ribbon{position:absolute;top:0;left:0;right:0;height:7px;background:linear-gradient(90deg,var(--sky),var(--leaf),var(--sun))}
+  .kid .av{font-size:2.7rem;margin-top:6px}
+  .kid h3{font-family:var(--head);font-size:1.3rem;margin:8px 0 2px;color:var(--navy)}
+  .kid .meta{color:var(--muted);font-size:.84rem;margin-bottom:14px;font-weight:600}
+  .stats{display:flex;gap:10px;margin-bottom:16px}
+  .stat{flex:1;border-radius:14px;padding:11px;text-align:center}
+  .stat.p{background:var(--sun-soft)} .stat.s{background:var(--leaf-soft)} .stat.l{background:var(--sky-soft)}
+  .stat b{display:block;font-family:var(--head);font-size:1.35rem;color:var(--navy)}
+  .stat span{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+  .kid .acts{display:flex;gap:8px}
+  .kid .acts a,.kid .acts button{flex:1;text-align:center;padding:12px;border-radius:24px;font-weight:700;font-size:.85rem;cursor:pointer;border:none;font-family:var(--head)}
+  .learn{background:linear-gradient(135deg,#7BBEFF,var(--sky));color:#06294f}
+  .view{background:var(--bg);color:var(--ink);border:1px solid var(--line)!important}
+  .addkid{background:#fff;border:2px dashed rgba(77,163,255,.5);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);min-height:230px;transition:.2s}
+  .addkid:hover{border-color:var(--sky);color:var(--sky);background:var(--sky-soft)}
+  .addkid .plus{font-size:2.6rem}
+
+  /* faculty hall (dashboard) */
+  .hall{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:8px}
+  .tcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 20px rgba(10,31,68,.06);position:relative}
+  .tcard .em{width:50px;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#fff;margin-bottom:12px}
+  .tcard .nm{font-family:var(--head);font-size:1.15rem;color:var(--navy)}
+  .tcard .sb{font-size:.8rem;color:var(--muted);font-weight:600}
+  .tcard .tag{position:absolute;top:14px;right:14px;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:4px 9px;border-radius:20px}
+  .tag.live{background:var(--leaf-soft);color:#1f9d57}
+  .tag.soon{background:var(--earth-soft);color:#b9772a}
+
+  /* ── MODALS ── */
+  .modal{position:fixed;inset:0;background:rgba(4,16,34,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:18px}
+  .modal.show{display:flex}
+  .modal .box{background:#fff;border-radius:24px;padding:28px;max-width:430px;width:100%;box-shadow:0 30px 70px rgba(0,0,0,.3)}
+  .modal h2{font-family:var(--head);font-size:1.4rem;color:var(--navy);margin-bottom:6px}
+  .modal .row{display:flex;gap:10px}.modal .row>div{flex:1}
+  .avatars{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .avatars button{font-size:1.5rem;background:var(--bg);border:2px solid var(--line);border-radius:13px;width:48px;height:48px;cursor:pointer}
+  .avatars button.sel{border-color:var(--sky);background:var(--sky-soft)}
+  .safe{background:var(--leaf-soft);border:1px solid rgba(63,191,127,.3);border-radius:14px;padding:13px 15px;font-size:.8rem;color:#1d7a4c;margin-top:18px;line-height:1.55;font-weight:600}
+  .cancel{width:100%;margin-top:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.86rem;font-weight:700;font-family:var(--body)}
+  #progressModal .box{max-width:540px}
+  .sesslist{max-height:300px;overflow-y:auto;margin-top:14px}
+  .sess{background:var(--bg);border-radius:12px;padding:11px 15px;margin-bottom:8px;font-size:.86rem;font-weight:600}
+  .sess .d{color:var(--muted);font-size:.72rem;font-weight:700}
+
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px}
+  footer .m{color:var(--gold);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:.7rem;margin-top:4px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a href="/kids-academy" class="brand"><img src="/icon-192.png" alt="SkyGlobe Kids Academy"><div class="t">SkyGlobe Kids Academy<small>FAMILY CAMPUS</small></div></a>
+  <div class="navlinks">
+    <a href="/kids-academy">About</a>
+    <button id="navLogout" onclick="logout()" style="display:none">Log out</button>
+  </div>
+</div></header>
+
+<!-- ════ AUTH ════ -->
+<div id="authView" class="authview"><div class="wrap">
+  <div class="hero-line">
+    <span class="pill">SkyGlobe Kids Academy</span>
+    <h1>One child. One <span>AI teacher.</span><br>A learning journey made just for them.</h1>
+    <p>Create your family campus account to give your child a personal, patient AI teacher — guided by you, every step of the way.</p>
+  </div>
+
+  <div class="auth">
+    <div class="tabs">
+      <button id="tabLogin" class="active" onclick="setTab('login')">Log In</button>
+      <button id="tabSignup" onclick="setTab('signup')">Create Account</button>
+    </div>
+    <div id="nameField" style="display:none">
+      <label>Your name</label>
+      <input id="pName" placeholder="e.g. Sarah Ahmed">
+    </div>
+    <label>Email</label>
+    <input id="pEmail" type="email" placeholder="you@email.com" autocomplete="email">
+    <label>Password</label>
+    <input id="pPass" type="password" placeholder="Your password" autocomplete="current-password">
+    <button class="btn" id="authBtn" onclick="doAuth()">Log In</button>
+    <div class="msg" id="authMsg"></div>
+  </div>
+
+  <div class="trust">
+    <div><span class="ic">🛡️</span>Parent-controlled &amp; safe</div>
+    <div><span class="ic">🧠</span>Personalised AI teaching</div>
+    <div><span class="ic">🆓</span>Free to get started</div>
+    <div><span class="ic">📈</span>Track real progress</div>
+  </div>
+
+  <div class="faculty-mini">
+    <h3>Meet the Faculty</h3>
+    <p>A dedicated AI teacher for every subject — each with their own name and personality.</p>
+    <div class="fac-row" id="facultyMini"></div>
+  </div>
+</div></div>
+
+<!-- ════ DASHBOARD ════ -->
+<div id="dashView" class="dash"><div class="wrap">
+  <div class="welcome">
+    <button class="logout" onclick="logout()">Log out</button>
+    <h1 id="welcomeHi">Welcome to your Family Campus 👋</h1>
+    <p id="whoLine"></p>
+  </div>
+
+  <div class="sec-head"><h2>👨‍👩‍👧 My Children</h2><span class="hint">Tap “Start Learning” to begin a lesson</span></div>
+  <div class="kids" id="kidsGrid"></div>
+
+  <div class="sec-head" style="margin-top:36px"><h2>🏫 The Faculty</h2><span class="hint">Your child's AI teachers</span></div>
+  <div class="hall" id="hall"></div>
+</div></div>
+
+<!-- ADD CHILD MODAL -->
+<div class="modal" id="addModal"><div class="box">
+  <h2>Add a child</h2>
+  <p style="color:var(--muted);font-size:.86rem;font-weight:600">Set up a learning profile so the AI teacher can personalise every lesson.</p>
+  <label>Child's name</label>
+  <input id="cName" placeholder="e.g. Amir">
+  <div class="row">
+    <div><label>Age</label><input id="cAge" type="number" min="3" max="18" placeholder="8"></div>
+    <div><label>Grade (optional)</label><input id="cGrade" placeholder="e.g. Grade 3"></div>
+  </div>
+  <label>Pick an avatar</label>
+  <div class="avatars" id="avatars"></div>
+  <div class="safe">🛡️ <b>Safe by design:</b> Lessons are age-appropriate, content-filtered, and you can review everything your child does — anytime, right here.</div>
+  <button class="btn sky" id="addBtn" onclick="addChild()">Create profile</button>
+  <div class="msg" id="addMsg"></div>
+  <button class="cancel" onclick="closeModal('addModal')">Cancel</button>
+</div></div>
+
+<!-- PROGRESS MODAL -->
+<div class="modal" id="progressModal"><div class="box">
+  <h2 id="progTitle">Progress</h2>
+  <div id="progStats" class="stats" style="margin-top:14px"></div>
+  <h3 style="font-family:var(--head);margin-top:18px;font-size:1.05rem;color:var(--navy)">Recent learning activity</h3>
+  <div class="sesslist" id="sessList"></div>
+  <button onclick="closeModal('progressModal')" class="btn" style="margin-top:18px">Close</button>
+</div></div>
+
+<footer>© <span id="yr"></span> SkyGlobe Kids Academy · part of SkyGlobe Group<div class="m">One World. One Mission.</div></footer>
+
+<script>
+const API='';
+let TOKEN=localStorage.getItem('academyToken')||'';
+let PARENT=JSON.parse(localStorage.getItem('academyParent')||'null');
+let mode='login', selectedAvatar='🧒', ROSTER=[];
+const AVATARS=['🧒','👦','👧','🧑','👶','🐯','🦊','🐱','🐶','🦁','🐼','🦉','🚀','🌟','🦄','🐢'];
+document.getElementById('yr').textContent=new Date().getFullYear();
+
+function setTab(m){
+  mode=m;
+  document.getElementById('tabLogin').classList.toggle('active',m==='login');
+  document.getElementById('tabSignup').classList.toggle('active',m==='signup');
+  document.getElementById('nameField').style.display=m==='signup'?'block':'none';
+  document.getElementById('authBtn').textContent=m==='signup'?'Create account':'Log In';
+  document.getElementById('authMsg').textContent='';
+}
+async function doAuth(){
+  const btn=document.getElementById('authBtn'),msg=document.getElementById('authMsg');
+  const email=document.getElementById('pEmail').value.trim(),pass=document.getElementById('pPass').value;
+  const name=document.getElementById('pName').value.trim();
+  if(!email||!pass){msg.className='msg err';msg.textContent='Please enter email and password.';return;}
+  btn.disabled=true;msg.className='msg';msg.textContent='Please wait…';
+  try{
+    const r=await fetch(API+'/api/academy/parent/'+(mode==='signup'?'signup':'login'),{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass})});
+    const d=await r.json();if(!r.ok)throw new Error(d.error||'Something went wrong.');
+    TOKEN=d.token;PARENT={email:d.email,name:d.name};
+    localStorage.setItem('academyToken',TOKEN);localStorage.setItem('academyParent',JSON.stringify(PARENT));
+    showDash();
+  }catch(e){msg.className='msg err';msg.textContent=e.message;}
+  btn.disabled=false;
+}
+function logout(){localStorage.removeItem('academyToken');localStorage.removeItem('academyParent');location.reload();}
+function authHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN};}
+
+async function loadRoster(){
+  try{const r=await fetch(API+'/api/academy/roster');ROSTER=await r.json();}catch(e){ROSTER=[];}
+}
+function facColor(t){return t.color||'#4DA3FF';}
+function renderFacultyMini(){
+  const box=document.getElementById('facultyMini');if(!box)return;
+  box.innerHTML=ROSTER.map(t=>`<div class="fac-chip">
+    <div class="em" style="background:${facColor(t)}">${t.emoji}</div>
+    <div><div class="nm">${esc(t.name)}</div><div class="sb">${esc(t.subject)}</div>
+    ${t.live?'':'<div class="soon">Coming soon</div>'}</div></div>`).join('');
+}
+function renderHall(){
+  const box=document.getElementById('hall');if(!box)return;
+  box.innerHTML=ROSTER.map(t=>`<div class="tcard">
+    <span class="tag ${t.live?'live':'soon'}">${t.live?'Live':'Soon'}</span>
+    <div class="em" style="background:${facColor(t)}">${t.emoji}</div>
+    <div class="nm">${esc(t.name)}</div><div class="sb">${esc(t.subject)}</div></div>`).join('');
+}
+
+async function showDash(){
+  document.getElementById('authView').style.display='none';
+  document.getElementById('dashView').classList.add('show');
+  document.getElementById('navLogout').style.display='inline-block';
+  document.getElementById('whoLine').textContent=(PARENT&&PARENT.name?PARENT.name:PARENT.email)+' · Family account';
+  await loadRoster();renderHall();
+  loadKids();
+}
+
+async function loadKids(){
+  const grid=document.getElementById('kidsGrid');
+  grid.innerHTML='<div style="color:var(--muted);font-weight:600">Loading…</div>';
+  try{
+    const r=await fetch(API+'/api/academy/students',{headers:authHeaders()});
+    if(r.status===401){logout();return;}
+    const kids=await r.json();grid.innerHTML='';
+    kids.forEach(k=>grid.appendChild(kidCard(k)));
+    const add=document.createElement('div');add.className='addkid';add.onclick=()=>openAdd();
+    add.innerHTML='<div class="plus">＋</div><div style="font-family:Fredoka;font-weight:600">Add a child</div>';
+    grid.appendChild(add);
+  }catch(e){grid.innerHTML='<div style="color:#e0566a;font-weight:600">'+esc(e.message)+'</div>';}
+}
+function kidCard(k){
+  const d=document.createElement('div');d.className='kid';
+  d.innerHTML=`<div class="ribbon"></div><div class="av">${k.avatar||'🧒'}</div>
+    <h3>${esc(k.name)}</h3><div class="meta">Age ${k.age}${k.grade?' · '+esc(k.grade):''}</div>
+    <div class="stats">
+      <div class="stat p"><b>${k.points||0}</b><span>Points</span></div>
+      <div class="stat s"><b>${k.streak||0}🔥</b><span>Streak</span></div>
+      <div class="stat l"><b>${k.age}</b><span>Age</span></div>
+    </div>
+    <div class="acts">
+      <a class="learn" href="/academy/learn?student=${k.id}">Start Learning</a>
+      <button class="view" onclick='viewProgress(${JSON.stringify(k.id)},${JSON.stringify(k.name)})'>Progress</button>
+    </div>`;
+  return d;
+}
+function openAdd(){selectedAvatar='🧒';['cName','cAge','cGrade'].forEach(i=>document.getElementById(i).value='');document.getElementById('addMsg').textContent='';renderAvatars();document.getElementById('addModal').classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function renderAvatars(){const box=document.getElementById('avatars');box.innerHTML='';AVATARS.forEach(a=>{const b=document.createElement('button');b.textContent=a;b.className=a===selectedAvatar?'sel':'';b.onclick=()=>{selectedAvatar=a;renderAvatars();};box.appendChild(b);});}
+async function addChild(){
+  const btn=document.getElementById('addBtn'),msg=document.getElementById('addMsg');
+  const name=document.getElementById('cName').value.trim(),age=document.getElementById('cAge').value,grade=document.getElementById('cGrade').value.trim();
+  if(!name||!age){msg.className='msg err';msg.textContent='Please enter name and age.';return;}
+  btn.disabled=true;msg.className='msg';msg.textContent='Creating…';
+  try{
+    const r=await fetch(API+'/api/academy/student',{method:'POST',headers:authHeaders(),body:JSON.stringify({name,age,grade,avatar:selectedAvatar})});
+    const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not add child.');
+    closeModal('addModal');loadKids();
+  }catch(e){msg.className='msg err';msg.textContent=e.message;}
+  btn.disabled=false;
+}
+async function viewProgress(id,name){
+  document.getElementById('progTitle').textContent=name+"'s Progress";
+  document.getElementById('progStats').innerHTML='<div style="color:var(--muted);font-weight:600">Loading…</div>';
+  document.getElementById('sessList').innerHTML='';document.getElementById('progressModal').classList.add('show');
+  try{
+    const r=await fetch(API+'/api/academy/progress/'+id,{headers:authHeaders()});const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'Could not load.');const s=d.student;
+    document.getElementById('progStats').innerHTML=
+      `<div class="stat p"><b>${s.points||0}</b><span>Points</span></div>
+       <div class="stat s"><b>${s.streak||0}🔥</b><span>Day streak</span></div>
+       <div class="stat l"><b>${(d.sessions||[]).length}</b><span>Lessons</span></div>`;
+    const list=document.getElementById('sessList');
+    if(!d.sessions||!d.sessions.length){list.innerHTML='<div style="color:var(--muted);font-size:.86rem;font-weight:600">No lessons yet. Tap “Start Learning” to begin!</div>';return;}
+    list.innerHTML=d.sessions.map(x=>`<div class="sess"><div class="d">${(x.created_at||'').slice(0,16).replace('T',' ')} · ${esc(x.teacher||'')} (${esc(x.subject||'')})</div>${esc(x.summary||'Lesson')}</div>`).join('');
+  }catch(e){document.getElementById('progStats').innerHTML='<div style="color:#e0566a;font-weight:600">'+esc(e.message)+'</div>';}
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// boot
+(async function(){
+  await loadRoster();renderFacultyMini();
+  if(TOKEN&&PARENT){showDash();}
+})();
+</script>
+</body>
+</html>
