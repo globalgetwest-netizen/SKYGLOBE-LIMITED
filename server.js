@@ -2659,22 +2659,32 @@ INSTRUCTIONS:
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }],
       }));
-      const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-      const r = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
-        {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents,
-            generationConfig: { maxOutputTokens: 2048, temperature: 0.5 },
-          }),
-        }
-      );
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error?.message || `Gemini API error ${r.status}`);
-      reply = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || 'No response generated.';
+      // Try preferred model first, then fall back to gemini-2.0-flash if overloaded
+      const geminiModels = [
+        process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+      ];
+      const geminiBody = JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents,
+        generationConfig: { maxOutputTokens: 2048, temperature: 0.5 },
+      });
+      let geminiData, geminiOk;
+      for (const model of geminiModels) {
+        const r = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+          { method: 'POST', headers: { 'content-type': 'application/json' }, body: geminiBody }
+        );
+        geminiData = await r.json();
+        geminiOk = r.ok;
+        if (r.ok) break;
+        // Only retry on overload (503) or quota (429); hard-fail on auth errors
+        const status = r.status;
+        if (status !== 429 && status !== 503) break;
+      }
+      if (!geminiOk) throw new Error(geminiData?.error?.message || 'Gemini API error');
+      reply = geminiData.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || 'No response generated.';
     } else {
       // ── FALLBACK: Anthropic (only if ANTHROPIC_API_KEY is set) ─────────────
       const r = await fetch('https://api.anthropic.com/v1/messages', {
