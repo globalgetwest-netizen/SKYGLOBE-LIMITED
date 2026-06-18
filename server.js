@@ -97,6 +97,72 @@ function genRef() {
   return `SKY-${year}-${rand}`;
 }
 
+// ── UNIFIED AI TEXT ENGINE ───────────────────────────────────────────────────
+// Resilient generation: try Gemini first (free tier), fall back to Claude
+// (premium) if Gemini is missing/errors/empty. Guarantees a stable result so
+// documents never silently fail. Returns the generated plain text.
+async function geminiGenerate(prompt, { maxTokens = 2048, temperature = 0.72, system } = {}) {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error('GEMINI_API_KEY not set');
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 50000);
+  try {
+    const body = {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: maxTokens, temperature },
+    };
+    if (system) body.system_instruction = { parts: [{ text: system }] };
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+      { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: ctrl.signal }
+    );
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error?.message || `Gemini error ${r.status}`);
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!text.trim()) throw new Error('Empty Gemini response');
+    return text;
+  } finally { clearTimeout(timer); }
+}
+
+async function claudeGenerate(prompt, { maxTokens = 2048, system } = {}) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) throw new Error('ANTHROPIC_API_KEY not set');
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 55000);
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-opus-4-8', max_tokens: maxTokens,
+        system: system || undefined,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+      signal: ctrl.signal,
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error?.message || `Claude error ${r.status}`);
+    const text = data.content?.[0]?.text || '';
+    if (!text.trim()) throw new Error('Empty Claude response');
+    return text;
+  } finally { clearTimeout(timer); }
+}
+
+// Gemini-primary (free) → Claude fallback (premium). Always returns text or throws.
+async function generateText(prompt, opts = {}) {
+  try {
+    return await geminiGenerate(prompt, opts);
+  } catch (gemErr) {
+    console.warn('[AI] Gemini failed, falling back to Claude:', gemErr.message);
+    try {
+      return await claudeGenerate(prompt, opts);
+    } catch (claudeErr) {
+      console.error('[AI] Both engines failed. Gemini:', gemErr.message, '| Claude:', claudeErr.message);
+      throw new Error('Both AI engines unavailable: ' + claudeErr.message);
+    }
+  }
+}
+
 // ── CONTACT / CONSULTATION FORM ───────────────────────────────────────────────
 app.post('/api/contact', async (req, res) => {
   const { fname, lname, email, phone, service, destination, message } = req.body;
@@ -495,6 +561,11 @@ app.delete('/api/documents/:id', async (req, res) => {
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/staff', (req, res) => res.sendFile(path.join(__dirname, 'staff.html')));
 app.get('/letterhead', (req, res) => res.sendFile(path.join(__dirname, 'letterhead.html')));
+app.get('/digitalization', (req, res) => res.sendFile(path.join(__dirname, 'digitalization.html')));
+app.get('/conferences', (req, res) => res.sendFile(path.join(__dirname, 'conferences.html')));
+app.get('/packages', (req, res) => res.sendFile(path.join(__dirname, 'packages.html')));
+app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));
+app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));
 
 // ── AI CHAT ───────────────────────────────────────────────────────────────────
 const SKYGLOBE_SYSTEM = `You are the AI assistant for SkyGlobe Group, a premium global travel and immigration consultancy. You are knowledgeable, professional, warm, and concise.
@@ -651,23 +722,14 @@ app.post('/api/admin/documents/:id/new-token', checkAdmin, async (req, res) => {
 
 
 app.get('/api/test-ai', async (req, res) => {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return res.json({ ok: false, error: 'GEMINI_API_KEY is NOT set on Render. Please add it in Environment settings.' });
-  try {
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Say: AI is working!' }] }] }),
-      }
-    );
-    const data = await r.json();
-    if (!r.ok) return res.json({ ok: false, error: data.error?.message || `API returned ${r.status}`, hint: 'Check your Gemini API key at aistudio.google.com' });
-    res.json({ ok: true, reply: data.candidates?.[0]?.content?.parts?.[0]?.text });
-  } catch (e) {
-    res.json({ ok: false, error: e.message });
-  }
+  // Tests BOTH engines so you can see exactly what's configured and working.
+  const out = { gemini: { configured: !!process.env.GEMINI_API_KEY }, claude: { configured: !!process.env.ANTHROPIC_API_KEY } };
+  try { out.gemini.reply = await geminiGenerate('Say: AI is working!', { maxTokens: 30 }); out.gemini.ok = true; }
+  catch (e) { out.gemini.ok = false; out.gemini.error = e.message; }
+  try { out.claude.reply = await claudeGenerate('Say: AI is working!', { maxTokens: 30 }); out.claude.ok = true; }
+  catch (e) { out.claude.ok = false; out.claude.error = e.message; }
+  out.documents_will_work = !!(out.gemini.ok || out.claude.ok);
+  res.json(out);
 });
 
 app.get('/api/test', async (req, res) => {
@@ -941,8 +1003,7 @@ CRITICAL FORMATTING RULES:
   if (isIssuerDoc && (!institution || !program))
     return res.status(400).json({ error: 'Missing required fields.' });
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey)
+  if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY)
     return res.status(500).json({ error: 'AI not configured. Please contact support.' });
 
   // Purpose-specific guidance so the AI writes the right kind of visa letter.
@@ -1091,38 +1152,13 @@ ${NO_PLACEHOLDERS}`,
   const prompt = prompts[docType];
   if (!prompt) return res.status(400).json({ error: 'Invalid document type.' });
 
-  // Abort the Gemini call if it hangs, so we always return a clean JSON error
-  // rather than letting the client connection time out (which shows as a NetworkError).
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 55000);
+  // Resilient: Gemini first (free), Claude fallback (premium) — never silently fails.
   try {
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 2048, temperature: 0.72 },
-        }),
-        signal: ctrl.signal,
-      }
-    );
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error?.message || `API error ${r.status}`);
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!text) throw new Error('Empty response from AI');
+    const text = await generateText(prompt, { maxTokens: 2048, temperature: 0.72 });
     res.json({ text });
   } catch (e) {
     console.error('Doc gen error:', e.message);
-    const aborted = e.name === 'AbortError';
-    res.status(aborted ? 504 : 500).json({
-      error: aborted
-        ? 'The AI took too long to respond. Please try again.'
-        : 'Document generation failed. Please try again.'
-    });
-  } finally {
-    clearTimeout(timer);
+    res.status(500).json({ error: 'Document generation is temporarily unavailable. Please try again in a moment.' });
   }
 });
 
