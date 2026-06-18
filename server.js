@@ -2790,7 +2790,7 @@ async function getAcademyRoster() {
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
 async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
-  const models = ['gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-flash'];
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
   let lastError = null;
   for (const model of models) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -2801,7 +2801,7 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemPrompt }] },
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 2048, temperature: 0.7 }
+            generationConfig: { maxOutputTokens: 4096, temperature: 0.7, thinkingConfig: { thinkingBudget: 0 } }
           }),
           signal: AbortSignal.timeout(30000)
         });
@@ -2833,11 +2833,11 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
 async function academyAskGemini(systemPrompt, contents, maxTokens = 1024) {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
-  const models = [process.env.GEMINI_MODEL || 'gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const models = [process.env.GEMINI_MODEL || 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
   const body = JSON.stringify({
     systemInstruction: { parts: [{ text: systemPrompt }] },
     contents,
-    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.6 },
+    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.6, thinkingConfig: { thinkingBudget: 0 } },
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_LOW_AND_ABOVE' },
       { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_LOW_AND_ABOVE' },
@@ -2963,6 +2963,16 @@ app.post('/api/academy/tutor', async (req, res) => {
   const { studentId, subject, message, history, language } = req.body || {};
   const subjKey = String(subject || 'mathematics').toLowerCase();
   const lang = String(language || 'en').trim() || 'en';
+  const LANG_NAMES = {
+    en:'English', es:'Spanish', fr:'French', de:'German', it:'Italian', pt:'Portuguese',
+    ar:'Arabic', hi:'Hindi', ur:'Urdu', bn:'Bengali', zh:'Chinese (Mandarin)', ja:'Japanese',
+    ko:'Korean', ru:'Russian', tr:'Turkish', fa:'Persian', sw:'Swahili', ha:'Hausa',
+    yo:'Yoruba', ig:'Igbo', am:'Amharic', zu:'Zulu', af:'Afrikaans', nl:'Dutch',
+    pl:'Polish', uk:'Ukrainian', ro:'Romanian', el:'Greek', he:'Hebrew', th:'Thai',
+    vi:'Vietnamese', id:'Indonesian', ms:'Malay', fil:'Filipino', ta:'Tamil', te:'Telugu',
+    ml:'Malayalam', mr:'Marathi', gu:'Gujarati', pa:'Punjabi', so:'Somali', ps:'Pashto'
+  };
+  const langName = LANG_NAMES[lang] || lang;
   const teacher = await getAcademyTeacher(subjKey);
   if (!teacher) return res.status(400).json({ error: 'Unknown subject.' });
   if (!ACADEMY_LIVE_SUBJECTS.includes(subjKey))
@@ -3013,7 +3023,7 @@ SAFETY RULES (very important — children use this):
 
 FORMAT: Plain, friendly text. You may use simple emoji occasionally to be warm. Keep it short and spoken-friendly (it may be read aloud by voice).`
     + (lang !== 'en'
-      ? `\n\nIMPORTANT: The student's chosen language is ${lang}. Respond entirely in ${lang}. Adapt vocabulary to be age-appropriate for a child.`
+      ? `\n\nCRITICAL LANGUAGE RULE: ${student.name} speaks ${langName}. You MUST write EVERY word of your reply in ${langName} only — do not use any English. Use simple, warm ${langName} vocabulary that a child can understand. This is essential.`
       : '');
 
     const contents = [];
@@ -3025,7 +3035,7 @@ FORMAT: Plain, friendly text. You may use simple emoji occasionally to be warm. 
     }
     contents.push({ role: 'user', parts: [{ text: String(message).trim() }] });
 
-    const reply = await academyAskGemini(systemPrompt, contents, 800) || `Hi ${student.name}! Let's try that again together.`;
+    const reply = await academyAskGemini(systemPrompt, contents, 1500) || `Hi ${student.name}! Let's try that again together.`;
 
     // Award points + update streak (best-effort), and log session memory
     const today = new Date().toISOString().slice(0, 10);
