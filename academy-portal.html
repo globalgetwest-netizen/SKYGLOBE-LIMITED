@@ -144,6 +144,42 @@
 
   footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px}
   footer .m{color:var(--gold);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:.7rem;margin-top:4px}
+
+  /* dashboard tabs */
+  .dtabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 2px 22px}
+  .dtabs button{background:#fff;border:1px solid var(--line);color:var(--muted);padding:11px 18px;border-radius:30px;font-weight:700;cursor:pointer;font-family:var(--head);font-size:.9rem}
+  .dtabs button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .pane{display:none}.pane.show{display:block}
+
+  /* admission status banner */
+  .statusbar{border-radius:var(--r);padding:22px 24px;margin-bottom:22px;box-shadow:var(--shadow);border:1px solid var(--line)}
+  .statusbar.pending{background:var(--sun-soft);border-color:var(--sun)}
+  .statusbar.reviewing{background:var(--sky-soft);border-color:var(--sky)}
+  .statusbar.accepted{background:var(--leaf-soft);border-color:var(--leaf)}
+  .statusbar h3{font-family:var(--head);color:var(--navy);font-size:1.15rem;margin-bottom:4px}
+  .statusbar p{color:var(--ink);font-size:.9rem;font-weight:600}
+  .statusbar .badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:#fff;color:var(--navy);margin-bottom:8px}
+
+  /* ID card */
+  .idcard{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:18px;padding:22px;max-width:380px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-bottom:8px}
+  .idcard:before{content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.3),transparent 70%)}
+  .idcard .lbl{color:var(--gold-hi);font-size:.62rem;text-transform:uppercase;letter-spacing:.14em;font-weight:700}
+  .idcard .sid{font-family:var(--head);font-size:1.5rem;color:var(--gold);letter-spacing:.05em;margin:2px 0 12px}
+  .idcard .nm{font-family:var(--head);font-size:1.25rem}
+  .idcard .meta{color:#bcd0ec;font-size:.84rem;margin-top:4px}
+
+  /* report card / tables */
+  .rtable{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:.88rem}
+  .rtable th{background:var(--bg);text-align:left;padding:11px 14px;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.05em}
+  .rtable td{padding:11px 14px;border-top:1px solid var(--line);font-weight:600}
+  .gr{font-weight:800;font-family:var(--head)}
+  .gr.A,.gr.B{color:#1f9d57}.gr.C{color:#b9772a}.gr.D,.gr.F{color:#e0566a}
+  .mat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 8px 20px rgba(10,31,68,.06)}
+  .mat .tag{display:inline-block;background:var(--sky-soft);color:var(--sky);font-size:.68rem;font-weight:800;text-transform:uppercase;padding:3px 10px;border-radius:14px;letter-spacing:.05em}
+  .mat h4{font-family:var(--head);color:var(--navy);margin:8px 0 4px;font-size:1.05rem}
+  .selrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .selrow select{max-width:200px}
+  .empty{color:var(--muted);font-weight:600;padding:14px 0}
 </style>
 </head>
 <body>
@@ -164,20 +200,18 @@
   </div>
 
   <div class="auth">
-    <div class="tabs">
-      <button id="tabLogin" class="active" onclick="setTab('login')">Log In</button>
-      <button id="tabSignup" onclick="setTab('signup')">Create Account</button>
-    </div>
-    <div id="nameField" style="display:none">
-      <label>Your name</label>
-      <input id="pName" placeholder="e.g. Sarah Ahmed">
-    </div>
+    <h3 style="font-family:var(--head);color:var(--navy);text-align:center;font-size:1.2rem;margin-bottom:4px">Parent / Guardian Log In</h3>
+    <p style="text-align:center;color:var(--muted);font-size:.84rem;margin-bottom:6px">Welcome back to your Family Campus.</p>
     <label>Email</label>
     <input id="pEmail" type="email" placeholder="you@email.com" autocomplete="email">
     <label>Password</label>
-    <input id="pPass" type="password" placeholder="Your password" autocomplete="current-password">
+    <input id="pPass" type="password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()">
     <button class="btn" id="authBtn" onclick="doAuth()">Log In</button>
     <div class="msg" id="authMsg"></div>
+    <div style="text-align:center;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
+      <p style="color:var(--muted);font-size:.86rem;margin-bottom:10px">New to SkyGlobe Kids Academy?</p>
+      <a class="btn sky" href="/academy/admission" style="display:block;text-decoration:none;text-align:center">📝 Apply for Admission</a>
+    </div>
   </div>
 
   <div class="trust">
@@ -202,11 +236,52 @@
     <p id="whoLine"></p>
   </div>
 
-  <div class="sec-head"><h2>👨‍👩‍👧 My Children</h2><span class="hint">Tap “Start Learning” to begin a lesson</span></div>
-  <div class="kids" id="kidsGrid"></div>
+  <div class="dtabs">
+    <button id="dt-children" class="active" onclick="showPane('children')">👨‍👩‍👧 My Children</button>
+    <button id="dt-records" onclick="showPane('records')">📋 Academic Records</button>
+    <button id="dt-materials" onclick="showPane('materials')">📚 Learning Materials</button>
+    <button id="dt-faculty" onclick="showPane('faculty')">🏫 Faculty</button>
+  </div>
 
-  <div class="sec-head" style="margin-top:36px"><h2>🏫 The Faculty</h2><span class="hint">Your child's AI teachers</span></div>
-  <div class="hall" id="hall"></div>
+  <!-- CHILDREN PANE -->
+  <div class="pane show" id="pane-children">
+    <div class="sec-head"><h2>👨‍👩‍👧 My Children</h2><span class="hint">Enrolled children can start learning</span></div>
+    <div class="kids" id="kidsGrid"></div>
+  </div>
+
+  <!-- ACADEMIC RECORDS PANE -->
+  <div class="pane" id="pane-records">
+    <div class="sec-head"><h2>📋 Academic Records</h2><span class="hint">Student ID, report card &amp; assessments</span></div>
+    <div class="selrow">
+      <select id="recChild" onchange="loadRecord()"></select>
+    </div>
+    <div id="recBody"><div class="empty">Select a child to view their academic file.</div></div>
+  </div>
+
+  <!-- LEARNING MATERIALS PANE -->
+  <div class="pane" id="pane-materials">
+    <div class="sec-head"><h2>📚 Learning Materials</h2><span class="hint">Curriculum by subject &amp; age group</span></div>
+    <div class="selrow">
+      <select id="matSubject" onchange="loadMaterials()">
+        <option value="">All subjects</option>
+        <option value="mathematics">Mathematics</option><option value="science">Science</option>
+        <option value="reading">Reading &amp; Language</option><option value="coding">Coding &amp; Robotics</option>
+        <option value="history">History &amp; Geography</option><option value="arts">Arts &amp; Music</option>
+        <option value="finance">Financial Literacy</option><option value="health">Health &amp; Well-being</option>
+      </select>
+      <select id="matAge" onchange="loadMaterials()">
+        <option value="">All ages</option><option value="4-6">Ages 4-6</option>
+        <option value="7-9">Ages 7-9</option><option value="10-12">Ages 10-12</option>
+      </select>
+    </div>
+    <div class="kids" id="matGrid"><div class="empty">Loading materials…</div></div>
+  </div>
+
+  <!-- FACULTY PANE -->
+  <div class="pane" id="pane-faculty">
+    <div class="sec-head"><h2>🏫 The Faculty</h2><span class="hint">Your child's AI teachers</span></div>
+    <div class="hall" id="hall"></div>
+  </div>
 </div></div>
 
 <!-- ADD CHILD MODAL -->
@@ -246,23 +321,14 @@ let mode='login', selectedAvatar='🧒', ROSTER=[];
 const AVATARS=['🧒','👦','👧','🧑','👶','🐯','🦊','🐱','🐶','🦁','🐼','🦉','🚀','🌟','🦄','🐢'];
 document.getElementById('yr').textContent=new Date().getFullYear();
 
-function setTab(m){
-  mode=m;
-  document.getElementById('tabLogin').classList.toggle('active',m==='login');
-  document.getElementById('tabSignup').classList.toggle('active',m==='signup');
-  document.getElementById('nameField').style.display=m==='signup'?'block':'none';
-  document.getElementById('authBtn').textContent=m==='signup'?'Create account':'Log In';
-  document.getElementById('authMsg').textContent='';
-}
 async function doAuth(){
   const btn=document.getElementById('authBtn'),msg=document.getElementById('authMsg');
   const email=document.getElementById('pEmail').value.trim(),pass=document.getElementById('pPass').value;
-  const name=document.getElementById('pName').value.trim();
   if(!email||!pass){msg.className='msg err';msg.textContent='Please enter email and password.';return;}
   btn.disabled=true;msg.className='msg';msg.textContent='Please wait…';
   try{
-    const r=await fetch(API+'/api/academy/parent/'+(mode==='signup'?'signup':'login'),{
-      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass})});
+    const r=await fetch(API+'/api/academy/parent/login',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
     const d=await r.json();if(!r.ok)throw new Error(d.error||'Something went wrong.');
     TOKEN=d.token;PARENT={email:d.email,name:d.name};
     localStorage.setItem('academyToken',TOKEN);localStorage.setItem('academyParent',JSON.stringify(PARENT));
