@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn with Numa — SkyGlobe Kids Academy</title>
+<meta name="theme-color" content="#041022">
+<link rel="icon" href="/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#041022;--navy2:#0a1f44;--gold:#D4A73A;--gold-hi:#F4D77A;
+    --sky:#4DA3FF;--sky-d:#2C7BE5;--sky-soft:#DCEBFF;
+    --leaf:#3FBF7F;--leaf-soft:#D9F5E6;--sun:#FFC542;--sun-soft:#FFF2CF;
+    --ink:#22324a;--muted:#7488a3;--line:#e7ecf3;
+    --head:'Fredoka',system-ui,sans-serif;--body:'Nunito',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--body);color:var(--ink);display:flex;flex-direction:column;height:100vh;overflow:hidden;
+    background:radial-gradient(900px 380px at 80% -6%,var(--sky-soft),transparent 60%),
+               radial-gradient(700px 340px at 10% 6%,var(--leaf-soft),transparent 55%),#f4f8ff}
+
+  /* Campus header (matches portal) */
+  header{background:linear-gradient(120deg,var(--navy),var(--navy2));color:#fff;padding:11px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 24px rgba(4,16,34,.28);z-index:5}
+  header .back{color:#cfe0f5;font-size:1.5rem;text-decoration:none;padding:2px 6px;border-radius:8px}
+  header .back:hover{background:rgba(255,255,255,.1);color:#fff}
+  .teacher{display:flex;align-items:center;gap:11px;flex:1}
+  .teacher .av{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#7BBEFF,var(--sky));display:flex;align-items:center;justify-content:center;font-size:1.55rem;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+  .teacher h1{font-family:var(--head);font-size:1.2rem;line-height:1.05}
+  .teacher small{font-size:.74rem;color:#bcd0ec}
+  .scorebar{display:flex;gap:8px}
+  .pill{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:7px 13px;font-family:var(--head);font-weight:600;font-size:.86rem;display:flex;align-items:center;gap:5px}
+
+  .feed{flex:1;overflow-y:auto;padding:22px 16px;display:flex;flex-direction:column;gap:14px}
+  .row{display:flex;gap:10px;max-width:840px;width:100%;margin:0 auto;align-items:flex-end}
+  .row.me{flex-direction:row-reverse}
+  .av-s{width:36px;height:36px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:#fff;box-shadow:0 3px 8px rgba(10,31,68,.12)}
+  .me .av-s{background:var(--sun-soft)}
+  .bubble{max-width:80%;padding:14px 18px;border-radius:22px;font-size:1.02rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;box-shadow:0 4px 16px rgba(10,31,68,.07);font-weight:600}
+  .bot .bubble{background:#fff;border-bottom-left-radius:6px;color:var(--ink)}
+  .me .bubble{background:linear-gradient(135deg,#7BBEFF,var(--sky));color:#06294f;border-bottom-right-radius:6px}
+  .listen{margin-top:8px;background:var(--sky-soft);border:1px solid #BBD9FF;color:var(--sky-d);font-size:.8rem;padding:6px 13px;border-radius:18px;cursor:pointer;font-weight:700;font-family:var(--head)}
+  .listen:hover{background:#cfe2ff}
+  .dots span{display:inline-block;width:8px;height:8px;margin:0 2px;border-radius:50%;background:var(--sky);opacity:.5;animation:bnc 1s infinite}
+  .dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+  @keyframes bnc{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-6px);opacity:1}}
+  .reward{align-self:center;background:var(--sun-soft);border:1px solid var(--sun);color:#9a6b00;font-family:var(--head);font-weight:600;font-size:.86rem;padding:7px 18px;border-radius:22px;animation:pop .3s}
+  @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+  .composer{padding:13px 16px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(10,31,68,.05)}
+  .composer .inner{max-width:840px;margin:0 auto;width:100%;display:flex;gap:10px;align-items:center}
+  #msg{flex:1;padding:15px 20px;border:2px solid var(--sky-soft);border-radius:30px;font-size:1.02rem;font-family:var(--body);font-weight:600;outline:none}
+  #msg:focus{border-color:var(--sky)}
+  .mic,.send{border:none;border-radius:50%;width:52px;height:52px;cursor:pointer;font-size:1.35rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mic{background:var(--sky-soft);color:var(--sky-d)}
+  .mic.on{background:#FEE2E2;color:#DC2626;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}50%{box-shadow:0 0 0 8px rgba(220,38,38,0)}}
+  .send{background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#3a2a00}
+  .send:disabled{opacity:.5}
+  .gate{flex:1;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;flex-direction:column;gap:14px}
+  .gate a{background:var(--gold);color:#3a2a00;padding:13px 28px;border-radius:30px;font-family:var(--head);font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="/academy" title="Back to Family Campus">←</a>
+  <div class="teacher">
+    <div class="av">🔢</div>
+    <div><h1>Numa</h1><small id="subline">Your Mathematics teacher</small></div>
+  </div>
+  <div class="scorebar">
+    <div class="pill">⭐ <span id="pts">0</span></div>
+    <div class="pill">🔥 <span id="strk">0</span></div>
+  </div>
+</header>
+
+<div class="feed" id="feed"></div>
+
+<div class="composer">
+  <div class="inner">
+    <button class="mic" id="mic" title="Speak" onclick="toggleMic()">🎤</button>
+    <input id="msg" placeholder="Ask Numa anything about maths…" onkeydown="if(event.key==='Enter')send()">
+    <button class="send" id="send" onclick="send()">➤</button>
+  </div>
+</div>
+
+<script>
+const API='';
+const TOKEN=localStorage.getItem('academyToken')||'';
+const params=new URLSearchParams(location.search);
+const STUDENT=params.get('student');
+const SUBJECT='mathematics';
+let TEACHER={name:'Numa',emoji:'🔢'};
+let history=[];
+
+if(!TOKEN||!STUDENT){
+  document.body.innerHTML='<div class="gate"><div style="font-size:3rem">🔒</div><h2 style="font-family:Fredoka;color:#041022">Please open from the Family Campus</h2><a href="/academy">Go to Parent Portal</a></div>';
+}
+function authHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN};}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function addMsg(role,text,typing){
+  const feed=document.getElementById('feed');
+  const id='m'+Date.now()+Math.random().toString(36).slice(2);
+  const me=role==='me';
+  const row=document.createElement('div');row.className='row '+(me?'me':'bot');row.id=id;
+  const av=document.createElement('div');av.className='av-s';av.textContent=me?'🧒':TEACHER.emoji;
+  const wrap=document.createElement('div');
+  const b=document.createElement('div');b.className='bubble';
+  if(typing){b.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';}else b.textContent=text;
+  wrap.appendChild(b);
+  if(!me&&!typing&&text&&'speechSynthesis'in window){
+    const lb=document.createElement('button');lb.className='listen';lb.textContent='🔊 Listen';lb.onclick=()=>speak(text,lb);wrap.appendChild(lb);
+  }
+  row.appendChild(av);row.appendChild(wrap);feed.appendChild(row);feed.scrollTop=feed.scrollHeight;return id;
+}
+function rm(id){const e=document.getElementById(id);if(e)e.remove();}
+function reward(txt){const f=document.getElementById('feed');const d=document.createElement('div');d.className='reward';d.textContent=txt;f.appendChild(d);f.scrollTop=f.scrollHeight;}
+
+async function send(){
+  const inp=document.getElementById('msg');const text=inp.value.trim();if(!text)return;
+  inp.value='';document.getElementById('send').disabled=true;
+  addMsg('me',text);const t=addMsg('bot','',true);
+  try{
+    const r=await fetch(API+'/api/academy/tutor',{method:'POST',headers:authHeaders(),
+      body:JSON.stringify({studentId:STUDENT,subject:SUBJECT,message:text,history:history.slice(-10)})});
+    const d=await r.json();rm(t);
+    if(!r.ok)throw new Error(d.error||'Numa is busy.');
+    addMsg('bot',d.reply);
+    history.push({role:'user',content:text});history.push({role:'assistant',content:d.reply});
+    if(history.length>20)history=history.slice(-20);
+    if(typeof d.points==='number'){
+      const prev=parseInt(document.getElementById('pts').textContent)||0;
+      document.getElementById('pts').textContent=d.points;document.getElementById('strk').textContent=d.streak||0;
+      if(d.points>prev)reward('+'+(d.points-prev)+' points ⭐ Great work!');
+    }
+  }catch(e){rm(t);addMsg('bot','Oops — '+e.message+' Let\'s try again! 😊');}
+  document.getElementById('send').disabled=false;inp.focus();
+}
+
+/* ── FREE PREMIUM VOICE ── */
+let curUtt=null;
+function cleanForSpeech(raw){return raw.replace(/#{1,6}\s*/g,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/`{1,3}[^`]*`{1,3}/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/^[\s\-\*•]+/gm,'').replace(/[\u{1F300}-\u{1FAFF}]/gu,'').replace(/\n{2,}/g,'. ').replace(/\n/g,', ').replace(/\s{2,}/g,' ').trim();}
+function pickVoice(){const v=window.speechSynthesis.getVoices();const prefs=[x=>/en-US/i.test(x.lang)&&/Google US English/i.test(x.name),x=>/en-GB/i.test(x.lang)&&/Google UK English Female/i.test(x.name),x=>/en/i.test(x.lang)&&/Samantha|Karen|Moira|Tessa/i.test(x.name),x=>/en-US/i.test(x.lang)&&/Microsoft.*Natural|Aria|Jenny/i.test(x.name),x=>/en-US/i.test(x.lang)&&!x.name.includes('espeak'),x=>/^en/i.test(x.lang)];for(const t of prefs){const m=v.find(t);if(m)return m;}return null;}
+function speak(text,btn){
+  if(!('speechSynthesis'in window))return;
+  if(window.speechSynthesis.speaking||window.speechSynthesis.pending){window.speechSynthesis.cancel();if(curUtt&&curUtt._b)curUtt._b.textContent='🔊 Listen';if(curUtt&&curUtt._b===btn){curUtt=null;return;}}
+  const u=new SpeechSynthesisUtterance(cleanForSpeech(text));
+  u.rate=0.95;u.pitch=1.05;u.lang='en-US';const best=pickVoice();if(best)u.voice=best;
+  u._b=btn;u.onstart=()=>btn.textContent='⏸ Stop';u.onend=()=>{btn.textContent='🔊 Listen';curUtt=null;};u.onerror=()=>{btn.textContent='🔊 Listen';curUtt=null;};
+  curUtt=u;window.speechSynthesis.speak(u);
+}
+if('speechSynthesis'in window){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();}
+
+/* ── FREE VOICE INPUT ── */
+let recog=null,listening=false;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){recog=new SR();recog.lang='en-US';recog.interimResults=false;recog.maxAlternatives=1;
+  recog.onresult=e=>{const t=e.results[0][0].transcript;document.getElementById('msg').value=t;listening=false;document.getElementById('mic').classList.remove('on');send();};
+  recog.onend=()=>{listening=false;document.getElementById('mic').classList.remove('on');};
+  recog.onerror=()=>{listening=false;document.getElementById('mic').classList.remove('on');};
+}else{const m=document.getElementById('mic');if(m)m.style.display='none';}
+function toggleMic(){if(!recog)return;if(listening){recog.stop();listening=false;document.getElementById('mic').classList.remove('on');}else{try{recog.start();listening=true;document.getElementById('mic').classList.add('on');}catch(e){}}}
+
+/* ── BOOT ── */
+async function loadTeacher(){
+  try{
+    const r=await fetch(API+'/api/academy/teacher/'+SUBJECT,{headers:authHeaders()});
+    if(r.ok){const t=await r.json();TEACHER={name:t.name||'Numa',emoji:t.emoji||'🔢'};
+      document.querySelector('.teacher h1').textContent=TEACHER.name;
+      document.querySelector('.teacher .av').textContent=TEACHER.emoji;
+      document.getElementById('msg').placeholder='Ask '+TEACHER.name+' anything about maths…';
+      document.title='Learn with '+TEACHER.name+' — SkyGlobe Kids Academy';}
+  }catch(e){}
+}
+async function boot(){
+  if(!TOKEN||!STUDENT)return;
+  await loadTeacher();
+  try{
+    const r=await fetch(API+'/api/academy/progress/'+STUDENT,{headers:authHeaders()});
+    const d=await r.json();
+    if(r.ok&&d.student){
+      document.getElementById('pts').textContent=d.student.points||0;
+      document.getElementById('strk').textContent=d.student.streak||0;
+      document.getElementById('subline').textContent='Your Mathematics teacher · for '+d.student.name;
+      const first=(!d.sessions||!d.sessions.length);
+      addMsg('bot',first
+        ?`Hi ${d.student.name}! 👋 I'm ${TEACHER.name}, your maths teacher. I'm so happy to meet you! What would you like to learn today — counting, adding, times tables, or something else? 😊`
+        :`Welcome back, ${d.student.name}! 🌟 Ready for more maths fun? Tell me what you'd like to practise today!`);
+    }
+  }catch(e){addMsg('bot','Hi! I\'m '+TEACHER.name+', your maths teacher. What would you like to learn today? 😊');}
+}
+boot();
+</script>
+</body>
+</html>
