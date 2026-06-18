@@ -329,6 +329,7 @@
         <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
         <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
         <button class="sb-link" data-view="payments" onclick="switchView('payments')"><span class="ic">💳</span> Payments</button>
+        <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
         <button class="sb-link" data-view="payroll" onclick="switchView('payroll')"><span class="ic">👥</span> Payroll</button>
         <button class="sb-link" data-view="departments" onclick="switchView('departments')"><span class="ic">🏢</span> Departments</button>
@@ -425,6 +426,20 @@
             </div>
             <div id="paymentsTable" style="overflow-x:auto">
               <p style="color:var(--muted);font-size:0.9rem">Loading payments…</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- LEGAL DOCUMENTS -->
+        <section class="view" id="view-legaldocs">
+          <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <h3 style="margin:0">⚖️ Legal Digital Documentation — Order Desk</h3>
+              <button onclick="loadLegalDocs()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
+            </div>
+            <p style="color:var(--muted);font-size:0.86rem;margin:-6px 0 14px">Every AI-generated, paid legal document. Review it, resend the secure link, or refresh an expired link. Facilitated &amp; Verified by SkyGlobe Group.</p>
+            <div id="legalDocsTable" style="overflow-x:auto">
+              <p style="color:var(--muted);font-size:0.9rem">Loading documents…</p>
             </div>
           </div>
         </section>
@@ -976,11 +991,12 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',ipregistry:'Brand & IP Registry',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',ipregistry:'Brand & IP Registry',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
   if(v==='payments') loadPayments();
+  if(v==='legaldocs') loadLegalDocs();
   if(v==='finance') loadFinance();
   if(v==='payroll') loadPayroll();
   if(v==='directory') loadDirectory();
@@ -1154,6 +1170,61 @@ async function loadPayments(){
       </tr>`).join('')}</tbody>
     </table>`;
   }catch(e){el.innerHTML='<p style="color:#e57373">Could not load payments: '+e.message+'</p>';}
+}
+
+/* ── LEGAL DOCUMENTS ORDER DESK (CEO) ── */
+async function loadLegalDocs(){
+  const el=document.getElementById('legalDocsTable');
+  if(!el)return;
+  el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">Loading documents…</p>';
+  try{
+    const r=await fetch(API+'/api/admin/legal-docs',{headers:{'x-admin-key':KEY}});
+    if(r.status===401){el.innerHTML='<p style="color:#e57373">Unauthorized.</p>';return;}
+    const rows=await r.json();
+    if(!Array.isArray(rows)||!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No legal documents have been generated yet.</p>';return;}
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+      <thead><tr style="background:#f0f4ff;border-bottom:2px solid var(--line)">
+        <th style="padding:10px 8px;text-align:left">Reference</th>
+        <th style="padding:10px 8px;text-align:left">Document</th>
+        <th style="padding:10px 8px;text-align:left">Client</th>
+        <th style="padding:10px 8px;text-align:left">Created</th>
+        <th style="padding:10px 8px;text-align:left">Status</th>
+        <th style="padding:10px 8px;text-align:left">Actions</th>
+      </tr></thead>
+      <tbody>${rows.map((d,i)=>{
+        const opened=!!d.accessed_at;
+        const badge=d.expired
+          ? '<span style="background:#c62828;color:#fff;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700">Link expired</span>'
+          : (opened
+            ? '<span style="background:#2e7d32;color:#fff;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700">Opened by client</span>'
+            : '<span style="background:#f57c00;color:#fff;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700">Delivered · unopened</span>');
+        return `<tr style="border-bottom:1px solid var(--line);background:${i%2?'#fafbff':'#fff'}">
+          <td style="padding:9px 8px;font-family:monospace;font-size:0.8rem">${esc(d.ref||'—')}</td>
+          <td style="padding:9px 8px">${esc(d.doc_type||'—')}<div style="font-size:0.72rem;color:var(--muted)">${esc(d.group||'')}</div></td>
+          <td style="padding:9px 8px">${esc(d.client_email||'—')}</td>
+          <td style="padding:9px 8px;color:var(--muted)">${d.created_at?new Date(d.created_at).toLocaleString():''}</td>
+          <td style="padding:9px 8px">${badge}</td>
+          <td style="padding:9px 8px;white-space:nowrap">
+            ${d.viewUrl&&!d.expired?`<a href="${d.viewUrl}" target="_blank" rel="noopener" style="background:var(--navy3);color:#fff;text-decoration:none;padding:6px 12px;border-radius:7px;font-size:0.78rem;font-weight:600;margin-right:6px">Open</a>`:''}
+            <button onclick="resendLegalDoc(${d.id},'${esc(d.client_email||'')}')" style="background:var(--gold);color:#1a1300;border:none;padding:6px 12px;border-radius:7px;font-weight:700;cursor:pointer;font-size:0.78rem">${d.expired?'Refresh & Send':'Resend Link'}</button>
+          </td>
+        </tr>`;}).join('')}</tbody>
+    </table>`;
+  }catch(e){el.innerHTML='<p style="color:#e57373">Could not load documents: '+e.message+'</p>';}
+}
+
+async function resendLegalDoc(id, currentEmail){
+  let email=currentEmail;
+  if(!email){ email=prompt('No client email on file. Enter the email to send the secure link to:'); if(!email)return; }
+  try{
+    const r=await fetch(API+'/api/admin/legal-docs/'+id+'/resend',{method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({email})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Failed');
+    alert('✅ Secure link sent to '+d.email);
+    loadLegalDocs();
+  }catch(e){ alert('Could not send: '+e.message); }
 }
 
 async function loadApps(){
