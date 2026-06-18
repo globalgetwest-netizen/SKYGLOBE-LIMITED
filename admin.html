@@ -2273,6 +2273,7 @@ function toggleCEOAssistant() {
     document.getElementById('ceoAIInput').focus();
   } else {
     panel.style.opacity = '0'; panel.style.transform = 'translateY(20px) scale(0.96)';
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel(); // stop any voice
     setTimeout(() => { panel.style.display = 'none'; }, 280);
     if (btn) btn.innerHTML = '<span style="font-size:1.3rem">🧠</span>';
   }
@@ -2324,10 +2325,48 @@ function appendCEOMsg(role, text, isTyping) {
     bubble.innerHTML = '<span style="display:inline-flex;gap:4px;align-items:center"><span class="ceo-dot"></span><span class="ceo-dot" style="animation-delay:.18s"></span><span class="ceo-dot" style="animation-delay:.36s"></span></span>';
   }
   div.appendChild(bubble);
+  // Voice (listen) button for assistant replies — free browser text-to-speech
+  if (!isUser && !isTyping && text && 'speechSynthesis' in window) {
+    const voiceBtn = document.createElement('button');
+    voiceBtn.type = 'button';
+    voiceBtn.innerHTML = '🔊 Listen';
+    voiceBtn.title = 'Listen to this reply';
+    voiceBtn.style.cssText = 'margin-top:6px;background:rgba(212,167,58,0.12);border:1px solid rgba(212,167,58,0.3);color:#D4A73A;font-size:0.72rem;padding:4px 11px;border-radius:14px;cursor:pointer;font-weight:600;transition:background .15s';
+    voiceBtn.onmouseover = () => voiceBtn.style.background = 'rgba(212,167,58,0.25)';
+    voiceBtn.onmouseout = () => voiceBtn.style.background = 'rgba(212,167,58,0.12)';
+    voiceBtn.onclick = () => speakCEOReply(text, voiceBtn);
+    div.appendChild(voiceBtn);
+  }
   feed.appendChild(div);
   feed.scrollTop = feed.scrollHeight;
   return id;
 }
+
+// ── FREE VOICE OUTPUT (browser Speech Synthesis — zero cost, no API key) ──────
+let ceoCurrentUtterance = null;
+function speakCEOReply(text, btn) {
+  if (!('speechSynthesis' in window)) return;
+  // If already speaking this, stop (toggle off)
+  if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+    window.speechSynthesis.cancel();
+    if (ceoCurrentUtterance && ceoCurrentUtterance._btn) ceoCurrentUtterance._btn.innerHTML = '🔊 Listen';
+    if (ceoCurrentUtterance && ceoCurrentUtterance._btn === btn) { ceoCurrentUtterance = null; return; }
+  }
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.0; u.pitch = 1.0; u.lang = 'en-US';
+  // Prefer a clear English voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const pref = voices.find(v => /en-US/i.test(v.lang) && /Google|Natural|Samantha|Microsoft/i.test(v.name)) || voices.find(v => /^en/i.test(v.lang));
+  if (pref) u.voice = pref;
+  u._btn = btn;
+  u.onstart = () => { btn.innerHTML = '⏸ Stop'; };
+  u.onend = () => { btn.innerHTML = '🔊 Listen'; ceoCurrentUtterance = null; };
+  u.onerror = () => { btn.innerHTML = '🔊 Listen'; ceoCurrentUtterance = null; };
+  ceoCurrentUtterance = u;
+  window.speechSynthesis.speak(u);
+}
+// Warm up voice list (some browsers load voices async)
+if ('speechSynthesis' in window) { window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices(); }
 
 function removeCEOMsg(id) {
   const el = document.getElementById(id);
