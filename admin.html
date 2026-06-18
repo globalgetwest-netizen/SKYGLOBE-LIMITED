@@ -51,11 +51,16 @@
   .sb-brand img{height:42px;width:42px;border-radius:11px}
   .sb-brand .t{font-weight:800;font-size:1.02rem;line-height:1.1}
   .sb-brand .t small{display:block;font-size:0.62rem;font-weight:600;color:var(--gold);letter-spacing:0.14em;text-transform:uppercase;margin-top:2px}
-  .sb-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:4px}
+  .sb-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .sb-nav::-webkit-scrollbar{width:6px}
+  .sb-nav::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px}
   .sb-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;cursor:pointer;color:var(--muted);font-weight:600;font-size:0.9rem;border:none;background:none;text-align:left;width:100%;transition:.15s}
   .sb-link .ic{font-size:1.05rem;width:20px;text-align:center}
   .sb-link:hover{background:var(--navy2);color:var(--txt)}
   .sb-link.active{background:linear-gradient(90deg,var(--gold-soft),transparent);color:var(--gold)}
+  .sb-link.core{background:linear-gradient(135deg,#D4A73A,#a87016);color:#1a1300;font-weight:800;margin-bottom:8px;box-shadow:0 6px 18px rgba(212,167,58,.35)}
+  .sb-link.core:hover{background:linear-gradient(135deg,#F4D77A,#D4A73A);color:#1a1300}
+  .sb-link.core .ic{font-size:1.15rem}
   .sb-link .badge-n{margin-left:auto;background:var(--red);color:#fff;font-size:0.66rem;font-weight:700;padding:1px 8px;border-radius:100px;display:none}
   .sb-link .badge-n.show{display:inline-block}
   .sb-foot{padding:14px;border-top:1px solid var(--line)}
@@ -324,6 +329,7 @@
         <div class="t">SkyGlobe<small>Group Portal</small></div>
       </div>
       <nav class="sb-nav">
+        <button class="sb-link core" onclick="toggleCEOAssistant()" title="SKYGLOBE CORE Intelligence — your CEO AI assistant"><span class="ic">🧠</span> SKYGLOBE CORE AI</button>
         <button class="sb-link active" data-view="dashboard" onclick="switchView('dashboard')"><span class="ic">📊</span> Dashboard</button>
         <button class="sb-link" data-view="applications" onclick="switchView('applications')"><span class="ic">📋</span> Applications <span class="badge-n" id="navAppsBadge"></span></button>
         <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
@@ -2260,14 +2266,15 @@ function toggleCEOAssistant() {
   const panel = document.getElementById('ceoAIPanel');
   const btn = document.getElementById('ceoAIBtn');
   if (ceoAIOpen) {
+    if (typeof toggleSidebar === 'function') toggleSidebar(false); // close mobile sidebar
     panel.style.display = 'flex';
     setTimeout(() => { panel.style.opacity = '1'; panel.style.transform = 'translateY(0) scale(1)'; }, 10);
-    btn.innerHTML = '✕';
+    if (btn) btn.innerHTML = '✕';
     document.getElementById('ceoAIInput').focus();
   } else {
     panel.style.opacity = '0'; panel.style.transform = 'translateY(20px) scale(0.96)';
     setTimeout(() => { panel.style.display = 'none'; }, 280);
-    btn.innerHTML = '<span style="font-size:1.3rem">🧠</span>';
+    if (btn) btn.innerHTML = '<span style="font-size:1.3rem">🧠</span>';
   }
 }
 
