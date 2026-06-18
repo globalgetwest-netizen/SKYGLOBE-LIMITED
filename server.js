@@ -1534,7 +1534,7 @@ async function providerInit(provider, { reference, amount, currency, email, labe
       body: JSON.stringify({
         tx_ref: reference, amount, currency,
         redirect_url: callbackUrl, customer: { email },
-        customizations: { title: 'SKYGLOBE LIMITED', description: label },
+        customizations: { title: 'SkyGlobe Group', description: label },
       }),
     });
     const d = await r.json();
@@ -1717,7 +1717,7 @@ app.get('/api/admin/payments', async (req, res) => {
 // We publish curated conferences. A client picks one, fills the form and pays a
 // SERVICE FEE. Behind the scenes we contact the REAL organiser, obtain the
 // GENUINE invitation/admission document, verify it, add our "Facilitated &
-// Verified by SKYGLOBE LIMITED" stamp (NOT an issuing stamp) and deliver it.
+// Verified by SkyGlobe Group" stamp (NOT an issuing stamp) and deliver it.
 // We never fabricate a document or impersonate an institution.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -2233,6 +2233,128 @@ app.get('/api/admin/attendance', checkAdmin, async (req, res) => {
     const rows = await dbQuery('GET', 'attendance', null, q);
     res.json({ today: localParts().date, rows: Array.isArray(rows) ? rows : [] });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── CEO AI INTELLIGENCE ASSISTANT ────────────────────────────────────────────
+app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
+  const { message, history } = req.body || {};
+  if (!message || !String(message).trim())
+    return res.status(400).json({ error: 'Message is required.' });
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey)
+    return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add ANTHROPIC_API_KEY to Render environment variables.' });
+
+  try {
+    // Pull live ecosystem snapshot from Supabase
+    const [apps, payments, staff, tasks, activity, conferences] = await Promise.all([
+      dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 200 }).catch(() => []),
+      dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 200 }).catch(() => []),
+      dbQuery('GET', 'staff_members', null, { limit: 100 }).catch(() => []),
+      dbQuery('GET', 'tasks', null, { order: 'created_at.desc', limit: 100 }).catch(() => []),
+      dbQuery('GET', 'activity_log', null, { order: 'created_at.desc', limit: 50 }).catch(() => []),
+      dbQuery('GET', 'conferences', null, { order: 'date.desc', limit: 50 }).catch(() => []),
+    ]);
+
+    // Build concise snapshot text
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+
+    const appsByStatus = apps.reduce((acc, a) => { acc[a.status] = (acc[a.status] || 0) + 1; return acc; }, {});
+    const payToday = payments.filter(p => (p.paid_at || p.created_at || '').slice(0, 10) === todayStr);
+    const revenueToday = payToday.filter(p => p.status === 'paid').reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+    const revenueTotalPaid = payments.filter(p => p.status === 'paid').reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+    const overdueTasks = tasks.filter(t => t.status !== 'done' && t.due_date && t.due_date < todayStr);
+    const pendingTasks = tasks.filter(t => t.status === 'pending');
+    const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
+
+    const ecosystemSnapshot = `
+LIVE ECOSYSTEM SNAPSHOT — ${now.toUTCString()}
+==============================================
+
+APPLICATIONS (${apps.length} total):
+${Object.entries(appsByStatus).map(([s, n]) => `  • ${s}: ${n}`).join('\n') || '  (none)'}
+Recent: ${apps.slice(0, 6).map(a => `${a.ref} — ${[a.fname, a.lname].filter(Boolean).join(' ') || a.name || a.email} — ${a.service || ''} — ${a.status}`).join('\n         ')}
+
+PAYMENTS:
+  • Total paid revenue: $${revenueTotalPaid.toFixed(2)}
+  • Today's paid payments: ${payToday.filter(p=>p.status==='paid').length} totalling $${revenueToday.toFixed(2)}
+  • Pending payments: ${payments.filter(p=>p.status==='pending').length}
+  Recent: ${payments.slice(0,5).map(p=>`${p.reference||p.id} — ${p.amount} ${p.currency||'USD'} — ${p.product||''} — ${p.status}`).join('\n          ')}
+
+STAFF (${staff.length} members):
+  ${staff.map(s => `${s.name} — ${s.role||s.department||''}`).join('\n  ') || '(none)'}
+
+TASKS:
+  • Pending: ${pendingTasks.length}  |  In Progress: ${inProgressTasks.length}  |  Overdue: ${overdueTasks.length}
+  Overdue: ${overdueTasks.map(t=>`"${t.title}" (due ${t.due_date}) assigned to ${t.assigned_to||'?'}`).join('; ') || 'none'}
+
+CONFERENCES (${conferences.length} total):
+  ${conferences.slice(0,6).map(c=>`${c.title||'Untitled'} — ${c.country||''}${c.city?', '+c.city:''} — ${c.date||'date TBC'} — ${c.active===false?'inactive':'active'}`).join('\n  ') || '(none)'}
+
+RECENT ACTIVITY (last 10 events):
+  ${activity.slice(0,10).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} — ${a.action} — ${a.detail||''}`).join('\n  ') || '(none)'}
+`;
+
+    const systemPrompt = `You are SKYGLOBE CORE Intelligence — the private AI assistant to Saleh Shuaibu, Founder & Chief Executive Officer of SkyGlobe Group.
+
+Your role: monitor, analyse, and report on the entire SkyGlobe Group ecosystem. You have direct access to live operational data. You execute CEO commands accurately, think strategically, and speak with the precision and authority the CEO expects.
+
+ABOUT SKYGLOBE GROUP:
+- Global organisation — immigration facilitation, work permits, conference management, travel services
+- Anchors: CONSTRUCT · TRUST · INTELLIGENCE · POWER
+- Motto: One World. One Mission.
+- The CEO is Saleh Shuaibu — Founder & Chief Executive Officer
+- All pricing in USD/EUR/GBP. Never Naira/NGN.
+- Brand: "Facilitated & Verified by SkyGlobe Group" — never "issued by us"
+- System layers: SKYGLOBE S (identity) → Public (app.skyglobegroup.com) → Portal (admin + staff) → Engine (SKYGLOBE CORE) → Supabase data foundation
+
+CURRENT LIVE ECOSYSTEM DATA:
+${ecosystemSnapshot}
+
+INSTRUCTIONS:
+- Answer every question using the live data above
+- When the CEO gives a command, act on it and confirm what was done or what data you found
+- Be concise but thorough — give numbers, names, specifics
+- If data is insufficient to answer, say so clearly and suggest what to check
+- Format responses for readability: use bullet points, clear sections, numbers
+- Never guess — if the data isn't there, say "not available in current data"
+- Always address the CEO respectfully but efficiently`;
+
+    const messages = [];
+    if (Array.isArray(history)) {
+      for (const m of history.slice(-12)) {
+        if (m.role === 'user' || m.role === 'assistant') {
+          messages.push({ role: m.role, content: String(m.content || '') });
+        }
+      }
+    }
+    messages.push({ role: 'user', content: String(message).trim() });
+
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-8',
+        max_tokens: 2048,
+        system: systemPrompt,
+        messages,
+      }),
+    });
+
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error?.message || `Anthropic API error ${r.status}`);
+
+    const reply = data.content?.[0]?.text || 'No response generated.';
+    res.json({ reply });
+  } catch (e) {
+    console.error('CEO AI Assistant error:', e.message);
+    res.status(500).json({ error: 'CEO AI Assistant encountered an error: ' + e.message });
+  }
 });
 
 // ── BRAND & IP REGISTRY (CEO only) ───────────────────────────────────────────
