@@ -819,6 +819,13 @@ app.post('/api/auth/login', async (req, res) => {
     if (!client || !verifyPassword(password, client.password_hash))
       return res.status(401).json({ error: 'Wrong email or password.' });
     const token = signToken(email);
+    // Record login session (best-effort — don't fail login if this errors)
+    dbQuery('POST', 'session_logs', {
+      email,
+      name: client.name || '',
+      ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null,
+      logged_in_at: new Date().toISOString(),
+    }).catch(() => {});
     res.json({ success: true, token, email, name: client.name || '' });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2532,13 +2539,15 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
   if (!message || !String(message).trim())
     return res.status(400).json({ error: 'Message is required.' });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey)
-    return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add ANTHROPIC_API_KEY to Render environment variables.' });
+  // Provider selection — prefer FREE Google Gemini, fall back to Anthropic if a key exists.
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!geminiKey && !anthropicKey)
+    return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add a free GEMINI_API_KEY (from aistudio.google.com) to your Render environment variables.' });
 
   try {
     // Pull live ecosystem snapshot from Supabase
-    const [apps, payments, staff, tasks, activity, conferences, legalDocs] = await Promise.all([
+    const [apps, payments, staff, tasks, activity, conferences, legalDocs, clients, sessionLogs] = await Promise.all([
       dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 200 }).catch(() => []),
       dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 200 }).catch(() => []),
       dbQuery('GET', 'staff_members', null, { limit: 100 }).catch(() => []),
@@ -2546,6 +2555,8 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
       dbQuery('GET', 'activity_log', null, { order: 'created_at.desc', limit: 50 }).catch(() => []),
       dbQuery('GET', 'conferences', null, { order: 'date.desc', limit: 50 }).catch(() => []),
       dbQuery('GET', 'documents', null, { uploaded_by: 'eq.ai:legal-docs', order: 'created_at.desc', limit: 100 }).catch(() => []),
+      dbQuery('GET', 'clients', null, { select: 'email,name,created_at', order: 'created_at.desc', limit: 500 }).catch(() => []),
+      dbQuery('GET', 'session_logs', null, { order: 'logged_in_at.desc', limit: 200 }).catch(() => []),
     ]);
 
     // Build concise snapshot text
@@ -2561,6 +2572,9 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
     const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
     const legalToday = legalDocs.filter(d => (d.created_at || '').slice(0, 10) === todayStr);
     const legalTypeName = (fn) => (LEGAL_DOC_INDEX[String(fn || '').split('_')[0]]?.name) || 'Legal document';
+    const clientsToday = clients.filter(c => (c.created_at || '').slice(0, 10) === todayStr);
+    const sessionsToday = sessionLogs.filter(s => (s.logged_in_at || '').slice(0, 10) === todayStr);
+    const uniqueLoginsToday = [...new Set(sessionsToday.map(s => s.email))];
 
     const ecosystemSnapshot = `
 LIVE ECOSYSTEM SNAPSHOT — ${now.toUTCString()}
@@ -2588,6 +2602,13 @@ CONFERENCES (${conferences.length} total):
 
 LEGAL DIGITAL DOCUMENTS (${legalDocs.length} total · ${legalToday.length} today):
   ${legalDocs.slice(0,8).map(d=>`${d.ref} — ${legalTypeName(d.filename)} — ${(d.created_at||'').slice(0,16)}`).join('\n  ') || '(none yet)'}
+
+CLIENT ACCOUNTS (${clients.length} registered · ${clientsToday.length} joined today):
+  Recent registrations: ${clients.slice(0,5).map(c=>`${c.name||'unnamed'} <${c.email}> — joined ${(c.created_at||'').slice(0,10)}`).join('\n    ') || '(none)'}
+
+LOGIN SESSIONS — TODAY (${uniqueLoginsToday.length} unique users · ${sessionsToday.length} total logins):
+  ${uniqueLoginsToday.length ? uniqueLoginsToday.map(e => { const s = sessionsToday.find(x=>x.email===e); return `${s?.name||'user'} <${e}> — last login ${(s?.logged_in_at||'').slice(0,16)}`; }).join('\n  ') : '(no logins today yet)'}
+  All-time sessions recorded: ${sessionLogs.length}
 
 RECENT ACTIVITY (last 10 events):
   ${activity.slice(0,10).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} — ${a.action} — ${a.detail||''}`).join('\n  ') || '(none)'}
@@ -2629,25 +2650,52 @@ INSTRUCTIONS:
     }
     messages.push({ role: 'user', content: String(message).trim() });
 
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-8',
-        max_tokens: 2048,
-        system: systemPrompt,
-        messages,
-      }),
-    });
+    let reply;
 
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error?.message || `Anthropic API error ${r.status}`);
+    if (geminiKey) {
+      // ── FREE PROVIDER: Google Gemini ──────────────────────────────────────
+      // Map the conversation into Gemini's "contents" format (user/model roles).
+      const contents = messages.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+      const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents,
+            generationConfig: { maxOutputTokens: 2048, temperature: 0.5 },
+          }),
+        }
+      );
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error?.message || `Gemini API error ${r.status}`);
+      reply = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || 'No response generated.';
+    } else {
+      // ── FALLBACK: Anthropic (only if ANTHROPIC_API_KEY is set) ─────────────
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': anthropicKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-8',
+          max_tokens: 2048,
+          system: systemPrompt,
+          messages,
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error?.message || `Anthropic API error ${r.status}`);
+      reply = data.content?.[0]?.text || 'No response generated.';
+    }
 
-    const reply = data.content?.[0]?.text || 'No response generated.';
     res.json({ reply });
   } catch (e) {
     console.error('CEO AI Assistant error:', e.message);
