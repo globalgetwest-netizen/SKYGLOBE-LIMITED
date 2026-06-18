@@ -2653,38 +2653,15 @@ INSTRUCTIONS:
     let reply;
 
     if (geminiKey) {
-      // ── FREE PROVIDER: Google Gemini ──────────────────────────────────────
-      // Map the conversation into Gemini's "contents" format (user/model roles).
-      const contents = messages.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      }));
-      // Try preferred model first, then fall back to gemini-2.0-flash if overloaded
-      const geminiModels = [
-        process.env.GEMINI_MODEL || 'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-1.5-flash',
-      ];
-      const geminiBody = JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents,
-        generationConfig: { maxOutputTokens: 2048, temperature: 0.5 },
-      });
-      let geminiData, geminiOk;
-      for (const model of geminiModels) {
-        const r = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
-          { method: 'POST', headers: { 'content-type': 'application/json' }, body: geminiBody }
-        );
-        geminiData = await r.json();
-        geminiOk = r.ok;
-        if (r.ok) break;
-        // Only retry on overload (503) or quota (429); hard-fail on auth errors
-        const status = r.status;
-        if (status !== 429 && status !== 503) break;
-      }
-      if (!geminiOk) throw new Error(geminiData?.error?.message || 'Gemini API error');
-      reply = geminiData.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || 'No response generated.';
+      // ── FREE PROVIDER: Google Gemini (robust retry + model fallback) ───────
+      // Fold prior conversation into the prompt so we can reuse the shared
+      // callGeminiWithRetry helper (which retries 429/500/503 transient errors).
+      const convo = messages.slice(0, -1)
+        .map(m => `${m.role === 'assistant' ? 'You (SKYGLOBE CORE)' : 'CEO'}: ${m.content}`)
+        .join('\n');
+      const userMsg = messages[messages.length - 1].content;
+      const prompt = convo ? `${convo}\n\nCEO: ${userMsg}` : userMsg;
+      reply = await callGeminiWithRetry(prompt, systemPrompt) || 'No response generated.';
     } else {
       // ── FALLBACK: Anthropic (only if ANTHROPIC_API_KEY is set) ─────────────
       const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -2809,11 +2786,54 @@ async function getAcademyRoster() {
   }));
 }
 
-// Free Gemini call with model fallback chain (reused by the AI teachers)
+// ── ROBUST GEMINI CALL WITH RETRY + MODEL FALLBACK ────────────────────────────
+// Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
+// retries transient errors (429/500/503) with a short backoff before moving on.
+async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-flash'];
+  let lastError = null;
+  for (const model of models) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 2048, temperature: 0.7 }
+          }),
+          signal: AbortSignal.timeout(30000)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text;
+        }
+        const status = res.status;
+        if (status === 429 || status === 503 || status === 500) {
+          lastError = `Model ${model} returned ${status}`;
+          if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+          continue; // retry same model
+        }
+        // Non-retryable error on this model, try next model
+        lastError = `Model ${model} returned ${status}`;
+        break;
+      } catch (e) {
+        lastError = e.message;
+        if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+      }
+    }
+  }
+  throw new Error('AI temporarily unavailable. Please try again in a moment.');
+}
+
+// Free Gemini call with model fallback chain (reused by the AI teachers).
+// Supports multi-turn `contents`; retries transient errors (429/500/503) per model.
 async function academyAskGemini(systemPrompt, contents, maxTokens = 1024) {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
-  const models = [process.env.GEMINI_MODEL || 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const models = [process.env.GEMINI_MODEL || 'gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemini-2.0-flash', 'gemini-1.5-flash'];
   const body = JSON.stringify({
     systemInstruction: { parts: [{ text: systemPrompt }] },
     contents,
@@ -2825,15 +2845,29 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1024) {
       { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_LOW_AND_ABOVE' },
     ],
   });
-  let data, ok;
+  let data, ok, lastError = null;
+  const maxRetries = 2;
+  outer:
   for (const model of models) {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
-      { method: 'POST', headers: { 'content-type': 'application/json' }, body });
-    data = await r.json(); ok = r.ok;
-    if (r.ok) break;
-    if (r.status !== 429 && r.status !== 503) break;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+          { method: 'POST', headers: { 'content-type': 'application/json' }, body, signal: AbortSignal.timeout(30000) });
+        data = await r.json(); ok = r.ok;
+        if (r.ok) break outer;
+        lastError = data?.error?.message || `Model ${model} returned ${r.status}`;
+        if (r.status === 429 || r.status === 503 || r.status === 500) {
+          if (attempt < maxRetries) { await new Promise(rs => setTimeout(rs, 1000 * (attempt + 1))); continue; }
+          break; // exhausted retries, try next model
+        }
+        break; // non-retryable, try next model
+      } catch (e) {
+        lastError = e.message;
+        if (attempt < maxRetries) await new Promise(rs => setTimeout(rs, 1000 * (attempt + 1)));
+      }
+    }
   }
-  if (!ok) throw new Error(data?.error?.message || 'AI teacher is busy. Please try again.');
+  if (!ok) throw new Error(lastError || 'AI teacher is busy. Please try again.');
   return data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
 }
 
@@ -2926,8 +2960,9 @@ app.get('/api/academy/progress/:studentId', async (req, res) => {
 app.post('/api/academy/tutor', async (req, res) => {
   const email = parentAuth(req);
   if (!email) return res.status(401).json({ error: 'Please log in.' });
-  const { studentId, subject, message, history } = req.body || {};
+  const { studentId, subject, message, history, language } = req.body || {};
   const subjKey = String(subject || 'mathematics').toLowerCase();
+  const lang = String(language || 'en').trim() || 'en';
   const teacher = await getAcademyTeacher(subjKey);
   if (!teacher) return res.status(400).json({ error: 'Unknown subject.' });
   if (!ACADEMY_LIVE_SUBJECTS.includes(subjKey))
@@ -2976,7 +3011,10 @@ SAFETY RULES (very important — children use this):
 - If the child seems upset or mentions something worrying, gently encourage them to talk to their parent or teacher.
 - Use simple, clear language with no slang.
 
-FORMAT: Plain, friendly text. You may use simple emoji occasionally to be warm. Keep it short and spoken-friendly (it may be read aloud by voice).`;
+FORMAT: Plain, friendly text. You may use simple emoji occasionally to be warm. Keep it short and spoken-friendly (it may be read aloud by voice).`
+    + (lang !== 'en'
+      ? `\n\nIMPORTANT: The student's chosen language is ${lang}. Respond entirely in ${lang}. Adapt vocabulary to be age-appropriate for a child.`
+      : '');
 
     const contents = [];
     if (Array.isArray(history)) {
@@ -2998,7 +3036,7 @@ FORMAT: Plain, friendly text. You may use simple emoji occasionally to be warm. 
       streak = lastDay === yesterday ? streak + 1 : 1;
     }
     const points = (student.points || 0) + 5;
-    dbQuery('PATCH', 'academy_students', { points, streak, last_active: new Date().toISOString() },
+    dbQuery('PATCH', 'academy_students', { points, streak, language: lang, last_active: new Date().toISOString() },
       { id: `eq.${student.id}` }).catch(() => {});
     dbQuery('POST', 'academy_sessions', {
       student_id: student.id, subject: subjKey, teacher: teacher.name,
@@ -3053,6 +3091,310 @@ app.patch('/api/admin/academy/teachers/:key', checkAdmin, async (req, res) => {
     res.json({ success: true, key, name, emoji: emoji || ACADEMY_TEACHERS[key].emoji });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SKYGLOBE KIDS ACADEMY — PROFESSIONAL ADMISSION + ACADEMIC RECORDS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Generate a unique student ID in SGK-YEAR-XXXX format
+function genStudentId() {
+  const year = new Date().getFullYear();
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `SGK-${year}-${rand}`;
+}
+
+// ── ADMISSION: FULL PROFESSIONAL REGISTRATION ─────────────────────────────────
+// Creates (or reuses) the parent/guardian account, the student record (status
+// 'pending'), and a guardian profile row. Public endpoint (the application form).
+app.post('/api/academy/admission/apply', async (req, res) => {
+  try {
+    const b = req.body || {};
+    const firstName = String(b.firstName || '').trim();
+    const lastName  = String(b.lastName || '').trim();
+    const fullName  = [firstName, String(b.middleName || '').trim(), lastName].filter(Boolean).join(' ').trim();
+    const guardianEmail = String(b.guardianEmail || b.email || '').trim().toLowerCase();
+    const password  = String(b.password || '');
+
+    if (!fullName) return res.status(400).json({ error: "Student's full name is required." });
+    if (!guardianEmail) return res.status(400).json({ error: 'Guardian email is required.' });
+    if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+
+    // Create or reuse the parent account (guardian email is the login)
+    let parent = await getParentByEmail(guardianEmail);
+    if (!parent) {
+      await dbQuery('POST', 'academy_parents', {
+        email: guardianEmail,
+        name: String(b.guardianName || '').trim(),
+        password_hash: hashPassword(password),
+      });
+    }
+
+    // Derive an age from date of birth (academy_students.age is required)
+    let age = parseInt(b.age, 10);
+    if ((!age || isNaN(age)) && b.dateOfBirth) {
+      const dob = new Date(b.dateOfBirth);
+      if (!isNaN(dob)) age = Math.max(3, Math.min(18, Math.floor((Date.now() - dob.getTime()) / (365.25 * 86400000))));
+    }
+    if (!age || isNaN(age)) age = 8;
+
+    const studentRow = {
+      parent_email: guardianEmail,
+      name: fullName,
+      age,
+      grade: String(b.schoolGrade || '').trim() || null,
+      avatar: '🧒',
+      points: 0, streak: 0, badges: [],
+      gender: String(b.gender || '').trim() || null,
+      date_of_birth: b.dateOfBirth || null,
+      country: String(b.country || '').trim() || null,
+      state_province: String(b.stateProvince || '').trim() || null,
+      nationality: String(b.nationality || '').trim() || null,
+      home_address: String(b.homeAddress || '').trim() || null,
+      school_grade: String(b.schoolGrade || '').trim() || null,
+      learning_needs: String(b.learningNeeds || '').trim() || null,
+      language: String(b.language || 'en').trim() || 'en',
+      admission_status: 'pending',
+      admission_date: new Date().toISOString(),
+    };
+
+    const rows = await dbQuery('POST', 'academy_students', studentRow);
+    const student = Array.isArray(rows) ? rows[0] : rows;
+
+    // Guardian profile
+    if (student?.id) {
+      await dbQuery('POST', 'academy_guardians', {
+        student_id: student.id,
+        guardian_name: String(b.guardianName || '').trim() || 'Guardian',
+        guardian_relationship: String(b.guardianRelationship || 'guardian').trim(),
+        guardian_phone: String(b.guardianPhone || '').trim() || null,
+        guardian_email: guardianEmail,
+        guardian_address: String(b.guardianAddress || b.homeAddress || '').trim() || null,
+      }).catch(e => console.error('[admission] guardian insert:', e.message));
+    }
+
+    // Confirmation email (best-effort)
+    try {
+      await sendEmail(guardianEmail, `Application Received — SkyGlobe Kids Academy`,
+        `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:#041022;padding:28px;text-align:center;border-radius:8px 8px 0 0">
+            <h1 style="color:#D4A73A;margin:0;font-size:1.4rem">Application Received ✅</h1>
+            <p style="color:#8899bb;margin:6px 0 0">SkyGlobe Kids Academy</p>
+          </div>
+          <div style="background:#f9f9f9;padding:28px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px">
+            <p>Dear ${esc2(b.guardianName) || 'Parent/Guardian'}, thank you for applying to enrol <strong>${esc2(fullName)}</strong>.</p>
+            <p>Your application reference is <strong>${esc2(student?.id || '')}</strong>. Our admissions team is now reviewing it. You can track the status anytime by logging in to the Family Campus.</p>
+            <p style="color:#555;font-size:.85rem">SkyGlobe Kids Academy · part of SkyGlobe Group</p>
+          </div>
+        </div>`);
+    } catch (e) { console.error('[admission] email:', e.message); }
+
+    res.json({ success: true, applicationRef: student?.id || null, admission_status: 'pending',
+      token: signToken(guardianEmail), email: guardianEmail, name: String(b.guardianName || '').trim() });
+  } catch (e) {
+    console.error('Admission apply error:', e.message);
+    res.status(500).json({ error: 'Could not submit application. Please try again.' });
+  }
+});
+
+function esc2(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// ── ADMISSION: CHECK STATUS ───────────────────────────────────────────────────
+app.get('/api/academy/admission/:id/status', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const student = await getStudentForParent(req.params.id, email);
+    if (!student) return res.status(404).json({ error: 'Application not found.' });
+    res.json({
+      admission_status: student.admission_status || 'pending',
+      student_id: student.student_id || null,
+      admission_date: student.admission_date || null,
+      enrollment_date: student.enrollment_date || null,
+      name: student.name,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── ADMISSION: CEO REVIEW / ACCEPT / ENROLL ───────────────────────────────────
+app.patch('/api/academy/admission/:id/review', checkAdmin, async (req, res) => {
+  try {
+    await dbQuery('PATCH', 'academy_students', { admission_status: 'reviewing' }, { id: `eq.${req.params.id}` });
+    logActivity(req._who, 'ceo', 'admission_review', `Marked admission ${req.params.id} as reviewing`, req.params.id);
+    res.json({ success: true, admission_status: 'reviewing' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/academy/admission/:id/accept', checkAdmin, async (req, res) => {
+  try {
+    const studentId = genStudentId();
+    await dbQuery('PATCH', 'academy_students',
+      { admission_status: 'accepted', student_id: studentId },
+      { id: `eq.${req.params.id}` });
+    logActivity(req._who, 'ceo', 'admission_accept', `Accepted admission ${req.params.id} → ${studentId}`, req.params.id);
+    // Notify guardian (best-effort)
+    try {
+      const rows = await dbQuery('GET', 'academy_students', null, { id: `eq.${req.params.id}`, limit: 1 });
+      const st = rows[0];
+      if (st?.parent_email) {
+        await sendEmail(st.parent_email, 'Congratulations — Admission Accepted',
+          `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+            <div style="background:#041022;padding:28px;text-align:center;border-radius:8px 8px 0 0">
+              <h1 style="color:#D4A73A;margin:0;font-size:1.4rem">🎉 Admission Accepted!</h1></div>
+            <div style="background:#f9f9f9;padding:28px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px">
+              <p><strong>${esc2(st.name)}</strong> has been accepted to SkyGlobe Kids Academy!</p>
+              <p>Student ID: <strong>${esc2(studentId)}</strong></p>
+              <p>Log in to your Family Campus to complete enrolment and begin learning.</p>
+            </div></div>`);
+      }
+    } catch (e) { console.error('[accept] email:', e.message); }
+    res.json({ success: true, admission_status: 'accepted', student_id: studentId });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/academy/admission/:id/enroll', checkAdmin, async (req, res) => {
+  try {
+    // Ensure a student_id exists even if enrolled directly
+    const rows = await dbQuery('GET', 'academy_students', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const st = rows[0] || {};
+    const studentId = st.student_id || genStudentId();
+    await dbQuery('PATCH', 'academy_students',
+      { admission_status: 'enrolled', student_id: studentId, enrollment_date: new Date().toISOString() },
+      { id: `eq.${req.params.id}` });
+    logActivity(req._who, 'ceo', 'admission_enroll', `Enrolled student ${req.params.id} (${studentId})`, req.params.id);
+    try {
+      if (st.parent_email) {
+        await sendEmail(st.parent_email, 'Enrolment Complete — Welcome to SkyGlobe Kids Academy',
+          `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+            <div style="background:#041022;padding:28px;text-align:center;border-radius:8px 8px 0 0">
+              <h1 style="color:#D4A73A;margin:0;font-size:1.4rem">Welcome aboard! 🚀</h1></div>
+            <div style="background:#f9f9f9;padding:28px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px">
+              <p><strong>${esc2(st.name)}</strong> is now fully enrolled (ID ${esc2(studentId)}). Log in to start learning with our AI faculty.</p>
+            </div></div>`);
+      }
+    } catch (e) { console.error('[enroll] email:', e.message); }
+    res.json({ success: true, admission_status: 'enrolled', student_id: studentId });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── CEO: ALL ADMISSION APPLICATIONS ───────────────────────────────────────────
+app.get('/api/admin/academy/admissions', checkAdmin, async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'academy_students', null, { order: 'admission_date.desc.nullslast', limit: 500 });
+    res.json(rows || []);
+  } catch (e) {
+    // Fallback ordering if admission_date column not present yet
+    try { res.json(await dbQuery('GET', 'academy_students', null, { order: 'created_at.desc', limit: 500 })); }
+    catch (e2) { res.status(500).json({ error: e2.message }); }
+  }
+});
+
+// ── ACADEMIC RECORDS (parent-scoped) ──────────────────────────────────────────
+app.get('/api/academy/student/:id/academic-record', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const student = await getStudentForParent(req.params.id, email);
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
+    const records = await dbQuery('GET', 'academy_academic_records', null,
+      { student_id: `eq.${student.id}`, order: 'session_date.desc', limit: 200 }).catch(() => []);
+    const assessments = await dbQuery('GET', 'academy_assessments', null,
+      { student_id: `eq.${student.id}`, order: 'taken_at.desc', limit: 200 }).catch(() => []);
+    const sessions = await dbQuery('GET', 'academy_sessions', null,
+      { student_id: `eq.${student.id}`, limit: 1000 }).catch(() => []);
+
+    // Build per-subject report card
+    const bySubject = {};
+    for (const a of assessments) {
+      const k = a.subject || 'general';
+      (bySubject[k] = bySubject[k] || { subject: k, count: 0, totalPct: 0 });
+      bySubject[k].count++;
+      bySubject[k].totalPct += a.total_marks ? (a.scored_marks / a.total_marks) * 100 : 0;
+    }
+    const reportCard = Object.values(bySubject).map(s => ({
+      subject: s.subject, assessments: s.count,
+      averagePercent: s.count ? Math.round(s.totalPct / s.count) : 0,
+    }));
+
+    res.json({
+      student: {
+        id: student.id, name: student.name, age: student.age,
+        student_id: student.student_id || null, grade: student.grade || student.school_grade || null,
+        admission_status: student.admission_status || 'pending', language: student.language || 'en',
+        country: student.country || null, nationality: student.nationality || null,
+      },
+      reportCard, records, assessments,
+      totalSessions: sessions.length,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/academy/student/:id/assessments', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const student = await getStudentForParent(req.params.id, email);
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
+    const assessments = await dbQuery('GET', 'academy_assessments', null,
+      { student_id: `eq.${student.id}`, order: 'taken_at.desc', limit: 300 }).catch(() => []);
+    res.json(assessments || []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Add an assessment (internal — invoked by tutors/CEO). Parent OR CEO authorised.
+app.post('/api/academy/student/:id/assessments', async (req, res) => {
+  const email = parentAuth(req);
+  const ceo = checkAdmin(req);
+  if (!email && !ceo) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    let student;
+    if (email) student = await getStudentForParent(req.params.id, email);
+    else { const rows = await dbQuery('GET', 'academy_students', null, { id: `eq.${req.params.id}`, limit: 1 }); student = rows[0]; }
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
+    const b = req.body || {};
+    const total = parseInt(b.total_marks, 10) || 100;
+    const scored = parseInt(b.scored_marks, 10) || 0;
+    const pct = total ? (scored / total) * 100 : 0;
+    const grade = b.grade || (pct >= 90 ? 'A' : pct >= 75 ? 'B' : pct >= 60 ? 'C' : pct >= 50 ? 'D' : 'F');
+    const rows = await dbQuery('POST', 'academy_assessments', {
+      student_id: student.id,
+      subject: String(b.subject || 'general'),
+      assessment_type: String(b.assessment_type || 'quiz'),
+      title: String(b.title || 'Assessment'),
+      total_marks: total, scored_marks: scored,
+      grade, passed: pct >= 50,
+      feedback: b.feedback || null,
+    });
+    res.json({ success: true, assessment: Array.isArray(rows) ? rows[0] : rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/academy/student/:id/attendance', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const student = await getStudentForParent(req.params.id, email);
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
+    const sessions = await dbQuery('GET', 'academy_sessions', null,
+      { student_id: `eq.${student.id}`, limit: 2000 }).catch(() => []);
+    const days = new Set((sessions || []).map(s => (s.created_at || '').slice(0, 10)).filter(Boolean));
+    res.json({ totalSessions: sessions.length, distinctDays: days.size,
+      lastActive: student.last_active || null, streak: student.streak || 0 });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── LEARNING MATERIALS (public to logged-in parents) ──────────────────────────
+app.get('/api/academy/materials', async (req, res) => {
+  try {
+    const params = { order: 'created_at.desc', limit: 300 };
+    if (req.query.subject)  params.subject = `eq.${req.query.subject}`;
+    if (req.query.ageGroup) params.age_group = `eq.${req.query.ageGroup}`;
+    const rows = await dbQuery('GET', 'academy_materials', null, params).catch(() => []);
+    res.json(rows || []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Standalone admission portal page
+app.get('/academy/admission', (req, res) => res.sendFile(path.join(__dirname, 'academy-admission.html')));
 
 // Academy page routes
 app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'academy-portal.html')));
