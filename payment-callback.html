@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Payment — SKYGLOBE LIMITED</title>
+<title>Payment — SkyGlobe Group</title>
 <link rel="icon" href="/favicon-32.png">
 <style>
-  body{font-family:'Segoe UI',system-ui,sans-serif;background:linear-gradient(160deg,#0a1628,#10203a);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;margin:0;padding:20px}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:linear-gradient(160deg,#041022,#071B3B);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;margin:0;padding:20px}
   .card{background:#fff;color:#1a2233;border-radius:18px;max-width:480px;width:100%;padding:38px 30px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35)}
   .ico{font-size:3.2rem;line-height:1}
   h1{font-family:Georgia,serif;margin:14px 0 6px;font-size:1.5rem}
   p{color:#5a6577}
-  .ref{display:inline-block;background:#0a1628;color:#c9a84c;font-family:Georgia,serif;font-size:1.3rem;letter-spacing:.06em;padding:12px 22px;border-radius:12px;border:2px solid #c9a84c;margin:14px 0}
-  .btn{display:inline-block;background:#c9a84c;color:#1a1300;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:10px;margin:6px 6px 0}
-  .btn.ghost{background:transparent;border:1px solid #c9a84c;color:#0a1628}
-  .spin{width:46px;height:46px;border:4px solid #e6e9ef;border-top-color:#c9a84c;border-radius:50%;animation:s 1s linear infinite;margin:10px auto}
+  .ref{display:inline-block;background:#041022;color:#D4A73A;font-family:Georgia,serif;font-size:1.3rem;letter-spacing:.06em;padding:12px 22px;border-radius:12px;border:2px solid #D4A73A;margin:14px 0}
+  .btn{display:inline-block;background:#D4A73A;color:#1a1300;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:10px;margin:6px 6px 0}
+  .btn.ghost{background:transparent;border:1px solid #D4A73A;color:#041022}
+  .spin{width:46px;height:46px;border:4px solid #e6e9ef;border-top-color:#D4A73A;border-radius:50%;animation:s 1s linear infinite;margin:10px auto}
   @keyframes s{to{transform:rotate(360deg)}}
   .muted{font-size:.85rem;color:#8a93a3;margin-top:18px}
 </style>
@@ -55,7 +55,7 @@ async function run(){
         <h1>Payment successful</h1>
         <p>Thank you! Your payment has been received and your request is now with our team.</p>
         ${appRef?`<div class="ref">${appRef}</div><p>Save this reference to track your request.</p>`:''}
-        ${d.instant?`<a class="btn" href="/">Access your purchase</a>`:`<a class="btn" href="/?track=${encodeURIComponent(appRef||'')}">Track my request</a>`}
+        ${d.instant?`<a class="btn" href="${(d.product||'').indexOf('legal_doc_')===0?'/legal-documents?resume=1':'/'}">Access your purchase</a>`:`<a class="btn" href="/?track=${encodeURIComponent(appRef||'')}">Track my request</a>`}
         <a class="btn ghost" href="https://wa.me/17373998522?text=Hi, I just paid. Ref: ${encodeURIComponent(appRef||ref)}">WhatsApp us</a>
         <p class="muted">A confirmation email is on its way.</p>`);
     } else {
