@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>CEO Portal — SkyGlobe Group</title>
-<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" href="icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#0a1628; --navy2:#111f38; --navy3:#0d1a30; --line:#233452; --line2:#1a2c4a;
-    --gold:#c9a84c; --gold2:#dbbe6a; --gold-soft:#c9a84c22;
+    /* SkyGlobe Group Brand System — exact palette */
+    --navy:#041022; --navy2:#071B3B; --navy3:#061530; --line:#14315a; --line2:#102747;
+    --gold:#D4A73A; --gold2:#F4D77A; --gold-soft:#D4A73A22;
     --txt:#e8eaf0; --muted:#8899bb; --muted2:#64759b;
     --green:#2e7d32; --red:#c62828; --blue:#1565c0; --orange:#ef6c00;
   }
@@ -24,11 +25,13 @@
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
 
   /* ── LOGIN ── */
-  #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(circle at 30% 20%,#13284e,#0a1628 60%)}
+  #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(circle at 30% 20%,#0b2147,#041022 60%)}
   .login-box{background:var(--navy2);border:1px solid var(--line);border-radius:20px;padding:44px 40px;width:100%;max-width:400px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.4)}
   .login-box img{height:86px;width:auto;border-radius:18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(0,0,0,0.3)}
-  .login-box h1{font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px}
-  .login-box .pill{display:inline-block;background:var(--gold-soft);color:var(--gold);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:26px}
+  .login-box h1{font-size:1.4rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px}
+  .login-box .by{font-size:0.66rem;font-weight:500;letter-spacing:0.20em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .login-box .pill{display:inline-block;background:var(--gold-soft);color:var(--gold);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:18px}
+  .login-box .motto{font-size:0.68rem;font-weight:600;letter-spacing:0.20em;text-transform:uppercase;color:var(--gold);margin-bottom:26px}
   .login-box input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:1rem;margin-bottom:14px;transition:border-color .2s}
   .login-box input:focus{outline:none;border-color:var(--gold)}
   .btn{background:var(--gold);color:var(--navy);border:none;padding:13px 28px;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;transition:.2s}
@@ -299,9 +302,11 @@
 <!-- ════ LOGIN ════ -->
 <div id="loginScreen">
   <div class="login-box">
-    <img src="icon.svg" alt="SkyGlobe Group" onerror="this.src='icon-512.png'">
+    <img src="icon-512.png" alt="SkyGlobe Group" onerror="this.src='icon.svg'">
     <h1>SkyGlobe <span class="gold">Group</span></h1>
+    <div class="by">by SKYGLOBEGROUP</div>
     <div class="pill">CEO Portal · Private</div>
+    <div class="motto">One World. One Mission.</div>
     <input type="password" id="pwInput" placeholder="Enter your access password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn" style="width:100%" onclick="doLogin()" id="loginBtn">Sign In Securely</button>
     <div class="err" id="loginErr"></div>
@@ -315,7 +320,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sb-brand">
-        <img src="icon.svg" alt="" onerror="this.src='icon-192.png'">
+        <img src="icon-192.png" alt="" onerror="this.src='icon-512.png'">
         <div class="t">SkyGlobe<small>Group Portal</small></div>
       </div>
       <nav class="sb-nav">
@@ -2044,7 +2049,7 @@ function printPayslip(id){
     @media print{body{padding:0}}
   </style></head><body><div class="page">
     <div class="header">
-      <div><div class="brand">SKYGLOBE LIMITED<small>Registered in England &amp; Wales</small></div></div>
+      <div><div class="brand">SkyGlobe Group<small>Global Operations</small></div></div>
       <div class="slip-title"><h2>Payslip</h2><div class="ref">Ref: PR-${String(p.id).padStart(5,'0')}</div></div>
     </div>
     <div class="info-grid">
@@ -2060,9 +2065,9 @@ function printPayslip(id){
     ${p.notes?`<div style="background:#f8f6ef;border-radius:8px;padding:14px 18px;margin-bottom:24px;font-size:0.86rem"><strong>Notes:</strong> ${esc(p.notes)}</div>`:''}
     ${p.paid_date?`<p style="font-size:0.84rem;color:#555;margin-bottom:20px">Payment Date: <strong>${new Date(p.paid_date).toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}</strong></p>`:''}
     <div style="margin-top:40px;display:flex;justify-content:flex-end">
-      <div class="sig-block"><div class="sig-line"></div><div style="font-size:0.78rem;color:#666">Authorised Signatory</div><div style="font-size:0.82rem;font-weight:700;margin-top:2px">SKYGLOBE LIMITED</div></div>
+      <div class="sig-block"><div class="sig-line"></div><div style="font-size:0.78rem;color:#666">Authorised Signatory</div><div style="font-size:0.82rem;font-weight:700;margin-top:2px">SkyGlobe Group</div></div>
     </div>
-    <div class="footer"><div>SKYGLOBE LIMITED · Registered in England &amp; Wales<br>This payslip is an official internal document and is confidential.</div><div style="text-align:right">Generated ${new Date().toLocaleString()}</div></div>
+    <div class="footer"><div>SkyGlobe Group · Global Operations<br>This payslip is an official internal document and is confidential.</div><div style="text-align:right">Generated ${new Date().toLocaleString()}</div></div>
   </div><script>window.onload=()=>window.print();<\/script></body></html>`);
   w.document.close();
 }
@@ -2174,6 +2179,147 @@ function exportIPPDF(){
   </body></html>`);
   win.document.close();
 }
+
+// ── CEO AI INTELLIGENCE ASSISTANT ────────────────────────────────────────────
+let ceoAIHistory = [];
+let ceoAIOpen = false;
+
+function toggleCEOAssistant() {
+  ceoAIOpen = !ceoAIOpen;
+  const panel = document.getElementById('ceoAIPanel');
+  const btn = document.getElementById('ceoAIBtn');
+  if (ceoAIOpen) {
+    panel.style.display = 'flex';
+    setTimeout(() => { panel.style.opacity = '1'; panel.style.transform = 'translateY(0) scale(1)'; }, 10);
+    btn.innerHTML = '✕';
+    document.getElementById('ceoAIInput').focus();
+  } else {
+    panel.style.opacity = '0'; panel.style.transform = 'translateY(20px) scale(0.96)';
+    setTimeout(() => { panel.style.display = 'none'; }, 280);
+    btn.innerHTML = '<span style="font-size:1.3rem">🧠</span>';
+  }
+}
+
+async function sendCEOMessage(e) {
+  if (e && e.key && e.key !== 'Enter') return;
+  const input = document.getElementById('ceoAIInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  appendCEOMsg('user', msg);
+  const typingId = appendCEOMsg('assistant', '…', true);
+
+  try {
+    const r = await fetch(API + '/api/ceo/assistant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': KEY },
+      body: JSON.stringify({ message: msg, history: ceoAIHistory.slice(-14) }),
+    });
+    const data = await r.json();
+    removeCEOMsg(typingId);
+    const reply = data.reply || data.error || 'No response.';
+    appendCEOMsg('assistant', reply);
+    ceoAIHistory.push({ role: 'user', content: msg });
+    ceoAIHistory.push({ role: 'assistant', content: reply });
+    if (ceoAIHistory.length > 30) ceoAIHistory = ceoAIHistory.slice(-30);
+  } catch (err) {
+    removeCEOMsg(typingId);
+    appendCEOMsg('assistant', 'Connection error: ' + err.message);
+  }
+}
+
+function appendCEOMsg(role, text, isTyping) {
+  const feed = document.getElementById('ceoAIFeed');
+  const id = 'ceo-msg-' + Date.now() + Math.random().toString(36).slice(2);
+  const isUser = role === 'user';
+  const div = document.createElement('div');
+  div.id = id;
+  div.style.cssText = `display:flex;flex-direction:column;align-items:${isUser?'flex-end':'flex-start'};margin-bottom:14px;animation:ceoMsgIn .22s ease`;
+  const bubble = document.createElement('div');
+  bubble.style.cssText = `max-width:82%;padding:12px 16px;border-radius:${isUser?'18px 18px 4px 18px':'18px 18px 18px 4px'};font-size:0.875rem;line-height:1.65;white-space:pre-wrap;word-break:break-word;` +
+    (isUser
+      ? 'background:linear-gradient(135deg,#D4A73A,#a87016);color:#0d0d0d;font-weight:500;'
+      : 'background:rgba(255,255,255,0.07);border:1px solid rgba(212,167,58,0.18);color:#eaf0ff;');
+  bubble.textContent = isTyping ? '' : text;
+  if (isTyping) {
+    bubble.innerHTML = '<span style="display:inline-flex;gap:4px;align-items:center"><span class="ceo-dot"></span><span class="ceo-dot" style="animation-delay:.18s"></span><span class="ceo-dot" style="animation-delay:.36s"></span></span>';
+  }
+  div.appendChild(bubble);
+  feed.appendChild(div);
+  feed.scrollTop = feed.scrollHeight;
+  return id;
+}
+
+function removeCEOMsg(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
 </script>
+
+<!-- CEO AI ASSISTANT BUTTON -->
+<button id="ceoAIBtn" onclick="toggleCEOAssistant()" title="CEO AI Intelligence Assistant"
+  style="position:fixed;bottom:28px;right:28px;z-index:9999;width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(145deg,#D4A73A,#a87016);
+  box-shadow:0 8px 28px rgba(212,167,58,0.55),0 2px 8px rgba(0,0,0,0.4);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#0d0d0d;
+  transition:transform .2s,box-shadow .2s;font-weight:700"
+  onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 12px 36px rgba(212,167,58,0.7),0 2px 8px rgba(0,0,0,0.4)'"
+  onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 28px rgba(212,167,58,0.55),0 2px 8px rgba(0,0,0,0.4)'">
+  <span style="font-size:1.3rem">🧠</span>
+</button>
+
+<!-- CEO AI ASSISTANT PANEL -->
+<div id="ceoAIPanel" style="display:none;opacity:0;transform:translateY(20px) scale(0.96);transition:opacity .28s,transform .28s;
+  position:fixed;bottom:100px;right:24px;z-index:9998;width:min(420px,calc(100vw - 32px));height:min(560px,calc(100vh - 140px));
+  flex-direction:column;border-radius:20px;overflow:hidden;
+  background:linear-gradient(160deg,#071B3B 0%,#041022 100%);
+  border:1px solid rgba(212,167,58,0.28);
+  box-shadow:0 24px 64px rgba(0,0,0,0.7),0 0 0 1px rgba(212,167,58,0.1)">
+
+  <!-- Header -->
+  <div style="padding:16px 20px 14px;border-bottom:1px solid rgba(212,167,58,0.15);
+    background:rgba(0,0,0,0.25);display:flex;align-items:center;gap:12px;flex-shrink:0">
+    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(145deg,#D4A73A,#a87016);
+      display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🧠</div>
+    <div>
+      <div style="color:#F4D77A;font-weight:700;font-size:0.95rem;letter-spacing:.04em">SKYGLOBE CORE Intelligence</div>
+      <div style="color:#9fb0d6;font-size:0.72rem;letter-spacing:.12em;text-transform:uppercase;margin-top:1px">CEO Command Centre · Live Ecosystem Access</div>
+    </div>
+    <button onclick="toggleCEOAssistant()" style="margin-left:auto;background:none;border:none;color:#9fb0d6;cursor:pointer;font-size:1.1rem;padding:4px;border-radius:6px;transition:.2s"
+      onmouseover="this.style.color='#F4D77A'" onmouseout="this.style.color='#9fb0d6'">✕</button>
+  </div>
+
+  <!-- Message feed -->
+  <div id="ceoAIFeed" style="flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;
+    scrollbar-width:thin;scrollbar-color:rgba(212,167,58,0.25) transparent">
+    <div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:14px">
+      <div style="max-width:88%;padding:12px 16px;border-radius:18px 18px 18px 4px;font-size:0.875rem;line-height:1.65;
+        background:rgba(255,255,255,0.07);border:1px solid rgba(212,167,58,0.18);color:#eaf0ff">
+        Good day, Saleh. I am SKYGLOBE CORE Intelligence — your direct line to the entire SkyGlobe ecosystem. I have live access to applications, payments, staff, tasks, and all operational data.<br><br>
+        Ask me anything. Try: <em style="color:#F4D77A">"Ecosystem status report"</em> or <em style="color:#F4D77A">"How many applications are pending?"</em>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div style="padding:14px 16px;border-top:1px solid rgba(212,167,58,0.15);background:rgba(0,0,0,0.2);display:flex;gap:10px;flex-shrink:0">
+    <input id="ceoAIInput" type="text" placeholder="Command SKYGLOBE CORE…" onkeydown="sendCEOMessage(event)"
+      style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(212,167,58,0.2);border-radius:12px;
+      padding:11px 16px;color:#eaf0ff;font-size:0.875rem;outline:none;font-family:inherit;transition:.2s"
+      onfocus="this.style.borderColor='rgba(212,167,58,0.55)'" onblur="this.style.borderColor='rgba(212,167,58,0.2)'">
+    <button onclick="sendCEOMessage()" style="background:linear-gradient(135deg,#D4A73A,#a87016);border:none;border-radius:12px;
+      width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      color:#0d0d0d;font-size:1.1rem;flex-shrink:0;transition:.2s"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">➤</button>
+  </div>
+</div>
+
+<style>
+@keyframes ceoMsgIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+.ceo-dot { width:6px;height:6px;border-radius:50%;background:#D4A73A;animation:ceoDot .9s ease-in-out infinite; display:inline-block; }
+@keyframes ceoDot { 0%,80%,100%{opacity:.3;transform:scale(.7)} 40%{opacity:1;transform:scale(1)} }
+</style>
+
 </body>
 </html>
