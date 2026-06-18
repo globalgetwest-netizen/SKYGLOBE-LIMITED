@@ -2819,9 +2819,10 @@ async function getAcademyRoster() {
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
 async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
-  // Only use confirmed-valid current model names. No guessing.
-  const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+  // flash-lite has the most generous free-tier quota, so try it first.
+  const models = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
   let lastError = 'No models responded';
+  let quotaHit = false;
   for (const model of models) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -2842,7 +2843,8 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
         if (!res.ok) {
           lastError = `[${model}] ${data?.error?.message || 'HTTP ' + res.status}`;
           console.error('Gemini error:', lastError);
-          if (res.status === 429 || res.status === 503 || res.status === 500) {
+          if (res.status === 429) { quotaHit = true; break; } // quota — next model won't help much, but try it
+          if (res.status === 503 || res.status === 500) {
             if (attempt < maxRetries) { await new Promise(r => setTimeout(r, 1500 * (attempt + 1))); continue; }
           }
           break; // non-retryable — try next model
@@ -2861,6 +2863,9 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
       }
     }
   }
+  if (quotaHit) {
+    throw new Error('Daily free AI limit reached on Google Gemini. Enable billing on your Gemini API key for unlimited use, or wait for the daily quota to reset.');
+  }
   throw new Error(lastError);
 }
 
@@ -2870,8 +2875,8 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
   // gemini-2.0-flash is primary: no thinking overhead, fast, reliable for education
-  // Only confirmed-valid current model names.
-  const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+  // flash-lite has the most generous free-tier quota, so try it first.
+  const models = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
   // BLOCK_ONLY_HIGH lets all educational content through while still blocking
   // genuinely harmful material.
   const safetySettings = [
@@ -2881,6 +2886,7 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
     { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
   ];
   let lastError = null;
+  let quotaHit = false;
   for (const model of models) {
     const body = JSON.stringify({
       system_instruction: { parts: [{ text: systemPrompt }] },
@@ -2897,7 +2903,8 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
         const data = await r.json();
         if (!r.ok) {
           lastError = data?.error?.message || `${model} returned ${r.status}`;
-          if (r.status === 429 || r.status === 503 || r.status === 500) {
+          if (r.status === 429) { quotaHit = true; break; }
+          if (r.status === 503 || r.status === 500) {
             if (attempt < 2) { await new Promise(rs => setTimeout(rs, 1200 * (attempt + 1))); continue; }
           }
           break; // try next model
@@ -2920,6 +2927,9 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
         if (attempt < 2) await new Promise(rs => setTimeout(rs, 1200 * (attempt + 1)));
       }
     }
+  }
+  if (quotaHit) {
+    throw new Error('Your teacher has reached the daily free AI limit on Google Gemini. Enable billing on the Gemini API key for unlimited lessons, or wait for the daily quota to reset.');
   }
   throw new Error(lastError || 'AI teacher is busy. Please try again in a moment.');
 }
