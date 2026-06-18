@@ -2789,7 +2789,7 @@ async function getAcademyRoster() {
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
 async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
-  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash-latest'];
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
   let lastError = null;
   for (const model of models) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -2834,7 +2834,7 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
   // gemini-2.0-flash is primary: no thinking overhead, fast, reliable for education
-  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash-latest'];
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
   // BLOCK_ONLY_HIGH lets all educational content through (history, science, body,
   // shapes, maths problems) while still blocking genuinely harmful material.
   const safetySettings = [
