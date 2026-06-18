@@ -70,10 +70,13 @@
     <div><h1>Numa</h1><small id="subline">Your Mathematics teacher</small></div>
   </div>
   <div class="scorebar">
+    <select id="langSel" title="Learning language" onchange="setLang(this.value)"
+      style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:22px;padding:7px 11px;font-family:var(--head);font-weight:600;font-size:.82rem;cursor:pointer;max-width:120px"></select>
     <div class="pill">⭐ <span id="pts">0</span></div>
     <div class="pill">🔥 <span id="strk">0</span></div>
   </div>
 </header>
+<div id="langLabel" style="text-align:center;font-size:.74rem;color:var(--muted);padding:4px;background:var(--sky-soft)"></div>
 
 <div class="feed" id="feed"></div>
 
@@ -93,6 +96,44 @@ const STUDENT=params.get('student');
 const SUBJECT='mathematics';
 let TEACHER={name:'Numa',emoji:'🔢'};
 let history=[];
+
+/* ── PER-TEACHER VOICE PROFILES ── */
+const TEACHER_VOICES={
+  mathematics:{pitch:1.1,rate:0.95,voiceHint:'female'},   // Numa - warm, clear
+  english:{pitch:1.2,rate:0.9,voiceHint:'female'},         // Nova - bright, gentle
+  science:{pitch:0.95,rate:1.0,voiceHint:'female'},        // Lexi - confident
+  technology:{pitch:0.85,rate:1.05,voiceHint:'male'},      // Cody - deep, energetic
+  history:{pitch:0.9,rate:0.85,voiceHint:'male'},          // Atlas - authoritative, slow
+  music_arts:{pitch:1.3,rate:0.95,voiceHint:'female'},     // Melody - high, musical
+  life_skills:{pitch:1.0,rate:0.9,voiceHint:'female'},     // Penny - balanced
+  health_pe:{pitch:0.8,rate:1.1,voiceHint:'male'}          // Vita - strong, upbeat
+};
+/* Map server subject keys to voice profiles (subject keys differ slightly) */
+const SUBJECT_VOICE_ALIAS={mathematics:'mathematics',science:'science',reading:'english',coding:'technology',history:'history',arts:'music_arts',finance:'life_skills',health:'health_pe'};
+function teacherVoice(){return TEACHER_VOICES[SUBJECT_VOICE_ALIAS[SUBJECT]||'mathematics']||TEACHER_VOICES.mathematics;}
+
+/* ── LANGUAGES (English + 30+ major world languages) ── */
+const LANGUAGES=[
+  ['en','English'],['es','Spanish'],['fr','French'],['de','German'],['pt','Portuguese'],
+  ['it','Italian'],['nl','Dutch'],['ru','Russian'],['ar','Arabic'],['zh','Chinese (Mandarin)'],
+  ['ja','Japanese'],['ko','Korean'],['hi','Hindi'],['bn','Bengali'],['ur','Urdu'],
+  ['pa','Punjabi'],['ta','Tamil'],['te','Telugu'],['tr','Turkish'],['fa','Persian'],
+  ['sw','Swahili'],['ha','Hausa'],['yo','Yoruba'],['ig','Igbo'],['am','Amharic'],
+  ['id','Indonesian'],['ms','Malay'],['th','Thai'],['vi','Vietnamese'],['pl','Polish'],
+  ['uk','Ukrainian'],['ro','Romanian'],['el','Greek'],['he','Hebrew'],['fil','Filipino']
+];
+let LANG=localStorage.getItem('academyLang_'+STUDENT)||'en';
+function langName(code){const m=LANGUAGES.find(l=>l[0]===code);return m?m[1]:'English';}
+function setLang(code){
+  LANG=code;localStorage.setItem('academyLang_'+STUDENT,code);
+  const lbl=document.getElementById('langLabel');if(lbl)lbl.textContent=code==='en'?'':('Learning in: '+langName(code));
+  if(typeof recog!=='undefined'&&recog){try{recog.lang=(code==='en'?'en-US':code);}catch(e){}}
+}
+function initLangSelect(){
+  const sel=document.getElementById('langSel');if(!sel)return;
+  sel.innerHTML=LANGUAGES.map(l=>`<option value="${l[0]}"${l[0]===LANG?' selected':''}>${l[1]}</option>`).join('');
+  setLang(LANG);
+}
 
 if(!TOKEN||!STUDENT){
   document.body.innerHTML='<div class="gate"><div style="font-size:3rem">🔒</div><h2 style="font-family:Fredoka;color:#041022">Please open from the Family Campus</h2><a href="/academy">Go to Parent Portal</a></div>';
@@ -124,7 +165,7 @@ async function send(){
   addMsg('me',text);const t=addMsg('bot','',true);
   try{
     const r=await fetch(API+'/api/academy/tutor',{method:'POST',headers:authHeaders(),
-      body:JSON.stringify({studentId:STUDENT,subject:SUBJECT,message:text,history:history.slice(-10)})});
+      body:JSON.stringify({studentId:STUDENT,subject:SUBJECT,message:text,history:history.slice(-10),language:LANG})});
     const d=await r.json();rm(t);
     if(!r.ok)throw new Error(d.error||'Numa is busy.');
     addMsg('bot',d.reply);
@@ -142,12 +183,28 @@ async function send(){
 /* ── FREE PREMIUM VOICE ── */
 let curUtt=null;
 function cleanForSpeech(raw){return raw.replace(/#{1,6}\s*/g,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/`{1,3}[^`]*`{1,3}/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/^[\s\-\*•]+/gm,'').replace(/[\u{1F300}-\u{1FAFF}]/gu,'').replace(/\n{2,}/g,'. ').replace(/\n/g,', ').replace(/\s{2,}/g,' ').trim();}
-function pickVoice(){const v=window.speechSynthesis.getVoices();const prefs=[x=>/en-US/i.test(x.lang)&&/Google US English/i.test(x.name),x=>/en-GB/i.test(x.lang)&&/Google UK English Female/i.test(x.name),x=>/en/i.test(x.lang)&&/Samantha|Karen|Moira|Tessa/i.test(x.name),x=>/en-US/i.test(x.lang)&&/Microsoft.*Natural|Aria|Jenny/i.test(x.name),x=>/en-US/i.test(x.lang)&&!x.name.includes('espeak'),x=>/^en/i.test(x.lang)];for(const t of prefs){const m=v.find(t);if(m)return m;}return null;}
+const FEMALE_RX=/female|Samantha|Karen|Moira|Tessa|Victoria|Zira|Aria|Jenny|Susan|Fiona|Google UK English Female|Google US English/i;
+const MALE_RX=/male|David|Daniel|Alex|Fred|Rishi|Google UK English Male|Mark|Guy/i;
+function pickVoice(hint){
+  const v=window.speechSynthesis.getVoices();
+  const langPref=LANG==='en'?'en':LANG;
+  // 1) match language + gender hint
+  const byLangGender=v.find(x=>new RegExp('^'+langPref,'i').test(x.lang)&&(hint==='female'?FEMALE_RX:MALE_RX).test(x.name));
+  if(byLangGender)return byLangGender;
+  // 2) match language only
+  const byLang=v.find(x=>new RegExp('^'+langPref,'i').test(x.lang));
+  if(byLang)return byLang;
+  // 3) English fallback w/ gender hint
+  const byGender=v.find(x=>/^en/i.test(x.lang)&&(hint==='female'?FEMALE_RX:MALE_RX).test(x.name));
+  if(byGender)return byGender;
+  return v.find(x=>/en-US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;
+}
 function speak(text,btn){
   if(!('speechSynthesis'in window))return;
   if(window.speechSynthesis.speaking||window.speechSynthesis.pending){window.speechSynthesis.cancel();if(curUtt&&curUtt._b)curUtt._b.textContent='🔊 Listen';if(curUtt&&curUtt._b===btn){curUtt=null;return;}}
   const u=new SpeechSynthesisUtterance(cleanForSpeech(text));
-  u.rate=0.95;u.pitch=1.05;u.lang='en-US';const best=pickVoice();if(best)u.voice=best;
+  const vp=teacherVoice();
+  u.rate=vp.rate;u.pitch=vp.pitch;u.lang=(LANG==='en'?'en-US':LANG);const best=pickVoice(vp.voiceHint);if(best)u.voice=best;
   u._b=btn;u.onstart=()=>btn.textContent='⏸ Stop';u.onend=()=>{btn.textContent='🔊 Listen';curUtt=null;};u.onerror=()=>{btn.textContent='🔊 Listen';curUtt=null;};
   curUtt=u;window.speechSynthesis.speak(u);
 }
@@ -176,6 +233,8 @@ async function loadTeacher(){
 }
 async function boot(){
   if(!TOKEN||!STUDENT)return;
+  initLangSelect();
+  if(recog){try{recog.lang=(LANG==='en'?'en-US':LANG);}catch(e){}}
   await loadTeacher();
   try{
     const r=await fetch(API+'/api/academy/progress/'+STUDENT,{headers:authHeaders()});
