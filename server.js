@@ -628,6 +628,8 @@ app.post('/api/admin/update', async (req, res) => {
     }
 
     logActivity(who, getRole(req)?.role || 'staff', 'application_update', `Set ${ref.toUpperCase()} → ${status}${response ? ' (with message to applicant)' : ''}`, ref.toUpperCase());
+    // Push real-time status update to the client if they are logged in
+    if (app_.email) sseNotify(app_.email, 'status-update', { ref: ref.toUpperCase(), status });
     res.json({ success: true, emailed, emailError: emailed ? null : 'Could not email applicant directly — a fallback notification was sent to your admin email. To fix permanently, verify a domain on Resend.' });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -1063,6 +1065,7 @@ app.post('/api/messages', async (req, res) => {
   if (!body || !String(body).trim()) return res.status(400).json({ error: 'Message cannot be empty.' });
   try {
     const rows = await dbQuery('POST', 'messages', { client_email: email, sender: 'client', body: String(body).trim(), read: false });
+    sseNotify('__admin__', 'new-client-message', { client_email: email, preview: String(body).trim().slice(0, 80) });
     // Notify the team by email
     try {
       const recipientEmail = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
@@ -1098,6 +1101,7 @@ app.post('/api/admin/messages', async (req, res) => {
     return res.status(400).json({ error: 'client_email and body are required.' });
   try {
     const rows = await dbQuery('POST', 'messages', { client_email: String(client_email).toLowerCase(), sender: 'admin', body: String(body).trim(), read: false });
+    sseNotify(String(client_email).toLowerCase(), 'new-message', { sender: 'admin', body: String(body).trim(), created_at: new Date().toISOString() });
     // Email the client that they have a reply
     try {
       await sendEmail(client_email, 'You have a new message from SkyGlobe Group',
@@ -1164,6 +1168,52 @@ app.post('/api/team/messages', async (req, res) => {
 
 // Lightweight endpoint the front-end pings to wake the server from sleep.
 app.get('/api/health', (req, res) => res.json({ ok: true, t: Date.now() }));
+
+// ── #3d REAL-TIME: SERVER-SENT EVENTS BROKER ─────────────────────────────────
+// Pure Node.js — no extra packages. Clients connect once and receive push events.
+// _clientSSE: email → Set<res>  (one user may have multiple tabs open)
+// _adminSSE:  Set<res>          (all admin/staff connections share one pool)
+const _clientSSE = new Map();
+const _adminSSE  = new Set();
+
+function _sseAdd(who, res) {
+  if (who === '__admin__') { _adminSSE.add(res); return; }
+  if (!_clientSSE.has(who)) _clientSSE.set(who, new Set());
+  _clientSSE.get(who).add(res);
+}
+function _sseRemove(who, res) {
+  if (who === '__admin__') { _adminSSE.delete(res); return; }
+  _clientSSE.get(who)?.delete(res);
+}
+function sseNotify(who, eventName, data) {
+  const payload = `event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`;
+  const targets = who === '__admin__' ? _adminSSE : (_clientSSE.get(who) || new Set());
+  for (const r of targets) { try { r.write(payload); } catch {} }
+}
+
+// GET /api/sse — authenticated SSE stream.
+// EventSource cannot set custom headers, so the auth token is a query param.
+// Clients send ?token=<jwt>; admin/staff send ?token=<admin-key>.
+app.get('/api/sse', (req, res) => {
+  const token = String(req.query.token || '');
+  const email = verifyToken(token);
+  const role  = !email ? getRole({ headers: { 'x-admin-key': token } }) : null;
+  if (!email && !role) return res.status(401).end();
+  const who = email || '__admin__';
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // disable Nginx/Render buffering
+  res.flushHeaders();
+
+  res.write('event: connected\ndata: {"ok":true}\n\n');
+  _sseAdd(who, res);
+
+  // Heartbeat every 25s keeps the connection alive through load balancers
+  const hb = setInterval(() => { try { res.write(':hb\n\n'); } catch { clearInterval(hb); } }, 25000);
+  req.on('close', () => { clearInterval(hb); _sseRemove(who, res); });
+});
 
 app.post('/api/generate-doc', async (req, res) => {
   const { docType, fullName, nationality, email, phone, address, city,
