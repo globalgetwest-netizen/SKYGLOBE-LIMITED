@@ -2851,17 +2851,18 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
     return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add a free GROQ_API_KEY (from console.groq.com) to your Render environment variables.' });
 
   try {
-    // Pull live ecosystem snapshot from Supabase
+    // Pull live ecosystem snapshot from Supabase (10 s cap so slow DB can't eat the AI budget).
+    const _dbTimeout = (p) => Promise.race([p, new Promise(r => setTimeout(() => r([]), 10000))]);
     const [apps, payments, staff, tasks, activity, conferences, legalDocs, clients, sessionLogs] = await Promise.all([
-      dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 200 }).catch(() => []),
-      dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 200 }).catch(() => []),
-      dbQuery('GET', 'staff_members', null, { limit: 100 }).catch(() => []),
-      dbQuery('GET', 'tasks', null, { order: 'created_at.desc', limit: 100 }).catch(() => []),
-      dbQuery('GET', 'activity_log', null, { order: 'created_at.desc', limit: 50 }).catch(() => []),
-      dbQuery('GET', 'conferences', null, { order: 'date.desc', limit: 50 }).catch(() => []),
-      dbQuery('GET', 'documents', null, { uploaded_by: 'eq.ai:legal-docs', order: 'created_at.desc', limit: 100 }).catch(() => []),
-      dbQuery('GET', 'clients', null, { select: 'email,name,created_at', order: 'created_at.desc', limit: 500 }).catch(() => []),
-      dbQuery('GET', 'session_logs', null, { order: 'logged_in_at.desc', limit: 200 }).catch(() => []),
+      _dbTimeout(dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 200 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 200 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'staff_members', null, { limit: 100 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'tasks', null, { order: 'created_at.desc', limit: 100 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'activity_log', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'conferences', null, { order: 'date.desc', limit: 50 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'documents', null, { uploaded_by: 'eq.ai:legal-docs', order: 'created_at.desc', limit: 100 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'clients', null, { select: 'email,name,created_at', order: 'created_at.desc', limit: 500 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'session_logs', null, { order: 'logged_in_at.desc', limit: 200 }).catch(() => [])),
     ]);
 
     // Build concise snapshot text
@@ -3146,7 +3147,7 @@ async function askGroq(systemPrompt, userPrompt, contents = null) {
       'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
     },
     body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 4096 }),
-    signal: AbortSignal.timeout(45000)
+    signal: AbortSignal.timeout(60000)
   });
   if (!res.ok) throw new Error(`Groq error ${res.status}: ${await res.text().catch(() => '')}`);
   const data = await res.json();
@@ -3164,8 +3165,8 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
   if (USE_OLLAMA) return askOllama(systemPrompt, prompt);
   // Otherwise prefer free Groq cloud AI if configured (fast, multi-user).
   if (USE_GROQ) return askGroq(systemPrompt, prompt);
-  // flash-lite has the most generous free-tier quota, so try it first.
-  const models = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  // 2.0-flash is most reliable on free tier — try it first, then newer models as fallback.
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
   let lastError = 'No models responded';
   let quotaHit = false;
   for (const model of models) {
@@ -3181,7 +3182,7 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
               contents: [{ role: 'user', parts: [{ text: prompt }] }],
               generationConfig: { maxOutputTokens: 4096, temperature: 0.7 }
             }),
-            signal: AbortSignal.timeout(35000)
+            signal: AbortSignal.timeout(55000)
           }
         );
         const data = await res.json();
@@ -3222,9 +3223,8 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
   if (USE_GROQ) return askGroq(systemPrompt, null, contents);
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
-  // gemini-2.0-flash is primary: no thinking overhead, fast, reliable for education
-  // flash-lite has the most generous free-tier quota, so try it first.
-  const models = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  // 2.0-flash is most reliable on free tier — try it first, then newer models as fallback.
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
   // BLOCK_ONLY_HIGH lets all educational content through while still blocking
   // genuinely harmful material.
   const safetySettings = [
@@ -3246,7 +3246,7 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
       try {
         const r = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
-          { method: 'POST', headers: { 'content-type': 'application/json' }, body, signal: AbortSignal.timeout(35000) }
+          { method: 'POST', headers: { 'content-type': 'application/json' }, body, signal: AbortSignal.timeout(55000) }
         );
         const data = await r.json();
         if (!r.ok) {
