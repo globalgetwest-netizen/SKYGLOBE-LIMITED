@@ -103,6 +103,18 @@
   .bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .6s}
   .bar-row .vn{text-align:right;font-weight:700;color:#fff}
 
+  /* Trend line chart (SVG) */
+  .trend-wrap{position:relative}
+  .trend-svg{width:100%;height:auto;aspect-ratio:700/200;display:block;overflow:visible}
+  .trend-svg .grid-line{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}
+  .trend-svg .area{fill:url(#trendGrad)}
+  .trend-svg .line{fill:none;stroke:var(--gold);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+  .trend-svg .dot{fill:var(--gold);stroke:var(--navy2);stroke-width:2}
+  .trend-svg .xlbl{fill:var(--muted);font-size:9px;text-anchor:middle}
+  .trend-svg .ylbl{fill:var(--muted);font-size:9px;text-anchor:end}
+  .trend-tip{position:absolute;pointer-events:none;background:var(--navy);border:1px solid var(--gold);border-radius:8px;padding:6px 10px;font-size:0.74rem;color:#fff;opacity:0;transition:opacity .15s;white-space:nowrap;transform:translate(-50%,-130%);z-index:5}
+  .trend-tip b{color:var(--gold)}
+
   /* Status donut legend */
   .donut-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
   .donut{width:140px;height:140px;border-radius:50%;flex-shrink:0;position:relative;background:var(--navy)}
@@ -378,6 +390,13 @@
                 <div class="donut" id="donut"><div class="hole"><div class="b" id="donutTotal">0</div><div class="s">Total</div></div></div>
                 <div class="legend" id="statusLegend"></div>
               </div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>📊 Application Volume <span class="mini" id="trendRange">last 12 weeks</span></h3>
+            <div class="trend-wrap">
+              <div class="trend-tip" id="trendTip"></div>
+              <svg class="trend-svg" id="trendSvg" viewBox="0 0 700 200"></svg>
             </div>
           </div>
           <div class="panel">
@@ -1342,9 +1361,58 @@ function renderDashboard(){
   document.getElementById('donut').style.background=`conic-gradient(${segs.join(',')})`;
   document.getElementById('statusLegend').innerHTML=STATUS_LIST.map(s=>{const n=count(s);return n?`<div class="li"><span class="dot" style="background:${STATUS_COLORS[s]}"></span>${s}<span class="n">${n}</span></div>`:'';}).join('')||'<span style="color:var(--muted)">No data</span>';
 
+  // volume trend
+  renderTrend();
+
   // recent table
   const recent=[...APPS].sort((a,b)=>new Date(b.timestamp||0)-new Date(a.timestamp||0)).slice(0,6);
   document.getElementById('recentBody').innerHTML=recent.length?recent.map(a=>rowHtml(a)).join(''):'<tr><td colspan="5" class="empty">No applications yet.</td></tr>';
+}
+
+/* ── VOLUME TREND (pure SVG, no library) ── */
+function renderTrend(){
+  const svg=document.getElementById('trendSvg'); if(!svg) return;
+  const WEEKS=12, W=700, H=200, padL=28, padR=8, padT=12, padB=22;
+  // Build 12 week buckets ending this week (Monday-start weeks)
+  const now=new Date(); now.setHours(0,0,0,0);
+  const day=(now.getDay()+6)%7; // 0=Mon
+  const thisMon=now.getTime()-day*864e5;
+  const buckets=[];
+  for(let i=WEEKS-1;i>=0;i--){const start=thisMon-i*7*864e5;buckets.push({start,end:start+7*864e5,n:0,label:new Date(start).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})});}
+  APPS.forEach(a=>{const t=a.timestamp?new Date(a.timestamp).getTime():0;if(!t)return;const b=buckets.find(b=>t>=b.start&&t<b.end);if(b)b.n++;});
+
+  const maxN=Math.max(1,...buckets.map(b=>b.n));
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const x=i=>padL+(buckets.length===1?plotW/2:i*plotW/(buckets.length-1));
+  const y=n=>padT+plotH-(n/maxN)*plotH;
+
+  // gridlines + y labels (0, mid, max)
+  let g='';
+  [0,Math.ceil(maxN/2),maxN].forEach(v=>{const yy=y(v);g+=`<line class="grid-line" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/><text class="ylbl" x="${padL-5}" y="${yy+3}">${v}</text>`;});
+
+  const pts=buckets.map((b,i)=>[x(i),y(b.n)]);
+  const linePath='M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');
+  const areaPath=linePath+` L${x(buckets.length-1).toFixed(1)} ${(padT+plotH).toFixed(1)} L${x(0).toFixed(1)} ${(padT+plotH).toFixed(1)} Z`;
+
+  const xlabels=buckets.map((b,i)=>(i%2===0||i===buckets.length-1)?`<text class="xlbl" x="${x(i)}" y="${H-6}">${b.label}</text>`:'').join('');
+  const dots=pts.map((p,i)=>`<circle class="dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" data-i="${i}"/>`).join('');
+
+  svg.innerHTML=`<defs><linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--gold)" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="var(--gold)" stop-opacity="0"/></linearGradient></defs>
+    ${g}<path class="area" d="${areaPath}"/><path class="line" d="${linePath}"/>${dots}${xlabels}`;
+
+  // hover tooltips
+  const tip=document.getElementById('trendTip'), wrap=svg.parentElement;
+  svg.querySelectorAll('.dot').forEach(c=>{
+    c.addEventListener('mouseenter',e=>{
+      const b=buckets[+c.dataset.i], rect=wrap.getBoundingClientRect();
+      const cx=(+c.getAttribute('cx'))/W*rect.width, cy=(+c.getAttribute('cy'))/H*rect.height;
+      tip.innerHTML=`<b>${b.n}</b> application${b.n===1?'':'s'}<br>week of ${b.label}`;
+      tip.style.left=cx+'px'; tip.style.top=cy+'px'; tip.style.opacity='1';
+    });
+    c.addEventListener('mouseleave',()=>{tip.style.opacity='0';});
+  });
 }
 function kpiCard(ic,num,lbl,cls=''){return `<div class="kpi ${cls}"><div class="ic">${ic}</div><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;}
 
