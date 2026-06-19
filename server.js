@@ -2571,8 +2571,8 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
   // Provider selection — prefer FREE Google Gemini, fall back to Anthropic if a key exists.
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!USE_OLLAMA && !geminiKey && !anthropicKey)
-    return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add a free GEMINI_API_KEY (from aistudio.google.com) to your Render environment variables.' });
+  if (!USE_OLLAMA && !USE_GROQ && !geminiKey && !anthropicKey)
+    return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add a free GROQ_API_KEY (from console.groq.com) to your Render environment variables.' });
 
   try {
     // Pull live ecosystem snapshot from Supabase
@@ -2681,8 +2681,8 @@ INSTRUCTIONS:
 
     let reply;
 
-    if (USE_OLLAMA || geminiKey) {
-      // ── FREE PROVIDER: local Ollama OR Google Gemini (robust retry + fallback)
+    if (USE_OLLAMA || USE_GROQ || geminiKey) {
+      // ── FREE PROVIDER: local Ollama / Groq cloud / Google Gemini (retry + fallback)
       // Fold prior conversation into the prompt so we can reuse the shared
       // callGeminiWithRetry helper (which retries 429/500/503 transient errors).
       const convo = messages.slice(0, -1)
@@ -2848,12 +2848,46 @@ async function askOllama(systemPrompt, userPrompt, contents = null) {
 }
 const USE_OLLAMA = !!process.env.OLLAMA_URL;
 
+// ── GROQ ENGINE (FREE cloud AI — runs Llama/Qwen, fast, multi-user) ───────────
+// Used on the live site (Render) so real users get AI without your laptop.
+// Set GROQ_MODEL to choose the model (default: llama-3.3-70b-versatile).
+async function askGroq(systemPrompt, userPrompt, contents = null) {
+  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+  const messages = [{ role: 'system', content: systemPrompt }];
+  if (Array.isArray(contents)) {
+    for (const c of contents) {
+      const role = c.role === 'model' ? 'assistant' : 'user';
+      const text = (c.parts || []).map(p => p.text || '').join('');
+      if (text) messages.push({ role, content: text });
+    }
+  } else if (userPrompt) {
+    messages.push({ role: 'user', content: userPrompt });
+  }
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+    },
+    body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 4096 }),
+    signal: AbortSignal.timeout(45000)
+  });
+  if (!res.ok) throw new Error(`Groq error ${res.status}: ${await res.text().catch(() => '')}`);
+  const data = await res.json();
+  const text = (data.choices?.[0]?.message?.content || '').trim();
+  if (!text) throw new Error('Groq returned an empty response.');
+  return text;
+}
+const USE_GROQ = !!process.env.GROQ_API_KEY;
+
 // ── ROBUST GEMINI CALL WITH RETRY + MODEL FALLBACK ────────────────────────────
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
 async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
   // If a local Ollama engine is configured, use it (free, no quota).
   if (USE_OLLAMA) return askOllama(systemPrompt, prompt);
+  // Otherwise prefer free Groq cloud AI if configured (fast, multi-user).
+  if (USE_GROQ) return askGroq(systemPrompt, prompt);
   // flash-lite has the most generous free-tier quota, so try it first.
   const models = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
   let lastError = 'No models responded';
@@ -2909,6 +2943,7 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
 async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
   // If a local Ollama engine is configured, use it (free, no quota).
   if (USE_OLLAMA) return askOllama(systemPrompt, null, contents);
+  if (USE_GROQ) return askGroq(systemPrompt, null, contents);
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
   // gemini-2.0-flash is primary: no thinking overhead, fast, reliable for education
