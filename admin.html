@@ -357,6 +357,7 @@
         <button class="sb-link" data-view="attendance" onclick="switchView('attendance')"><span class="ic">🕐</span> Attendance</button>
         <button class="sb-link" data-view="activity" onclick="switchView('activity')"><span class="ic">🛰️</span> Activity Log</button>
         <button class="sb-link" data-view="analytics" onclick="switchView('analytics')"><span class="ic">📈</span> Analytics</button>
+        <button class="sb-link" data-view="errors" onclick="switchView('errors')"><span class="ic">🚨</span> Error Logs</button>
         <button class="sb-link" data-view="ipregistry" onclick="switchView('ipregistry')"><span class="ic">🛡️</span> IP Registry</button>
         <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> Kids Academy</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
@@ -917,6 +918,19 @@
           </div>
         </section>
 
+        <!-- ERROR LOGS -->
+        <section class="view" id="view-errors">
+          <div class="dept-hero" style="margin-bottom:18px">
+            <div style="font-size:1.6rem">🚨 Error Logs</div>
+            <div class="cd-sub" style="margin-top:6px">Self-hosted error monitoring — client JS errors and unhandled server exceptions, stored in Supabase. No Sentry needed.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+            <button onclick="loadErrors()" class="btn btn-sm btn-ghost">↻ Refresh</button>
+            <span id="errCount" style="color:var(--muted);font-size:0.82rem"></span>
+          </div>
+          <div id="errorFeed" style="display:flex;flex-direction:column;gap:8px"></div>
+        </section>
+
         <!-- IP REGISTRY -->
         <section class="view" id="view-ipregistry">
           <div class="dept-hero" style="margin-bottom:18px">
@@ -1083,6 +1097,7 @@ function switchView(v){
   if(v==='attendance') loadAttendanceAdmin();
   if(v==='activity') loadActivity();
   if(v==='analytics') loadAnalytics();
+  if(v==='errors') loadErrors();
   if(v==='ipregistry') loadIPRegistry();
   if(v==='academy') loadAcademyTeachers();
   toggleSidebar(false);
@@ -1359,6 +1374,33 @@ function renderAnalytics(rows,days){
     </div>`).join(''):'<div style="color:var(--muted);text-align:center;padding:30px">No events yet — start browsing skyglobegroup.com to generate data.</div>';
 }
 
+
+/* ── #23 ERROR LOGS ── */
+async function loadErrors(){
+  const feed=document.getElementById('errorFeed');
+  const cnt=document.getElementById('errCount');
+  feed.innerHTML='<div class="skeleton">Loading error logs…</div>';
+  try{
+    const r=await fetch(API+'/api/admin/errors',{headers:{'x-admin-key':KEY}});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const rows=await r.json();
+    cnt.textContent=rows.length+' record'+(rows.length===1?'':'s');
+    const srcCol={server:'#e05c5c',client:'#D4A73A'};
+    feed.innerHTML=rows.length?rows.map(e=>`
+      <div style="border-radius:10px;background:var(--navy);padding:12px 14px;border-left:3px solid ${srcCol[e.source]||'#5f74a0'}">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+          <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:${srcCol[e.source]||'#5f74a0'};letter-spacing:.08em">${esc(e.source||'?')}</span>
+          <span style="font-size:0.78rem;color:var(--txt);flex:1;min-width:0;word-break:break-all">${esc(e.message||'(no message)')}</span>
+          <span style="font-size:0.7rem;color:var(--muted);flex-shrink:0">${timeAgo(e.created_at)}</span>
+        </div>
+        ${e.url?`<div style="font-size:0.72rem;color:var(--muted);word-break:break-all;margin-bottom:4px">📍 ${esc(e.url)}</div>`:''}
+        ${e.stack?`<pre style="font-size:0.68rem;color:#7a8db8;white-space:pre-wrap;word-break:break-all;margin:0;max-height:120px;overflow:auto">${esc(e.stack)}</pre>`:''}
+      </div>`).join('')
+      :'<div style="color:var(--muted);text-align:center;padding:40px">No errors logged yet — great sign! 🎉</div>';
+  }catch(err){
+    feed.innerHTML='<div style="color:#e05c5c;padding:20px">Failed to load: '+esc(err.message)+'</div>';
+  }
+}
 
 /* ── LOAD ── */
 async function loadAll(){ await loadApps(); await loadMessages(true); await pollTeamBadge(); }
