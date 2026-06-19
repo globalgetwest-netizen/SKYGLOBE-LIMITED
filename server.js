@@ -94,9 +94,15 @@ app.use(generalLimiter);
 
 // ── #16 INPUT SANITISATION helper (no extra package needed) ──────────────────
 // Strips characters that could break HTML/SQL. Used on all user-supplied strings.
-// ── #24 SHARED PURE HELPERS (unit-tested in test/utils.test.js) ──────────────
-const utils = require('./lib/utils');
-const { sanitize, sanitizeEmail, genRef, hashPassword, verifyPassword, esc2 } = utils;
+function sanitize(val, maxLen = 1000) {
+  if (val === null || val === undefined) return '';
+  return String(val).trim().slice(0, maxLen)
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function sanitizeEmail(val) {
+  const e = String(val || '').trim().toLowerCase().slice(0, 254);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : '';
+}
 
 // ── #19 COMPRESSION (gzip/brotli) ─────────────────────────────────────────────
 // Shrinks HTML/CSS/JS/JSON by ~60-70% before sending. Uses the `compression`
@@ -245,7 +251,11 @@ async function sendEmail(to, subject, html, replyTo) {
   return data;
 }
 
-// genRef / sanitize / sanitizeEmail moved to ./lib/utils (see #24).
+function genRef() {
+  const year = new Date().getFullYear();
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `SKY-${year}-${rand}`;
+}
 
 // ── §3 AI ENGINE (Ollama → Groq → Gemini fallback chain) ─────────────────────
 // ── UNIFIED AI TEXT ENGINE ───────────────────────────────────────────────────
@@ -957,10 +967,33 @@ app.get('/api/test', async (req, res) => {
 const crypto = require('crypto');
 const SESSION_SECRET = process.env.SESSION_SECRET || process.env.SUPABASE_KEY || 'skyglobe-dev-secret';
 
-// hashPassword/verifyPassword come from ./lib/utils. Token helpers wrap the
-// shared signer with our SESSION_SECRET so callers keep the same signature.
-const signToken   = (email) => utils.signToken(email, SESSION_SECRET);
-const verifyToken = (token) => utils.verifyToken(token, SESSION_SECRET);
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+function verifyPassword(password, stored) {
+  if (!stored || !stored.includes(':')) return false;
+  const [salt, hash] = stored.split(':');
+  const test = crypto.scryptSync(password, salt, 64).toString('hex');
+  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(test));
+}
+function signToken(email) {
+  const payload = Buffer.from(JSON.stringify({ email, iat: Date.now() })).toString('base64url');
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
+  return `${payload}.${sig}`;
+}
+function verifyToken(token) {
+  if (!token || !token.includes('.')) return null;
+  const [payload, sig] = token.split('.');
+  const expected = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
+  if (sig !== expected) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    if (Date.now() - data.iat > 30 * 24 * 60 * 60 * 1000) return null; // 30-day expiry
+    return data.email;
+  } catch { return null; }
+}
 function clientAuth(req) {
   const h = req.headers['authorization'] || '';
   const token = h.startsWith('Bearer ') ? h.slice(7) : '';
@@ -2918,40 +2951,76 @@ ${ecosystemSnapshot}`;
     const sendDone  = ()     => { res.write('data: [DONE]\n\n'); res.end(); };
     const sendError = (msg)  => { res.write(`data: ${JSON.stringify({ error: msg })}\n\n`); res.end(); };
 
-    // ── GROQ streaming (fastest — runs Llama at 500+ tokens/sec) ────────────────
-    if (USE_GROQ) {
-      const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
-      const msgs = [{ role: 'system', content: systemPrompt }, ...messages];
-      const gr = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
-        body: JSON.stringify({ model, messages: msgs, temperature: 0.7, max_tokens: 2048, stream: true }),
-        signal: AbortSignal.timeout(60000),
-      });
-      if (!gr.ok) { sendError(`Groq error ${gr.status}`); return; }
-      const reader = gr.body.getReader(); const dec = new TextDecoder(); let buf = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        const lines = buf.split('\n'); buf = lines.pop();
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const payload = line.slice(6).trim();
-          if (payload === '[DONE]') { sendDone(); return; }
-          try { const d = JSON.parse(payload); const t = d.choices?.[0]?.delta?.content; if (t) sendChunk(t); } catch {}
+    // ── AUTOMATIC CASCADE for 24/7 uptime ───────────────────────────────────────
+    // Each attempt returns true ONLY if it began streaming content. If a provider
+    // fails BEFORE any text is sent, we fall through to the next one automatically,
+    // so the live site keeps answering even if one engine is down.
+    // Order: your Ollama (free/private) → Groq (fast cloud) → Gemini → Anthropic.
+    let streamed = false;
+
+    // 1) OLLAMA — your own GPU (local or exposed via tunnel)
+    async function tryOllama() {
+      if (!USE_OLLAMA) return false;
+      const base = (process.env.OLLAMA_URL || '').replace(/\/$/, '');
+      const model = process.env.OLLAMA_MODEL || 'llama3.2:3b';
+      const oMsgs = [{ role: 'system', content: systemPrompt }, ...messages];
+      const headers = { 'Content-Type': 'application/json' };
+      if (process.env.OLLAMA_AUTH) headers['Authorization'] = process.env.OLLAMA_AUTH;
+      try {
+        const orr = await fetch(`${base}/api/chat`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ model, messages: oMsgs, stream: true }),
+          signal: AbortSignal.timeout(120000),
+        });
+        if (!orr.ok) { console.error('Ollama down, falling back:', orr.status); return false; }
+        const reader = orr.body.getReader(); const dec = new TextDecoder(); let buf = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const lines = buf.split('\n'); buf = lines.pop();
+          for (const line of lines) {
+            const t = line.trim(); if (!t) continue;
+            try { const d = JSON.parse(t); const c = d.message?.content; if (c) { streamed = true; sendChunk(c); } } catch {}
+          }
         }
-      }
-      sendDone(); return;
+        return streamed;
+      } catch (e) { console.error('Ollama unreachable, falling back:', e.message); return false; }
     }
 
-    // ── GEMINI streaming ────────────────────────────────────────────────────────
-    if (USE_OLLAMA || geminiKey) {
-      if (USE_OLLAMA) {
-        // Ollama doesn't stream here — fall through to non-streaming reply
-        const reply = await askOllama(systemPrompt, messages[messages.length-1].content);
-        sendChunk(reply || 'No response.'); sendDone(); return;
-      }
+    // 2) GROQ — fast free cloud (always on)
+    async function tryGroq() {
+      if (streamed || !USE_GROQ) return streamed;
+      const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+      const msgs = [{ role: 'system', content: systemPrompt }, ...messages];
+      try {
+        const gr = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
+          body: JSON.stringify({ model, messages: msgs, temperature: 0.7, max_tokens: 2048, stream: true }),
+          signal: AbortSignal.timeout(60000),
+        });
+        if (!gr.ok) { console.error('Groq down, falling back:', gr.status); return false; }
+        const reader = gr.body.getReader(); const dec = new TextDecoder(); let buf = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const lines = buf.split('\n'); buf = lines.pop();
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const payload = line.slice(6).trim();
+            if (payload === '[DONE]') return streamed;
+            try { const d = JSON.parse(payload); const t = d.choices?.[0]?.delta?.content; if (t) { streamed = true; sendChunk(t); } } catch {}
+          }
+        }
+        return streamed;
+      } catch (e) { console.error('Groq unreachable, falling back:', e.message); return false; }
+    }
+
+    // 3) GEMINI — free cloud with model fallback
+    async function tryGemini() {
+      if (streamed || !geminiKey) return streamed;
       const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
       const convoContents = messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
       for (const model of models) {
@@ -2969,7 +3038,7 @@ ${ecosystemSnapshot}`;
               signal: AbortSignal.timeout(55000),
             }
           );
-          if (!gr.ok) { const e = await gr.json().catch(()=>{}); console.error('Gemini stream error', model, e); continue; }
+          if (!gr.ok) { console.error('Gemini stream error', model, gr.status); continue; }
           const reader = gr.body.getReader(); const dec = new TextDecoder(); let buf = '';
           while (true) {
             const { done, value } = await reader.read();
@@ -2982,29 +3051,38 @@ ${ecosystemSnapshot}`;
               try {
                 const d = JSON.parse(payload);
                 const parts = d.candidates?.[0]?.content?.parts || [];
-                for (const p of parts) { if (p.text) sendChunk(p.text); }
+                for (const p of parts) { if (p.text) { streamed = true; sendChunk(p.text); } }
               } catch {}
             }
           }
-          sendDone(); return;
+          if (streamed) return true;
         } catch (e) { console.error('CEO Gemini stream error', model, e.message); }
       }
-      sendError('AI service did not respond. Please try again.'); return;
+      return streamed;
     }
 
-    // ── ANTHROPIC fallback (non-streaming) ────────────────────────────────────
-    if (anthropicKey) {
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-opus-4-8', max_tokens: 2048, system: systemPrompt, messages }),
-      });
-      const data = await r.json();
-      if (!r.ok) { sendError(data.error?.message || 'Anthropic error'); return; }
-      sendChunk(data.content?.[0]?.text || 'No response.'); sendDone(); return;
+    // 4) ANTHROPIC — non-streaming last resort
+    async function tryAnthropic() {
+      if (streamed || !anthropicKey) return streamed;
+      try {
+        const r = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+          body: JSON.stringify({ model: 'claude-opus-4-8', max_tokens: 2048, system: systemPrompt, messages }),
+        });
+        const data = await r.json();
+        if (!r.ok) { console.error('Anthropic error:', data.error?.message); return false; }
+        const txt = data.content?.[0]?.text;
+        if (txt) { streamed = true; sendChunk(txt); }
+        return streamed;
+      } catch (e) { console.error('Anthropic unreachable:', e.message); return false; }
     }
 
-    sendError('No AI provider configured.');
+    // Run the cascade — stop at the first engine that actually produces output.
+    const ok = await tryOllama() || await tryGroq() || await tryGemini() || await tryAnthropic();
+    if (ok) { sendDone(); return; }
+    if (streamed) { sendDone(); return; } // partial output already sent
+    sendError('All AI engines are temporarily unavailable. Please try again in a moment.');
   } catch (e) {
     console.error('CEO AI Assistant error:', e.message);
     if (!res.headersSent) res.status(500).json({ error: e.message });
@@ -3108,10 +3186,15 @@ async function getAcademyRoster() {
   }));
 }
 
-// ── LOCAL OLLAMA ENGINE (free, runs on your own machine) ──────────────────────
-// When OLLAMA_URL is set (e.g. http://localhost:11434), the academy + CEO AI use
-// your local Ollama model instead of Gemini. Perfect for development on your
-// laptop, and for production once you have a dedicated AI machine.
+// ── OLLAMA ENGINE (free, runs on your own machine — local OR exposed publicly) ─
+// When OLLAMA_URL is set (e.g. http://localhost:11434 in dev, or a public tunnel
+// URL like https://xxx.ngrok-free.app in production), the academy + CEO AI use
+// your Ollama model instead of Gemini/Groq. Tried FIRST in the fallback chain.
+//   • Local dev:  OLLAMA_URL=http://localhost:11434
+//   • Production: expose Ollama via Cloudflare Tunnel/ngrok, set OLLAMA_URL on Render.
+// SECURITY: set OLLAMA_AUTH to a secret and put the same behind your tunnel
+// (e.g. Cloudflare Access / a reverse-proxy header check) so only this server
+// can use your GPU. It is sent as the Authorization header on every call.
 // Set OLLAMA_MODEL to choose the model (default: llama3.2:3b).
 async function askOllama(systemPrompt, userPrompt, contents = null) {
   const base = (process.env.OLLAMA_URL || '').replace(/\/$/, '');
@@ -3127,9 +3210,11 @@ async function askOllama(systemPrompt, userPrompt, contents = null) {
   } else if (userPrompt) {
     messages.push({ role: 'user', content: userPrompt });
   }
+  const headers = { 'Content-Type': 'application/json' };
+  if (process.env.OLLAMA_AUTH) headers['Authorization'] = process.env.OLLAMA_AUTH;
   const res = await fetch(`${base}/api/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ model, messages, stream: false }),
     signal: AbortSignal.timeout(120000) // local CPU can be slow — allow 2 min
   });
@@ -3650,7 +3735,7 @@ app.post('/api/academy/admission/apply', async (req, res) => {
   }
 });
 
-// esc2 imported from ./lib/utils (see #24).
+function esc2(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 // ── ADMISSION: CHECK STATUS ───────────────────────────────────────────────────
 app.get('/api/academy/admission/:id/status', async (req, res) => {
