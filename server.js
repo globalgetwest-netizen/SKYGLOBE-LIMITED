@@ -124,6 +124,33 @@ async function getAllApps() {
   return dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 500 });
 }
 
+// #2 Paginated fetch — cursor by offset. Returns one page plus a total count
+// so the admin dashboard can scroll infinitely without ever losing old records.
+async function getAppsPage(page = 1, perPage = 25) {
+  page = Math.max(1, parseInt(page, 10) || 1);
+  perPage = Math.min(100, Math.max(1, parseInt(perPage, 10) || 25));
+  const offset = (page - 1) * perPage;
+  // Range header makes Supabase return the Content-Range total count.
+  const url = `${SUPA_URL}/rest/v1/applications?` +
+    new URLSearchParams({ order: 'created_at.desc', offset: String(offset), limit: String(perPage) });
+  const r = await fetch(url, {
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Prefer': 'count=exact',
+      'Range-Unit': 'items',
+      'Range': `${offset}-${offset + perPage - 1}`,
+    },
+  });
+  const text = await r.text();
+  if (!r.ok) throw new Error(`Supabase page applications: ${r.status} ${text}`);
+  const rows = text ? JSON.parse(text) : [];
+  // Content-Range looks like "0-24/342" — the number after / is the total.
+  const cr = r.headers.get('content-range') || '';
+  const total = parseInt(cr.split('/')[1], 10) || rows.length;
+  return { rows, page, perPage, total, hasMore: offset + rows.length < total };
+}
+
 async function updateApp(ref, patch) {
   const rows = await dbQuery('PATCH', 'applications', patch, { ref: `eq.${ref}` });
   return Array.isArray(rows) ? rows[0] : rows;
@@ -502,8 +529,14 @@ app.post('/api/staff/login', loginLimiter, (req, res) => {
 
 app.get('/api/admin/applications', async (req, res) => {
   if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
-  try { res.json(await getAllApps()); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    // Paginated mode when ?page= is supplied; otherwise legacy full list (back-compat).
+    if (req.query.page) {
+      const data = await getAppsPage(req.query.page, req.query.per_page);
+      return res.json(data);
+    }
+    res.json(await getAllApps());
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/admin/update', async (req, res) => {
