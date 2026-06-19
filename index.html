@@ -6310,6 +6310,16 @@ function _clearMsgBadge() {
   if (badge) { badge.textContent = ''; badge.style.display = 'none'; }
 }
 
+// ── #23 CLIENT ERROR CAPTURE ─────────────────────────────────────────────────
+window.onerror = function(msg, src, line, col, err) {
+  fetch('/api/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: msg, stack: err?.stack, url: src }), keepalive: true }).catch(() => {});
+};
+window.addEventListener('unhandledrejection', (e) => {
+  fetch('/api/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: String(e.reason), stack: e.reason?.stack, url: location.href }), keepalive: true }).catch(() => {});
+});
+
 // ── #12 ANALYTICS — fire-and-forget event beacon ─────────────────────────────
 // No cookies. No third-party service. Just a server-side Supabase table.
 function trackEvent(event, page, meta) {
