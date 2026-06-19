@@ -3148,8 +3148,45 @@ const ACADEMY_TEACHERS = {
   finance:     { name: 'Penny',  subject: 'Financial Literacy', emoji: '💰', color: '#14B8A6' },
   health:      { name: 'Vita',   subject: 'Health & Well-being',emoji: '🌟', color: '#06B6D4' },
 };
-// Phase 1 launches Mathematics; others reserved for upcoming phases.
-const ACADEMY_LIVE_SUBJECTS = ['mathematics'];
+// All subjects are now live — every teacher is active.
+const ACADEMY_LIVE_SUBJECTS = ['mathematics','science','reading','coding','history','arts','finance','health'];
+
+// Per-teacher personality traits injected into the system prompt so each
+// teacher has a genuinely distinct voice and character.
+const TEACHER_PERSONALITIES = {
+  mathematics: `You are Numa — calm, encouraging, and brilliant at breaking big ideas into tiny steps.
+Your personality: patient, methodical, loves "aha!" moments. You use counting rhymes, visual examples (number lines, shapes), and always celebrate when the student gets something right.
+Your catchphrase style: "Let's figure this out together, one step at a time!"
+You draw shapes, number lines, clocks, and charts using SVG whenever a visual will help.`,
+  science:     `You are Nova — curious, enthusiastic, and always excited about discoveries.
+Your personality: energetic, asks "Why do you think that happens?", loves experiments described in words ("Imagine you mix…"), uses real-world examples (rainbows, volcanoes, stars, animals).
+Your catchphrase style: "Science is everywhere — even in your breakfast!"
+You draw simple diagrams (atoms, food chains, life cycles) using SVG when it helps.`,
+  reading:     `You are Lexi — warm, imaginative, and a true storyteller.
+Your personality: gentle, dramatic when reading, loves word games, rhymes, and building stories together. Makes every word feel like an adventure.
+Your catchphrase style: "Every word you learn is a superpower!"
+You use short story snippets, fill-in-the-blank, and word-family patterns to teach.`,
+  coding:      `You are Cody — energetic, future-focused, and makes tech feel like play.
+Your personality: uses game analogies, loves step-by-step thinking ("if this… then that"), celebrates logic and problem-solving, very encouraging about mistakes ("bugs are just puzzles!").
+Your catchphrase style: "Every great app started with one idea — just like yours!"
+You explain code concepts using simple pseudocode examples in text form.`,
+  history:     `You are Atlas — wise, storytelling, and brings the past to life.
+Your personality: dramatic storyteller, loves "Did you know…?" facts, connects history to the present day, makes students feel like explorers through time.
+Your catchphrase style: "History isn't old news — it's the story of how we got HERE!"
+You use timelines described in words, vivid descriptions of historical moments.`,
+  arts:        `You are Melody — joyful, expressive, and celebrates every creative act.
+Your personality: enthusiastic about all art forms, uses colourful descriptive language, never says anything is "wrong" in art, loves to inspire imagination.
+Your catchphrase style: "Your creativity is your superpower — there are no mistakes in art!"
+You describe colours, rhythms, and techniques in vivid sensory language.`,
+  finance:     `You are Penny — practical, friendly, and makes money make sense for kids.
+Your personality: relatable, uses everyday examples (pocket money, saving for a toy, a lemonade stand), connects finance to real choices, makes maths feel useful.
+Your catchphrase style: "Every penny saved is a step toward your dream!"
+You use simple scenarios and comparisons to explain saving, spending, and earning.`,
+  health:      `You are Vita — energetic, kind, and a champion of healthy choices.
+Your personality: upbeat, uses body-positive language, celebrates all forms of movement, talks about food in a fun (never restrictive) way, links physical and mental health.
+Your catchphrase style: "A healthy body and a happy mind — you've got this!"
+You use fun challenges, simple body facts, and positive affirmations.`,
+};
 
 // Returns the teacher for a subject, applying any CEO rename saved in the DB.
 async function getAcademyTeacher(subjKey) {
@@ -3522,13 +3559,16 @@ app.post('/api/academy/tutor', async (req, res) => {
     const ageBand = age <= 6 ? 'Ages 4-6 (Discover): very simple words, playful, lots of encouragement, short sentences, use stories and pictures-in-words.'
       : age <= 10 ? 'Ages 7-10 (Explore): friendly and clear, use small examples and quick questions, light challenges.'
       : age <= 14 ? 'Ages 11-14 (Build): encourage reasoning and "why", give richer problems, build critical thinking.'
-      : 'Ages 15-18 (Create): treat as a capable young adult, connect maths to real life, careers and projects.';
+      : `Ages 15-18 (Create): treat as a capable young adult, connect ${teacher.subject} to real life, careers and projects.`;
 
-    const systemPrompt = `You are ${teacher.name}, the friendly AI ${teacher.subject} teacher at SkyGlobe Kids Academy. You are warm, patient, encouraging, and never condescending. You teach ONE child named ${student.name}, age ${age}${student.grade ? `, grade ${student.grade}` : ''}.
+    const personality = TEACHER_PERSONALITIES[subjKey] || `You are ${teacher.name}, a warm and encouraging ${teacher.subject} teacher.`;
+    const systemPrompt = `${personality}
+
+You are the ${teacher.subject} teacher at SkyGlobe Kids Academy. You are warm, patient, encouraging, and never condescending. You teach ONE child named ${student.name}, age ${age}${student.grade ? `, grade ${student.grade}` : ''}.
 
 YOUR IDENTITY:
 - Your name is ${teacher.name}. Always refer to yourself as ${teacher.name}. Never say you are an AI language model.
-- You teach only ${teacher.subject}. If asked about other subjects, gently say that another SkyGlobe teacher covers that, and steer back to maths.
+- You teach only ${teacher.subject}. If a student asks about another subject, kindly say "That's a great question for my colleague! Right now let's keep exploring ${teacher.subject} together."
 
 LEARNING LEVEL: ${ageBand}
 
@@ -3936,14 +3976,144 @@ app.get('/api/academy/student/:id/attendance', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Built-in learning materials — always available even if academy_materials DB table is empty.
+const BUILTIN_MATERIALS = [
+  // MATHEMATICS
+  { id:'m1', subject:'mathematics', age_group:'4-6',  title:'Counting 1 to 10',      type:'lesson',   description:'Learn to count from 1 to 10 with fun pictures and songs. Perfect for your very first maths lesson!',              emoji:'🔢', color:'#3B82F6' },
+  { id:'m2', subject:'mathematics', age_group:'4-6',  title:'Shapes All Around Us',   type:'activity', description:'Circles, squares, and triangles are hiding everywhere! Find them around your home.',                               emoji:'🔷', color:'#3B82F6' },
+  { id:'m3', subject:'mathematics', age_group:'4-6',  title:'More & Less',            type:'lesson',   description:'Which has more apples? Which has fewer? Learning to compare quantities.',                                           emoji:'⚖️', color:'#3B82F6' },
+  { id:'m4', subject:'mathematics', age_group:'7-9',  title:'Adding & Subtracting',   type:'lesson',   description:'Master addition and subtraction with step-by-step examples, number lines, and word problems.',                      emoji:'➕', color:'#3B82F6' },
+  { id:'m5', subject:'mathematics', age_group:'7-9',  title:'Times Tables Challenge', type:'activity', description:'2s, 5s, and 10s first — then conquer ALL the times tables with Numa!',                                            emoji:'✖️', color:'#3B82F6' },
+  { id:'m6', subject:'mathematics', age_group:'7-9',  title:'Telling the Time',       type:'lesson',   description:'Read analogue and digital clocks, understand hours and minutes.',                                                   emoji:'🕐', color:'#3B82F6' },
+  { id:'m7', subject:'mathematics', age_group:'10-12',title:'Fractions & Decimals',   type:'lesson',   description:'Slicing pizzas into fractions and converting them to decimals — maths meets real life.',                           emoji:'🍕', color:'#3B82F6' },
+  { id:'m8', subject:'mathematics', age_group:'10-12',title:'Geometry Explorer',      type:'activity', description:'Perimeter, area, angles — explore shapes in 2D and 3D.',                                                           emoji:'📐', color:'#3B82F6' },
+  // SCIENCE
+  { id:'s1', subject:'science',     age_group:'4-6',  title:'Living & Non-Living',    type:'lesson',   description:'How do we know if something is alive? Explore plants, animals, rocks, and water.',                                  emoji:'🌱', color:'#10B981' },
+  { id:'s2', subject:'science',     age_group:'4-6',  title:'Weather Every Day',      type:'activity', description:'Sunny, rainy, cloudy, windy — be a mini weather scientist and record the weather this week!',                       emoji:'🌦️', color:'#10B981' },
+  { id:'s3', subject:'science',     age_group:'7-9',  title:'The Human Body',         type:'lesson',   description:'Heart, lungs, bones, and muscles — discover what keeps you running, jumping, and thinking.',                        emoji:'🫀', color:'#10B981' },
+  { id:'s4', subject:'science',     age_group:'7-9',  title:'Plants & Photosynthesis',type:'lesson',   description:'How do plants eat sunlight? Learn about roots, stems, leaves, and the amazing food factory inside every plant.',    emoji:'🌿', color:'#10B981' },
+  { id:'s5', subject:'science',     age_group:'10-12',title:'Forces & Motion',        type:'lesson',   description:'Gravity, friction, push and pull — understand why things move (or stop!) the way they do.',                         emoji:'🚀', color:'#10B981' },
+  { id:'s6', subject:'science',     age_group:'10-12',title:'The Solar System',       type:'lesson',   description:'Eight planets, one sun, countless moons — journey through space with Nova.',                                        emoji:'🪐', color:'#10B981' },
+  // READING
+  { id:'r1', subject:'reading',     age_group:'4-6',  title:'ABCs & Phonics',         type:'lesson',   description:'Every letter makes a sound. Learn the alphabet and start blending sounds into words with Lexi.',                    emoji:'🔤', color:'#F59E0B' },
+  { id:'r2', subject:'reading',     age_group:'4-6',  title:'My First Story',         type:'activity', description:'Listen to a short story, then tell Lexi what happened in your own words.',                                          emoji:'📖', color:'#F59E0B' },
+  { id:'r3', subject:'reading',     age_group:'7-9',  title:'Reading Comprehension',  type:'lesson',   description:'Read a passage and answer questions about who, what, where, when, and why.',                                        emoji:'📝', color:'#F59E0B' },
+  { id:'r4', subject:'reading',     age_group:'7-9',  title:'Word Families & Rhymes', type:'activity', description:'Cat, bat, hat, mat — discover word families and build your vocabulary through rhyme.',                               emoji:'🎵', color:'#F59E0B' },
+  { id:'r5', subject:'reading',     age_group:'10-12',title:'Creative Writing',       type:'activity', description:'Write your own short story with a beginning, middle, and end. Lexi will give you a prompt to start!',               emoji:'✍️', color:'#F59E0B' },
+  // CODING
+  { id:'c1', subject:'coding',      age_group:'4-6',  title:'What is a Computer?',   type:'lesson',   description:'Screens, keyboards, and mice — learn what computers are and what they can do.',                                      emoji:'💻', color:'#8B5CF6' },
+  { id:'c2', subject:'coding',      age_group:'7-9',  title:'Sequences & Steps',      type:'lesson',   description:'Coding is just giving clear instructions! Learn how sequences work and give Cody a set of instructions.',            emoji:'📋', color:'#8B5CF6' },
+  { id:'c3', subject:'coding',      age_group:'7-9',  title:'Loops & Patterns',       type:'lesson',   description:'Instead of repeating yourself, use a loop! Discover how computers use loops to be efficient.',                       emoji:'🔄', color:'#8B5CF6' },
+  { id:'c4', subject:'coding',      age_group:'10-12',title:'If / Then Logic',        type:'lesson',   description:'IF it rains THEN bring an umbrella. Learn how computers make decisions with conditions.',                           emoji:'🧠', color:'#8B5CF6' },
+  { id:'c5', subject:'coding',      age_group:'10-12',title:'Build a Mini Game',      type:'activity', description:'Plan a simple guessing game step by step — design the rules, the win condition, and the "game over" screen.',        emoji:'🎮', color:'#8B5CF6' },
+  // HISTORY
+  { id:'h1', subject:'history',     age_group:'4-6',  title:'My Family Story',        type:'lesson',   description:'History starts at home! Learn about family trees and how your own story began.',                                    emoji:'👨‍👩‍👧', color:'#EF4444' },
+  { id:'h2', subject:'history',     age_group:'7-9',  title:'Ancient Egypt',          type:'lesson',   description:'Pyramids, pharaohs, and hieroglyphics — travel 5,000 years back to the land of the Nile.',                          emoji:'🏺', color:'#EF4444' },
+  { id:'h3', subject:'history',     age_group:'7-9',  title:'Great African Kingdoms', type:'lesson',   description:'Mali, Songhai, Great Zimbabwe — discover the powerful empires that shaped our world.',                               emoji:'🌍', color:'#EF4444' },
+  { id:'h4', subject:'history',     age_group:'10-12',title:'The Age of Exploration', type:'lesson',   description:'Continents discovered, trade routes mapped, cultures connected — and the complicated truth behind it all.',          emoji:'🗺️', color:'#EF4444' },
+  { id:'h5', subject:'history',     age_group:'10-12',title:'World Wars & Peace',     type:'lesson',   description:'Why did the world go to war twice? And how did nations come together to build peace afterwards?',                   emoji:'🕊️', color:'#EF4444' },
+  // ARTS
+  { id:'a1', subject:'arts',        age_group:'4-6',  title:'Colours & Feelings',     type:'activity', description:'Every colour tells a story! Learn the primary colours and what feelings they can express.',                          emoji:'🎨', color:'#EC4899' },
+  { id:'a2', subject:'arts',        age_group:'4-6',  title:'My Favourite Song',      type:'activity', description:'Music is everywhere. Clap, hum, and discover rhythm with Melody.',                                                  emoji:'🎵', color:'#EC4899' },
+  { id:'a3', subject:'arts',        age_group:'7-9',  title:'Drawing with Shapes',    type:'activity', description:'Every great drawing starts with circles, squares, and triangles. Build a picture step by step.',                    emoji:'✏️', color:'#EC4899' },
+  { id:'a4', subject:'arts',        age_group:'7-9',  title:'Music & Beat',           type:'lesson',   description:'What makes a beat? Learn about rhythm, tempo, and how music travels from your ears to your heart.',                  emoji:'🥁', color:'#EC4899' },
+  { id:'a5', subject:'arts',        age_group:'10-12',title:'Art Through History',    type:'lesson',   description:'Cave paintings to digital art — how has creativity changed across the centuries?',                                   emoji:'🖼️', color:'#EC4899' },
+  // FINANCE
+  { id:'f1', subject:'finance',     age_group:'7-9',  title:'Needs vs Wants',         type:'lesson',   description:'Do you NEED new trainers or do you WANT them? Learn the difference and make smarter choices.',                       emoji:'💡', color:'#14B8A6' },
+  { id:'f2', subject:'finance',     age_group:'7-9',  title:'Saving Up',              type:'activity', description:'Set a saving goal, track your pocket money, and watch it grow. Penny will help you plan!',                          emoji:'🐷', color:'#14B8A6' },
+  { id:'f3', subject:'finance',     age_group:'10-12',title:'Earning & Spending',     type:'lesson',   description:'Lemonade stands, lawn mowing, selling crafts — explore how people earn money and make spending decisions.',          emoji:'💸', color:'#14B8A6' },
+  { id:'f4', subject:'finance',     age_group:'10-12',title:'Banks & Budgets',        type:'lesson',   description:'What is a bank? What is a budget? Build the financial literacy that sets you up for life.',                         emoji:'🏦', color:'#14B8A6' },
+  // HEALTH
+  { id:'v1', subject:'health',      age_group:'4-6',  title:'My Body Moves!',         type:'activity', description:'Jump, stretch, spin! Learn the names of body parts and celebrate everything your amazing body can do.',              emoji:'🤸', color:'#06B6D4' },
+  { id:'v2', subject:'health',      age_group:'4-6',  title:'Healthy Foods',          type:'lesson',   description:'Fruits, vegetables, proteins, and more — discover the colours of a healthy plate.',                                 emoji:'🥗', color:'#06B6D4' },
+  { id:'v3', subject:'health',      age_group:'7-9',  title:'Sleep & Rest',           type:'lesson',   description:'Why does your brain need sleep? Learn how rest helps you grow, remember, and feel great.',                          emoji:'😴', color:'#06B6D4' },
+  { id:'v4', subject:'health',      age_group:'7-9',  title:'Feelings & Emotions',    type:'lesson',   description:'Happy, sad, angry, excited — all feelings are valid. Learn healthy ways to understand and express them.',           emoji:'💛', color:'#06B6D4' },
+  { id:'v5', subject:'health',      age_group:'10-12',title:'Exercise & the Body',    type:'lesson',   description:'How does exercise change your muscles, heart, and mood? Build a simple fitness plan with Vita.',                    emoji:'🏃', color:'#06B6D4' },
+];
+
 // ── LEARNING MATERIALS (public to logged-in parents) ──────────────────────────
 app.get('/api/academy/materials', async (req, res) => {
   try {
+    // Try DB first — if the table has content, use it.
     const params = { order: 'created_at.desc', limit: 300 };
-    if (req.query.subject)  params.subject = `eq.${req.query.subject}`;
+    if (req.query.subject)  params.subject  = `eq.${req.query.subject}`;
     if (req.query.ageGroup) params.age_group = `eq.${req.query.ageGroup}`;
-    const rows = await dbQuery('GET', 'academy_materials', null, params).catch(() => []);
-    res.json(rows || []);
+    const dbRows = await dbQuery('GET', 'academy_materials', null, params).catch(() => []);
+    if (dbRows && dbRows.length > 0) { res.json(dbRows); return; }
+    // DB empty — return built-in materials, filtered to match the request.
+    let items = BUILTIN_MATERIALS;
+    if (req.query.subject)  items = items.filter(m => m.subject  === req.query.subject);
+    if (req.query.ageGroup) items = items.filter(m => m.age_group === req.query.ageGroup);
+    res.json(items);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Weekly timetable — computed from student age, not stored in DB.
+// Returns today's schedule and the full week so the portal can display it.
+app.get('/api/academy/timetable/:studentId', async (req, res) => {
+  const email = parentAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const student = await getStudentForParent(req.params.studentId, email);
+    if (!student) return res.status(404).json({ error: 'Child not found.' });
+    const age = student.age || 8;
+    // Age-appropriate session length and daily subjects
+    let sessionMins, dailySubjects, playLabel;
+    if (age <= 6) {
+      sessionMins = 20; playLabel = 'Free Play 🎈';
+      dailySubjects = [
+        ['mathematics','arts'],
+        ['reading','health'],
+        ['mathematics','arts'],
+        ['reading','health'],
+        ['Free Play'], // Friday
+      ];
+    } else if (age <= 10) {
+      sessionMins = 30; playLabel = 'Play Break 🏃';
+      dailySubjects = [
+        ['mathematics','science'],
+        ['reading','history'],
+        ['coding','arts'],
+        ['finance','health'],
+        ['mathematics','Free Play'],
+      ];
+    } else if (age <= 14) {
+      sessionMins = 40; playLabel = 'Break & Activity 🎯';
+      dailySubjects = [
+        ['mathematics','science','reading'],
+        ['history','coding','arts'],
+        ['mathematics','finance','health'],
+        ['science','reading','history'],
+        ['coding','arts','Free Play'],
+      ];
+    } else {
+      sessionMins = 45; playLabel = 'Creative Break 🎨';
+      dailySubjects = [
+        ['mathematics','science','reading','coding'],
+        ['history','arts','finance','health'],
+        ['mathematics','science','coding','history'],
+        ['reading','arts','finance','health'],
+        ['mathematics','coding','Free Play','Free Play'],
+      ];
+    }
+    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const dow = new Date().getDay(); // 0=Sun … 6=Sat
+    // Map 0(Sun)=rest, 1-5=school, 6(Sat)=rest
+    const todayIdx = (dow >= 1 && dow <= 5) ? dow - 1 : null;
+    const week = ['Monday','Tuesday','Wednesday','Thursday','Friday'].map((d, i) => {
+      const subjects = dailySubjects[i].map((s, j) => ({
+        order: j + 1,
+        subject: s,
+        isPlay: s === 'Free Play',
+        label: s === 'Free Play' ? playLabel : s.charAt(0).toUpperCase() + s.slice(1),
+        startTime: `${(8 + j * (Math.ceil(sessionMins / 60))).toString().padStart(2,'0')}:00`,
+        durationMins: s === 'Free Play' ? 30 : sessionMins,
+      }));
+      return { day: d, isToday: todayIdx === i, subjects };
+    });
+    const todaySchedule = todayIdx !== null ? week[todayIdx] : null;
+    const nextSubject = todaySchedule?.subjects.find(s => !s.isPlay) || null;
+    res.json({ student: { name: student.name, age }, week, todaySchedule, nextSubject, sessionMins, playLabel });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
