@@ -3162,6 +3162,7 @@ function showPage(page, mode) {
   injectBackBar(page);
   updateNavArrows();
   setupCounters(target);
+  trackEvent('page_view', page);
 }
 
 function navBack() {
@@ -3291,6 +3292,7 @@ async function submitForm() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Server error');
     showToast('✅ Request submitted! We\'ll contact you within 24 hours.');
+    trackEvent('contact_submit', 'contact', { service });
     ['fname','lname','email','phone','service','destination','message'].forEach(id => {
       document.getElementById(id).value = '';
     });
@@ -4674,6 +4676,7 @@ async function submitApplication() {
     if (!res.ok && !data.ref) throw new Error(data.error || 'Server error');
     const ref = data.ref || ('SKY-' + new Date().getFullYear() + '-SAVE');
     document.getElementById('appRefDisplay').textContent = ref;
+    trackEvent('application_submit', 'apply', { service: payload.service, destination: payload.destination });
     // Save to localStorage so tracking works even after server restarts
     const savedApp = {...payload, ref, timestamp: new Date().toISOString(), status: 'Received'};
     try { localStorage.setItem('skyapp_' + ref, JSON.stringify(savedApp)); } catch(e){}
@@ -6147,6 +6150,7 @@ async function doLogin(e) {
     const d = await r.json();
     if (!r.ok) return setAuthMsg(d.error || 'Login failed.', true);
     saveSession(d); showDashboard();
+    trackEvent('client_login', 'account');
   } catch { setAuthMsg('Network error. Please try again.', true); }
 }
 
@@ -6159,6 +6163,7 @@ async function doSignup(e) {
     const d = await r.json();
     if (!r.ok) return setAuthMsg(d.error || 'Sign up failed.', true);
     saveSession(d); showDashboard();
+    trackEvent('client_signup', 'account');
   } catch { setAuthMsg('Network error. Please try again.', true); }
 }
 
@@ -6303,6 +6308,20 @@ function _clearMsgBadge() {
   _sseUnread = 0;
   const badge = document.getElementById('msgNavBadge');
   if (badge) { badge.textContent = ''; badge.style.display = 'none'; }
+}
+
+// ── #12 ANALYTICS — fire-and-forget event beacon ─────────────────────────────
+// No cookies. No third-party service. Just a server-side Supabase table.
+function trackEvent(event, page, meta) {
+  try {
+    const body = JSON.stringify({ event, page: page || '', meta: meta || null });
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: 'application/json' });
+      navigator.sendBeacon('/api/analytics/event', blob);
+    } else {
+      fetch('/api/analytics/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+    }
+  } catch {}
 }
 
 updateAccountNav();
