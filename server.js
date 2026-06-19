@@ -1242,6 +1242,50 @@ app.get('/api/admin/analytics', async (req, res) => {
     res.json({ rows, days });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
+
+// ── #23 ERROR MONITORING (self-hosted — no Sentry, no extra package) ──────────
+// Required Supabase table (run once):
+//   create table if not exists error_logs (
+//     id bigserial primary key,
+//     source text,          -- 'server' | 'client'
+//     message text,
+//     stack text,
+//     url text,
+//     user_agent text,
+//     created_at timestamptz default now()
+//   );
+//   create index on error_logs (created_at desc);
+async function logError({ source, message, stack, url, userAgent }) {
+  try {
+    await dbQuery('POST', 'error_logs', {
+      source: source || 'server',
+      message: String(message || '').slice(0, 1000),
+      stack:   String(stack || '').slice(0, 4000),
+      url:     String(url || '').slice(0, 500),
+      user_agent: String(userAgent || '').slice(0, 300),
+    });
+  } catch { /* never let logging crash the app */ }
+}
+
+// Public: client-side error reporting (rate-limited so it can't be abused)
+app.post('/api/log-error', analyticsLimiter, (req, res) => {
+  const { message, stack, url } = req.body || {};
+  if (message) {
+    logError({ source: 'client', message, stack, url, userAgent: req.headers['user-agent'] });
+  }
+  res.status(202).end();
+});
+
+// CEO only: view recent errors
+app.get('/api/admin/errors', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'error_logs', null, { order: 'created_at.desc', limit: 200 });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── #3d REAL-TIME: SERVER-SENT EVENTS BROKER ─────────────────────────────────
 // Pure Node.js — no extra packages. Clients connect once and receive push events.
 // _clientSSE: email → Set<res>  (one user may have multiple tabs open)
 // _adminSSE:  Set<res>          (all admin/staff connections share one pool)
@@ -3830,6 +3874,13 @@ app.get('/academy/learn', (req, res) => res.sendFile(path.join(__dirname, 'acade
 
 // ── §14 PAGE ROUTES & CATCH-ALL ──────────────────────────────────────────────
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+// ── #23 GLOBAL EXPRESS ERROR HANDLER ─────────────────────────────────────────
+// Must be 4-argument to be recognised by Express as error middleware.
+app.use((err, req, res, next) => {
+  logError({ source: 'server', message: err.message, stack: err.stack, url: req.originalUrl });
+  if (!res.headersSent) res.status(500).json({ error: 'Internal server error' });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
