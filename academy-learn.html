@@ -106,11 +106,14 @@
 
 <div class="feed" id="feed"></div>
 
-<div id="recInd" style="display:none;align-items:center;justify-content:center;gap:6px;padding:4px 0;font-size:.78rem;font-weight:800;color:#DC2626;background:#FEE2E2;border-top:1px solid #FECACA;font-family:var(--head)">🔴 Recording…</div>
+<div id="recInd" style="display:none;align-items:center;justify-content:center;gap:6px;padding:6px 0;font-size:.78rem;font-weight:800;color:#DC2626;background:#FEE2E2;border-top:1px solid #FECACA;font-family:var(--head)">
+  <span id="recDot" style="width:10px;height:10px;border-radius:50%;background:#DC2626;display:inline-block;animation:pulse 1s infinite"></span>
+  🔴 Recording… <span id="recTimer">0s</span>
+</div>
 <div class="composer">
   <div class="inner">
-    <button class="mic" id="mic" title="Speak" onclick="toggleMic()">🎤</button>
-    <input id="msg" placeholder="Ask Numa anything about maths…" onkeydown="if(event.key==='Enter')send()">
+    <button class="mic" id="mic" title="Hold to record — tap to toggle" onmousedown="startRec()" onmouseup="stopRec()" ontouchstart="startRec(event)" ontouchend="stopRec(event)">🎤</button>
+    <input id="msg" placeholder="Type or hold 🎤 to speak…" onkeydown="if(event.key==='Enter')send()">
     <button class="send" id="send" onclick="send()">➤</button>
   </div>
 </div>
@@ -255,29 +258,101 @@ function speak(text,btn){
 }
 if('speechSynthesis'in window){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();}
 
-/* ── VOICE INPUT WITH RECORDING INDICATOR ── */
-let recog=null,listening=false;
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(SR){
-  recog=new SR();recog.lang='en-US';recog.interimResults=false;recog.maxAlternatives=1;
-  recog.onresult=e=>{
-    const t=e.results[0][0].transcript;document.getElementById('msg').value=t;
-    listening=false;setRecordingUI(false);send();
-  };
-  recog.onend=()=>{listening=false;setRecordingUI(false);};
-  recog.onerror=()=>{listening=false;setRecordingUI(false);};
-}else{const m=document.getElementById('mic');if(m)m.style.display='none';}
+/* ── PROFESSIONAL VOICE RECORDING (MediaRecorder → Groq Whisper) ── */
+let mediaRec=null,audioChunks=[],recTimerInt=null,recSecs=0,recStream=null,recStarted=false;
 
 function setRecordingUI(on){
   const mic=document.getElementById('mic');
   const ind=document.getElementById('recInd');
+  const tmr=document.getElementById('recTimer');
   if(mic)mic.classList.toggle('on',on);
-  if(ind){ind.style.display=on?'flex':'none';ind.textContent='🔴 Recording…';}
+  if(ind)ind.style.display=on?'flex':'none';
+  if(on){
+    recSecs=0;if(tmr)tmr.textContent='0s';
+    clearInterval(recTimerInt);
+    recTimerInt=setInterval(()=>{recSecs++;if(tmr)tmr.textContent=recSecs+'s';},1000);
+  }else{
+    clearInterval(recTimerInt);if(tmr)tmr.textContent='0s';
+  }
 }
+
+async function startRec(e){
+  if(e)e.preventDefault();
+  if(recStarted)return;
+  recStarted=true;
+  audioChunks=[];
+  try{
+    recStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,sampleRate:16000}});
+    const mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus'
+      :MediaRecorder.isTypeSupported('audio/webm')?'audio/webm'
+      :MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'';
+    mediaRec=new MediaRecorder(recStream,mimeType?{mimeType}:{});
+    mediaRec.ondataavailable=ev=>{if(ev.data&&ev.data.size>0)audioChunks.push(ev.data);};
+    mediaRec.onstop=processAudio;
+    mediaRec.start(100);
+    setRecordingUI(true);
+  }catch(err){
+    recStarted=false;
+    const inp=document.getElementById('msg');
+    if(inp)inp.placeholder='Microphone access denied — please type your question.';
+  }
+}
+
+function stopRec(e){
+  if(e)e.preventDefault();
+  recStarted=false;
+  if(mediaRec&&mediaRec.state!=='inactive'){mediaRec.stop();}
+  if(recStream){recStream.getTracks().forEach(t=>t.stop());recStream=null;}
+  setRecordingUI(false);
+}
+
+async function processAudio(){
+  if(!audioChunks.length)return;
+  const mimeType=audioChunks[0].type||'audio/webm';
+  const blob=new Blob(audioChunks,{type:mimeType});
+  audioChunks=[];
+  // Show processing state
+  const mic=document.getElementById('mic');
+  if(mic){mic.textContent='⏳';mic.disabled=true;}
+  try{
+    const base64=await blobToBase64(blob);
+    const r=await fetch(API+'/api/transcribe',{
+      method:'POST',
+      headers:{...authHeaders(),'Content-Type':'application/json'},
+      body:JSON.stringify({audio:base64,mimeType})
+    });
+    const data=await r.json();
+    if(data.text&&data.text.trim()){
+      const inp=document.getElementById('msg');
+      if(inp)inp.value=data.text.trim();
+      send();
+    }else{
+      const inp=document.getElementById('msg');
+      if(inp)inp.placeholder='Could not hear you — please try again or type.';
+    }
+  }catch(err){
+    console.error('[voice]',err);
+  }finally{
+    if(mic){mic.textContent='🎤';mic.disabled=false;}
+  }
+}
+
+function blobToBase64(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=rej;
+    r.readAsDataURL(blob);
+  });
+}
+// Tap (click without hold) also toggles a quick 5-second recording
+document.getElementById('mic')?.addEventListener('click',function(e){
+  // Ignore if hold already handled
+  if(recStarted)return;
+});
+// Fallback for very short taps: treat as tap-to-toggle
 function toggleMic(){
-  if(!recog)return;
-  if(listening){recog.stop();listening=false;setRecordingUI(false);}
-  else{try{recog.start();listening=true;setRecordingUI(true);}catch(e){}}
+  if(recStarted){stopRec();}else{startRec();}
 }
 
 /* ── GREETINGS PER SUBJECT ── */
