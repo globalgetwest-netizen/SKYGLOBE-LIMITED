@@ -3262,10 +3262,16 @@ const USE_GROQ = !!process.env.GROQ_API_KEY;
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
 async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
-  // If a local Ollama engine is configured, use it (free, no quota).
-  if (USE_OLLAMA) return askOllama(systemPrompt, prompt);
-  // Otherwise prefer free Groq cloud AI if configured (fast, multi-user).
-  if (USE_GROQ) return askGroq(systemPrompt, prompt);
+  // 24/7 AUTOMATIC CASCADE: Ollama → Groq → Gemini. Fall THROUGH on failure
+  // instead of returning early, so one engine being down never breaks the call.
+  if (USE_OLLAMA) {
+    try { const t = await askOllama(systemPrompt, prompt); if (t) return t; }
+    catch (e) { console.error('Ollama failed, falling through to Groq:', e.message); }
+  }
+  if (USE_GROQ) {
+    try { const t = await askGroq(systemPrompt, prompt); if (t) return t; }
+    catch (e) { console.error('Groq failed, falling through to Gemini:', e.message); }
+  }
   // 2.0-flash is most reliable on free tier — try it first, then newer models as fallback.
   const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
   let lastError = 'No models responded';
@@ -3319,11 +3325,20 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
 // Free Gemini call with model fallback chain (reused by the AI teachers).
 // Supports multi-turn `contents`; retries transient errors (429/500/503) per model.
 async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
-  // If a local Ollama engine is configured, use it (free, no quota).
-  if (USE_OLLAMA) return askOllama(systemPrompt, null, contents);
-  if (USE_GROQ) return askGroq(systemPrompt, null, contents);
+  // 24/7 AUTOMATIC CASCADE: Ollama → Groq → Gemini.
+  // Each engine is tried in turn; if one fails (down, timeout, quota) we fall
+  // THROUGH to the next instead of giving up — so a lesson never dies just
+  // because the first engine hiccuped.
+  if (USE_OLLAMA) {
+    try { const t = await askOllama(systemPrompt, null, contents); if (t) return t; }
+    catch (e) { console.error('Academy Ollama failed, falling through to Groq:', e.message); }
+  }
+  if (USE_GROQ) {
+    try { const t = await askGroq(systemPrompt, null, contents); if (t) return t; }
+    catch (e) { console.error('Academy Groq failed, falling through to Gemini:', e.message); }
+  }
   const geminiKey = process.env.GEMINI_API_KEY;
-  if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
+  if (!geminiKey) throw new Error('AI teacher is busy right now. Please try again in a moment.');
   // 2.0-flash is most reliable on free tier — try it first, then newer models as fallback.
   const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
   // BLOCK_ONLY_HIGH lets all educational content through while still blocking
