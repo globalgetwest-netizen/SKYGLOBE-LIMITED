@@ -79,9 +79,40 @@ function sanitizeEmail(val) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : '';
 }
 
+// ── #19 COMPRESSION (gzip/brotli) ─────────────────────────────────────────────
+// Shrinks HTML/CSS/JS/JSON by ~60-70% before sending. Uses the `compression`
+// package when installed (Render runs npm install); if it's missing locally the
+// server still starts — it just skips compression instead of crashing.
+let compression = null;
+try { compression = require('compression'); } catch { /* optional */ }
+if (compression) {
+  app.use(compression({ level: 6, threshold: 1024 }));
+  console.log('✓ gzip compression enabled');
+} else {
+  console.log('• compression package not installed — run `npm install` to enable gzip');
+}
+
 app.use(express.json({ limit: '2mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(cors());
-app.use(express.static(path.join(__dirname)));
+
+// ── #20 STATIC CACHING HEADERS ────────────────────────────────────────────────
+// Repeat visitors re-use cached assets instead of re-downloading them.
+//  • HTML  → always revalidate (users always get the newest page)
+//  • CSS/JS → 1 hour (fresh enough to pick up edits, still fast on repeat hits)
+//  • images/fonts/icons → 30 days (these rarely change)
+app.use(express.static(path.join(__dirname), {
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, filePath) => {
+    if (/\.html?$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    } else if (/\.(css|js)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+    } else if (/\.(png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|mp4|webm)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000');
+    }
+  },
+}));
 
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
