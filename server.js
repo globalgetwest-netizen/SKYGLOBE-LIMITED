@@ -94,15 +94,9 @@ app.use(generalLimiter);
 
 // ── #16 INPUT SANITISATION helper (no extra package needed) ──────────────────
 // Strips characters that could break HTML/SQL. Used on all user-supplied strings.
-function sanitize(val, maxLen = 1000) {
-  if (val === null || val === undefined) return '';
-  return String(val).trim().slice(0, maxLen)
-    .replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-function sanitizeEmail(val) {
-  const e = String(val || '').trim().toLowerCase().slice(0, 254);
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : '';
-}
+// ── #24 SHARED PURE HELPERS (unit-tested in test/utils.test.js) ──────────────
+const utils = require('./lib/utils');
+const { sanitize, sanitizeEmail, genRef, hashPassword, verifyPassword, esc2 } = utils;
 
 // ── #19 COMPRESSION (gzip/brotli) ─────────────────────────────────────────────
 // Shrinks HTML/CSS/JS/JSON by ~60-70% before sending. Uses the `compression`
@@ -251,11 +245,7 @@ async function sendEmail(to, subject, html, replyTo) {
   return data;
 }
 
-function genRef() {
-  const year = new Date().getFullYear();
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `SKY-${year}-${rand}`;
-}
+// genRef / sanitize / sanitizeEmail moved to ./lib/utils (see #24).
 
 // ── §3 AI ENGINE (Ollama → Groq → Gemini fallback chain) ─────────────────────
 // ── UNIFIED AI TEXT ENGINE ───────────────────────────────────────────────────
@@ -967,34 +957,10 @@ app.get('/api/test', async (req, res) => {
 const crypto = require('crypto');
 const SESSION_SECRET = process.env.SESSION_SECRET || process.env.SUPABASE_KEY || 'skyglobe-dev-secret';
 
-function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
-  return `${salt}:${hash}`;
-}
-function verifyPassword(password, stored) {
-  if (!stored || !stored.includes(':')) return false;
-  const [salt, hash] = stored.split(':');
-  const test = crypto.scryptSync(password, salt, 64).toString('hex');
-  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(test));
-}
-function signToken(email) {
-  const payload = Buffer.from(JSON.stringify({ email, iat: Date.now() })).toString('base64url');
-  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
-  return `${payload}.${sig}`;
-}
-function verifyToken(token) {
-  if (!token || !token.includes('.')) return null;
-  const [payload, sig] = token.split('.');
-  const expected = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
-  if (sig !== expected) return null;
-  try {
-    const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
-    // 30-day expiry
-    if (Date.now() - data.iat > 30 * 24 * 60 * 60 * 1000) return null;
-    return data.email;
-  } catch { return null; }
-}
+// hashPassword/verifyPassword come from ./lib/utils. Token helpers wrap the
+// shared signer with our SESSION_SECRET so callers keep the same signature.
+const signToken   = (email) => utils.signToken(email, SESSION_SECRET);
+const verifyToken = (token) => utils.verifyToken(token, SESSION_SECRET);
 function clientAuth(req) {
   const h = req.headers['authorization'] || '';
   const token = h.startsWith('Bearer ') ? h.slice(7) : '';
@@ -3668,7 +3634,7 @@ app.post('/api/academy/admission/apply', async (req, res) => {
   }
 });
 
-function esc2(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// esc2 imported from ./lib/utils (see #24).
 
 // ── ADMISSION: CHECK STATUS ───────────────────────────────────────────────────
 app.get('/api/academy/admission/:id/status', async (req, res) => {
