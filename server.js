@@ -1201,7 +1201,47 @@ app.post('/api/team/messages', async (req, res) => {
 // Lightweight endpoint the front-end pings to wake the server from sleep.
 app.get('/api/health', (req, res) => res.json({ ok: true, t: Date.now() }));
 
-// ── #3d REAL-TIME: SERVER-SENT EVENTS BROKER ─────────────────────────────────
+// ── §12 ANALYTICS (self-hosted — no third-party service, no cookies) ─────────
+// Required Supabase table (run once):
+//   create table if not exists analytics_events (
+//     id bigserial primary key,
+//     event text not null,
+//     page  text,
+//     meta  jsonb,
+//     created_at timestamptz default now()
+//   );
+//   create index on analytics_events (event, created_at desc);
+
+const analyticsLimiter = rateLimit({ windowMs: 60 * 1000, max: 60 });
+
+// Public: fire an analytics event (fire-and-forget from the client)
+app.post('/api/analytics/event', analyticsLimiter, async (req, res) => {
+  const { event, page, meta } = req.body || {};
+  if (!event || typeof event !== 'string' || event.length > 80) return res.status(400).end();
+  // Write async — never block the response
+  dbQuery('POST', 'analytics_events', {
+    event: sanitize(event, 80),
+    page:  sanitize(page || '', 200),
+    meta:  (meta && typeof meta === 'object') ? meta : null,
+  }).catch(() => {});
+  res.status(202).end();
+});
+
+// CEO only: query analytics for the dashboard
+app.get('/api/admin/analytics', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const days = Math.min(90, Math.max(1, parseInt(req.query.days) || 30));
+    const since = new Date(Date.now() - days * 864e5).toISOString();
+    const rows = await dbQuery('GET', 'analytics_events', null, {
+      created_at: `gte.${since}`,
+      order: 'created_at.desc',
+      limit: 5000,
+    });
+    if (!Array.isArray(rows) || !rows.length) return res.json({ rows: [], days });
+    res.json({ rows, days });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 // Pure Node.js — no extra packages. Clients connect once and receive push events.
 // _clientSSE: email → Set<res>  (one user may have multiple tabs open)
 // _adminSSE:  Set<res>          (all admin/staff connections share one pool)
