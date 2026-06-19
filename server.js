@@ -4,9 +4,85 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-app.use(express.json({ limit: '15mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
+
+// ── #17 SECURITY HEADERS (helmet equivalent, no extra package needed) ─────────
+// Protects against clickjacking, MIME sniffing, XSS reflection, and enforces HTTPS.
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://fonts.googleapis.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https: http:",
+      "connect-src 'self' https://api.groq.com https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com http://localhost:*",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ')
+  );
+  next();
+});
+
+// ── #14 RATE LIMITING (pure Node.js — no extra package needed) ────────────────
+// Tracks requests per IP in-memory. Resets every windowMs milliseconds.
+// Chosen limits: login = 5 attempts/15 min (brute-force proof), contact = 10/15 min.
+const _rateBuckets = new Map();
+function rateLimit({ windowMs = 15 * 60 * 1000, max = 5, message = 'Too many requests. Please try again later.' } = {}) {
+  return (req, res, next) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';
+    const key = `${req.path}:${ip}`;
+    const now = Date.now();
+    const bucket = _rateBuckets.get(key) || { count: 0, reset: now + windowMs };
+    if (now > bucket.reset) { bucket.count = 0; bucket.reset = now + windowMs; }
+    bucket.count++;
+    _rateBuckets.set(key, bucket);
+    res.setHeader('X-RateLimit-Limit', max);
+    res.setHeader('X-RateLimit-Remaining', Math.max(0, max - bucket.count));
+    res.setHeader('X-RateLimit-Reset', Math.ceil(bucket.reset / 1000));
+    if (bucket.count > max) return res.status(429).json({ error: message });
+    next();
+  };
+}
+// Clean up old buckets every 30 minutes to prevent memory leak
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of _rateBuckets) if (now > v.reset) _rateBuckets.delete(k);
+}, 30 * 60 * 1000);
+
+// Pre-built limiters for specific routes
+const loginLimiter   = rateLimit({ windowMs: 15*60*1000, max: 5,  message: 'Too many login attempts. Wait 15 minutes and try again.' });
+const contactLimiter = rateLimit({ windowMs: 15*60*1000, max: 10, message: 'Too many messages sent. Please wait 15 minutes.' });
+const applyLimiter   = rateLimit({ windowMs: 60*60*1000, max: 8,  message: 'Too many applications submitted from this IP. Please wait an hour.' });
+const aiLimiter      = rateLimit({ windowMs: 60*60*1000, max: 30, message: 'AI request limit reached. Please wait an hour.' });
+const generalLimiter = rateLimit({ windowMs: 60*1000,    max: 120, message: 'Slow down — too many requests.' });
+
+// Global limiter on all routes
+app.use(generalLimiter);
+
+// ── #16 INPUT SANITISATION helper (no extra package needed) ──────────────────
+// Strips characters that could break HTML/SQL. Used on all user-supplied strings.
+function sanitize(val, maxLen = 1000) {
+  if (val === null || val === undefined) return '';
+  return String(val).trim().slice(0, maxLen)
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function sanitizeEmail(val) {
+  const e = String(val || '').trim().toLowerCase().slice(0, 254);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : '';
+}
+
+app.use(express.json({ limit: '2mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(cors());
 app.use(express.static(path.join(__dirname)));
+
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 // Env vars needed on Render:
@@ -164,10 +240,19 @@ async function generateText(prompt, opts = {}) {
 }
 
 // ── CONTACT / CONSULTATION FORM ───────────────────────────────────────────────
-app.post('/api/contact', async (req, res) => {
-  const { fname, lname, email, phone, service, destination, message } = req.body;
+app.post('/api/contact', contactLimiter, async (req, res) => {
+  const raw = req.body || {};
+  const fname   = sanitize(raw.fname, 100);
+  const lname   = sanitize(raw.lname, 100);
+  const email   = sanitizeEmail(raw.email);
+  const phone   = sanitize(raw.phone, 30);
+  const service = sanitize(raw.service, 120);
+  const destination = sanitize(raw.destination, 100);
+  const message = sanitize(raw.message, 3000);
   if (!fname || !email || !service)
     return res.status(400).json({ error: 'Name, email and service are required.' });
+  if (!email)
+    return res.status(400).json({ error: 'A valid email address is required.' });
   if (!process.env.RESEND_API_KEY)
     return res.status(500).json({ error: 'Email service not configured. Contact us via WhatsApp.' });
 
@@ -201,7 +286,7 @@ app.post('/api/contact', async (req, res) => {
 });
 
 // ── SUBMIT APPLICATION ────────────────────────────────────────────────────────
-app.post('/api/apply', async (req, res) => {
+app.post('/api/apply', applyLimiter, async (req, res) => {
   const {
     service, fname, lname, email, phone, dob, nationality, passport, passportExpiry,
     destination, travelDate, duration, purpose, institution, employer,
@@ -398,7 +483,7 @@ function checkStaffOrAdmin(req, res, next) {
 }
 
 // CEO portal login — rejects staff passwords (CEO portal is CEO-only)
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', loginLimiter, (req, res) => {
   const fakeReq = { headers: { 'x-admin-key': (req.body && req.body.password) || '' } };
   const who = checkAdmin(fakeReq);
   if (!who) return res.status(401).json({ error: 'Wrong password.' });
@@ -407,7 +492,7 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // Staff portal login — accepts staff OR CEO passwords
-app.post('/api/staff/login', (req, res) => {
+app.post('/api/staff/login', loginLimiter, (req, res) => {
   const fakeReq = { headers: { 'x-admin-key': (req.body && req.body.password) || '' } };
   const r = getRole(fakeReq);
   if (!r) return res.status(401).json({ error: 'Wrong password.' });
@@ -825,7 +910,7 @@ async function getClientByEmail(email) {
 }
 
 // ── SIGN UP ───────────────────────────────────────────────────────────────────
-app.post('/api/auth/signup', async (req, res) => {
+app.post('/api/auth/signup', loginLimiter, async (req, res) => {
   let { name, email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
   email = String(email).trim().toLowerCase();
@@ -840,7 +925,7 @@ app.post('/api/auth/signup', async (req, res) => {
 });
 
 // ── LOG IN ──────────────────────────────────────────────────────────────────────
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', loginLimiter, async (req, res) => {
   let { email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
   email = String(email).trim().toLowerCase();
@@ -1639,7 +1724,7 @@ For "text" rows keep each value short (max ~8 words, real specifics: real univer
 });
 
 // ---- AI Tips endpoint ----
-app.post('/api/ai-tips', async (req, res) => {
+app.post('/api/ai-tips', aiLimiter, async (req, res) => {
   const { countries = [], universities = [], appCount = 0 } = req.body || {};
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.json({ tips: null }); // fallback to client-side tips
@@ -3035,7 +3120,7 @@ app.post('/api/academy/parent/signup', async (req, res) => {
 });
 
 // ── PARENT: LOG IN ────────────────────────────────────────────────────────────
-app.post('/api/academy/parent/login', async (req, res) => {
+app.post('/api/academy/parent/login', loginLimiter, async (req, res) => {
   let { email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
   email = String(email).trim().toLowerCase();
