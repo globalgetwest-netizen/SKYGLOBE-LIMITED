@@ -106,6 +106,7 @@
 
 <div class="feed" id="feed"></div>
 
+<div id="recInd" style="display:none;align-items:center;justify-content:center;gap:6px;padding:4px 0;font-size:.78rem;font-weight:800;color:#DC2626;background:#FEE2E2;border-top:1px solid #FECACA;font-family:var(--head)">🔴 Recording…</div>
 <div class="composer">
   <div class="inner">
     <button class="mic" id="mic" title="Speak" onclick="toggleMic()">🎤</button>
@@ -119,26 +120,24 @@ const API='';
 const TOKEN=localStorage.getItem('academyToken')||'';
 const params=new URLSearchParams(location.search);
 const STUDENT=params.get('student');
-const SUBJECT='mathematics';
-let TEACHER={name:'Numa',emoji:'🔢'};
+const SUBJECT=(params.get('subject')||'mathematics').toLowerCase();
+let TEACHER={name:'Numa',emoji:'🔢',color:'#3B82F6'};
 let history=[];
 
 /* ── PER-TEACHER VOICE PROFILES ── */
 const TEACHER_VOICES={
-  mathematics:{pitch:1.1,rate:0.95,voiceHint:'female'},   // Numa - warm, clear
-  english:{pitch:1.2,rate:0.9,voiceHint:'female'},         // Nova - bright, gentle
-  science:{pitch:0.95,rate:1.0,voiceHint:'female'},        // Lexi - confident
-  technology:{pitch:0.85,rate:1.05,voiceHint:'male'},      // Cody - deep, energetic
-  history:{pitch:0.9,rate:0.85,voiceHint:'male'},          // Atlas - authoritative, slow
-  music_arts:{pitch:1.3,rate:0.95,voiceHint:'female'},     // Melody - high, musical
-  life_skills:{pitch:1.0,rate:0.9,voiceHint:'female'},     // Penny - balanced
-  health_pe:{pitch:0.8,rate:1.1,voiceHint:'male'}          // Vita - strong, upbeat
+  mathematics:{pitch:1.1,rate:0.95,voiceHint:'female'},
+  science:    {pitch:0.95,rate:1.0,voiceHint:'female'},
+  reading:    {pitch:1.2,rate:0.9,voiceHint:'female'},
+  coding:     {pitch:0.85,rate:1.05,voiceHint:'male'},
+  history:    {pitch:0.9,rate:0.85,voiceHint:'male'},
+  arts:       {pitch:1.3,rate:0.95,voiceHint:'female'},
+  finance:    {pitch:1.0,rate:0.9,voiceHint:'female'},
+  health:     {pitch:0.8,rate:1.1,voiceHint:'male'},
 };
-/* Map server subject keys to voice profiles (subject keys differ slightly) */
-const SUBJECT_VOICE_ALIAS={mathematics:'mathematics',science:'science',reading:'english',coding:'technology',history:'history',arts:'music_arts',finance:'life_skills',health:'health_pe'};
-function teacherVoice(){return TEACHER_VOICES[SUBJECT_VOICE_ALIAS[SUBJECT]||'mathematics']||TEACHER_VOICES.mathematics;}
+function teacherVoice(){return TEACHER_VOICES[SUBJECT]||TEACHER_VOICES.mathematics;}
 
-/* ── LANGUAGES (English + 30+ major world languages) ── */
+/* ── LANGUAGES ── */
 const LANGUAGES=[
   ['en','English'],['es','Spanish'],['fr','French'],['de','German'],['pt','Portuguese'],
   ['it','Italian'],['nl','Dutch'],['ru','Russian'],['ar','Arabic'],['zh','Chinese (Mandarin)'],
@@ -167,30 +166,21 @@ if(!TOKEN||!STUDENT){
 function authHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN};}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-// Render teacher reply: extract embedded SVG, sanitize it, display inline.
-// Text around the SVG is shown as normal chat text.
+/* ── RENDER BOT CONTENT WITH INLINE SVG ── */
 function renderBotContent(b, text) {
-  const svgRx = /<svg[\s\S]*?<\/svg>/gi;
-  const svgs = text.match(svgRx) || [];
-  if (!svgs.length) { b.textContent = text; return; }
-  // Split text by SVG blocks
-  const parts = text.split(svgRx);
-  parts.forEach((part, i) => {
-    if (part.trim()) {
-      const t = document.createElement('p');
-      t.style.cssText = 'margin:0 0 8px;white-space:pre-wrap;word-break:break-word';
-      t.textContent = part.trim();
-      b.appendChild(t);
-    }
-    if (svgs[i]) {
-      const wrapper = document.createElement('div');
-      wrapper.style.cssText = 'margin:8px 0;overflow:auto;max-width:100%;border-radius:12px;background:#f4f8ff;padding:10px;display:inline-block';
-      // Sanitize: only allow SVG elements (no scripts/links/foreignObject)
-      const clean = svgs[i].replace(/<(script|a|foreignObject|use|image)[^>]*>[\s\S]*?<\/\1>/gi, '')
-                            .replace(/on\w+="[^"]*"/g, '').replace(/href\s*=/gi, 'data-href=');
-      wrapper.innerHTML = clean;
-      const svgEl = wrapper.querySelector('svg');
-      if (svgEl) { svgEl.style.maxWidth = '100%'; svgEl.setAttribute('aria-hidden','true'); }
+  const svgRx=/<svg[\s\S]*?<\/svg>/gi;
+  const svgs=text.match(svgRx)||[];
+  if(!svgs.length){b.textContent=text;return;}
+  const parts=text.split(svgRx);
+  parts.forEach((part,i)=>{
+    if(part.trim()){const t=document.createElement('p');t.style.cssText='margin:0 0 8px;white-space:pre-wrap;word-break:break-word';t.textContent=part.trim();b.appendChild(t);}
+    if(svgs[i]){
+      const wrapper=document.createElement('div');
+      wrapper.style.cssText='margin:8px 0;overflow:auto;max-width:100%;border-radius:12px;background:#f4f8ff;padding:10px;display:inline-block';
+      const clean=svgs[i].replace(/<(script|a|foreignObject|use|image)[^>]*>[\s\S]*?<\/\1>/gi,'').replace(/on\w+="[^"]*"/g,'').replace(/href\s*=/gi,'data-href=');
+      wrapper.innerHTML=clean;
+      const svgEl=wrapper.querySelector('svg');
+      if(svgEl){svgEl.style.maxWidth='100%';svgEl.setAttribute('aria-hidden','true');}
       b.appendChild(wrapper);
     }
   });
@@ -209,7 +199,6 @@ function addMsg(role,text,typing){
   else{renderBotContent(b,text);}
   wrap.appendChild(b);
   if(!me&&!typing&&text&&'speechSynthesis'in window){
-    // Strip SVG tags from text spoken aloud
     const speakText=text.replace(/<svg[\s\S]*?<\/svg>/gi,'[visual shown]').replace(/<[^>]+>/g,'').trim();
     const lb=document.createElement('button');lb.className='listen';lb.textContent='🔊 Listen';lb.onclick=()=>speak(speakText,lb);wrap.appendChild(lb);
   }
@@ -226,20 +215,21 @@ async function send(){
     const r=await fetch(API+'/api/academy/tutor',{method:'POST',headers:authHeaders(),
       body:JSON.stringify({studentId:STUDENT,subject:SUBJECT,message:text,history:history.slice(-10),language:LANG})});
     const d=await r.json();rm(t);
-    if(!r.ok)throw new Error(d.error||'Numa is busy.');
+    if(!r.ok)throw new Error(d.error||TEACHER.name+' is busy.');
     addMsg('bot',d.reply);
     history.push({role:'user',content:text});history.push({role:'assistant',content:d.reply});
     if(history.length>20)history=history.slice(-20);
     if(typeof d.points==='number'){
       const prev=parseInt(document.getElementById('pts').textContent)||0;
-      document.getElementById('pts').textContent=d.points;document.getElementById('strk').textContent=d.streak||0;
+      document.getElementById('pts').textContent=d.points;
+      document.getElementById('strk').textContent=d.streak||0;
       if(d.points>prev)reward('+'+(d.points-prev)+' points ⭐ Great work!');
     }
   }catch(e){rm(t);addMsg('bot','Oops — '+e.message+' Let\'s try again! 😊');}
   document.getElementById('send').disabled=false;inp.focus();
 }
 
-/* ── FREE PREMIUM VOICE ── */
+/* ── VOICE OUTPUT ── */
 let curUtt=null;
 function cleanForSpeech(raw){return raw.replace(/#{1,6}\s*/g,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/`{1,3}[^`]*`{1,3}/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/^[\s\-\*•]+/gm,'').replace(/[\u{1F300}-\u{1FAFF}]/gu,'').replace(/\n{2,}/g,'. ').replace(/\n/g,', ').replace(/\s{2,}/g,' ').trim();}
 const FEMALE_RX=/female|Samantha|Karen|Moira|Tessa|Victoria|Zira|Aria|Jenny|Susan|Fiona|Google UK English Female|Google US English/i;
@@ -247,13 +237,10 @@ const MALE_RX=/male|David|Daniel|Alex|Fred|Rishi|Google UK English Male|Mark|Guy
 function pickVoice(hint){
   const v=window.speechSynthesis.getVoices();
   const langPref=LANG==='en'?'en':LANG;
-  // 1) match language + gender hint
   const byLangGender=v.find(x=>new RegExp('^'+langPref,'i').test(x.lang)&&(hint==='female'?FEMALE_RX:MALE_RX).test(x.name));
   if(byLangGender)return byLangGender;
-  // 2) match language only
   const byLang=v.find(x=>new RegExp('^'+langPref,'i').test(x.lang));
   if(byLang)return byLang;
-  // 3) English fallback w/ gender hint
   const byGender=v.find(x=>/^en/i.test(x.lang)&&(hint==='female'?FEMALE_RX:MALE_RX).test(x.name));
   if(byGender)return byGender;
   return v.find(x=>/en-US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;
@@ -262,32 +249,76 @@ function speak(text,btn){
   if(!('speechSynthesis'in window))return;
   if(window.speechSynthesis.speaking||window.speechSynthesis.pending){window.speechSynthesis.cancel();if(curUtt&&curUtt._b)curUtt._b.textContent='🔊 Listen';if(curUtt&&curUtt._b===btn){curUtt=null;return;}}
   const u=new SpeechSynthesisUtterance(cleanForSpeech(text));
-  const vp=teacherVoice();
-  u.rate=vp.rate;u.pitch=vp.pitch;u.lang=(LANG==='en'?'en-US':LANG);const best=pickVoice(vp.voiceHint);if(best)u.voice=best;
+  const vp=teacherVoice();u.rate=vp.rate;u.pitch=vp.pitch;u.lang=(LANG==='en'?'en-US':LANG);const best=pickVoice(vp.voiceHint);if(best)u.voice=best;
   u._b=btn;u.onstart=()=>btn.textContent='⏸ Stop';u.onend=()=>{btn.textContent='🔊 Listen';curUtt=null;};u.onerror=()=>{btn.textContent='🔊 Listen';curUtt=null;};
   curUtt=u;window.speechSynthesis.speak(u);
 }
 if('speechSynthesis'in window){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();}
 
-/* ── FREE VOICE INPUT ── */
+/* ── VOICE INPUT WITH RECORDING INDICATOR ── */
 let recog=null,listening=false;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(SR){recog=new SR();recog.lang='en-US';recog.interimResults=false;recog.maxAlternatives=1;
-  recog.onresult=e=>{const t=e.results[0][0].transcript;document.getElementById('msg').value=t;listening=false;document.getElementById('mic').classList.remove('on');send();};
-  recog.onend=()=>{listening=false;document.getElementById('mic').classList.remove('on');};
-  recog.onerror=()=>{listening=false;document.getElementById('mic').classList.remove('on');};
+if(SR){
+  recog=new SR();recog.lang='en-US';recog.interimResults=false;recog.maxAlternatives=1;
+  recog.onresult=e=>{
+    const t=e.results[0][0].transcript;document.getElementById('msg').value=t;
+    listening=false;setRecordingUI(false);send();
+  };
+  recog.onend=()=>{listening=false;setRecordingUI(false);};
+  recog.onerror=()=>{listening=false;setRecordingUI(false);};
 }else{const m=document.getElementById('mic');if(m)m.style.display='none';}
-function toggleMic(){if(!recog)return;if(listening){recog.stop();listening=false;document.getElementById('mic').classList.remove('on');}else{try{recog.start();listening=true;document.getElementById('mic').classList.add('on');}catch(e){}}}
+
+function setRecordingUI(on){
+  const mic=document.getElementById('mic');
+  const ind=document.getElementById('recInd');
+  if(mic)mic.classList.toggle('on',on);
+  if(ind){ind.style.display=on?'flex':'none';ind.textContent='🔴 Recording…';}
+}
+function toggleMic(){
+  if(!recog)return;
+  if(listening){recog.stop();listening=false;setRecordingUI(false);}
+  else{try{recog.start();listening=true;setRecordingUI(true);}catch(e){}}
+}
+
+/* ── GREETINGS PER SUBJECT ── */
+const FIRST_GREETINGS={
+  mathematics: n=>`Hi ${n}! 👋 I'm Numa, your maths teacher. I'm so happy to meet you! What would you like to learn today — counting, adding, shapes, or something else? 😊`,
+  science:     n=>`Hello ${n}! 🔬 I'm Nova, your science teacher. Science is all around you — in the sky, in your food, in your body! What shall we discover today?`,
+  reading:     n=>`Hi there, ${n}! 📚 I'm Lexi, your reading teacher. Words are magical — shall we explore a story, practise phonics, or build your vocabulary today?`,
+  coding:      n=>`Hey ${n}! 🤖 I'm Cody, your coding teacher. Think of me as your guide to the world of computers and logic! Ready to think like a programmer?`,
+  history:     n=>`Greetings, ${n}! 🗺️ I'm Atlas, your history teacher. We're about to travel through time together. Which part of history shall we explore first?`,
+  arts:        n=>`Hello ${n}! 🎨 I'm Melody, your arts teacher. Every lesson with me is a chance to create something beautiful. Shall we explore colour, music, or drawing today?`,
+  finance:     n=>`Hi ${n}! 💰 I'm Penny, your finance teacher. Let's learn how money works — saving, spending, and making smart choices. Ready to become money-smart?`,
+  health:      n=>`Hi ${n}! 🌟 I'm Vita, your health teacher. A healthy body and happy mind are the greatest gifts you have. What shall we explore — food, movement, or feelings?`,
+};
+const RETURN_GREETINGS={
+  mathematics: n=>`Welcome back, ${n}! 🌟 Ready for more maths fun with Numa? Tell me what you'd like to practise today!`,
+  science:     n=>`Great to see you, ${n}! 🔬 Nova here — ready for another amazing science adventure? What question shall we answer today?`,
+  reading:     n=>`Welcome back, ${n}! 📖 It's Lexi! I've been waiting for you. Shall we read, write, or play word games today?`,
+  coding:      n=>`Hey, ${n} is back! 🤖 Cody here — ready to flex those coding muscles? Let's build something amazing!`,
+  history:     n=>`Welcome back, time traveller ${n}! 🗺️ Atlas here — where in history shall we journey today?`,
+  arts:        n=>`${n}! Wonderful to have you back! 🎨 Melody here — your creativity has been missed. What shall we make today?`,
+  finance:     n=>`Welcome back, ${n}! 💰 Penny here — every day you learn a little more about money, you get a step closer to your goals. Ready?`,
+  health:      n=>`Great to see you, ${n}! 🌟 Vita here — your body and mind are amazing. Let's keep learning how to take great care of them!`,
+};
+
+/* ── SUBJECT DISPLAY NAMES ── */
+const SUBJECT_LABELS={mathematics:'Mathematics',science:'Science',reading:'Reading & Language',coding:'Coding & Robotics',history:'History & Geography',arts:'Arts & Music',finance:'Financial Literacy',health:'Health & Well-being'};
 
 /* ── BOOT ── */
 async function loadTeacher(){
   try{
     const r=await fetch(API+'/api/academy/teacher/'+SUBJECT,{headers:authHeaders()});
-    if(r.ok){const t=await r.json();TEACHER={name:t.name||'Numa',emoji:t.emoji||'🔢'};
+    if(r.ok){
+      const t=await r.json();
+      TEACHER={name:t.name||'Numa',emoji:t.emoji||'🔢',color:t.color||'#3B82F6'};
       document.querySelector('.teacher h1').textContent=TEACHER.name;
       document.querySelector('.teacher .av').textContent=TEACHER.emoji;
-      document.getElementById('msg').placeholder='Ask '+TEACHER.name+' anything about maths…';
-      document.title='Learn with '+TEACHER.name+' — SkyGlobe Kids Academy';}
+      document.querySelector('.teacher .av').style.background=`linear-gradient(135deg,${TEACHER.color}cc,${TEACHER.color})`;
+      const subLabel=SUBJECT_LABELS[SUBJECT]||SUBJECT;
+      document.getElementById('msg').placeholder='Ask '+TEACHER.name+' about '+subLabel+'…';
+      document.title='Learn with '+TEACHER.name+' — SkyGlobe Kids Academy';
+    }
   }catch(e){}
 }
 async function boot(){
@@ -301,13 +332,13 @@ async function boot(){
     if(r.ok&&d.student){
       document.getElementById('pts').textContent=d.student.points||0;
       document.getElementById('strk').textContent=d.student.streak||0;
-      document.getElementById('subline').textContent='Your Mathematics teacher · for '+d.student.name;
-      const first=(!d.sessions||!d.sessions.length);
-      addMsg('bot',first
-        ?`Hi ${d.student.name}! 👋 I'm ${TEACHER.name}, your maths teacher. I'm so happy to meet you! What would you like to learn today — counting, adding, times tables, or something else? 😊`
-        :`Welcome back, ${d.student.name}! 🌟 Ready for more maths fun? Tell me what you'd like to practise today!`);
+      const subLabel=SUBJECT_LABELS[SUBJECT]||SUBJECT;
+      document.getElementById('subline').textContent='Your '+subLabel+' teacher · for '+d.student.name;
+      const first=(!d.sessions||!d.sessions.filter(s=>s.subject===SUBJECT).length);
+      const greetFn=first?(FIRST_GREETINGS[SUBJECT]||FIRST_GREETINGS.mathematics):(RETURN_GREETINGS[SUBJECT]||RETURN_GREETINGS.mathematics);
+      addMsg('bot',greetFn(d.student.name));
     }
-  }catch(e){addMsg('bot','Hi! I\'m '+TEACHER.name+', your maths teacher. What would you like to learn today? 😊');}
+  }catch(e){addMsg('bot','Hi! I\'m '+TEACHER.name+'. What would you like to learn today? 😊');}
 }
 boot();
 </script>
