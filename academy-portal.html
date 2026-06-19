@@ -191,6 +191,25 @@
   .selrow select{max-width:200px}
   .empty{color:var(--muted);font-weight:600;padding:14px 0}
 
+  /* ── SUBJECT PICKER ── */
+  .subj-btn{background:#fff;border:2px solid var(--line);border-radius:18px;padding:16px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;transition:.2s;font-family:var(--body);width:100%}
+  .subj-btn:hover{border-color:var(--sky);background:var(--sky-soft);transform:translateY(-2px)}
+  .subj-btn .ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;flex-shrink:0}
+  .subj-btn .nm{font-family:var(--head);font-size:1rem;color:var(--navy);line-height:1.2}
+  .subj-btn .tc{font-size:.74rem;color:var(--muted);font-weight:600}
+
+  /* ── TIMETABLE ── */
+  .tt-week{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;margin-top:8px}
+  .tt-day{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(10,31,68,.06)}
+  .tt-day.today{border-color:var(--sky);box-shadow:0 0 0 3px rgba(77,163,255,.18)}
+  .tt-day-hd{background:var(--navy);color:#fff;padding:10px 14px;font-family:var(--head);font-size:.92rem;display:flex;align-items:center;justify-content:space-between}
+  .tt-today-badge{background:var(--gold);color:#3a2a00;font-size:.62rem;font-weight:800;text-transform:uppercase;padding:3px 8px;border-radius:10px;letter-spacing:.05em}
+  .tt-slot{padding:10px 14px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;font-size:.84rem}
+  .tt-slot.play{background:var(--leaf-soft)}
+  .tt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .tt-nm{font-weight:700;color:var(--ink);flex:1}
+  .tt-dur{font-size:.72rem;color:var(--muted);font-weight:600}
+
   /* ── MOBILE / RESPONSIVE ── */
   @media (max-width:640px){
     .wrap{padding:0 14px}
@@ -283,6 +302,7 @@
     <button id="dt-records" onclick="showPane('records')">📋 Academic Records</button>
     <button id="dt-materials" onclick="showPane('materials')">📚 Learning Materials</button>
     <button id="dt-faculty" onclick="showPane('faculty')">🏫 Faculty</button>
+    <button id="dt-timetable" onclick="showPane('timetable')">📅 Timetable</button>
   </div>
 
   <!-- CHILDREN PANE -->
@@ -324,6 +344,21 @@
     <div class="sec-head"><h2>🏫 The Faculty</h2><span class="hint">Your child's AI teachers</span></div>
     <div class="hall" id="hall"></div>
   </div>
+
+  <!-- TIMETABLE PANE -->
+  <div class="pane" id="pane-timetable">
+    <div class="sec-head"><h2>📅 Weekly Timetable</h2><span class="hint">Age-appropriate schedule for each child</span></div>
+    <div class="selrow"><select id="ttChild" onchange="loadTimetable()"><option value="">Select a child…</option></select></div>
+    <div id="ttBody"><div class="empty">Select a child to see their timetable.</div></div>
+  </div>
+</div></div>
+
+<!-- SUBJECT PICKER MODAL -->
+<div class="modal" id="subjectModal"><div class="box" style="max-width:520px">
+  <h2>📚 Choose a Subject</h2>
+  <p id="subPickerName" style="color:var(--muted);font-size:.86rem;font-weight:600;margin:4px 0 16px">Pick a subject to start learning</p>
+  <div id="subGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px"></div>
+  <button class="cancel" onclick="closeModal('subjectModal')" style="margin-top:14px">Cancel</button>
 </div></div>
 
 <!-- ADD CHILD MODAL -->
@@ -407,7 +442,63 @@ async function showDash(){
   document.getElementById('navLogout').style.display='inline-block';
   document.getElementById('whoLine').textContent=(PARENT&&PARENT.name?PARENT.name:PARENT.email)+' · Family account';
   await loadRoster();renderHall();
-  loadKids();
+  loadKids();loadMaterials();
+}
+
+function showPane(name){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.dtabs button').forEach(b=>b.classList.remove('active'));
+  const p=document.getElementById('pane-'+name);if(p)p.classList.add('show');
+  const b=document.getElementById('dt-'+name);if(b)b.classList.add('active');
+}
+
+async function loadMaterials(){
+  const subj=document.getElementById('matSubject')?.value||'';
+  const age=document.getElementById('matAge')?.value||'';
+  const grid=document.getElementById('matGrid');if(!grid)return;
+  grid.innerHTML='<div class="empty">Loading materials…</div>';
+  try{
+    let url=API+'/api/academy/materials';
+    const q=[];if(subj)q.push('subject='+encodeURIComponent(subj));if(age)q.push('ageGroup='+encodeURIComponent(age));
+    if(q.length)url+='?'+q.join('&');
+    const r=await fetch(url,{headers:authHeaders()});const items=await r.json();
+    if(!items||!items.length){grid.innerHTML='<div class="empty">No materials found.</div>';return;}
+    grid.innerHTML='';
+    items.forEach(m=>{
+      const card=document.createElement('div');card.className='mat';
+      card.innerHTML=`<span class="tag">${esc(m.type||'lesson')}</span>
+        <h4>${m.emoji||''} ${esc(m.title)}</h4>
+        <p style="color:var(--muted);font-size:.82rem;font-weight:600;margin-top:4px">${esc(m.description||'')}</p>
+        <p style="font-size:.74rem;color:var(--muted);margin-top:8px;text-transform:capitalize">${esc(m.subject||'')} · Ages ${esc(m.age_group||'')}</p>`;
+      grid.appendChild(card);
+    });
+  }catch(e){grid.innerHTML='<div class="empty" style="color:#e0566a">'+esc(e.message)+'</div>';}
+}
+
+async function loadRecord(){
+  const id=document.getElementById('recChild')?.value;
+  const body=document.getElementById('recBody');if(!body)return;
+  if(!id){body.innerHTML='<div class="empty">Select a child to view their academic file.</div>';return;}
+  body.innerHTML='<div style="color:var(--muted);font-weight:600">Loading…</div>';
+  try{
+    const r=await fetch(API+'/api/academy/progress/'+id,{headers:authHeaders()});
+    const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load.');
+    const s=d.student;
+    const sid=s.student_id||('SKA-'+String(s.id||'').slice(0,8).toUpperCase());
+    body.innerHTML=`<div class="idcard">
+      <div class="lbl">Student ID</div><div class="sid">${esc(sid)}</div>
+      <div class="nm">${esc(s.name)}</div>
+      <div class="meta">Age ${s.age||'—'}${s.grade?' · '+esc(s.grade):''} · ${(d.sessions||[]).length} lessons</div>
+    </div>
+    <div class="stats" style="margin:16px 0">
+      <div class="stat p"><b>${s.points||0}</b><span>Points</span></div>
+      <div class="stat s"><b>${s.streak||0}🔥</b><span>Streak</span></div>
+      <div class="stat l"><b>${(d.sessions||[]).length}</b><span>Lessons</span></div>
+    </div>
+    ${buildCharts(d.sessions||[])}
+    <h3 style="font-family:var(--head);margin-top:18px;font-size:1.05rem;color:var(--navy)">Recent lessons</h3>
+    <div class="sesslist">${(d.sessions||[]).map(x=>`<div class="sess"><div class="d">${(x.created_at||'').slice(0,16).replace('T',' ')} · ${esc(x.teacher||'')} (${esc(x.subject||'')})</div>${esc(x.summary||'Lesson')}</div>`).join('')||'<div style="color:var(--muted);font-size:.86rem;font-weight:600">No lessons yet.</div>'}</div>`;
+  }catch(e){body.innerHTML='<div style="color:#e0566a;font-weight:600">'+esc(e.message)+'</div>';}
 }
 
 async function loadKids(){
@@ -418,11 +509,74 @@ async function loadKids(){
     if(r.status===401){logout();return;}
     const kids=await r.json();grid.innerHTML='';
     kids.forEach(k=>grid.appendChild(kidCard(k)));
+    // populate child selectors across all tabs
+    const opts='<option value="">Select a child…</option>'+kids.map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('');
+    ['ttChild','recChild'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
     const add=document.createElement('div');add.className='addkid';add.onclick=()=>openAdd();
     add.innerHTML='<div class="plus">＋</div><div style="font-family:Fredoka;font-weight:600">Add a child</div>';
     grid.appendChild(add);
   }catch(e){grid.innerHTML='<div style="color:#e0566a;font-weight:600">'+esc(e.message)+'</div>';}
 }
+/* ── SUBJECT DATA (mirrors server ACADEMY_TEACHERS) ── */
+const SUBJECTS=[
+  {key:'mathematics',name:'Mathematics',        teacher:'Numa',  emoji:'🔢',color:'#3B82F6'},
+  {key:'science',    name:'Science',            teacher:'Nova',  emoji:'🔬',color:'#10B981'},
+  {key:'reading',    name:'Reading & Language', teacher:'Lexi',  emoji:'📚',color:'#F59E0B'},
+  {key:'coding',     name:'Coding & Robotics',  teacher:'Cody',  emoji:'🤖',color:'#8B5CF6'},
+  {key:'history',    name:'History & Geography',teacher:'Atlas', emoji:'🗺️',color:'#EF4444'},
+  {key:'arts',       name:'Arts & Music',       teacher:'Melody',emoji:'🎨',color:'#EC4899'},
+  {key:'finance',    name:'Financial Literacy', teacher:'Penny', emoji:'💰',color:'#14B8A6'},
+  {key:'health',     name:'Health & Well-being',teacher:'Vita',  emoji:'🌟',color:'#06B6D4'},
+];
+let _pickStudentId='',_pickStudentName='';
+function pickSubject(id,name){
+  _pickStudentId=id;_pickStudentName=name;
+  document.getElementById('subPickerName').textContent=name+' — pick a subject to start!';
+  // sync teacher names from loaded ROSTER
+  const nameMap={};if(ROSTER&&ROSTER.length)ROSTER.forEach(t=>nameMap[t.key]={name:t.name,emoji:t.emoji});
+  const grid=document.getElementById('subGrid');
+  grid.innerHTML=SUBJECTS.map(s=>{
+    const r=nameMap[s.key]||{};
+    return `<button class="subj-btn" onclick="startLearn('${s.key}')">
+      <div class="ic" style="background:${s.color}">${r.emoji||s.emoji}</div>
+      <div><div class="nm">${s.name}</div><div class="tc">with ${r.name||s.teacher}</div></div>
+    </button>`;
+  }).join('');
+  document.getElementById('subjectModal').classList.add('show');
+}
+function startLearn(subjectKey){
+  closeModal('subjectModal');
+  location.href='/academy/learn?student='+_pickStudentId+'&subject='+subjectKey;
+}
+
+/* ── TIMETABLE ── */
+const SUBJ_COLORS_TT={mathematics:'#3B82F6',science:'#10B981',reading:'#F59E0B',coding:'#8B5CF6',history:'#EF4444',arts:'#EC4899',finance:'#14B8A6',health:'#06B6D4'};
+async function loadTimetable(){
+  const sel=document.getElementById('ttChild');const id=sel&&sel.value;
+  const body=document.getElementById('ttBody');
+  if(!id){body.innerHTML='<div class="empty">Select a child to see their timetable.</div>';return;}
+  body.innerHTML='<div style="color:var(--muted);font-weight:600">Loading schedule…</div>';
+  try{
+    const r=await fetch(API+'/api/academy/timetable/'+id,{headers:authHeaders()});
+    const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load.');
+    const days=d.week||[];
+    const cols=days.map(day=>{
+      const hd=`<div class="tt-day-hd">${esc(day.day)}${day.isToday?'<span class="tt-today-badge">Today</span>':''}</div>`;
+      const slots=(day.subjects||[]).map(s=>{
+        const col=s.isPlay?'#3FBF7F':(SUBJ_COLORS_TT[s.subject]||'#7488a3');
+        return `<div class="tt-slot${s.isPlay?' play':''}">
+          <div class="tt-dot" style="background:${col}"></div>
+          <div class="tt-nm">${esc(s.isPlay?d.playLabel:s.label)}</div>
+          <div class="tt-dur">${s.durationMins}m</div>
+        </div>`;
+      }).join('');
+      return `<div class="tt-day${day.isToday?' today':''}">${hd}${slots}</div>`;
+    }).join('');
+    body.innerHTML=`<div class="tt-week">${cols}</div>
+      <p style="color:var(--muted);font-size:.78rem;font-weight:600;margin-top:14px">⏱ Each session: ${d.sessionMins} min · ${esc(d.playLabel)} on Fridays</p>`;
+  }catch(e){body.innerHTML='<div style="color:#e0566a;font-weight:600">'+esc(e.message)+'</div>';}
+}
+
 function kidCard(k){
   const d=document.createElement('div');d.className='kid';
   d.innerHTML=`<div class="ribbon"></div><div class="av">${k.avatar||'🧒'}</div>
@@ -433,7 +587,7 @@ function kidCard(k){
       <div class="stat l"><b>${k.age}</b><span>Age</span></div>
     </div>
     <div class="acts">
-      <a class="learn" href="/academy/learn?student=${k.id}">Start Learning</a>
+      <button class="learn" onclick='pickSubject(${JSON.stringify(k.id)},${JSON.stringify(k.name)})'>Start Learning</button>
       <button class="view" onclick='viewProgress(${JSON.stringify(k.id)},${JSON.stringify(k.name)})'>Progress</button>
     </div>`;
   return d;
