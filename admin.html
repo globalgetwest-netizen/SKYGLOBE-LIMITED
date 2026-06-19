@@ -356,6 +356,7 @@
         <button class="sb-link" data-view="tasks" onclick="switchView('tasks')"><span class="ic">📋</span> Task Board</button>
         <button class="sb-link" data-view="attendance" onclick="switchView('attendance')"><span class="ic">🕐</span> Attendance</button>
         <button class="sb-link" data-view="activity" onclick="switchView('activity')"><span class="ic">🛰️</span> Activity Log</button>
+        <button class="sb-link" data-view="analytics" onclick="switchView('analytics')"><span class="ic">📈</span> Analytics</button>
         <button class="sb-link" data-view="ipregistry" onclick="switchView('ipregistry')"><span class="ic">🛡️</span> IP Registry</button>
         <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> Kids Academy</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
@@ -877,6 +878,45 @@
           <div id="activityFeed" style="display:flex;flex-direction:column;gap:2px"></div>
         </section>
 
+        <!-- ANALYTICS -->
+        <section class="view" id="view-analytics">
+          <div class="dept-hero" style="margin-bottom:18px">
+            <div style="font-size:1.6rem">📈 Site Analytics</div>
+            <div class="cd-sub" style="margin-top:6px">Self-hosted — no cookies, no third-party tracking. Raw event data from your own visitors, stored in Supabase.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+            <select id="anDays" onchange="loadAnalytics()" style="padding:10px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.88rem">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+            <button onclick="loadAnalytics()" class="btn btn-sm btn-ghost">↻ Refresh</button>
+            <span id="anTotal" style="color:var(--muted);font-size:0.82rem"></span>
+          </div>
+          <div class="kpis" id="anKpis" style="margin-bottom:20px"></div>
+          <div class="grid2" style="margin-bottom:24px">
+            <div class="panel">
+              <h3>📄 Top Pages <span class="mini">by views</span></h3>
+              <div class="bars" id="anPageBars"><div class="skeleton">Loading…</div></div>
+            </div>
+            <div class="panel">
+              <h3>⚡ Top Events <span class="mini">by count</span></h3>
+              <div class="bars" id="anEventBars"><div class="skeleton">Loading…</div></div>
+            </div>
+          </div>
+          <div class="panel" style="margin-bottom:24px">
+            <h3>📊 Daily Volume <span class="mini" id="anDayRange"></span></h3>
+            <div class="trend-wrap">
+              <div class="trend-tip" id="anTip"></div>
+              <svg class="trend-svg" id="anSvg" viewBox="0 0 700 160"></svg>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>🕒 Recent Events <span class="mini">latest 50</span></h3>
+            <div id="anFeed" style="display:flex;flex-direction:column;gap:2px"></div>
+          </div>
+        </section>
+
         <!-- IP REGISTRY -->
         <section class="view" id="view-ipregistry">
           <div class="dept-hero" style="margin-bottom:18px">
@@ -1029,7 +1069,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
@@ -1042,6 +1082,7 @@ function switchView(v){
   if(v==='tasks') loadTasks();
   if(v==='attendance') loadAttendanceAdmin();
   if(v==='activity') loadActivity();
+  if(v==='analytics') loadAnalytics();
   if(v==='ipregistry') loadIPRegistry();
   if(v==='academy') loadAcademyTeachers();
   toggleSidebar(false);
@@ -1220,6 +1261,104 @@ async function loadActivity(){
     }).join('');
   }catch(e){feed.innerHTML='<div style="color:#ef9a9a;text-align:center;padding:40px">Could not load activity log.</div>';}
 }
+
+/* ── ANALYTICS ── */
+async function loadAnalytics(){
+  const days=parseInt(document.getElementById('anDays')?.value||30);
+  try{
+    const r=await fetch(API+'/api/admin/analytics?days='+days,{headers:{'x-admin-key':KEY}});
+    if(!r.ok){document.getElementById('anKpis').innerHTML='<div style="color:#ef9a9a">Could not load analytics.</div>';return;}
+    const {rows}=await r.json();
+    renderAnalytics(rows||[],days);
+  }catch(e){document.getElementById('anKpis').innerHTML='<div style="color:#ef9a9a">'+esc(e.message)+'</div>';}
+}
+
+function renderAnalytics(rows,days){
+  const total=rows.length;
+  document.getElementById('anTotal').textContent=total+' events in last '+days+' day'+(days===1?'':'s');
+  document.getElementById('anDayRange').textContent='last '+days+' days';
+
+  // KPI counts
+  const count=ev=>rows.filter(r=>r.event===ev).length;
+  const pvs=rows.filter(r=>r.event==='page_view').length;
+  const apps=count('application_submit');
+  const contacts=count('contact_submit');
+  const logins=count('client_login');
+  document.getElementById('anKpis').innerHTML=[
+    kpiCard('👁️',pvs,'Page Views'),
+    kpiCard('📋',apps,'Applications'),
+    kpiCard('📬',contacts,'Contact Forms'),
+    kpiCard('🔑',logins,'Client Logins'),
+  ].join('');
+
+  // Top pages bar chart
+  const pgCounts={};
+  rows.filter(r=>r.event==='page_view'&&r.page).forEach(r=>{pgCounts[r.page]=(pgCounts[r.page]||0)+1;});
+  const pgEntries=Object.entries(pgCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const pgMax=Math.max(1,...pgEntries.map(e=>e[1]));
+  document.getElementById('anPageBars').innerHTML=pgEntries.length?pgEntries.map(([nm,n])=>`
+    <div class="bar-row"><span class="nm" title="${esc(nm)}">${esc(nm)}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/pgMax*100)}%;background:linear-gradient(90deg,#3d82f7,#60a5fa)"></div></div>
+    <span class="vn">${n}</span></div>`).join(''):'<div class="skeleton">No page view data yet.</div>';
+
+  // Top events bar chart
+  const evCounts={};
+  rows.forEach(r=>{if(r.event!=='page_view')evCounts[r.event]=(evCounts[r.event]||0)+1;});
+  const evEntries=Object.entries(evCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const evMax=Math.max(1,...evEntries.map(e=>e[1]));
+  document.getElementById('anEventBars').innerHTML=evEntries.length?evEntries.map(([nm,n])=>`
+    <div class="bar-row"><span class="nm" title="${esc(nm)}">${esc(nm)}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/evMax*100)}%;background:linear-gradient(90deg,#16a34a,#4ade80)"></div></div>
+    <span class="vn">${n}</span></div>`).join(''):'<div class="skeleton">No events yet.</div>';
+
+  // Daily volume SVG trend
+  const buckets=[];
+  for(let i=Math.min(days,30)-1;i>=0;i--){
+    const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-i);
+    buckets.push({date:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}),start:d.getTime(),end:d.getTime()+864e5,n:0});
+  }
+  rows.forEach(r=>{const t=r.created_at?new Date(r.created_at).getTime():0;const b=buckets.find(b=>t>=b.start&&t<b.end);if(b)b.n++;});
+  const W=700,H=160,padL=28,padR=8,padT=10,padB=22;
+  const plotW=W-padL-padR,plotH=H-padT-padB;
+  const maxN=Math.max(1,...buckets.map(b=>b.n));
+  const x=i=>padL+(buckets.length<2?plotW/2:i*plotW/(buckets.length-1));
+  const y=n=>padT+plotH-(n/maxN)*plotH;
+  let g='';
+  [0,Math.ceil(maxN/2),maxN].forEach(v=>{const yy=y(v);g+=`<line class="grid-line" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/><text class="ylbl" x="${padL-5}" y="${yy+3}">${v}</text>`;});
+  const pts=buckets.map((b,i)=>[x(i),y(b.n)]);
+  const linePath='M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');
+  const areaPath=linePath+` L${x(buckets.length-1).toFixed(1)} ${(padT+plotH).toFixed(1)} L${x(0).toFixed(1)} ${(padT+plotH).toFixed(1)} Z`;
+  const step=Math.ceil(buckets.length/10);
+  const xlabels=buckets.map((b,i)=>(i%step===0||i===buckets.length-1)?`<text class="xlbl" x="${x(i)}" y="${H-6}">${b.date}</text>`:'').join('');
+  const dots=pts.map((p,i)=>`<circle class="dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" data-i="${i}"/>`).join('');
+  const svg=document.getElementById('anSvg');
+  svg.innerHTML=`<defs><linearGradient id="anGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3d82f7" stop-opacity="0.28"/><stop offset="100%" stop-color="#3d82f7" stop-opacity="0"/></linearGradient></defs>
+    ${g}<path class="area" d="${areaPath}" style="fill:url(#anGrad)"/><path class="line" d="${linePath}" style="stroke:#3d82f7"/>${dots}${xlabels}`;
+  const tip=document.getElementById('anTip'),wrap=svg.parentElement;
+  svg.querySelectorAll('.dot').forEach(c=>{
+    c.addEventListener('mouseenter',()=>{
+      const b=buckets[+c.dataset.i],rect=wrap.getBoundingClientRect();
+      const cx=(+c.getAttribute('cx'))/W*rect.width,cy=(+c.getAttribute('cy'))/H*rect.height;
+      tip.innerHTML=`<b>${b.n}</b> event${b.n===1?'':'s'} · ${b.date}`;
+      tip.style.left=cx+'px';tip.style.top=cy+'px';tip.style.opacity='1';
+    });
+    c.addEventListener('mouseleave',()=>{tip.style.opacity='0';});
+  });
+
+  // Recent events feed
+  const recent=rows.slice(0,50);
+  const evIcons={page_view:'👁️',application_submit:'📋',contact_submit:'📬',client_login:'🔑',client_signup:'✅'};
+  document.getElementById('anFeed').innerHTML=recent.length?recent.map(r=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;background:var(--navy);margin-bottom:2px">
+      <span style="flex-shrink:0;font-size:0.95rem;margin-top:1px">${evIcons[r.event]||'⚡'}</span>
+      <div style="min-width:0;flex:1">
+        <span style="font-size:0.85rem;color:var(--txt);font-weight:600">${esc(r.event)}</span>
+        ${r.page?`<span style="font-size:0.8rem;color:var(--muted);margin-left:8px">${esc(r.page)}</span>`:''}
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${timeAgo(r.created_at)}</div>
+      </div>
+    </div>`).join(''):'<div style="color:var(--muted);text-align:center;padding:30px">No events yet — start browsing skyglobegroup.com to generate data.</div>';
+}
+
 
 /* ── LOAD ── */
 async function loadAll(){ await loadApps(); await loadMessages(true); await pollTeamBadge(); }
