@@ -2595,25 +2595,68 @@ async function sendCEOMessage(e) {
   input.value = '';
 
   appendCEOMsg('user', msg);
-  const typingId = appendCEOMsg('assistant', '…', true);
+  // Create a live streaming bubble — text appears word by word
+  const streamId = 'ceo-stream-' + Date.now();
+  const feed = document.getElementById('ceoAIFeed');
+  const streamDiv = document.createElement('div');
+  streamDiv.id = streamId;
+  streamDiv.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;margin-bottom:14px;animation:ceoMsgIn .22s ease';
+  const bubble = document.createElement('div');
+  bubble.style.cssText = 'max-width:82%;padding:12px 16px;border-radius:18px 18px 18px 4px;font-size:0.875rem;line-height:1.65;white-space:pre-wrap;word-break:break-word;background:rgba(255,255,255,0.07);border:1px solid rgba(212,167,58,0.18);color:#eaf0ff;';
+  bubble.innerHTML = '<span style="display:inline-flex;gap:4px;align-items:center"><span class="ceo-dot"></span><span class="ceo-dot" style="animation-delay:.18s"></span><span class="ceo-dot" style="animation-delay:.36s"></span></span>';
+  streamDiv.appendChild(bubble);
+  feed.appendChild(streamDiv);
+  feed.scrollTop = feed.scrollHeight;
 
+  let fullText = '';
+  let started = false;
   try {
     const r = await fetch(API + '/api/ceo/assistant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-key': KEY },
-      body: JSON.stringify({ message: msg, history: ceoAIHistory.slice(-14) }),
+      body: JSON.stringify({ message: msg, history: ceoAIHistory.slice(-12) }),
     });
-    const data = await r.json();
-    removeCEOMsg(typingId);
-    const reply = data.reply || data.error || 'No response.';
-    appendCEOMsg('assistant', reply);
+    if (!r.ok) { const d = await r.json().catch(()=>{}); throw new Error(d?.error || 'Server error '+r.status); }
+    const reader = r.body.getReader(); const dec = new TextDecoder(); let buf = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (payload === '[DONE]') break;
+        try {
+          const d = JSON.parse(payload);
+          if (d.error) { bubble.textContent = d.error; break; }
+          if (d.chunk) {
+            if (!started) { bubble.textContent = ''; started = true; }
+            fullText += d.chunk;
+            bubble.textContent = fullText;
+            feed.scrollTop = feed.scrollHeight;
+          }
+        } catch {}
+      }
+    }
+    if (!started) bubble.textContent = 'No response received.';
+    // Add voice button after streaming completes
+    if (fullText && 'speechSynthesis' in window) {
+      const voiceBtn = document.createElement('button');
+      voiceBtn.type = 'button'; voiceBtn.innerHTML = '🔊 Listen'; voiceBtn.title = 'Listen to this reply';
+      voiceBtn.style.cssText = 'margin-top:6px;background:rgba(212,167,58,0.12);border:1px solid rgba(212,167,58,0.3);color:#D4A73A;font-size:0.72rem;padding:4px 11px;border-radius:14px;cursor:pointer;font-weight:600;transition:background .15s';
+      voiceBtn.onmouseover = () => voiceBtn.style.background = 'rgba(212,167,58,0.25)';
+      voiceBtn.onmouseout  = () => voiceBtn.style.background = 'rgba(212,167,58,0.12)';
+      voiceBtn.onclick = () => speakCEOReply(fullText, voiceBtn);
+      streamDiv.appendChild(voiceBtn);
+    }
     ceoAIHistory.push({ role: 'user', content: msg });
-    ceoAIHistory.push({ role: 'assistant', content: reply });
-    if (ceoAIHistory.length > 30) ceoAIHistory = ceoAIHistory.slice(-30);
+    ceoAIHistory.push({ role: 'assistant', content: fullText || bubble.textContent });
+    if (ceoAIHistory.length > 24) ceoAIHistory = ceoAIHistory.slice(-24);
   } catch (err) {
-    removeCEOMsg(typingId);
-    appendCEOMsg('assistant', 'Connection error: ' + err.message);
+    bubble.textContent = 'Connection error: ' + err.message;
   }
+  feed.scrollTop = feed.scrollHeight;
 }
 
 function appendCEOMsg(role, text, isTyping) {
