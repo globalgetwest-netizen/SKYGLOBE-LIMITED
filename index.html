@@ -1245,58 +1245,70 @@ body.wc-active .mobile-menu{padding-top:46px}
     /* Hero copy layer: top-aligned, full width, proper nav clearance */
     #cosmicHero > div[style*="position:absolute;inset"]{
       align-items:flex-start!important;
-      padding:max(5.5rem, calc(4.25rem + env(safe-area-inset-top))) clamp(1.25rem,5vw,2rem) 2rem!important;
+      padding:max(4.75rem, calc(3.75rem + env(safe-area-inset-top))) clamp(1.25rem,5vw,2rem) 1.5rem!important;
     }
     #cosmicHero > div[style*="position:absolute;inset"] > div{
       max-width:100%!important;
     }
 
-    /* Headline: fluid 2.1rem→2.6rem based on viewport — rem = density-independent */
+    /* Headline: refined, Apple-grade — tight and elegant, not overwhelming */
     #cosmicHero h1{
-      font-size:clamp(2rem,7vw,2.6rem)!important;
-      line-height:1.1!important;
-      letter-spacing:-.022em!important;
+      font-size:clamp(1.55rem,6vw,1.95rem)!important;
+      line-height:1.14!important;
+      letter-spacing:-.02em!important;
+      margin-bottom:.9rem!important;
     }
 
-    /* Subhead: smaller, tighter on phones */
+    /* Subhead: smaller, tighter, calmer on phones */
     #cosmicHero p{
-      font-size:clamp(.9rem,3.8vw,1.05rem)!important;
-      line-height:1.6!important;
-      margin-bottom:1.4rem!important;
+      font-size:clamp(.82rem,3.4vw,.92rem)!important;
+      line-height:1.5!important;
+      margin-bottom:1.1rem!important;
       max-width:none!important;
+      color:rgba(234,240,255,.72)!important;
     }
 
     /* Search bar: full width, pill shape */
-    #cosmicHero form{max-width:none!important;margin-bottom:1.2rem!important}
+    #cosmicHero form{max-width:none!important;margin-bottom:1rem!important}
 
     /* CTA buttons: stack, full width, min 50px touch target */
     #cosmicHero > div[style*="position:absolute;inset"] div[style*="display:flex;flex-wrap:wrap;gap:.85rem"]{
       flex-direction:column!important;
+      margin-bottom:1.4rem!important;
     }
     #cosmicHero > div[style*="position:absolute;inset"] div[style*="display:flex;flex-wrap:wrap;gap:.85rem"] button{
       width:100%!important;justify-content:center!important;
-      min-height:52px!important;font-size:1rem!important;
+      min-height:50px!important;font-size:.95rem!important;
+      padding:12px 22px!important;
     }
 
     /* Stats row: 2×2 grid, rem-based so consistent across all phone densities */
     #cosmicHero > div[style*="position:absolute;inset"] div[style*="display:flex;flex-wrap:wrap;gap:1.8rem"]{
       display:grid!important;
       grid-template-columns:1fr 1fr!important;
-      gap:.75rem 1.25rem!important;
-      margin-top:1.4rem!important;
+      gap:.6rem 1.25rem!important;
+      margin-top:.25rem!important;
     }
-    #cosmicHero .count-up,#liveTime{font-size:1.5rem!important}
+    #cosmicHero .count-up,#liveTime{font-size:1.3rem!important}
 
     /* Eyebrow pill: smaller on phone */
     #cosmicHero > div[style*="position:absolute;inset"] div[style*="display:inline-flex"]{
-      font-size:.65rem!important;margin-bottom:1rem!important;
+      font-size:.62rem!important;margin-bottom:.85rem!important;padding:.4em 1em!important;
     }
   }
 
-  /* Extra-small phones (SE, fold inner, 360px) */
+  /* Extra-small phones (SE, fold inner, ≤390px) */
   @media(max-width:390px){
-    #cosmicHero h1{font-size:1.85rem!important}
-    #cosmicHero p{font-size:.88rem!important}
+    #cosmicHero h1{font-size:1.4rem!important}
+    #cosmicHero p{font-size:.8rem!important;line-height:1.45!important}
+    #cosmicHero .count-up,#liveTime{font-size:1.2rem!important}
+  }
+
+  /* Short phones (landscape / small height) — keep everything on one screen */
+  @media(max-width:640px) and (max-height:740px){
+    #cosmicHero h1{font-size:1.45rem!important;margin-bottom:.7rem!important}
+    #cosmicHero p{font-size:.78rem!important;line-height:1.42!important;margin-bottom:.9rem!important}
+    #cosmicHero > div[style*="position:absolute;inset"]{padding-top:max(4.25rem, calc(3.25rem + env(safe-area-inset-top)))!important}
   }
 
   /* Smooth open/close for mobile menu — needs block→flex override */
