@@ -3,9 +3,34 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+// ═══════════════════════════════════════════════════════════════════════════════
+//  SKYGLOBE GROUP — server.js  (Express 4 · Node.js · Supabase · Vanilla JS)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+//  TABLE OF CONTENTS
+//  ─────────────────
+//  §1   Middleware stack         (security headers, rate limiting, compression, static)
+//  §2   Core data layer          (Supabase REST client, Storage, Email via Resend)
+//  §3   AI engine                (Ollama → Groq → Gemini fallback chain)
+//  §4   Public routes            (contact form, application submit/lookup)
+//  §5   Auth layer               (role-based admin/staff, client JWT, activity log)
+//  §6   Application management   (admin CRUD, status updates, documents)
+//  §7   Client portal            (signup, login, messages, documents, SSE)
+//  §8   AI features              (chat, document generator, legal docs, letterhead,
+//                                 country info/compare, AI tips, interview prep)
+//  §9   Payments                 (Paystack checkout, webhook, verify, admin list)
+//  §10  Conferences & work permit
+//  §11  HR & operations          (payroll, staff directory, tasks, attendance, activity)
+//  §12  CEO tools                (AI assistant, brand & IP registry)
+//  §13  Kids Academy             (parents, students, teachers, admissions, records)
+//  §14  Page routes & catch-all
+//
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const app = express();
 
-// ── #17 SECURITY HEADERS (helmet equivalent, no extra package needed) ─────────
+// ── §1 MIDDLEWARE STACK ───────────────────────────────────────────────────────
+// #17 Security headers (helmet equivalent, no extra package needed) ───────────
 // Protects against clickjacking, MIME sniffing, XSS reflection, and enforces HTTPS.
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -115,6 +140,7 @@ app.use(express.static(path.join(__dirname), {
 }));
 
 
+// ── §2 CORE DATA LAYER ───────────────────────────────────────────────────────
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 // Env vars needed on Render:
 //   SUPABASE_URL  = https://xxxx.supabase.co
@@ -231,6 +257,7 @@ function genRef() {
   return `SKY-${year}-${rand}`;
 }
 
+// ── §3 AI ENGINE (Ollama → Groq → Gemini fallback chain) ─────────────────────
 // ── UNIFIED AI TEXT ENGINE ───────────────────────────────────────────────────
 // Resilient generation: try Gemini first (free tier), fall back to Claude
 // (premium) if Gemini is missing/errors/empty. Guarantees a stable result so
@@ -297,6 +324,7 @@ async function generateText(prompt, opts = {}) {
   }
 }
 
+// ── §4 PUBLIC ROUTES ─────────────────────────────────────────────────────────
 // ── CONTACT / CONSULTATION FORM ───────────────────────────────────────────────
 app.post('/api/contact', contactLimiter, async (req, res) => {
   const raw = req.body || {};
@@ -474,6 +502,7 @@ app.get('/api/apply', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── §5 AUTH LAYER ────────────────────────────────────────────────────────────
 // ── AUTH (role-based) ────────────────────────────────────────────────────────
 // ADMIN_PASSWORDS  → CEO-level access (full portal: analytics, exports, everything)
 // STAFF_PASSWORDS  → Staff-level access (legacy env-var staff accounts)
@@ -634,6 +663,7 @@ app.post('/api/admin/update', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── §6 APPLICATION MANAGEMENT ────────────────────────────────────────────────
 // ── DOCUMENTS ─────────────────────────────────────────────────────────────────
 // Upload a document. Body: { ref, filename, contentType, data (base64) }
 // Users upload from the tracking page; admins (with x-admin-key) from the dashboard.
@@ -719,6 +749,7 @@ app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-pe
 app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));
 app.get('/legal-documents', (req, res) => res.sendFile(path.join(__dirname, 'legal-documents.html')));
 
+// ── §8 AI FEATURES ───────────────────────────────────────────────────────────
 // ── AI CHAT ───────────────────────────────────────────────────────────────────
 const SKYGLOBE_SYSTEM = `You are the AI assistant for SkyGlobe Group, a premium global travel and immigration consultancy. You are knowledgeable, professional, warm, and concise.
 
@@ -975,6 +1006,7 @@ async function getClientByEmail(email) {
   return rows[0] || null;
 }
 
+// ── §7 CLIENT PORTAL ─────────────────────────────────────────────────────────
 // ── SIGN UP ───────────────────────────────────────────────────────────────────
 app.post('/api/auth/signup', loginLimiter, async (req, res) => {
   let { name, email, password } = req.body || {};
@@ -1647,7 +1679,7 @@ app.post('/api/admin/legal-docs/:id/resend', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ---- Official Letterhead AI writer (CEO / authorised staff only) ----
+// ── LETTERHEAD AI WRITER (CEO / authorised staff only) ───────────────────────
 // Writes the BODY of an official SkyGlobe Group letter. Auth required so the
 // public can never generate company correspondence. The signature/stamp are
 // added on the letterhead page, governed by role (staff cannot sign as CEO).
@@ -1710,7 +1742,7 @@ STRICT RULES:
   }
 });
 
-// ---- Country AI Research endpoint ----
+// ── COUNTRY AI RESEARCH ───────────────────────────────────────────────────────
 app.post('/api/country-info', async (req, res) => {
   const { country, capital, region, langs, currency } = req.body || {};
   if (!country) return res.status(400).json({ error: 'country required' });
@@ -1785,7 +1817,7 @@ Be specific with real numbers and real university names. Keep each section conci
   } catch (e) { clearTimeout(timer); res.json({ html: null }); }
 });
 
-// ---- Country Comparison endpoint ----
+// ── COUNTRY COMPARISON ────────────────────────────────────────────────────────
 app.post('/api/country-compare', async (req, res) => {
   const { countries = [] } = req.body || {};
   if (!Array.isArray(countries) || countries.length < 2)
@@ -1837,7 +1869,7 @@ For "text" rows keep each value short (max ~8 words, real specifics: real univer
   } catch (e) { clearTimeout(timer); res.json({ rows: null }); }
 });
 
-// ---- AI Tips endpoint ----
+// ── AI TIPS ───────────────────────────────────────────────────────────────────
 app.post('/api/ai-tips', aiLimiter, async (req, res) => {
   const { countries = [], universities = [], appCount = 0 } = req.body || {};
   const apiKey = process.env.GEMINI_API_KEY;
@@ -1870,7 +1902,7 @@ Give exactly 5 personalised, actionable tips. Respond with ONLY a JSON array, no
   } catch { clearTimeout(timer); res.json({ tips: null }); }
 });
 
-// ---- AI Interview Prep endpoint ----
+// ── AI INTERVIEW PREP ─────────────────────────────────────────────────────────
 app.post('/api/interview-prep', async (req, res) => {
   const { type = 'visa', target = '', nationality = '', background = '', payToken = '' } = req.body || {};
   // Optional paywall: set PAYWALL_INTERVIEW=on in Render to require payment.
@@ -1939,9 +1971,7 @@ Generate a comprehensive personalised interview preparation guide. Respond with 
   }
 });
 
-// ════════════════════════════════════════════════════════════════════════════
-// PAYMENTS + CONFERENCE SOURCING
-// ────────────────────────────────────────────────────────────────────────────
+// ── §9 PAYMENTS ──────────────────────────────────────────────────────────────
 // Provider-agnostic engine. Paystack, Stripe and Flutterwave are all supported.
 // Activate a provider simply by adding its secret/public keys to Render env vars.
 // Nothing breaks while keys are missing — that provider is just "not available".
@@ -2237,15 +2267,10 @@ app.get('/api/admin/payments', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ════════════════════════════════════════════════════════════════════════════
-// CONFERENCE SOURCING
-// ────────────────────────────────────────────────────────────────────────────
-// We publish curated conferences. A client picks one, fills the form and pays a
-// SERVICE FEE. Behind the scenes we contact the REAL organiser, obtain the
-// GENUINE invitation/admission document, verify it, add our "Facilitated &
-// Verified by SkyGlobe Group" stamp (NOT an issuing stamp) and deliver it.
-// We never fabricate a document or impersonate an institution.
-// ════════════════════════════════════════════════════════════════════════════
+// ── §10 CONFERENCES & WORK PERMIT ────────────────────────────────────────────
+// Conferences: curated listings; clients pay a SERVICE FEE and we facilitate
+// genuine invitation/admission documents from the real organiser — never
+// fabricated, never impersonating an institution.
 
 // Public: list conferences shown on /conferences
 app.get('/api/conferences', async (_req, res) => {
@@ -2484,6 +2509,7 @@ app.post('/api/work-permit/apply', async (req, res) => {
   }
 });
 
+// ── §11 HR & OPERATIONS ──────────────────────────────────────────────────────
 // ── PAYROLL ──────────────────────────────────────────────────────────────────
 app.get('/api/admin/payroll', checkAdmin, async (req, res) => {
   try {
@@ -2761,6 +2787,7 @@ app.get('/api/admin/attendance', checkAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── §12 CEO TOOLS ────────────────────────────────────────────────────────────
 // ── CEO AI INTELLIGENCE ASSISTANT ────────────────────────────────────────────
 app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
   const { message, history } = req.body || {};
@@ -3220,6 +3247,7 @@ async function getStudentForParent(studentId, parentEmail) {
   return rows[0] || null;
 }
 
+// ── §13 KIDS ACADEMY ─────────────────────────────────────────────────────────
 // ── PARENT: SIGN UP ───────────────────────────────────────────────────────────
 app.post('/api/academy/parent/signup', async (req, res) => {
   let { name, email, password } = req.body || {};
@@ -3760,6 +3788,7 @@ app.get('/academy/admission', (req, res) => res.sendFile(path.join(__dirname, 'a
 app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'academy-portal.html')));
 app.get('/academy/learn', (req, res) => res.sendFile(path.join(__dirname, 'academy-learn.html')));
 
+// ── §14 PAGE ROUTES & CATCH-ALL ──────────────────────────────────────────────
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
@@ -3770,10 +3799,9 @@ app.listen(PORT, () => {
 // Keep the staff-account cache fresh (in case of direct DB edits)
 setInterval(refreshStaffCache, 5 * 60 * 1000);
 
-// ---- Keep-alive self-ping (prevents Render free-tier cold starts) ----
+// ── KEEP-ALIVE SELF-PING (prevents Render free-tier cold starts) ─────────────
 // Render sleeps the service after ~15 min with no inbound HTTP traffic.
-// We ping our own /api/health every 13 minutes so the service stays awake,
-// which means users never hit the "server is waking up" delay.
+// We ping our own /api/health every 13 minutes so the service stays awake.
 const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 setInterval(() => {
   fetch(`${SELF_URL}/api/health`)
