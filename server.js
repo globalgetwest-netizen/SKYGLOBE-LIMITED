@@ -2815,10 +2815,45 @@ async function getAcademyRoster() {
   }));
 }
 
+// ── LOCAL OLLAMA ENGINE (free, runs on your own machine) ──────────────────────
+// When OLLAMA_URL is set (e.g. http://localhost:11434), the academy + CEO AI use
+// your local Ollama model instead of Gemini. Perfect for development on your
+// laptop, and for production once you have a dedicated AI machine.
+// Set OLLAMA_MODEL to choose the model (default: llama3.2:3b).
+async function askOllama(systemPrompt, userPrompt, contents = null) {
+  const base = (process.env.OLLAMA_URL || '').replace(/\/$/, '');
+  const model = process.env.OLLAMA_MODEL || 'llama3.2:3b';
+  // Build chat messages: system + (history) + user
+  const messages = [{ role: 'system', content: systemPrompt }];
+  if (Array.isArray(contents)) {
+    for (const c of contents) {
+      const role = c.role === 'model' ? 'assistant' : 'user';
+      const text = (c.parts || []).map(p => p.text || '').join('');
+      if (text) messages.push({ role, content: text });
+    }
+  } else if (userPrompt) {
+    messages.push({ role: 'user', content: userPrompt });
+  }
+  const res = await fetch(`${base}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, messages, stream: false }),
+    signal: AbortSignal.timeout(120000) // local CPU can be slow — allow 2 min
+  });
+  if (!res.ok) throw new Error(`Ollama error ${res.status}: ${await res.text().catch(() => '')}`);
+  const data = await res.json();
+  const text = (data.message?.content || '').trim();
+  if (!text) throw new Error('Ollama returned an empty response.');
+  return text;
+}
+const USE_OLLAMA = !!process.env.OLLAMA_URL;
+
 // ── ROBUST GEMINI CALL WITH RETRY + MODEL FALLBACK ────────────────────────────
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
 async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
+  // If a local Ollama engine is configured, use it (free, no quota).
+  if (USE_OLLAMA) return askOllama(systemPrompt, prompt);
   // flash-lite has the most generous free-tier quota, so try it first.
   const models = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
   let lastError = 'No models responded';
@@ -2872,6 +2907,8 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
 // Free Gemini call with model fallback chain (reused by the AI teachers).
 // Supports multi-turn `contents`; retries transient errors (429/500/503) per model.
 async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
+  // If a local Ollama engine is configured, use it (free, no quota).
+  if (USE_OLLAMA) return askOllama(systemPrompt, null, contents);
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error('AI teacher is not configured. Add a free GEMINI_API_KEY.');
   // gemini-2.0-flash is primary: no thinking overhead, fast, reliable for education
