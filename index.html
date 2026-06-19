@@ -357,11 +357,11 @@ footer{background:#041022;border-top:1px solid rgba(255,255,255,0.08);padding:60
 .faq-item.open .faq-q span{transform:rotate(45deg)}
 .faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 22px;font-size:0.88rem;color:#4b5563;line-height:1.7}
 .faq-item.open .faq-a{max-height:300px;padding:0 22px 18px}
-/* LEFT-side stack (bottom→up): back/forward arrows · WhatsApp · Install chip.
-   Right side is reserved for the AI chat FAB + panel, so nothing overlaps. */
-.wa-float{position:fixed;bottom:82px;left:20px;width:52px;height:52px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.45rem;text-decoration:none;z-index:998;box-shadow:0 4px 20px rgba(37,211,102,0.4);transition:var(--trans)}
+/* LEFT-side floating stack (bottom→up): back/forward arrows · WhatsApp · scroll-top.
+   Fixed, evenly spaced so they NEVER overlap. Right side = AI chat FAB only. */
+.wa-float{position:fixed;bottom:80px;left:20px;width:52px;height:52px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.45rem;text-decoration:none;z-index:998;box-shadow:0 4px 20px rgba(37,211,102,0.4);transition:var(--trans)}
 .wa-float:hover{transform:scale(1.1)}
-@media(max-width:600px){.wa-float{bottom:70px;left:14px;width:46px;height:46px;font-size:1.3rem}}
+@media(max-width:600px){.wa-float{bottom:72px;left:14px;width:46px;height:46px;font-size:1.3rem}}
 
 /* ── PAGE BACK/NEXT NAV ─────────────────────────────────────────── */
 .page-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;max-width:1200px;margin:2rem auto 3.5rem;padding:1.5rem 2rem;border-top:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
@@ -377,9 +377,10 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .page-nav-next{text-align:right;align-items:flex-end}
 
 /* ── SCROLL TO TOP ──────────────────────────────────────────────── */
-.scroll-top{position:fixed;bottom:6.2rem;left:2rem;width:46px;height:46px;background:#041022;color:var(--gold);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;z-index:997;opacity:0;visibility:hidden;transition:var(--trans);box-shadow:0 4px 16px rgba(0,0,0,0.25)}
+.scroll-top{position:fixed;bottom:144px;left:20px;width:46px;height:46px;background:#041022;color:var(--gold);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;z-index:997;opacity:0;visibility:hidden;transition:var(--trans);box-shadow:0 4px 16px rgba(0,0,0,0.25)}
 .scroll-top.show{opacity:1;visibility:visible}
 .scroll-top:hover{background:var(--gold);color:#041022;transform:translateY(-3px)}
+@media(max-width:600px){.scroll-top{bottom:126px;left:14px;width:42px;height:42px}}
 
 /* ── COOKIE CONSENT ─────────────────────────────────────────────── */
 .cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9500;background:#041022;color:#e8eef7;padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:center;gap:1.2rem;flex-wrap:wrap;box-shadow:0 -4px 24px rgba(0,0,0,0.3);transform:translateY(100%);transition:transform 0.4s ease;border-top:1px solid rgba(212,167,58,0.3)}
