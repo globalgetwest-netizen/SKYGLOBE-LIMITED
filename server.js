@@ -2844,31 +2844,28 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
   if (!message || !String(message).trim())
     return res.status(400).json({ error: 'Message is required.' });
 
-  // Provider selection — prefer FREE Google Gemini, fall back to Anthropic if a key exists.
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (!USE_OLLAMA && !USE_GROQ && !geminiKey && !anthropicKey)
     return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add a free GROQ_API_KEY (from console.groq.com) to your Render environment variables.' });
 
   try {
-    // Pull live ecosystem snapshot from Supabase (10 s cap so slow DB can't eat the AI budget).
+    // Pull live snapshot — keep row counts small so the prompt stays lean and fast.
     const _dbTimeout = (p) => Promise.race([p, new Promise(r => setTimeout(() => r([]), 10000))]);
     const [apps, payments, staff, tasks, activity, conferences, legalDocs, clients, sessionLogs] = await Promise.all([
-      _dbTimeout(dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 200 }).catch(() => [])),
-      _dbTimeout(dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 200 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'staff_members', null, { limit: 100 }).catch(() => [])),
-      _dbTimeout(dbQuery('GET', 'tasks', null, { order: 'created_at.desc', limit: 100 }).catch(() => [])),
-      _dbTimeout(dbQuery('GET', 'activity_log', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
-      _dbTimeout(dbQuery('GET', 'conferences', null, { order: 'date.desc', limit: 50 }).catch(() => [])),
-      _dbTimeout(dbQuery('GET', 'documents', null, { uploaded_by: 'eq.ai:legal-docs', order: 'created_at.desc', limit: 100 }).catch(() => [])),
-      _dbTimeout(dbQuery('GET', 'clients', null, { select: 'email,name,created_at', order: 'created_at.desc', limit: 500 }).catch(() => [])),
-      _dbTimeout(dbQuery('GET', 'session_logs', null, { order: 'logged_in_at.desc', limit: 200 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'tasks', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'activity_log', null, { order: 'created_at.desc', limit: 20 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'conferences', null, { order: 'date.desc', limit: 20 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'documents', null, { uploaded_by: 'eq.ai:legal-docs', order: 'created_at.desc', limit: 30 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'clients', null, { select: 'email,name,created_at', order: 'created_at.desc', limit: 50 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'session_logs', null, { order: 'logged_in_at.desc', limit: 30 }).catch(() => [])),
     ]);
 
-    // Build concise snapshot text
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
-
     const appsByStatus = apps.reduce((acc, a) => { acc[a.status] = (acc[a.status] || 0) + 1; return acc; }, {});
     const payToday = payments.filter(p => (p.paid_at || p.created_at || '').slice(0, 10) === todayStr);
     const revenueToday = payToday.filter(p => p.status === 'paid').reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
@@ -2882,117 +2879,136 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
     const sessionsToday = sessionLogs.filter(s => (s.logged_in_at || '').slice(0, 10) === todayStr);
     const uniqueLoginsToday = [...new Set(sessionsToday.map(s => s.email))];
 
-    const ecosystemSnapshot = `
-LIVE ECOSYSTEM SNAPSHOT — ${now.toUTCString()}
-==============================================
+    const ecosystemSnapshot = `LIVE SNAPSHOT — ${now.toUTCString()}
+APPLICATIONS (recent ${apps.length}): ${Object.entries(appsByStatus).map(([s,n])=>`${s}:${n}`).join(', ')||'none'}
+  Recent: ${apps.slice(0,5).map(a=>`${a.ref} ${[a.fname,a.lname].filter(Boolean).join(' ')||a.email} — ${a.service||''} — ${a.status}`).join(' | ')}
+PAYMENTS: Total paid $${revenueTotalPaid.toFixed(2)} | Today $${revenueToday.toFixed(2)} (${payToday.filter(p=>p.status==='paid').length} paid) | Pending: ${payments.filter(p=>p.status==='pending').length}
+  Recent: ${payments.slice(0,4).map(p=>`${p.reference||p.id} $${p.amount} ${p.currency||''} ${p.product||''} ${p.status}`).join(' | ')}
+STAFF (${staff.length}): ${staff.map(s=>`${s.name} ${s.role||s.department||''}`).join(', ')||'none'}
+TASKS: Pending:${pendingTasks.length} InProgress:${inProgressTasks.length} Overdue:${overdueTasks.length}
+  Overdue: ${overdueTasks.slice(0,5).map(t=>`"${t.title}" due:${t.due_date} assigned:${t.assigned_to||'?'}`).join('; ')||'none'}
+CONFERENCES (${conferences.length}): ${conferences.slice(0,4).map(c=>`${c.title||'Untitled'} ${c.country||''} ${c.date||'TBC'} ${c.active===false?'inactive':'active'}`).join(' | ')||'none'}
+LEGAL DOCS (${legalDocs.length} total, ${legalToday.length} today): ${legalDocs.slice(0,5).map(d=>`${d.ref} ${legalTypeName(d.filename)} ${(d.created_at||'').slice(0,10)}`).join(' | ')||'none'}
+CLIENTS (${clients.length} registered, ${clientsToday.length} today): ${clients.slice(0,4).map(c=>`${c.name||'?'} <${c.email}>`).join(', ')||'none'}
+LOGINS TODAY: ${uniqueLoginsToday.length} users | ${uniqueLoginsToday.slice(0,5).join(', ')||'none'}
+RECENT ACTIVITY: ${activity.slice(0,6).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} ${a.action} ${a.detail||''}`).join(' | ')||'none'}`;
 
-APPLICATIONS (${apps.length} total):
-${Object.entries(appsByStatus).map(([s, n]) => `  • ${s}: ${n}`).join('\n') || '  (none)'}
-Recent: ${apps.slice(0, 6).map(a => `${a.ref} — ${[a.fname, a.lname].filter(Boolean).join(' ') || a.name || a.email} — ${a.service || ''} — ${a.status}`).join('\n         ')}
+    const systemPrompt = `You are SKYGLOBE CORE Intelligence — private AI assistant to Saleh Shuaibu, Founder & CEO of SkyGlobe Group. Monitor, analyse, and report on the entire SkyGlobe Group ecosystem. Use the live data below. Be concise, precise, strategic. Use bullet points and numbers. Address the CEO efficiently. Never guess — say "not in current data" if needed.
 
-PAYMENTS:
-  • Total paid revenue: $${revenueTotalPaid.toFixed(2)}
-  • Today's paid payments: ${payToday.filter(p=>p.status==='paid').length} totalling $${revenueToday.toFixed(2)}
-  • Pending payments: ${payments.filter(p=>p.status==='pending').length}
-  Recent: ${payments.slice(0,5).map(p=>`${p.reference||p.id} — ${p.amount} ${p.currency||'USD'} — ${p.product||''} — ${p.status}`).join('\n          ')}
+ABOUT SKYGLOBE GROUP: 5 divisions — Global Mobility, Travel Services, Events & Conferences, Knowledge Hub (incl. Kids Academy), Digitalization. Motto: One World. One Mission. Anchors: CONSTRUCT · TRUST · INTELLIGENCE · POWER. Pricing in USD/EUR/GBP only.
 
-STAFF (${staff.length} members):
-  ${staff.map(s => `${s.name} — ${s.role||s.department||''}`).join('\n  ') || '(none)'}
-
-TASKS:
-  • Pending: ${pendingTasks.length}  |  In Progress: ${inProgressTasks.length}  |  Overdue: ${overdueTasks.length}
-  Overdue: ${overdueTasks.map(t=>`"${t.title}" (due ${t.due_date}) assigned to ${t.assigned_to||'?'}`).join('; ') || 'none'}
-
-CONFERENCES (${conferences.length} total):
-  ${conferences.slice(0,6).map(c=>`${c.title||'Untitled'} — ${c.country||''}${c.city?', '+c.city:''} — ${c.date||'date TBC'} — ${c.active===false?'inactive':'active'}`).join('\n  ') || '(none)'}
-
-LEGAL DIGITAL DOCUMENTS (${legalDocs.length} total · ${legalToday.length} today):
-  ${legalDocs.slice(0,8).map(d=>`${d.ref} — ${legalTypeName(d.filename)} — ${(d.created_at||'').slice(0,16)}`).join('\n  ') || '(none yet)'}
-
-CLIENT ACCOUNTS (${clients.length} registered · ${clientsToday.length} joined today):
-  Recent registrations: ${clients.slice(0,5).map(c=>`${c.name||'unnamed'} <${c.email}> — joined ${(c.created_at||'').slice(0,10)}`).join('\n    ') || '(none)'}
-
-LOGIN SESSIONS — TODAY (${uniqueLoginsToday.length} unique users · ${sessionsToday.length} total logins):
-  ${uniqueLoginsToday.length ? uniqueLoginsToday.map(e => { const s = sessionsToday.find(x=>x.email===e); return `${s?.name||'user'} <${e}> — last login ${(s?.logged_in_at||'').slice(0,16)}`; }).join('\n  ') : '(no logins today yet)'}
-  All-time sessions recorded: ${sessionLogs.length}
-
-RECENT ACTIVITY (last 10 events):
-  ${activity.slice(0,10).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} — ${a.action} — ${a.detail||''}`).join('\n  ') || '(none)'}
-`;
-
-    const systemPrompt = `You are SKYGLOBE CORE Intelligence — the private AI assistant to Saleh Shuaibu, Founder & Chief Executive Officer of SkyGlobe Group.
-
-Your role: monitor, analyse, and report on the entire SkyGlobe Group ecosystem. You have direct access to live operational data. You execute CEO commands accurately, think strategically, and speak with the precision and authority the CEO expects.
-
-ABOUT SKYGLOBE GROUP:
-- Global organisation across 5 active divisions: Global Mobility, Travel Services, Events & Conferences, Knowledge Hub (incl. SkyGlobe Kids Academy), and Digitalization
-- Digitalization's flagship is Legal Digital Documentation — AI-generated, encrypted, verified legal documents sold per-document in 3 tiers (Standard/Premium/Priority), delivered via secure token links
-- Anchors: CONSTRUCT · TRUST · INTELLIGENCE · POWER
-- Motto: One World. One Mission.
-- The CEO is Saleh Shuaibu — Founder & Chief Executive Officer
-- All pricing in USD/EUR/GBP. Never Naira/NGN.
-- Brand: "Facilitated & Verified by SkyGlobe Group" — never "issued by us"
-- System layers: SKYGLOBE S (identity) → Public (app.skyglobegroup.com) → Portal (admin + staff) → Engine (SKYGLOBE CORE) → Supabase data foundation
-
-CURRENT LIVE ECOSYSTEM DATA:
-${ecosystemSnapshot}
-
-INSTRUCTIONS:
-- Answer every question using the live data above
-- When the CEO gives a command, act on it and confirm what was done or what data you found
-- Be concise but thorough — give numbers, names, specifics
-- If data is insufficient to answer, say so clearly and suggest what to check
-- Format responses for readability: use bullet points, clear sections, numbers
-- Never guess — if the data isn't there, say "not available in current data"
-- Always address the CEO respectfully but efficiently`;
+LIVE DATA:
+${ecosystemSnapshot}`;
 
     const messages = [];
     if (Array.isArray(history)) {
-      for (const m of history.slice(-12)) {
-        if (m.role === 'user' || m.role === 'assistant') {
+      for (const m of history.slice(-8)) {
+        if (m.role === 'user' || m.role === 'assistant')
           messages.push({ role: m.role, content: String(m.content || '') });
-        }
       }
     }
     messages.push({ role: 'user', content: String(message).trim() });
 
-    let reply;
+    // ── STREAMING response so the CEO sees words appear immediately ─────────────
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Accel-Buffering', 'no'); // prevent Nginx/Render from buffering
 
-    if (USE_OLLAMA || USE_GROQ || geminiKey) {
-      // ── FREE PROVIDER: local Ollama / Groq cloud / Google Gemini (retry + fallback)
-      // Fold prior conversation into the prompt so we can reuse the shared
-      // callGeminiWithRetry helper (which retries 429/500/503 transient errors).
-      const convo = messages.slice(0, -1)
-        .map(m => `${m.role === 'assistant' ? 'You (SKYGLOBE CORE)' : 'CEO'}: ${m.content}`)
-        .join('\n');
-      const userMsg = messages[messages.length - 1].content;
-      const prompt = convo ? `${convo}\n\nCEO: ${userMsg}` : userMsg;
-      reply = await callGeminiWithRetry(prompt, systemPrompt) || 'No response generated.';
-    } else {
-      // ── FALLBACK: Anthropic (only if ANTHROPIC_API_KEY is set) ─────────────
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const sendChunk = (text) => res.write(`data: ${JSON.stringify({ chunk: text })}\n\n`);
+    const sendDone  = ()     => { res.write('data: [DONE]\n\n'); res.end(); };
+    const sendError = (msg)  => { res.write(`data: ${JSON.stringify({ error: msg })}\n\n`); res.end(); };
+
+    // ── GROQ streaming (fastest — runs Llama at 500+ tokens/sec) ────────────────
+    if (USE_GROQ) {
+      const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+      const msgs = [{ role: 'system', content: systemPrompt }, ...messages];
+      const gr = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'x-api-key': anthropicKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'claude-opus-4-8',
-          max_tokens: 2048,
-          system: systemPrompt,
-          messages,
-        }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
+        body: JSON.stringify({ model, messages: msgs, temperature: 0.7, max_tokens: 2048, stream: true }),
+        signal: AbortSignal.timeout(60000),
       });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error?.message || `Anthropic API error ${r.status}`);
-      reply = data.content?.[0]?.text || 'No response generated.';
+      if (!gr.ok) { sendError(`Groq error ${gr.status}`); return; }
+      const reader = gr.body.getReader(); const dec = new TextDecoder(); let buf = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split('\n'); buf = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = line.slice(6).trim();
+          if (payload === '[DONE]') { sendDone(); return; }
+          try { const d = JSON.parse(payload); const t = d.choices?.[0]?.delta?.content; if (t) sendChunk(t); } catch {}
+        }
+      }
+      sendDone(); return;
     }
 
-    res.json({ reply });
+    // ── GEMINI streaming ────────────────────────────────────────────────────────
+    if (USE_OLLAMA || geminiKey) {
+      if (USE_OLLAMA) {
+        // Ollama doesn't stream here — fall through to non-streaming reply
+        const reply = await askOllama(systemPrompt, messages[messages.length-1].content);
+        sendChunk(reply || 'No response.'); sendDone(); return;
+      }
+      const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+      const convoContents = messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+      for (const model of models) {
+        try {
+          const gr = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${geminiKey}&alt=sse`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                system_instruction: { parts: [{ text: systemPrompt }] },
+                contents: convoContents,
+                generationConfig: { maxOutputTokens: 2048, temperature: 0.7 },
+              }),
+              signal: AbortSignal.timeout(55000),
+            }
+          );
+          if (!gr.ok) { const e = await gr.json().catch(()=>{}); console.error('Gemini stream error', model, e); continue; }
+          const reader = gr.body.getReader(); const dec = new TextDecoder(); let buf = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            const lines = buf.split('\n'); buf = lines.pop();
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const payload = line.slice(6).trim();
+              try {
+                const d = JSON.parse(payload);
+                const parts = d.candidates?.[0]?.content?.parts || [];
+                for (const p of parts) { if (p.text) sendChunk(p.text); }
+              } catch {}
+            }
+          }
+          sendDone(); return;
+        } catch (e) { console.error('CEO Gemini stream error', model, e.message); }
+      }
+      sendError('AI service did not respond. Please try again.'); return;
+    }
+
+    // ── ANTHROPIC fallback (non-streaming) ────────────────────────────────────
+    if (anthropicKey) {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-opus-4-8', max_tokens: 2048, system: systemPrompt, messages }),
+      });
+      const data = await r.json();
+      if (!r.ok) { sendError(data.error?.message || 'Anthropic error'); return; }
+      sendChunk(data.content?.[0]?.text || 'No response.'); sendDone(); return;
+    }
+
+    sendError('No AI provider configured.');
   } catch (e) {
     console.error('CEO AI Assistant error:', e.message);
-    res.status(500).json({ error: e.message });
+    if (!res.headersSent) res.status(500).json({ error: e.message });
+    else res.write(`data: ${JSON.stringify({ error: e.message })}\n\n`), res.end();
   }
 });
 
