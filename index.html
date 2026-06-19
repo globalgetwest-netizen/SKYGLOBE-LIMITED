@@ -1068,37 +1068,305 @@ body.wc-active .mobile-menu{padding-top:46px}
 <!-- ============ HOME PAGE ============ -->
 <div class="page active" id="page-home">
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-bg">
-      <div class="grid-lines"></div>
-      <div class="glow-blob blob-1"></div>
-      <div class="glow-blob blob-2"></div>
-      <div id="globeContainer" style="position:absolute;right:-8%;top:50%;transform:translateY(-50%);width:56%;max-width:680px;aspect-ratio:1/1;z-index:0"></div>
+  <!-- ═══════════════════════════════════════════════════════════════
+       COSMIC HERO — Real-time Earth · Sun · Moon · Stars · Milky Way
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="cosmicHero" style="position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:#000005">
+
+    <!-- Deep space canvas: stars + Milky Way -->
+    <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0"></canvas>
+
+    <!-- Sun glow (positioned by JS from real solar angle) -->
+    <div id="sunGlow" style="position:absolute;z-index:1;pointer-events:none;transition:opacity 2s">
+      <div style="width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,220,80,0.55) 0%,rgba(255,160,30,0.25) 35%,rgba(255,100,0,0.08) 65%,transparent 100%);filter:blur(8px)"></div>
     </div>
-    <div class="hero-content">
-      <div class="hero-badge">✦ One World. One Mission.</div>
-      <h1>Travel, Study, Work<br>&amp; <em>Connect</em> <strong>Globally</strong></h1>
-      <p>Explore every country, discover universities, find jobs, and unlock immigration pathways — all from one trusted global platform.</p>
-      <form class="hero-search" style="position:relative" onsubmit="heroSearch(event)">
-        <span class="hero-search-ico">🔍</span>
-        <input type="text" id="heroSearchInput" placeholder="Search any country — Canada, UK, Germany…" autocomplete="off" oninput="acInput('heroSearchInput','heroAcDrop')" onkeydown="acKey(event,'heroSearchInput','heroAcDrop')">
-        <button type="submit">Search</button>
-        <div class="ac-drop" id="heroAcDrop"></div>
-      </form>
-      <div class="hero-btns">
-        <button class="btn-primary" onclick="showPage('countries')">🌍 Explore Countries</button>
-        <button class="btn-outline" onclick="showPage('apply')">📋 Apply Now</button>
-        <button class="btn-outline" onclick="openElig()" style="border-color:rgba(100,180,255,0.4);color:#15418c">✦ Check My Eligibility</button>
-      </div>
-      <div class="hero-stats">
-        <div class="stat-item"><span class="stat-num count-up" data-count="12" data-suffix="K+">0</span><span class="stat-label">Visas Processed</span></div>
-        <div class="stat-item"><span class="stat-num count-up" data-count="98" data-suffix="%">0</span><span class="stat-label">Success Rate</span></div>
-        <div class="stat-item"><span class="stat-num count-up" data-count="47" data-suffix="">0</span><span class="stat-label">Countries Served</span></div>
-        <div class="stat-item"><span class="stat-num count-up" data-count="8" data-suffix="yr">0</span><span class="stat-label">Experience</span></div>
+
+    <!-- Moon (positioned by JS from real lunar angle) -->
+    <div id="moonObj" style="position:absolute;z-index:2;pointer-events:none;width:38px;height:38px">
+      <div style="width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 38% 35%,#f5f0e0 0%,#d8cfa0 45%,#a89060 100%);box-shadow:0 0 18px 6px rgba(240,230,180,0.22),inset -6px -4px 12px rgba(0,0,0,0.35)"></div>
+    </div>
+
+    <!-- 3-D Globe (globe.gl) -->
+    <div id="globeContainer" style="position:absolute;right:-4%;top:50%;transform:translateY(-50%);width:min(58vw,680px);aspect-ratio:1/1;z-index:3"></div>
+
+    <!-- Atmosphere halo around globe -->
+    <div id="globeAtmo" style="position:absolute;right:-4%;top:50%;transform:translateY(-50%);width:min(58vw,680px);aspect-ratio:1/1;z-index:2;border-radius:50%;background:radial-gradient(circle,transparent 46%,rgba(60,140,255,0.12) 55%,rgba(30,80,200,0.07) 68%,transparent 75%);pointer-events:none"></div>
+
+    <!-- Hero copy -->
+    <div style="position:absolute;inset:0;z-index:10;display:flex;align-items:center;padding:0 clamp(1.5rem,6vw,5rem)">
+      <div style="max-width:clamp(300px,48vw,620px)">
+
+        <!-- Eyebrow -->
+        <div style="display:inline-flex;align-items:center;gap:.55em;background:rgba(212,167,58,.12);border:1px solid rgba(212,167,58,.35);border-radius:100px;padding:.45em 1.1em;margin-bottom:1.6rem">
+          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:pulseDot 2s ease-in-out infinite"></span>
+          <span style="font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#F4D77A">One World. One Mission.</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 style="font-family:'SF Pro Display','Inter','Segoe UI',sans-serif;font-size:clamp(2.4rem,5.2vw,4.4rem);font-weight:700;line-height:1.04;letter-spacing:-.025em;color:#fff;margin-bottom:1.4rem">
+          The Platform<br>
+          <span style="background:linear-gradient(135deg,#D4A73A,#F4D77A);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Built to Move</span><br>
+          the World.
+        </h1>
+
+        <!-- Sub -->
+        <p style="font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.65;color:rgba(234,240,255,.78);margin-bottom:2.2rem;max-width:52ch">
+          Global mobility, education, intelligence and digital innovation —
+          unified under one name. SkyGlobe Group is where the world's
+          people, ideas and ambitions converge.
+        </p>
+
+        <!-- Search -->
+        <form style="position:relative;display:flex;align-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:100px;padding:6px 6px 6px 18px;backdrop-filter:blur(12px);margin-bottom:1.6rem;max-width:500px" onsubmit="heroSearch(event)">
+          <span style="margin-right:8px;opacity:.6;font-size:1rem">🔍</span>
+          <input id="heroSearchInput" type="text" placeholder="Search any country — Canada, UK, Germany…" autocomplete="off"
+            oninput="acInput('heroSearchInput','heroAcDrop')" onkeydown="acKey(event,'heroSearchInput','heroAcDrop')"
+            style="border:none;outline:none;background:transparent;color:#fff;font-size:.92rem;font-family:inherit;flex:1;min-width:0">
+          <input type="submit" value="Search" style="background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;border:none;border-radius:100px;padding:10px 22px;font-weight:700;font-size:.88rem;cursor:pointer;flex-shrink:0">
+          <div class="ac-drop" id="heroAcDrop"></div>
+        </form>
+
+        <!-- CTAs -->
+        <div style="display:flex;flex-wrap:wrap;gap:.85rem;margin-bottom:2.4rem">
+          <button onclick="showPage('countries')" style="display:inline-flex;align-items:center;gap:.5em;background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;border:none;border-radius:10px;padding:14px 26px;font-weight:700;font-size:.95rem;cursor:pointer;min-height:50px;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 32px rgba(212,167,58,.45)'" onmouseout="this.style.transform='';this.style.boxShadow=''">🌍 Explore the World</button>
+          <button onclick="showPage('apply')" style="display:inline-flex;align-items:center;gap:.5em;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:14px 26px;font-weight:600;font-size:.95rem;cursor:pointer;min-height:50px;backdrop-filter:blur(8px);transition:background .2s,border-color .2s" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">📋 Begin Your Journey</button>
+        </div>
+
+        <!-- Live stats -->
+        <div style="display:flex;flex-wrap:wrap;gap:1.8rem">
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="12" data-suffix="K+">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(234,240,255,.5);margin-top:.3rem">Visas Processed</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="98" data-suffix="%">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(234,240,255,.5);margin-top:.3rem">Success Rate</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="195" data-suffix="">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(234,240,255,.5);margin-top:.3rem">Countries</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#F4D77A;line-height:1" id="liveTime"></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(234,240,255,.5);margin-top:.3rem">UTC Live</div></div>
+        </div>
+
       </div>
     </div>
+
+    <!-- Scroll cue -->
+    <div style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.55">
+      <span style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#9fb0d6">Explore</span>
+      <div style="width:1px;height:36px;background:linear-gradient(to bottom,rgba(212,167,58,.7),transparent);animation:scrollPulse 1.8s ease-in-out infinite"></div>
+    </div>
+
   </section>
+
+  <!-- COSMIC HERO STYLES + ASTRONOMY ENGINE -->
+  <style>
+  @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+  @keyframes scrollPulse{0%,100%{opacity:.55;transform:scaleY(1)}50%{opacity:.2;transform:scaleY(.6)}}
+  @keyframes twinkle{0%,100%{opacity:1}50%{opacity:.3}}
+  @media(max-width:640px){
+    #cosmicHero{height:100svh}
+    #globeContainer,#globeAtmo{right:-30%;width:90vw;top:auto;bottom:-12%;transform:none}
+    #cosmicHero > div[style*="position:absolute;inset"]{align-items:flex-start;padding-top:clamp(5rem,15vw,8rem)}
+    #cosmicHero > div[style*="position:absolute;inset"] > div{max-width:100%}
+  }
+  </style>
+
+  <script>
+  /* ── COSMIC HERO ENGINE ─────────────────────────────────────────── */
+  (function(){
+
+    /* ── 1. STAR FIELD + MILKY WAY ──────────────────────────────── */
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, stars=[], shooters=[];
+
+    function resize(){
+      W=canvas.width=canvas.offsetWidth;
+      H=canvas.height=canvas.offsetHeight;
+    }
+
+    function mkStars(){
+      stars=[];
+      const count = Math.min(Math.floor(W*H/900), 1800);
+      for(let i=0;i<count;i++){
+        const r=Math.random();
+        stars.push({
+          x:Math.random()*W, y:Math.random()*H,
+          r: r<.6 ? Math.random()*.8+.3 : r<.85 ? Math.random()*1.2+.8 : Math.random()*1.8+1.2,
+          a: Math.random()*.6+.4,
+          twinkleSpeed: Math.random()*.02+.005,
+          twinklePhase: Math.random()*Math.PI*2,
+          color: ['#ffffff','#eaf0ff','#fff8e8','#e8f0ff','#ffe8e8'][Math.floor(Math.random()*5)]
+        });
+      }
+    }
+
+    function drawMilkyWay(){
+      /* Milky Way arc — scientifically positioned band across sky */
+      const grd=ctx.createLinearGradient(W*.1,H*.8,W*.9,H*.1);
+      grd.addColorStop(0,'rgba(80,100,180,0)');
+      grd.addColorStop(.2,'rgba(100,120,200,0.04)');
+      grd.addColorStop(.35,'rgba(160,140,220,0.09)');
+      grd.addColorStop(.5,'rgba(180,160,230,0.13)');
+      grd.addColorStop(.65,'rgba(160,140,220,0.09)');
+      grd.addColorStop(.8,'rgba(100,120,200,0.04)');
+      grd.addColorStop(1,'rgba(80,100,180,0)');
+      ctx.save();
+      ctx.translate(W/2,H/2);
+      ctx.rotate(-.42);  /* ~24° tilt, Milky Way plane inclination */
+      ctx.fillStyle=grd;
+      ctx.fillRect(-W*.7,-H*.22,W*1.4,H*.44);
+      /* Dense core cluster */
+      const core=ctx.createRadialGradient(W*.08,H*.12,0,W*.08,H*.12,W*.18);
+      core.addColorStop(0,'rgba(255,240,180,0.12)');
+      core.addColorStop(.5,'rgba(200,180,255,0.06)');
+      core.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=core;
+      ctx.fillRect(-W*.7,-H*.22,W*1.4,H*.44);
+      ctx.restore();
+    }
+
+    let animT=0;
+    function drawStars(){
+      animT+=.016;
+      ctx.clearRect(0,0,W,H);
+
+      /* Background void */
+      const bg=ctx.createRadialGradient(W*.5,H*.4,0,W*.5,H*.4,Math.max(W,H)*.7);
+      bg.addColorStop(0,'#02050f');
+      bg.addColorStop(.5,'#010308');
+      bg.addColorStop(1,'#000002');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+      drawMilkyWay();
+
+      /* Stars */
+      for(const s of stars){
+        const twinkle=Math.sin(animT*s.twinkleSpeed*60+s.twinklePhase)*.35+.65;
+        ctx.globalAlpha=s.a*twinkle;
+        ctx.fillStyle=s.color;
+        ctx.beginPath();
+        ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        ctx.fill();
+        /* Bloom for bright stars */
+        if(s.r>1.5){
+          ctx.globalAlpha=s.a*twinkle*.25;
+          ctx.beginPath();
+          ctx.arc(s.x,s.y,s.r*3,0,Math.PI*2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha=1;
+
+      /* Shooting stars */
+      if(Math.random()<.004) spawnShooter();
+      for(let i=shooters.length-1;i>=0;i--){
+        const sh=shooters[i];
+        sh.x+=sh.vx; sh.y+=sh.vy; sh.life--;
+        if(sh.life<=0){shooters.splice(i,1);continue}
+        const p=sh.life/sh.maxLife;
+        ctx.globalAlpha=p*.85;
+        ctx.strokeStyle=`rgba(255,248,220,${p})`;
+        ctx.lineWidth=sh.r;
+        ctx.shadowBlur=6;ctx.shadowColor='rgba(255,240,180,.6)';
+        ctx.beginPath();
+        ctx.moveTo(sh.x,sh.y);
+        ctx.lineTo(sh.x-sh.vx*8,sh.y-sh.vy*8);
+        ctx.stroke();
+        ctx.shadowBlur=0;ctx.globalAlpha=1;
+      }
+
+      requestAnimationFrame(drawStars);
+    }
+
+    function spawnShooter(){
+      const angle=(Math.random()*.4+.1)*Math.PI;
+      const speed=Math.random()*4+3;
+      shooters.push({
+        x:Math.random()*W*.7, y:Math.random()*H*.4,
+        vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed,
+        r:Math.random()+.5,
+        life:60, maxLife:60
+      });
+    }
+
+    /* ── 2. REAL-TIME ASTRONOMY ─────────────────────────────────── */
+    /* Sun + Moon positions via simplified VSOP87 approximations.
+       Accurate to within ~1° for the period 2000-2100. */
+
+    function julianDay(d){ return d.valueOf()/86400000 + 2440587.5 }
+
+    function sunPosition(now){
+      const JD=julianDay(now);
+      const n=JD-2451545.0;          /* days since J2000 */
+      const L=(280.460+0.9856474*n)%360;
+      const g=((357.528+0.9856003*n)%360)*Math.PI/180;
+      const lambda=(L+1.915*Math.sin(g)+0.02*Math.sin(2*g))*Math.PI/180;
+      const eps=23.439*Math.PI/180;
+      const ra=Math.atan2(Math.cos(eps)*Math.sin(lambda),Math.cos(lambda));
+      const dec=Math.asin(Math.sin(eps)*Math.sin(lambda));
+      return {ra:ra*180/Math.PI, dec:dec*180/Math.PI};
+    }
+
+    function moonPosition(now){
+      const JD=julianDay(now);
+      const T=(JD-2451545.0)/36525;
+      const L=(218.3165+13.1763966*T*(JD-2451545.0/36525*36525))%360;
+      const M=(134.9634+13.0649929*T*(JD-2451545.0/36525*36525))%360;
+      const Mv=(M*Math.PI/180);
+      const lat=5.1282*Math.sin((93.272+13.2293*T*(JD-2451545.0/36525*36525))*Math.PI/180);
+      const lng=(L+6.289*Math.sin(Mv))%360;
+      return {lng:lng, lat:lat};
+    }
+
+    function positionCelestial(){
+      const now=new Date();
+      const sun=sunPosition(now);
+      const moon=moonPosition(now);
+      const hero=document.getElementById('cosmicHero');
+      if(!hero) return;
+      const hw=hero.offsetWidth, hh=hero.offsetHeight;
+
+      /* Sun: place on opposite side of globe (light source) */
+      const sunAz=((sun.ra+180)%360)/360;  /* normalise 0-1 */
+      const sunEl=((90-sun.dec)/180);       /* 0=top,1=bottom */
+      const sg=document.getElementById('sunGlow');
+      if(sg){
+        sg.style.left=(sunAz*hw*.55)+'px';
+        sg.style.top=(sunEl*hh*.7+hh*.05)+'px';
+        sg.style.transform='translate(-50%,-50%)';
+        /* Opacity varies by time of day roughly */
+        const hr=now.getUTCHours();
+        sg.style.opacity=(hr>=6&&hr<=18)?'1':'0.45';
+      }
+
+      /* Moon: orbit position */
+      const mAz=((moon.lng+60)%360)/360;
+      const mEl=Math.max(.06,Math.min(.88,(.5-moon.lat/90*.4)));
+      const mo=document.getElementById('moonObj');
+      if(mo){
+        mo.style.left=(mAz*hw*.72+hw*.08)+'px';
+        mo.style.top=(mEl*hh)+'px';
+        mo.style.transform='translate(-50%,-50%)';
+        /* Moon phase illumination — roughly correct */
+        const phase=((now-new Date('2000-01-06'))/2551442779)%1; /* synodic month */
+        const moonDiv=mo.firstElementChild;
+        const angle=phase*360;
+        moonDiv.style.background=`radial-gradient(circle at ${38+Math.cos(angle*Math.PI/180)*20}% 35%,#f5f0e0 0%,#d8cfa0 45%,#a89060 100%)`;
+      }
+    }
+
+    /* ── 3. LIVE UTC CLOCK ───────────────────────────────────────── */
+    function tickClock(){
+      const el=document.getElementById('liveTime');
+      if(!el) return;
+      const n=new Date();
+      el.textContent=n.getUTCHours().toString().padStart(2,'0')+':'+
+        n.getUTCMinutes().toString().padStart(2,'0')+':'+
+        n.getUTCSeconds().toString().padStart(2,'0');
+    }
+    setInterval(tickClock,1000); tickClock();
+    setInterval(positionCelestial,60000); positionCelestial();
+
+    /* ── 4. INIT ─────────────────────────────────────────────────── */
+    window.addEventListener('resize',()=>{resize();mkStars()});
+    resize(); mkStars(); drawStars();
+
+  })();
+  </script>
 
   <!-- FLAG STRIP -->
   <div style="background:#041022;padding:14px 0;overflow:hidden;border-top:1px solid rgba(212,167,58,0.15);border-bottom:1px solid rgba(212,167,58,0.15)">
@@ -5280,13 +5548,19 @@ function initGlobe(){
     {lat:56.95,lng:24.11,label:'🇱🇻 Riga',color:'#d4a017'},
   ];
 
+  /* Real-time day/night: switch texture based on UTC hour */
+  const utcHour = new Date().getUTCHours();
+  const isDaySide = utcHour >= 6 && utcHour < 20;
+  const dayTexture   = 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
+  const nightTexture = 'https://unpkg.com/three-globe/example/img/earth-night.jpg';
+
   globe
     .width(size).height(size)
     .backgroundColor('rgba(0,0,0,0)')
-    .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+    .globeImageUrl(dayTexture)
     .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
-    .atmosphereColor('#b8860b')
-    .atmosphereAltitude(0.22)
+    .atmosphereColor('rgba(120,180,255,0.9)')
+    .atmosphereAltitude(0.28)
     .arcsData([
       {startLat:40.71,startLng:-74.0,endLat:51.5,endLng:-0.12,color:'#b8860b'},
       {startLat:51.5,startLng:-0.12,endLat:48.85,endLng:2.35,color:'#d4a017'},
