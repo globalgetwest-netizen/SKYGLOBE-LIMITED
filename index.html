@@ -5588,6 +5588,55 @@ async function sendChatMsg(){
   }catch(e){res.style.color='#e57373';res.textContent='Error: '+e.message;}
 }
 
+/* ── CEO CHAT VOICE RECORDING (MediaRecorder → Groq Whisper) ── */
+let aiMediaRec=null,aiAudioChunks=[],aiRecTmrInt=null,aiRecSecs=0,aiRecStream=null,aiRecOn=false;
+function aiSetRecUI(on){
+  const btn=document.getElementById('aiMic');
+  const ind=document.getElementById('aiRecInd');
+  const tmr=document.getElementById('aiRecTimer');
+  if(btn){btn.style.background=on?'#FEE2E2':'#EFF6FF';btn.style.color=on?'#DC2626':'#2563EB';}
+  if(ind)ind.style.display=on?'flex':'none';
+  if(on){aiRecSecs=0;if(tmr)tmr.textContent='0s';clearInterval(aiRecTmrInt);aiRecTmrInt=setInterval(()=>{aiRecSecs++;if(tmr)tmr.textContent=aiRecSecs+'s';},1000);}
+  else{clearInterval(aiRecTmrInt);if(tmr)tmr.textContent='0s';}
+}
+async function aiStartRec(e){
+  if(e)e.preventDefault();
+  if(aiRecOn)return;aiRecOn=true;aiAudioChunks=[];
+  try{
+    aiRecStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    const mt=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'';
+    aiMediaRec=new MediaRecorder(aiRecStream,mt?{mimeType:mt}:{});
+    aiMediaRec.ondataavailable=ev=>{if(ev.data&&ev.data.size>0)aiAudioChunks.push(ev.data);};
+    aiMediaRec.onstop=aiProcessAudio;
+    aiMediaRec.start(100);aiSetRecUI(true);
+  }catch(err){aiRecOn=false;const inp=document.getElementById('aiInput');if(inp)inp.placeholder='Mic denied — please type your question.';}
+}
+function aiStopRec(e){
+  if(e)e.preventDefault();
+  aiRecOn=false;
+  if(aiMediaRec&&aiMediaRec.state!=='inactive')aiMediaRec.stop();
+  if(aiRecStream){aiRecStream.getTracks().forEach(t=>t.stop());aiRecStream=null;}
+  aiSetRecUI(false);
+}
+async function aiProcessAudio(){
+  if(!aiAudioChunks.length)return;
+  const mt=aiAudioChunks[0].type||'audio/webm';
+  const blob=new Blob(aiAudioChunks,{type:mt});aiAudioChunks=[];
+  const btn=document.getElementById('aiMic');
+  if(btn){btn.textContent='⏳';btn.disabled=true;}
+  try{
+    const b64=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result.split(',')[1]);fr.onerror=rej;fr.readAsDataURL(blob);});
+    const r=await fetch('/api/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:b64,mimeType:mt})});
+    const data=await r.json();
+    if(data.text&&data.text.trim()){
+      const inp=document.getElementById('aiInput');
+      if(inp)inp.value=data.text.trim();
+      askAI();
+    }
+  }catch(err){console.error('[ai-voice]',err);}
+  finally{if(btn){btn.textContent='🎤';btn.disabled=false;}}
+}
+
 function printApp(cardId) {
   const data = (window.__printApps || {})[cardId];
   if (!data) return;
@@ -5849,8 +5898,14 @@ else{
       <span class="chat-sug" onclick="askAI('How much do your services cost?')">Fees & cost</span>
     </div>
     <div class="chat-body" id="aiMessages"></div>
-    <div class="chat-footer">
-      <input class="chat-input" id="aiInput" placeholder="Ask me anything about visas, travel…" onkeypress="if(event.key==='Enter')askAI()">
+    <div id="aiRecInd" style="display:none;align-items:center;gap:6px;padding:5px 12px;font-size:.75rem;font-weight:700;color:#DC2626;background:#FEE2E2;border-top:1px solid #FECACA">
+      <span style="width:8px;height:8px;border-radius:50%;background:#DC2626;display:inline-block;animation:pulse 1s infinite"></span>
+      🔴 Recording… <span id="aiRecTimer">0s</span>
+    </div>
+    <div class="chat-footer" style="gap:6px">
+      <button id="aiMic" title="Hold to record" style="border:none;border-radius:50%;width:38px;height:38px;flex-shrink:0;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;background:#EFF6FF;color:#2563EB;transition:all .2s"
+        onmousedown="aiStartRec()" onmouseup="aiStopRec()" ontouchstart="aiStartRec(event)" ontouchend="aiStopRec(event)">🎤</button>
+      <input class="chat-input" id="aiInput" placeholder="Ask me anything… or hold 🎤" onkeypress="if(event.key==='Enter')askAI()" style="flex:1">
       <button class="chat-send-btn" onclick="askAI()">Send</button>
     </div>
   </div>
