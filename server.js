@@ -4127,6 +4127,44 @@ app.get('/academy/learn', (req, res) => res.sendFile(path.join(__dirname, 'acade
 // ── §14 PAGE ROUTES & CATCH-ALL ──────────────────────────────────────────────
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
+// ── #22b VOICE TRANSCRIPTION (Groq Whisper) ───────────────────────────────────
+// Accepts { audio: <base64 string>, mimeType: <string> }
+// Returns { text: <transcript> }
+// Falls back to empty string if Groq key missing or Groq fails.
+app.post('/api/transcribe', express.json({ limit: '12mb' }), async (req, res) => {
+  const { audio, mimeType = 'audio/webm' } = req.body || {};
+  if (!audio) return res.status(400).json({ error: 'No audio provided.' });
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) return res.status(503).json({ error: 'Transcription not configured (add GROQ_API_KEY).' });
+  try {
+    const buf = Buffer.from(audio, 'base64');
+    const ext = mimeType.includes('mp4') || mimeType.includes('m4a') ? 'm4a'
+               : mimeType.includes('ogg') ? 'ogg'
+               : mimeType.includes('wav') ? 'wav'
+               : 'webm';
+    const fd = new FormData();
+    fd.append('file', new Blob([buf], { type: mimeType }), `audio.${ext}`);
+    fd.append('model', 'whisper-large-v3-turbo');
+    fd.append('language', 'en');
+    fd.append('response_format', 'json');
+    const gr = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${groqKey}` },
+      body: fd,
+    });
+    if (!gr.ok) {
+      const err = await gr.text();
+      console.error('[transcribe] Groq error:', gr.status, err);
+      return res.status(502).json({ error: 'Transcription failed.' });
+    }
+    const data = await gr.json();
+    res.json({ text: (data.text || '').trim() });
+  } catch (e) {
+    console.error('[transcribe] error:', e.message);
+    res.status(500).json({ error: 'Transcription error.' });
+  }
+});
+
 // ── #23 GLOBAL EXPRESS ERROR HANDLER ─────────────────────────────────────────
 // Must be 4-argument to be recognised by Express as error middleware.
 app.use((err, req, res, next) => {
