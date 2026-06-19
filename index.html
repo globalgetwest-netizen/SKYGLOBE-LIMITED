@@ -8897,30 +8897,78 @@ function setDirRegion(r) {
   document.querySelectorAll('.dir-tab').forEach(t => t.classList.toggle('active', t.dataset.region === r));
   renderAllCountries();
 }
+// ── #2 INFINITE SCROLL — country directory ────────────────────────────────
+// Cards render in batches as the user scrolls (no "next page" button).
+// IntersectionObserver with a 400px rootMargin pre-loads the next batch
+// before the user reaches the bottom → content always appears instantly.
+let _dirObserver = null;
+const _dirState = { list: [], rendered: 0, batch: 24 };
+
+function _dirCardHTML(c, saved) {
+  const isSaved = saved.includes(c.name);
+  const safeName = c.name.replace(/'/g, "\\'");
+  return `<div class="dir-card" onclick="showCountryDetail('${safeName}')">
+    <button class="dir-card-save ${isSaved?'saved':''}" title="${isSaved?'Remove from saved':'Save country'}" onclick="event.stopPropagation();toggleSaveCountry('${safeName}',this)">🔖</button>
+    <div class="df">${c.flag}</div>
+    <div class="dn">${c.name}</div>
+    <div class="dr">${REGION_NAMES[c.region]} · ${c.capital}</div>
+    ${c.top ? '<span class="dstar">⭐ Top Destination</span>' : ''}
+  </div>`;
+}
+
+function _renderDirBatch(grid) {
+  const sentinel = document.getElementById('dirSentinel');
+  const saved = getSavedCountries();
+  const slice = _dirState.list.slice(_dirState.rendered, _dirState.rendered + _dirState.batch);
+  const html = slice.map(c => _dirCardHTML(c, saved)).join('');
+  if (sentinel) sentinel.insertAdjacentHTML('beforebegin', html);
+  else grid.insertAdjacentHTML('beforeend', html);
+  _dirState.rendered += slice.length;
+  const done = _dirState.rendered >= _dirState.list.length;
+  if (done && _dirObserver) { _dirObserver.disconnect(); if (sentinel) sentinel.remove(); }
+  return done;
+}
+
 function renderAllCountries() {
   initDirTabs();
   const grid = document.getElementById('allCountryGrid');
   if (!grid) return;
   const q = (document.getElementById('dirSearchInput')?.value || '').trim().toLowerCase();
-  let list = ALL_COUNTRIES.filter(c => {
+  const list = ALL_COUNTRIES.filter(c => {
     const matchRegion = _dirRegion === 'ALL' ? true : (_dirRegion === 'top' ? c.top : c.region === _dirRegion);
     const matchQ = !q || c.name.toLowerCase().includes(q) || c.capital.toLowerCase().includes(q);
     return matchRegion && matchQ;
   });
   const countEl = document.getElementById('dirCount');
   if (countEl) countEl.textContent = `${list.length} ${list.length === 1 ? 'country' : 'countries'}`;
-  const saved = getSavedCountries();
-  grid.innerHTML = list.map(c => {
-    const isSaved = saved.includes(c.name);
-    const safeName = c.name.replace(/'/g,"\\'");
-    return `<div class="dir-card" onclick="showCountryDetail('${safeName}')">
-      <button class="dir-card-save ${isSaved?'saved':''}" title="${isSaved?'Remove from saved':'Save country'}" onclick="event.stopPropagation();toggleSaveCountry('${safeName}',this)">${isSaved?'🔖':'🔖'}</button>
-      <div class="df">${c.flag}</div>
-      <div class="dn">${c.name}</div>
-      <div class="dr">${REGION_NAMES[c.region]} · ${c.capital}</div>
-      ${c.top ? '<span class="dstar">⭐ Top Destination</span>' : ''}
-    </div>`;
-  }).join('') || `<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem">No countries match "${q}".</div>`;
+
+  // Reset: stop any previous observer and clear the grid
+  if (_dirObserver) { _dirObserver.disconnect(); _dirObserver = null; }
+  grid.innerHTML = '';
+  _dirState.list = list;
+  _dirState.rendered = 0;
+
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem">No countries match "${q}".</div>`;
+    return;
+  }
+
+  // Sentinel = invisible element at the end; when it nears the viewport we load more
+  const sentinel = document.createElement('div');
+  sentinel.id = 'dirSentinel';
+  sentinel.style.cssText = 'grid-column:1/-1;height:1px';
+  grid.appendChild(sentinel);
+
+  const done = _renderDirBatch(grid);
+  if (!done && 'IntersectionObserver' in window) {
+    _dirObserver = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) _renderDirBatch(grid);
+    }, { rootMargin: '400px' });   // prefetch 400px early → background loading feel
+    _dirObserver.observe(sentinel);
+  } else if (!done) {
+    // Fallback for very old browsers: render everything at once
+    while (!_renderDirBatch(grid)) { /* loop until done */ }
+  }
 }
 
 // Region-based honest overview text (guidance, not fabricated specifics)
