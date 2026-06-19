@@ -64,6 +64,27 @@
   .bot .bubble svg{border-radius:10px;background:#fff}
   .bot .bubble p{margin:0 0 6px}
   #langSel option{color:#22324a;background:#fff;font-weight:600}
+
+  /* ── MOBILE / RESPONSIVE ── */
+  @media (max-width:640px){
+    header{padding:9px 11px;gap:8px;flex-wrap:wrap}
+    .teacher .av{width:40px;height:40px;font-size:1.35rem}
+    .teacher h1{font-size:1.05rem}
+    .teacher small{font-size:.68rem}
+    .scorebar{gap:6px}
+    .pill{padding:6px 10px;font-size:.8rem}
+    #langSel{max-width:96px!important;padding:6px 8px!important;font-size:.76rem!important}
+    .feed{padding:16px 11px;gap:11px}
+    .bubble{max-width:88%;font-size:.98rem;padding:12px 15px}
+    .composer{padding:10px 11px}
+    .composer .inner{gap:8px}
+    #msg{padding:13px 16px;font-size:1rem}
+    .mic,.send{width:46px;height:46px;font-size:1.2rem}
+  }
+  @media (max-width:380px){
+    .teacher small{display:none}
+    .bubble{max-width:92%}
+  }
 </style>
 </head>
 <body>
