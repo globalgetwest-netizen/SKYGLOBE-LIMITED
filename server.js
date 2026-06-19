@@ -2571,7 +2571,7 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
   // Provider selection — prefer FREE Google Gemini, fall back to Anthropic if a key exists.
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!geminiKey && !anthropicKey)
+  if (!USE_OLLAMA && !geminiKey && !anthropicKey)
     return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add a free GEMINI_API_KEY (from aistudio.google.com) to your Render environment variables.' });
 
   try {
@@ -2681,8 +2681,8 @@ INSTRUCTIONS:
 
     let reply;
 
-    if (geminiKey) {
-      // ── FREE PROVIDER: Google Gemini (robust retry + model fallback) ───────
+    if (USE_OLLAMA || geminiKey) {
+      // ── FREE PROVIDER: local Ollama OR Google Gemini (robust retry + fallback)
       // Fold prior conversation into the prompt so we can reuse the shared
       // callGeminiWithRetry helper (which retries 429/500/503 transient errors).
       const convo = messages.slice(0, -1)
