@@ -138,6 +138,16 @@
   .safe{background:var(--leaf-soft);border:1px solid rgba(63,191,127,.3);border-radius:14px;padding:13px 15px;font-size:.8rem;color:#1d7a4c;margin-top:18px;line-height:1.55;font-weight:600}
   .cancel{width:100%;margin-top:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.86rem;font-weight:700;font-family:var(--body)}
   #progressModal .box{max-width:540px}
+  /* progress charts (hand-drawn SVG — no libraries) */
+  .chartcard{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:16px}
+  .chartcard h4{font-family:var(--head);color:var(--navy);font-size:.96rem;margin-bottom:4px}
+  .chartcard .sub{color:var(--muted);font-size:.74rem;font-weight:600;margin-bottom:12px}
+  .chartcard svg{width:100%;height:auto;display:block;overflow:visible}
+  .subj-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .subj-row .nm{font-size:.8rem;font-weight:700;color:var(--ink);width:88px;flex-shrink:0;text-transform:capitalize}
+  .subj-row .track{flex:1;background:#fff;border-radius:8px;height:14px;overflow:hidden;border:1px solid var(--line)}
+  .subj-row .fill{height:100%;border-radius:8px;transition:width .5s ease}
+  .subj-row .ct{font-size:.74rem;font-weight:800;color:var(--muted);width:22px;text-align:right;flex-shrink:0}
   .sesslist{max-height:300px;overflow-y:auto;margin-top:14px}
   .sess{background:var(--bg);border-radius:12px;padding:11px 15px;margin-bottom:8px;font-size:.86rem;font-weight:600}
   .sess .d{color:var(--muted);font-size:.72rem;font-weight:700}
@@ -180,6 +190,38 @@
   .selrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
   .selrow select{max-width:200px}
   .empty{color:var(--muted);font-weight:600;padding:14px 0}
+
+  /* ── MOBILE / RESPONSIVE ── */
+  @media (max-width:640px){
+    .wrap{padding:0 14px}
+    header .wrap{padding:11px 14px}
+    .brand .t{font-size:.98rem}
+    .brand img{height:34px;width:34px}
+    .navlinks a,.navlinks button{font-size:.8rem;padding:7px 8px}
+    .auth{padding:24px 20px;border-radius:22px}
+    .welcome{padding:22px 18px 50px}
+    .welcome h1{font-size:1.3rem}
+    .welcome .logout{top:14px;right:14px;padding:7px 13px;font-size:.76rem}
+    /* horizontally scrollable tab strip instead of wrapping */
+    .dtabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;margin-bottom:18px;scrollbar-width:none}
+    .dtabs::-webkit-scrollbar{display:none}
+    .dtabs button{flex:0 0 auto;padding:10px 14px;font-size:.84rem}
+    .kids,.hall{grid-template-columns:1fr;gap:14px}
+    .sec-head{flex-direction:column;align-items:flex-start;gap:2px}
+    .sec-head h2{font-size:1.15rem}
+    .modal{padding:12px}
+    .modal .box{padding:22px 18px;border-radius:20px;max-height:92vh;overflow-y:auto}
+    .modal .row{flex-direction:column;gap:0}
+    .selrow select{max-width:100%;width:100%}
+    /* report tables scroll sideways rather than overflow the screen */
+    #recBody,.pane{overflow-x:auto}
+    .idcard{max-width:100%}
+  }
+  @media (max-width:380px){
+    .stats{flex-wrap:wrap}
+    .stat{min-width:calc(50% - 5px)}
+    .kid .acts{flex-direction:column}
+  }
 </style>
 </head>
 <body>
@@ -306,6 +348,7 @@
 <div class="modal" id="progressModal"><div class="box">
   <h2 id="progTitle">Progress</h2>
   <div id="progStats" class="stats" style="margin-top:14px"></div>
+  <div id="progCharts"></div>
   <h3 style="font-family:var(--head);margin-top:18px;font-size:1.05rem;color:var(--navy)">Recent learning activity</h3>
   <div class="sesslist" id="sessList"></div>
   <button onclick="closeModal('progressModal')" class="btn" style="margin-top:18px">Close</button>
@@ -413,7 +456,7 @@ async function addChild(){
 async function viewProgress(id,name){
   document.getElementById('progTitle').textContent=name+"'s Progress";
   document.getElementById('progStats').innerHTML='<div style="color:var(--muted);font-weight:600">Loading…</div>';
-  document.getElementById('sessList').innerHTML='';document.getElementById('progressModal').classList.add('show');
+  document.getElementById('sessList').innerHTML='';document.getElementById('progCharts').innerHTML='';document.getElementById('progressModal').classList.add('show');
   try{
     const r=await fetch(API+'/api/academy/progress/'+id,{headers:authHeaders()});const d=await r.json();
     if(!r.ok)throw new Error(d.error||'Could not load.');const s=d.student;
@@ -421,12 +464,60 @@ async function viewProgress(id,name){
       `<div class="stat p"><b>${s.points||0}</b><span>Points</span></div>
        <div class="stat s"><b>${s.streak||0}🔥</b><span>Day streak</span></div>
        <div class="stat l"><b>${(d.sessions||[]).length}</b><span>Lessons</span></div>`;
+    document.getElementById('progCharts').innerHTML=buildCharts(d.sessions||[]);
     const list=document.getElementById('sessList');
     if(!d.sessions||!d.sessions.length){list.innerHTML='<div style="color:var(--muted);font-size:.86rem;font-weight:600">No lessons yet. Tap “Start Learning” to begin!</div>';return;}
     list.innerHTML=d.sessions.map(x=>`<div class="sess"><div class="d">${(x.created_at||'').slice(0,16).replace('T',' ')} · ${esc(x.teacher||'')} (${esc(x.subject||'')})</div>${esc(x.summary||'Lesson')}</div>`).join('');
   }catch(e){document.getElementById('progStats').innerHTML='<div style="color:#e0566a;font-weight:600">'+esc(e.message)+'</div>';}
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ── PROGRESS CHARTS — hand-drawn SVG, zero libraries ── */
+const SUBJ_COLORS={mathematics:'#4DA3FF',science:'#3FBF7F',reading:'#F06CA8',english:'#F06CA8',
+  coding:'#8B5CF6',technology:'#8B5CF6',history:'#E8A24A',arts:'#FFC542',music_arts:'#FFC542',
+  finance:'#1f9d57',health:'#FF8C66',health_pe:'#FF8C66'};
+function subjColor(s){return SUBJ_COLORS[String(s||'').toLowerCase()]||'#7488a3';}
+function buildCharts(sessions){
+  if(!sessions||!sessions.length)return'';
+  // ── 1) Last-14-days activity bar chart ──
+  const DAYS=14, today=new Date(); today.setHours(0,0,0,0);
+  const counts=new Array(DAYS).fill(0), labels=[];
+  for(let i=0;i<DAYS;i++){const dt=new Date(today);dt.setDate(today.getDate()-(DAYS-1-i));labels.push(dt);}
+  sessions.forEach(s=>{
+    const t=s.created_at?new Date(s.created_at):null;if(!t||isNaN(t))return;t.setHours(0,0,0,0);
+    const diff=Math.round((today-t)/86400000);const idx=DAYS-1-diff;
+    if(idx>=0&&idx<DAYS)counts[idx]++;
+  });
+  const max=Math.max(1,...counts);
+  const W=480,H=140,padB=22,padL=6,bw=(W-padL*2)/DAYS, chartH=H-padB;
+  let bars='';
+  counts.forEach((c,i)=>{
+    const bh=c?Math.max(4,(c/max)*(chartH-8)):0;
+    const x=padL+i*bw+bw*0.18, y=chartH-bh, w=bw*0.64;
+    const dow=labels[i].getDay();
+    bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="${c?'#4DA3FF':'#e7ecf3'}"></rect>`;
+    if(c)bars+=`<text x="${(x+w/2).toFixed(1)}" y="${(y-4).toFixed(1)}" font-size="9" font-weight="700" fill="#22324a" text-anchor="middle">${c}</text>`;
+    // weekday initials every other day to avoid clutter
+    if(i%2===0)bars+=`<text x="${(x+w/2).toFixed(1)}" y="${H-6}" font-size="8" fill="#7488a3" text-anchor="middle">${'SMTWTFS'[dow]}</text>`;
+  });
+  const totalLessons=sessions.length;
+  const activeDays=counts.filter(c=>c>0).length;
+  const chart1=`<div class="chartcard"><h4>📈 Last 14 days</h4>
+    <div class="sub">${totalLessons} lesson${totalLessons===1?'':'s'} total · active on ${activeDays} of the last 14 days</div>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Lessons over the last 14 days">${bars}</svg></div>`;
+  // ── 2) Lessons by subject ──
+  const bySubj={};
+  sessions.forEach(s=>{const k=String(s.subject||'other').toLowerCase();bySubj[k]=(bySubj[k]||0)+1;});
+  const entries=Object.entries(bySubj).sort((a,b)=>b[1]-a[1]);
+  const smax=Math.max(...entries.map(e=>e[1]));
+  const rows=entries.map(([s,c])=>`<div class="subj-row">
+    <div class="nm">${esc(s)}</div>
+    <div class="track"><div class="fill" style="width:${Math.round((c/smax)*100)}%;background:${subjColor(s)}"></div></div>
+    <div class="ct">${c}</div></div>`).join('');
+  const chart2=`<div class="chartcard"><h4>📚 Lessons by subject</h4>
+    <div class="sub">Where ${totalLessons===1?'this lesson went':'the learning has happened'}</div>${rows}</div>`;
+  return chart1+chart2;
+}
 
 // boot
 (async function(){
