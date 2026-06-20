@@ -106,9 +106,11 @@
 
 <div class="feed" id="feed"></div>
 
-<div id="recInd" style="display:none;align-items:center;justify-content:center;gap:6px;padding:6px 0;font-size:.78rem;font-weight:800;color:#DC2626;background:#FEE2E2;border-top:1px solid #FECACA;font-family:var(--head)">
+<div id="recInd" style="display:none;align-items:center;justify-content:center;gap:8px;padding:6px 14px;font-size:.78rem;font-weight:800;color:#DC2626;background:#FEE2E2;border-top:1px solid #FECACA;font-family:var(--head)">
   <span id="recDot" style="width:10px;height:10px;border-radius:50%;background:#DC2626;display:inline-block;animation:pulse 1s infinite"></span>
-  🔴 Recording… <span id="recTimer">0s</span>
+  <span>🔴 Recording…</span>
+  <canvas id="recWave" style="flex:1;max-width:200px;height:26px;display:block"></canvas>
+  <span id="recTimer">0s</span>
 </div>
 <div class="composer">
   <div class="inner">
@@ -275,6 +277,7 @@ if('speechSynthesis'in window){loadVoices();window.speechSynthesis.onvoiceschang
 
 /* ── PROFESSIONAL VOICE RECORDING (MediaRecorder → Groq Whisper) ── */
 let mediaRec=null,audioChunks=[],recTimerInt=null,recSecs=0,recStream=null,recStarted=false;
+let recAudioCtx=null,recAnalyser=null,recWaveRAF=null;
 
 function setRecordingUI(on){
   const mic=document.getElementById('mic');
@@ -286,9 +289,51 @@ function setRecordingUI(on){
     recSecs=0;if(tmr)tmr.textContent='0s';
     clearInterval(recTimerInt);
     recTimerInt=setInterval(()=>{recSecs++;if(tmr)tmr.textContent=recSecs+'s';},1000);
+    startRecWave();
   }else{
     clearInterval(recTimerInt);if(tmr)tmr.textContent='0s';
+    stopRecWave();
   }
+}
+
+/* ── Live voice waveform (reacts to real microphone amplitude) ── */
+function startRecWave(){
+  if(!recStream||!(window.AudioContext||window.webkitAudioContext))return;
+  try{
+    recAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const src=recAudioCtx.createMediaStreamSource(recStream);
+    recAnalyser=recAudioCtx.createAnalyser();
+    recAnalyser.fftSize=256;recAnalyser.smoothingTimeConstant=0.78;
+    src.connect(recAnalyser);
+    const canvas=document.getElementById('recWave');
+    if(!canvas)return;
+    const ctx=canvas.getContext('2d'),dpr=window.devicePixelRatio||1;
+    const loop=()=>{
+      if(!recAnalyser)return;
+      const cw=canvas.clientWidth||160,ch=canvas.clientHeight||26;
+      if(canvas.width!==cw*dpr){canvas.width=cw*dpr;canvas.height=ch*dpr;}
+      const w=canvas.width,h=canvas.height;
+      const bins=recAnalyser.frequencyBinCount,data=new Uint8Array(bins);
+      recAnalyser.getByteFrequencyData(data);
+      ctx.clearRect(0,0,w,h);
+      const bars=22,step=Math.max(1,Math.floor(bins/bars)),gap=w/bars,bw=gap*0.5;
+      for(let i=0;i<bars;i++){
+        let sum=0;for(let j=0;j<step;j++)sum+=data[i*step+j]||0;
+        const v=Math.min(1,(sum/step)/200);
+        const bh=Math.max(h*0.14,v*h),x=i*gap+(gap-bw)/2,y=(h-bh)/2;
+        ctx.fillStyle='rgba(220,38,38,'+(0.5+v*0.5)+')';
+        if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,bh,bw/2);ctx.fill();}
+        else ctx.fillRect(x,y,bw,bh);
+      }
+      recWaveRAF=requestAnimationFrame(loop);
+    };
+    loop();
+  }catch(e){}
+}
+function stopRecWave(){
+  if(recWaveRAF){cancelAnimationFrame(recWaveRAF);recWaveRAF=null;}
+  if(recAudioCtx){try{recAudioCtx.close();}catch(e){}recAudioCtx=null;}
+  recAnalyser=null;
 }
 
 async function startRec(e){
