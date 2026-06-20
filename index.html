@@ -1133,18 +1133,22 @@ body.wc-active .mobile-menu{padding-top:46px}
   <!-- ═══════════════════════════════════════════════════════════════
        COSMIC HERO — Real-time Earth · Sun · Moon · Stars · Milky Way
        ═══════════════════════════════════════════════════════════════ -->
-  <section id="cosmicHero" style="position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:#000005">
+  <section id="cosmicHero" style="position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:linear-gradient(160deg,#ffffff 0%,#eef4ff 38%,#f3f8ff 58%,#fef8ee 100%)">
 
-    <!-- Deep space canvas: stars + Milky Way -->
-    <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0"></canvas>
+    <!-- Soft premium aurora glows (replace the old deep-space starfield) -->
+    <div style="position:absolute;left:-8%;top:-12%;width:48vw;height:48vw;max-width:620px;max-height:620px;border-radius:50%;background:radial-gradient(circle,rgba(96,150,255,0.18) 0%,rgba(96,150,255,0.07) 40%,transparent 70%);filter:blur(20px);pointer-events:none;z-index:0"></div>
+    <div style="position:absolute;left:8%;bottom:-14%;width:42vw;height:42vw;max-width:540px;max-height:540px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.16) 0%,rgba(212,167,58,0.06) 42%,transparent 70%);filter:blur(20px);pointer-events:none;z-index:0"></div>
 
-    <!-- Sun glow (positioned by JS from real solar angle) -->
-    <div id="sunGlow" style="position:absolute;z-index:1;pointer-events:none;transition:opacity 2s">
+    <!-- Deep space canvas: hidden in the light hero, kept for future dark mode -->
+    <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;display:none"></canvas>
+
+    <!-- Sun glow (hidden in light hero) -->
+    <div id="sunGlow" style="position:absolute;z-index:1;pointer-events:none;transition:opacity 2s;display:none">
       <div style="width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,220,80,0.55) 0%,rgba(255,160,30,0.25) 35%,rgba(255,100,0,0.08) 65%,transparent 100%);filter:blur(8px)"></div>
     </div>
 
-    <!-- Moon (positioned by JS from real lunar angle) -->
-    <div id="moonObj" style="position:absolute;z-index:2;pointer-events:none;width:38px;height:38px">
+    <!-- Moon (hidden in light hero) -->
+    <div id="moonObj" style="position:absolute;z-index:2;pointer-events:none;width:38px;height:38px;display:none">
       <div style="width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 38% 35%,#f5f0e0 0%,#d8cfa0 45%,#a89060 100%);box-shadow:0 0 18px 6px rgba(240,230,180,0.22),inset -6px -4px 12px rgba(0,0,0,0.35)"></div>
     </div>
 
@@ -1161,29 +1165,29 @@ body.wc-active .mobile-menu{padding-top:46px}
         <!-- Eyebrow -->
         <div style="display:inline-flex;align-items:center;gap:.55em;background:rgba(212,167,58,.12);border:1px solid rgba(212,167,58,.35);border-radius:100px;padding:.45em 1.1em;margin-bottom:1.6rem">
           <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:pulseDot 2s ease-in-out infinite"></span>
-          <span style="font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#F4D77A">One World. One Mission.</span>
+          <span style="font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#92640a">One World. One Mission.</span>
         </div>
 
         <!-- Headline -->
-        <h1 style="font-family:'SF Pro Display','Inter','Segoe UI',sans-serif;font-size:clamp(2.4rem,5.2vw,4.4rem);font-weight:700;line-height:1.04;letter-spacing:-.025em;color:#fff;margin-bottom:1.4rem">
+        <h1 style="font-family:'SF Pro Display','Inter','Segoe UI',sans-serif;font-size:clamp(2.4rem,5.2vw,4.4rem);font-weight:700;line-height:1.04;letter-spacing:-.025em;color:#041022;margin-bottom:1.4rem">
           The Platform<br>
           <span style="background:linear-gradient(135deg,#D4A73A,#F4D77A);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Built to Move</span><br>
           the World.
         </h1>
 
         <!-- Sub -->
-        <p style="font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.65;color:rgba(234,240,255,.78);margin-bottom:2.2rem;max-width:52ch">
+        <p style="font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.65;color:#475569;margin-bottom:2.2rem;max-width:52ch">
           Global mobility, education, intelligence and digital innovation —
           unified under one name. SkyGlobe Group is where the world's
           people, ideas and ambitions converge.
         </p>
 
         <!-- Search -->
-        <form style="position:relative;display:flex;align-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:100px;padding:6px 6px 6px 18px;backdrop-filter:blur(12px);margin-bottom:1.6rem;max-width:500px" onsubmit="heroSearch(event)">
+        <form style="position:relative;display:flex;align-items:center;background:#fff;border:1px solid rgba(10,46,101,.15);border-radius:100px;padding:6px 6px 6px 18px;box-shadow:0 12px 36px rgba(10,46,101,.12);margin-bottom:1.6rem;max-width:500px" onsubmit="heroSearch(event)">
           <span style="margin-right:8px;opacity:.6;font-size:1rem">🔍</span>
           <input id="heroSearchInput" type="text" placeholder="Search any country — Canada, UK, Germany…" autocomplete="off"
             oninput="acInput('heroSearchInput','heroAcDrop')" onkeydown="acKey(event,'heroSearchInput','heroAcDrop')"
-            style="border:none;outline:none;background:transparent;color:#fff;font-size:.92rem;font-family:inherit;flex:1;min-width:0">
+            style="border:none;outline:none;background:transparent;color:#041022;font-size:.92rem;font-family:inherit;flex:1;min-width:0">
           <input type="submit" value="Search" style="background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;border:none;border-radius:100px;padding:10px 22px;font-weight:700;font-size:.88rem;cursor:pointer;flex-shrink:0">
           <div class="ac-drop" id="heroAcDrop"></div>
         </form>
@@ -1191,15 +1195,15 @@ body.wc-active .mobile-menu{padding-top:46px}
         <!-- CTAs -->
         <div style="display:flex;flex-wrap:wrap;gap:.85rem;margin-bottom:2.4rem">
           <button onclick="showPage('countries')" style="display:inline-flex;align-items:center;gap:.5em;background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;border:none;border-radius:10px;padding:14px 26px;font-weight:700;font-size:.95rem;cursor:pointer;min-height:50px;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 32px rgba(212,167,58,.45)'" onmouseout="this.style.transform='';this.style.boxShadow=''">🌍 Explore the World</button>
-          <button onclick="showPage('apply')" style="display:inline-flex;align-items:center;gap:.5em;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:14px 26px;font-weight:600;font-size:.95rem;cursor:pointer;min-height:50px;backdrop-filter:blur(8px);transition:background .2s,border-color .2s" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">📋 Begin Your Journey</button>
+          <button onclick="showPage('apply')" style="display:inline-flex;align-items:center;gap:.5em;background:#fff;color:#0a2e65;border:1px solid rgba(10,46,101,.22);border-radius:10px;padding:14px 26px;font-weight:600;font-size:.95rem;cursor:pointer;min-height:50px;box-shadow:0 4px 16px rgba(10,46,101,.08);transition:background .2s,border-color .2s,transform .2s" onmouseover="this.style.background='#f5f8ff';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#fff';this.style.transform=''">📋 Begin Your Journey</button>
         </div>
 
         <!-- Live stats -->
         <div style="display:flex;flex-wrap:wrap;gap:1.8rem">
-          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="12" data-suffix="K+">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(234,240,255,.5);margin-top:.3rem">Visas Processed</div></div>
-          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="98" data-suffix="%">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(234,240,255,.5);margin-top:.3rem">Success Rate</div></div>
-          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="195" data-suffix="">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(234,240,255,.5);margin-top:.3rem">Countries</div></div>
-          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#F4D77A;line-height:1" id="liveTime"></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(234,240,255,.5);margin-top:.3rem">UTC Live</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="12" data-suffix="K+">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Visas Processed</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="98" data-suffix="%">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Success Rate</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="195" data-suffix="">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Countries</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1" id="liveTime"></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">UTC Live</div></div>
         </div>
 
       </div>
@@ -1207,7 +1211,7 @@ body.wc-active .mobile-menu{padding-top:46px}
 
     <!-- Scroll cue -->
     <div style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.55">
-      <span style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#9fb0d6">Explore</span>
+      <span style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8">Explore</span>
       <div style="width:1px;height:36px;background:linear-gradient(to bottom,rgba(212,167,58,.7),transparent);animation:scrollPulse 1.8s ease-in-out infinite"></div>
     </div>
 
@@ -1272,7 +1276,7 @@ body.wc-active .mobile-menu{padding-top:46px}
       line-height:1.5!important;
       margin-bottom:1.1rem!important;
       max-width:none!important;
-      color:rgba(234,240,255,.72)!important;
+      color:#475569!important;
     }
 
     /* Search bar: full width, pill shape */
@@ -1328,6 +1332,12 @@ body.wc-active .mobile-menu{padding-top:46px}
   <script>
   /* ── COSMIC HERO ENGINE ─────────────────────────────────────────── */
   (function(){
+
+    /* Light & Airy hero: the deep-space starfield/sun/moon are hidden,
+       so skip the whole animation engine to save CPU. Flip to false to
+       restore the cosmic dark hero. */
+    const LIGHT_HERO = true;
+    if (LIGHT_HERO) return;
 
     /* ── 1. STAR FIELD + MILKY WAY ──────────────────────────────── */
     const canvas = document.getElementById('starCanvas');
@@ -2553,6 +2563,7 @@ body.wc-active .mobile-menu{padding-top:46px}
     </div>
   </div>
   <div class="search-results" id="searchResults"></div>
+  <div class="search-results" id="webResults"></div>
 </div>
 
 <!-- ============ APPLY PAGE ============ -->
@@ -2783,7 +2794,22 @@ body.wc-active .mobile-menu{padding-top:46px}
 
       <!-- DOCUMENTS panel -->
       <div class="dash-panel" id="dp-docs">
-        <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem">Track which documents you have ready for your application.</p>
+        <!-- REAL SECURE FILE VAULT: upload / scan / download -->
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:14px;padding:1.1rem 1.2rem;margin-bottom:1.4rem">
+          <h3 style="font-size:1rem;font-weight:700;margin:0 0 4px">🔐 My Secure Files</h3>
+          <p style="font-size:0.83rem;color:#64748b;margin:0 0 1rem">Upload documents, pictures and scans. They're stored securely and you can download them anytime, from any device.</p>
+          <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem">
+            <label class="btn-primary" style="cursor:pointer;font-size:0.85rem;padding:10px 18px">📤 Upload File
+              <input type="file" id="clientFileInput" multiple accept="image/*,application/pdf,.doc,.docx,.txt" style="display:none" onchange="uploadClientFiles(this.files)">
+            </label>
+            <button class="btn-outline" style="font-size:0.85rem;padding:10px 18px" onclick="openScanner()">📷 Scan Document</button>
+            <button class="btn-outline" style="font-size:0.85rem;padding:10px 18px" onclick="printClientFiles()">🖨️ Print</button>
+          </div>
+          <div id="clientUploadMsg" style="font-size:0.82rem;min-height:16px;margin-bottom:0.6rem"></div>
+          <div id="clientFilesList" style="display:flex;flex-direction:column;gap:10px"><p style="color:#94a3b8;font-size:0.86rem">Loading your files…</p></div>
+        </div>
+
+        <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem">Below: track which documents you have ready for your application.</p>
         <div id="docVaultList"></div>
         <div class="dash-add-form">
           <p style="margin:0 0 0.8rem;font-size:0.82rem;font-weight:600;color:#374151">+ Add Document</p>
@@ -4082,9 +4108,11 @@ function doSearch() {
   if (!q) {
     popularEl.style.display = 'block';
     resultsEl.innerHTML = '';
+    const webEl = document.getElementById('webResults'); if (webEl) webEl.innerHTML = '';
     return;
   }
   popularEl.style.display = 'none';
+  loadWebResults(document.getElementById('searchInput').value.trim());
 
   // KB results
   let kbResults = KB.filter(item => {
@@ -4224,6 +4252,50 @@ function doSearch() {
   const intentCount = (flightIntent?1:0)+(hotelIntent?1:0)+(insureIntent?1:0);
   const displayTotal = totalCount + intentCount;
   resultsEl.innerHTML = `<p class="results-count">${displayTotal} result${displayTotal>1?'s':''} found for "<strong>${q}</strong>"</p>` + intentHTML + kbHTML + countrySection + loadingNote;
+}
+
+/* ── REAL-WORLD WEB SEARCH (live results from across the web) ── */
+let _webSearchSeq = 0;
+async function loadWebResults(rawQ) {
+  const el = document.getElementById('webResults');
+  if (!el) return;
+  const q = (rawQ || '').trim();
+  if (q.length < 2) { el.innerHTML = ''; return; }
+  const seq = ++_webSearchSeq;
+  el.innerHTML = `<p class="results-count" style="margin-top:1.5rem">🌐 Searching the web…</p>`;
+  try {
+    const r = await fetch('/api/search?q=' + encodeURIComponent(q));
+    const d = await r.json();
+    if (seq !== _webSearchSeq) return; // a newer search superseded this one
+    const esc = s => String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    let html = `<p class="results-count" style="margin-top:1.5rem">🌐 Web results for "<strong>${esc(q)}</strong>"</p>`;
+    if (d.answer && d.answer.snippet) {
+      html += `<div class="result-card" style="border-color:var(--gold);background:rgba(212,167,58,0.04)">
+        <div class="result-card-header"><div class="result-icon">💡</div>
+        <div style="flex:1"><div class="result-category">QUICK ANSWER · ${esc(d.answer.source||'Web')}</div>
+        <div class="result-title">${esc(d.answer.title||q)}</div></div></div>
+        <div class="result-body">${esc(d.answer.snippet)}</div>
+        ${d.answer.url?`<div style="margin-top:0.8rem"><a href="${esc(d.answer.url)}" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.82rem;padding:8px 16px;text-decoration:none">Read more →</a></div>`:''}
+      </div>`;
+    }
+    if (d.results && d.results.length) {
+      html += d.results.map(rs => `<div class="result-card">
+        <div class="result-card-header">
+          ${rs.thumbnail?`<img src="${esc(rs.thumbnail)}" alt="" style="width:44px;height:44px;border-radius:8px;object-fit:cover" onerror="this.style.display='none'">`:`<div class="result-icon">🔗</div>`}
+          <div style="flex:1"><div class="result-category">${esc(rs.source||'Web')}</div>
+          <div class="result-title">${esc(rs.title||'')}</div></div>
+        </div>
+        <div class="result-body">${esc((rs.snippet||'').slice(0,220))}${(rs.snippet||'').length>220?'…':''}</div>
+        <div style="margin-top:0.8rem"><a href="${esc(rs.url)}" target="_blank" rel="noopener" class="btn-outline" style="font-size:0.82rem;padding:8px 16px;text-decoration:none">Open →</a></div>
+      </div>`).join('');
+    } else if (!d.answer) {
+      html += `<div class="no-results" style="padding:1.5rem"><p style="color:var(--muted);font-size:0.85rem">No live web results right now — try rephrasing your search.</p></div>`;
+    }
+    el.innerHTML = html;
+  } catch (e) {
+    if (seq !== _webSearchSeq) return;
+    el.innerHTML = '';
+  }
 }
 
 async function fetchLiveData(name, capital, currencyCode, idx) {
@@ -5968,6 +6040,7 @@ function showDashboard() {
   loadSavedCountriesPanel();
   loadSavedUnisPanel();
   loadDocVaultPanel();
+  loadClientFiles();
   loadOverviewRecent();
 }
 
@@ -5981,6 +6054,7 @@ function switchDashTab(name, btn) {
   if (name === 'messages') { loadMessages(); _clearMsgBadge(); }
   if (name === 'ai') loadAiTips();
   if (name === 'inbox') loadInboxDocs();
+  if (name === 'docs') loadClientFiles();
 }
 
 /* ---- Stats ---- */
@@ -6014,6 +6088,180 @@ function loadOverviewRecent() {
   }
   if (!html) html = `<p style="color:#94a3b8;font-size:0.85rem">No saved items yet. Explore <a onclick="showPage('countries')" style="color:var(--gold);cursor:pointer">countries</a> and save your favourites.</p>`;
   el.innerHTML = html;
+}
+
+function escHtml(s) { return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---- Client Secure File Vault ---- */
+async function loadClientFiles() {
+  const el = document.getElementById('clientFilesList');
+  if (!el) return;
+  const token = localStorage.getItem('sg_token');
+  if (!token) {
+    el.innerHTML = '<p style="color:#ef4444;font-size:0.85rem">Please log in to access your files.</p>';
+    return;
+  }
+  el.innerHTML = '<p style="color:#94a3b8;font-size:0.85rem">Loading…</p>';
+  try {
+    const r = await fetch('/api/client/files', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) throw new Error('auth');
+    const { files } = await r.json();
+    if (!files || !files.length) {
+      el.innerHTML = '<p style="color:#94a3b8;font-size:0.85rem">No files yet. Upload something above!</p>';
+      return;
+    }
+    el.innerHTML = files.map(f => {
+      const icon = f.mime_type && f.mime_type.startsWith('image/') ? '🖼️' : f.mime_type === 'application/pdf' ? '📄' : '📁';
+      const size = f.size ? (f.size > 1048576 ? (f.size/1048576).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB') : '';
+      const date = f.created_at ? new Date(f.created_at).toLocaleDateString() : '';
+      return `<div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid rgba(0,0,0,0.09);border-radius:10px;padding:12px 16px">
+        <span style="font-size:1.5rem">${icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:0.85rem;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(f.filename)}</div>
+          <div style="font-size:0.75rem;color:#94a3b8">${size}${size && date ? ' · ' : ''}${date}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button onclick="downloadClientFile('${f.id}','${escHtml(f.filename)}')" style="background:#0ea5e9;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:0.78rem;cursor:pointer">⬇ Download</button>
+          <button onclick="deleteClientFile('${f.id}')" style="background:#ef4444;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:0.78rem;cursor:pointer">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:#94a3b8;font-size:0.85rem">Unable to load files right now.</p>';
+  }
+}
+
+async function uploadClientFiles(files) {
+  if (!files || !files.length) return;
+  const token = localStorage.getItem('sg_token');
+  if (!token) { showToast('Please log in first.'); return; }
+  const msg = document.getElementById('clientUploadMsg');
+  const MAX = 15 * 1024 * 1024;
+  for (const file of Array.from(files)) {
+    if (file.size > MAX) { if (msg) msg.innerHTML = `<span style="color:#ef4444">⚠ ${escHtml(file.name)} exceeds 15 MB limit.</span>`; continue; }
+    if (msg) msg.innerHTML = `<span style="color:#0ea5e9">⬆ Uploading ${escHtml(file.name)}…</span>`;
+    try {
+      const b64 = await new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result.split(',')[1]);
+        fr.onerror = rej;
+        fr.readAsDataURL(file);
+      });
+      const r = await fetch('/api/client/upload', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, mimeType: file.type || 'application/octet-stream', data: b64 })
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Upload failed');
+      if (msg) msg.innerHTML = `<span style="color:#10b981">✅ ${escHtml(file.name)} uploaded!</span>`;
+    } catch (e) {
+      if (msg) msg.innerHTML = `<span style="color:#ef4444">❌ Failed: ${escHtml(e.message)}</span>`;
+    }
+  }
+  // Reset input so same file can be re-uploaded
+  const inp = document.getElementById('clientFileInput');
+  if (inp) inp.value = '';
+  await loadClientFiles();
+  setTimeout(() => { if (msg) msg.innerHTML = ''; }, 4000);
+}
+
+async function downloadClientFile(id, filename) {
+  const token = localStorage.getItem('sg_token');
+  if (!token) return;
+  try {
+    const r = await fetch('/api/client/files/' + id + '/download', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) throw new Error('Download failed');
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename || 'file';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+  } catch (e) {
+    showToast('⚠ Download failed: ' + e.message);
+  }
+}
+
+async function deleteClientFile(id) {
+  if (!confirm('Delete this file permanently?')) return;
+  const token = localStorage.getItem('sg_token');
+  if (!token) return;
+  try {
+    const r = await fetch('/api/client/files/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) throw new Error('Delete failed');
+    showToast('🗑 File deleted.');
+    await loadClientFiles();
+  } catch (e) {
+    showToast('⚠ Could not delete: ' + e.message);
+  }
+}
+
+let _scannerStream = null;
+function openScanner() {
+  if (document.getElementById('_scannerModal')) return;
+  const modal = document.createElement('div');
+  modal.id = '_scannerModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
+  modal.innerHTML = `
+    <div style="color:#fff;font-size:1.1rem;font-weight:700">📷 Document Scanner — point camera at document</div>
+    <video id="_scanVid" autoplay playsinline style="max-width:95vw;max-height:60vh;border-radius:12px;border:2px solid #0ea5e9"></video>
+    <canvas id="_scanCanvas" style="display:none"></canvas>
+    <div style="display:flex;gap:12px">
+      <button onclick="captureScannedDoc()" style="background:#0ea5e9;color:#fff;border:none;border-radius:9px;padding:12px 28px;font-size:1rem;font-weight:700;cursor:pointer">📸 Capture</button>
+      <button onclick="closeScanner()" style="background:#64748b;color:#fff;border:none;border-radius:9px;padding:12px 20px;font-size:1rem;cursor:pointer">✕ Close</button>
+    </div>`;
+  document.body.appendChild(modal);
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(stream => {
+    _scannerStream = stream;
+    document.getElementById('_scanVid').srcObject = stream;
+  }).catch(() => {
+    modal.innerHTML = '<div style="color:#ef4444;font-size:1rem;padding:32px">Camera access denied or unavailable.<br><br><button onclick="closeScanner()" style="background:#64748b;color:#fff;border:none;border-radius:9px;padding:10px 20px;cursor:pointer">Close</button></div>';
+  });
+}
+
+function captureScannedDoc() {
+  const vid = document.getElementById('_scanVid');
+  const canvas = document.getElementById('_scanCanvas');
+  if (!vid || !canvas) return;
+  canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
+  canvas.getContext('2d').drawImage(vid, 0, 0);
+  canvas.toBlob(async blob => {
+    closeScanner();
+    if (!blob) return;
+    const filename = 'scan_' + Date.now() + '.jpg';
+    const fakeFile = new File([blob], filename, { type: 'image/jpeg' });
+    await uploadClientFiles([fakeFile]);
+    showToast('📷 Scan captured and uploaded!');
+  }, 'image/jpeg', 0.92);
+}
+
+function closeScanner() {
+  if (_scannerStream) { _scannerStream.getTracks().forEach(t => t.stop()); _scannerStream = null; }
+  const m = document.getElementById('_scannerModal');
+  if (m) m.remove();
+}
+
+function printClientFiles() {
+  const el = document.getElementById('clientFilesList');
+  if (!el) return;
+  const w = window.open('', '_blank', 'width=800,height=600');
+  w.document.write(`<!DOCTYPE html><html><head><title>My Files — SkyGlobe</title><style>body{font-family:sans-serif;padding:24px}h1{font-size:1.2rem;margin-bottom:16px}table{width:100%;border-collapse:collapse;font-size:0.88rem}td,th{border:1px solid #ddd;padding:8px 12px;text-align:left}th{background:#f1f5f9}@media print{button{display:none}}</style></head><body>`);
+  w.document.write('<h1>SkyGlobe — My Secure Files</h1>');
+  const rows = el.querySelectorAll('div[style*="border-radius:10px"]');
+  if (!rows.length) { w.document.write('<p>No files to print.</p>'); }
+  else {
+    w.document.write('<table><tr><th>File</th><th>Size / Date</th></tr>');
+    rows.forEach(row => {
+      const name = row.querySelector('div[style*="font-weight:600"]')?.textContent || '';
+      const meta = row.querySelectorAll('div')[2]?.textContent || '';
+      w.document.write(`<tr><td>${name}</td><td>${meta}</td></tr>`);
+    });
+    w.document.write('</table>');
+  }
+  w.document.write('</body></html>');
+  w.document.close();
+  w.focus(); w.print();
 }
 
 /* ---- Saved Countries ---- */
