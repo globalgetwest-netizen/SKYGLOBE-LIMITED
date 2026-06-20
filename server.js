@@ -794,11 +794,14 @@ app.post('/api/chat', async (req, res) => {
   if (!message || !String(message).trim())
     return res.status(400).json({ error: 'Message is required.' });
 
+  const userMsg = String(message).trim();
+
   // 24/7 AUTOMATIC CASCADE: Ollama → Groq → Gemini (same engine chain as the
   // Academy and CEO assistant). The assistant works as long as ANY one engine
-  // is configured — it no longer requires GEMINI_API_KEY specifically.
+  // is configured. If none are configured, fall back to the built-in FAQ so the
+  // assistant is NEVER dead — it always gives a useful answer.
   if (!USE_OLLAMA && !USE_GROQ && !process.env.GEMINI_API_KEY)
-    return res.status(500).json({ error: 'AI assistant is not configured yet. Please WhatsApp us at +1 737-399-8522 for help.' });
+    return res.json({ reply: skyglobeFaqAnswer(userMsg), source: 'faq' });
 
   try {
     const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
@@ -807,16 +810,46 @@ app.post('/api/chat', async (req, res) => {
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }));
-    contents.push({ role: 'user', parts: [{ text: String(message).trim() }] });
+    contents.push({ role: 'user', parts: [{ text: userMsg }] });
 
-    const reply = await academyAskGemini(SKYGLOBE_SYSTEM, contents, 1024)
-      || 'Sorry, I could not generate a response.';
-    res.json({ reply });
+    const reply = await academyAskGemini(SKYGLOBE_SYSTEM, contents, 1024);
+    // If the AI engine returned nothing usable, use the FAQ fallback
+    res.json({ reply: reply || skyglobeFaqAnswer(userMsg) });
   } catch (e) {
     console.error('AI chat error:', e.message);
-    res.status(500).json({ error: 'AI assistant is temporarily unavailable. Please WhatsApp us at +1 737-399-8522.' });
+    // AI engine down → still help the user with the built-in FAQ
+    res.json({ reply: skyglobeFaqAnswer(userMsg), source: 'faq' });
   }
 });
+
+// Built-in FAQ responder — keyword-matched answers so the public assistant
+// always replies helpfully even when every AI engine is unavailable.
+function skyglobeFaqAnswer(q) {
+  const m = String(q || '').toLowerCase();
+  const has = (...kw) => kw.some(k => m.includes(k));
+  const CONTACT = '\n\nFor personal help, WhatsApp us at +1 737-399-8522 or email support@skyglobegroup.com.';
+  if (has('student visa', 'study', 'study abroad', 'admission', 'university'))
+    return 'We handle student visas for the UK (Student Route), USA (F-1), Canada (Study Permit), Australia (Subclass 500), Germany and more — including university admissions and scholarship applications (we\'ve helped secure $2M+ in scholarships). We manage your documents, financial proof and interview prep end to end.' + CONTACT;
+  if (has('work visa', 'work permit', 'job', 'employment', 'eu direct', 'relocat', 'skilled'))
+    return 'Our EU Direct Employment Programme places you in a real job with work permit + visa in 17 countries (Poland, Portugal, Germany, Norway, Finland and more), typically in 8–20 weeks. We also handle UK Skilled Worker, Canada Express Entry/PR, Germany EU Blue Card and Australia Skilled Migration.' + CONTACT;
+  if (has('tourist', 'schengen', 'visit visa', 'holiday'))
+    return 'We process tourist & Schengen visas for 40+ destinations with a full package: visa application + embassy-accepted flight reservation letter + hotel letter + travel insurance. Tourist/Schengen service fees start from $150.' + CONTACT;
+  if (has('flight', 'reservation letter', 'ticket', 'pnr'))
+    return 'We provide PNR-backed, embassy-accepted flight reservation letters from $15 (same day), plus real flight ticket booking across 500+ airlines.' + CONTACT;
+  if (has('hotel', 'accommodation'))
+    return 'We issue embassy-accepted hotel reservation letters (same day) and real hotel bookings in 150+ countries.' + CONTACT;
+  if (has('insurance'))
+    return 'We offer Schengen-compliant travel insurance (€30,000 minimum cover) from $20, plus comprehensive and student health cover (OSHC/IHS).' + CONTACT;
+  if (has('cost', 'price', 'fee', 'how much', 'charge'))
+    return 'Our service fees (separate from government/embassy fees): flight or hotel letters from $15, travel insurance from $20, tourist/Schengen visas from $150. Student and work visa packages are quoted based on your destination and case.' + CONTACT;
+  if (has('time', 'how long', 'duration', 'processing'))
+    return 'Timelines vary by service: flight/hotel letters are same-day; tourist/Schengen visas typically take 1–3 weeks; the EU Direct Employment Programme runs 8–20 weeks depending on country and role.' + CONTACT;
+  if (has('contact', 'phone', 'whatsapp', 'email', 'reach', 'call', 'office'))
+    return 'You can reach SkyGlobe Group on WhatsApp/phone at +1 737-399-8522, email support@skyglobegroup.com, or via our socials @skyglobegroup. We\'re based in New York City and serve clients worldwide.';
+  if (has('hi', 'hello', 'hey', 'salam', 'good morning', 'good afternoon', 'good evening'))
+    return '👋 Hello! I\'m SkyGlobe\'s AI assistant. I can help with student & work visas, tourist/Schengen visas, university admissions, flight & hotel letters, travel insurance and more. What would you like to know?';
+  return 'SkyGlobe Group is a premium global travel & immigration consultancy — student & work visas, tourist/Schengen visas, university admissions, EU job placement, flight & hotel letters and travel insurance (12,400+ visas approved, 98% success rate, 47 countries).' + CONTACT;
+}
 
 // ── SECURE DOCUMENT TOKENS ────────────────────────────────────────────────────
 
