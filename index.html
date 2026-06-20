@@ -770,6 +770,51 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .chat-send-btn:hover{opacity:0.85}
 @media(max-width:400px){.chat-panel{width:calc(100vw - 32px);right:16px}.chat-fab{bottom:16px;right:16px}}
 
+/* ═══ NORIA AI INTELLIGENCE BAR ═══════════════════════════════════════════ */
+@keyframes noriaSlideIn{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes noriaGlowPulse{0%,100%{filter:drop-shadow(0 0 0px rgba(212,167,58,0))}50%{filter:drop-shadow(0 0 10px rgba(212,167,58,0.6))}}
+@keyframes noriaWordIn{from{opacity:0;letter-spacing:.5em}to{opacity:1;letter-spacing:.2em}}
+@keyframes noriaChipIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#noriaBar{position:fixed;top:68px;left:0;right:0;z-index:998;background:linear-gradient(180deg,#07101e 0%,#0d1a2e 100%);border-bottom:1px solid rgba(212,167,58,0.2);box-shadow:0 4px 32px rgba(0,0,0,0.5);transition:all 0.35s cubic-bezier(0.4,0,0.2,1);animation:noriaSlideIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.3s both}
+.noria-logo-svg{animation:noriaGlowPulse 3s ease-in-out 1.2s 2}
+.noria-compact{display:flex;align-items:center;gap:12px;padding:10px 3%;min-height:58px;flex-wrap:wrap}
+.noria-brand{display:flex;align-items:center;gap:9px;flex-shrink:0;cursor:default;user-select:none;text-decoration:none}
+.noria-wordmark{font-family:'Inter',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.2em;background:linear-gradient(135deg,#D4A73A 0%,#F4D77A 45%,#0ea5e9 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-transform:uppercase;animation:noriaWordIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.75s both}
+.noria-tagline{font-size:.5rem;letter-spacing:.13em;color:rgba(180,200,230,.4);text-transform:uppercase;margin-top:1px;display:none}
+@media(min-width:820px){.noria-tagline{display:block}}
+.noria-input-row{flex:1;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(212,167,58,0.22);border-radius:100px;padding:7px 7px 7px 18px;min-width:0;transition:border-color .2s,box-shadow .2s;max-width:680px}
+.noria-input-row:focus-within{border-color:rgba(212,167,58,0.6);box-shadow:0 0 0 3px rgba(212,167,58,0.1)}
+#noriaInput{flex:1;border:none;outline:none;background:transparent;font-size:.88rem;color:#dce8ff;font-family:'Inter',sans-serif;min-width:0}
+#noriaInput::placeholder{color:rgba(180,200,230,.4)}
+.noria-send-btn{background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;border:none;border-radius:100px;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:opacity .2s,transform .15s;flex-shrink:0}
+.noria-send-btn:hover{opacity:.87;transform:scale(1.07)}
+.noria-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-shrink:0}
+.noria-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.11);color:rgba(210,225,255,.65);border-radius:100px;padding:5px 12px;font-size:.73rem;cursor:pointer;transition:all .18s;white-space:nowrap;font-family:'Inter',sans-serif;animation:noriaChipIn 0.5s ease both}
+.noria-chip:nth-child(1){animation-delay:1s}
+.noria-chip:nth-child(2){animation-delay:1.12s}
+.noria-chip:nth-child(3){animation-delay:1.24s}
+.noria-chip:nth-child(4){animation-delay:1.36s}
+.noria-chip:hover{background:rgba(212,167,58,0.14);border-color:rgba(212,167,58,0.4);color:#F4D77A}
+.noria-live-badge{font-size:.6rem;color:#22c55e;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto}
+.noria-live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+/* expanded conversation panel */
+#noriaPanel{max-height:0;overflow:hidden;transition:max-height 0.45s cubic-bezier(0.4,0,0.2,1)}
+#noriaPanel.open{max-height:68vh}
+.noria-conv{display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.07)}
+.noria-messages{flex:1;overflow-y:auto;padding:14px 3% 10px;display:flex;flex-direction:column;gap:11px;max-height:calc(68vh - 60px)}
+.noria-messages::-webkit-scrollbar{width:4px}
+.noria-messages::-webkit-scrollbar-thumb{background:rgba(212,167,58,.35);border-radius:2px}
+.noria-msg{max-width:75%;padding:10px 15px;border-radius:14px;font-size:.86rem;line-height:1.58;font-family:'Inter',sans-serif;animation:fadeUp .3s ease both}
+.noria-msg.user{align-self:flex-end;background:rgba(212,167,58,.14);border:1px solid rgba(212,167,58,.28);color:#f0e6c0}
+.noria-msg.bot{align-self:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#d4e2ff}
+.noria-panel-footer{display:flex;align-items:center;padding:9px 3%;border-top:1px solid rgba(255,255,255,.07);gap:8px}
+.noria-panel-input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:8px 16px;color:#dce8ff;font-size:.87rem;outline:none;font-family:'Inter',sans-serif}
+.noria-panel-input::placeholder{color:rgba(180,200,230,.38)}
+.noria-panel-input:focus{border-color:rgba(212,167,58,.45)}
+.noria-close-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(190,210,240,.55);border-radius:100px;padding:6px 14px;font-size:.76rem;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;flex-shrink:0;white-space:nowrap}
+.noria-close-btn:hover{background:rgba(255,255,255,.12);color:#e0ebff}
+@media(max-width:600px){.noria-chips{display:none}.noria-compact{gap:8px;padding:9px 4%}.noria-msg{max-width:90%}}
+
 /* ── SOCIAL PROOF POPUP ──────────────────────────────────────── */
 .sp-popup{position:fixed;bottom:7rem;right:1.5rem;z-index:8990;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:14px;padding:0.8rem 1rem;max-width:280px;box-shadow:0 8px 28px rgba(0,0,0,0.14);display:flex;align-items:center;gap:0.75rem;transform:translateX(320px);opacity:0;transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1),opacity 0.35s ease;pointer-events:none}
 .sp-popup.show{transform:translateX(0);opacity:1}
@@ -1132,6 +1177,84 @@ body.wc-active .mobile-menu{padding-top:46px}
   <button id="navArrowFwd" class="nav-arrow disabled" onclick="navForward()" title="Forward" aria-label="Forward">›</button>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     NORIA — Intelligence · Innovation · Impact
+     Premium AI Intelligence Bar · SkyGlobe Group Public Portal
+     Strictly isolated from admin/secret ecosystem. Public knowledge only.
+     ════════════════════════════════════════════════════════════ -->
+<div id="noriaBar">
+  <div class="noria-compact">
+
+    <!-- NORIA brand mark -->
+    <div class="noria-brand" title="NORIA · Intelligence · Innovation · Impact">
+      <svg class="noria-logo-svg" width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="nLg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D4A73A"/><stop offset="50%" stop-color="#F4D77A"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient>
+          <linearGradient id="nG1" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#b8841e"/><stop offset="100%" stop-color="#F4D77A"/></linearGradient>
+          <linearGradient id="nG2" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient>
+          <radialGradient id="nGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#D4A73A" stop-opacity="0.18"/><stop offset="100%" stop-color="#D4A73A" stop-opacity="0"/></radialGradient>
+        </defs>
+        <!-- Outer glow -->
+        <circle cx="20" cy="20" r="20" fill="url(#nGlow)"/>
+        <!-- Base circle -->
+        <circle cx="20" cy="20" r="18.5" fill="#0a1525" stroke="rgba(212,167,58,0.32)" stroke-width="1"/>
+        <!-- Gold swirl — 3 arcs radiating from center-left, curling top-right -->
+        <path d="M8 17 C8 10, 14 5, 20 5" stroke="url(#nG1)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M5.5 22 C5 12, 12 4, 20 3.5" stroke="#D4A73A" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.45"/>
+        <path d="M7 13 C9 7, 15 4, 21 4.2" stroke="#F4D77A" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.3"/>
+        <!-- Blue swirl — 3 arcs radiating from center-right, curling bottom-left -->
+        <path d="M32 23 C32 30, 26 35, 20 35" stroke="url(#nG2)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M34.5 18 C35 28, 28 36, 20 36.5" stroke="#0ea5e9" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.45"/>
+        <path d="M33 27 C31 33, 25 36, 19 35.8" stroke="#38bdf8" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.3"/>
+        <!-- N lettermark — strong, gradient, centered -->
+        <text x="20" y="25.5" text-anchor="middle" font-size="15" font-weight="900" font-family="Inter,SF Pro Display,system-ui,sans-serif" fill="url(#nLg)" letter-spacing="-0.5">N</text>
+      </svg>
+      <div>
+        <div class="noria-wordmark">NORIA</div>
+        <div class="noria-tagline">Intelligence · Innovation · Impact</div>
+      </div>
+    </div>
+
+    <!-- Main input -->
+    <div class="noria-input-row">
+      <input id="noriaInput" type="text" autocomplete="off"
+        placeholder="Ask NORIA — visas, universities, work permits, conferences, scholarships, travel..."
+        onkeydown="if(event.key==='Enter')noriaAsk()"/>
+      <button class="noria-send-btn" onclick="noriaAsk()" title="Ask NORIA">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#041022" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+
+    <!-- Quick chips -->
+    <div class="noria-chips">
+      <button class="noria-chip" onclick="noriaChip('Student visa requirements and step-by-step process')">🎓 Student Visa</button>
+      <button class="noria-chip" onclick="noriaChip('EU work permit and job placement programme details')">🇪🇺 Work Permit</button>
+      <button class="noria-chip" onclick="noriaChip('International conferences 2025 2026 worldwide')">🎤 Conferences</button>
+      <button class="noria-chip" onclick="noriaChip('Flight reservation letter for visa application')">✈️ Flight Letter</button>
+    </div>
+
+    <!-- Live indicator -->
+    <div class="noria-live-badge">LIVE</div>
+
+  </div>
+
+  <!-- Conversation panel (slides open on first query) -->
+  <div id="noriaPanel">
+    <div class="noria-conv">
+      <div class="noria-messages" id="noriaMessages"></div>
+      <div class="noria-panel-footer">
+        <input class="noria-panel-input" id="noriaPanelInput" type="text" autocomplete="off"
+          placeholder="Ask NORIA another question..."
+          onkeydown="if(event.key==='Enter')noriaReply()"/>
+        <button class="noria-send-btn" onclick="noriaReply()" title="Send">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#041022" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+        <button class="noria-close-btn" onclick="noriaClose()">✕ Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ============ HOME PAGE ============ -->
 <div class="page active" id="page-home">
 
@@ -1281,10 +1404,11 @@ body.wc-active .mobile-menu{padding-top:46px}
       z-index:1!important;
     }
 
-    /* Hero copy layer: top-aligned, full width, proper nav clearance */
+    /* Hero copy layer: top-aligned, full width — clears BOTH the fixed nav (68px)
+       AND the fixed NORIA bar (~58px) so the headline is never covered */
     #cosmicHero > div[style*="position:absolute;inset"]{
       align-items:flex-start!important;
-      padding:max(4.75rem, calc(3.75rem + env(safe-area-inset-top))) clamp(1.25rem,5vw,2rem) 1.5rem!important;
+      padding:max(8.5rem, calc(7.5rem + env(safe-area-inset-top))) clamp(1.25rem,5vw,2rem) 1.5rem!important;
     }
     #cosmicHero > div[style*="position:absolute;inset"] > div{
       max-width:100%!important;
@@ -1347,7 +1471,7 @@ body.wc-active .mobile-menu{padding-top:46px}
   @media(max-width:640px) and (max-height:740px){
     #cosmicHero h1{font-size:1.45rem!important;margin-bottom:.7rem!important}
     #cosmicHero p{font-size:.78rem!important;line-height:1.42!important;margin-bottom:.9rem!important}
-    #cosmicHero > div[style*="position:absolute;inset"]{padding-top:max(4.25rem, calc(3.25rem + env(safe-area-inset-top)))!important}
+    #cosmicHero > div[style*="position:absolute;inset"]{padding-top:max(8rem, calc(7rem + env(safe-area-inset-top)))!important}
   }
 
   /* Smooth open/close for mobile menu — needs block→flex override */
@@ -5631,6 +5755,77 @@ function renderEligResult(){
   <div style="text-align:center;margin-top:1.2rem">
     <button onclick="eligStep=0;eligState={};eligFlow=[];buildEligFlow();renderEligStep()" style="background:none;border:none;color:var(--muted);font-size:0.82rem;cursor:pointer;padding:0">← Start over</button>
   </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  NORIA — Premium AI Intelligence Bar
+//  Isolated: public portal knowledge only. No admin/DB access.
+// ═══════════════════════════════════════════════════════════════════════════
+let noriaHistory=[], noriaBusy=false;
+
+function noriaAsk(){
+  const inp=document.getElementById('noriaInput');
+  const q=(inp?.value||'').trim();
+  if(!q||noriaBusy)return;
+  inp.value='';
+  noriaOpenPanel();
+  noriaSubmit(q);
+}
+function noriaChip(q){
+  noriaOpenPanel();
+  noriaSubmit(q);
+}
+function noriaReply(){
+  const inp=document.getElementById('noriaPanelInput');
+  const q=(inp?.value||'').trim();
+  if(!q||noriaBusy)return;
+  inp.value='';
+  noriaSubmit(q);
+}
+function noriaOpenPanel(){
+  const panel=document.getElementById('noriaPanel');
+  if(!panel||panel.classList.contains('open'))return;
+  panel.classList.add('open');
+  if(!noriaHistory.length){
+    _noriaAddMsg('👋 Hello! I\'m <strong>NORIA</strong> — SkyGlobe Group\'s AI Intelligence Assistant. I have complete knowledge of our services: visas for 47+ countries, university admissions, EU direct employment, scholarships, conferences, flight & hotel letters, travel insurance, and much more.<br><br>What can I help you with today?','bot');
+  }
+}
+function noriaClose(){
+  const p=document.getElementById('noriaPanel');
+  if(p)p.classList.remove('open');
+}
+function _noriaAddMsg(html,role,id){
+  const c=document.getElementById('noriaMessages');
+  if(!c)return;
+  const d=document.createElement('div');
+  d.className='noria-msg '+role;
+  if(id)d.id=id;
+  d.innerHTML=html.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
+}
+async function noriaSubmit(q){
+  noriaBusy=true;
+  _noriaAddMsg(q,'user');
+  _noriaAddMsg('<span style="display:inline-flex;gap:4px;align-items:center"><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite 0s"></span><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite .2s"></span><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite .4s"></span></span>','bot','noriaTyping');
+  try{
+    const r=await fetch('/api/noria',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:q,history:noriaHistory.slice(-10)})
+    });
+    const data=await r.json();
+    document.getElementById('noriaTyping')?.remove();
+    const reply=data.reply||'I apologize — please try again or WhatsApp us at +1 737-399-8522.';
+    _noriaAddMsg(reply,'bot');
+    noriaHistory.push({role:'user',parts:[{text:q}]});
+    noriaHistory.push({role:'model',parts:[{text:reply}]});
+    if(noriaHistory.length>30)noriaHistory=noriaHistory.slice(-30);
+  }catch(e){
+    document.getElementById('noriaTyping')?.remove();
+    _noriaAddMsg('⚡ NORIA is reconnecting. Please try again or contact us at +1 737-399-8522.','bot');
+  }
+  noriaBusy=false;
 }
 
 // ── AI ASSISTANT & CHAT WIDGET ────────────────────────────────────────────────
