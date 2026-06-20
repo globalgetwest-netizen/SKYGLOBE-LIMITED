@@ -1133,22 +1133,31 @@ body.wc-active .mobile-menu{padding-top:46px}
   <!-- ═══════════════════════════════════════════════════════════════
        COSMIC HERO — Real-time Earth · Sun · Moon · Stars · Milky Way
        ═══════════════════════════════════════════════════════════════ -->
-  <section id="cosmicHero" style="position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:linear-gradient(160deg,#ffffff 0%,#eef4ff 38%,#f3f8ff 58%,#fef8ee 100%)">
+  <section id="cosmicHero" style="position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:linear-gradient(160deg,#ffffff 0%,#eef4ff 38%,#f3f8ff 58%,#fef8ee 100%);transition:background 2.5s ease">
 
-    <!-- Soft premium aurora glows (replace the old deep-space starfield) -->
-    <div style="position:absolute;left:-8%;top:-12%;width:48vw;height:48vw;max-width:620px;max-height:620px;border-radius:50%;background:radial-gradient(circle,rgba(96,150,255,0.18) 0%,rgba(96,150,255,0.07) 40%,transparent 70%);filter:blur(20px);pointer-events:none;z-index:0"></div>
-    <div style="position:absolute;left:8%;bottom:-14%;width:42vw;height:42vw;max-width:540px;max-height:540px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.16) 0%,rgba(212,167,58,0.06) 42%,transparent 70%);filter:blur(20px);pointer-events:none;z-index:0"></div>
+    <!-- Daytime soft aurora glows -->
+    <div class="sky-day-glow" style="position:absolute;left:-8%;top:-12%;width:48vw;height:48vw;max-width:620px;max-height:620px;border-radius:50%;background:radial-gradient(circle,rgba(96,150,255,0.18) 0%,rgba(96,150,255,0.07) 40%,transparent 70%);filter:blur(20px);pointer-events:none;z-index:0;transition:opacity 2.5s"></div>
+    <div class="sky-day-glow" style="position:absolute;left:8%;bottom:-14%;width:42vw;height:42vw;max-width:540px;max-height:540px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.16) 0%,rgba(212,167,58,0.06) 42%,transparent 70%);filter:blur(20px);pointer-events:none;z-index:0;transition:opacity 2.5s"></div>
 
-    <!-- Deep space canvas: hidden in the light hero, kept for future dark mode -->
-    <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;display:none"></canvas>
+    <!-- Night galaxy / nebula haze (revealed at dusk & night) -->
+    <div id="heroNebula" style="position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity 2.5s">
+      <div style="position:absolute;left:-6%;top:-10%;width:50vw;height:50vw;max-width:680px;max-height:680px;border-radius:50%;background:radial-gradient(circle,rgba(120,90,220,0.30) 0%,rgba(90,70,200,0.12) 45%,transparent 72%);filter:blur(30px)"></div>
+      <div style="position:absolute;right:6%;top:8%;width:40vw;height:40vw;max-width:520px;max-height:520px;border-radius:50%;background:radial-gradient(circle,rgba(60,170,230,0.26) 0%,rgba(40,120,210,0.10) 45%,transparent 72%);filter:blur(30px)"></div>
+      <div style="position:absolute;left:24%;bottom:-16%;width:46vw;height:46vw;max-width:600px;max-height:600px;border-radius:50%;background:radial-gradient(circle,rgba(220,120,180,0.20) 0%,rgba(180,90,160,0.08) 45%,transparent 72%);filter:blur(34px)"></div>
+      <!-- Faint diagonal Milky-Way band -->
+      <div style="position:absolute;left:-20%;top:20%;width:140%;height:38%;transform:rotate(-18deg);background:linear-gradient(90deg,transparent,rgba(200,210,255,0.10) 40%,rgba(230,220,255,0.14) 55%,transparent);filter:blur(26px)"></div>
+    </div>
 
-    <!-- Sun glow (hidden in light hero) -->
-    <div id="sunGlow" style="position:absolute;z-index:1;pointer-events:none;transition:opacity 2s;display:none">
+    <!-- Star field (drawn by engine; faded in by night) -->
+    <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0;transition:opacity 2.5s"></canvas>
+
+    <!-- Sun (engine positions it; visible by day) -->
+    <div id="sunGlow" style="position:absolute;z-index:1;pointer-events:none;transition:opacity 2s">
       <div style="width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,220,80,0.55) 0%,rgba(255,160,30,0.25) 35%,rgba(255,100,0,0.08) 65%,transparent 100%);filter:blur(8px)"></div>
     </div>
 
-    <!-- Moon (hidden in light hero) -->
-    <div id="moonObj" style="position:absolute;z-index:2;pointer-events:none;width:38px;height:38px;display:none">
+    <!-- Moon (engine positions it; visible by night) -->
+    <div id="moonObj" style="position:absolute;z-index:2;pointer-events:none;width:38px;height:38px;opacity:0;transition:opacity 2s">
       <div style="width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 38% 35%,#f5f0e0 0%,#d8cfa0 45%,#a89060 100%);box-shadow:0 0 18px 6px rgba(240,230,180,0.22),inset -6px -4px 12px rgba(0,0,0,0.35)"></div>
     </div>
 
@@ -1165,7 +1174,7 @@ body.wc-active .mobile-menu{padding-top:46px}
         <!-- Eyebrow -->
         <div style="display:inline-flex;align-items:center;gap:.55em;background:rgba(212,167,58,.12);border:1px solid rgba(212,167,58,.35);border-radius:100px;padding:.45em 1.1em;margin-bottom:1.6rem">
           <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:pulseDot 2s ease-in-out infinite"></span>
-          <span style="font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#92640a">One World. One Mission.</span>
+          <span class="he-eyebrow" style="font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#92640a">One World. One Mission.</span>
         </div>
 
         <!-- Headline -->
@@ -1200,10 +1209,10 @@ body.wc-active .mobile-menu{padding-top:46px}
 
         <!-- Live stats -->
         <div style="display:flex;flex-wrap:wrap;gap:1.8rem">
-          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="12" data-suffix="K+">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Visas Processed</div></div>
-          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="98" data-suffix="%">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Success Rate</div></div>
-          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="195" data-suffix="">0</span></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Countries</div></div>
-          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1" id="liveTime"></div><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">UTC Live</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="12" data-suffix="K+">0</span></div><div class="he-statlabel" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Visas Processed</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="98" data-suffix="%">0</span></div><div class="he-statlabel" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Success Rate</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1"><span class="count-up" data-count="195" data-suffix="">0</span></div><div class="he-statlabel" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">Countries</div></div>
+          <div><div style="font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#b8860b;line-height:1" id="liveTime"></div><div class="he-statlabel" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-top:.3rem">UTC Live</div></div>
         </div>
 
       </div>
@@ -1211,7 +1220,7 @@ body.wc-active .mobile-menu{padding-top:46px}
 
     <!-- Scroll cue -->
     <div style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.55">
-      <span style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8">Explore</span>
+      <span class="he-scroll" style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8">Explore</span>
       <div style="width:1px;height:36px;background:linear-gradient(to bottom,rgba(212,167,58,.7),transparent);animation:scrollPulse 1.8s ease-in-out infinite"></div>
     </div>
 
@@ -1222,6 +1231,20 @@ body.wc-active .mobile-menu{padding-top:46px}
   @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
   @keyframes scrollPulse{0%,100%{opacity:.55;transform:scaleY(1)}50%{opacity:.2;transform:scaleY(.6)}}
   @keyframes twinkle{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* ── TIME-OF-DAY SKY — premium day ⇄ night theming (Apple/Samsung grade) ── */
+  /* DARK skies (dusk + night): reveal galaxy, flip text to luminous light */
+  #cosmicHero.sky-dark .sky-day-glow{opacity:0}
+  #cosmicHero.sky-dark #heroNebula{opacity:1!important}
+  #cosmicHero.sky-dark #moonObj{opacity:1!important}
+  #cosmicHero.sky-dark h1{color:#ffffff!important}
+  #cosmicHero.sky-dark p{color:rgba(226,234,255,.86)!important}
+  #cosmicHero.sky-dark .he-eyebrow{color:#F4D77A!important}
+  #cosmicHero.sky-dark .he-statlabel{color:rgba(214,224,255,.62)!important}
+  #cosmicHero.sky-dark .he-scroll{color:#b9c6ec!important}
+  #cosmicHero.sky-dark form{background:rgba(255,255,255,.10)!important;border-color:rgba(255,255,255,.22)!important;box-shadow:0 12px 40px rgba(0,0,10,.35)!important;backdrop-filter:blur(14px)}
+  #cosmicHero.sky-dark #heroSearchInput{color:#fff!important}
+  #cosmicHero.sky-dark #heroSearchInput::placeholder{color:rgba(226,234,255,.55)!important}
 
   /* ── MOBILE HERO — Android/iOS density-independent layout ── */
   @media(max-width:900px){
@@ -1333,12 +1356,6 @@ body.wc-active .mobile-menu{padding-top:46px}
   /* ── COSMIC HERO ENGINE ─────────────────────────────────────────── */
   (function(){
 
-    /* Light & Airy hero: the deep-space starfield/sun/moon are hidden,
-       so skip the whole animation engine to save CPU. Flip to false to
-       restore the cosmic dark hero. */
-    const LIGHT_HERO = true;
-    if (LIGHT_HERO) return;
-
     /* ── 1. STAR FIELD + MILKY WAY ──────────────────────────────── */
     const canvas = document.getElementById('starCanvas');
     const ctx = canvas.getContext('2d');
@@ -1353,8 +1370,14 @@ body.wc-active .mobile-menu{padding-top:46px}
     const EXP = 0.75;                             /* over-scan so corners never go blank */
 
     function resize(){
-      W=canvas.width=canvas.offsetWidth;
-      H=canvas.height=canvas.offsetHeight;
+      /* Retina / high-DPI scaling so stars stay razor-sharp on Apple
+         Liquid-Retina & Samsung AMOLED panels (devicePixelRatio up to 3-4). */
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width  = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);   /* draw in CSS px, render at device px */
       /* Celestial pole sits high to the upper-right, off-screen — stars
          arc around it just like Polaris in the northern sky. */
       poleX=W*0.82;
@@ -1522,9 +1545,9 @@ body.wc-active .mobile-menu{padding-top:46px}
         sg.style.left=(sunAz*hw*.55)+'px';
         sg.style.top=(sunEl*hh*.7+hh*.05)+'px';
         sg.style.transform='translate(-50%,-50%)';
-        /* Opacity varies by time of day roughly */
-        const hr=now.getUTCHours();
-        sg.style.opacity=(hr>=6&&hr<=18)?'1':'0.45';
+        /* Sun shines by day, fully sets at night (local time) */
+        const hr=now.getHours();
+        sg.style.opacity=(hr>=7&&hr<17)?'1':(hr>=5&&hr<20)?'0.5':'0';
       }
 
       /* Moon: orbit position */
@@ -1555,9 +1578,38 @@ body.wc-active .mobile-menu{padding-top:46px}
     setInterval(tickClock,1000); tickClock();
     setInterval(positionCelestial,60000); positionCelestial();
 
+    /* ── 3b. TIME-OF-DAY SKY ─────────────────────────────────────── */
+    /* Picks a sky phase from the visitor's LOCAL hour and paints a
+       premium gradient. Dawn/Day = light (dark text); Dusk/Night = dark
+       (galaxy + stars + moon revealed, luminous text via .sky-dark).   */
+    const SKY = {
+      dawn:  'linear-gradient(160deg,#fff3ea 0%,#ffe6dc 30%,#f0ecff 62%,#fef2e4 100%)',
+      day:   'linear-gradient(160deg,#ffffff 0%,#eef4ff 38%,#f3f8ff 58%,#fef8ee 100%)',
+      dusk:  'linear-gradient(160deg,#1b1c3e 0%,#3a2752 38%,#6b3a59 70%,#b4654a 100%)',
+      night: 'linear-gradient(160deg,#050817 0%,#0c1230 40%,#141a3c 72%,#1d1533 100%)'
+    };
+    function skyPhase(h){
+      if(h>=5 && h<8)  return 'dawn';
+      if(h>=8 && h<17) return 'day';
+      if(h>=17 && h<20)return 'dusk';
+      return 'night';
+    }
+    function applyHeroSky(){
+      const hero=document.getElementById('cosmicHero');
+      if(!hero) return;
+      const phase=skyPhase(new Date().getHours());
+      hero.style.background=SKY[phase];
+      const dark = (phase==='dusk' || phase==='night');
+      hero.classList.toggle('sky-dark', dark);
+      /* Star intensity: full at night, gentle at dusk, none by day */
+      const sc=document.getElementById('starCanvas');
+      if(sc) sc.style.opacity = phase==='night' ? '1' : phase==='dusk' ? '0.6' : '0';
+    }
+
     /* ── 4. INIT ─────────────────────────────────────────────────── */
     window.addEventListener('resize',()=>{resize();mkStars()});
     resize(); mkStars(); drawStars();
+    applyHeroSky(); setInterval(applyHeroSky,60000);
 
   })();
   </script>
