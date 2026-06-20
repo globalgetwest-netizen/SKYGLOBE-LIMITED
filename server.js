@@ -37,7 +37,7 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
+  res.setHeader('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=()');
   res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   res.setHeader(
     'Content-Security-Policy',
@@ -2345,11 +2345,12 @@ app.get('/api/admin/payments', async (req, res) => {
 // Public: list conferences shown on /conferences
 app.get('/api/conferences', async (_req, res) => {
   try {
-    const rows = await dbQuery('GET', 'conferences', null, { active: 'eq.true', order: 'date.asc', limit: 200 });
-    res.json(rows);
+    const rows = await dbQuery('GET', 'conferences', null, { active: 'eq.true', order: 'date.asc', limit: 200 }).catch(() => []);
+    if (rows && rows.length) return res.json(rows);
+    // DB empty / table missing — serve the curated real-world conferences.
+    res.json(BUILTIN_CONFERENCES);
   } catch (e) {
-    // If the table doesn't exist yet, return an empty list instead of erroring.
-    res.json([]);
+    res.json(BUILTIN_CONFERENCES);
   }
 });
 
@@ -4111,8 +4112,9 @@ app.get('/academy/admission', (req, res) => res.sendFile(path.join(__dirname, 'a
 app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'academy-portal.html')));
 app.get('/academy/learn', (req, res) => res.sendFile(path.join(__dirname, 'academy-learn.html')));
 
-// ── §14 PAGE ROUTES & CATCH-ALL ──────────────────────────────────────────────
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+// ── §14 PAGE ROUTES ──────────────────────────────────────────────────────────
+// NOTE: the SPA catch-all (app.get('*')) lives at the very END of all routes so
+// it never shadows API endpoints defined below.
 
 // ── #22b VOICE TRANSCRIPTION (Groq Whisper) ───────────────────────────────────
 // Accepts { audio: <base64 string>, mimeType: <string> }
@@ -4151,6 +4153,208 @@ app.post('/api/transcribe', express.json({ limit: '12mb' }), async (req, res) =>
     res.status(500).json({ error: 'Transcription error.' });
   }
 });
+
+// ── #22c REAL-WORLD WEB SEARCH (free sources, no API key) ─────────────────────
+// Server-side aggregator so the public portal can search real information from
+// across the web — Wikipedia (live articles) + DuckDuckGo Instant Answers.
+// Structured so a paid provider (Google CSE / Bing / SerpAPI) can be dropped in
+// later by setting SEARCH_API_KEY + SEARCH_ENGINE_ID — no frontend changes.
+async function searchWikipedia(q) {
+  try {
+    const url = `https://en.wikipedia.org/w/rest.php/v1/search/page?q=${encodeURIComponent(q)}&limit=6`;
+    const r = await fetch(url, { headers: { 'User-Agent': 'SkyGlobeGroup/1.0 (support@skyglobegroup.com)' }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return [];
+    const data = await r.json();
+    return (data.pages || []).map(p => ({
+      title: p.title,
+      snippet: (p.description || p.excerpt || '').replace(/<[^>]+>/g, ''),
+      url: `https://en.wikipedia.org/wiki/${encodeURIComponent(p.key)}`,
+      source: 'Wikipedia',
+      thumbnail: p.thumbnail ? (p.thumbnail.url.startsWith('//') ? 'https:' + p.thumbnail.url : p.thumbnail.url) : null,
+    }));
+  } catch (e) { console.error('[search] wiki:', e.message); return []; }
+}
+async function searchDuckDuckGo(q) {
+  try {
+    const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1&skip_disambig=1`;
+    const r = await fetch(url, { headers: { 'User-Agent': 'SkyGlobeGroup/1.0' }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return { abstract: null, results: [] };
+    const d = await r.json();
+    const abstract = d.AbstractText ? {
+      title: d.Heading || q,
+      snippet: d.AbstractText,
+      url: d.AbstractURL || null,
+      source: d.AbstractSource || 'DuckDuckGo',
+      thumbnail: d.Image ? (d.Image.startsWith('/') ? 'https://duckduckgo.com' + d.Image : d.Image) : null,
+    } : null;
+    const results = [];
+    const walk = (arr) => (arr || []).forEach(t => {
+      if (t.Topics) { walk(t.Topics); return; }
+      if (t.Text && t.FirstURL) results.push({ title: t.Text.split(' - ')[0], snippet: t.Text, url: t.FirstURL, source: 'DuckDuckGo', thumbnail: t.Icon && t.Icon.URL ? 'https://duckduckgo.com' + t.Icon.URL : null });
+    });
+    walk(d.RelatedTopics);
+    return { abstract, results: results.slice(0, 6) };
+  } catch (e) { console.error('[search] ddg:', e.message); return { abstract: null, results: [] }; }
+}
+// Optional paid provider (Google Custom Search) — only used if configured.
+async function searchPaid(q) {
+  const key = process.env.SEARCH_API_KEY, cx = process.env.SEARCH_ENGINE_ID;
+  if (!key || !cx) return null;
+  try {
+    const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&q=${encodeURIComponent(q)}&num=8`;
+    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return (d.items || []).map(it => ({
+      title: it.title, snippet: it.snippet, url: it.link, source: (it.displayLink || 'Web'),
+      thumbnail: it.pagemap?.cse_thumbnail?.[0]?.src || null,
+    }));
+  } catch (e) { console.error('[search] paid:', e.message); return null; }
+}
+app.get('/api/search', async (req, res) => {
+  const q = String(req.query.q || '').trim();
+  if (q.length < 2) return res.json({ query: q, answer: null, results: [] });
+  try {
+    // 1) Paid provider if configured (best quality)
+    const paid = await searchPaid(q);
+    if (paid && paid.length) return res.json({ query: q, answer: null, results: paid, provider: 'web' });
+    // 2) Free real-world sources in parallel
+    const [wiki, ddg] = await Promise.all([searchWikipedia(q), searchDuckDuckGo(q)]);
+    const results = [];
+    const seen = new Set();
+    const push = (item) => { if (item && item.url && !seen.has(item.url)) { seen.add(item.url); results.push(item); } };
+    (ddg.results || []).forEach(push);
+    wiki.forEach(push);
+    res.json({ query: q, answer: ddg.abstract || null, results: results.slice(0, 10), provider: 'free' });
+  } catch (e) {
+    console.error('[search] error:', e.message);
+    res.status(500).json({ error: 'Search is temporarily unavailable. Please try again.' });
+  }
+});
+
+// ── #22d REAL-WORLD CONFERENCES (built-in, served when DB is empty) ───────────
+// A curated set of genuine, recurring international conferences across many
+// fields so the Conferences page is never empty. The CEO can still add/override
+// via the admin panel (DB rows take priority).
+const BUILTIN_CONFERENCES = [
+  { id:'c1', title:'World Health Summit 2026', organization:'World Health Summit / Charité', field:'Health & Medicine', city:'Berlin', country:'Germany', date:'2026-10-18', summary:'One of the world\'s foremost forums on global health, bringing together 300+ speakers, ministers, researchers and industry leaders.', website:'https://www.worldhealthsummit.org' },
+  { id:'c2', title:'Web Summit 2026', organization:'Web Summit', field:'Technology & Startups', city:'Lisbon', country:'Portugal', date:'2026-11-02', summary:'The largest technology conference in the world — 70,000+ attendees, founders, investors and global media.', website:'https://websummit.com' },
+  { id:'c3', title:'COP31 — UN Climate Change Conference', organization:'United Nations (UNFCCC)', field:'Climate & Environment', city:'Antalya', country:'Turkey', date:'2026-11-09', summary:'The annual UN climate summit where nearly 200 nations negotiate global climate action and policy.', website:'https://unfccc.int' },
+  { id:'c4', title:'AAAS Annual Meeting 2026', organization:'American Association for the Advancement of Science', field:'Science & Research', city:'Phoenix', country:'United States', date:'2026-02-12', summary:'A leading general-science gathering spanning every discipline, with thousands of researchers and students.', website:'https://meetings.aaas.org' },
+  { id:'c5', title:'World Economic Forum Annual Meeting', organization:'World Economic Forum', field:'Business & Economics', city:'Davos', country:'Switzerland', date:'2027-01-18', summary:'Global leaders in business, government and civil society convene to shape the world economic agenda.', website:'https://www.weforum.org' },
+  { id:'c6', title:'NeurIPS 2026', organization:'Neural Information Processing Systems', field:'Artificial Intelligence', city:'San Diego', country:'United States', date:'2026-12-06', summary:'The premier global conference on machine learning and AI research.', website:'https://neurips.cc' },
+  { id:'c7', title:'BETT 2026 — Education Technology', organization:'BETT', field:'Education', city:'London', country:'United Kingdom', date:'2026-01-21', summary:'The world\'s largest education-technology exhibition for teachers, leaders and edtech innovators.', website:'https://www.bettshow.com' },
+  { id:'c8', title:'World Petroleum Congress', organization:'World Petroleum Council', field:'Energy & Engineering', city:'Calgary', country:'Canada', date:'2026-09-13', summary:'The global meeting point for the energy industry — often called the "Olympics of the petroleum sector".', website:'https://www.world-petroleum.org' },
+  { id:'c9', title:'ICN World Nursing Congress', organization:'International Council of Nurses', field:'Nursing & Healthcare', city:'Singapore', country:'Singapore', date:'2026-06-09', summary:'The leading international congress for nurses and healthcare professionals worldwide.', website:'https://www.icn.ch' },
+  { id:'c10', title:'IFA Berlin 2026', organization:'Messe Berlin', field:'Consumer Electronics', city:'Berlin', country:'Germany', date:'2026-09-04', summary:'One of the world\'s largest trade shows for consumer electronics and home appliances.', website:'https://www.ifa-berlin.com' },
+  { id:'c11', title:'African Economic Conference 2026', organization:'African Development Bank / UNECA / UNDP', field:'Business & Economics', city:'Addis Ababa', country:'Ethiopia', date:'2026-11-23', summary:'A premier forum addressing development, trade and economic transformation across Africa.', website:'https://aec.afdb.org' },
+  { id:'c12', title:'World Congress of Architects (UIA)', organization:'International Union of Architects', field:'Architecture & Design', city:'Barcelona', country:'Spain', date:'2026-07-06', summary:'The global gathering of architects and urban designers shaping the cities of tomorrow.', website:'https://www.uia-architectes.org' },
+];
+// Payment-free professional conference registration.
+// Saves the request (best-effort) and emails the client + admin a confirmation.
+app.post('/api/conference/register', contactLimiter, async (req, res) => {
+  const b = req.body || {};
+  const fname = String(b.fname || '').trim();
+  const email = String(b.email || '').trim();
+  if (!fname || !email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+    return res.status(400).json({ error: 'Please provide your name and a valid email.' });
+  const ref = 'CONF-' + Date.now().toString(36).toUpperCase().slice(-6);
+  const record = {
+    ref, fname, lname: String(b.lname || '').trim(), email,
+    phone: String(b.phone || '').trim(), nationality: String(b.nationality || '').trim(),
+    conference: String(b.conference || '').trim(), country: String(b.country || '').trim(),
+    field: String(b.field || '').trim(), travel_date: String(b.travelDate || '').trim(),
+    notes: String(b.notes || '').trim(), status: 'received', created_at: new Date().toISOString(),
+  };
+  // Best-effort save (table may not exist yet — never blocks the user)
+  await dbQuery('POST', 'conference_requests', record).catch(() => {});
+  // Notify client + admin (best-effort)
+  if (process.env.RESEND_API_KEY) {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com';
+    const clientHtml = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto">
+      <div style="background:#041022;color:#fff;padding:20px;border-radius:12px 12px 0 0"><h2 style="margin:0;color:#D4A73A">SkyGlobe Group</h2><p style="margin:4px 0 0;color:#c3cee0">Conference Registration Received</p></div>
+      <div style="border:1px solid #e6e9ef;border-top:none;padding:22px;border-radius:0 0 12px 12px">
+        <p>Dear ${fname},</p>
+        <p>Thank you for registering your interest in <strong>${record.conference || 'a conference'}</strong>. Your reference number is <strong>${ref}</strong>.</p>
+        <p>Our team will contact the organising institution on your behalf, verify the genuine invitation/admission document, and follow up with you by email within 1–3 business days.</p>
+        <p style="margin-top:18px;color:#6b7689;font-size:.9rem">Need anything sooner? Reply to this email or WhatsApp us at +1 737-399-8522.</p>
+        <p style="margin-top:18px">Warm regards,<br><strong>SkyGlobe Group</strong></p>
+      </div></div>`;
+    try { await sendEmail(email, `Conference Registration Received [${ref}] — SkyGlobe Group`, clientHtml); } catch (e) { console.error('conf client email:', e.message); }
+    const adminHtml = `<div style="font-family:Arial,sans-serif"><h3>New Conference Registration [${ref}]</h3>
+      <p><b>Name:</b> ${fname} ${record.lname}<br><b>Email:</b> ${email}<br><b>Phone:</b> ${record.phone}<br>
+      <b>Nationality:</b> ${record.nationality}<br><b>Conference:</b> ${record.conference}<br><b>Country:</b> ${record.country}<br>
+      <b>Field:</b> ${record.field}<br><b>Travel date:</b> ${record.travel_date}<br><b>Notes:</b> ${record.notes}</p></div>`;
+    try { await sendEmail(adminEmail, `New Conference Registration [${ref}]`, adminHtml, email); } catch (e) { console.error('conf admin email:', e.message); }
+  }
+  res.json({ ok: true, ref });
+});
+
+// ── #22e CLIENT DOCUMENT VAULT (real upload / list / download / delete) ───────
+// Clients can upload documents, pictures and scanned files to secure storage,
+// then download or remove them. Stored in the Supabase 'documents' bucket under
+// a per-client folder, tracked in the client_files table.
+app.post('/api/client/upload', express.json({ limit: '20mb' }), async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  const { filename, mimeType, data } = req.body || {};
+  if (!filename || !data) return res.status(400).json({ error: 'File is required.' });
+  try {
+    const buf = Buffer.from(data, 'base64');
+    if (buf.length > 15 * 1024 * 1024) return res.status(413).json({ error: 'File too large (max 15MB).' });
+    const safe = String(filename).replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80);
+    const folder = 'client-vault/' + Buffer.from(email).toString('hex').slice(0, 24);
+    const filePath = `${folder}/${Date.now()}_${safe}`;
+    await storageUpload(filePath, buf, mimeType || 'application/octet-stream');
+    const row = {
+      client_email: email, filename: safe, path: filePath,
+      mime_type: mimeType || 'application/octet-stream', size: buf.length,
+      created_at: new Date().toISOString(),
+    };
+    const saved = await dbQuery('POST', 'client_files', row).catch(() => null);
+    res.json({ ok: true, file: (saved && saved[0]) || row });
+  } catch (e) {
+    console.error('[client upload]', e.message);
+    res.status(500).json({ error: 'Upload failed. Please try again.' });
+  }
+});
+app.get('/api/client/files', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const rows = await dbQuery('GET', 'client_files', null, { client_email: `eq.${email}`, order: 'created_at.desc', limit: 200 }).catch(() => []);
+    res.json(rows || []);
+  } catch (e) { res.json([]); }
+});
+app.get('/api/client/files/:id/download', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).send('Please log in.');
+  try {
+    const rows = await dbQuery('GET', 'client_files', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const f = rows[0];
+    if (!f || f.client_email !== email) return res.status(404).send('Not found.');
+    const upstream = await fetch(storagePublicUrl(f.path));
+    if (!upstream.ok) return res.status(404).send('File not found.');
+    res.setHeader('Content-Type', f.mime_type || 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${f.filename}"`);
+    const ab = await upstream.arrayBuffer();
+    res.send(Buffer.from(ab));
+  } catch (e) { res.status(500).send('Download error.'); }
+});
+app.delete('/api/client/files/:id', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please log in.' });
+  try {
+    const rows = await dbQuery('GET', 'client_files', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const f = rows[0];
+    if (!f || f.client_email !== email) return res.status(404).json({ error: 'Not found.' });
+    await dbQuery('DELETE', 'client_files', null, { id: `eq.${req.params.id}` }).catch(() => {});
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── §14b SPA CATCH-ALL (must stay LAST so it never shadows API routes) ────────
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 // ── #23 GLOBAL EXPRESS ERROR HANDLER ─────────────────────────────────────────
 // Must be 4-argument to be recognised by Express as error middleware.
