@@ -5601,15 +5601,18 @@ function aiSetRecUI(on){
 }
 async function aiStartRec(e){
   if(e)e.preventDefault();
-  if(aiRecOn)return;aiRecOn=true;aiAudioChunks=[];
+  if(aiRecOn||aiMediaRec)return;aiRecOn=true;aiAudioChunks=[];
   try{
-    aiRecStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('unsupported');
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    if(!aiRecOn){stream.getTracks().forEach(t=>t.stop());return;}
+    aiRecStream=stream;
     const mt=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'';
     aiMediaRec=new MediaRecorder(aiRecStream,mt?{mimeType:mt}:{});
     aiMediaRec.ondataavailable=ev=>{if(ev.data&&ev.data.size>0)aiAudioChunks.push(ev.data);};
-    aiMediaRec.onstop=aiProcessAudio;
+    aiMediaRec.onstop=()=>{aiMediaRec=null;aiProcessAudio();};
     aiMediaRec.start(100);aiSetRecUI(true);
-  }catch(err){aiRecOn=false;const inp=document.getElementById('aiInput');if(inp)inp.placeholder='Mic denied — please type your question.';}
+  }catch(err){aiRecOn=false;aiMediaRec=null;const inp=document.getElementById('aiInput');if(inp)inp.placeholder=(err&&err.name==='NotAllowedError')?'Please allow microphone, then tap 🎤 again.':'Mic not available — please type.';}
 }
 function aiStopRec(e){
   if(e)e.preventDefault();
