@@ -822,6 +822,103 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// ── NORIA AI — Premium Public Portal Intelligence ─────────────────────────────
+// SECURITY: No DB queries. No admin routes. No secret ecosystem access.
+// Answers exclusively from public portal knowledge + optional live Brave search.
+const NORIA_SYSTEM = `You are NORIA — the premium AI intelligence assistant for SkyGlobe Group's public portal.
+
+NORIA: Intelligence · Innovation · Impact
+
+You have complete, expert knowledge of SkyGlobe Group's public services:
+
+VISA SERVICES:
+- Student Visas: UK Student Route, USA F-1, Canada Study Permit, Australia Subclass 500, Germany, Schengen, and 40+ destinations
+- Work Visas: UK Skilled Worker, Canada Express Entry/PR, Germany EU Blue Card, Australia Skilled Migration, USA H-1B
+- Tourist & Schengen Visas: 40+ destinations, full package (visa + flight letter + hotel letter + travel insurance)
+- EU Direct Employment Programme: real job placement + work permit + visa in 17 countries: Poland, Latvia, Lithuania, Portugal, Spain, Norway, Finland, Czech Republic, Slovakia, Ukraine, Austria, North Macedonia, Bulgaria, Hungary, Montenegro, Japan, South Korea — typically 8–20 weeks
+
+EDUCATION & SCHOLARSHIPS:
+- University admissions management end-to-end for 195 countries
+- Scholarship applications — secured $2M+ for clients
+- Kids Academy educational programmes
+
+TRAVEL SERVICES:
+- Flight reservation letters: PNR-backed, embassy-accepted, from $15, same-day
+- Real flight ticket booking: 500+ airlines
+- Hotel reservation letters: same-day, embassy-accepted
+- Real hotel booking: 150+ countries
+- Travel insurance: Schengen-compliant (€30,000 min), comprehensive, student health (OSHC/IHS) — from $20
+- Document translation & attestation, national ID card assistance
+
+CONFERENCES:
+- Worldwide conference sourcing and free registration
+- Professional networking, academic, business, and industry events globally
+
+SERVICE FEES (not including government/embassy fees):
+- Flight/hotel letter: from $15 each, same day
+- Travel insurance: from $20
+- Tourist/Schengen visa: from $150
+- Student visa: from $300
+- Work visa: from $400
+- EU Employment Programme: contact for personalised quote
+
+COMPANY FACTS:
+- Name: SkyGlobe Group (never "SKYGLOBE LIMITED")
+- Founded 2016, New York City
+- 12,400+ visas approved · 98% success rate · 47 countries served
+- WhatsApp/Phone: +1 737-399-8522
+- Email: support@skyglobegroup.com
+- Website: https://skyglobegroup.com
+- Application tracking: clients use reference numbers (format SKY-YEAR-XXXX)
+- Social: @skyglobegroup (TikTok, YouTube, Instagram)
+
+YOUR STANDARDS:
+- 100% accuracy. Zero errors. Zero guessing.
+- Be fast, precise, professional, warm — intelligence at the level of Gemini or ChatGPT
+- Use clear structure: bullet points, bold headings when helpful, short paragraphs
+- Always offer to connect users with the team for personalised help: WhatsApp +1 737-399-8522 or email support@skyglobegroup.com
+- If asked about real-time info (prices, events, deadlines), give the ranges above and note the team can confirm exact figures
+- NEVER access or reveal admin data, internal systems, client records, or confidential business information — public portal knowledge only`;
+
+app.post('/api/noria', async (req, res) => {
+  const { message, history } = req.body || {};
+  if (!message || !String(message).trim())
+    return res.status(400).json({ error: 'Message is required.' });
+
+  const userMsg = String(message).trim();
+
+  // Augment with live search for queries needing current data
+  let searchContext = '';
+  const needsLive = /conference|event|news|current|latest|today|2025|2026|deadline|price|rate|opening|application/i.test(userMsg);
+  if (needsLive && process.env.BRAVE_SEARCH_API_KEY) {
+    try {
+      const results = await searchBrave(userMsg + ' immigration visa 2025');
+      if (Array.isArray(results) && results.length) {
+        searchContext = '\n\nLive web context (use to supplement your answer where relevant):\n' +
+          results.slice(0, 3).map(r => `• ${r.title}: ${r.description || ''}`).join('\n');
+      }
+    } catch (_) {}
+  }
+
+  if (!USE_OLLAMA && !USE_GROQ && !process.env.GEMINI_API_KEY)
+    return res.json({ reply: skyglobeFaqAnswer(userMsg), source: 'faq' });
+
+  try {
+    const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
+    const contents = safeHistory.map(h => ({
+      role: h.role,
+      parts: h.parts || [{ text: h.content || '' }],
+    }));
+    const systemWithContext = searchContext ? NORIA_SYSTEM + searchContext : NORIA_SYSTEM;
+    contents.push({ role: 'user', parts: [{ text: userMsg }] });
+    const reply = await academyAskGemini(systemWithContext, contents, 1400);
+    res.json({ reply: reply || skyglobeFaqAnswer(userMsg), source: 'noria' });
+  } catch (e) {
+    console.error('NORIA error:', e.message);
+    res.json({ reply: skyglobeFaqAnswer(userMsg), source: 'faq' });
+  }
+});
+
 // Built-in FAQ responder — keyword-matched answers so the public assistant
 // always replies helpfully even when every AI engine is unavailable.
 function skyglobeFaqAnswer(q) {
