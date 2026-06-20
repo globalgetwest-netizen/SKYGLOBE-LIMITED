@@ -155,7 +155,6 @@ function langName(code){const m=LANGUAGES.find(l=>l[0]===code);return m?m[1]:'En
 function setLang(code){
   LANG=code;localStorage.setItem('academyLang_'+STUDENT,code);
   const lbl=document.getElementById('langLabel');if(lbl)lbl.textContent=code==='en'?'':('Learning in: '+langName(code));
-  if(typeof recog!=='undefined'&&recog){try{recog.lang=(code==='en'?'en-US':code);}catch(e){}}
 }
 function initLangSelect(){
   const sel=document.getElementById('langSel');if(!sel)return;
@@ -235,28 +234,44 @@ async function send(){
 /* ── VOICE OUTPUT ── */
 let curUtt=null;
 function cleanForSpeech(raw){return raw.replace(/#{1,6}\s*/g,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/`{1,3}[^`]*`{1,3}/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/^[\s\-\*•]+/gm,'').replace(/[\u{1F300}-\u{1FAFF}]/gu,'').replace(/\n{2,}/g,'. ').replace(/\n/g,', ').replace(/\s{2,}/g,' ').trim();}
-const FEMALE_RX=/female|Samantha|Karen|Moira|Tessa|Victoria|Zira|Aria|Jenny|Susan|Fiona|Google UK English Female|Google US English/i;
-const MALE_RX=/male|David|Daniel|Alex|Fred|Rishi|Google UK English Male|Mark|Guy/i;
+const FEMALE_RX=/female|Samantha|Karen|Moira|Tessa|Victoria|Zira|Aria|Jenny|Susan|Fiona|Google.*Female|Google US English/i;
+const MALE_RX=/male|David|Daniel|Alex|Fred|Rishi|Google.*Male|Mark|Guy/i;
+// Map our short language codes to a full BCP-47 region so we request the
+// right regional voice (e.g. es → es-ES, zh → zh-CN, ar → ar-SA).
+const LANG_BCP47={en:'en-US',es:'es-ES',fr:'fr-FR',de:'de-DE',pt:'pt-BR',it:'it-IT',nl:'nl-NL',ru:'ru-RU',ar:'ar-SA',zh:'zh-CN',ja:'ja-JP',ko:'ko-KR',hi:'hi-IN',bn:'bn-IN',ur:'ur-PK',pa:'pa-IN',ta:'ta-IN',te:'te-IN',tr:'tr-TR',fa:'fa-IR',sw:'sw-KE',ha:'ha-NG',yo:'yo-NG',ig:'ig-NG',am:'am-ET',id:'id-ID',ms:'ms-MY',th:'th-TH',vi:'vi-VN',pl:'pl-PL',uk:'uk-UA',ro:'ro-RO',el:'el-GR',he:'he-IL',fil:'fil-PH'};
+function speechLang(){return LANG_BCP47[LANG]||(LANG==='en'?'en-US':LANG);}
+// Keep a live cache of voices; some browsers populate them asynchronously.
+let VOICES=[];
+function loadVoices(){if('speechSynthesis'in window){VOICES=window.speechSynthesis.getVoices()||[];}}
 function pickVoice(hint){
-  const v=window.speechSynthesis.getVoices();
-  const langPref=LANG==='en'?'en':LANG;
-  const byLangGender=v.find(x=>new RegExp('^'+langPref,'i').test(x.lang)&&(hint==='female'?FEMALE_RX:MALE_RX).test(x.name));
+  const v=VOICES.length?VOICES:(window.speechSynthesis.getVoices()||[]);
+  const base=LANG; // e.g. 'es'
+  // 1) Exact language + gender
+  const byLangGender=v.find(x=>new RegExp('^'+base,'i').test(x.lang)&&(hint==='female'?FEMALE_RX:MALE_RX).test(x.name));
   if(byLangGender)return byLangGender;
-  const byLang=v.find(x=>new RegExp('^'+langPref,'i').test(x.lang));
+  // 2) Any voice in the target language (correct accent matters most)
+  const byLang=v.find(x=>new RegExp('^'+base,'i').test(x.lang));
   if(byLang)return byLang;
+  // 3) No native voice on this device → English fallback by gender
   const byGender=v.find(x=>/^en/i.test(x.lang)&&(hint==='female'?FEMALE_RX:MALE_RX).test(x.name));
   if(byGender)return byGender;
   return v.find(x=>/en-US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;
 }
-function speak(text,btn){
-  if(!('speechSynthesis'in window))return;
-  if(window.speechSynthesis.speaking||window.speechSynthesis.pending){window.speechSynthesis.cancel();if(curUtt&&curUtt._b)curUtt._b.textContent='🔊 Listen';if(curUtt&&curUtt._b===btn){curUtt=null;return;}}
+function speakNow(text,btn){
   const u=new SpeechSynthesisUtterance(cleanForSpeech(text));
-  const vp=teacherVoice();u.rate=vp.rate;u.pitch=vp.pitch;u.lang=(LANG==='en'?'en-US':LANG);const best=pickVoice(vp.voiceHint);if(best)u.voice=best;
+  const vp=teacherVoice();u.rate=vp.rate;u.pitch=vp.pitch;u.lang=speechLang();
+  const best=pickVoice(vp.voiceHint);if(best){u.voice=best;u.lang=best.lang;}
   u._b=btn;u.onstart=()=>btn.textContent='⏸ Stop';u.onend=()=>{btn.textContent='🔊 Listen';curUtt=null;};u.onerror=()=>{btn.textContent='🔊 Listen';curUtt=null;};
   curUtt=u;window.speechSynthesis.speak(u);
 }
-if('speechSynthesis'in window){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();}
+function speak(text,btn){
+  if(!('speechSynthesis'in window))return;
+  if(window.speechSynthesis.speaking||window.speechSynthesis.pending){window.speechSynthesis.cancel();if(curUtt&&curUtt._b)curUtt._b.textContent='🔊 Listen';if(curUtt&&curUtt._b===btn){curUtt=null;return;}}
+  // If voices haven't loaded yet, load then speak on the next tick.
+  if(!VOICES.length){loadVoices();if(!VOICES.length){setTimeout(()=>speakNow(text,btn),250);return;}}
+  speakNow(text,btn);
+}
+if('speechSynthesis'in window){loadVoices();window.speechSynthesis.onvoiceschanged=loadVoices;}
 
 /* ── PROFESSIONAL VOICE RECORDING (MediaRecorder → Groq Whisper) ── */
 let mediaRec=null,audioChunks=[],recTimerInt=null,recSecs=0,recStream=null,recStarted=false;
@@ -278,23 +293,31 @@ function setRecordingUI(on){
 
 async function startRec(e){
   if(e)e.preventDefault();
-  if(recStarted)return;
+  if(recStarted||mediaRec)return;
   recStarted=true;
   audioChunks=[];
   try{
-    recStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,sampleRate:16000}});
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)
+      throw new Error('unsupported');
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    // If the user already released the button while the permission prompt was
+    // open, don't start a runaway recording — release the mic and bail.
+    if(!recStarted){stream.getTracks().forEach(t=>t.stop());return;}
+    recStream=stream;
     const mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus'
       :MediaRecorder.isTypeSupported('audio/webm')?'audio/webm'
       :MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'';
     mediaRec=new MediaRecorder(recStream,mimeType?{mimeType}:{});
     mediaRec.ondataavailable=ev=>{if(ev.data&&ev.data.size>0)audioChunks.push(ev.data);};
-    mediaRec.onstop=processAudio;
+    mediaRec.onstop=()=>{mediaRec=null;processAudio();};
     mediaRec.start(100);
     setRecordingUI(true);
   }catch(err){
-    recStarted=false;
+    recStarted=false;mediaRec=null;
     const inp=document.getElementById('msg');
-    if(inp)inp.placeholder='Microphone access denied — please type your question.';
+    if(inp)inp.placeholder=(err&&err.name==='NotAllowedError')
+      ?'Please allow microphone access in your browser, then tap 🎤 again.'
+      :'Microphone not available — please type your question.';
   }
 }
 
@@ -345,12 +368,7 @@ function blobToBase64(blob){
     r.readAsDataURL(blob);
   });
 }
-// Tap (click without hold) also toggles a quick 5-second recording
-document.getElementById('mic')?.addEventListener('click',function(e){
-  // Ignore if hold already handled
-  if(recStarted)return;
-});
-// Fallback for very short taps: treat as tap-to-toggle
+// Tap-to-toggle fallback (e.g. accessibility / keyboard activation)
 function toggleMic(){
   if(recStarted){stopRec();}else{startRec();}
 }
@@ -399,7 +417,6 @@ async function loadTeacher(){
 async function boot(){
   if(!TOKEN||!STUDENT)return;
   initLangSelect();
-  if(recog){try{recog.lang=(LANG==='en'?'en-US':LANG);}catch(e){}}
   await loadTeacher();
   try{
     const r=await fetch(API+'/api/academy/progress/'+STUDENT,{headers:authHeaders()});
