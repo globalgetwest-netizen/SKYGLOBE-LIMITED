@@ -37,7 +37,7 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
   res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   res.setHeader(
     'Content-Security-Policy',
@@ -794,36 +794,23 @@ app.post('/api/chat', async (req, res) => {
   if (!message || !String(message).trim())
     return res.status(400).json({ error: 'Message is required.' });
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey)
+  // 24/7 AUTOMATIC CASCADE: Ollama → Groq → Gemini (same engine chain as the
+  // Academy and CEO assistant). The assistant works as long as ANY one engine
+  // is configured — it no longer requires GEMINI_API_KEY specifically.
+  if (!USE_OLLAMA && !USE_GROQ && !process.env.GEMINI_API_KEY)
     return res.status(500).json({ error: 'AI assistant is not configured yet. Please WhatsApp us at +1 737-399-8522 for help.' });
 
   try {
     const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
-    // Convert history to Gemini format (role: user/model)
+    // Convert history to the shared format (role: user/model)
     const contents = safeHistory.map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }));
     contents.push({ role: 'user', parts: [{ text: String(message).trim() }] });
 
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SKYGLOBE_SYSTEM }] },
-          contents,
-          generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
-        }),
-      }
-    );
-
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error?.message || `API error ${r.status}`);
-
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+    const reply = await academyAskGemini(SKYGLOBE_SYSTEM, contents, 1024)
+      || 'Sorry, I could not generate a response.';
     res.json({ reply });
   } catch (e) {
     console.error('AI chat error:', e.message);
