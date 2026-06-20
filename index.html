@@ -732,11 +732,16 @@ body.wc-active .page-nav.page-nav-top{top:118px}
 .policy-body li{margin-bottom:0.4rem}
 
 /* ── CHAT WIDGET ─────────────────────────────────────────────────── */
-.chat-fab{position:fixed;bottom:28px;right:28px;z-index:9000;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;cursor:pointer;box-shadow:0 8px 28px rgba(184,134,11,0.45);display:flex;align-items:center;justify-content:center;font-size:26px;transition:var(--trans);animation:chatPop 0.5s 1.5s both}
+.chat-fab{position:fixed;bottom:28px;right:28px;z-index:9000;width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;cursor:pointer;box-shadow:0 8px 28px rgba(184,134,11,0.45);display:flex;align-items:center;justify-content:center;font-size:26px;transition:var(--trans);animation:chatPop 0.5s 1.5s both}
 @keyframes chatPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes aiDot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+@keyframes fabPulseRing{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.9);opacity:0}}
 .chat-fab:hover{transform:scale(1.1);box-shadow:0 14px 40px rgba(184,134,11,0.6)}
+.chat-fab::before{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid rgba(212,167,58,.6);animation:fabPulseRing 2s ease-out infinite}
 .chat-badge{position:absolute;top:-3px;right:-3px;width:20px;height:20px;background:#e53935;border-radius:50%;border:2px solid #041022;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:white;animation:pulse 2s infinite}
+/* Floating label beside the FAB */
+.chat-fab-label{position:fixed;bottom:38px;right:100px;z-index:9000;background:linear-gradient(135deg,#041022,#0a2e65);color:#F4D77A;font-size:.78rem;font-weight:700;padding:8px 14px;border-radius:100px;box-shadow:0 6px 20px rgba(4,16,34,.4);pointer-events:none;animation:chatPop .5s 2.5s both,fabLabelPulse 3s 3s ease-in-out infinite;white-space:nowrap}
+@keyframes fabLabelPulse{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:.7;transform:translateY(-3px)}}
 .chat-panel{position:fixed;bottom:100px;right:28px;z-index:8999;width:360px;background:#0d1f3e;border:1px solid rgba(212,167,58,0.25);border-radius:var(--radius-xl);box-shadow:0 24px 60px rgba(0,0,0,0.55);display:none;flex-direction:column;overflow:hidden}
 .chat-panel.open{display:flex;animation:slideUp 0.3s ease}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -1133,7 +1138,7 @@ body.wc-active .mobile-menu{padding-top:46px}
   <!-- ═══════════════════════════════════════════════════════════════
        COSMIC HERO — Real-time Earth · Sun · Moon · Stars · Milky Way
        ═══════════════════════════════════════════════════════════════ -->
-  <section id="cosmicHero" style="position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:linear-gradient(160deg,#ffffff 0%,#eef4ff 38%,#f3f8ff 58%,#fef8ee 100%);transition:background 2.5s ease">
+  <section id="cosmicHero" style="position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:linear-gradient(170deg,#c8deff 0%,#d8eaff 12%,#e4f0ff 24%,#eef6ff 36%,#f5f9ff 48%,#fafcff 58%,#fdf8ff 68%,#fef5f0 80%,#fef8ea 90%,#fffcf0 100%);transition:background 3s ease">
 
     <!-- Daytime soft aurora glows -->
     <div class="sky-day-glow" style="position:absolute;left:-8%;top:-12%;width:48vw;height:48vw;max-width:620px;max-height:620px;border-radius:50%;background:radial-gradient(circle,rgba(96,150,255,0.18) 0%,rgba(96,150,255,0.07) 40%,transparent 70%);filter:blur(20px);pointer-events:none;z-index:0;transition:opacity 2.5s"></div>
@@ -1582,11 +1587,14 @@ body.wc-active .mobile-menu{padding-top:46px}
     /* Picks a sky phase from the visitor's LOCAL hour and paints a
        premium gradient. Dawn/Day = light (dark text); Dusk/Night = dark
        (galaxy + stars + moon revealed, luminous text via .sky-dark).   */
+    /* Sky gradients: many stops with tiny perceptual steps — no visible banding.
+       Uses background with two stacked radial-gradient overlays rendered via
+       CSS multi-background (canvas handles stars separately). */
     const SKY = {
-      dawn:  'linear-gradient(160deg,#fff3ea 0%,#ffe6dc 30%,#f0ecff 62%,#fef2e4 100%)',
-      day:   'linear-gradient(160deg,#ffffff 0%,#eef4ff 38%,#f3f8ff 58%,#fef8ee 100%)',
-      dusk:  'linear-gradient(160deg,#1b1c3e 0%,#3a2752 38%,#6b3a59 70%,#b4654a 100%)',
-      night: 'linear-gradient(160deg,#050817 0%,#0c1230 40%,#141a3c 72%,#1d1533 100%)'
+      dawn:  'linear-gradient(170deg,#1a0a3c 0%,#3d1758 8%,#7a2e6a 16%,#c05060 24%,#e8784a 32%,#f4a040 40%,#ffd080 50%,#fff5d6 62%,#fef0e8 76%,#fde8f0 88%,#f8eeff 100%)',
+      day:   'linear-gradient(170deg,#c8deff 0%,#d8eaff 12%,#e4f0ff 24%,#eef6ff 36%,#f5f9ff 48%,#fafcff 58%,#fdf8ff 68%,#fef5f0 80%,#fef8ea 90%,#fffcf0 100%)',
+      dusk:  'linear-gradient(170deg,#04041a 0%,#0c0830 10%,#1e0f48 20%,#3a1558 30%,#5e2060 40%,#8c2d5a 50%,#bc4040 62%,#d46030 74%,#e0864a 84%,#eda060 92%,#f5c080 100%)',
+      night: 'linear-gradient(170deg,#00000a 0%,#020410 8%,#040818 18%,#060c22 30%,#080e28 44%,#0a1030 58%,#0c1236 72%,#0e1440 86%,#101545 100%)'
     };
     function skyPhase(h){
       if(h>=5 && h<8)  return 'dawn';
@@ -5633,9 +5641,11 @@ function toggleChat(){
   document.getElementById('chatPanel').classList.toggle('open',chatOpen);
   document.getElementById('chatFabIcon').textContent=chatOpen?'✕':'💬';
   document.getElementById('chatBadge').style.display='none';
+  const lbl=document.getElementById('chatFabLabel');
+  if(lbl) lbl.style.display=chatOpen?'none':'';
   if(chatOpen&&!aiGreeted){
     aiGreeted=true;
-    setTimeout(()=>addChatMsg('aiMessages',`👋 Hi! I'm SkyGlobe's AI assistant.\n\nI can answer questions about visas, universities, work permits, our services, fees, and more. What would you like to know?`,'bot'),8000);
+    setTimeout(()=>addChatMsg('aiMessages',`👋 Hello! I'm SkyGlobe's AI assistant — here to help with visas, universities, work permits, relocation, and any questions about our services. What can I help you with today?`,'bot'),1500);
   }
 }
 function switchChatTab(tab){
@@ -5992,6 +6002,7 @@ else{
 </div>
 
 <!-- ===== CHAT WIDGET ===== -->
+<div class="chat-fab-label" id="chatFabLabel">✨ AI Assistant</div>
 <button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Chat with us · AI Assistant">
   <span id="chatFabIcon">💬</span>
   <div class="chat-badge" id="chatBadge">1</div>
