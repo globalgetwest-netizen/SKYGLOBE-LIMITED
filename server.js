@@ -4157,8 +4157,31 @@ app.post('/api/transcribe', express.json({ limit: '12mb' }), async (req, res) =>
 // ── #22c REAL-WORLD WEB SEARCH (free sources, no API key) ─────────────────────
 // Server-side aggregator so the public portal can search real information from
 // across the web — Wikipedia (live articles) + DuckDuckGo Instant Answers.
-// Structured so a paid provider (Google CSE / Bing / SerpAPI) can be dropped in
-// later by setting SEARCH_API_KEY + SEARCH_ENGINE_ID — no frontend changes.
+// Brave Search API (BRAVE_SEARCH_API_KEY env var) gives real live web results free.
+// Google CSE (SEARCH_API_KEY + SEARCH_ENGINE_ID) is also supported as premium option.
+async function searchBrave(q) {
+  const key = process.env.BRAVE_SEARCH_API_KEY;
+  if (!key) return null;
+  try {
+    const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(q)}&count=10&freshness=pw`;
+    const r = await fetch(url, {
+      headers: { 'Accept': 'application/json', 'Accept-Encoding': 'gzip', 'X-Subscription-Token': key },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const results = (d.web?.results || []).map(it => ({
+      title: it.title, snippet: it.description, url: it.url,
+      source: it.profile?.name || new URL(it.url).hostname.replace('www.',''),
+      thumbnail: it.thumbnail?.src || null,
+    }));
+    const answer = d.infobox ? {
+      title: d.infobox.label || q, snippet: d.infobox.description || '',
+      url: d.infobox.website || null, source: 'Brave Search'
+    } : null;
+    return { results, answer };
+  } catch (e) { console.error('[search] brave:', e.message); return null; }
+}
 async function searchWikipedia(q) {
   try {
     const url = `https://en.wikipedia.org/w/rest.php/v1/search/page?q=${encodeURIComponent(q)}&limit=6`;
@@ -4215,10 +4238,14 @@ app.get('/api/search', async (req, res) => {
   const q = String(req.query.q || '').trim();
   if (q.length < 2) return res.json({ query: q, answer: null, results: [] });
   try {
-    // 1) Paid provider if configured (best quality)
+    // 1) Paid provider if configured (best quality — Google CSE)
     const paid = await searchPaid(q);
-    if (paid && paid.length) return res.json({ query: q, answer: null, results: paid, provider: 'web' });
-    // 2) Free real-world sources in parallel
+    if (paid && paid.length) return res.json({ query: q, answer: null, results: paid, provider: 'google' });
+    // 2) Brave Search (free tier, real live web results — set BRAVE_SEARCH_API_KEY)
+    const brave = await searchBrave(q);
+    if (brave && brave.results && brave.results.length)
+      return res.json({ query: q, answer: brave.answer || null, results: brave.results, provider: 'brave' });
+    // 3) Fallback: Wikipedia + DuckDuckGo Instant Answers (no key needed)
     const [wiki, ddg] = await Promise.all([searchWikipedia(q), searchDuckDuckGo(q)]);
     const results = [];
     const seen = new Set();
