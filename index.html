@@ -5969,7 +5969,7 @@ function noriaSpeak(html,btnEl){
     if(_noriaCurrentSpeakBtn){_noriaCurrentSpeakBtn.classList.remove('speaking');_noriaCurrentSpeakBtn.innerHTML='🔊 Listen';}
     if(btnEl===_noriaCurrentSpeakBtn)return; // same btn = just stop
   }
-  const clean=(html||'').replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+  const clean=(html||'').replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/#{1,6}\s*/g,'').replace(/`([^`]+)`/g,'$1').replace(/\s+/g,' ').trim();
   if(!clean)return;
   const utt=new SpeechSynthesisUtterance(clean);
   utt.lang='en-US';utt.rate=1.0;utt.pitch=1.05;
@@ -6063,14 +6063,14 @@ async function noriaSubmit(q){
   _noriaAddMsg(q,'user');
   _noriaAddMsg('<span style="display:inline-flex;gap:4px;align-items:center"><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite 0s"></span><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite .2s"></span><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite .4s"></span></span>','bot','noriaTyping');
   try{
-    const r=await fetch('/api/noria',{
+    const r=await fetch('https://noria-engine.onrender.com/v1/ask',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:q,history:noriaHistory.slice(-10)})
+      body:JSON.stringify({query:q,history:noriaHistory.slice(-10)})
     });
     const data=await r.json();
     document.getElementById('noriaTyping')?.remove();
-    const reply=data.reply||'I apologize — please try again or WhatsApp us at +1 737-399-8522.';
+    const reply=data.answer||'I apologize — please try again or WhatsApp us at +1 737-399-8522.';
     _noriaAddMsg(reply,'bot');
     noriaHistory.push({role:'user',parts:[{text:q}]});
     noriaHistory.push({role:'model',parts:[{text:reply}]});
