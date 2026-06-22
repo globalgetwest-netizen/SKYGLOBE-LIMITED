@@ -891,12 +891,17 @@ app.post('/api/noria', async (req, res) => {
         query: String(message).trim(),
         history: Array.isArray(history) ? history.slice(-10) : [],
       }),
+      signal: AbortSignal.timeout(55000),
     });
     const data = await r.json();
     res.json({ reply: data.answer || skyglobeFaqAnswer(String(message).trim()), source: 'noria' });
   } catch (e) {
     console.error('NORIA proxy error:', e.message);
-    res.json({ reply: skyglobeFaqAnswer(String(message).trim()), source: 'faq' });
+    const isTimeout = e.name === 'TimeoutError' || e.name === 'AbortError';
+    const fallback = isTimeout
+      ? 'NORIA is warming up — this is a cold start and takes about 30 seconds. Please send your message again in a moment.'
+      : skyglobeFaqAnswer(String(message).trim());
+    res.json({ reply: fallback, source: 'faq' });
   }
 });
 
