@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -884,38 +883,20 @@ app.post('/api/noria', async (req, res) => {
   const { message, history } = req.body || {};
   if (!message || !String(message).trim())
     return res.status(400).json({ error: 'Message is required.' });
-
-  const userMsg = String(message).trim();
-
-  // Augment with live search for queries needing current data
-  let searchContext = '';
-  const needsLive = /conference|event|news|current|latest|today|2025|2026|deadline|price|rate|opening|application/i.test(userMsg);
-  if (needsLive && process.env.BRAVE_SEARCH_API_KEY) {
-    try {
-      const results = await searchBrave(userMsg + ' immigration visa 2025');
-      if (Array.isArray(results) && results.length) {
-        searchContext = '\n\nLive web context (use to supplement your answer where relevant):\n' +
-          results.slice(0, 3).map(r => `• ${r.title}: ${r.description || ''}`).join('\n');
-      }
-    } catch (_) {}
-  }
-
-  if (!USE_OLLAMA && !USE_GROQ && !process.env.GEMINI_API_KEY)
-    return res.json({ reply: skyglobeFaqAnswer(userMsg), source: 'faq' });
-
   try {
-    const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
-    const contents = safeHistory.map(h => ({
-      role: h.role,
-      parts: h.parts || [{ text: h.content || '' }],
-    }));
-    const systemWithContext = searchContext ? NORIA_SYSTEM + searchContext : NORIA_SYSTEM;
-    contents.push({ role: 'user', parts: [{ text: userMsg }] });
-    const reply = await academyAskGemini(systemWithContext, contents, 1400);
-    res.json({ reply: reply || skyglobeFaqAnswer(userMsg), source: 'noria' });
+    const r = await fetch('https://noria-engine.onrender.com/v1/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: String(message).trim(),
+        history: Array.isArray(history) ? history.slice(-10) : [],
+      }),
+    });
+    const data = await r.json();
+    res.json({ reply: data.answer || skyglobeFaqAnswer(String(message).trim()), source: 'noria' });
   } catch (e) {
-    console.error('NORIA error:', e.message);
-    res.json({ reply: skyglobeFaqAnswer(userMsg), source: 'faq' });
+    console.error('NORIA proxy error:', e.message);
+    res.json({ reply: skyglobeFaqAnswer(String(message).trim()), source: 'faq' });
   }
 });
 
