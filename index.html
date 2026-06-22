@@ -6066,10 +6066,17 @@ async function noriaSubmit(q){
     const r=await fetch('/api/noria',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:q,history:noriaHistory.slice(-10)})
+      body:JSON.stringify({message:q,history:noriaHistory.slice(-10)}),
+      signal:AbortSignal.timeout(28000)
     });
     const data=await r.json();
     document.getElementById('noriaTyping')?.remove();
+    if(data.reply==='__NORIA_WARMING__'){
+      _noriaAddMsg('⏳ NORIA is starting up — this takes about 30 seconds on the first request. Retrying automatically…','bot');
+      noriaBusy=false;
+      setTimeout(()=>noriaAsk(q),35000);
+      return;
+    }
     const reply=data.reply||'I apologize — please try again or WhatsApp us at +1 737-399-8522.';
     _noriaAddMsg(reply,'bot');
     noriaHistory.push({role:'user',parts:[{text:q}]});
@@ -6077,7 +6084,7 @@ async function noriaSubmit(q){
     if(noriaHistory.length>30)noriaHistory=noriaHistory.slice(-30);
   }catch(e){
     document.getElementById('noriaTyping')?.remove();
-    _noriaAddMsg('⚡ NORIA is reconnecting. Please try again or contact us at +1 737-399-8522.','bot');
+    _noriaAddMsg('⏳ NORIA is starting up — please wait 30 seconds and send your message again.','bot');
   }
   noriaBusy=false;
 }
