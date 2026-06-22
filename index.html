@@ -6063,14 +6063,14 @@ async function noriaSubmit(q){
   _noriaAddMsg(q,'user');
   _noriaAddMsg('<span style="display:inline-flex;gap:4px;align-items:center"><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite 0s"></span><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite .2s"></span><span style="width:7px;height:7px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite .4s"></span></span>','bot','noriaTyping');
   try{
-    const r=await fetch('https://noria-engine.onrender.com/v1/ask',{
+    const r=await fetch('/api/noria',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:q,history:noriaHistory.slice(-10)})
+      body:JSON.stringify({message:q,history:noriaHistory.slice(-10)})
     });
     const data=await r.json();
     document.getElementById('noriaTyping')?.remove();
-    const reply=data.answer||'I apologize — please try again or WhatsApp us at +1 737-399-8522.';
+    const reply=data.reply||'I apologize — please try again or WhatsApp us at +1 737-399-8522.';
     _noriaAddMsg(reply,'bot');
     noriaHistory.push({role:'user',parts:[{text:q}]});
     noriaHistory.push({role:'model',parts:[{text:reply}]});
