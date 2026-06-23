@@ -440,6 +440,99 @@ textarea::placeholder{color:var(--text-dim)}
   .upgrade-btn span{display:none}
   .tool-btn span{display:none}
 }
+
+/* ════════════════════════════════════════════════════════
+   NORIA PREMIUM RESPONSIVE LAYER
+   Flawless on every device — phone, tablet, laptop, desktop,
+   foldables & ultrawide. Built on existing theme variables.
+   ════════════════════════════════════════════════════════ */
+
+/* iOS / notch safe areas — keep content clear of cutouts & home bar */
+@supports(padding:max(0px)){
+  .topbar{padding-right:max(20px,env(safe-area-inset-right))}
+  .sidebar{padding-left:env(safe-area-inset-left)}
+  .composer-wrap{
+    padding-left:max(20px,env(safe-area-inset-left));
+    padding-right:max(20px,env(safe-area-inset-right));
+    padding-bottom:max(16px,env(safe-area-inset-bottom));
+  }
+}
+
+/* Ultrawide / large desktop — center content, widen reading column */
+@media(min-width:1500px){
+  :root{--sidebar:300px}
+  .stream,.composer-inner{max-width:860px}
+  .proj-welcome{max-width:780px}
+  .content{font-size:1rem}
+}
+
+/* Standard desktop — comfortable defaults already apply (≥1025px) */
+
+/* Tablet landscape (≤1024px) — tighten chrome, keep sidebar */
+@media(max-width:1024px){
+  :root{--sidebar:240px}
+  .stream,.composer-inner{max-width:680px}
+  .search-wrap{width:180px}
+  .search-wrap:focus-within{width:220px}
+}
+
+/* Tablet portrait & large phones (≤768px) — sidebar becomes overlay drawer */
+@media(max-width:768px){
+  .app{grid-template-columns:0 1fr}
+  .sidebar{position:fixed;left:0;top:0;height:100dvh;width:var(--sidebar);box-shadow:var(--shadow)}
+  .sidebar.hidden{margin-left:calc(-1 * var(--sidebar))}
+  .tb-brand{display:none}
+  .toolbar{grid-column:1/-1;overflow-x:auto;scrollbar-width:none}
+  .toolbar::-webkit-scrollbar{display:none}
+  .stream{padding:16px 18px 8px}
+  .composer-wrap{padding:8px 16px 14px}
+}
+
+/* Phones (≤600px) — single column, larger touch targets */
+@media(max-width:600px){
+  :root{--sidebar:84vw;--topbar:54px;--toolbar:46px}
+  .stream{padding:14px 14px 6px}
+  .welcome{padding:24px 16px 12px}
+  .w-greeting{font-size:1.45rem;margin-bottom:20px}
+  .modules,.proj-welcome{max-width:100%}
+  .proj-actions-grid{grid-template-columns:1fr}
+  .proj-title{font-size:1.3rem}
+  .proj-icon-lg{width:44px;height:44px}
+  .proj-icon-lg svg{width:22px;height:22px}
+  .content{font-size:.92rem;line-height:1.7}
+  .content table{font-size:.8rem}
+  /* Comfortable, thumb-friendly tap targets */
+  .icon-btn{width:38px;height:38px}
+  .cb{width:40px;height:40px}
+  .tool-btn{padding:8px 12px}
+  .act{padding:6px 11px;font-size:.74rem}
+  .msg{gap:10px;padding:16px 0}
+  .av{width:30px;height:30px}
+}
+
+/* Small phones (≤380px) — protect from cramping */
+@media(max-width:380px){
+  :root{--sidebar:88vw}
+  .w-greeting{font-size:1.25rem}
+  .tb-name{font-size:1.1rem}
+  .tb-badge{display:none}
+  .stream{padding:12px 11px 6px}
+  .composer{padding:7px 7px 7px 14px}
+  textarea{font-size:.9rem}
+  .proj-title{font-size:1.15rem}
+}
+
+/* Landscape phones — reclaim vertical space */
+@media(max-height:480px) and (orientation:landscape){
+  :root{--topbar:48px;--toolbar:42px}
+  .welcome{justify-content:flex-start;padding-top:18px}
+  .w-greeting{margin-bottom:14px}
+}
+
+/* Honour reduced-motion preference for accessibility */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
 </style>
 </head>
 <body>
