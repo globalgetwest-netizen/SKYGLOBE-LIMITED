@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-<title>NORIA — Intelligence with Elegance</title>
+<title>NORIA</title>
 <meta name="description" content="NORIA — SkyGlobe Group's AI intelligence assistant."/>
+<meta name="application-name" content="NORIA"/>
+<meta name="apple-mobile-web-app-title" content="NORIA"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#060B1E"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='b' cx='40%25' cy='35%25' r='75%25'%3E%3Cstop offset='0' stop-color='%23c8e2ff'/%3E%3Cstop offset='1' stop-color='%237aaee0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='%230A1128'/%3E%3Ccircle cx='50' cy='50' r='36' fill='url(%23b)' opacity='.9' stroke='%231a56a0' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='27' fill='none' stroke='%23C9A84C' stroke-width='2'/%3E%3Cpolygon points='50,10 53,44 50,56 47,44' fill='%231a56a0'/%3E%3Cpolygon points='50,90 53,56 50,44 47,56' fill='%231a56a0' opacity='.6'/%3E%3Cpolygon points='90,50 56,53 44,50 56,47' fill='%231a56a0' opacity='.7'/%3E%3Cpolygon points='10,50 44,53 56,50 44,47' fill='%231a56a0' opacity='.7'/%3E%3Cpolygon points='50,43 56,50 50,57 44,50' fill='%23C9A84C'/%3E%3Ctext x='50' y='57' text-anchor='middle' font-family='Georgia,serif' font-size='30' font-weight='700' fill='%231a56a0'%3EN%3C/text%3E%3C/svg%3E"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -113,6 +117,8 @@
 
 /* ─── Reset & base ─── */
 *{box-sizing:border-box;margin:0;padding:0}
+/* premium: all line-icons get rounded, smooth joints */
+svg{stroke-linecap:round;stroke-linejoin:round}
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -162,7 +168,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .project-item:hover{background:var(--bg-hover);color:var(--text)}
 .project-item.active{background:var(--accent-glow);color:var(--accent);font-weight:600}
 .project-item.active::before{content:'';position:absolute;left:0;top:18%;height:64%;width:3px;background:var(--accent);border-radius:0 3px 3px 0}
-.project-icon{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:grid;place-items:center;font-size:.85rem;background:var(--bg-hover)}
+.project-icon{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:grid;place-items:center;background:var(--bg-hover)}
+.project-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7}
 .project-item.active .project-icon{background:var(--accent-glow)}
 .project-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sidebar-divider{height:1px;background:var(--border);margin:8px 14px}
@@ -258,10 +265,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .typing b{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.3;animation:dot 1.3s infinite;display:block}
 .typing b:nth-child(2){animation-delay:.18s}.typing b:nth-child(3){animation-delay:.36s}
 @keyframes dot{0%,60%,100%{opacity:.2;transform:scale(.8)}30%{opacity:1;transform:scale(1.1)}}
-.msg-acts{display:flex;gap:5px;margin-top:10px;opacity:0;transition:opacity .2s}
+.msg-acts{display:flex;gap:7px;margin-top:12px;opacity:0;transition:opacity .25s}
 .msg:hover .msg-acts{opacity:1}
-.act{font-size:.7rem;color:var(--text-dim);background:transparent;border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:var(--ease);font-family:var(--font)}
-.act:hover{color:var(--text);border-color:var(--text-dim);background:var(--bg-hover)}
+/* premium icon-pill buttons — solid enough to read on any theme */
+.act{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 13px 5px 10px;
+  border-radius:20px;
+  border:1.5px solid var(--border);
+  background:var(--bg-elev);
+  color:var(--text-soft);
+  font-family:var(--font);font-size:.74rem;font-weight:600;
+  cursor:pointer;transition:var(--ease);
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
+}
+.act svg{flex-shrink:0;stroke:var(--accent);transition:stroke var(--ease)}
+.act:hover{
+  background:var(--accent-glow);
+  border-color:var(--accent);
+  color:var(--text);
+  transform:translateY(-1px);
+  box-shadow:0 3px 10px var(--accent-glow);
+}
+.act:hover svg{stroke:var(--accent)}
 
 /* ─── Composer ─── */
 .composer-wrap{flex-shrink:0;padding:8px 20px 16px;background:var(--bg)}
@@ -284,28 +310,23 @@ textarea::placeholder{color:var(--text-dim)}
 /* ─── Coming soon panel ─── */
 .coming-soon{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--text-soft);font-size:.9rem}
 
-/* ─── Voice overlay (WhatsApp/ChatGPT style) ─── */
-.voice-overlay{
-  position:fixed;inset:0;z-index:300;
-  background:rgba(4,6,18,.97);
-  display:none;flex-direction:column;align-items:center;justify-content:center;gap:28px;
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+/* ─── Inline voice bar (inside composer, ChatGPT-style) ─── */
+.voice-inline{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-elev);border:1.5px solid var(--accent);
+  border-radius:22px;padding:9px 9px 9px 16px;
+  box-shadow:0 0 0 3px var(--accent-glow);
+  animation:viFadeIn .22s ease;
 }
-.voice-overlay.show{display:flex}
-.voice-logo-wrap{width:64px;height:64px;opacity:.9}
-.voice-logo-wrap svg{width:100%;height:100%}
-.voice-status{font-family:var(--serif);font-size:1.5rem;font-weight:600;color:#E8EEFF;letter-spacing:.04em}
-.voice-waveform{display:flex;align-items:center;gap:5px;height:72px}
-.v-bar{width:4px;border-radius:3px;background:var(--gold);animation:vwave 1.4s ease-in-out infinite}
-@keyframes vwave{0%,100%{height:6px;opacity:.25}50%{height:var(--h,40px);opacity:1}}
-.voice-transcript{font-size:.92rem;color:rgba(232,238,255,.6);max-width:340px;text-align:center;min-height:26px;font-style:italic;padding:0 16px}
-.voice-hint{font-size:.78rem;color:rgba(232,238,255,.35);letter-spacing:.03em}
-.voice-controls{display:flex;align-items:center;gap:28px;margin-top:8px}
-.voice-btn{border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;transition:var(--ease)}
-.voice-btn-cancel{width:56px;height:56px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.15)}
-.voice-btn-cancel:hover{background:rgba(255,255,255,.14);color:#fff;transform:scale(1.05)}
-.voice-btn-send{width:68px;height:68px;background:var(--gold);color:#0A1128;box-shadow:0 4px 24px rgba(201,168,76,.5)}
-.voice-btn-send:hover{background:var(--gold-light);transform:scale(1.06);box-shadow:0 6px 30px rgba(201,168,76,.6)}
+@keyframes viFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.vi-wave{display:flex;align-items:center;gap:3px;height:36px;flex-shrink:0}
+.v-bar{width:3px;border-radius:2px;background:var(--accent);animation:vwave 1.3s ease-in-out infinite}
+@keyframes vwave{0%,100%{height:4px;opacity:.3}50%{height:var(--h,24px);opacity:1}}
+.vi-text{flex:1;font-size:.88rem;color:var(--text-soft);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.vi-cancel{background:var(--bg-hover);color:var(--text-dim);border:1px solid var(--border);width:32px;height:32px;border-radius:50%;flex-shrink:0}
+.vi-cancel:hover{color:var(--text);border-color:var(--text-soft)}
+.vi-send{background:var(--accent);color:#fff;box-shadow:0 2px 10px var(--accent-glow);width:36px;height:36px;border-radius:50%;flex-shrink:0}
+.vi-send:hover{filter:brightness(1.1);transform:translateY(-1px)}
 
 /* ─── Login modal ─── */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(4,6,18,.8);z-index:100;place-items:center;backdrop-filter:blur(8px)}
@@ -322,6 +343,10 @@ textarea::placeholder{color:var(--text-dim)}
 .modal-btn:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,168,76,.4)}
 .modal-skip{display:block;margin-top:14px;font-size:.78rem;color:var(--text-dim);cursor:pointer;text-decoration:underline}
 .modal-skip:hover{color:var(--text)}
+.action-modal{text-align:left}
+.action-modal h2{text-align:left;margin-bottom:14px}
+.action-modal-tag{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-glow);border:1px solid var(--accent);padding:3px 10px;border-radius:100px;margin-bottom:14px}
+.action-modal textarea:focus{border-color:var(--accent)}
 
 /* ─── Overlay (mobile sidebar) ─── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:12;backdrop-filter:blur(2px)}
@@ -388,40 +413,36 @@ textarea::placeholder{color:var(--text-dim)}
       <!-- small gold star accent -->
       <g transform="translate(63,44)"><polygon points="0,-3.2 .75,-.75 3.2,0 .75,.75 0,3.2 -.75,.75 -3.2,0 -.75,-.75" fill="#E8C97A"/></g>
     </symbol>
+
+    <!-- ── Premium project line-icons (24×24) ── -->
+    <symbol id="ic-chat" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-4.2 3.6a.6.6 0 0 1-1-.46V5.5Z"/><path d="M8 8.5h8M8 12h5"/></symbol>
+    <symbol id="ic-book" viewBox="0 0 24 24"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H11a2 2 0 0 1 2 2v15a1.6 1.6 0 0 0-1.6-1.6H5.5A1.5 1.5 0 0 1 4 16.9V4.5Z"/><path d="M20 4.5A1.5 1.5 0 0 0 18.5 3H13a2 2 0 0 0-2 2v15a1.6 1.6 0 0 1 1.6-1.6h5.9A1.5 1.5 0 0 0 20 16.9V4.5Z"/></symbol>
+    <symbol id="ic-briefcase" viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8.5 7.5V5.8A1.8 1.8 0 0 1 10.3 4h3.4a1.8 1.8 0 0 1 1.8 1.8v1.7"/><path d="M3 12.5h18"/></symbol>
+    <symbol id="ic-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l2 2.5h9A1.5 1.5 0 0 1 21 9v8.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6.5Z"/></symbol>
+    <symbol id="ic-cap" viewBox="0 0 24 24"><path d="M2.5 9 12 5l9.5 4-9.5 4-9.5-4Z"/><path d="M6.5 11.2v4.3c0 1 2.5 2.5 5.5 2.5s5.5-1.5 5.5-2.5v-4.3"/><path d="M21.5 9v4.5"/></symbol>
+    <symbol id="ic-clipboard" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 4.5V6H9V4.5Z"/><path d="M9 11h6M9 14.5h4"/></symbol>
+    <symbol id="ic-scales" viewBox="0 0 24 24"><path d="M12 3v17M7 20h10"/><path d="M12 6 5 8m7-2 7 2"/><path d="M5 8 2.5 13.5h5L5 8Zm14 0-2.5 5.5h5L19 8Z"/></symbol>
+    <symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 3.8 5.7 3.8 9S14.5 18.5 12 21c-2.5-2.5-3.8-5.7-3.8-9S9.5 5.5 12 3Z"/></symbol>
+    <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6"/></symbol>
+    <symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="ic-bolt" viewBox="0 0 24 24"><path d="M13 2 4.5 13.5h6L11 22l8.5-11.5h-6L13 2Z"/></symbol>
+    <symbol id="ic-bulb" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2H14.5c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3Z"/></symbol>
+    <symbol id="ic-gem" viewBox="0 0 24 24"><path d="M6 3h12l3 5-9 13L3 8l3-5Z"/><path d="M3 8h18M9 3 7.5 8 12 21 16.5 8 15 3"/></symbol>
+    <symbol id="ic-legacy" viewBox="0 0 24 24"><path d="M3 9 12 4l9 5"/><path d="M5 9v8m4-8v8m6-8v8m4-8v8"/><path d="M3.5 20h17"/></symbol>
   </defs>
 </svg>
 
-<!-- Voice Overlay -->
-<div class="voice-overlay" id="voiceOverlay">
-  <div class="voice-logo-wrap"><svg viewBox="0 0 100 100"><use href="#noriaMark"/></svg></div>
-  <div class="voice-status" id="voiceStatus">Listening…</div>
-  <div class="voice-waveform" id="voiceWaveform">
-    <div class="v-bar" style="--h:14px;animation-delay:0s"></div>
-    <div class="v-bar" style="--h:28px;animation-delay:.08s"></div>
-    <div class="v-bar" style="--h:48px;animation-delay:.16s"></div>
-    <div class="v-bar" style="--h:62px;animation-delay:.24s"></div>
-    <div class="v-bar" style="--h:54px;animation-delay:.32s"></div>
-    <div class="v-bar" style="--h:68px;animation-delay:.40s"></div>
-    <div class="v-bar" style="--h:46px;animation-delay:.48s"></div>
-    <div class="v-bar" style="--h:58px;animation-delay:.56s"></div>
-    <div class="v-bar" style="--h:70px;animation-delay:.64s"></div>
-    <div class="v-bar" style="--h:52px;animation-delay:.72s"></div>
-    <div class="v-bar" style="--h:60px;animation-delay:.80s"></div>
-    <div class="v-bar" style="--h:40px;animation-delay:.88s"></div>
-    <div class="v-bar" style="--h:50px;animation-delay:.96s"></div>
-    <div class="v-bar" style="--h:32px;animation-delay:1.04s"></div>
-    <div class="v-bar" style="--h:20px;animation-delay:1.12s"></div>
-    <div class="v-bar" style="--h:10px;animation-delay:1.20s"></div>
-  </div>
-  <div class="voice-transcript" id="voiceTranscript"></div>
-  <div class="voice-hint">Take your time — tap send when you're done</div>
-  <div class="voice-controls">
-    <button class="voice-btn voice-btn-cancel" onclick="cancelVoice()" title="Cancel" aria-label="Cancel">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <button class="voice-btn voice-btn-send" onclick="finishVoice()" title="Send" aria-label="Send">
-      <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    </button>
+
+<!-- Action input modal -->
+<div class="modal-bg" id="actionModal">
+  <div class="modal action-modal">
+    <div class="action-modal-tag" id="actionModalTitle"></div>
+    <h2 id="actionModalAsk" style="font-size:1.25rem">Tell me more</h2>
+    <textarea id="actionModalInput" rows="3" placeholder="Type here…"
+      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--font);font-size:.92rem;color:var(--text);outline:none;resize:none;margin-bottom:14px;line-height:1.5"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitActionModal();}"></textarea>
+    <button class="modal-btn" onclick="submitActionModal()">Generate</button>
+    <span class="modal-skip" onclick="closeActionModal()">Cancel</span>
   </div>
 </div>
 
@@ -467,24 +488,24 @@ textarea::placeholder{color:var(--text-dim)}
   <!-- TOOLBAR -->
   <div class="toolbar">
     <button class="tool-btn active" onclick="setTool(this,'chat')" data-tool="chat">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M7.5 8h9M7.5 12h6"/><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-4.2 3.6a.6.6 0 0 1-1-.46V5.5Z"/></svg>
       <span>Chat</span>
     </button>
     <div class="tool-sep"></div>
     <button class="tool-btn" onclick="setTool(this,'docs')" data-tool="docs">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5L13.5 3Z"/><path d="M13.5 3v5.5H19"/><path d="M8.5 13h7M8.5 16.5h5"/></svg>
       <span>Docs</span>
     </button>
     <button class="tool-btn" onclick="setTool(this,'images')" data-tool="images">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m3.5 17 4.5-4.2a1.5 1.5 0 0 1 2 0L15 17.5"/><path d="m13 14 1.8-1.7a1.5 1.5 0 0 1 2.1 0l3.4 3.2"/></svg>
       <span>Images</span>
     </button>
     <button class="tool-btn" onclick="setTool(this,'apps')" data-tool="apps">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg>
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
       <span>Apps</span>
     </button>
     <button class="upgrade-btn" onclick="showUpgrade()">
-      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="m12 2.5 2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.9l-5.8 3.05 1.1-6.45-4.7-4.6 6.5-.95L12 2.5Z"/></svg>
       <span>Upgrade</span>
     </button>
   </div>
@@ -493,24 +514,24 @@ textarea::placeholder{color:var(--text-dim)}
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-section-label">Projects</div>
     <button class="new-project-btn" onclick="newChat()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>
       New Project
     </button>
     <div class="project-list" id="projectList">
-      <div class="project-item active" onclick="selectProject(this,'General Chat')" data-project="General Chat"><div class="project-icon">💬</div><span class="project-label">General Chat</span></div>
-      <div class="project-item" onclick="selectProject(this,'Home Work')" data-project="Home Work"><div class="project-icon">📚</div><span class="project-label">Home Work</span></div>
-      <div class="project-item" onclick="selectProject(this,'Business Docs')" data-project="Business Docs"><div class="project-icon">💼</div><span class="project-label">Business Docs</span></div>
-      <div class="project-item" onclick="selectProject(this,'Office Docs')" data-project="Office Docs"><div class="project-icon">🗂️</div><span class="project-label">Office Docs</span></div>
-      <div class="project-item" onclick="selectProject(this,'Educational Docs')" data-project="Educational Docs"><div class="project-icon">🎓</div><span class="project-label">Educational Docs</span></div>
-      <div class="project-item" onclick="selectProject(this,'Official Docs')" data-project="Official Docs"><div class="project-icon">📋</div><span class="project-label">Official Docs</span></div>
-      <div class="project-item" onclick="selectProject(this,'Legal Docs')" data-project="Legal Docs"><div class="project-icon">⚖️</div><span class="project-label">Legal Docs</span></div>
-      <div class="project-item" onclick="selectProject(this,'Global Opportunities')" data-project="Global Opportunities"><div class="project-icon">🌍</div><span class="project-label">Global Opportunities</span></div>
-      <div class="project-item" onclick="selectProject(this,'Purpose')" data-project="Purpose"><div class="project-icon">🎯</div><span class="project-label">Purpose</span></div>
-      <div class="project-item" onclick="selectProject(this,'Vision')" data-project="Vision"><div class="project-icon">🔭</div><span class="project-label">Vision</span></div>
-      <div class="project-item" onclick="selectProject(this,'Vitality')" data-project="Vitality"><div class="project-icon">⚡</div><span class="project-label">Vitality</span></div>
-      <div class="project-item" onclick="selectProject(this,'Wisdom')" data-project="Wisdom"><div class="project-icon">🧠</div><span class="project-label">Wisdom</span></div>
-      <div class="project-item" onclick="selectProject(this,'Wealth')" data-project="Wealth"><div class="project-icon">💎</div><span class="project-label">Wealth</span></div>
-      <div class="project-item" onclick="selectProject(this,'Legacy')" data-project="Legacy"><div class="project-icon">🏛️</div><span class="project-label">Legacy</span></div>
+      <div class="project-item active" onclick="selectProject(this,'General Chat')" data-project="General Chat"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-chat"/></svg></div><span class="project-label">General Chat</span></div>
+      <div class="project-item" onclick="selectProject(this,'Home Work')" data-project="Home Work"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-book"/></svg></div><span class="project-label">Home Work</span></div>
+      <div class="project-item" onclick="selectProject(this,'Business Docs')" data-project="Business Docs"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-briefcase"/></svg></div><span class="project-label">Business Docs</span></div>
+      <div class="project-item" onclick="selectProject(this,'Office Docs')" data-project="Office Docs"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-folder"/></svg></div><span class="project-label">Office Docs</span></div>
+      <div class="project-item" onclick="selectProject(this,'Educational Docs')" data-project="Educational Docs"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-cap"/></svg></div><span class="project-label">Educational Docs</span></div>
+      <div class="project-item" onclick="selectProject(this,'Official Docs')" data-project="Official Docs"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-clipboard"/></svg></div><span class="project-label">Official Docs</span></div>
+      <div class="project-item" onclick="selectProject(this,'Legal Docs')" data-project="Legal Docs"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-scales"/></svg></div><span class="project-label">Legal Docs</span></div>
+      <div class="project-item" onclick="selectProject(this,'Global Opportunities')" data-project="Global Opportunities"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-globe"/></svg></div><span class="project-label">Global Opportunities</span></div>
+      <div class="project-item" onclick="selectProject(this,'Purpose')" data-project="Purpose"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-target"/></svg></div><span class="project-label">Purpose</span></div>
+      <div class="project-item" onclick="selectProject(this,'Vision')" data-project="Vision"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-eye"/></svg></div><span class="project-label">Vision</span></div>
+      <div class="project-item" onclick="selectProject(this,'Vitality')" data-project="Vitality"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-bolt"/></svg></div><span class="project-label">Vitality</span></div>
+      <div class="project-item" onclick="selectProject(this,'Wisdom')" data-project="Wisdom"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-bulb"/></svg></div><span class="project-label">Wisdom</span></div>
+      <div class="project-item" onclick="selectProject(this,'Wealth')" data-project="Wealth"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-gem"/></svg></div><span class="project-label">Wealth</span></div>
+      <div class="project-item" onclick="selectProject(this,'Legacy')" data-project="Legacy"><div class="project-icon"><svg viewBox="0 0 24 24"><use href="#ic-legacy"/></svg></div><span class="project-label">Legacy</span></div>
     </div>
     <div class="sidebar-divider"></div>
     <div class="chat-hist-label">Recent</div>
@@ -544,7 +565,8 @@ textarea::placeholder{color:var(--text-dim)}
     <!-- Composer -->
     <div class="composer-wrap" id="composerWrap">
       <div class="composer-inner">
-        <div class="composer">
+        <!-- Normal text input row -->
+        <div class="composer" id="composerBar">
           <textarea id="input" rows="1" placeholder="Ask NORIA anything…" aria-label="Message"></textarea>
           <button class="cb mic" id="micBtn" onclick="toggleMic()" aria-label="Voice input" title="Voice input">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -560,6 +582,30 @@ textarea::placeholder{color:var(--text-dim)}
             </svg>
           </button>
         </div>
+        <!-- Inline voice bar — replaces the text bar while listening -->
+        <div class="voice-inline" id="voiceInline" style="display:none">
+          <div class="vi-wave">
+            <div class="v-bar" style="--h:10px;animation-delay:0s"></div>
+            <div class="v-bar" style="--h:22px;animation-delay:.07s"></div>
+            <div class="v-bar" style="--h:36px;animation-delay:.14s"></div>
+            <div class="v-bar" style="--h:28px;animation-delay:.21s"></div>
+            <div class="v-bar" style="--h:40px;animation-delay:.28s"></div>
+            <div class="v-bar" style="--h:32px;animation-delay:.35s"></div>
+            <div class="v-bar" style="--h:44px;animation-delay:.42s"></div>
+            <div class="v-bar" style="--h:36px;animation-delay:.49s"></div>
+            <div class="v-bar" style="--h:44px;animation-delay:.56s"></div>
+            <div class="v-bar" style="--h:30px;animation-delay:.63s"></div>
+            <div class="v-bar" style="--h:38px;animation-delay:.70s"></div>
+            <div class="v-bar" style="--h:24px;animation-delay:.77s"></div>
+          </div>
+          <span class="vi-text" id="voiceTranscript">Listening…</span>
+          <button class="cb vi-cancel" onclick="cancelVoice()" title="Cancel" aria-label="Cancel">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <button class="cb vi-send" onclick="finishVoice()" title="Send" aria-label="Send">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
         <div class="disclaimer">NORIA · SkyGlobe Intelligence · AI can make mistakes — verify critical information</div>
       </div>
     </div>
@@ -570,19 +616,24 @@ textarea::placeholder{color:var(--text-dim)}
 <script>
 const ENGINE = 'https://noria-engine.onrender.com/v1/ask';
 
-const SYSTEM_PROMPT = `You are NORIA, SkyGlobe Group's world-class AI intelligence assistant.
-Tagline: "Intelligence with Elegance." Created by SkyGlobe Group.
+const SYSTEM_PROMPT = `You are NORIA — SkyGlobe Group's world-class intelligence. You speak with the confidence of a world-class expert who has mastered every subject. You do not cite sources, reference databases, or say things like "according to sources" or "source 1, source 2". You speak from knowledge — directly, clearly, and with full authority, the way a brilliant professor, strategist, or advisor speaks to a person they respect.
 
-CRITICAL RULES:
-- NEVER introduce yourself unless explicitly asked "who are you" or "what are you".
-- NEVER start a response with "I am NORIA" or any self-introduction.
-- Answer the question directly, immediately, without any preamble.
-- Structure every response clearly — use headers, bullets, numbered lists, bold text exactly like a premium AI assistant.
-- Be thorough but concise. No filler. No padding. No repetition.
-- Match the user's language. Be honest about uncertainty.
-- Never reveal your underlying model or technical stack.
+VOICE & COMMUNICATION STYLE:
+- Confident and clear — never hesitant, never hedging unnecessarily
+- Structured and precise — use headers, numbered steps, bullets where useful
+- Warm but professional — you care about the person you're speaking to
+- Direct — answer the question immediately, no preamble, no filler
+- Human — write the way a highly intelligent, articulate person speaks
 
-Your expertise spans all domains including Africa, global mobility, world history, science, business, technology, law, finance, education, and every field of human knowledge.`;
+HARD RULES:
+- NEVER say "Source 1", "Source 2", "according to source", or cite references
+- NEVER introduce yourself unless the user directly asks who or what you are
+- NEVER say "I am NORIA" unprompted
+- NEVER say "I don't have access to real-time data" in a way that makes you seem limited — simply say what you know with confidence and note if something changes frequently
+- NEVER reveal your underlying model or technical infrastructure
+- NEVER pad responses with unnecessary filler or repetition
+
+Your knowledge spans every domain: Africa, global mobility, world history, science, business, technology, law, finance, education, culture, and all of human knowledge. Speak like you own it.`;
 
 const MODULES = [
   {
@@ -590,35 +641,300 @@ const MODULES = [
     codename:'SNova',
     status:'s-active', statusLabel:'ACTIVE',
     tagline:'"Turn ideas into action"',
-    actions:[{label:'Create a Plan',q:'Help me create a step-by-step plan for my idea'},{label:'Solve a Problem',q:'I have a challenge I need to solve'},{label:'Build Something',q:'Help me build and execute a new project'}]
+    actions:[
+      {
+        label:'Create a Plan',
+        ask:'What do you want to plan?',
+        ph:'e.g. Launch my online clothing store in 90 days',
+        tpl:`Act as an elite execution strategist. Create a complete, ready-to-use ACTION PLAN for: "{INPUT}".
+
+Structure your response exactly like this:
+## 🎯 Goal & Success Criteria
+(Define the goal clearly and what success looks like, measurably.)
+## 🗺️ Phases & Milestones
+(Break into 3–5 clear phases. For each: name, objective, key milestones.)
+## ✅ Step-by-Step Actions
+(A numbered checklist of concrete tasks, in order.)
+## ⏱️ Suggested Timeline
+(A realistic timeline table — Phase | Duration | Deliverable.)
+## 🧰 Resources & Tools Needed
+(People, tools, budget, materials.)
+## ⚠️ Risks & How to Handle Them
+(Top risks + mitigation for each.)
+## 🚀 Your First Action Today
+(The single most important thing to do right now.)
+
+Be specific and practical. No vague advice.`
+      },
+      {
+        label:'Solve a Problem',
+        ask:'What problem are you facing?',
+        ph:'e.g. My business is losing customers and I don\'t know why',
+        tpl:`Act as a world-class problem solver. Help me fully solve this problem: "{INPUT}".
+
+Structure your response like this:
+## 🔍 Understanding the Problem
+(Restate it clearly and identify what's really being asked.)
+## 🧩 Root Causes
+(Dig into the likely underlying causes, not just symptoms.)
+## 💡 Possible Solutions
+(3–4 distinct options. For each: how it works, pros, cons.)
+## ⭐ Recommended Solution
+(Pick the best one and explain why.)
+## ✅ Action Steps
+(Exact steps to implement the recommended solution.)
+
+Be decisive and practical.`
+      },
+      {
+        label:'Build Something',
+        ask:'What do you want to build?',
+        ph:'e.g. A mobile app, a brand, a community, a product',
+        tpl:`Act as a master builder and product architect. Give me a complete BUILD BLUEPRINT for: "{INPUT}".
+
+Structure:
+## 🏗️ What We're Building
+(Clear definition + the vision.)
+## 🧱 Core Components
+(Every essential part/feature it needs.)
+## 🔧 Tools & Materials
+(Exactly what's required to build it.)
+## 📋 Build Steps
+(Numbered, in build order, from zero to finished.)
+## 💰 Estimated Budget & Time
+(Realistic ranges in a small table.)
+## 🚀 Launch Plan
+(How to release it to the world.)
+
+Make it actionable enough to start today.`
+      }
+    ]
   },
   {
     name:'Memory System',
     codename:'SNemo',
     status:'s-learning', statusLabel:'LEARNING',
     tagline:'"Remembers your journey"',
-    actions:[{label:'Save a Preference',q:'Remember this preference for me:'},{label:'Summarise Session',q:'Summarise what we have discussed so far'},{label:'Recall Context',q:'What do you know about my projects?'}]
+    actions:[
+      {
+        label:'Save a Memory',
+        ask:'What should NORIA always remember about you?',
+        ph:'e.g. I run a logistics company in Lagos and prefer brief answers',
+        special:'savePref'
+      },
+      {
+        label:'What You Remember',
+        special:'recall'
+      },
+      {
+        label:'Summarise This Chat',
+        special:'summarise'
+      }
+    ]
   },
   {
     name:'World Link',
     codename:'SNetra',
     status:'s-connected', statusLabel:'CONNECTED',
     tagline:'"Real + digital sync"',
-    actions:[{label:'Global Research',q:'Find me information on a global topic:'},{label:'World Events',q:'What is happening in the world right now that I should know?'},{label:'Opportunities',q:'What global opportunities exist in my field?'}]
+    actions:[
+      {
+        label:'Deep Research',
+        ask:'What topic should NORIA research?',
+        ph:'e.g. The future of solar energy in Africa',
+        tpl:`Act as a senior research analyst. Produce a structured RESEARCH BRIEF on: "{INPUT}".
+
+Structure:
+## 📌 Overview
+(A clear, intelligent summary of the topic.)
+## 🔑 Key Facts & Figures
+(The most important facts, with numbers where relevant.)
+## 🧭 Different Perspectives
+(How different stakeholders/sides view it.)
+## 📈 Trends & What's Changing
+(Where this is heading.)
+## ⚖️ Implications
+(What this means in practice — opportunities and risks.)
+## 📌 Stay Current On
+(Flag anything that changes frequently and the user should check for the latest figures or dates.)
+
+Be thorough, balanced, and precise.`
+      },
+      {
+        label:'Find Opportunities',
+        ask:'What is your field, goal, or interest?',
+        ph:'e.g. Software developer wanting to work abroad',
+        tpl:`Act as a global opportunities scout. Find and present the best OPPORTUNITIES for: "{INPUT}".
+
+Structure:
+## 🌍 Global Opportunities
+(Jobs, markets, demand — where the opportunities are now.)
+## 🎓 Programs, Grants & Scholarships
+(Relevant funding, training, or visa/mobility pathways.)
+## 🚪 How to Access Them
+(Concrete steps to pursue each.)
+## ⭐ Top 3 To Act On First
+(Prioritised, with why.)
+## ⚠️ What to Verify
+(Flag anything that may change — deadlines, prices, eligibility — the user should check the latest.)
+
+Be specific and realistic.`
+      },
+      {
+        label:'Explain the World',
+        ask:'What do you want explained?',
+        ph:'e.g. Why are global oil prices rising?',
+        tpl:`Act as a brilliant world-affairs educator. Explain clearly: "{INPUT}".
+
+Structure:
+## 🧠 The Simple Answer
+(Explain it plainly in 2–3 sentences first.)
+## 🔍 The Full Picture
+(The key factors, causes, and context.)
+## 🔗 How It Connects
+(How this links to the bigger global picture.)
+## 💡 Why It Matters To You
+(Practical relevance.)
+## ✅ What to Verify
+(Flag anything that may change — deadlines, prices, eligibility — the user should check the latest.)
+
+Be clear, accurate, and engaging.`
+      }
+    ]
   },
   {
     name:'Builder Engine',
     codename:'SBuild',
     status:'s-ready', statusLabel:'READY',
     tagline:'"Create systems"',
-    actions:[{label:'Design a System',q:'Help me design a system or framework for:'},{label:'Write a Document',q:'Help me write a professional document'},{label:'Build a Strategy',q:'Help me build a strategy for:'}]
+    actions:[
+      {
+        label:'Design a System',
+        ask:'What system or framework do you need?',
+        ph:'e.g. A customer onboarding system for my agency',
+        tpl:`Act as a systems architect. Design a complete SYSTEM for: "{INPUT}".
+
+Structure:
+## 🎯 Purpose
+(What this system achieves.)
+## 🧩 Core Components
+(Every part of the system and what it does.)
+## 🔄 How It Works (Workflow)
+(Step-by-step flow from start to finish.)
+## 👥 Roles & Responsibilities
+(Who/what handles each part.)
+## 🧰 Tools to Run It
+(Recommended tools/software.)
+## 🚀 Implementation Steps
+(How to set it up, in order.)
+
+Make it complete enough to deploy.`
+      },
+      {
+        label:'Write a Document',
+        ask:'What document do you need written?',
+        ph:'e.g. A business proposal for investors',
+        tpl:`Act as a professional writer. Write a complete, polished DOCUMENT: "{INPUT}".
+
+Rules:
+- Produce the ACTUAL finished document, ready to use — not advice about how to write it.
+- Use proper professional structure (title, sections, headings).
+- Use a confident, professional tone.
+- Where specific details are unknown, insert clear [PLACEHOLDERS] the user can fill in.
+
+Write the full document now.`
+      },
+      {
+        label:'Build a Strategy',
+        ask:'What is the goal you need a strategy for?',
+        ph:'e.g. Grow my YouTube channel to 100k subscribers',
+        tpl:`Act as a master strategist. Build a complete STRATEGY to achieve: "{INPUT}".
+
+Structure:
+## 🎯 Vision & Objectives
+(The end goal + measurable objectives.)
+## 📊 Situation Analysis (SWOT)
+(Strengths, Weaknesses, Opportunities, Threats.)
+## ♟️ Core Strategy
+(The main approach that will win.)
+## ✅ Tactics & Actions
+(Concrete moves to execute the strategy.)
+## 📈 Key Metrics (KPIs)
+(How to measure progress.)
+## 🗓️ Timeline
+(Phased roadmap.)
+
+Be sharp and decisive.`
+      }
+    ]
   },
   {
     name:'Ethics Core',
     codename:'Sethos',
     status:'s-protected', statusLabel:'PROTECTED',
     tagline:'"Guided intelligence"',
-    actions:[{label:'Check a Decision',q:'Help me think through the ethics of this decision:'},{label:'Risk Analysis',q:'Analyse the risks and ethical implications of:'},{label:'Fair Perspective',q:'Give me a balanced perspective on:'}]
+    actions:[
+      {
+        label:'Check a Decision',
+        ask:'What decision are you weighing?',
+        ph:'e.g. Should I leave my job to start a business?',
+        tpl:`Act as a wise, impartial advisor. Help me evaluate this decision: "{INPUT}".
+
+Structure:
+## ⚖️ The Decision
+(Restate it clearly and what's at stake.)
+## 👥 Who Is Affected
+(Everyone impacted by each choice.)
+## ✅ Case For
+(The strongest reasons to do it.)
+## ❌ Case Against
+(The strongest reasons not to.)
+## 🧭 Ethical & Practical Considerations
+(Values, fairness, long-term impact.)
+## ⭐ Balanced Recommendation
+(A thoughtful recommendation — while respecting it's the user's choice.)
+
+Be honest, fair, and caring.`
+      },
+      {
+        label:'Risk Analysis',
+        ask:'What should NORIA analyse for risk?',
+        ph:'e.g. Investing my savings in cryptocurrency',
+        tpl:`Act as a risk management expert. Produce a full RISK ANALYSIS for: "{INPUT}".
+
+Structure:
+## 🔎 Overview
+(What we're assessing.)
+## ⚠️ Key Risks
+(A table: Risk | Likelihood (Low/Med/High) | Impact (Low/Med/High).)
+## 💥 Worst-Case Scenarios
+(What could go seriously wrong.)
+## 🛡️ Mitigation Plan
+(How to reduce or handle each major risk.)
+## ⭐ Overall Risk Verdict
+(A clear bottom-line assessment.)
+
+Be rigorous and honest.`
+      },
+      {
+        label:'Fair Perspective',
+        ask:'What topic do you want a balanced view on?',
+        ph:'e.g. Is remote work better than office work?',
+        tpl:`Act as a balanced, impartial thinker. Give a FAIR, MULTI-SIDED PERSPECTIVE on: "{INPUT}".
+
+Structure:
+## 🟢 One Side
+(Strongest arguments for this view, presented fairly.)
+## 🔵 The Other Side
+(Strongest arguments for the opposing view, presented fairly.)
+## 🌫️ The Nuance
+(Where the truth is more complicated / context-dependent.)
+## 🧭 A Balanced Takeaway
+(A fair, thoughtful synthesis — not forcing one answer.)
+
+Stay neutral and intellectually honest.`
+      }
+    ]
   }
 ];
 
@@ -678,7 +994,7 @@ function renderModuleCards(){
         <div class="mod-role">${m.codename} · Intelligence Module</div>
         <div class="mod-tagline">${m.tagline}</div>
         <div class="mod-actions" id="modact-${i}">
-          ${m.actions.map(a=>`<button class="mod-act-btn" onclick="useModuleAction(event,'${a.q}')">${a.label}</button>`).join('')}
+          ${m.actions.map((a,j)=>`<button class="mod-act-btn" onclick="runModuleAction(event,${i},${j})">${a.label}</button>`).join('')}
         </div>
       </div>
       <svg class="mod-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -696,11 +1012,90 @@ function toggleModule(i){
   document.querySelectorAll('.module-card').forEach(c=>c.classList.remove('expanded'));
   if(!wasExpanded) card.classList.add('expanded');
 }
-function useModuleAction(e, q){
+/* ─── Memory store (real, on-device) ─── */
+let noriaMemory = JSON.parse(localStorage.getItem('noria2_memory') || '{"prefs":[]}');
+function saveMemory(){ localStorage.setItem('noria2_memory', JSON.stringify(noriaMemory)); }
+function memoryPromptBlock(){
+  if(!noriaMemory.prefs.length) return '';
+  return `\n\nWHAT YOU REMEMBER ABOUT THIS USER (use this to personalise your answer):\n- ` +
+    noriaMemory.prefs.map(p=>p.text).join('\n- ');
+}
+
+/* ─── Module action engine ─── */
+let pendingAction = null; // {tpl}
+
+function runModuleAction(e, mi, ai){
   e.stopPropagation();
-  document.getElementById('input').value = q;
-  autoGrow();
-  send();
+  const action = MODULES[mi].actions[ai];
+
+  // Special memory actions — instant, no backend needed
+  if(action.special === 'savePref'){ openActionModal(action, mi, ai); return; }
+  if(action.special === 'recall'){ showMemoryRecall(); return; }
+  if(action.special === 'summarise'){ summariseChat(); return; }
+
+  // Prompt-recipe actions — ask for the one input, then fire the power-prompt
+  openActionModal(action, mi, ai);
+}
+
+function openActionModal(action, mi, ai){
+  pendingAction = {action, mi, ai};
+  document.getElementById('actionModalTitle').textContent = MODULES[mi].name;
+  document.getElementById('actionModalAsk').textContent = action.ask;
+  const inp = document.getElementById('actionModalInput');
+  inp.value = '';
+  inp.placeholder = action.ph || 'Type here…';
+  document.getElementById('actionModal').classList.add('show');
+  setTimeout(()=>inp.focus(), 60);
+}
+function closeActionModal(){
+  document.getElementById('actionModal').classList.remove('show');
+  pendingAction = null;
+}
+function submitActionModal(){
+  if(!pendingAction) return;
+  const val = document.getElementById('actionModalInput').value.trim();
+  if(!val){ document.getElementById('actionModalInput').focus(); return; }
+  const {action} = pendingAction;
+
+  // Save-a-memory: store on device + confirm instantly
+  if(action.special === 'savePref'){
+    noriaMemory.prefs.push({text:val, at:Date.now()});
+    saveMemory();
+    closeActionModal();
+    renderMsg('assistant',
+      `✅ **Saved to memory.**\n\nI'll remember this from now on:\n\n> ${esc(val)}\n\nIt will shape how I help you in future answers. You can see everything I remember with **Memory System → What You Remember**.`);
+    if(activeId){ chats[activeId].messages.push({role:'assistant', content:'(memory saved)'}); chats[activeId].updated=Date.now(); save(); }
+    return;
+  }
+
+  // Recipe action: build the engineered power-prompt and send
+  const fullPrompt = action.tpl.replace('{INPUT}', val);
+  closeActionModal();
+  // Show the user's plain request in the chat, but send the engineered prompt to NORIA
+  send(fullPrompt, action.ask.replace(/\?$/,'') + ': ' + val);
+}
+
+/* Memory: show everything saved — instant */
+function showMemoryRecall(){
+  let body;
+  if(!noriaMemory.prefs.length){
+    body = `🧠 **Memory is empty right now.**\n\nNothing saved yet. Use **Memory System → Save a Memory** to teach me about you — your work, your goals, how you like answers — and I'll remember it on this device and use it every time.`;
+  } else {
+    body = `🧠 **Here's what I remember about you:**\n\n` +
+      noriaMemory.prefs.map((p,i)=>`${i+1}. ${esc(p.text)}`).join('\n') +
+      `\n\nI use these to personalise every answer. Want me to forget something? Just tell me in chat.`;
+  }
+  renderMsg('assistant', body);
+}
+
+/* Memory: summarise current chat */
+function summariseChat(){
+  if(!activeId || !chats[activeId] || chats[activeId].messages.length < 2){
+    renderMsg('assistant', `There's nothing to summarise yet — start a conversation first, then I'll capture the key points for you.`);
+    return;
+  }
+  const prompt = `Summarise our conversation so far into a clean briefing. Structure:\n## 📝 Summary\n(What we discussed.)\n## ✅ Key Points & Decisions\n(Bullet the important takeaways.)\n## 👉 Suggested Next Steps\n(What to do next.)\n\nBe concise.`;
+  send(prompt, '📋 Summarise this chat');
 }
 
 /* ─── Theme cycle ─── */
@@ -814,7 +1209,7 @@ function openChat(id){
   document.getElementById('welcome').style.display = 'none';
   document.getElementById('scroll').style.display = '';
   document.getElementById('stream').innerHTML = '';
-  c.messages.forEach(m=>renderMsg(m.role, m.content, false));
+  c.messages.forEach(m=>renderMsg(m.role, (m.role==='user' && m.display) ? m.display : m.content, false));
   renderHistory();
   if(window.innerWidth<=860) closeSidebar();
   scrollDown();
@@ -858,8 +1253,8 @@ function renderMsg(role, content, animate=true){
       <div class="msg-name">${isAI?'NORIA <span class="msg-tag">SkyGlobe Intelligence</span>':'You'}</div>
       <div class="content">${html}</div>
       ${isAI?`<div class="msg-acts">
-        <button class="act" onclick="copyMsg(this)"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
-        <button class="act" onclick="readAloud(this)"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read</button>
+        <button class="act" onclick="copyMsg(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        <button class="act" onclick="readAloud(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read Aloud</button>
       </div>`:''}
     </div>`;
   stream.appendChild(div);
@@ -899,56 +1294,52 @@ function copyMsg(btn){
   const txt = btn.closest('.msg-body').querySelector('.content').innerText;
   navigator.clipboard.writeText(txt).then(()=>{
     btn.textContent='✓ Copied';
-    setTimeout(()=>{ btn.innerHTML='<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'; }, 1800);
+    setTimeout(()=>{ btn.innerHTML='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'; }, 1800);
   });
 }
 
 /* ─── Read aloud ─── */
 function readAloud(btn){
   if(!('speechSynthesis' in window)) return;
-  if(speaking){ speechSynthesis.cancel(); speaking=false; btn.innerHTML='<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read'; return; }
+  if(speaking){ speechSynthesis.cancel(); speaking=false; btn.innerHTML='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read Aloud'; return; }
   const txt = btn.closest('.msg-body').querySelector('.content').innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
   const u = new SpeechSynthesisUtterance(txt); u.rate=1.0;
-  u.onend=()=>{ speaking=false; btn.innerHTML='<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read'; };
+  u.onend=()=>{ speaking=false; btn.innerHTML='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read Aloud'; };
   speaking=true; btn.textContent='⏹ Stop'; speechSynthesis.speak(u);
 }
 
-/* ─── Voice input (ChatGPT style — record, then tap Send) ─── */
-let voiceFinal = '';      // accumulated final transcript
-let voiceSending = false; // true when user tapped Send
+/* ─── Voice input — inline composer bar, ChatGPT-style ─── */
+let voiceFinal = '';
+let voiceSending = false;
 
-function openVoiceOverlay(){
-  document.getElementById('voiceOverlay').classList.add('show');
-  document.getElementById('voiceStatus').textContent = 'Listening…';
-  document.getElementById('voiceTranscript').textContent = '';
+function openVoiceUI(){
+  document.getElementById('composerBar').style.display = 'none';
+  document.getElementById('voiceInline').style.display = 'flex';
+  document.getElementById('voiceTranscript').textContent = 'Listening…';
   document.getElementById('micBtn').classList.add('on');
 }
-function closeVoiceOverlay(){
-  document.getElementById('voiceOverlay').classList.remove('show');
+function closeVoiceUI(){
+  document.getElementById('composerBar').style.display = 'flex';
+  document.getElementById('voiceInline').style.display = 'none';
   document.getElementById('micBtn').classList.remove('on');
 }
 
-/* Cancel — discard everything */
 function cancelVoice(){
   voiceSending = false;
   if(recog){ recog.onend=null; recog.onerror=null; try{recog.stop();}catch(e){} }
   listening = false;
-  closeVoiceOverlay();
+  closeVoiceUI();
   voiceFinal = '';
 }
 
-/* Send — user is done speaking, stop and send */
 function finishVoice(){
-  const text = (voiceFinal + ' ' + (document.getElementById('voiceTranscript').dataset.interim || '')).trim();
+  const interim = document.getElementById('voiceTranscript').dataset.interim || '';
+  const text = (voiceFinal + ' ' + interim).trim();
   voiceSending = true;
   if(recog){ try{recog.stop();}catch(e){} }
   listening = false;
-  closeVoiceOverlay();
-  if(text){
-    document.getElementById('input').value = text;
-    autoGrow();
-    send();
-  }
+  closeVoiceUI();
+  if(text){ document.getElementById('input').value = text; autoGrow(); send(); }
   voiceFinal = '';
 }
 
@@ -965,7 +1356,7 @@ function toggleMic(){
   recog.continuous = true;        // keep listening until user taps Send
   recog.maxAlternatives = 1;
 
-  recog.onstart = () => { listening = true; openVoiceOverlay(); };
+  recog.onstart = () => { listening = true; openVoiceUI(); };
 
   recog.onresult = (e) => {
     let interim = '';
@@ -989,10 +1380,10 @@ function toggleMic(){
   };
 
   recog.onerror = (e) => {
-    if(e.error === 'no-speech') return; // ignore, onend will restart
+    if(e.error === 'no-speech') return;
     if(e.error === 'aborted') return;
     listening = false;
-    closeVoiceOverlay();
+    closeVoiceUI();
     console.warn('Voice error:', e.error);
   };
 
@@ -1003,21 +1394,26 @@ function toggleMic(){
 /* ─── Scroll ─── */
 function scrollDown(){ const s=document.getElementById('scroll'); s.scrollTop=s.scrollHeight; }
 
-/* ─── Send ─── */
-async function send(){
+/* ─── Send ───
+   engineeredPrompt: optional power-prompt to send to NORIA instead of raw text
+   displayOverride:  optional friendly text to show in the chat bubble        */
+async function send(engineeredPrompt, displayOverride){
   if(busy) return;
   const inp = document.getElementById('input');
-  const q = inp.value.trim();
+  const typed = inp.value.trim();
+  const q = (typeof engineeredPrompt === 'string' && engineeredPrompt) ? engineeredPrompt : typed;
   if(!q) return;
+  const displayText = displayOverride || q;
 
   if(!activeId){
     activeId = 'c'+Date.now();
-    chats[activeId] = {id:activeId, title:q.slice(0,50), messages:[], project:currentProject, updated:Date.now()};
+    chats[activeId] = {id:activeId, title:displayText.slice(0,50), messages:[], project:currentProject, updated:Date.now()};
   }
 
-  inp.value=''; autoGrow();
-  renderMsg('user', q);
-  chats[activeId].messages.push({role:'user', content:q});
+  if(!engineeredPrompt){ inp.value=''; autoGrow(); }
+  renderMsg('user', displayText);
+  // store the real (engineered) prompt for context continuity
+  chats[activeId].messages.push({role:'user', content:q, display:displayText});
   chats[activeId].updated = Date.now(); save(); renderHistory();
 
   busy=true; document.getElementById('sendBtn').disabled=true;
@@ -1030,7 +1426,7 @@ async function send(){
     const res = await fetch(ENGINE, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:q, history, system:SYSTEM_PROMPT}),
+      body:JSON.stringify({query:q, history, system:SYSTEM_PROMPT + memoryPromptBlock()}),
       signal:ctrl.signal
     });
     clearTimeout(to);
