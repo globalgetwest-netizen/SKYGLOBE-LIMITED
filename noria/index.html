@@ -26,41 +26,89 @@
   --sidebar:260px;--topbar:56px;--toolbar:48px;
 }
 
-/* White & Gold */
-[data-theme="light"]{
-  --bg:#F5F6FA;--bg-soft:#FFFFFF;--bg-elev:#FFFFFF;
-  --bg-hover:#ECEEF6;--bg-glass:rgba(255,255,255,.72);
-  --border:#E2E4EE;--border-glass:rgba(0,0,0,.08);
-  --text:#0F1120;--text-soft:#4A4F6A;--text-dim:#9094AE;
-  --shadow:0 4px 24px rgba(15,17,32,.08);
-  --shadow-sm:0 2px 10px rgba(15,17,32,.06);
-  --code-bg:#F2F3F8;
-  --accent:#C9A84C;--accent-glow:rgba(201,168,76,.2);
-  --mic-bg:rgba(201,168,76,.12);--mic-color:#9A6F00;
-}
-/* Deep Navy & Gold (default) */
+/* ── Dark Luxury (default) — gold + electric blue on deep navy ── */
 [data-theme="navy"]{
   --bg:#060B1E;--bg-soft:#0A1128;--bg-elev:#0F1835;
   --bg-hover:#152040;--bg-glass:rgba(15,24,53,.55);
   --border:rgba(201,168,76,.15);--border-glass:rgba(201,168,76,.1);
-  --text:#E8EEFF;--text-soft:#7A8FC0;--text-dim:#3A4870;
+  --text:#FFFFFF;--text-soft:#A0A0A0;--text-dim:#6B6B6B;
   --shadow:0 4px 32px rgba(0,0,16,.65);
   --shadow-sm:0 2px 16px rgba(0,0,16,.4);
   --code-bg:#080E22;
   --accent:#C9A84C;--accent-glow:rgba(201,168,76,.22);
-  --mic-bg:rgba(201,168,76,.18);--mic-color:#E8C97A;
+  --mic-bg:#C9A84C;--mic-color:#0A1128;
 }
-/* Obsidian & Platinum */
+/* ── Minimal Light — black text, blue accent ── */
+[data-theme="light"]{
+  --bg:#F5F6FA;--bg-soft:#FFFFFF;--bg-elev:#FFFFFF;
+  --bg-hover:#ECEEF6;--bg-glass:rgba(255,255,255,.72);
+  --border:#E2E4EE;--border-glass:rgba(0,0,0,.08);
+  --text:#0F1120;--text-soft:#5A5F70;--text-dim:#9094AE;
+  --shadow:0 4px 24px rgba(15,17,32,.08);
+  --shadow-sm:0 2px 10px rgba(15,17,32,.06);
+  --code-bg:#F2F3F8;
+  --accent:#1a56a0;--accent-glow:rgba(26,86,160,.14);
+  --mic-bg:#1a56a0;--mic-color:#FFFFFF;
+}
+/* ── SkyGlobe — brand gold + blue + orange ── */
+[data-theme="skyglobe"]{
+  --bg:#071A33;--bg-soft:#0B244A;--bg-elev:#0E2D5C;
+  --bg-hover:#143A70;--bg-glass:rgba(14,45,92,.55);
+  --border:rgba(245,166,35,.2);--border-glass:rgba(245,166,35,.12);
+  --text:#FFFFFF;--text-soft:#A8C0E0;--text-dim:#5A7299;
+  --shadow:0 4px 32px rgba(0,8,24,.6);
+  --shadow-sm:0 2px 16px rgba(0,8,24,.4);
+  --code-bg:#061428;
+  --accent:#F5A623;--accent-glow:rgba(245,166,35,.22);
+  --mic-bg:#F5A623;--mic-color:#071A33;
+}
+/* ── Futuristic Neon — cyan / neon blue / purple ── */
+[data-theme="neon"]{
+  --bg:#05030F;--bg-soft:#0B0820;--bg-elev:#120D2E;
+  --bg-hover:#1A1340;--bg-glass:rgba(18,13,46,.5);
+  --border:rgba(0,229,255,.18);--border-glass:rgba(123,97,255,.14);
+  --text:#FFFFFF;--text-soft:#9D8FD0;--text-dim:#5A4A8C;
+  --shadow:0 4px 32px rgba(0,229,255,.12);
+  --shadow-sm:0 2px 18px rgba(123,97,255,.18);
+  --code-bg:#070420;
+  --accent:#00E5FF;--accent-glow:rgba(0,229,255,.2);
+  --mic-bg:#00E5FF;--mic-color:#05030F;
+}
+/* ── Glass Memory — ice blue on light blur ── */
+[data-theme="glass"]{
+  --bg:#DCE6F2;--bg-soft:rgba(255,255,255,.6);--bg-elev:rgba(255,255,255,.7);
+  --bg-hover:rgba(255,255,255,.85);--bg-glass:rgba(255,255,255,.45);
+  --border:rgba(120,160,210,.3);--border-glass:rgba(120,160,210,.22);
+  --text:#1A2A44;--text-soft:#4A5A78;--text-dim:#8A9AB8;
+  --shadow:0 8px 40px rgba(90,140,200,.22);
+  --shadow-sm:0 4px 20px rgba(90,140,200,.16);
+  --code-bg:rgba(200,220,245,.5);
+  --accent:#3D9BE9;--accent-glow:rgba(61,155,233,.16);
+  --mic-bg:#3D9BE9;--mic-color:#FFFFFF;
+}
+/* ── Earth Real — green / ocean blue, grounded ── */
+[data-theme="earth"]{
+  --bg:#0A1A1E;--bg-soft:#0E2429;--bg-elev:#123036;
+  --bg-hover:#1A4148;--bg-glass:rgba(18,48,54,.55);
+  --border:rgba(52,168,140,.18);--border-glass:rgba(52,168,140,.12);
+  --text:#FFFFFF;--text-soft:#8FB8AE;--text-dim:#4A6E66;
+  --shadow:0 4px 32px rgba(0,16,12,.6);
+  --shadow-sm:0 2px 16px rgba(0,16,12,.4);
+  --code-bg:#081618;
+  --accent:#2BB673;--accent-glow:rgba(43,182,115,.2);
+  --mic-bg:#2BB673;--mic-color:#0A1A1E;
+}
+/* ── Obsidian & Platinum ── */
 [data-theme="obsidian"]{
   --bg:#080810;--bg-soft:#0E0E1A;--bg-elev:#14141E;
   --bg-hover:#1A1A28;--bg-glass:rgba(20,20,30,.65);
   --border:rgba(184,189,212,.12);--border-glass:rgba(184,189,212,.09);
-  --text:#E2E4F0;--text-soft:#72768E;--text-dim:#30323E;
+  --text:#FFFFFF;--text-soft:#A0A0A0;--text-dim:#6B6B6B;
   --shadow:0 4px 32px rgba(0,0,0,.8);
   --shadow-sm:0 2px 16px rgba(0,0,0,.5);
   --code-bg:#060608;
   --accent:#B8BDD4;--accent-glow:rgba(184,189,212,.15);
-  --mic-bg:rgba(184,189,212,.12);--mic-color:#B8BDD4;
+  --mic-bg:#B8BDD4;--mic-color:#14141E;
 }
 
 /* ─── Reset & base ─── */
@@ -223,11 +271,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 textarea{flex:1;border:none;background:transparent;color:var(--text);font-family:var(--font);font-size:.95rem;resize:none;outline:none;line-height:1.55;max-height:160px;padding:7px 0}
 textarea::placeholder{color:var(--text-dim)}
 .cb{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:var(--ease)}
-/* mic — always gold/visible regardless of theme */
-.cb.mic{background:var(--mic-bg);color:var(--mic-color);border:1.5px solid var(--accent)}
-.cb.mic:hover{background:rgba(201,168,76,.25);transform:scale(1.06)}
-.cb.mic.on{background:rgba(201,168,76,.3);color:var(--gold-light);border-color:var(--gold-light);animation:micPulse 1.2s infinite}
-@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 0 8px rgba(201,168,76,0)}}
+/* mic — solid filled accent, always clearly visible on any theme */
+.cb.mic{background:var(--mic-bg);color:var(--mic-color);box-shadow:0 2px 10px var(--accent-glow)}
+.cb.mic:hover{transform:scale(1.08);filter:brightness(1.08);box-shadow:0 3px 14px var(--accent-glow)}
+.cb.mic.on{animation:micPulse 1.2s infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 var(--accent-glow)}50%{box-shadow:0 0 0 9px transparent}}
 .cb.send{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(201,168,76,.35)}
 .cb.send:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 4px 16px rgba(201,168,76,.45)}
 .cb.send:disabled{background:var(--bg-hover);color:var(--text-dim);cursor:not-allowed;box-shadow:none;transform:none}
@@ -252,8 +300,12 @@ textarea::placeholder{color:var(--text-dim)}
 @keyframes vwave{0%,100%{height:6px;opacity:.25}50%{height:var(--h,40px);opacity:1}}
 .voice-transcript{font-size:.92rem;color:rgba(232,238,255,.6);max-width:340px;text-align:center;min-height:26px;font-style:italic;padding:0 16px}
 .voice-hint{font-size:.78rem;color:rgba(232,238,255,.35);letter-spacing:.03em}
-.voice-cancel{padding:12px 36px;border:1.5px solid rgba(255,255,255,.2);border-radius:40px;background:transparent;color:rgba(255,255,255,.65);font-family:var(--font);font-size:.9rem;font-weight:500;cursor:pointer;transition:var(--ease)}
-.voice-cancel:hover{border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.06)}
+.voice-controls{display:flex;align-items:center;gap:28px;margin-top:8px}
+.voice-btn{border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;transition:var(--ease)}
+.voice-btn-cancel{width:56px;height:56px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.15)}
+.voice-btn-cancel:hover{background:rgba(255,255,255,.14);color:#fff;transform:scale(1.05)}
+.voice-btn-send{width:68px;height:68px;background:var(--gold);color:#0A1128;box-shadow:0 4px 24px rgba(201,168,76,.5)}
+.voice-btn-send:hover{background:var(--gold-light);transform:scale(1.06);box-shadow:0 6px 30px rgba(201,168,76,.6)}
 
 /* ─── Login modal ─── */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(4,6,18,.8);z-index:100;place-items:center;backdrop-filter:blur(8px)}
@@ -362,8 +414,15 @@ textarea::placeholder{color:var(--text-dim)}
     <div class="v-bar" style="--h:10px;animation-delay:1.20s"></div>
   </div>
   <div class="voice-transcript" id="voiceTranscript"></div>
-  <div class="voice-hint">Stop speaking to send automatically</div>
-  <button class="voice-cancel" onclick="cancelVoice()">Cancel</button>
+  <div class="voice-hint">Take your time — tap send when you're done</div>
+  <div class="voice-controls">
+    <button class="voice-btn voice-btn-cancel" onclick="cancelVoice()" title="Cancel" aria-label="Cancel">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <button class="voice-btn voice-btn-send" onclick="finishVoice()" title="Send" aria-label="Send">
+      <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
 </div>
 
 <!-- Login Modal -->
@@ -645,17 +704,45 @@ function useModuleAction(e, q){
 }
 
 /* ─── Theme cycle ─── */
-const THEMES = ['navy','light','obsidian'];
-const THEME_ICONS = {navy:'◑', light:'○', obsidian:'●'};
+const THEMES = ['navy','skyglobe','neon','glass','earth','light','obsidian'];
+const THEME_META = {
+  navy:    {icon:'✦', name:'Dark Luxury'},
+  skyglobe:{icon:'🌐', name:'SkyGlobe'},
+  neon:    {icon:'⚡', name:'Futuristic Neon'},
+  glass:   {icon:'🧊', name:'Glass Memory'},
+  earth:   {icon:'🌍', name:'Earth Real'},
+  light:   {icon:'☀', name:'Minimal Light'},
+  obsidian:{icon:'◆', name:'Obsidian'}
+};
 function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   localStorage.setItem('noria2_theme', t);
-  document.getElementById('themeLbl').textContent = THEME_ICONS[t] || '◑';
+  const m = THEME_META[t] || THEME_META.navy;
+  const btn = document.getElementById('themeLbl');
+  btn.textContent = m.icon;
+  btn.parentElement.title = m.name + ' — tap to switch';
 }
 function cycleTheme(){
   const cur = document.documentElement.getAttribute('data-theme') || 'navy';
   const idx = THEMES.indexOf(cur);
-  applyTheme(THEMES[(idx+1) % THEMES.length]);
+  const next = THEMES[(idx+1) % THEMES.length];
+  applyTheme(next);
+  // brief toast of theme name
+  showThemeToast(THEME_META[next].name);
+}
+let themeToastTimer = null;
+function showThemeToast(name){
+  let toast = document.getElementById('themeToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'themeToast';
+    toast.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--bg-elev);border:1px solid var(--accent);color:var(--text);padding:8px 18px;border-radius:30px;font-size:.8rem;font-weight:600;z-index:200;box-shadow:var(--shadow);transition:opacity .3s;pointer-events:none';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = name;
+  toast.style.opacity = '1';
+  clearTimeout(themeToastTimer);
+  themeToastTimer = setTimeout(()=>{ toast.style.opacity='0'; }, 1400);
 }
 (()=>{ applyTheme(localStorage.getItem('noria2_theme') || 'navy'); })();
 
@@ -826,7 +913,10 @@ function readAloud(btn){
   speaking=true; btn.textContent='⏹ Stop'; speechSynthesis.speak(u);
 }
 
-/* ─── Voice input (WhatsApp/ChatGPT style) ─── */
+/* ─── Voice input (ChatGPT style — record, then tap Send) ─── */
+let voiceFinal = '';      // accumulated final transcript
+let voiceSending = false; // true when user tapped Send
+
 function openVoiceOverlay(){
   document.getElementById('voiceOverlay').classList.add('show');
   document.getElementById('voiceStatus').textContent = 'Listening…';
@@ -837,53 +927,73 @@ function closeVoiceOverlay(){
   document.getElementById('voiceOverlay').classList.remove('show');
   document.getElementById('micBtn').classList.remove('on');
 }
+
+/* Cancel — discard everything */
 function cancelVoice(){
-  if(recog){ recog.onend=null; recog.onerror=null; recog.stop(); }
+  voiceSending = false;
+  if(recog){ recog.onend=null; recog.onerror=null; try{recog.stop();}catch(e){} }
   listening = false;
   closeVoiceOverlay();
-  document.getElementById('input').value = '';
+  voiceFinal = '';
 }
+
+/* Send — user is done speaking, stop and send */
+function finishVoice(){
+  const text = (voiceFinal + ' ' + (document.getElementById('voiceTranscript').dataset.interim || '')).trim();
+  voiceSending = true;
+  if(recog){ try{recog.stop();}catch(e){} }
+  listening = false;
+  closeVoiceOverlay();
+  if(text){
+    document.getElementById('input').value = text;
+    autoGrow();
+    send();
+  }
+  voiceFinal = '';
+}
+
 function toggleMic(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ alert('Voice input requires Chrome or Edge browser.'); return; }
   if(listening){ cancelVoice(); return; }
 
+  voiceFinal = '';
+  voiceSending = false;
   recog = new SR();
   recog.lang = navigator.language || 'en-US';
   recog.interimResults = true;
-  recog.continuous = false;
+  recog.continuous = true;        // keep listening until user taps Send
   recog.maxAlternatives = 1;
 
-  recog.onstart = () => {
-    listening = true;
-    openVoiceOverlay();
-  };
+  recog.onstart = () => { listening = true; openVoiceOverlay(); };
 
   recog.onresult = (e) => {
-    let interim = '', final = '';
+    let interim = '';
     for(let i = e.resultIndex; i < e.results.length; i++){
       const t = e.results[i][0].transcript;
-      if(e.results[i].isFinal) final += t;
+      if(e.results[i].isFinal) voiceFinal += t + ' ';
       else interim += t;
     }
-    const display = final || interim;
-    document.getElementById('voiceTranscript').textContent = display;
-    if(final) document.getElementById('input').value = final.trim();
+    const tr = document.getElementById('voiceTranscript');
+    tr.dataset.interim = interim;
+    tr.textContent = (voiceFinal + interim).trim() || 'Listening…';
+    document.getElementById('voiceStatus').textContent = (voiceFinal || interim) ? 'Go on…' : 'Listening…';
   };
 
   recog.onend = () => {
+    // Browser auto-stops after silence — if user hasn't tapped Send, keep listening
+    if(listening && !voiceSending){
+      try{ recog.start(); return; }catch(e){}
+    }
     listening = false;
-    closeVoiceOverlay();
-    autoGrow();
-    const val = document.getElementById('input').value.trim();
-    if(val) send();
   };
 
   recog.onerror = (e) => {
+    if(e.error === 'no-speech') return; // ignore, onend will restart
+    if(e.error === 'aborted') return;
     listening = false;
     closeVoiceOverlay();
-    if(e.error === 'no-speech') return;
-    if(e.error !== 'aborted') console.warn('Voice error:', e.error);
+    console.warn('Voice error:', e.error);
   };
 
   try{ recog.start(); }
