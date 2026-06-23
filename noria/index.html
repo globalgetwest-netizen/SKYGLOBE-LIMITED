@@ -265,9 +265,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .typing b{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.3;animation:dot 1.3s infinite;display:block}
 .typing b:nth-child(2){animation-delay:.18s}.typing b:nth-child(3){animation-delay:.36s}
 @keyframes dot{0%,60%,100%{opacity:.2;transform:scale(.8)}30%{opacity:1;transform:scale(1.1)}}
-.msg-acts{display:flex;gap:7px;margin-top:12px;opacity:.55;transition:opacity .2s}
+.msg-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;opacity:.55;transition:opacity .2s}
 .msg:hover .msg-acts{opacity:1}
 .msg-acts:focus-within{opacity:1}
+/* Profile sidebar button */
+.profile-sidebar-btn{
+  display:flex;align-items:center;gap:8px;
+  width:calc(100% - 20px);margin:0 10px 8px;
+  padding:9px 12px;border-radius:var(--radius);
+  border:1px solid var(--border);background:var(--bg-elev);
+  color:var(--text);font-size:.8rem;font-weight:600;
+  cursor:pointer;transition:var(--ease);text-align:left;
+}
+.profile-sidebar-btn:hover{border-color:var(--accent);background:var(--accent-glow)}
+.profile-sidebar-btn svg{stroke:var(--accent);flex-shrink:0}
+.profile-side-badge{margin-left:auto;font-size:.68rem;font-weight:700;background:var(--accent);color:#fff;padding:2px 7px;border-radius:10px}
+.profile-side-badge.done{background:var(--bg-hover);color:var(--text-soft)}
+/* Profile modal */
+.profile-modal{max-width:460px;width:92%}
+.profile-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pf-label{display:flex;flex-direction:column;gap:4px;font-size:.75rem;font-weight:700;color:var(--text-soft);letter-spacing:.03em;text-transform:uppercase}
+.pf-input{padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--font);font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s}
+.pf-input:focus{border-color:var(--accent)}
+@media(max-width:500px){.profile-fields{grid-template-columns:1fr}}
 /* premium icon-pill buttons — solid enough to read on any theme */
 .act{
   display:inline-flex;align-items:center;gap:6px;
@@ -338,7 +358,12 @@ textarea::placeholder{color:var(--text-dim)}
 .pac-label{font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:4px}
 .pac-desc{font-size:.74rem;color:var(--text-soft);line-height:1.4}
 .proj-action-card:hover .pac-desc{color:var(--text)}
-@media(max-width:520px){.proj-actions-grid{grid-template-columns:1fr}}
+@media(max-width:520px){
+  .proj-actions-grid{grid-template-columns:1fr}
+  .proj-welcome{gap:14px}
+  .pac-label{font-size:.84rem}
+  .pac-desc{font-size:.72rem}
+}
 
 /* ─── Inline voice bar (inside composer, ChatGPT-style) ─── */
 .voice-inline{
@@ -393,6 +418,11 @@ textarea::placeholder{color:var(--text-dim)}
   .w-greeting{font-size:1.5rem;margin-bottom:20px}
   .modules{max-width:100%}
   .module-card{padding:12px 14px}
+  .proj-title{font-size:1.25rem}
+  .proj-hero{gap:10px}
+  .proj-icon-lg{width:42px;height:42px}
+  .msg-acts{gap:5px}
+  .act{padding:4px 10px 4px 8px;font-size:.71rem}
 }
 @media(max-width:480px){
   .search-wrap{display:none}
@@ -473,6 +503,50 @@ textarea::placeholder{color:var(--text-dim)}
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitActionModal();}"></textarea>
     <button class="modal-btn" onclick="submitActionModal()">Generate</button>
     <span class="modal-skip" onclick="closeActionModal()">Cancel</span>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal-bg" id="profileModal">
+  <div class="modal profile-modal">
+    <div class="modal-logo" style="width:36px;height:36px;margin-bottom:10px"><svg viewBox="0 0 100 100"><use href="#noriaMark"/></svg></div>
+    <h2 style="font-size:1.25rem;margin-bottom:4px">Your Profile</h2>
+    <p style="font-size:.82rem;color:var(--text-soft);margin-bottom:18px;text-align:center">NORIA uses these details to personalise every document it generates for you.</p>
+    <div class="profile-fields">
+      <label class="pf-label">Full Name
+        <input class="pf-input" id="pf-name" type="text" placeholder="e.g. Fatima Al-Hassan" maxlength="80"/>
+      </label>
+      <label class="pf-label">Job Title / Role
+        <input class="pf-input" id="pf-title" type="text" placeholder="e.g. Chief Executive Officer" maxlength="80"/>
+      </label>
+      <label class="pf-label">Organisation / Company
+        <input class="pf-input" id="pf-org" type="text" placeholder="e.g. SkyGlobe Limited" maxlength="80"/>
+      </label>
+      <label class="pf-label">City, Country
+        <input class="pf-input" id="pf-location" type="text" placeholder="e.g. Abuja, Nigeria" maxlength="80"/>
+      </label>
+      <label class="pf-label">Email Address
+        <input class="pf-input" id="pf-email" type="email" placeholder="e.g. fatima@company.com" maxlength="100"/>
+      </label>
+      <label class="pf-label">Phone Number
+        <input class="pf-input" id="pf-phone" type="tel" placeholder="e.g. +234 801 234 5678" maxlength="30"/>
+      </label>
+    </div>
+    <button class="modal-btn" style="margin-top:18px" onclick="saveProfileModal()">Save Profile</button>
+    <span class="modal-skip" onclick="closeProfileModal()">Cancel</span>
+  </div>
+</div>
+
+<!-- Translate Modal -->
+<div class="modal-bg" id="translateModal">
+  <div class="modal action-modal">
+    <div class="action-modal-tag">Translate</div>
+    <h2 style="font-size:1.15rem">Which language?</h2>
+    <input id="translateLangInput" type="text" placeholder="e.g. French, Arabic, Yoruba, Swahili"
+      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--font);font-size:.92rem;color:var(--text);outline:none;margin-bottom:14px"
+      onkeydown="if(event.key==='Enter') submitTranslate()"/>
+    <button class="modal-btn" onclick="submitTranslate()">Translate</button>
+    <span class="modal-skip" onclick="document.getElementById('translateModal').classList.remove('show')">Cancel</span>
   </div>
 </div>
 
@@ -566,6 +640,11 @@ textarea::placeholder{color:var(--text-dim)}
     <div class="sidebar-divider"></div>
     <div class="chat-hist-label">Recent</div>
     <div class="chat-history" id="historyList"></div>
+    <button class="profile-sidebar-btn" id="profileSideBtn" onclick="openProfileModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span id="profileSideName">My Profile</span>
+      <span class="profile-side-badge" id="profileSideBadge">Set up</span>
+    </button>
     <div class="side-foot">NORIA · Intelligence with Elegance<br>A <a href="https://skyglobegroup.com" target="_blank">SkyGlobe Group</a> creation.</div>
   </aside>
 
@@ -705,6 +784,28 @@ SACRED HONORIFICS — ALWAYS OBSERVE THESE:
 - Whenever you mention Prophet Muhammad, always say "Prophet Muhammad Rasulullah" (you may also use "peace be upon him"). Never say his name alone.
 - For every other prophet (Adam, Nuh/Noah, Ibrahim/Abraham, Musa/Moses, Isa/Jesus, Dawud/David, Sulaiman/Solomon, Yusuf/Joseph, and all others), add "Alaihi Salam" with their name (e.g. "Prophet Ibrahim Alaihi Salam", "Prophet Musa Alaihi Salam", "Prophet Isa Alaihi Salam").
 - Observe these honorifics consistently and naturally, as a respectful scholar always would.
+
+YOUR NAME — HOW TO PRONOUNCE IT:
+- Your name is NORIA, pronounced "NOR-ee-ah" (three syllables: NOR · ee · ah), with the stress on the first syllable.
+- If anyone asks how to say or pronounce your name, tell them clearly: "My name is NORIA — pronounced NOR-ee-ah."
+- The name evokes the noria, the ancient water wheel that lifts water to nourish the land — a symbol of intelligence raised up to serve and uplift people.
+
+MULTILINGUAL INTELLIGENCE — ANSWER IN THE USER'S LANGUAGE:
+- Automatically detect the language a person writes in and respond fluently in that SAME language — whether English, French, Arabic, Hausa, Yoruba, Igbo, Swahili, Spanish, Portuguese, Chinese, Hindi, Urdu, or any other.
+- You possess true cross-lingual reasoning: you understand meaning across languages and can translate, interpret, and explain nuance, idiom, and cultural context faithfully.
+- When a person mixes languages, mirror them naturally. When asked to translate, preserve tone, formatting, and intent — not just words.
+- For Arabic and other right-to-left languages, write correctly and elegantly.
+- Maintain your full eloquence and depth in every language — you are equally a master communicator in all of them.
+
+PREDICTIVE & ANTICIPATORY INTELLIGENCE:
+- Anticipate what the person truly needs, not just what they literally asked. Read the intent beneath the words.
+- When helpful, briefly offer the logical next step, a relevant follow-up, or something they likely haven't thought to ask — without being pushy.
+- Recognise patterns in a conversation and stay several steps ahead, like a brilliant adviser who already sees where things are heading.
+
+STRUCTURED OUTPUT & DOCUMENT INTELLIGENCE:
+- When producing documents, reports, plans, or any formal deliverable, generate clean, professional, well-organised structure: clear headings, logical sections, tables where they add clarity, and consistent formatting.
+- Match the conventions of the relevant industry, institution, or sector so every deliverable meets professional and real-world standards.
+- When details such as names, titles, organisations, dates, or contacts are provided to you, use them directly and accurately throughout — never leave a placeholder where a real value was given.
 
 Your knowledge spans every domain of human endeavour: Africa, global mobility, world history, science, business, technology, law, finance, education, culture, arts, and the full breadth of human knowledge. Speak like you own every room you walk into.`;
 
@@ -2700,6 +2801,181 @@ marked.setOptions({breaks:true, gfm:true});
 let chats = JSON.parse(localStorage.getItem('noria2_chats') || '{}');
 let activeId = null;
 let busy = false;
+
+/* ─── User Profile ─── */
+let noriaProfile = JSON.parse(localStorage.getItem('noria_profile') || '{}');
+function saveProfile(){ localStorage.setItem('noria_profile', JSON.stringify(noriaProfile)); }
+
+function buildProfileContext(){
+  const p = noriaProfile;
+  const lines = [];
+  const displayName = p.name || userName;
+  if(displayName) lines.push(`Full Name: ${displayName}`);
+  if(p.title)    lines.push(`Title / Role: ${p.title}`);
+  if(p.org)      lines.push(`Organisation: ${p.org}`);
+  if(p.location) lines.push(`Location: ${p.location}`);
+  if(p.email)    lines.push(`Email: ${p.email}`);
+  if(p.phone)    lines.push(`Phone: ${p.phone}`);
+  if(!lines.length) return '';
+  return `[AUTHOR DETAILS — Use these throughout wherever a name, title, organisation, date, or contact appears. Do NOT use "[PLACEHOLDER]" for these details — use the actual values below:]\n${lines.join('\n')}\nDate: ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}\n\n`;
+}
+
+function openProfileModal(){
+  const p = noriaProfile;
+  document.getElementById('pf-name').value     = p.name     || userName || '';
+  document.getElementById('pf-title').value    = p.title    || '';
+  document.getElementById('pf-org').value      = p.org      || '';
+  document.getElementById('pf-location').value = p.location || '';
+  document.getElementById('pf-email').value    = p.email    || '';
+  document.getElementById('pf-phone').value    = p.phone    || '';
+  document.getElementById('profileModal').classList.add('show');
+  document.getElementById('pf-name').focus();
+}
+function closeProfileModal(){ document.getElementById('profileModal').classList.remove('show'); }
+function saveProfileModal(){
+  noriaProfile = {
+    name:     document.getElementById('pf-name').value.trim(),
+    title:    document.getElementById('pf-title').value.trim(),
+    org:      document.getElementById('pf-org').value.trim(),
+    location: document.getElementById('pf-location').value.trim(),
+    email:    document.getElementById('pf-email').value.trim(),
+    phone:    document.getElementById('pf-phone').value.trim(),
+  };
+  saveProfile();
+  closeProfileModal();
+  updateProfileSideBtn();
+  // Flash confirmation in sidebar button
+  const btn = document.getElementById('profileSideBtn');
+  btn.style.borderColor = 'var(--accent)';
+  setTimeout(()=>btn.style.borderColor='', 1200);
+}
+function updateProfileSideBtn(){
+  const p = noriaProfile;
+  const badge = document.getElementById('profileSideBadge');
+  const nameEl = document.getElementById('profileSideName');
+  if(p.name || p.org){
+    nameEl.textContent = p.name || p.org;
+    badge.textContent = '✓ Done';
+    badge.className = 'profile-side-badge done';
+  } else {
+    nameEl.textContent = 'My Profile';
+    badge.textContent = 'Set up';
+    badge.className = 'profile-side-badge';
+  }
+}
+
+/* ─── Download as Professional Document ─── */
+function downloadDoc(btn){
+  const contentEl = btn.closest('.msg-body').querySelector('.content');
+  const html = contentEl.innerHTML;
+  const p = noriaProfile;
+  const name = p.name || userName || '';
+  const org = p.org || 'SkyGlobe Intelligence';
+  const title = p.title || '';
+  const email = p.email || '';
+  const phone = p.phone || '';
+  const location = p.location || '';
+  const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  const doc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NORIA Document — ${esc(org)}</title>
+<style>
+  @page{margin:2.2cm 2.5cm}
+  *{box-sizing:border-box}
+  body{font-family:Georgia,'Times New Roman',serif;color:#111;max-width:800px;margin:0 auto;padding:48px 40px;line-height:1.75;font-size:14px}
+  .doc-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:20px;border-bottom:2.5px solid #111;margin-bottom:36px}
+  .dh-left{}
+  .dh-brand{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#888;font-family:Arial,sans-serif;margin-bottom:6px}
+  .dh-org{font-size:22px;font-weight:700;font-family:Georgia,serif;margin:0 0 3px}
+  .dh-person{font-size:13px;color:#555}
+  .dh-right{text-align:right;font-size:11px;color:#666;line-height:1.8;font-family:Arial,sans-serif}
+  h1{font-size:1.6em;margin:28px 0 14px;border-bottom:1.5px solid #ddd;padding-bottom:8px}
+  h2{font-size:1.2em;margin:24px 0 10px;border-bottom:1px solid #eee;padding-bottom:5px}
+  h3{font-size:1.05em;margin:20px 0 8px}
+  h4{font-size:.95em;margin:16px 0 6px;text-transform:uppercase;letter-spacing:.05em}
+  p{margin:0 0 12px}
+  ul,ol{padding-left:24px;margin:0 0 14px}
+  li{margin-bottom:6px}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+  th,td{border:1px solid #ccc;padding:9px 13px;text-align:left}
+  th{background:#f5f5f5;font-weight:700}
+  tr:nth-child(even) td{background:#fafafa}
+  blockquote{border-left:4px solid #333;padding-left:18px;color:#444;margin:16px 0;font-style:italic}
+  code{background:#f3f3f3;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:12px}
+  pre{background:#f3f3f3;padding:14px;border-radius:6px;overflow-x:auto;margin:0 0 14px}
+  strong{font-weight:700}
+  em{font-style:italic}
+  .doc-footer{margin-top:52px;padding-top:14px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:10px;color:#bbb;font-family:Arial,sans-serif;letter-spacing:.04em}
+  @media print{body{padding:0}button{display:none}}
+</style>
+</head>
+<body>
+<div class="doc-header">
+  <div class="dh-left">
+    <div class="dh-brand">NORIA · SkyGlobe Intelligence</div>
+    <div class="dh-org">${esc(org)}</div>
+    ${name?`<div class="dh-person">${esc(name)}${title?` · ${esc(title)}`:''}${location?` · ${esc(location)}`:''}</div>`:''}
+  </div>
+  <div class="dh-right">
+    <div><strong>Generated by NORIA</strong></div>
+    <div>${esc(dateStr)}</div>
+    ${email?`<div>${esc(email)}</div>`:''}
+    ${phone?`<div>${esc(phone)}</div>`:''}
+  </div>
+</div>
+${html}
+<div class="doc-footer">
+  <span>Generated by NORIA · SkyGlobe Intelligence · skyglobegroup.com</span>
+  <span>${esc(dateStr)}</span>
+</div>
+</body>
+</html>`;
+
+  const blob = new Blob([doc], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `NORIA-${(org||'Document').replace(/[^a-zA-Z0-9]/g,'-')}-${new Date().toISOString().slice(0,10)}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // Feedback on button
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Downloading…';
+  setTimeout(()=>{ btn.innerHTML = orig; }, 2000);
+}
+
+/* ─── Refine message ─── */
+let _refineContent = '';
+function refineMsg(btn, type){
+  const content = btn.closest('.msg-body').querySelector('.content').innerText;
+  if(type === 'translate'){
+    _refineContent = content;
+    document.getElementById('translateLangInput').value = '';
+    document.getElementById('translateModal').classList.add('show');
+    setTimeout(()=>document.getElementById('translateLangInput').focus(), 60);
+    return;
+  }
+  const prompts = {
+    longer:  `Please expand and develop the following response in more depth — add more detail, examples, analysis, and supporting content throughout. Keep the same format and structure:\n\n${content}`,
+    shorter: `Please condense the following into a shorter, tighter version while preserving all the key points and structure:\n\n${content}`,
+    formal:  `Please rewrite the following in a more formal, professional tone suitable for official documents, business or institutional use. Keep the same structure:\n\n${content}`,
+  };
+  send(prompts[type]);
+}
+function submitTranslate(){
+  const lang = document.getElementById('translateLangInput').value.trim();
+  if(!lang){ document.getElementById('translateLangInput').focus(); return; }
+  document.getElementById('translateModal').classList.remove('show');
+  send(`Please translate the following into ${lang}. Preserve all formatting, structure, headings, and layout. Translate all content faithfully:\n\n${_refineContent}`);
+  _refineContent = '';
+}
 let speaking = false;
 let recog = null;
 let listening = false;
@@ -2731,6 +3007,7 @@ function doLogin(override){
   }
   renderModuleCards();
   renderHistory();
+  updateProfileSideBtn();
 }
 (()=>{
   const saved = localStorage.getItem('noria2_user');
@@ -2828,7 +3105,9 @@ function submitActionModal(){
   }
 
   // Recipe action: build the engineered power-prompt and send
-  const fullPrompt = action.tpl.replace('{INPUT}', val);
+  // Prepend user profile so NORIA auto-personalises every document
+  const profileCtx = buildProfileContext();
+  const fullPrompt = profileCtx + action.tpl.replace('{INPUT}', val);
   closeActionModal();
   // Show the user's plain request in the chat, but send the engineered prompt to NORIA
   send(fullPrompt, action.ask.replace(/\?$/,'') + ': ' + val);
@@ -3073,6 +3352,11 @@ function renderMsg(role, content, animate=true){
       <div class="content">${html}</div>
       ${isAI?`<div class="msg-acts">
         <button class="act" onclick="copyMsg(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        <button class="act" onclick="downloadDoc(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</button>
+        <button class="act" onclick="refineMsg(this,'longer')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Lengthen</button>
+        <button class="act" onclick="refineMsg(this,'shorter')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg> Shorten</button>
+        <button class="act" onclick="refineMsg(this,'formal')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h10M4 14h12M4 18h8"/></svg> More Formal</button>
+        <button class="act" onclick="refineMsg(this,'translate')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8h8M9 5v3"/><path d="M3 14s1.5 2.5 6 2.5M15 14s-1.5 2.5-6 2.5"/><path d="M13 20l4-8 4 8"/><path d="M14.5 17h5"/></svg> Translate</button>
         <button class="act" onclick="readAloud(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Read Aloud</button>
       </div>`:''}
     </div>`;
