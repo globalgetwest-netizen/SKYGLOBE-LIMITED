@@ -311,6 +311,35 @@ textarea::placeholder{color:var(--text-dim)}
 /* ─── Coming soon panel ─── */
 .coming-soon{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--text-soft);font-size:.9rem}
 
+/* ─── Project workspace panel ─── */
+.proj-welcome{width:100%;max-width:580px;display:flex;flex-direction:column;gap:18px}
+.proj-hero{display:flex;align-items:center;gap:14px}
+.proj-icon-lg{
+  width:52px;height:52px;border-radius:14px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  display:grid;place-items:center;flex-shrink:0;
+}
+.proj-icon-lg svg{width:26px;height:26px;fill:none;stroke:var(--accent);stroke-width:1.7}
+.proj-title{font-family:var(--serif);font-size:1.55rem;font-weight:700;color:var(--text);letter-spacing:.02em}
+.proj-desc{font-size:.83rem;color:var(--text-soft);margin-top:4px;line-height:1.5}
+.proj-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.proj-action-card{
+  text-align:left;padding:14px 16px;border-radius:var(--radius);
+  border:1px solid var(--border-glass);background:var(--bg-glass);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  cursor:pointer;transition:var(--ease);
+}
+.proj-action-card:hover{
+  border-color:var(--accent);
+  background:var(--accent-glow);
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-sm);
+}
+.pac-label{font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:4px}
+.pac-desc{font-size:.74rem;color:var(--text-soft);line-height:1.4}
+.proj-action-card:hover .pac-desc{color:var(--text)}
+@media(max-width:520px){.proj-actions-grid{grid-template-columns:1fr}}
+
 /* ─── Inline voice bar (inside composer, ChatGPT-style) ─── */
 .voice-inline{
   display:flex;align-items:center;gap:10px;
@@ -982,6 +1011,1690 @@ Stay neutral and intellectually honest.`
   }
 ];
 
+/* ══════════════════════════════════════════════════════
+   PROJECT WORKSPACE CONFIGURATIONS — ALL 14 PROJECTS
+   Each has: icon, desc, and 5-6 power-prompt actions
+   ══════════════════════════════════════════════════════ */
+const PROJECT_CONFIGS = {
+
+  /* ── HOME WORK ── */
+  'Home Work':{
+    icon:'ic-book', desc:'Your personal study and homework workspace.',
+    actions:[
+      { label:'Explain a Topic',
+        sub:'Clear structured explanation of any subject',
+        ask:'What topic do you need explained?',
+        ph:'e.g. How does photosynthesis work? What caused World War 1?',
+        tpl:`You are a brilliant educator. Explain this topic comprehensively: "{INPUT}".
+
+## The Simple Answer
+(2–3 clear sentences. Plain language first.)
+## The Full Explanation
+(Go deep — all the key concepts, causes, processes, or components.)
+## Real-World Example
+(A concrete example that makes it click.)
+## Key Facts to Remember
+(Bullet the 5–7 most important points.)
+## Common Misunderstandings
+(Clear up what people usually get wrong.)
+
+Be thorough, precise, and engaging.` },
+
+      { label:'Solve a Problem',
+        sub:'Step-by-step working shown clearly',
+        ask:'What problem needs to be solved?',
+        ph:'e.g. Solve 3x² + 5x - 2 = 0  or  Find the area of a triangle with base 8cm, height 5cm',
+        tpl:`Act as an expert tutor. Solve this problem and show every step clearly: "{INPUT}".
+
+## Understanding the Problem
+(What are we solving? Identify what's given and what's needed.)
+## Step-by-Step Solution
+(Number each step. Show working. Explain why each step is taken.)
+## The Answer
+(State the final answer clearly.)
+## How to Check It
+(Show how to verify the answer is correct.)
+## Key Rule or Formula Used
+(Name the principle applied so the student learns it.)` },
+
+      { label:'Write an Essay',
+        sub:'Full, structured academic essay — ready to submit',
+        ask:'What is the essay topic or question?',
+        ph:'e.g. Discuss the impact of climate change on African economies',
+        tpl:`Act as an expert academic writer. Write a complete, polished essay: "{INPUT}".
+
+Write a FULL ESSAY with:
+- A strong, engaging introduction with a clear thesis statement
+- Well-structured body paragraphs — each with a clear topic sentence, evidence/analysis, and link to the thesis
+- A strong conclusion that synthesises the argument
+- Academic tone throughout
+
+Do NOT give advice on how to write it. Write the actual essay now. Use [WORD COUNT APPROX: ~600 words] as your target unless the topic suggests more.` },
+
+      { label:'Make a Study Plan',
+        sub:'Personalised schedule to master any subject',
+        ask:'What subject do you need to study, and when is your deadline?',
+        ph:'e.g. Physics exam in 3 weeks — need to cover mechanics, waves, electricity',
+        tpl:`Act as an expert academic coach. Create a complete, personalised STUDY PLAN: "{INPUT}".
+
+## Overview & Goal
+(What needs to be mastered and by when.)
+## Topics Breakdown
+(List every topic/chapter to cover.)
+## Weekly Study Schedule
+(A daily timetable table — Day | Topics | Hours | Method.)
+## Study Techniques for This Subject
+(Best methods: flashcards, practice papers, mind maps, etc.)
+## Resources to Use
+(Textbooks, videos, practice tests — specific suggestions.)
+## Exam Strategy
+(How to perform on the day.)
+
+Make it specific and achievable.` },
+
+      { label:'Quiz Me',
+        sub:'Test your knowledge with smart questions',
+        ask:'What subject or topic should NORIA quiz you on?',
+        ph:'e.g. Islamic History, Algebra, The Human Body, World Geography',
+        tpl:`Act as an expert examiner. Create a comprehensive quiz on: "{INPUT}".
+
+Produce exactly 10 questions across different difficulty levels:
+- 3 Basic questions (recall and understanding)
+- 4 Intermediate questions (application and analysis)
+- 3 Advanced questions (evaluation and synthesis)
+
+Format:
+**Question 1:** [Question text]
+[For multiple choice: give 4 options labelled A B C D]
+
+After all 10 questions, include:
+---
+**ANSWERS:**
+[Number each answer and give a brief explanation of why it is correct.]` },
+
+      { label:'Summarise Content',
+        sub:'Condense any text into sharp key points',
+        ask:'Paste the text or describe the content to summarise',
+        ph:'e.g. Paste a passage, or say "Summarise the causes of the French Revolution"',
+        tpl:`Act as an expert analyst. Summarise this content into a clear, usable briefing: "{INPUT}".
+
+## Main Point
+(The single most important idea — one sentence.)
+## Key Points
+(Numbered list of the 5–8 most important points.)
+## What This Means in Practice
+(The practical takeaway — why does this matter?)
+## Memorable Quote or Phrase
+(If there is one key sentence that captures the essence.)
+
+Be precise. No padding.` }
+    ]
+  },
+
+  /* ── BUSINESS DOCS ── */
+  'Business Docs':{
+    icon:'ic-briefcase', desc:'Professional business documents and strategic analysis.',
+    actions:[
+      { label:'Business Plan',
+        sub:'Full investor-ready business plan',
+        ask:'Describe your business idea',
+        ph:'e.g. A mobile hair salon targeting working women in Lagos',
+        tpl:`Act as a master business strategist. Write a complete, investor-ready BUSINESS PLAN for: "{INPUT}".
+
+## Executive Summary
+(The business, the opportunity, the ask — in one compelling page.)
+## Business Description
+(What we do, who we serve, why we exist.)
+## Market Analysis
+(Target market, market size, trends, competition.)
+## Products & Services
+(What we offer and our value proposition.)
+## Revenue Model
+(How we make money — pricing, streams, margins.)
+## Marketing & Sales Strategy
+(How we reach, attract, and retain customers.)
+## Operations Plan
+(How the business runs day-to-day.)
+## Management Team
+([PLACEHOLDER] — insert your team here.)
+## Financial Projections
+(Year 1–3 targets: revenue, costs, profit. Realistic estimates.)
+## Funding Requirements
+([PLACEHOLDER] — insert your ask and how it will be used.)
+
+Write this as a complete, professional document.` },
+
+      { label:'Business Proposal',
+        sub:'Persuasive proposal for a client or partner',
+        ask:'What is this proposal for?',
+        ph:'e.g. A proposal to supply catering services to ABC Corporation',
+        tpl:`Act as a professional business writer. Write a compelling BUSINESS PROPOSAL for: "{INPUT}".
+
+## Cover Summary
+(One powerful paragraph — what we are proposing and why it matters.)
+## Understanding the Need
+(Show you understand the client's situation and challenge.)
+## Proposed Solution
+(What we are offering — specifically and in detail.)
+## Scope of Work
+(Exactly what will be delivered, and what is excluded.)
+## Timeline
+(A clear project or delivery timeline.)
+## Investment
+([PLACEHOLDER — insert your pricing structure here.])
+## Why Choose Us
+(Our strengths, experience, and unique value.)
+## Next Steps
+(Clear call to action.)
+
+Write the complete, polished proposal now.` },
+
+      { label:'Market Analysis',
+        sub:'Deep intelligence on any market or industry',
+        ask:'Which market or industry should NORIA analyse?',
+        ph:'e.g. The Nigerian e-commerce market, Global electric vehicle industry',
+        tpl:`Act as a senior market intelligence analyst. Produce a FULL MARKET ANALYSIS: "{INPUT}".
+
+## Market Overview
+(Definition, size, geography, key segments.)
+## Market Size & Growth
+(Current size and projected growth. Key trends driving it.)
+## Customer Segments
+(Who buys in this market. Key profiles and needs.)
+## Competitive Landscape
+(Key players, their market position, strengths/weaknesses.)
+## Opportunities
+(Where the gaps and growth opportunities lie.)
+## Threats & Risks
+(Risks, disruptions, regulatory factors.)
+## Strategic Recommendations
+(3–4 actionable recommendations for entering or competing in this market.)
+
+Be specific, analytical, and data-aware.` },
+
+      { label:'Business Report',
+        sub:'Formal professional report on any topic',
+        ask:'What is this business report about?',
+        ph:'e.g. Q3 performance review, Staff training needs assessment',
+        tpl:`Act as a senior business analyst. Write a complete, formal BUSINESS REPORT on: "{INPUT}".
+
+## Title Page
+BUSINESS REPORT: [Title based on topic]
+Prepared by: [PLACEHOLDER]
+Date: [PLACEHOLDER]
+
+## Executive Summary
+(Key findings and recommendations — half page.)
+## Introduction & Background
+(Context and purpose of this report.)
+## Methodology
+(How information was gathered.)
+## Findings
+(The core analysis — structured in clear sections with headers.)
+## Conclusions
+(What the findings mean.)
+## Recommendations
+(Numbered, specific, actionable.)
+## Appendix
+([PLACEHOLDER — supporting data, charts, tables if needed.])
+
+Write the full document in professional business style.` },
+
+      { label:'Pitch Deck',
+        sub:'Investor pitch outline — slide by slide',
+        ask:'What is your startup or business idea?',
+        ph:'e.g. An EdTech platform connecting rural African students to tutors',
+        tpl:`Act as a top startup advisor. Create a complete INVESTOR PITCH DECK OUTLINE for: "{INPUT}".
+
+For each of the 12 slides, give:
+- **Slide title**
+- **What goes on this slide** (clear guidance)
+- **The key message** (what the investor should feel)
+
+SLIDE STRUCTURE:
+1. Title Slide 2. Problem 3. Solution 4. Market Opportunity 5. Product/Service 6. Business Model 7. Traction & Milestones 8. Go-To-Market Strategy 9. Competition 10. Team 11. Financial Projections 12. The Ask
+
+End with: **Presenting Tips** — 5 key rules for a winning pitch delivery.` }
+    ]
+  },
+
+  /* ── OFFICE DOCS ── */
+  'Office Docs':{
+    icon:'ic-folder', desc:'Professional office documents — ready to send.',
+    actions:[
+      { label:'Professional Email',
+        sub:'Polished, ready-to-send business email',
+        ask:'What is this email about? Who is it to?',
+        ph:'e.g. Following up on a job application sent last week to HR Manager',
+        tpl:`Act as a professional business writer. Write a complete, polished PROFESSIONAL EMAIL: "{INPUT}".
+
+Write the actual email — subject line, greeting, body, closing, and signature placeholder. Make it:
+- Clear and purposeful
+- Professional but warm
+- Appropriately concise
+- Ending with a clear next step or call to action
+
+Subject: [Write a specific subject line]
+
+[Full email body]
+
+[Professional closing]
+[Name — PLACEHOLDER]
+[Title — PLACEHOLDER]` },
+
+      { label:'Meeting Minutes',
+        sub:'Formal minutes ready for distribution',
+        ask:'What was the meeting about?',
+        ph:'e.g. Weekly team meeting — discussed Q4 targets, budget review, and new hiring plan',
+        tpl:`Act as a professional minute-taker. Write complete, formal MEETING MINUTES for: "{INPUT}".
+
+## MEETING MINUTES
+**Meeting Title:** [PLACEHOLDER]
+**Date & Time:** [PLACEHOLDER]
+**Location/Platform:** [PLACEHOLDER]
+**Chaired by:** [PLACEHOLDER]
+**Attendees:** [PLACEHOLDER]
+**Apologies:** [PLACEHOLDER]
+
+## Agenda Items Discussed
+(For each item: topic, discussion summary, decision made, action owner, deadline.)
+
+## Actions Arising
+| Action | Owner | Deadline |
+|---|---|---|
+[Generate 3–5 realistic action rows based on the context]
+
+## Date of Next Meeting
+[PLACEHOLDER]
+
+**Minutes recorded by:** [PLACEHOLDER]` },
+
+      { label:'Meeting Agenda',
+        sub:'Structured agenda for any meeting',
+        ask:'What is this meeting for and how long will it run?',
+        ph:'e.g. 1-hour monthly management meeting covering finance, operations, and HR',
+        tpl:`Act as a professional office manager. Create a complete MEETING AGENDA: "{INPUT}".
+
+## MEETING AGENDA
+**Meeting:** [PLACEHOLDER]
+**Date:** [PLACEHOLDER]
+**Time:** [PLACEHOLDER]
+**Location:** [PLACEHOLDER]
+**Chaired by:** [PLACEHOLDER]
+
+| # | Agenda Item | Lead | Time |
+|---|---|---|---|
+[Create 6–8 relevant agenda items with realistic time allocations]
+
+**Total Meeting Time:** [Sum]
+
+**Pre-Meeting Preparation:**
+(What attendees should read/prepare beforehand.)
+
+**Documents Attached:** [PLACEHOLDER]` },
+
+      { label:'Internal Memo',
+        sub:'Clear memo for any internal communication',
+        ask:'What is this memo communicating?',
+        ph:'e.g. New office hours policy starting 1 January',
+        tpl:`Act as a professional office administrator. Write a complete, formal INTERNAL MEMORANDUM: "{INPUT}".
+
+MEMORANDUM
+
+**TO:** [PLACEHOLDER — All Staff / Specific Department]
+**FROM:** [PLACEHOLDER]
+**DATE:** [PLACEHOLDER]
+**RE:** [Clear subject based on the memo topic]
+
+[Write the full memo body — clear, formal, and comprehensive. Cover: what is changing/happening, why, when it takes effect, what action staff need to take, and who to contact with questions.]
+
+[Closing and signature placeholder]` },
+
+      { label:'Office Report',
+        sub:'Structured professional report for any purpose',
+        ask:'What is this office report about?',
+        ph:'e.g. Monthly departmental productivity report, Office safety inspection findings',
+        tpl:`Act as a professional report writer. Write a complete OFFICE REPORT: "{INPUT}".
+
+## REPORT
+**Report Title:** [PLACEHOLDER]
+**Department:** [PLACEHOLDER]
+**Prepared by:** [PLACEHOLDER]
+**Date:** [PLACEHOLDER]
+**Report Period:** [PLACEHOLDER]
+
+## Summary
+(Key findings in 3–4 sentences.)
+## Background
+(Why this report was prepared.)
+## Findings
+(The main body — structured clearly by topic or area.)
+## Analysis
+(What the findings mean.)
+## Recommendations
+(3–5 numbered, specific, actionable recommendations.)
+## Conclusion
+
+Write in professional, formal language throughout.` }
+    ]
+  },
+
+  /* ── EDUCATIONAL DOCS ── */
+  'Educational Docs':{
+    icon:'ic-cap', desc:'Academic and educational content for teachers and learners.',
+    actions:[
+      { label:'Lesson Plan',
+        sub:'Complete lesson plan ready to teach',
+        ask:'What subject, topic, and age group is this lesson for?',
+        ph:'e.g. Science — The Solar System — Age 10–12, 45-minute lesson',
+        tpl:`Act as a master educator. Write a complete, ready-to-teach LESSON PLAN: "{INPUT}".
+
+## LESSON PLAN
+**Subject:** | **Topic:** | **Age/Year Group:** | **Duration:**
+
+## Learning Objectives
+(By the end of this lesson, students will be able to: — list 3–4 clear outcomes.)
+## Materials & Resources
+(Everything needed to teach this lesson.)
+## Lesson Structure
+| Phase | Activity | Duration |
+|---|---|---|
+| Warm-Up / Starter | | |
+| Introduction | | |
+| Main Teaching | | |
+| Practice / Activity | | |
+| Review / Plenary | | |
+
+## Detailed Activities
+(Describe each phase in detail — what teacher does, what students do.)
+## Differentiation
+(How to adapt for struggling students and advanced students.)
+## Assessment
+(How you will know students understood the lesson.)
+## Homework / Extension
+(Optional follow-up activity.)` },
+
+      { label:'Assessment & Quiz',
+        sub:'Complete test or quiz for any subject',
+        ask:'What subject, topic, and level is this assessment for?',
+        ph:'e.g. English Language — Comprehension — Secondary School, 30 minutes',
+        tpl:`Act as an expert examiner. Create a complete ASSESSMENT: "{INPUT}".
+
+## ASSESSMENT
+**Subject:** | **Topic:** | **Level:** | **Duration:** | **Total Marks:**
+
+**Instructions to Students:** Read all questions carefully. [Customise as needed.]
+
+---
+## Section A — Multiple Choice [1 mark each]
+(Write 5 multiple choice questions — 4 options each, one correct.)
+
+## Section B — Short Answer [3 marks each]
+(Write 4 short answer questions requiring 2–4 sentences.)
+
+## Section C — Extended Writing [10 marks]
+(Write 1 essay question with a mark scheme guide.)
+
+---
+## MARK SCHEME
+(Full answers for each question with marks allocated.)` },
+
+      { label:'Course Curriculum',
+        sub:'Full curriculum outline for any subject',
+        ask:'What subject and level is this curriculum for?',
+        ph:'e.g. Islamic Studies curriculum for secondary school — full year',
+        tpl:`Act as an expert curriculum designer. Create a complete COURSE CURRICULUM: "{INPUT}".
+
+## CURRICULUM OVERVIEW
+**Subject:** | **Level:** | **Duration:** | **Total Hours:**
+
+## Course Aims & Objectives
+(What students will know and be able to do by the end.)
+## Curriculum Map
+| Term/Module | Topics Covered | Key Skills | Assessment |
+|---|---|---|---|
+[Create 3–4 terms/modules with 4–6 topics each.]
+
+## Detailed Module Breakdown
+(For each module: overview, learning outcomes, key content, suggested activities, resources.)
+## Assessment Strategy
+(How students will be assessed throughout and at the end.)
+## Resources & Materials
+(Recommended textbooks, digital resources, materials.)` },
+
+      { label:'Student Report',
+        sub:'Professional academic report for a student',
+        ask:'Describe the student and what the report is for',
+        ph:'e.g. Year 8 student, end of term report — doing well in Maths, struggling with English',
+        tpl:`Act as a professional educator. Write a complete, balanced STUDENT ACADEMIC REPORT: "{INPUT}".
+
+Write separate subject comments for at least 5 subjects. For each:
+- Subject name
+- 2–3 sentences on performance, attitude, and progress
+- Specific strength mentioned
+- Specific area for improvement
+
+Then write:
+**General Comment (Form Tutor / Class Teacher):**
+(3–4 sentences on the student's overall conduct, character, effort, and potential — warm and professional.)
+
+**Target Grade / Level:** [PLACEHOLDER]
+**Attendance:** [PLACEHOLDER]
+**Teacher:** [PLACEHOLDER]
+
+Use [STUDENT NAME] as placeholder throughout.` },
+
+      { label:'Research Paper',
+        sub:'Full structured academic research paper',
+        ask:'What is the research topic or question?',
+        ph:'e.g. The effects of social media on the mental health of teenagers',
+        tpl:`Act as an expert academic researcher. Write a complete RESEARCH PAPER on: "{INPUT}".
+
+## Title
+[A precise, academic title]
+
+## Abstract
+(150–200 words: background, purpose, methodology, key findings, conclusion.)
+
+## 1. Introduction
+(Background, significance, research question, paper structure.)
+
+## 2. Literature Review
+(What is already known. Key themes and debates in the field.)
+
+## 3. Methodology
+(Approach to gathering and analysing information.)
+
+## 4. Findings & Discussion
+(Core analysis — what the evidence shows, organised by theme.)
+
+## 5. Conclusion
+(Summary of findings, implications, recommendations for further research.)
+
+## References
+(List 5–8 real, credible references in APA format. Use works that genuinely exist.)
+
+Write in formal academic English throughout.` }
+    ]
+  },
+
+  /* ── OFFICIAL DOCS ── */
+  'Official Docs':{
+    icon:'ic-clipboard', desc:'Formal official documents — polished and ready to submit.',
+    actions:[
+      { label:'Formal Letter',
+        sub:'Official formal letter for any purpose',
+        ask:'What is this formal letter about?',
+        ph:'e.g. Request for transfer to a different department',
+        tpl:`Act as a professional writer. Write a complete, formal OFFICIAL LETTER: "{INPUT}".
+
+[Your Name]
+[Your Address]
+[PLACEHOLDER]
+
+[Date]
+
+[Recipient Name]
+[Recipient Title]
+[Organisation]
+[Address]
+
+Dear [Sir/Madam/Name],
+
+RE: [Clear subject line]
+
+[Write the full formal letter body — opening paragraph stating purpose, body paragraphs with full detail, closing paragraph with clear request or next step.]
+
+Yours faithfully / sincerely,
+
+[Your Name]
+[Position/Title — PLACEHOLDER]
+[Contact — PLACEHOLDER]` },
+
+      { label:'Application Letter',
+        sub:'Compelling application for a job, program, or opportunity',
+        ask:'What are you applying for?',
+        ph:'e.g. Finance Officer position at the African Development Bank',
+        tpl:`Act as a professional careers advisor. Write a compelling APPLICATION LETTER for: "{INPUT}".
+
+Write a powerful, specific letter that:
+- Opens with a strong hook (why you, why this role, why now)
+- Demonstrates deep alignment between your background and what they need
+- Uses specific evidence of achievement, not vague claims
+- Shows genuine enthusiasm for the organisation's mission
+- Closes with confidence and a clear call to action
+
+[Use [YOUR NAME], [YOUR EXPERIENCE], [YOUR ACHIEVEMENT] as placeholders where specific details are needed.]
+
+Keep it to one page. Every sentence must earn its place.` },
+
+      { label:'Recommendation Letter',
+        sub:'Professional letter of recommendation',
+        ask:'Who is being recommended and for what?',
+        ph:'e.g. Recommending a former employee for a master\'s programme in the UK',
+        tpl:`Act as a professional writer. Write a strong LETTER OF RECOMMENDATION: "{INPUT}".
+
+[Recommender Name]
+[Title & Institution — PLACEHOLDER]
+[Date]
+
+To Whom It May Concern / [Admissions Committee / Hiring Manager],
+
+RE: Recommendation of [Candidate Name]
+
+[Write a full, compelling recommendation letter with:]
+- Paragraph 1: How you know this person, in what capacity and for how long
+- Paragraph 2: Their key strengths and standout qualities with specific evidence
+- Paragraph 3: A specific achievement or moment that demonstrates their potential
+- Paragraph 4: Why you believe they will excel in this role/programme
+- Closing: Your strongest endorsement and contact offer
+
+Sincerely,
+[Recommender Name, Title, Contact — PLACEHOLDER]` },
+
+      { label:'Official Statement',
+        sub:'Formal statement for any official purpose',
+        ask:'What is the statement about?',
+        ph:'e.g. A company statement on a staff incident / A personal witness statement',
+        tpl:`Act as a professional writer. Write a complete OFFICIAL STATEMENT: "{INPUT}".
+
+## OFFICIAL STATEMENT
+
+**Date:** [PLACEHOLDER]
+**Ref:** [PLACEHOLDER]
+**Issued by:** [PLACEHOLDER]
+
+[Write the full statement — clear, authoritative, factual. Structure:
+- Opening: purpose and context of this statement
+- Body: the facts as known, presented chronologically and clearly
+- Closing: any action being taken, contact for follow-up, or confirmation of accuracy]
+
+**Signed:** ____________________
+**Name:** [PLACEHOLDER]
+**Title:** [PLACEHOLDER]
+**Date:** [PLACEHOLDER]` },
+
+      { label:'Complaint Letter',
+        sub:'Formal complaint — firm, professional, effective',
+        ask:'What is the complaint about?',
+        ph:'e.g. Poor service received at a government office on [date]',
+        tpl:`Act as a professional advocate. Write a firm but professional COMPLAINT LETTER: "{INPUT}".
+
+[Your Name & Address — PLACEHOLDER]
+[Date]
+
+[Recipient Name/Title]
+[Organisation]
+
+Dear [Sir/Madam/Name],
+
+RE: Formal Complaint — [Subject]
+
+[Write the full complaint letter:]
+- Paragraph 1: Clear statement of what happened and when
+- Paragraph 2: How this has affected you (specifically)
+- Paragraph 3: What you have already done to resolve this
+- Paragraph 4: What you are requesting — specific resolution, deadline for response
+- Closing: Notice that you will escalate if unresolved
+
+Be firm, specific, and professional throughout. No aggression — controlled authority.
+
+Yours faithfully,
+[Your Name — PLACEHOLDER]` }
+    ]
+  },
+
+  /* ── LEGAL DOCS ── */
+  'Legal Docs':{
+    icon:'ic-scales', desc:'Legal document templates — always consult a qualified lawyer for your jurisdiction.',
+    actions:[
+      { label:'Contract Template',
+        sub:'Comprehensive general services contract',
+        ask:'What is this contract between and for?',
+        ph:'e.g. A services contract between a freelance designer and a client',
+        tpl:`Act as a professional legal document drafter. Create a comprehensive CONTRACT TEMPLATE for: "{INPUT}".
+
+Note to user: This is an intelligent template. Have it reviewed by a qualified lawyer in your jurisdiction before use.
+
+---
+## CONTRACT FOR SERVICES
+
+**This Agreement** is entered into as of [DATE] between:
+
+**Service Provider:** [Full Name/Company — PLACEHOLDER]
+**Client:** [Full Name/Company — PLACEHOLDER]
+
+### 1. Services
+(Define the scope of work in clear, specific terms.)
+
+### 2. Compensation & Payment Terms
+(Amount, payment schedule, method, late payment consequences.)
+
+### 3. Timeline & Deliverables
+(Start date, milestones, completion date, delivery format.)
+
+### 4. Intellectual Property
+(Who owns the work product upon full payment.)
+
+### 5. Confidentiality
+(What information must be kept confidential and for how long.)
+
+### 6. Termination
+(How either party may end this agreement and the consequences.)
+
+### 7. Liability & Indemnification
+(Limitation of liability clause.)
+
+### 8. Governing Law
+(Which jurisdiction's law governs this contract.)
+
+### 9. Entire Agreement
+(Standard integration clause.)
+
+**SIGNATURES:**
+Service Provider: _________________ Date: _______
+Client: __________________________ Date: _______` },
+
+      { label:'NDA',
+        sub:'Non-Disclosure Agreement template',
+        ask:'Who are the parties and what is being protected?',
+        ph:'e.g. Between two companies discussing a joint venture — protecting business strategies',
+        tpl:`Act as a legal document drafter. Create a MUTUAL NON-DISCLOSURE AGREEMENT for: "{INPUT}".
+
+Note: Have reviewed by a qualified lawyer before use.
+
+---
+## NON-DISCLOSURE AGREEMENT (NDA)
+
+This NDA is entered into as of [DATE] between:
+**Party A:** [PLACEHOLDER] and **Party B:** [PLACEHOLDER]
+
+### 1. Definition of Confidential Information
+(What qualifies as confidential — be comprehensive.)
+
+### 2. Obligations of Receiving Party
+(Duty to protect, not disclose, limit access.)
+
+### 3. Permitted Disclosures
+(When disclosure is allowed — legal obligation, prior public knowledge.)
+
+### 4. Term
+(Duration of the agreement — typically 2–5 years.)
+
+### 5. Return or Destruction of Information
+(What happens to confidential materials when the relationship ends.)
+
+### 6. Remedies
+(Right to seek injunction; acknowledgement that breach causes irreparable harm.)
+
+### 7. Governing Law
+([PLACEHOLDER — jurisdiction])
+
+**Party A Signature:** _____________ Date: _______
+**Party B Signature:** _____________ Date: _______` },
+
+      { label:'Terms & Conditions',
+        sub:'Website or service terms and conditions',
+        ask:'What is your website or service?',
+        ph:'e.g. An e-commerce clothing store based in Nigeria',
+        tpl:`Act as a legal document drafter. Write comprehensive TERMS & CONDITIONS for: "{INPUT}".
+
+Note: Have reviewed by a qualified lawyer before publishing.
+
+---
+## TERMS AND CONDITIONS
+
+**Last Updated:** [DATE]
+**Company:** [PLACEHOLDER] | **Website:** [PLACEHOLDER]
+
+### 1. Acceptance of Terms
+### 2. Description of Service
+### 3. User Obligations & Prohibited Activities
+### 4. Intellectual Property Rights
+### 5. Products / Services & Pricing
+### 6. Payment & Refund Policy
+### 7. Privacy — Reference to Privacy Policy
+### 8. Disclaimer of Warranties
+### 9. Limitation of Liability
+### 10. Indemnification
+### 11. Account Termination
+### 12. Governing Law & Dispute Resolution
+### 13. Changes to These Terms
+### 14. Contact Information
+
+Write each section in full, appropriate legal language.` },
+
+      { label:'Privacy Policy',
+        sub:'GDPR-aware privacy policy for any service',
+        ask:'What is your business and what data do you collect?',
+        ph:'e.g. A mobile app that collects user profiles, location, and payment information',
+        tpl:`Act as a legal document drafter. Write a complete, GDPR-aware PRIVACY POLICY for: "{INPUT}".
+
+Note: Have reviewed by a qualified lawyer, especially for GDPR/NDPR compliance.
+
+---
+## PRIVACY POLICY
+
+**Effective Date:** [DATE]
+**Organisation:** [PLACEHOLDER] | **Contact:** [PLACEHOLDER]
+
+### 1. Introduction
+### 2. What Information We Collect
+(Personal data, usage data, cookies, payment information — all relevant types.)
+### 3. How We Collect Your Data
+### 4. How We Use Your Data
+(Legal basis for each purpose under GDPR — consent, legitimate interest, contract, legal obligation.)
+### 5. How We Store & Protect Your Data
+### 6. How Long We Keep Your Data
+### 7. Sharing Your Data
+(Third parties, processors, legal requirements.)
+### 8. Your Rights
+(Access, rectification, erasure, portability, objection, restriction.)
+### 9. Cookies Policy
+### 10. Children's Privacy
+### 11. Changes to This Policy
+### 12. Contact & Data Controller Details
+
+Write each section in full, clear legal language.` },
+
+      { label:'Legal Letter',
+        sub:'Formal legal correspondence template',
+        ask:'What is this legal letter regarding?',
+        ph:'e.g. Demand letter for unpaid debt of $5,000 owed for 3 months',
+        tpl:`Act as a professional legal correspondent. Write a formal LEGAL LETTER regarding: "{INPUT}".
+
+Note: Have reviewed by a qualified legal professional before sending.
+
+---
+[Law Firm / Your Name — PLACEHOLDER]
+[Address — PLACEHOLDER]
+[Date]
+
+[Recipient Full Name]
+[Address]
+
+**WITHOUT PREJUDICE** / **STRICTLY PRIVATE & CONFIDENTIAL** [choose as appropriate]
+
+Dear [Mr/Mrs/Name],
+
+**RE: [Clear legal subject heading]**
+
+[Write the full legal letter:]
+- Paragraph 1: Who we act for (or who you are) and the matter at hand
+- Paragraph 2: Statement of facts — what occurred, dates, amounts, agreements
+- Paragraph 3: The legal position — what obligations have not been met
+- Paragraph 4: The demand — what is required, by what date
+- Paragraph 5: Consequences of non-compliance
+
+Yours faithfully,
+[Name — PLACEHOLDER]
+[Title — PLACEHOLDER]` }
+    ]
+  },
+
+  /* ── GLOBAL OPPORTUNITIES ── */
+  'Global Opportunities':{
+    icon:'ic-globe', desc:'Find global pathways — visas, scholarships, jobs, and opportunities worldwide.',
+    actions:[
+      { label:'Visa & Immigration Guide',
+        sub:'Step-by-step pathway to any country',
+        ask:'Which country do you want to go to and why?',
+        ph:'e.g. I want to move to Canada as a skilled worker from Nigeria',
+        tpl:`Act as a global immigration expert. Provide a comprehensive VISA & IMMIGRATION GUIDE for: "{INPUT}".
+
+## Pathway Overview
+(The most realistic route for this profile and destination.)
+## Visa Category & Requirements
+(The best visa type, full eligibility criteria, required documents.)
+## Step-by-Step Application Process
+(Numbered steps from start to arrival.)
+## Costs & Fees
+(Application fees, associated costs, realistic total budget.)
+## Processing Times
+(Current typical timelines.)
+## Common Rejection Reasons
+(What to avoid.)
+## Tips for a Strong Application
+(What significantly improves success rate.)
+## 📌 Stay Current On
+(Application fees and processing times change — check the official embassy/government website for the latest.)` },
+
+      { label:'Find Scholarships',
+        sub:'Scholarships and funding opportunities for you',
+        ask:'What is your field of study, level, and country of origin?',
+        ph:'e.g. Engineering Master\'s degree, Nigerian student, want to study in the UK or US',
+        tpl:`Act as a global scholarships expert. Identify the best SCHOLARSHIP OPPORTUNITIES for: "{INPUT}".
+
+## Top Scholarships Available
+(For each scholarship: name, provider, value, eligibility, deadline, application link description.)
+List at least 6–8 relevant scholarships.
+
+## Grants & Government Funding
+(Government-to-government programs, host country funding.)
+## Application Tips
+(What scholarship committees are really looking for.)
+## How to Write a Winning Application
+(The key elements: personal statement, recommendation letters, interview prep.)
+## Your Action Plan
+(A 3-month timeline to apply for the best options.)
+## 📌 Stay Current On
+(Deadlines and availability change each cycle — verify on official websites.)` },
+
+      { label:'Work Abroad',
+        sub:'Complete guide to working in another country',
+        ask:'Where do you want to work and in what field?',
+        ph:'e.g. I\'m a nurse wanting to work in the UK or Australia',
+        tpl:`Act as a global career and immigration advisor. Create a complete WORK ABROAD GUIDE for: "{INPUT}".
+
+## The Opportunity Landscape
+(How in-demand is this profession in the target country right now.)
+## Work Visa Options
+(Available work visas — types, requirements, eligibility.)
+## Professional Recognition
+(Will your qualifications be accepted? What to do if they need verification.)
+## Job Search Strategy
+(Best platforms, recruitment agencies, professional networks for this field and country.)
+## Salary & Cost of Living
+(What to expect to earn vs. the cost of living.)
+## Step-by-Step Plan
+(From application to arrival — numbered steps.)
+## 📌 Stay Current On
+(Visa policies and qualification recognition change frequently — check official sources.)` },
+
+      { label:'Study Abroad',
+        sub:'Academic opportunities and university pathways',
+        ask:'What do you want to study and where?',
+        ph:'e.g. MBA at a top university in the US or Europe — I have a business degree',
+        tpl:`Act as a global education advisor. Create a STUDY ABROAD GUIDE for: "{INPUT}".
+
+## Top Universities for This Programme
+(5–7 universities with: name, country, programme details, reputation, entry requirements.)
+## Admission Requirements
+(Academic qualifications, language tests — IELTS/TOEFL/GMAT/GRE — work experience.)
+## Application Process
+(Step by step — from choosing universities to receiving an offer.)
+## Funding Options
+(Scholarships, assistantships, student loans, work-study.)
+## Visa & Pre-Departure
+(Student visa requirements for the target country.)
+## Life as a Student
+(What to expect — accommodation, culture, part-time work rules.)
+## Your Timeline
+(A 12-month action plan from now to starting your programme.)` },
+
+      { label:'Business Abroad',
+        sub:'How to start or expand a business internationally',
+        ask:'What kind of business and in which country?',
+        ph:'e.g. I want to start a tech startup in the UAE or export African goods to Europe',
+        tpl:`Act as an international business advisor. Create a BUSINESS ABROAD GUIDE for: "{INPUT}".
+
+## Market Assessment
+(Is this country right for this business? Key factors.)
+## Legal Structure & Registration
+(How to legally set up a business in this country as a foreigner.)
+## Business Culture & Local Knowledge
+(What you must know to succeed here — relationships, negotiation, customs.)
+## Regulatory & Tax Environment
+(Key rules, taxes, licences required.)
+## Banking & Finance
+(How to open accounts, access finance, manage currency.)
+## Market Entry Strategy
+(How to launch and win customers.)
+## Key Contacts & Institutions
+(Government bodies, trade organisations, chambers of commerce.)
+## Risks & How to Manage Them
+## 📌 Stay Current On
+(Regulations and requirements change — verify with a local legal advisor.)` }
+    ]
+  },
+
+  /* ── PURPOSE ── */
+  'Purpose':{
+    icon:'ic-target', desc:'Discover who you are, why you are here, and what you are called to do.',
+    actions:[
+      { label:'Find My Purpose',
+        sub:'A guided exploration to discover your true calling',
+        ask:'Tell me about yourself — your passions, your skills, and what troubles you about the world',
+        ph:'e.g. I love working with young people, I\'m good at teaching, and I hate seeing talent wasted in poverty',
+        tpl:`Act as a wise life purpose coach. Help this person discover their PURPOSE: "{INPUT}".
+
+## What I See in You
+(Reflect back what the information reveals — gifts, values, patterns.)
+## Your Ikigai
+(The Japanese framework — where passion, mission, vocation, and profession intersect for this person.)
+## Your Unique Gift to the World
+(What only you, with your specific combination of experience and passion, can offer.)
+## Your Core Values
+(The values driving everything they described.)
+## Your Purpose Statement
+(A single powerful sentence: "I exist to _____ so that _____.")
+## What This Looks Like in Practice
+(3 concrete ways to live this purpose — career, community, daily life.)
+## A Message to Your Future Self
+(An inspiring, personal note to encourage them on the journey.)` },
+
+      { label:'Mission Statement',
+        sub:'Your personal mission — clear and powerful',
+        ask:'What do you want your life to stand for?',
+        ph:'e.g. I want to educate African children and give them a future they deserve',
+        tpl:`Act as a personal development expert. Write a powerful PERSONAL MISSION STATEMENT: "{INPUT}".
+
+## Draft Mission Statement
+(Write 3 versions — short, medium, and expanded. The person can choose what resonates.)
+
+**Version 1 — The One Sentence (for social profiles, elevator pitch):**
+**Version 2 — The Paragraph (for bios, applications):**
+**Version 3 — The Full Statement (for personal planning, deep reflection):**
+
+## Core Principles
+(The 5–7 values that this mission is built on.)
+## What This Mission Demands
+(The commitments and habits this mission requires.)
+## Success Looks Like
+(How you will know you are living your mission — measurable markers.)
+## First Step Tomorrow
+(The one thing to do tomorrow to start living this mission.)` },
+
+      { label:'Discover My Values',
+        sub:'Clarify the values that drive everything you do',
+        ask:'Describe a time you felt most alive and a time you felt most conflicted',
+        ph:'e.g. Felt alive: teaching a student who finally understood. Conflicted: taking a well-paid job I hated',
+        tpl:`Act as a personal values coach. Help discover and clarify CORE VALUES: "{INPUT}".
+
+## Values Identified
+(From the experiences described, identify 8–10 core values this person holds.)
+## Your Top 5 Values
+(The deepest 5 — ranked and explained: what each means to this person specifically.)
+## Where Your Values Show Up
+(How these values appear in daily choices, relationships, and work.)
+## Where You May Be Out of Alignment
+(Where current life may be conflicting with these values.)
+## A Values Declaration
+("I am a person who values ___. I will honour this by ___.")
+## Living Your Values Daily
+(One practical act for each top value to practise this week.)` },
+
+      { label:'Life Goals Blueprint',
+        sub:'A complete, structured life goals framework',
+        ask:'What are your biggest dreams across all areas of your life?',
+        ph:'e.g. Start my own business, get married, travel to 20 countries, help my community',
+        tpl:`Act as a master life coach. Create a complete LIFE GOALS BLUEPRINT: "{INPUT}".
+
+## Vision of Your Best Life
+(Paint a vivid picture of life fully lived — 5–10 years from now.)
+## Goals Across All 7 Areas of Life
+For each area, define 1–2 major goals:
+1. Career & Purpose
+2. Financial & Wealth
+3. Health & Vitality
+4. Relationships & Family
+5. Spiritual & Inner Life
+6. Knowledge & Growth
+7. Legacy & Impact
+
+## 90-Day Focus
+(The 3 most important goals to pursue in the next 90 days.)
+## Goal-Setting Rules
+(How to set goals that you actually achieve.)
+## Accountability System
+(How to track progress and stay committed.)` },
+
+      { label:'Strengths & Gifts',
+        sub:'Map your unique talents and how to use them',
+        ask:'What do you find effortlessly easy that others find hard?',
+        ph:'e.g. I can explain complicated things simply, I notice what people are feeling, I always solve problems calmly',
+        tpl:`Act as a strengths coach. Identify and map STRENGTHS & GIFTS: "{INPUT}".
+
+## Your Natural Strengths
+(Name and describe each distinct strength you can see in what they shared.)
+## How These Show Up
+(Where these strengths naturally emerge — at work, in relationships, under pressure.)
+## Your Signature Gift
+(The one gift that is uniquely powerful in combination with the others.)
+## Where These Strengths Are Most Needed in the World
+(The problems, roles, and environments where these gifts create maximum impact.)
+## How to Develop Each Strength Further
+(One action per strength to take it from good to extraordinary.)
+## Your Strengths Statement
+("My greatest gifts are ___. I am at my best when ___. My world needs me to ___.")` }
+    ]
+  },
+
+  /* ── VISION ── */
+  'Vision':{
+    icon:'ic-eye', desc:'Design your future — with clarity, intention, and power.',
+    actions:[
+      { label:'Write My Vision',
+        sub:'A vivid, compelling personal or organisational vision',
+        ask:'What is your vision for? (Personal life, your organisation, your community?)',
+        ph:'e.g. My vision for my life in 10 years / My vision for my company',
+        tpl:`Act as a visionary life architect. Write a powerful, vivid VISION STATEMENT: "{INPUT}".
+
+## The Vision Statement
+(Write a beautiful, inspiring vision statement — 1–3 paragraphs. Present tense. Vivid and specific. Written as if it has already been achieved.)
+
+## Key Elements of This Vision
+(Break down the 6–8 specific elements of what this vision contains.)
+## Why This Vision Matters
+(The deeper "why" — who benefits, what changes in the world.)
+## What This Vision Demands
+(The sacrifices, commitments, and changes required to achieve it.)
+## The First 90 Days
+(Concrete first steps to begin moving toward this vision immediately.)
+## A Declaration
+(A single powerful declaration the person can speak aloud daily.)` },
+
+      { label:'10-Year Vision Plan',
+        sub:'Your decade roadmap — year by year',
+        ask:'What do you want your life to look like in 10 years?',
+        ph:'e.g. Running a successful school network across West Africa, financially free, strong family',
+        tpl:`Act as a strategic life planner. Create a complete 10-YEAR VISION PLAN: "{INPUT}".
+
+## The 10-Year Picture
+(Describe the life in full detail — career, wealth, family, health, legacy.)
+## Year-by-Year Milestones
+| Year | Focus Area | Key Milestones |
+|---|---|---|
+[Create a row for each of the 10 years — realistic, progressive milestones.]
+
+## The Big 10-Year Goals
+(5–7 specific, measurable goals to achieve in 10 years.)
+## What Must Change Starting Now
+(Habits, mindset shifts, relationships, skills to develop.)
+## Annual Review Framework
+(How to review and update this plan each year.)
+## A Letter from Your Future Self
+(Write a letter from the 10-year-from-now version of this person to their present self — inspiring and specific.)` },
+
+      { label:'Brand Vision',
+        sub:'A compelling vision for your personal or company brand',
+        ask:'What is your brand and what do you want it to stand for?',
+        ph:'e.g. My clothing brand — I want it to represent African luxury and pride globally',
+        tpl:`Act as a master brand strategist. Develop a complete BRAND VISION: "{INPUT}".
+
+## Brand Vision Statement
+(Where this brand is going — inspiring, ambitious, timeless.)
+## Brand Mission Statement
+(What this brand does and for whom — the daily commitment.)
+## Brand Values
+(5–6 core values the brand will never compromise on.)
+## Brand Personality
+(If the brand were a person, describe them in detail — voice, character, style.)
+## The Brand Promise
+(The one thing every customer will always experience with this brand.)
+## Visual Identity Direction
+(Colours, aesthetic, feel — describe the visual world of this brand.)
+## Brand Positioning
+(How this brand is different from every competitor.)
+## The 5-Year Brand Ambition
+(Where this brand will be in 5 years — specific and exciting.)` },
+
+      { label:'Vision Board Guide',
+        sub:'A personalised vision board plan — what to put on it',
+        ask:'What areas of your life do you want your vision board to cover?',
+        ph:'e.g. Career, wealth, travel, health, family, spiritual life',
+        tpl:`Act as a vision and manifestation coach. Create a personalised VISION BOARD GUIDE: "{INPUT}".
+
+## What a Vision Board Actually Does
+(The psychology and neuroscience behind it — why it works.)
+## Your Vision Board Sections
+(For each area mentioned, describe exactly what to put — images, words, symbols, colours.)
+## The Words & Affirmations
+(10–15 powerful affirmations specific to this person's vision.)
+## The Central Image
+(What should sit at the centre and why.)
+## Colours & Energy
+(The colour psychology to use for this specific vision.)
+## How to Activate It Daily
+(The morning ritual to make it powerful — 5 minutes daily.)
+## Digital vs Physical Board
+(Pros and cons and how to do each.)
+## When to Update It
+(How to know when the board needs refreshing.)` },
+
+      { label:'Legacy Vision',
+        sub:'What you want to leave behind for generations',
+        ask:'What do you want people to say about you when you are gone?',
+        ph:'e.g. I want to be known as someone who lifted his community and built something that lasted',
+        tpl:`Act as a legacy architect. Help design a clear, powerful LEGACY VISION: "{INPUT}".
+
+## The Legacy Statement
+(A single profound statement of what this person wants to leave behind.)
+## The Three Pillars of This Legacy
+(The three most important things they want to be remembered for.)
+## Who Will Be Impacted
+(The specific people, communities, or generations who will carry this legacy.)
+## What Must Be Built
+(Institutions, systems, ideas, or works that will outlast them.)
+## How to Live It Now
+(Daily choices and commitments that are already building this legacy.)
+## A Letter to the Next Generation
+(A personal letter — to their children, students, community — outlining what they want to pass on.)` }
+    ]
+  },
+
+  /* ── VITALITY ── */
+  'Vitality':{
+    icon:'ic-bolt', desc:'Your health, energy, and wellbeing — mind, body, and spirit.',
+    actions:[
+      { label:'Personal Health Plan',
+        sub:'A holistic health roadmap tailored to your goals',
+        ask:'Describe your health goals and current situation',
+        ph:'e.g. I\'m 35, overweight, tired all the time, want to lose 20kg and have more energy',
+        tpl:`Act as a holistic health advisor. Create a comprehensive PERSONAL HEALTH PLAN: "{INPUT}".
+
+## Health Assessment
+(Reflect what has been shared — key health challenges and goals.)
+## The 4 Pillars of Your Health Plan
+### 1. Nutrition
+(Eating principles, what to eat more of, what to reduce, meal timing.)
+### 2. Movement & Exercise
+(Type of exercise, frequency, duration, progression.)
+### 3. Sleep & Recovery
+(Sleep hygiene practices, recommended hours, recovery strategies.)
+### 4. Mental & Emotional Health
+(Stress management, mindfulness, emotional wellness practices.)
+## Your Daily Health Routine
+(Morning, afternoon, and evening habits — specific and practical.)
+## 12-Week Milestone Plan
+(What to aim for at 4, 8, and 12 weeks.)
+## Key Health Metrics to Track
+(What to measure and how often.)
+
+Note: For specific medical conditions, work with a qualified healthcare professional.` },
+
+      { label:'Nutrition Guide',
+        sub:'A personalised eating plan for your body and goals',
+        ask:'What are your nutrition goals and any dietary restrictions?',
+        ph:'e.g. I want to build muscle, I\'m Muslim so I eat halal, I hate vegetables',
+        tpl:`Act as a nutrition expert. Create a personalised NUTRITION GUIDE: "{INPUT}".
+
+## Nutritional Principles
+(The core eating approach for these goals — not a fad diet, a sustainable lifestyle.)
+## What to Eat — The Priority Foods
+(Proteins, carbohydrates, fats, vegetables — specific foods that work for these goals and restrictions.)
+## What to Limit or Avoid
+(And why — no guilt, just clarity.)
+## Sample Meal Plan — 7 Days
+(Day | Breakfast | Lunch | Dinner | Snacks)
+## Hydration
+(Daily water intake guide.)
+## Supplements to Consider
+(Only evidence-based options.)
+## Eating on a Budget
+(How to eat this way affordably.)
+## Eating Out & Social Situations
+(How to stay on track without being antisocial.)` },
+
+      { label:'Fitness Plan',
+        sub:'A complete exercise programme for your goals',
+        ask:'What are your fitness goals and current fitness level?',
+        ph:'e.g. Complete beginner, want to lose weight and feel stronger, can exercise 4x per week',
+        tpl:`Act as a certified fitness coach. Create a complete FITNESS PLAN: "{INPUT}".
+
+## Fitness Assessment
+(Current level, goal, what this plan will achieve.)
+## Training Principles
+(The approach — why this plan will work.)
+## Weekly Training Schedule
+| Day | Session Type | Duration |
+|---|---|---|
+[7-day table with rest days included]
+
+## Detailed Workout Sessions
+(For each session type: warm-up, main exercises with sets/reps, cool-down.)
+## Progression System
+(How to increase difficulty week by week.)
+## Tracking Your Progress
+(What to measure, how often.)
+## Common Mistakes to Avoid
+## Recovery & Injury Prevention` },
+
+      { label:'Mental Wellness',
+        sub:'A personalised mental health and wellbeing plan',
+        ask:'What mental or emotional challenges are you dealing with?',
+        ph:'e.g. High stress from work, anxiety, difficulty sleeping, feeling overwhelmed',
+        tpl:`Act as a compassionate mental wellness guide. Create a MENTAL WELLNESS PLAN: "{INPUT}".
+
+## Acknowledging What You're Carrying
+(Reflect with compassion on what has been shared.)
+## Understanding the Patterns
+(The likely underlying patterns — stress response, thought patterns, habits.)
+## Your Daily Mental Wellness Practices
+(Morning, midday, and evening practices — specific and manageable.)
+## Stress Management Tools
+(Evidence-based techniques: breathing, journaling, reframing, movement.)
+## Sleep & Rest
+(Specific sleep hygiene for this situation.)
+## Boundaries
+(Where to say no and why it's not selfish.)
+## Social Connection
+(The role of relationships in recovery.)
+## When to Seek Professional Support
+(Signs that indicate talking to a therapist or doctor is the right next step — said with care, not alarm.)
+
+Note: This plan supports wellbeing but does not replace professional mental health care.` },
+
+      { label:'Daily Routine',
+        sub:'A powerful daily vitality routine built around your life',
+        ask:'Describe your daily schedule and what you want to improve',
+        ph:'e.g. I wake up at 7am, work from 9-6, always tired by afternoon, evenings are unproductive',
+        tpl:`Act as a peak performance coach. Design a DAILY VITALITY ROUTINE: "{INPUT}".
+
+## The Philosophy
+(Why a strong daily routine is the foundation of everything.)
+## Your Optimised Daily Routine
+
+**Morning Block — [TIME]**
+(Step-by-step morning routine — wake-up, movement, nutrition, mindset, work prep.)
+
+**Work/Focus Block — [TIME]**
+(How to structure focus time — deep work, breaks, energy management.)
+
+**Midday Reset — [TIME]**
+(What to do at midday to restore energy and clarity.)
+
+**Afternoon Block — [TIME]**
+(How to handle the post-lunch dip and maintain productivity.)
+
+**Evening Shutdown — [TIME]**
+(Work closure ritual, family/personal time, preparation for tomorrow.)
+
+**Sleep Ritual — [TIME]**
+(What to do in the hour before bed.)
+
+## The Non-Negotiables
+(5 daily habits that anchor the whole routine.)
+## Adapting for Bad Days
+(A shorter version for when things go off plan.)` }
+    ]
+  },
+
+  /* ── WISDOM ── */
+  'Wisdom':{
+    icon:'ic-bulb', desc:'Knowledge, insight, and growth — for a life of depth and clarity.',
+    actions:[
+      { label:'Daily Wisdom',
+        sub:'A deep, meaningful insight for today',
+        ask:'What are you facing or thinking about today?',
+        ph:'e.g. I\'m struggling with a decision about whether to take a risk / I want to reflect on patience',
+        tpl:`Act as a wise counsellor drawing on the full breadth of human wisdom — from scripture, philosophy, history, and lived experience. Offer profound WISDOM for: "{INPUT}".
+
+## The Insight
+(A clear, deep, and personally relevant wisdom statement.)
+## From the Quran & Hadith
+(Relevant verse or teaching from the Quran or Hadith, with explanation.)
+## From Scripture & Tradition
+(A relevant teaching from the Bible or another wisdom tradition.)
+## From Great Thinkers
+(What a great philosopher, leader, or teacher has said on this.)
+## The Practical Application
+(How to apply this wisdom today — specific and actionable.)
+## A Reflection Question
+(One question to sit with and journal on.)
+## A Closing Word
+(A warm, personal closing thought.)` },
+
+      { label:'Book Summary',
+        sub:'Key lessons from any book — in minutes',
+        ask:'Which book should NORIA summarise?',
+        ph:'e.g. Atomic Habits by James Clear / The Alchemist by Paulo Coelho',
+        tpl:`Act as a master reader and intellectual synthesiser. Produce a deep BOOK SUMMARY of: "{INPUT}".
+
+## What This Book Is
+(Author, genre, what it's fundamentally about in 2 sentences.)
+## The Core Argument
+(The central thesis or message the author is making.)
+## Key Ideas & Concepts
+(The 5–8 most important ideas in the book — one section per idea.)
+## The Best Stories & Examples
+(The most memorable illustrations from the book.)
+## Practical Takeaways
+(10 things you can actually do based on this book.)
+## A Memorable Quote
+(The most powerful sentence in the book.)
+## Who Should Read This & Why
+(And who probably won't benefit from it.)
+## My Rating
+(A genuine assessment — what it does brilliantly and what it lacks.)` },
+
+      { label:'Philosophical Question',
+        sub:'Deep exploration of any question about life',
+        ask:'What philosophical question do you want to explore?',
+        ph:'e.g. What is the meaning of suffering? Does free will exist? What is justice?',
+        tpl:`Act as a philosopher of depth and clarity. Explore this question with intellectual rigour and wisdom: "{INPUT}".
+
+## The Question
+(Restate it precisely — what is really being asked.)
+## The Major Perspectives
+(How the great philosophical traditions have answered this — Eastern, Western, Islamic, African philosophy.)
+## From Faith & Revelation
+(What divine wisdom — Quran, Bible, Torah — says about this question.)
+## Where the Perspectives Converge
+(Common ground across traditions.)
+## Where They Diverge
+(The genuine disagreements and why they exist.)
+## My Considered View
+(A thoughtful, balanced synthesis — not avoiding the question.)
+## Living the Question
+(How this question should shape the way we live, not just think.)` },
+
+      { label:'Decision Wisdom',
+        sub:'Wisdom-guided clarity for an important decision',
+        ask:'What decision are you facing?',
+        ph:'e.g. Should I leave my country to pursue opportunities abroad?',
+        tpl:`Act as a wise counsellor. Help bring clarity and wisdom to this decision: "{INPUT}".
+
+## Understanding the Decision
+(What is really at stake — the surface and the deeper question.)
+## The Facts
+(What is certain, what is uncertain.)
+## What Your Heart Says
+(The instinctive response — and why it matters.)
+## What Wisdom Says
+(Drawing on scripture, life principles, and human experience.)
+## The Options & Their True Cost
+(Not just pros and cons — what each path actually costs and gives.)
+## Questions to Help You Decide
+(3–5 deep questions to sit with before deciding.)
+## The Wise Counsel
+(A direct, honest recommendation — while honouring your autonomy.)
+## Trust the Process
+(A closing word on how to move forward with peace.)` },
+
+      { label:'Learn Something Deep',
+        sub:'A comprehensive deep-dive into any topic',
+        ask:'What topic do you want to understand deeply?',
+        ph:'e.g. The history of Islam, How the stock market works, Quantum physics basics',
+        tpl:`Act as a world-class educator and intellectual. Teach this topic comprehensively: "{INPUT}".
+
+## What This Really Is
+(The clearest, most accurate definition and description.)
+## The History & Origins
+(Where it comes from — the story behind it.)
+## The Core Concepts
+(The fundamental ideas — explained clearly, in order.)
+## Why This Matters
+(The significance — to the world, to the individual, to history.)
+## Common Misconceptions
+(The most important things people get wrong.)
+## Fascinating Details
+(The parts that make this topic truly remarkable.)
+## How to Go Deeper
+(What to read, study, or explore next if this sparked curiosity.)` }
+    ]
+  },
+
+  /* ── WEALTH ── */
+  'Wealth':{
+    icon:'ic-gem', desc:'Build, protect, and grow your wealth — with intelligence and strategy.',
+    actions:[
+      { label:'Financial Plan',
+        sub:'Your complete personal financial roadmap',
+        ask:'Describe your financial situation and goals',
+        ph:'e.g. I earn $1,500/month, have $3,000 in debt, want to own a home in 5 years',
+        tpl:`Act as an expert financial advisor. Create a comprehensive PERSONAL FINANCIAL PLAN: "{INPUT}".
+
+## Financial Assessment
+(Where you stand today — income, expenses, debts, assets.)
+## The Financial Foundation — Priority Order
+1. Emergency Fund (3–6 months expenses)
+2. Debt Elimination (strategy and order)
+3. Protection (insurance)
+4. Saving & Investing (for wealth)
+
+## Monthly Budget Plan
+| Category | % of Income | Amount |
+|---|---|---|
+[Create a realistic budget based on the income shared.]
+
+## Debt Elimination Strategy
+(Which method: avalanche or snowball — and the specific plan.)
+## Savings Targets
+(Short-term, medium-term, long-term goals with amounts and timelines.)
+## Investment Strategy
+(Where and how to start investing based on this financial stage.)
+## 12-Month Financial Milestones
+(Month 3, 6, 9, 12 targets — specific and achievable.)
+
+Note: For complex situations, consult a qualified financial advisor in your country.` },
+
+      { label:'Investment Strategy',
+        sub:'A clear investment approach for your goals',
+        ask:'What is your investment goal, timeline, and risk tolerance?',
+        ph:'e.g. I want to grow $10,000 over 5 years, medium risk, I\'m 28 years old',
+        tpl:`Act as an investment strategist. Create a personalised INVESTMENT STRATEGY: "{INPUT}".
+
+## Investor Profile
+(Age, goal, timeline, risk tolerance — and what this means for strategy.)
+## Core Investment Principles
+(The rules that should guide every investment decision.)
+## Recommended Asset Allocation
+| Asset Class | Allocation % | Why |
+|---|---|---|
+[Create a specific, justified allocation table.]
+
+## Investment Vehicles to Consider
+(Stocks, bonds, mutual funds, ETFs, real estate, sukuk — relevant to profile and geography.)
+## How to Start — Step by Step
+(From opening accounts to making first investments.)
+## Risk Management
+(Diversification, dollar-cost averaging, when to rebalance.)
+## What to Avoid
+(Common investment mistakes and dangerous products.)
+## 5-Year Projection
+(Conservative, moderate, and optimistic scenarios.)
+## 📌 Stay Current On
+(Investment products and regulations vary by country — verify with a licensed local advisor.)` },
+
+      { label:'Budget Plan',
+        sub:'A practical monthly budget you can actually follow',
+        ask:'What is your monthly income and main expenses?',
+        ph:'e.g. I earn £2,200/month. Rent £800, food £300, transport £150. Want to save more.',
+        tpl:`Act as a personal finance coach. Create a practical MONTHLY BUDGET PLAN: "{INPUT}".
+
+## Financial Overview
+(Income vs. current spending — and the gap.)
+## The Budget Framework
+(The method: 50/30/20 or Zero-Based — chosen for this situation.)
+## Your Monthly Budget
+| Category | Allocated | Notes |
+|---|---|---|
+[Create a complete, detailed budget line by line.]
+
+## Where to Find Extra Money
+(3–5 specific ways to cut spending without reducing quality of life.)
+## The Savings System
+(Where each saved pound/dollar goes automatically.)
+## The One Financial Rule
+(The single most important habit to build financial stability.)
+## Budget Review System
+(How to track spending and review the budget monthly — 15 minutes is all it takes.)` },
+
+      { label:'Wealth Blueprint',
+        sub:'A long-term wealth-building strategy',
+        ask:'What does financial freedom look like to you?',
+        ph:'e.g. I want to retire at 50, own 3 properties, and never worry about money again',
+        tpl:`Act as a wealth architect. Create a complete WEALTH-BUILDING BLUEPRINT: "{INPUT}".
+
+## The Wealth Vision
+(What freedom looks like — specific, vivid, motivating.)
+## The Number
+(The wealth target needed to achieve this vision.)
+## The Wealth-Building Pillars
+1. Income Growth (career, business, promotion strategy)
+2. Expense Optimisation (spending less than you earn — always)
+3. Debt Management (eliminating and avoiding toxic debt)
+4. Saving Rate (the percentage that creates wealth)
+5. Investing (making money work while you sleep)
+6. Multiple Income Streams (active and passive)
+7. Protection (insurance, legal structures, estate planning)
+
+## Your 10-Year Wealth Roadmap
+(Year by year — income targets, net worth milestones.)
+## The Wealth Mindset
+(The mental shifts required — money beliefs, abundance vs. scarcity.)
+## The Most Common Wealth Mistakes
+(And how to avoid every one of them.)` },
+
+      { label:'Income Streams',
+        sub:'Multiple income ideas tailored to your skills',
+        ask:'What are your skills, interests, and how much time do you have?',
+        ph:'e.g. I\'m good at design, have evenings free, currently earn $800/month salary',
+        tpl:`Act as an entrepreneurship and income expert. Identify the best INCOME STREAMS: "{INPUT}".
+
+## Your Income Assessment
+(Current situation and what's realistic to add.)
+## Active Income Ideas
+(Things to do for pay using these skills — ranked by earning potential.)
+## Passive Income Ideas
+(Things to set up that earn without your time — realistic ones for this profile.)
+## Digital Income Opportunities
+(Online, remote, location-independent options.)
+## The First Income Stream to Start
+(Specific recommendation — why this one, how to start in the next 7 days.)
+## A 6-Month Income-Building Plan
+(Month by month — from idea to earning.)
+## Common Income-Building Mistakes
+(What to avoid so you don't waste time.)` }
+    ]
+  },
+
+  /* ── LEGACY ── */
+  'Legacy':{
+    icon:'ic-legacy', desc:'Build something that outlasts you — impact, heritage, and lasting contribution.',
+    actions:[
+      { label:'Define My Legacy',
+        sub:'Clarity on what you want to leave behind',
+        ask:'What do you want the world to look like because you lived in it?',
+        ph:'e.g. I want more African children to have access to quality education because of my work',
+        tpl:`Act as a legacy and life design coach. Help define a clear, powerful PERSONAL LEGACY: "{INPUT}".
+
+## The Legacy Vision
+(A rich description of what the world looks like because this person lived in it.)
+## The Three Pillars of This Legacy
+(The three most important contributions they want to make.)
+## Who Will Carry This Forward
+(The people, institutions, or movements that will continue the work.)
+## What Must Be Built in This Lifetime
+(The specific things — organisations, works, systems, relationships — that must be created.)
+## The Legacy in Action Now
+(How daily choices today are already building or undermining this legacy.)
+## Words for the Eulogy
+(What you hope people will say about you at your funeral — write it now as a guide for how to live.)
+## A Letter to Those Who Come After You
+(A personal message to your children, community, or the next generation.)` },
+
+      { label:'Letter to the Future',
+        sub:'A meaningful letter to future generations',
+        ask:'Who is this letter to and what do you most want them to know?',
+        ph:'e.g. To my children and grandchildren, about life, faith, family, and what I learned',
+        tpl:`Act as a thoughtful life writer. Write a deeply meaningful LETTER TO FUTURE GENERATIONS: "{INPUT}".
+
+Write a beautiful, personal, profound letter that includes:
+
+## Opening
+(A warm, loving greeting — who you are and why you are writing this.)
+## What I Learned About Life
+(The most important truths — from joy, from pain, from experience.)
+## What I Believe
+(Faith, values, principles — the things that kept you going.)
+## What I Want You to Know About Our Family / Our People
+(Heritage, history, stories worth preserving.)
+## My Advice for the Journey
+(Not rules — wisdom. The things you wish someone had told you.)
+## What I Hope For You
+(A prayer and a blessing — specific and heartfelt.)
+## How I Will Always Be With You
+(The values, habits, words, or memories that carry on.)
+## Closing
+(A final, loving farewell — and a promise.)
+
+Write with warmth, depth, and authenticity. Use [YOUR NAME] as placeholder.` },
+
+      { label:'Impact & Giving Plan',
+        sub:'A strategic plan for charitable giving and social impact',
+        ask:'What causes matter most to you and what resources do you have to give?',
+        ph:'e.g. I care about orphans and education, I can give 10% of my income, I\'m a Muslim',
+        tpl:`Act as a philanthropy and impact advisor. Create a GIVING & IMPACT PLAN: "{INPUT}".
+
+## Your Cause
+(Why this cause matters — the problem and why you are the right person to help.)
+## Islamic Giving Framework (if applicable)
+(Zakat, Sadaqah, Waqf, Sadaqah Jariyah — the types and their spiritual reward.)
+## Giving Strategy
+(How much, how often, to whom, in what form — specific and structured.)
+## Organisations to Support
+(Types of organisations aligned with this cause — how to evaluate them.)
+## Direct Impact Actions
+(Things to do personally, beyond money — time, skills, mentorship.)
+## Building Lasting Impact — Sadaqah Jariyah
+(Investments that keep giving after you are gone: scholarships, wells, mosques, schools.)
+## Measuring Your Impact
+(How to know your giving is actually changing lives.)
+## The Giver's Mindset
+(How generosity changes the giver as much as the receiver.)` },
+
+      { label:'Memoir Outline',
+        sub:'Structure your life story into a powerful memoir',
+        ask:'Tell me the key chapters of your life so far',
+        ph:'e.g. Grew up poor in rural Ghana, became first in family to go to university, built a business, lost everything, rebuilt',
+        tpl:`Act as a memoir writing coach. Create a complete MEMOIR OUTLINE: "{INPUT}".
+
+## Title Options
+(3–5 possible titles — memorable, evocative, true to the story.)
+
+## The Premise
+(What this memoir is fundamentally about — the journey, the question, the transformation.)
+
+## Chapter Outline
+For each chapter:
+- **Chapter [Number]: [Title]**
+- Time Period: [Years]
+- What Happened: (Key events)
+- The Emotional Truth: (What this chapter is really about underneath the events)
+- The Reader Takeaway: (What someone reading this will feel or learn)
+
+## The Arc
+(The overarching transformation — who you were at the start vs. who you became.)
+## The Opening Scene
+(A specific, vivid scene to open with — one that hooks the reader immediately.)
+## Your Voice
+(The tone and style that suits this story — and why.)
+## Writing It
+(A practical guide to actually writing this memoir — where to start, how long to write each day.)` },
+
+      { label:'Foundation Plan',
+        sub:'How to build an organisation with lasting impact',
+        ask:'What is the purpose of the foundation or organisation you want to build?',
+        ph:'e.g. A foundation to provide scholarships to talented but poor students in West Africa',
+        tpl:`Act as an organisational design and impact advisor. Create a FOUNDATION PLAN: "{INPUT}".
+
+## The Mission
+(Why this organisation must exist — the problem and the unique answer.)
+## Vision
+(What success looks like in 10 years.)
+## Organisational Structure
+(Foundation, NGO, charity, CBO — the right legal structure and why.)
+## Legal Setup
+(How to register and incorporate — general steps, jurisdiction-specific research needed.)
+## Governance
+(Board of Trustees/Directors — roles, responsibilities, ideal profiles.)
+## Programs & Activities
+(The specific initiatives the organisation will run to achieve its mission.)
+## Funding Model
+(How the organisation sustains itself — donations, grants, social enterprise, Waqf.)
+## Staffing & Volunteers
+(Who you need to run this — phased hiring plan.)
+## Launch Plan
+(How to launch credibly and attract early supporters.)
+## Measuring Impact
+(The metrics that prove the organisation is achieving its mission.)` }
+    ]
+  }
+
+}; /* END PROJECT_CONFIGS */
+
 marked.setOptions({breaks:true, gfm:true});
 
 let chats = JSON.parse(localStorage.getItem('noria2_chats') || '{}');
@@ -1081,9 +2794,11 @@ function runModuleAction(e, mi, ai){
   openActionModal(action, mi, ai);
 }
 
-function openActionModal(action, mi, ai){
-  pendingAction = {action, mi, ai};
-  document.getElementById('actionModalTitle').textContent = MODULES[mi].name;
+function openActionModal(action, titleOrMi, ai){
+  pendingAction = {action};
+  // Support both old (mi, ai) and new (string title) calling conventions
+  const title = typeof titleOrMi === 'string' ? titleOrMi : (MODULES[titleOrMi] ? MODULES[titleOrMi].name : '');
+  document.getElementById('actionModalTitle').textContent = title;
   document.getElementById('actionModalAsk').textContent = action.ask;
   const inp = document.getElementById('actionModalInput');
   inp.value = '';
@@ -1195,7 +2910,67 @@ function selectProject(el, name){
   document.querySelectorAll('.project-item').forEach(i=>i.classList.remove('active'));
   el.classList.add('active');
   currentProject = name;
-  newChat();
+  openProject(name);
+}
+
+function openProject(name){
+  activeId = null;
+  document.getElementById('scroll').style.display = 'none';
+  document.getElementById('stream').innerHTML = '';
+  renderHistory();
+  if(window.innerWidth <= 860) closeSidebar();
+  document.getElementById('input').focus();
+
+  const welcome = document.getElementById('welcome');
+  const greeting = document.getElementById('wGreeting');
+  const moduleCards = document.getElementById('moduleCards');
+  welcome.style.display = 'flex';
+
+  // General Chat → show module cards (default home)
+  if(name === 'General Chat' || !PROJECT_CONFIGS[name]){
+    greeting.style.display = '';
+    moduleCards.style.display = '';
+    const oldPanel = document.getElementById('projPanel');
+    if(oldPanel) oldPanel.remove();
+    greeting.textContent = `Hello, ${userName.split(' ')[0]} — how can I help?`;
+    return;
+  }
+
+  // Named project → show project workspace panel
+  greeting.style.display = 'none';
+  moduleCards.style.display = 'none';
+  const oldPanel = document.getElementById('projPanel');
+  if(oldPanel) oldPanel.remove();
+
+  const cfg = PROJECT_CONFIGS[name];
+  const panel = document.createElement('div');
+  panel.id = 'projPanel';
+  panel.className = 'proj-welcome';
+  panel.innerHTML = `
+    <div class="proj-hero">
+      <div class="proj-icon-lg"><svg viewBox="0 0 24 24"><use href="#${cfg.icon}"/></svg></div>
+      <div>
+        <div class="proj-title">${name}</div>
+        <div class="proj-desc">${cfg.desc}</div>
+      </div>
+    </div>
+    <div class="proj-actions-grid">
+      ${cfg.actions.map((a,i)=>`
+        <button class="proj-action-card" onclick="runProjectAction(${i})">
+          <div class="pac-label">${a.label}</div>
+          <div class="pac-desc">${a.sub}</div>
+        </button>`).join('')}
+    </div>`;
+  welcome.appendChild(panel);
+}
+
+function runProjectAction(ai){
+  const cfg = PROJECT_CONFIGS[currentProject];
+  if(!cfg) return;
+  const action = cfg.actions[ai];
+  if(!action) return;
+  // Reuse the same modal + send system as module cards
+  openActionModal(action, currentProject);
 }
 
 /* ─── Toolbar ─── */
