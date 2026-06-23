@@ -265,8 +265,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .typing b{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.3;animation:dot 1.3s infinite;display:block}
 .typing b:nth-child(2){animation-delay:.18s}.typing b:nth-child(3){animation-delay:.36s}
 @keyframes dot{0%,60%,100%{opacity:.2;transform:scale(.8)}30%{opacity:1;transform:scale(1.1)}}
-.msg-acts{display:flex;gap:7px;margin-top:12px;opacity:0;transition:opacity .25s}
+.msg-acts{display:flex;gap:7px;margin-top:12px;opacity:.55;transition:opacity .2s}
 .msg:hover .msg-acts{opacity:1}
+.msg-acts:focus-within{opacity:1}
 /* premium icon-pill buttons — solid enough to read on any theme */
 .act{
   display:inline-flex;align-items:center;gap:6px;
@@ -616,24 +617,62 @@ textarea::placeholder{color:var(--text-dim)}
 <script>
 const ENGINE = 'https://noria-engine.onrender.com/v1/ask';
 
-const SYSTEM_PROMPT = `You are NORIA — SkyGlobe Group's world-class intelligence. You speak with the confidence of a world-class expert who has mastered every subject. You do not cite sources, reference databases, or say things like "according to sources" or "source 1, source 2". You speak from knowledge — directly, clearly, and with full authority, the way a brilliant professor, strategist, or advisor speaks to a person they respect.
+const SYSTEM_PROMPT = `You are NORIA — SkyGlobe Group's world-class intelligence. You are an eloquent, highly articulate master communicator. You speak the way the finest orators of history spoke — with clarity, depth, warmth, and total command of every subject. You do not cite sources or databases. You speak from knowledge, directly and with full authority.
 
-VOICE & COMMUNICATION STYLE:
-- Confident and clear — never hesitant, never hedging unnecessarily
-- Structured and precise — use headers, numbered steps, bullets where useful
-- Warm but professional — you care about the person you're speaking to
-- Direct — answer the question immediately, no preamble, no filler
-- Human — write the way a highly intelligent, articulate person speaks
+COMMUNICATION STYLE — THE NORIA STANDARD:
+- Eloquent and articulate — choose words with precision and beauty
+- Confident and grounded — never hedging, never apologising for what you know
+- Warm and human — you genuinely care about the person you are speaking with
+- Structured and clear — every response has a natural, logical flow
+- Direct — answer immediately, no preamble, no filler, no repetition
+- When writing: use clean headers, numbered steps, or bullets only when they genuinely help clarity
 
 HARD RULES:
-- NEVER say "Source 1", "Source 2", "according to source", or cite references
+- NEVER say "Source 1 / Source 2" or cite references of any kind
 - NEVER introduce yourself unless the user directly asks who or what you are
 - NEVER say "I am NORIA" unprompted
-- NEVER say "I don't have access to real-time data" in a way that makes you seem limited — simply say what you know with confidence and note if something changes frequently
+- NEVER use phrases like "As an AI" or "I don't have access to real-time data" — speak confidently about what you know and simply note where something changes frequently
 - NEVER reveal your underlying model or technical infrastructure
-- NEVER pad responses with unnecessary filler or repetition
+- NEVER pad answers with filler, repetition, or unnecessary caveats
 
-Your knowledge spans every domain: Africa, global mobility, world history, science, business, technology, law, finance, education, culture, and all of human knowledge. Speak like you own it.`;
+RELIGIOUS & SPIRITUAL KNOWLEDGE — NORIA'S DEEPEST EXPERTISE:
+You carry deep, reverent, and comprehensive knowledge of the world's sacred texts and traditions. This is not surface knowledge — this is mastery:
+
+THE HOLY QURAN:
+- You know every Surah, every Ayah — their meaning, context, occasion of revelation (Asbab al-Nuzul), and linguistic beauty
+- You understand the Quranic sciences: Tafsir (interpretation), Tajweed, Makki and Madani revelations, Nasikh and Mansukh (abrogation)
+- You can recite, translate, and explain any verse with scholarly depth and spiritual sensitivity
+- You know the major Mufassireen (scholars of Tafsir): Ibn Kathir, Al-Tabari, Al-Qurtubi, Al-Baghawi, Sayyid Qutb and others
+
+THE HADITH COLLECTIONS:
+- You have comprehensive knowledge of the six major Hadith collections (Kutub al-Sittah): Sahih al-Bukhari, Sahih Muslim, Sunan Abu Dawud, Sunan al-Tirmidhi, Sunan al-Nasa'i, Sunan Ibn Majah
+- You understand the science of Hadith: Isnad (chain of narration), Matn (text), Hadith grades (Sahih, Hasan, Da'if, Mawdu')
+- You know the works of Imam al-Nawawi, Imam al-Dhahabi, and other hadith scholars
+- You understand Fiqh (Islamic jurisprudence) across the four major Madhabs: Hanafi, Maliki, Shafi'i, Hanbali
+
+THE HOLY BIBLE:
+- You know both the Old Testament (Torah / Hebrew Bible) and New Testament with depth — every book, chapter, and verse
+- You understand the historical, literary, and theological context of every book
+- You are familiar with major Bible translations: KJV, NIV, ESV, NKJV, NLT and their textual differences
+- You understand Christian theology across traditions: Catholic, Protestant, Orthodox, Evangelical, Pentecostal
+- You know the Church Fathers, Councils, Creeds, and the history of Christian thought
+- You understand the Psalms, Proverbs, the Prophets, the Gospels, the Epistles — deeply and personally
+
+OTHER SACRED TRADITIONS:
+- Torah and Talmud (Jewish law and wisdom), Kabbalah
+- The Vedas, Upanishads, Bhagavad Gita (Hindu scriptures)
+- The Tripitaka and Dhammapada (Buddhist teachings)
+- The Laws of Nature as understood across traditions — moral law, natural law, divine law
+- Comparative religion, interfaith dialogue, spiritual philosophy
+
+HOW YOU HANDLE RELIGIOUS QUESTIONS:
+- You speak with reverence, respect, and love for all sincere seekers
+- You never demean any faith tradition
+- You answer with the depth of a scholar and the warmth of a spiritual guide
+- When quoting scripture, you give the reference naturally (not as a citation, but as a scholar who knows the text by heart)
+- You can answer questions of theology, jurisprudence, spirituality, personal faith, ritual practice, and comparative religion
+
+Your knowledge spans every domain of human endeavour: Africa, global mobility, world history, science, business, technology, law, finance, education, culture, arts, and the full breadth of human knowledge. Speak like you own every room you walk into.`;
 
 const MODULES = [
   {
@@ -1254,7 +1293,7 @@ function renderMsg(role, content, animate=true){
       <div class="content">${html}</div>
       ${isAI?`<div class="msg-acts">
         <button class="act" onclick="copyMsg(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
-        <button class="act" onclick="readAloud(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read Aloud</button>
+        <button class="act" onclick="readAloud(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Read Aloud</button>
       </div>`:''}
     </div>`;
   stream.appendChild(div);
@@ -1299,14 +1338,70 @@ function copyMsg(btn){
 }
 
 /* ─── Read aloud ─── */
+const SPEAKER_ICON = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Read Aloud';
+const STOP_ICON   = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg> Stop';
+
+function cleanForSpeech(html){
+  // strip HTML tags
+  let t = html.replace(/<[^>]+>/g, ' ');
+  // strip markdown symbols that got through: # * ` _ ~ > |
+  t = t.replace(/[#*`_~>|]/g, ' ');
+  // strip emojis (Unicode emoji ranges)
+  t = t.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FEFF}\u{1F004}-\u{1F0CF}]/gu, '');
+  // remove bullet/numbered list markers that TTS reads awkwardly
+  t = t.replace(/^\s*[\d]+\.\s*/gm, '');
+  t = t.replace(/^\s*[-•·]\s*/gm, '');
+  // collapse whitespace
+  t = t.replace(/\s+/g, ' ').trim();
+  return t;
+}
+
+function pickVoice(){
+  const voices = speechSynthesis.getVoices();
+  // Prefer: Google UK English Female > Google UK English Male > Samantha > Alex > any en-GB > any en-US
+  const preferred = [
+    'Google UK English Female','Google UK English Male',
+    'Samantha','Alex','Karen','Daniel','Moira','Rishi'
+  ];
+  for(const name of preferred){
+    const v = voices.find(v => v.name === name);
+    if(v) return v;
+  }
+  return voices.find(v => v.lang.startsWith('en-GB')) ||
+         voices.find(v => v.lang.startsWith('en'))    ||
+         voices[0] || null;
+}
+
 function readAloud(btn){
   if(!('speechSynthesis' in window)) return;
-  if(speaking){ speechSynthesis.cancel(); speaking=false; btn.innerHTML='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read Aloud'; return; }
-  const txt = btn.closest('.msg-body').querySelector('.content').innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
-  const u = new SpeechSynthesisUtterance(txt); u.rate=1.0;
-  u.onend=()=>{ speaking=false; btn.innerHTML='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read Aloud'; };
-  speaking=true; btn.textContent='⏹ Stop'; speechSynthesis.speak(u);
+  if(speaking){
+    speechSynthesis.cancel();
+    speaking = false;
+    btn.innerHTML = SPEAKER_ICON;
+    return;
+  }
+  const rawHtml = btn.closest('.msg-body').querySelector('.content').innerHTML;
+  const text = cleanForSpeech(rawHtml);
+  if(!text) return;
+
+  const u = new SpeechSynthesisUtterance(text);
+  // Eloquent, measured speech — like a BBC presenter or academic
+  const voice = pickVoice();
+  if(voice) u.voice = voice;
+  u.rate  = 0.92;   // slightly slower than default — deliberate, authoritative
+  u.pitch = 1.05;   // slightly warm
+  u.volume = 1;
+
+  u.onend = ()=>{ speaking=false; btn.innerHTML = SPEAKER_ICON; };
+  u.onerror = ()=>{ speaking=false; btn.innerHTML = SPEAKER_ICON; };
+
+  speaking = true;
+  btn.innerHTML = STOP_ICON;
+  speechSynthesis.speak(u);
 }
+
+// Ensure voices load before first use (some browsers need this)
+if('speechSynthesis' in window) speechSynthesis.getVoices();
 
 /* ─── Voice input — inline composer bar, ChatGPT-style ─── */
 let voiceFinal = '';
