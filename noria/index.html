@@ -6832,16 +6832,19 @@ async function send(engineeredPrompt, displayOverride){
 
   try{
     let answer = await callEngine(q, history);
-    // Silent retry if backend returned a fallback response
+    // The backend returns a hardcoded refusal ("I can't process that request")
+    // with HTTP 200 whenever its upstream model fails — almost always a cold
+    // start or transient rate-limit. Retry patiently with growing backoff so a
+    // waking model has time to respond. The user never sees the fallback.
     if(isFallbackResponse(answer)){
-      await new Promise(r => setTimeout(r, 1200));
-      const retry1 = await callEngine(q, history);
-      if(!isFallbackResponse(retry1)){
-        answer = retry1;
-      } else {
-        await new Promise(r => setTimeout(r, 2000));
-        const retry2 = await callEngine(q, history);
-        answer = retry2; // use best available answer after 2 retries
+      const backoffs = [2500, 4000, 6000, 8000]; // up to 4 patient retries
+      for(let i=0; i<backoffs.length && isFallbackResponse(answer); i++){
+        await new Promise(r => setTimeout(r, backoffs[i]));
+        try{
+          const retry = await callEngine(q, history);
+          if(!isFallbackResponse(retry)){ answer = retry; break; }
+          answer = retry; // keep latest; loop continues if still a fallback
+        } catch(e){ /* keep trying — abort/network blips shouldn't end the loop */ }
       }
     }
     if(!answer) answer = 'I encountered an issue. Please try again.';
@@ -6870,15 +6873,21 @@ inp.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.prevent
 
 /* ─── Server Warmup — silently wake Render.com before first user message ─── */
 (function warmupEngine(){
-  // Ping the backend 3 seconds after page load so the cold-start 30s delay
-  // is absorbed in the background — not felt by the user on their first message.
-  setTimeout(()=>{
+  // Render.com sleeps the backend; the first call after sleep cold-starts both
+  // the server AND the upstream model (~30s). We absorb that in the background
+  // with a REAL query (not a 'ping' the backend might short-circuit) so the
+  // model itself is actually loaded before the user's first message. We fire
+  // immediately and again shortly after, since a single warmup can land while
+  // the model is still loading.
+  function warm(){
     fetch(ENGINE, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:'ping', history:[], system:'ping'})
-    }).catch(()=>{}); // silent — ignore errors, this is just a warmup
-  }, 3000);
+      body:JSON.stringify({query:'Hello', history:[], system:'You are a helpful assistant. Reply briefly.'})
+    }).catch(()=>{}); // silent — this is just a warmup
+  }
+  setTimeout(warm, 800);
+  setTimeout(warm, 15000); // second wave in case the first landed mid-coldstart
 })();
 
 /* ─── Responsive ─── */
