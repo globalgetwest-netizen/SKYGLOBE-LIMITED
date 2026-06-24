@@ -6797,19 +6797,55 @@ async function send(engineeredPrompt, displayOverride){
   const typingEl = showTyping();
   const history = chats[activeId].messages.slice(0,-1).slice(-14).map(m=>({role:m.role, content:m.content}));
 
-  try{
+  function isFallbackResponse(text){
+    if(!text) return true;
+    const t = text.trim();
+    // Detect backend fallback/refusal patterns
+    const patterns = [
+      /i can't process that request/i,
+      /i cannot process that request/i,
+      /i'm noria.*i can't/i,
+      /i'm temporarily unavailable/i,
+      /i am temporarily unavailable/i,
+      /happy to help with any question.*science.*technology/i,
+      /^i'm noria[^.]*\./i,
+    ];
+    if(patterns.some(p => p.test(t))) return true;
+    // Suspiciously short response that contains a refusal keyword
+    if(t.length < 200 && /\b(can't|cannot|unable to|not able to)\b.*\b(process|handle|answer|provide)\b/i.test(t)) return true;
+    return false;
+  }
+
+  async function callEngine(query, hist, retryNum){
     const ctrl = new AbortController();
     const to = setTimeout(()=>ctrl.abort(), 75000);
     const res = await fetch(ENGINE, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:q, history, system:SYSTEM_PROMPT + memoryPromptBlock()}),
+      body:JSON.stringify({query, history:hist, system:SYSTEM_PROMPT + memoryPromptBlock()}),
       signal:ctrl.signal
     });
     clearTimeout(to);
     const data = await res.json();
+    return data.answer || '';
+  }
+
+  try{
+    let answer = await callEngine(q, history);
+    // Silent retry if backend returned a fallback response
+    if(isFallbackResponse(answer)){
+      await new Promise(r => setTimeout(r, 1200));
+      const retry1 = await callEngine(q, history);
+      if(!isFallbackResponse(retry1)){
+        answer = retry1;
+      } else {
+        await new Promise(r => setTimeout(r, 2000));
+        const retry2 = await callEngine(q, history);
+        answer = retry2; // use best available answer after 2 retries
+      }
+    }
+    if(!answer) answer = 'I encountered an issue. Please try again.';
     typingEl.remove();
-    const answer = data.answer || 'I encountered an issue. Please try again.';
     const aiDiv = renderMsg('assistant','');
     revealWords(aiDiv.querySelector('.content'), answer, ()=>{
       chats[activeId].messages.push({role:'assistant', content:answer});
