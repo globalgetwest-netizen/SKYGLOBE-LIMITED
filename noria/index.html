@@ -312,6 +312,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
   box-shadow:0 3px 10px var(--accent-glow);
 }
 .act:hover svg{stroke:var(--accent)}
+.act-pdf{
+  background:linear-gradient(135deg,#0d1b3e 0%,#1a3166 100%);
+  border-color:#2a5db0;color:#e8b84b;
+  box-shadow:0 2px 8px rgba(13,27,62,.35);
+}
+.act-pdf svg{stroke:#e8b84b}
+.act-pdf:hover{
+  background:linear-gradient(135deg,#1a3166 0%,#2a5db0 100%);
+  border-color:#4a7fd4;color:#ffd26b;
+  box-shadow:0 4px 14px rgba(13,27,62,.5);
+  transform:translateY(-1px);
+}
+.act-pdf:hover svg{stroke:#ffd26b}
+.act-pdf:disabled{opacity:.6;cursor:default;transform:none}
 
 /* ─── Composer ─── */
 .composer-wrap{flex-shrink:0;padding:8px 20px 16px;background:var(--bg)}
@@ -416,6 +430,16 @@ textarea::placeholder{color:var(--text-dim)}
 .action-modal h2{text-align:left;margin-bottom:14px}
 .action-modal-tag{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-glow);border:1px solid var(--accent);padding:3px 10px;border-radius:100px;margin-bottom:14px}
 .action-modal textarea:focus{border-color:var(--accent)}
+/* Structured document form */
+.action-fields{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;max-height:52vh;overflow-y:auto;padding-right:2px}
+.af-field{display:flex;flex-direction:column;gap:5px}
+.af-label{font-size:.72rem;font-weight:700;color:var(--text-soft);letter-spacing:.04em;text-transform:uppercase}
+.af-label .af-opt{font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);font-size:.92em}
+.af-input,.af-textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--font);font-size:.9rem;color:var(--text);outline:none;transition:border-color var(--ease)}
+.af-textarea{resize:vertical;min-height:64px;line-height:1.5}
+.af-input:focus,.af-textarea:focus{border-color:var(--accent)}
+.af-input::placeholder,.af-textarea::placeholder{color:var(--text-dim)}
+.af-input.af-error,.af-textarea.af-error{border-color:#e0524d}
 
 /* ─── Overlay (mobile sidebar) ─── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:12;backdrop-filter:blur(2px)}
@@ -450,10 +474,23 @@ textarea::placeholder{color:var(--text-dim)}
    foldables & ultrawide. Built on existing theme variables.
    ════════════════════════════════════════════════════════ */
 
-/* iOS / notch safe areas — keep content clear of cutouts & home bar */
+/* iOS / notch safe areas — keep content clear of cutouts & home bar.
+   With viewport-fit=cover the page fills the whole screen (incl. under the
+   notch & home indicator), so we must reserve the insets ourselves or the
+   top bar slides under the status bar and the composer under the home bar. */
 @supports(padding:max(0px)){
+  /* Reserve the status-bar / notch height at the very top of the shell so the
+     top bar is always fully visible. border-box keeps the grid inside 100dvh. */
+  .app{padding-top:env(safe-area-inset-top)}
   .topbar{padding-right:max(20px,env(safe-area-inset-right))}
-  .sidebar{padding-left:env(safe-area-inset-left)}
+  /* The drawer is position:fixed (outside the grid), so it needs its own
+     top inset, plus bottom inset so its footer clears the home bar. */
+  .sidebar{
+    padding-left:env(safe-area-inset-left);
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .overlay{top:0}
   .composer-wrap{
     padding-left:max(20px,env(safe-area-inset-left));
     padding-right:max(20px,env(safe-area-inset-right));
@@ -594,6 +631,9 @@ textarea::placeholder{color:var(--text-dim)}
   <div class="modal action-modal">
     <div class="action-modal-tag" id="actionModalTitle"></div>
     <h2 id="actionModalAsk" style="font-size:1.25rem">Tell me more</h2>
+    <!-- Structured form fields (rendered when a template defines fields) -->
+    <div id="actionModalFields" class="action-fields" style="display:none"></div>
+    <!-- Free-text fallback (used when a template has no structured fields) -->
     <textarea id="actionModalInput" rows="3" placeholder="Type here…"
       style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--font);font-size:.92rem;color:var(--text);outline:none;resize:none;margin-bottom:14px;line-height:1.5"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitActionModal();}"></textarea>
@@ -610,7 +650,7 @@ textarea::placeholder{color:var(--text-dim)}
     <p style="font-size:.82rem;color:var(--text-soft);margin-bottom:18px;text-align:center">NORIA uses these details to personalise every document it generates for you.</p>
     <div class="profile-fields">
       <label class="pf-label">Full Name
-        <input class="pf-input" id="pf-name" type="text" placeholder="e.g. Fatima Al-Hassan" maxlength="80"/>
+        <input class="pf-input" id="pf-name" type="text" placeholder="e.g. Daniel Bennett" maxlength="80"/>
       </label>
       <label class="pf-label">Job Title / Role
         <input class="pf-input" id="pf-title" type="text" placeholder="e.g. Chief Executive Officer" maxlength="80"/>
@@ -619,13 +659,13 @@ textarea::placeholder{color:var(--text-dim)}
         <input class="pf-input" id="pf-org" type="text" placeholder="e.g. SkyGlobe Limited" maxlength="80"/>
       </label>
       <label class="pf-label">City, Country
-        <input class="pf-input" id="pf-location" type="text" placeholder="e.g. Abuja, Nigeria" maxlength="80"/>
+        <input class="pf-input" id="pf-location" type="text" placeholder="e.g. London, United Kingdom" maxlength="80"/>
       </label>
       <label class="pf-label">Email Address
         <input class="pf-input" id="pf-email" type="email" placeholder="e.g. fatima@company.com" maxlength="100"/>
       </label>
       <label class="pf-label">Phone Number
-        <input class="pf-input" id="pf-phone" type="tel" placeholder="e.g. +234 801 234 5678" maxlength="30"/>
+        <input class="pf-input" id="pf-phone" type="tel" placeholder="e.g. +1 555 123 4567" maxlength="30"/>
       </label>
     </div>
     <button class="modal-btn" style="margin-top:18px" onclick="saveProfileModal()">Save Profile</button>
@@ -1049,7 +1089,15 @@ Within the five grand domains, Noria holds deep mastery across all 40 core areas
 ══════════════════════════════════════════
 STRUCTURED OUTPUT & DOCUMENT INTELLIGENCE
 ══════════════════════════════════════════
-When producing any document, report, plan, proposal, CV, letter, or formal deliverable:
+
+DOCUMENT GENERATION MODE — ABSOLUTE RULE:
+When a user asks for ANY document — CV, résumé, cover letter, business plan, proposal, report, letter, contract, essay, application, agreement, reference letter, invitation letter, or any other written deliverable — Noria MUST:
+1. Generate the COMPLETE, FINISHED document immediately in the FIRST response.
+2. NEVER ask follow-up questions before generating. Use the information given and make professional, reasonable assumptions for any missing detail.
+3. NEVER say "I'll help you write..." or "Here's a draft..." or "Let me create..." — just produce the document directly.
+4. NEVER discuss the document before writing it. The document IS the response.
+5. NEVER leave placeholder brackets like [Name] or [Date] unfilled — substitute professional defaults or ask for nothing.
+6. The user is not there for a conversation. They are there to receive a finished, printable, submission-ready document. Treat every document request like a print job.
 
 DOCUMENT QUALITY STANDARDS:
 - Generate clean, professional, sector-appropriate structure — logical headings, well-ordered sections, tables where they add genuine value
@@ -1057,6 +1105,7 @@ DOCUMENT QUALITY STANDARDS:
 - Use the user's real profile details (name, title, organisation, date, contact) directly and accurately — never leave a placeholder where real information was provided
 - Every document Noria produces should feel as if it was prepared by the finest professional in that field
 - Documents must be submission-ready and print-ready — clean, structured, and professional from the first word to the last
+- Use rich markdown formatting: ## for section headers, **bold** for titles and labels, proper lists, horizontal rules (---) between sections
 
 ABSOLUTE RULE — NO AI BRANDING ON DOCUMENTS:
 Never include the words "NORIA", "SkyGlobe", "SkyGlobe Intelligence", "Generated by", "AI assistant", or any reference to an AI tool anywhere inside a generated document. The document belongs to the user — it must appear entirely as their own work. This applies to: CVs, cover letters, business plans, proposals, letters, legal documents, reports, essays, and every other document type. The only place Noria's identity is expressed is in the chat interface — never inside the document itself.
@@ -1074,6 +1123,12 @@ Keep it concise (1–2 pages of real content), specific, and quantified where po
 
 COVER LETTERS:
 Maximum 4 paragraphs. Opening (who you are + role), Value (specific evidence), Alignment (why this organisation), Closing (call to action). Professional sign-off. Never generic — always specific to the role and employer.
+
+REPORTS & BUSINESS DOCUMENTS:
+Title page (title, author, date, organisation), Executive Summary, numbered sections with sub-headings, conclusions, recommendations. Tables and bullet points where they add clarity. Professional, authoritative tone throughout.
+
+FORMAL LETTERS:
+Sender's details top-right, date, recipient's address left-aligned, RE: subject line, formal salutation, body paragraphs, complimentary close, name and title. Clean, precise, never wordy.
 
 ══════════════════════════════════════════
 RELIGIOUS & SPIRITUAL KNOWLEDGE — DEEPEST EXPERTISE
@@ -1135,6 +1190,7 @@ Be specific and practical. No vague advice.`
       {
         label:'Solve a Problem',
         ask:'What problem are you facing?',
+        fields:[{label:'The Problem', ph:'Describe the problem you are facing in detail', type:'textarea', rows:4, required:true}, {label:'Context / Background', ph:'Anything relevant Noria should know', type:'textarea', rows:3}, {label:'Constraints', ph:'e.g. Budget, time, resources available'}],
         ph:'e.g. My business is losing customers and I don\'t know why',
         tpl:`Act as a world-class problem solver. Help me fully solve this problem: "{INPUT}".
 
@@ -1185,7 +1241,7 @@ Make it actionable enough to start today.`
       {
         label:'Save a Memory',
         ask:'What should NORIA always remember about you?',
-        ph:'e.g. I run a logistics company in Lagos and prefer brief answers',
+        ph:'e.g. I run a logistics company and prefer brief answers',
         special:'savePref'
       },
       {
@@ -1420,6 +1476,7 @@ const PROJECT_CONFIGS = {
         label:'Explain a Topic',
         sub:'Deep, structured explanation of any subject',
         ask:'What topic do you need explained? Include your level (school/university/professional).',
+        fields:[{label:'Topic to Explain', ph:'e.g. Quantum entanglement', required:true}, {label:'Explain it for', ph:'e.g. A 12-year-old / A university student / A beginner'}, {label:'Focus or angle', ph:'e.g. Real-world examples, the maths, the history', type:'textarea', rows:3}],
         ph:'e.g. Explain photosynthesis for a Year 10 student / Explain how interest rates affect inflation for university economics',
         tpl:`Act as a world-class educator and subject expert. Produce a complete, structured EXPLANATION of: "{INPUT}".
 
@@ -1480,6 +1537,7 @@ Write the complete worked solution now.` },
         label:'Quiz Me',
         sub:'Test your knowledge with 10 smart questions',
         ask:'What subject or topic should Noria quiz you on? Specify your level.',
+        fields:[{label:'Subject / Topic', ph:'e.g. World War II / Organic chemistry', required:true}, {label:'Level', ph:'e.g. Beginner / High school / University'}, {label:'Number of Questions', ph:'e.g. 10'}, {label:'Question Type', ph:'e.g. Multiple choice / Short answer / Mixed'}],
         ph:'e.g. Islamic History for O-Level / Algebra — quadratic equations for Year 11 / Human Body Systems for medical students',
         tpl:`Act as an expert examiner. Create a comprehensive, well-crafted QUIZ on: "{INPUT}".
 
@@ -1513,6 +1571,7 @@ Write the complete quiz now.` },
         label:'Summarise Content',
         sub:'Condense any text or topic into sharp, usable notes',
         ask:'Paste the text to summarise, or describe what you want summarised.',
+        fields:[{label:'Content to Summarise', ph:'Paste the text, article, or notes here', type:'textarea', rows:6, required:true}, {label:'Summary Length', ph:'e.g. One paragraph / 5 bullet points / One page'}, {label:'Focus', ph:'e.g. Key arguments only / Action points'}],
         ph:'e.g. Paste a passage here / Summarise the causes and effects of the French Revolution / Summarise Chapter 5 of Biology — Cell Division',
         tpl:`Act as a masterful analyst and note-taker. Produce a complete, structured SUMMARY of: "{INPUT}".
 
@@ -1540,6 +1599,7 @@ Write the complete summary now.` },
         label:'Write an Essay',
         sub:'Complete, polished academic essay ready to submit',
         ask:'What is the essay question or topic? Include any word count requirement and your academic level.',
+        fields:[{label:'Essay Topic or Question', ph:'e.g. Discuss the causes of climate change', required:true}, {label:'Essay Type', ph:'e.g. Argumentative / Descriptive / Analytical'}, {label:'Word Count', ph:'e.g. 1000 words'}, {label:'Key Points to Include', ph:'Anything that must be covered', type:'textarea', rows:3}],
         ph:'e.g. Discuss the impact of colonialism on African economies — 800 words, A-Level / To what extent was the Cold War inevitable? — 1200 words, university',
         tpl:`Act as a senior academic writer and subject expert. Write a complete, polished ACADEMIC ESSAY for: "{INPUT}".
 
@@ -1569,6 +1629,7 @@ Write with academic precision, strong vocabulary, and clear logical flow through
         label:'Research Paper Outline',
         sub:'Full structure and content guide for any research paper',
         ask:'What is your research paper topic, subject area, and academic level?',
+        fields:[{label:'Research Topic', ph:'e.g. The impact of AI on healthcare', required:true}, {label:'Field / Discipline', ph:'e.g. Computer Science / Public Health'}, {label:'Paper Length / Level', ph:'e.g. Undergraduate, 5000 words'}, {label:'Key Themes or Questions', ph:'Areas to cover', type:'textarea', rows:3}],
         ph:'e.g. The effect of mobile banking on financial inclusion in Sub-Saharan Africa — undergraduate economics / The role of diet in preventing Type 2 diabetes — A-Level biology',
         tpl:`Act as an academic research advisor. Produce a complete RESEARCH PAPER OUTLINE and WRITING GUIDE for: "{INPUT}".
 
@@ -1622,6 +1683,7 @@ Write the complete research paper outline now.` },
         label:'Study Plan',
         sub:'Personalised schedule to master any subject by your deadline',
         ask:'What subject must you study, and when is your exam or deadline? Include current level and weak areas.',
+        fields:[{label:'Subject or Goal', ph:'e.g. Pass my final exams / Learn Python', required:true}, {label:'Time Available', ph:'e.g. 2 hours per day for 3 months'}, {label:'Deadline', ph:'e.g. Exam in June'}, {label:'Current Level', ph:'e.g. Beginner / Intermediate'}],
         ph:'e.g. WAEC Chemistry in 6 weeks — weak in organic chemistry and electrochemistry / University Maths finals in 3 weeks — need to cover calculus, matrices, and probability',
         tpl:`Act as an expert academic coach. Create a complete, realistic STUDY PLAN for: "{INPUT}".
 
@@ -1661,6 +1723,7 @@ Write the complete study plan now.` },
         label:'Book Report',
         sub:'Complete book report or literary review',
         ask:'What is the book title, author, and what level is this report for?',
+        fields:[{label:'Book Title', ph:'e.g. To Kill a Mockingbird', required:true}, {label:'Author', ph:'e.g. Harper Lee'}, {label:'Report Type', ph:'e.g. Summary / Critical analysis / School report'}, {label:'Focus Areas', ph:'e.g. Themes, characters, your opinion', type:'textarea', rows:3}],
         ph:'e.g. Things Fall Apart by Chinua Achebe — secondary school / Animal Farm by George Orwell — A-Level literary analysis',
         tpl:`Act as a senior literature teacher and literary critic. Write a complete BOOK REPORT / LITERARY ANALYSIS for: "{INPUT}".
 
@@ -1705,7 +1768,8 @@ Write the complete book report now.` }
         label:'Business Plan',
         sub:'Complete investor-ready business plan',
         ask:'Describe your business — what it does, who it serves, what stage it is at, and any funding needed.',
-        ph:'e.g. A mobile laundry service for working professionals in Abuja — idea stage, seeking ₦2M seed funding / An online fashion brand targeting African diaspora in the UK — 6 months old, 200 customers',
+        fields:[{label:'Business Name', ph:'e.g. Meridian Logistics'}, {label:'Industry / Type of Business', ph:'e.g. E-commerce fashion retail', required:true}, {label:'Stage', ph:'e.g. Idea stage / 6 months old / Established'}, {label:'Funding Sought', ph:'e.g. $20K seed funding'}, {label:'Describe the Business', ph:'What it does, who it serves, the vision', type:'textarea', rows:4, required:true}],
+        ph:'e.g. A mobile laundry service for working professionals — idea stage, seeking $20K seed funding / An online fashion brand targeting the European market — 6 months old, 200 customers',
         tpl:`Act as a senior business strategist and investment advisor. Produce a complete, investor-ready BUSINESS PLAN for: "{INPUT}".
 
 ## Executive Summary
@@ -1756,7 +1820,8 @@ Write the complete, professional business plan now. Every section fully written.
         label:'Business Proposal',
         sub:'Persuasive proposal for a client, partner, or institution',
         ask:'What is this proposal for? Who is the recipient and what are you offering?',
-        ph:'e.g. A proposal to supply IT services to Lagos State Government / A catering proposal for a corporate client / A partnership proposal to a potential distributor',
+        fields:[{label:'Proposing To (Client / Partner)', ph:'e.g. A retail company / Government agency', required:true}, {label:'What You Are Offering', ph:'Describe your product or service', type:'textarea', rows:4, required:true}, {label:'Your Company', ph:'e.g. Apex IT Solutions'}, {label:'Key Value / Benefit', ph:'Why they should say yes', type:'textarea', rows:3}],
+        ph:'e.g. A proposal to supply IT services to a government agency / A catering proposal for a corporate client / A partnership proposal to a potential distributor',
         tpl:`Act as a professional business writer and strategist. Write a compelling, complete BUSINESS PROPOSAL for: "{INPUT}".
 
 ## Cover Letter
@@ -1800,6 +1865,7 @@ Write the complete proposal now.` },
         label:'Feasibility Study',
         sub:'Full feasibility analysis before committing to a venture',
         ask:'Describe the business idea or project you want to assess for feasibility.',
+        fields:[{label:'Project or Idea', ph:'Describe what you want to assess', type:'textarea', rows:4, required:true}, {label:'Industry / Sector', ph:'e.g. Renewable energy'}, {label:'Location / Target Market', ph:'e.g. Western Europe'}, {label:'Estimated Budget', ph:'e.g. $50,000'}],
         ph:'e.g. Opening a private primary school in Kano / Launching a cassava processing factory in Rivers State / Starting an export business shipping shea butter to Europe',
         tpl:`Act as a senior business and investment analyst. Produce a complete FEASIBILITY STUDY for: "{INPUT}".
 
@@ -1849,7 +1915,8 @@ Write the complete feasibility study now.` },
         label:'Market Analysis',
         sub:'Deep intelligence report on any market or industry',
         ask:'Which market, industry, or sector should Noria analyse? Include the geography.',
-        ph:'e.g. The Nigerian fintech market / Solar energy industry in East Africa / Global market for African fashion and textiles',
+        fields:[{label:'Market / Industry', ph:'e.g. The European fintech market', required:true}, {label:'Region', ph:'e.g. Western Europe / Global'}, {label:'Purpose', ph:'e.g. Entering the market / Investment decision'}, {label:'Key Questions', ph:'What you want to learn', type:'textarea', rows:3}],
+        ph:'e.g. The European fintech market / Solar energy industry in the Middle East / Global market for sustainable fashion and textiles',
         tpl:`Act as a senior market intelligence analyst. Produce a comprehensive MARKET ANALYSIS REPORT for: "{INPUT}".
 
 ## Market Overview
@@ -1894,7 +1961,8 @@ Write the complete market analysis now.` },
         label:'Company Profile',
         sub:'Professional company profile for pitches, tenders, and partnerships',
         ask:'Describe your company — what it does, when it was founded, key services/products, and any achievements.',
-        ph:'e.g. A 3-year-old engineering consultancy in Ghana specialising in water infrastructure, 12 staff, completed 40+ projects for NGOs and government',
+        fields:[{label:'Company Name', ph:'e.g. Meridian Group', required:true}, {label:'Industry', ph:'e.g. Construction & engineering'}, {label:'Year Founded', ph:'e.g. 2015'}, {label:'What the Company Does', ph:'Core products, services, mission', type:'textarea', rows:4, required:true}, {label:'Key Achievements', ph:'Milestones, clients, awards', type:'textarea', rows:3}],
+        ph:'e.g. A 3-year-old engineering consultancy specialising in water infrastructure, 12 staff, completed 40+ projects for NGOs and government',
         tpl:`Act as a professional corporate writer. Produce a complete, polished COMPANY PROFILE for: "{INPUT}".
 
 ## About Us
@@ -1937,6 +2005,7 @@ Write the complete company profile now — polished, confident, and professional
         label:'Business Report',
         sub:'Formal analytical report on any business topic',
         ask:'What is this business report about? Include the audience and purpose.',
+        fields:[{label:'Report Title / Subject', ph:'e.g. Q3 Sales Performance Review', required:true}, {label:'Report Type', ph:'e.g. Performance / Annual / Project report'}, {label:'Period Covered', ph:'e.g. January–March 2026'}, {label:'Key Findings or Data', ph:'The main points to report', type:'textarea', rows:4, required:true}],
         ph:'e.g. Q3 performance review for the board / Staff training needs assessment / Analysis of why sales declined in the Northern region',
         tpl:`Act as a senior business analyst. Write a complete, formal BUSINESS REPORT on: "{INPUT}".
 
@@ -1983,7 +2052,8 @@ Write the complete business report now.` },
         label:'Board Resolution',
         sub:'Formal resolution for company decisions requiring board approval',
         ask:'What decision or action does the board need to formally resolve?',
-        ph:'e.g. Opening a new bank account / Appointing a new director / Approving the annual budget / Authorising a contract above ₦5 million',
+        fields:[{label:'Company Name', ph:'e.g. Meridian Holdings Ltd', required:true}, {label:'Resolution About', ph:'What is being resolved or approved', type:'textarea', rows:4, required:true}, {label:'Meeting Date', ph:'e.g. 15 June 2026'}, {label:'Directors Present', ph:'Names, if relevant'}],
+        ph:'e.g. Opening a new bank account / Appointing a new director / Approving the annual budget / Authorising a contract above $50,000',
         tpl:`Act as a corporate secretary and company law specialist. Draft a formal BOARD RESOLUTION for: "{INPUT}".
 
 ---
@@ -2037,6 +2107,7 @@ Write the complete board resolution now, using precise corporate language.` },
         label:'Memorandum of Understanding',
         sub:'Formal MOU between two or more parties',
         ask:'Who are the parties to this MOU and what is the nature of their agreement or collaboration?',
+        fields:[{label:'First Party', ph:'e.g. Meridian Ltd', required:true}, {label:'Second Party', ph:'e.g. Apex Solutions Ltd', required:true}, {label:'Purpose of the MoU', ph:'What both parties intend to do together', type:'textarea', rows:4, required:true}, {label:'Key Terms', ph:'Responsibilities, duration, conditions', type:'textarea', rows:3}],
         ph:'e.g. Between our consulting firm and a university for student internship placements / Between two businesses to collaborate on a government tender / Between an NGO and a community group for a development project',
         tpl:`Act as a professional contract drafter. Produce a complete MEMORANDUM OF UNDERSTANDING (MOU) for: "{INPUT}".
 
@@ -2126,6 +2197,7 @@ Write the complete MOU now.` },
         label:'Letter of Intent',
         sub:'Formal letter of intent before a contract or transaction',
         ask:'What is the intent being expressed? Who are the parties and what is the proposed deal?',
+        fields:[{label:'From (You / Your Company)', ph:'e.g. Meridian Ltd', required:true}, {label:'To (Recipient)', ph:'e.g. Apex Solutions Ltd', required:true}, {label:'Subject / Purpose', ph:'What you intend to do', type:'textarea', rows:4, required:true}, {label:'Key Terms', ph:'Conditions or expectations', type:'textarea', rows:3}],
         ph:'e.g. Intent to acquire a 40% stake in a tech startup / Intent to enter a distribution agreement / Intent to purchase a commercial property',
         tpl:`Act as a professional corporate lawyer and business advisor. Draft a formal LETTER OF INTENT (LOI) for: "{INPUT}".
 
@@ -2191,6 +2263,7 @@ Write the complete Letter of Intent now.` },
         label:'Tender Proposal',
         sub:'Competitive bid or tender submission for a contract',
         ask:'What contract or tender are you bidding for? Describe your company and what you are offering.',
+        fields:[{label:'Tendering For', ph:'e.g. Supply of IT equipment', required:true}, {label:'Procuring Authority', ph:'e.g. A government agency', required:true}, {label:'Your Key Strengths', ph:'Why your bid should win', type:'textarea', rows:4, required:true}, {label:'Your Company', ph:'e.g. Apex IT Solutions'}],
         ph:'e.g. Government tender to supply school furniture to 50 public schools in Ogun State / NGO tender for construction of a community health centre / Corporate tender to provide catering services for a bank',
         tpl:`Act as a professional tender writer and procurement specialist. Write a complete TENDER PROPOSAL for: "{INPUT}".
 
@@ -2255,6 +2328,7 @@ Write the complete tender proposal now.` }
         label:'Professional Email',
         sub:'Polished, ready-to-send business email',
         ask:'What is this email about? Who is it to and what outcome do you need?',
+        fields:[{label:'To (Recipient)', ph:'e.g. A client / supplier / colleague', required:true}, {label:'Subject', ph:'e.g. Follow-up on our meeting', required:true}, {label:'Message / Purpose', ph:'What you want to say', type:'textarea', rows:4, required:true}, {label:'Tone', ph:'e.g. Formal / Friendly-professional'}],
         ph:'e.g. Following up on a job application / Requesting a meeting with a senior partner / Responding to a client complaint professionally',
         tpl:`Act as a senior professional business writer. Write a complete, polished PROFESSIONAL EMAIL for: "{INPUT}".
 
@@ -2286,6 +2360,7 @@ Write the complete email now — subject line through signature.` },
         label:'Business Letter',
         sub:'Formal printed letter for any professional purpose',
         ask:'What is this letter about? Who is sending it and who is receiving it?',
+        fields:[{label:'From (Sender)', ph:'Your name and title', required:true}, {label:'To (Recipient)', ph:'Name, title, organisation', required:true}, {label:'Subject', ph:'e.g. Request for refund', required:true}, {label:'Message', ph:'What the letter should say', type:'textarea', rows:4, required:true}],
         ph:'e.g. A letter of complaint to a supplier / A letter introducing our company to a potential client / A formal letter requesting a refund',
         tpl:`Act as a professional business correspondent. Write a complete, formal BUSINESS LETTER for: "{INPUT}".
 
@@ -2333,6 +2408,7 @@ Write the complete letter now.` },
         label:'Internal Memo / Circular',
         sub:'Official internal communication to staff or departments',
         ask:'What is this memo or circular about? Who is it from and who is it going to?',
+        fields:[{label:'To (Department / Staff)', ph:'e.g. All staff / Finance team', required:true}, {label:'Subject', ph:'e.g. New leave policy', required:true}, {label:'Message', ph:'The announcement or information', type:'textarea', rows:4, required:true}, {label:'From', ph:'Your name and title'}],
         ph:'e.g. Announcing new office working hours to all staff / A memo from the MD reminding staff of the code of conduct / A circular about the upcoming staff annual retreat',
         tpl:`Act as a professional office administrator. Write a complete INTERNAL MEMO / CIRCULAR for: "{INPUT}".
 
@@ -2379,6 +2455,7 @@ Write the complete memo/circular now.` },
         label:'Job Description',
         sub:'Comprehensive job description for any role',
         ask:'What is the job title, department, and key responsibilities of this role?',
+        fields:[{label:'Job Title', ph:'e.g. Marketing Manager', required:true}, {label:'Department', ph:'e.g. Marketing'}, {label:'Key Responsibilities', ph:'Main duties of the role', type:'textarea', rows:4, required:true}, {label:'Requirements', ph:'Qualifications, skills, experience', type:'textarea', rows:3}],
         ph:'e.g. Marketing Manager for a growing e-commerce company / Finance Officer for an NGO / Senior Software Engineer for a fintech startup',
         tpl:`Act as a senior HR professional and talent acquisition specialist. Write a comprehensive JOB DESCRIPTION for: "{INPUT}".
 
@@ -2423,7 +2500,8 @@ Write the complete job description now.` },
         label:'Appointment Letter',
         sub:'Formal letter offering employment to a candidate',
         ask:'Who is being appointed, to what role, and what are the key terms (salary, start date)?',
-        ph:'e.g. Appointing Amara Osei as Finance Manager starting 1st August at ₦300,000/month / Offering Ibrahim Musa a contract role as IT Consultant for 6 months at $2,000/month',
+        fields:[{label:'Candidate Name', ph:'e.g. David Kim', required:true}, {label:'Position', ph:'e.g. Finance Manager', required:true}, {label:'Salary', ph:'e.g. $3,000/month'}, {label:'Start Date', ph:'e.g. 1 August 2026'}, {label:'Terms', ph:'Probation, hours, benefits', type:'textarea', rows:3}],
+        ph:'e.g. Appointing Laura Schmidt as Finance Manager starting 1st August at $3,000/month / Offering David Kim a contract role as IT Consultant for 6 months at $2,000/month',
         tpl:`Act as a senior HR professional. Write a formal APPOINTMENT / OFFER LETTER for: "{INPUT}".
 
 ---
@@ -2498,6 +2576,7 @@ Write the complete appointment letter now.` },
         label:'Warning / Query Letter',
         sub:'Formal disciplinary or query letter to an employee',
         ask:'What is the nature of the misconduct or poor performance, and who is the employee?',
+        fields:[{label:'Employee Name', ph:'e.g. David Kim', required:true}, {label:'Issue / Incident', ph:'Describe what happened', type:'textarea', rows:4, required:true}, {label:'Date of Incident', ph:'e.g. 10 June 2026'}, {label:'Type', ph:'e.g. Query / Warning / Final warning'}],
         ph:'e.g. Staff member repeatedly late to work / Employee who disclosed confidential client information / Staff whose performance has declined over 3 months',
         tpl:`Act as a senior HR professional. Write a formal WARNING / QUERY LETTER for: "{INPUT}".
 
@@ -2554,6 +2633,7 @@ Write the complete warning/query letter now.` },
         label:'Reference Letter',
         sub:'Professional reference or recommendation letter for an individual',
         ask:'Who is the reference for, what role did they hold, and what is the reference for?',
+        fields:[{label:'Person Being Referred', ph:'e.g. Emily Carter', required:true}, {label:'Their Role / Your Relationship', ph:'e.g. Worked under my supervision as analyst', required:true}, {label:'Their Strengths & Achievements', ph:'Specific qualities and accomplishments', type:'textarea', rows:4, required:true}, {label:'Purpose of Reference', ph:'e.g. Job application / University admission'}],
         ph:'e.g. Reference for Ahmed Bello who worked as an accountant for 3 years, applying for a senior finance role / Reference for a student who completed an internship with us',
         tpl:`Act as a senior professional providing a formal character and professional reference. Write a complete REFERENCE LETTER for: "{INPUT}".
 
@@ -2598,8 +2678,19 @@ Write the complete reference letter now. IMPORTANT: Do not mention NORIA, SkyGlo
       { cat:'CV & Career',
         label:'CV / Résumé',
         sub:'European-standard professional CV — clean, submission-ready, no AI branding',
-        ask:'Tell me about the person this CV is for — their name, profession, experience, education, and skills.',
-        ph:'e.g. John Mensah, 5 years as a civil engineer, BSc Civil Engineering, skills in AutoCAD, project management, fluent in English and French / Sarah Boateng, recent graduate in nursing, 2 internships, seeking a hospital position in Germany',
+        ask:'Fill in your details — Noria will produce a finished, print-ready CV',
+        fields:[
+          {label:'Full Name', ph:'e.g. Daniel Bennett', required:true},
+          {label:'Professional Title / Field', ph:'e.g. Civil Engineer', required:true},
+          {label:'Email', type:'email', ph:'e.g. daniel.bennett@email.com', required:true},
+          {label:'Phone', type:'tel', ph:'e.g. +1 555 123 4567', required:false},
+          {label:'Location (City, Country)', ph:'e.g. London, United Kingdom', required:false},
+          {label:'Professional Summary', type:'textarea', rows:2, ph:'2–3 lines about who you are, your strengths and goals', required:false},
+          {label:'Work Experience', type:'textarea', rows:4, ph:'List roles, most recent first. e.g. Senior Engineer, ABC Ltd, London (2020–Present) — led 12 projects, managed $2M budget…', required:true},
+          {label:'Education', type:'textarea', rows:3, ph:'e.g. BSc Civil Engineering, University of Leeds, 2018 (First Class)', required:true},
+          {label:'Skills', type:'textarea', rows:2, ph:'e.g. AutoCAD, project management, leadership; Languages: English (native), French (fluent)', required:false},
+          {label:'Certifications / Memberships', type:'textarea', rows:2, ph:'e.g. Chartered Engineer (CEng); Member, Institution of Civil Engineers', required:false},
+        ],
         tpl:`Produce a complete, professional CURRICULUM VITAE in European (EU/Europass) standard format for: "{INPUT}".
 
 The CV must be ready for immediate submission. Format it exactly as shown below. Do NOT include any mention of NORIA, SkyGlobe, AI tools, or any generation note anywhere in the document. The CV must appear entirely as the individual's own document.
@@ -2677,8 +2768,17 @@ Now write the complete CV using real, specific information from the input. Make 
       { cat:'CV & Career',
         label:'Cover Letter',
         sub:'Professional cover letter for any job application — EU standard',
-        ask:'Who is applying, what role are they applying for, and what is the employer/organisation?',
-        ph:'e.g. John Mensah applying for Senior Civil Engineer at Accra Infrastructure Ltd / Sarah Boateng applying for Registered Nurse at Charité Hospital Berlin',
+        ask:'Fill in your details — Noria will produce a finished, print-ready cover letter',
+        fields:[
+          {label:'Your Full Name', ph:'e.g. Daniel Bennett', required:true},
+          {label:'Your Email', type:'email', ph:'e.g. daniel.bennett@email.com', required:false},
+          {label:'Your Phone', type:'tel', ph:'e.g. +1 555 123 4567', required:false},
+          {label:'Position Applying For', ph:'e.g. Senior Civil Engineer', required:true},
+          {label:'Company / Organisation', ph:'e.g. Meridian Infrastructure Ltd', required:true},
+          {label:'Hiring Manager Name', ph:'Leave blank for "Dear Hiring Manager"', required:false},
+          {label:'Your Key Experience & Achievements', type:'textarea', rows:4, ph:'e.g. 5 years in infrastructure, led $2M projects, delivered 12 bridges on time and under budget', required:true},
+          {label:'Why This Company', type:'textarea', rows:2, ph:'e.g. Admire their sustainable engineering work and want to contribute to their renewable projects', required:false},
+        ],
         tpl:`Write a complete, professional COVER LETTER for: "{INPUT}".
 
 The letter must follow European professional standards: formal, concise, compelling, and submission-ready. Do NOT include any mention of NORIA, SkyGlobe, or any AI tool anywhere. The letter must appear entirely as the applicant's own work.
@@ -2730,6 +2830,7 @@ Write the complete, final cover letter now. Make it polished, professional, and 
         label:'Meeting Agenda',
         sub:'Structured agenda for any meeting',
         ask:'What is this meeting for, how long will it run, and who will attend?',
+        fields:[{label:'Meeting Title / Purpose', ph:'e.g. Monthly board meeting', required:true}, {label:'Date & Time', ph:'e.g. 20 June 2026, 10:00'}, {label:'Topics to Discuss', ph:'List the agenda items', type:'textarea', rows:4, required:true}, {label:'Attendees', ph:'Who will attend'}],
         ph:'e.g. 2-hour monthly management review meeting / 45-minute project update call with 5 team members / Annual general meeting for the board and shareholders',
         tpl:`Act as a professional office manager. Create a complete MEETING AGENDA for: "{INPUT}".
 
@@ -2779,6 +2880,7 @@ Write the complete meeting agenda now.` },
         label:'Meeting Minutes',
         sub:'Formal minutes ready for distribution',
         ask:'What was the meeting about? Describe what was discussed, decided, and who attended.',
+        fields:[{label:'Meeting Title', ph:'e.g. Monthly board meeting', required:true}, {label:'Date', ph:'e.g. 20 June 2026'}, {label:'Attendees', ph:'Who was present'}, {label:'What Was Discussed & Decided', ph:'Key points, decisions, action items', type:'textarea', rows:6, required:true}],
         ph:'e.g. Board meeting where Q2 results were reviewed, a new hire was approved, and the expansion plan was debated / Team meeting where project delays were discussed and new deadlines set',
         tpl:`Act as a professional company secretary and minute-taker. Write complete, formal MEETING MINUTES for: "{INPUT}".
 
@@ -2864,7 +2966,8 @@ Write the complete meeting minutes now.` }
         label:'Lesson Plan',
         sub:'Complete, structured lesson plan for any subject',
         ask:'What is the subject, topic, grade level, and duration of this lesson?',
-        ph:'e.g. English Language — Narrative Writing for SS2, 80-minute lesson / Primary 5 Mathematics — Introduction to Fractions, 45 minutes',
+        fields:[{label:'Subject', ph:'e.g. Biology', required:true}, {label:'Topic', ph:'e.g. Photosynthesis', required:true}, {label:'Grade / Level', ph:'e.g. Grade 10'}, {label:'Duration', ph:'e.g. 45 minutes'}, {label:'Learning Objectives', ph:'What students should learn', type:'textarea', rows:3}],
+        ph:'e.g. English Language — Narrative Writing for Grade 10, 80-minute lesson / Primary 5 Mathematics — Introduction to Fractions, 45 minutes',
         tpl:`Act as a master teacher and curriculum specialist. Produce a complete, detailed LESSON PLAN for: "{INPUT}".
 
 ---
@@ -2930,7 +3033,8 @@ Write the complete lesson plan now.` },
         label:'Scheme of Work',
         sub:'Full term or semester scheme of work for any subject',
         ask:'What subject, class, and term/semester is this scheme of work for? List the topics to be covered.',
-        ph:'e.g. Biology for SS1, First Term — topics: Cell Biology, Nutrition, Reproductive System / Mathematics for Year 8, Spring Term — Algebra, Geometry, Statistics',
+        fields:[{label:'Subject', ph:'e.g. Mathematics', required:true}, {label:'Grade / Class', ph:'e.g. Grade 9'}, {label:'Term / Semester', ph:'e.g. First Term'}, {label:'Topics to Cover', ph:'List the topics for the term', type:'textarea', rows:4, required:true}],
+        ph:'e.g. Biology for Grade 9, First Term — topics: Cell Biology, Nutrition, Reproductive System / Mathematics for Year 8, Spring Term — Algebra, Geometry, Statistics',
         tpl:`Act as a curriculum specialist and head of department. Produce a complete SCHEME OF WORK for: "{INPUT}".
 
 ---
@@ -2978,6 +3082,7 @@ Write the complete scheme of work now.` },
         label:'Curriculum Design',
         sub:'Full curriculum design document for a course or programme',
         ask:'What course or programme are you designing? Include level, duration, and target learners.',
+        fields:[{label:'Subject / Programme', ph:'e.g. Computer Science diploma', required:true}, {label:'Level', ph:'e.g. Secondary / Undergraduate'}, {label:'Duration', ph:'e.g. One academic year'}, {label:'Goals & Outcomes', ph:'What learners should achieve', type:'textarea', rows:3}],
         ph:'e.g. A 6-month vocational training programme in Digital Marketing for unemployed youth / A 2-year secondary school curriculum for Entrepreneurship Studies',
         tpl:`Act as a senior curriculum designer and education specialist. Produce a complete CURRICULUM DESIGN DOCUMENT for: "{INPUT}".
 
@@ -3039,7 +3144,8 @@ Write the complete curriculum design document now.` },
         label:'Student Progress Report',
         sub:'Comprehensive academic progress report for a student',
         ask:'What student are you reporting on? Include their name, class, subjects, and key observations.',
-        ph:'e.g. Progress report for Chinwe Okafor, JSS2A — strong in English and Arts, struggles with Maths, excellent attitude / End-of-term report for a secondary school student with mixed performance',
+        fields:[{label:'Student Name', ph:'e.g. Emily Carter', required:true}, {label:'Class / Grade', ph:'e.g. Grade 8'}, {label:'Performance Summary', ph:'Strengths, weaknesses, attitude', type:'textarea', rows:4, required:true}, {label:'Period', ph:'e.g. First Term'}],
+        ph:'e.g. Progress report for Emily Carter, Grade 8 — strong in English and Arts, struggles with Maths, excellent attitude / End-of-term report for a secondary school student with mixed performance',
         tpl:`Act as a professional class teacher and academic advisor. Write a complete STUDENT PROGRESS REPORT for: "{INPUT}".
 
 ---
@@ -3103,7 +3209,8 @@ Write the complete student progress report now.` },
         label:'Admission Letter',
         sub:'Official admission or acceptance letter to a student',
         ask:'Who is being admitted, to what programme or class, and what are the key terms?',
-        ph:'e.g. Admitting Halima Ibrahim to SS1 starting September / Accepting a student into the BSc Computer Science programme for 2024/2025 session / Offering admission to a postgraduate programme',
+        fields:[{label:'Applicant Name', ph:'e.g. Sofia Lopez', required:true}, {label:'Programme / Class', ph:'e.g. BSc Computer Science', required:true}, {label:'Institution', ph:'e.g. Riverside University'}, {label:'Start Date', ph:'e.g. September 2026'}],
+        ph:'e.g. Admitting Sofia Lopez to Grade 9 starting September / Accepting a student into the BSc Computer Science programme for 2024/2025 session / Offering admission to a postgraduate programme',
         tpl:`Act as a registrar or admissions officer. Write a formal ADMISSION / ACCEPTANCE LETTER for: "{INPUT}".
 
 ---
@@ -3165,6 +3272,7 @@ Write the complete admission letter now.` },
         label:'Letter to Parents',
         sub:'Official school letter to parents or guardians',
         ask:'What is the purpose of this letter to parents? What do they need to know or do?',
+        fields:[{label:'Subject / Reason', ph:'e.g. Upcoming parent-teacher meeting', required:true}, {label:'Class / Group', ph:'e.g. Grade 5'}, {label:'Message', ph:'What you want to communicate', type:'textarea', rows:4, required:true}, {label:'From', ph:'School or teacher name'}],
         ph:'e.g. Informing parents about the upcoming parent-teacher conference / Letter about a student disciplinary issue / Invitation to end-of-year graduation ceremony / Notice about increased school fees',
         tpl:`Act as a school principal or class teacher. Write a professional, warm LETTER TO PARENTS for: "{INPUT}".
 
@@ -3213,6 +3321,7 @@ Write the complete parent letter now.` },
         label:'School Policy Document',
         sub:'Official school or institution policy on any subject',
         ask:'What policy is this? What is it for and who does it govern?',
+        fields:[{label:'Policy Title', ph:'e.g. Student Code of Conduct', required:true}, {label:'Purpose & Scope', ph:'What the policy covers and why', type:'textarea', rows:4, required:true}, {label:'Institution', ph:'e.g. Riverside Academy'}, {label:'Key Rules / Provisions', ph:'Main points of the policy', type:'textarea', rows:3}],
         ph:'e.g. Student Code of Conduct and Discipline Policy / Examination and Assessment Policy / Child Protection and Safeguarding Policy / Staff Attendance Policy',
         tpl:`Act as a school administrator and policy specialist. Write a complete SCHOOL / INSTITUTIONAL POLICY DOCUMENT for: "{INPUT}".
 
@@ -3282,6 +3391,7 @@ Write the complete policy document now.` }
         label:'Official Letter',
         sub:'Formal official letter for any government or institutional purpose',
         ask:'What is this official letter about? Who is sending it and who is the recipient?',
+        fields:[{label:'From (Office / Department)', ph:'e.g. Office of the Director', required:true}, {label:'To (Recipient)', ph:'Name, title, organisation', required:true}, {label:'Subject', ph:'e.g. Notification of policy change', required:true}, {label:'Content', ph:'What the letter should say', type:'textarea', rows:4, required:true}],
         ph:'e.g. A letter from the Director of Health to the State Governor requesting budget allocation / An official letter from a ministry to an NGO granting approval / A formal letter from an institution to another about a partnership',
         tpl:`Act as a senior government official and formal correspondence specialist. Write a complete, authoritative OFFICIAL LETTER for: "{INPUT}".
 
@@ -3331,6 +3441,7 @@ Write the complete official letter now.` },
         label:'Government Memo',
         sub:'Official internal government memorandum',
         ask:'What is this government memo about? Who is it from and to whom is it directed?',
+        fields:[{label:'To', ph:'e.g. All department heads', required:true}, {label:'Subject', ph:'e.g. Budget review meeting', required:true}, {label:'Message', ph:'The directive or information', type:'textarea', rows:4, required:true}, {label:'From (Office)', ph:'Issuing office'}],
         ph:'e.g. Memo from the Permanent Secretary to all Heads of Department about budget cuts / Internal memo from Director to staff about new procurement procedures',
         tpl:`Act as a senior civil servant and administrative officer. Write a complete GOVERNMENT / OFFICIAL MEMORANDUM for: "{INPUT}".
 
@@ -3378,6 +3489,7 @@ Write the complete government memo now.` },
         label:'Ministry / Department Circular',
         sub:'Official circular from a ministry or government department',
         ask:'What is this circular about? What ministry or department is issuing it and who is the audience?',
+        fields:[{label:'Issuing Body', ph:'e.g. Ministry of Education', required:true}, {label:'Subject', ph:'e.g. New academic calendar', required:true}, {label:'Directive / Content', ph:'What is being communicated', type:'textarea', rows:4, required:true}, {label:'Effective Date', ph:'e.g. 1 September 2026'}],
         ph:'e.g. Ministry of Education circular to all schools about new examination dates / A circular from the Local Government Chairman to all department heads about performance targets',
         tpl:`Act as a government communications officer. Write a complete MINISTRY / DEPARTMENT CIRCULAR for: "{INPUT}".
 
@@ -3425,6 +3537,7 @@ Write the complete circular now.` },
         label:'Press Release',
         sub:'Official press release for media and public distribution',
         ask:'What is the news or announcement? Who is making it and what is the key message?',
+        fields:[{label:'Headline / Subject', ph:'e.g. Company launches new product', required:true}, {label:'Organisation', ph:'e.g. Meridian Group', required:true}, {label:'The Announcement', ph:'Full details of the news', type:'textarea', rows:4, required:true}, {label:'Date & Location', ph:'e.g. London, 20 June 2026'}],
         ph:'e.g. Announcing the launch of a new government health programme / A company announcing a major contract win / An NGO announcing the opening of a new community centre',
         tpl:`Act as a professional communications director and press officer. Write a complete, compelling PRESS RELEASE for: "{INPUT}".
 
@@ -3475,6 +3588,7 @@ Write the complete press release now.` },
         label:'Official Congratulatory Letter',
         sub:'Formal letter of congratulations from an official body',
         ask:'Who is being congratulated, for what achievement, and who is sending the letter?',
+        fields:[{label:'Recipient', ph:'e.g. David Kim', required:true}, {label:'Achievement / Occasion', ph:'e.g. Appointment as CEO', required:true}, {label:'From', ph:'Your name and title'}, {label:'Personal Message', ph:'Any specific words to include', type:'textarea', rows:3}],
         ph:'e.g. Congratulating a school on winning a national award / Commending a staff member on 25 years of service / Congratulating a community on the completion of a major infrastructure project',
         tpl:`Act as a senior official communications writer. Write a formal, warm CONGRATULATORY LETTER for: "{INPUT}".
 
@@ -3514,7 +3628,8 @@ Write the complete congratulatory letter now.` },
         label:'Policy Brief',
         sub:'Concise, authoritative policy brief for decision-makers',
         ask:'What policy issue or subject should this brief address? Who is the audience?',
-        ph:'e.g. A policy brief on youth unemployment in Nigeria for the Ministry of Labour / A brief on digital taxation for the Finance Committee / Recommendations on school feeding programmes for state government',
+        fields:[{label:'Policy Issue', ph:'e.g. Youth unemployment', required:true}, {label:'Target Audience / Body', ph:'e.g. Ministry of Labour'}, {label:'Recommendations', ph:'Your proposed solutions', type:'textarea', rows:4, required:true}, {label:'Background', ph:'Context and key data', type:'textarea', rows:3}],
+        ph:'e.g. A policy brief on youth unemployment for the Ministry of Labour / A brief on digital taxation for the Finance Committee / Recommendations on school feeding programmes for state government',
         tpl:`Act as a senior policy analyst and government advisor. Write a complete POLICY BRIEF on: "{INPUT}".
 
 ---
@@ -3585,6 +3700,7 @@ Write the complete policy brief now.` }
         label:'Non-Disclosure Agreement',
         sub:'Legally structured NDA / confidentiality agreement',
         ask:'Who are the parties and what confidential information needs to be protected?',
+        fields:[{label:'Disclosing Party', ph:'Who shares the information', required:true}, {label:'Receiving Party', ph:'Who receives the information', required:true}, {label:'Purpose / Information Covered', ph:'What is confidential and why', type:'textarea', rows:4, required:true}, {label:'Duration', ph:'e.g. 2 years'}],
         ph:'e.g. Between our company and a potential investor discussing our proprietary technology / Between two businesses exploring a joint venture / Between employer and employee with access to trade secrets',
         tpl:`Act as a professional contract lawyer. Draft a complete NON-DISCLOSURE AGREEMENT (NDA) for: "{INPUT}".
 
@@ -3672,7 +3788,8 @@ Write the complete NDA now.` },
         label:'Service Agreement',
         sub:'Professional service contract between client and provider',
         ask:'Who is providing what service to whom, and what are the key terms?',
-        ph:'e.g. IT consulting firm providing monthly support to a retail company at ₦150k/month / A freelance graphic designer providing branding services to a startup / A security company providing guards to an office building',
+        fields:[{label:'Service Provider', ph:'e.g. Apex IT Solutions', required:true}, {label:'Client', ph:'e.g. Meridian Ltd', required:true}, {label:'Services & Terms', ph:'What is provided and conditions', type:'textarea', rows:4, required:true}, {label:'Fee', ph:'e.g. $1,500/month'}],
+        ph:'e.g. IT consulting firm providing monthly support to a retail company at $1,500/month / A freelance graphic designer providing branding services to a startup / A security company providing guards to an office building',
         tpl:`Act as a professional contract lawyer. Draft a complete SERVICE AGREEMENT for: "{INPUT}".
 
 ---
@@ -3749,7 +3866,8 @@ Write the complete service agreement now.` },
         label:'Employment Contract',
         sub:'Comprehensive employment contract for any role',
         ask:'What role is being employed, who is the employer, and what are the key terms?',
-        ph:'e.g. Full-time Marketing Director at ₦500k/month with 3-month probation / Part-time accountant at $1500/month remote / Contract software developer for a 12-month project',
+        fields:[{label:'Employer', ph:'e.g. Meridian Ltd', required:true}, {label:'Employee', ph:'e.g. David Kim', required:true}, {label:'Position & Terms', ph:'Role, duties, hours, conditions', type:'textarea', rows:4, required:true}, {label:'Salary', ph:'e.g. $5,000/month'}, {label:'Start Date', ph:'e.g. 1 August 2026'}],
+        ph:'e.g. Full-time Marketing Director at $5,000/month with 3-month probation / Part-time accountant at $1500/month remote / Contract software developer for a 12-month project',
         tpl:`Act as an employment law specialist. Draft a complete EMPLOYMENT CONTRACT for: "{INPUT}".
 
 ---
@@ -3835,7 +3953,8 @@ Write the complete employment contract now.` },
         label:'Tenancy Agreement',
         sub:'Comprehensive tenancy / rental agreement',
         ask:'Who is the landlord and tenant, what property, and what are the key terms (rent, duration)?',
-        ph:'e.g. 1-bedroom flat at 15 Abeokuta Street Lagos rented to Mr. Emeka Eze at ₦600,000/year for 2 years / Commercial shop space rented to a business at $800/month for 12 months',
+        fields:[{label:'Landlord', ph:'e.g. Robert Hughes', required:true}, {label:'Tenant', ph:'e.g. David Kim', required:true}, {label:'Property', ph:'e.g. 1-bedroom flat, 15 Oak Street', required:true}, {label:'Rent & Duration', ph:'e.g. $6,000/year for 2 years', type:'textarea', rows:3, required:true}],
+        ph:'e.g. 1-bedroom flat at 15 Oak Street rented to Mr. Robert Hughes at $6,000/year for 2 years / Commercial shop space rented to a business at $800/month for 12 months',
         tpl:`Act as a property lawyer. Draft a complete TENANCY / LEASE AGREEMENT for: "{INPUT}".
 
 ---
@@ -3914,6 +4033,7 @@ Write the complete tenancy agreement now.` },
         label:'Affidavit',
         sub:'Sworn statement or affidavit for any legal purpose',
         ask:'What is this affidavit for and what facts need to be sworn?',
+        fields:[{label:'Deponent (Your Name)', ph:'The person swearing the affidavit', required:true}, {label:'Facts to Declare', ph:'State the facts clearly and truthfully', type:'textarea', rows:4, required:true}, {label:'Location', ph:'e.g. London'}, {label:'Purpose', ph:'e.g. For court / visa / verification'}],
         ph:'e.g. Affidavit confirming change of name from Ngozi Adams to Ngozi Okonkwo / Affidavit of loss of certificate / Affidavit confirming date of birth / Affidavit in support of a court application',
         tpl:`Act as a legal drafter specialising in statutory declarations. Draft a complete AFFIDAVIT / SWORN STATEMENT for: "{INPUT}".
 
@@ -3966,7 +4086,8 @@ Write the complete affidavit now.` },
         label:'Demand Letter',
         sub:'Formal legal demand letter before litigation',
         ask:'What is the demand for and who are the parties involved?',
-        ph:'e.g. Demanding payment of ₦500,000 owed for services rendered 90 days ago / Demanding return of property unlawfully withheld / Demanding compensation for breach of contract',
+        fields:[{label:'From (You)', ph:'Your name or company', required:true}, {label:'To (Other Party)', ph:'Who owes you', required:true}, {label:'What Is Owed / Demanded', ph:'Amount or action, and the reason', type:'textarea', rows:4, required:true}, {label:'Deadline', ph:'e.g. Within 14 days'}],
+        ph:'e.g. Demanding payment of $5,000 owed for services rendered 90 days ago / Demanding return of property unlawfully withheld / Demanding compensation for breach of contract',
         tpl:`Act as a lawyer drafting formal legal correspondence. Write a complete LEGAL DEMAND LETTER for: "{INPUT}".
 
 ---
@@ -4025,6 +4146,7 @@ Write the complete demand letter now.` },
         label:'Power of Attorney',
         sub:'Legal document authorising another person to act on your behalf',
         ask:'Who is granting the power of attorney, who is receiving it, and what powers are being granted?',
+        fields:[{label:'Grantor (You)', ph:'Who grants the power', required:true}, {label:'Attorney (Appointed Person)', ph:'Who receives the power', required:true}, {label:'Powers Granted', ph:'What they are authorised to do', type:'textarea', rows:4, required:true}, {label:'Duration', ph:'e.g. 12 months / Until revoked'}],
         ph:'e.g. Authorising my brother to manage my property and bank accounts while I am abroad / Giving a solicitor power to sign contracts on my behalf / Authorising an employee to represent the company in transactions up to $50,000',
         tpl:`Act as a legal drafter specialising in powers of attorney. Draft a complete POWER OF ATTORNEY for: "{INPUT}".
 
@@ -4091,7 +4213,8 @@ Write the complete power of attorney now.` }
         label:'Statement of Purpose',
         sub:'Compelling SOP for university or programme admission',
         ask:'What programme are you applying to, at which institution, and what is your background and motivation?',
-        ph:'e.g. Applying for MSc International Development at University of Manchester — background in NGO work in Nigeria, passion for poverty alleviation / Applying for MBA at INSEAD with 5 years finance experience',
+        fields:[{label:'Programme Applying For', ph:'e.g. MSc International Development', required:true}, {label:'Institution', ph:'e.g. University of Manchester'}, {label:'Your Background', ph:'Education, experience, achievements', type:'textarea', rows:4, required:true}, {label:'Your Goals', ph:'Why this programme, your future plans', type:'textarea', rows:3}],
+        ph:'e.g. Applying for MSc International Development at University of Manchester — background in NGO work overseas, passion for poverty alleviation / Applying for MBA at INSEAD with 5 years finance experience',
         tpl:`Act as an elite admissions consultant and academic writer. Write a compelling, complete STATEMENT OF PURPOSE for: "{INPUT}".
 
 Write a full Statement of Purpose of approximately 800–1000 words. Every paragraph must be specific, personal, and strategically crafted.
@@ -4129,7 +4252,8 @@ Write the complete Statement of Purpose now — vivid, specific, and compelling 
         label:'Scholarship Essay',
         sub:'Winning scholarship application essay',
         ask:'What scholarship are you applying for, what are its criteria, and what is your story?',
-        ph:'e.g. Commonwealth Scholarship for a Masters in Public Health — from Ghana, first-generation university student, worked in rural health clinics / Chevening Scholarship, background in law, want to specialise in international human rights',
+        fields:[{label:'Scholarship', ph:'e.g. Commonwealth Scholarship', required:true}, {label:'Your Background & Story', ph:'Your journey, challenges, achievements', type:'textarea', rows:4, required:true}, {label:'Field of Study', ph:'e.g. Public Health'}, {label:'Why You Deserve It', ph:'Your strengths and goals', type:'textarea', rows:3}],
+        ph:'e.g. Commonwealth Scholarship for a Masters in Public Health — first-generation university student, worked in rural health clinics / Chevening Scholarship, background in law, want to specialise in international human rights',
         tpl:`Act as an elite scholarship application coach and writer. Write a complete, winning SCHOLARSHIP APPLICATION ESSAY for: "{INPUT}".
 
 Write a powerful, authentic, and persuasive scholarship essay of 600–900 words. Every sentence must earn its place.
@@ -4164,7 +4288,8 @@ Write the complete scholarship essay now — powerful, personal, and unforgettab
         label:'Research Proposal',
         sub:'Academic research proposal for postgraduate or funding applications',
         ask:'What is your research topic, field, level (Masters/PhD), and key research question?',
-        ph:'e.g. The impact of mobile money on women\'s economic empowerment in rural Kenya — PhD in Development Economics / Barriers to secondary school completion for girls in Northern Nigeria — Masters in Education',
+        fields:[{label:'Research Topic', ph:'e.g. Mobile money and womens empowerment', required:true}, {label:'Field', ph:'e.g. Development Economics'}, {label:'Research Questions / Aims', ph:'What you want to investigate', type:'textarea', rows:4, required:true}, {label:'Methodology', ph:'How you will conduct the research', type:'textarea', rows:3}],
+        ph:'e.g. The impact of mobile money on women\'s economic empowerment in rural communities — PhD in Development Economics / Barriers to secondary school completion for girls in underserved regions — Masters in Education',
         tpl:`Act as a senior academic researcher and proposal writer. Write a complete RESEARCH PROPOSAL for: "{INPUT}".
 
 ---
@@ -4227,6 +4352,7 @@ Write the complete research proposal now.` },
         label:'Visa Cover Letter',
         sub:'Compelling visa application cover letter',
         ask:'What type of visa are you applying for, to which country, and what is the purpose of travel?',
+        fields:[{label:'Applicant Name', ph:'e.g. David Kim', required:true}, {label:'Visa Type & Country', ph:'e.g. UK visitor visa', required:true}, {label:'Purpose of Travel', ph:'Why you are travelling', type:'textarea', rows:4, required:true}, {label:'Duration & Dates', ph:'e.g. 3 weeks, August 2026'}],
         ph:'e.g. UK Student Visa to study at University of Leeds / Schengen Tourist Visa to visit France and Germany for 2 weeks / Canadian Work Permit for a software engineering role in Toronto',
         tpl:`Act as an immigration consultant and professional letter writer. Write a complete, compelling VISA APPLICATION COVER LETTER for: "{INPUT}".
 
@@ -4283,7 +4409,8 @@ Write the complete visa cover letter now.` },
         label:'Letter of Invitation',
         sub:'Formal invitation letter for a visa application',
         ask:'Who are you inviting, from where, for what purpose, and for how long?',
-        ph:'e.g. Inviting my sister from Nigeria to visit me in the UK for 3 weeks / Inviting a business partner from Kenya to attend our conference in Dubai / Inviting a guest speaker from the USA to our conference in Accra',
+        fields:[{label:'Inviter (You)', ph:'Your name and status', required:true}, {label:'Guest Name', ph:'Who you are inviting', required:true}, {label:'Purpose & Duration', ph:'Reason for the visit and how long', type:'textarea', rows:4, required:true}, {label:'Destination', ph:'e.g. London, United Kingdom'}],
+        ph:'e.g. Inviting my sister to visit me in the UK for 3 weeks / Inviting a business partner to attend our conference in Dubai / Inviting a guest speaker from abroad to our conference',
         tpl:`Act as an immigration support specialist. Write a formal LETTER OF INVITATION for a visa application for: "{INPUT}".
 
 ---
@@ -4336,6 +4463,7 @@ Write the complete invitation letter now.` },
         label:'Grant Proposal',
         sub:'Full grant application for NGOs, researchers, or projects',
         ask:'What is the grant for, who is the funder, and what project needs funding?',
+        fields:[{label:'Project Title', ph:'e.g. Clean water for rural schools', required:true}, {label:'Organisation', ph:'Your organisation name'}, {label:'Funder', ph:'Who you are applying to'}, {label:'Project Summary', ph:'Goals, activities, impact', type:'textarea', rows:4, required:true}, {label:'Amount Requested', ph:'e.g. $50,000'}],
         ph:'e.g. Applying to the Bill & Melinda Gates Foundation for funding for a clean water project in rural Zambia / Applying for EU development grant for a youth skills training programme in Cameroon / UK research grant for a study on maternal health',
         tpl:`Act as a professional grant writer and development expert. Write a complete GRANT PROPOSAL for: "{INPUT}".
 
@@ -4418,6 +4546,7 @@ Write the complete grant proposal now.` }
         label:'Discover My Life Purpose',
         sub:'A deep guided process to discover your unique purpose',
         ask:'Tell me about yourself — your passions, your gifts, what breaks your heart in the world, and any experiences that have deeply shaped you.',
+        fields:[{label:'About You', ph:'Your passions, strengths, what excites you', type:'textarea', rows:4, required:true}, {label:'What Matters Most to You', ph:'Values, causes, people'}, {label:'Your Current Stage of Life', ph:'e.g. Recent graduate / Career change'}],
         ph:'e.g. I love teaching, I grew up poor and saw how education changed my life, I am good at explaining things, poverty and ignorance break my heart / I have business skills, I care about Africa rising, I want to create jobs',
         tpl:`Act as a master life coach and purpose facilitator. Guide a complete PURPOSE DISCOVERY PROCESS for: "{INPUT}".
 
@@ -4456,6 +4585,7 @@ Write the complete purpose discovery session now.` },
         label:'Personal Mission Statement',
         sub:'Craft a powerful personal mission statement',
         ask:'Describe your core values, your greatest strengths, and the impact you want to make in the world.',
+        fields:[{label:'Who You Are', ph:'A short description of yourself', required:true}, {label:'Your Core Passions & Values', ph:'What drives you', type:'textarea', rows:4, required:true}, {label:'What You Want to Achieve', ph:'Your aspirations'}],
         ph:'e.g. I value integrity, family, and service. I am good at strategy and communication. I want to help African businesses grow globally / I value faith, justice, and excellence. I want to empower disadvantaged youth',
         tpl:`Act as a personal development expert and life strategist. Write a complete PERSONAL MISSION STATEMENT FRAMEWORK for: "{INPUT}".
 
@@ -4498,6 +4628,7 @@ Write the complete mission statement framework now.` },
         label:'Core Values Declaration',
         sub:'Identify and declare your non-negotiable core values',
         ask:'What do you value most in life? What principles guide your decisions, even when it is difficult?',
+        fields:[{label:'About You', ph:'Your background and what matters to you', type:'textarea', rows:4, required:true}, {label:'What Matters Most', ph:'The principles you live by'}],
         ph:'e.g. I value honesty above all — I have lost friendships for telling the truth. I value family, faith, and hard work. Justice matters to me deeply / I value excellence, loyalty, and service',
         tpl:`Act as a values clarification expert and life coach. Produce a complete CORE VALUES DECLARATION for: "{INPUT}".
 
@@ -4530,6 +4661,7 @@ Write the complete core values declaration now.` },
         label:'Purpose-Driven Goals Plan',
         sub:'A goal-setting plan rooted in your purpose and values',
         ask:'What is your purpose or mission, and what major goals do you want to achieve in the next 1–5 years?',
+        fields:[{label:'Your Purpose or Vision', ph:'What you want your life to be about', type:'textarea', rows:4, required:true}, {label:'Time Frame', ph:'e.g. Next 3 years'}, {label:'Key Areas', ph:'e.g. Career, family, health, faith'}],
         ph:'e.g. My purpose is to improve education in Africa. Goals: launch a tutoring platform, train 1000 teachers, write a book on pedagogy / Purpose: become financially free by 40 and support my community. Goals: start a business, buy property, invest',
         tpl:`Act as a strategic life coach and goal-setting expert. Create a complete PURPOSE-DRIVEN GOALS PLAN for: "{INPUT}".
 
@@ -4575,6 +4707,7 @@ Write the complete purpose-driven goals plan now.` },
         label:'Personal Manifesto',
         sub:'A powerful declaration of who you are, what you believe, and how you will live',
         ask:'Tell me who you are, what you believe, what you stand for, and how you want to live. Be honest and deep.',
+        fields:[{label:'Your Beliefs & Principles', ph:'What you stand for', type:'textarea', rows:4, required:true}, {label:'Tone / Theme', ph:'e.g. Bold and inspiring / Calm and reflective'}],
         ph:'e.g. I am a Muslim African man who believes in justice, hard work, and family. I want to leave the world better than I found it. I refuse to be mediocre. / I am a woman building my own path, I believe in God, I believe in myself, I will not shrink',
         tpl:`Act as a master writer and life coach. Write a powerful, deeply personal PERSONAL MANIFESTO for: "{INPUT}".
 
@@ -4615,6 +4748,7 @@ Write this manifesto with real emotion, specific detail, and literary power. Thi
         label:'Personal Life Vision',
         sub:'A clear, compelling vision for your entire life',
         ask:'Where do you want to be in 10–20 years? What kind of person, what kind of life, what legacy?',
+        fields:[{label:'Your Dreams & Aspirations', ph:'What you want your life to look like', type:'textarea', rows:4, required:true}, {label:'Time Horizon', ph:'e.g. 5 years / Lifetime'}, {label:'Key Life Areas', ph:'e.g. Career, relationships, health, growth'}],
         ph:'e.g. I want to be a successful entrepreneur, live debt-free, be a great father, travel the world, and give back to my community / I want to lead a major organisation, build a school in my hometown, and raise godly children',
         tpl:`Act as a visionary life coach and strategic planner. Craft a complete PERSONAL LIFE VISION DOCUMENT for: "{INPUT}".
 
@@ -4652,6 +4786,7 @@ Write the complete personal life vision document now.` },
         label:'10-Year Life Vision Plan',
         sub:'A structured roadmap from today to your 10-year vision',
         ask:'What do you want to achieve in the next 10 years across all areas of your life?',
+        fields:[{label:'Where You Are Now', ph:'Your current situation', type:'textarea', rows:3, required:true}, {label:'Where You Want to Be in 10 Years', ph:'Your big vision', type:'textarea', rows:4, required:true}, {label:'Key Areas', ph:'e.g. Career, finance, family, health'}],
         ph:'e.g. Build a business worth $1M, own property, get married and have children, earn an MBA, give to charity monthly / Become a published author, move abroad, achieve financial freedom, deepen my faith',
         tpl:`Act as a strategic life architect. Build a complete 10-YEAR LIFE VISION PLAN for: "{INPUT}".
 
@@ -4702,6 +4837,7 @@ Write the complete 10-year life vision plan now.` },
         label:'Organisation Vision Statement',
         sub:'Powerful vision statement for any organisation or team',
         ask:'What does your organisation do, who does it serve, and what does success look like in 10 years?',
+        fields:[{label:'Organisation Name', ph:'e.g. Meridian Group', required:true}, {label:'What You Do', ph:'Your core work and mission', type:'textarea', rows:3, required:true}, {label:'Long-Term Aspiration', ph:'Where you want the organisation to be'}],
         ph:'e.g. A social enterprise providing clean energy to rural communities, aiming to reach 1 million homes in 10 years / A school aiming to be the top institution in West Africa for STEM education by 2035',
         tpl:`Act as a strategic organisational consultant and brand strategist. Develop a complete ORGANISATIONAL VISION FRAMEWORK for: "{INPUT}".
 
@@ -4744,6 +4880,7 @@ Write the complete organisational vision framework now.` },
         label:'Strategic Vision Plan',
         sub:'3–5 year strategic plan aligned to your organisation\'s vision',
         ask:'What is your organisation, what is its vision, and what are the key strategic priorities for the next 3–5 years?',
+        fields:[{label:'Organisation', ph:'e.g. Meridian Group', required:true}, {label:'Current Position', ph:'Where the organisation stands today', type:'textarea', rows:3, required:true}, {label:'Strategic Goals', ph:'What you want to achieve', type:'textarea', rows:3}, {label:'Time Frame', ph:'e.g. 3–5 years'}],
         ph:'e.g. A healthcare NGO wanting to expand from 1 to 5 states in 3 years, improve patient outcomes, and become financially sustainable / A school planning to double enrolment, achieve top WAEC results, and launch a vocational programme',
         tpl:`Act as a senior strategic planning consultant. Produce a complete STRATEGIC VISION PLAN for: "{INPUT}".
 
@@ -4818,6 +4955,7 @@ Write the complete strategic vision plan now.` }
         label:'Fitness Plan',
         sub:'Personalised exercise and fitness programme',
         ask:'What are your fitness goals, current activity level, and any limitations or equipment available?',
+        fields:[{label:'Your Goal', ph:'e.g. Lose weight / Build muscle / Run a 5K', required:true}, {label:'Current Fitness Level', ph:'e.g. Beginner / Intermediate'}, {label:'Time & Equipment Available', ph:'e.g. 30 min/day, home, no equipment'}, {label:'Any Limitations', ph:'e.g. Knee injury, health conditions', type:'textarea', rows:3}],
         ph:'e.g. Want to lose 15kg in 6 months, currently sedentary, no gym but have resistance bands at home / Want to build muscle, go to the gym 4x/week, intermediate level, no injuries',
         tpl:`Act as a certified fitness trainer and health coach. Create a complete PERSONALISED FITNESS PLAN for: "{INPUT}".
 
@@ -4872,7 +5010,8 @@ Write the complete fitness plan now.` },
         label:'Nutrition & Meal Plan',
         sub:'Personalised nutrition plan and weekly meal guide',
         ask:'What are your nutrition goals, dietary preferences or restrictions, and your typical daily routine?',
-        ph:'e.g. Want to eat healthier, lose weight, mostly eat Nigerian food, have diabetes / Vegetarian wanting to build muscle, budget of ₦5000/week, busy schedule / Want to improve energy levels, no red meat, family of 4',
+        fields:[{label:'Your Goal', ph:'e.g. Eat healthier / Lose weight / Build muscle', required:true}, {label:'Dietary Preferences / Restrictions', ph:'e.g. Vegetarian, no dairy, diabetic', type:'textarea', rows:3}, {label:'Budget', ph:'e.g. $50/week'}, {label:'Lifestyle', ph:'e.g. Busy schedule, family of 4'}],
+        ph:'e.g. Want to eat healthier, lose weight, mostly eat home-cooked meals, have diabetes / Vegetarian wanting to build muscle, budget of $50/week, busy schedule / Want to improve energy levels, no red meat, family of 4',
         tpl:`Act as a certified nutritionist and dietitian. Create a complete NUTRITION & MEAL PLAN for: "{INPUT}".
 
 ## Nutritional Goals
@@ -4924,6 +5063,7 @@ Write the complete nutrition and meal plan now.` },
         label:'Mental Wellness Plan',
         sub:'A personal plan for mental health, emotional resilience, and inner peace',
         ask:'What mental or emotional challenges are you facing? What does emotional wellbeing look like for you?',
+        fields:[{label:'What You Are Facing', ph:'e.g. Stress, anxiety, burnout', type:'textarea', rows:4, required:true}, {label:'Your Goals', ph:'e.g. More calm, better sleep, focus'}, {label:'Current Habits', ph:'e.g. Sleep, exercise, routines'}],
         ph:'e.g. Struggling with anxiety and stress from work, want to feel more at peace and focused / Going through grief after a loss and need to rebuild emotionally / Want to improve confidence, reduce overthinking, and be more positive',
         tpl:`Act as a mental health and wellness coach. Create a compassionate, practical MENTAL WELLNESS PLAN for: "{INPUT}".
 
@@ -4972,6 +5112,7 @@ Write the complete mental wellness plan now.` },
         label:'Daily Routine Design',
         sub:'Design a powerful, productive, and life-giving daily routine',
         ask:'What does your ideal day look like? What goals must your routine serve? What are your current time constraints?',
+        fields:[{label:'Your Goals', ph:'What you want your days to achieve', type:'textarea', rows:4, required:true}, {label:'Work & Commitments', ph:'e.g. 9–5 job, study, family'}, {label:'Wake & Sleep Times', ph:'e.g. Up at 6am, sleep by 11pm'}],
         ph:'e.g. I want a morning routine that sets me up well, I work 9–5, I want to exercise and read more, I have two young children / I am an entrepreneur with flexible hours, I want to be more disciplined and productive',
         tpl:`Act as a productivity and lifestyle design coach. Create a complete DAILY ROUTINE DESIGN for: "{INPUT}".
 
@@ -5026,6 +5167,7 @@ Write the complete daily routine design now.` }
         label:'Learning & Growth Plan',
         sub:'A structured plan to master any skill or field of knowledge',
         ask:'What do you want to learn or master? What is your current level and how much time can you commit?',
+        fields:[{label:'What You Want to Learn', ph:'e.g. Data analysis and Python', required:true}, {label:'Current Level', ph:'e.g. Complete beginner'}, {label:'Time Available', ph:'e.g. 1 hour per day'}, {label:'Goal / Deadline', ph:'e.g. Job-ready in 6 months'}],
         ph:'e.g. Want to master data analysis and Python in 6 months, complete beginner, 1 hour/day / Want to become a fluent Arabic speaker in 1 year, can dedicate 30 minutes daily / Want to learn Islamic finance for professional use',
         tpl:`Act as a master learning coach and expert in accelerated skill acquisition. Create a complete LEARNING & GROWTH PLAN for: "{INPUT}".
 
@@ -5078,6 +5220,7 @@ Write the complete learning and growth plan now.` },
         label:'Knowledge Mastery Map',
         sub:'A complete map of everything you need to know in any field',
         ask:'What subject, field, or discipline do you want a complete knowledge map for?',
+        fields:[{label:'Subject or Skill to Master', ph:'e.g. Digital marketing', required:true}, {label:'Current Level', ph:'e.g. Beginner / Intermediate'}, {label:'Purpose', ph:'e.g. Career, business, personal interest'}],
         ph:'e.g. Islamic jurisprudence (Fiqh) / Entrepreneurship and business / Modern African history / Investment and personal finance / Software development',
         tpl:`Act as a master scholar and curriculum designer. Create a complete KNOWLEDGE MASTERY MAP for: "{INPUT}".
 
@@ -5120,6 +5263,7 @@ Write the complete knowledge mastery map now.` },
         label:'Spiritual Development Plan',
         sub:'A personal plan for deepening your spiritual life and relationship with God',
         ask:'What faith tradition do you follow? Where are you in your spiritual journey, and what do you want to deepen?',
+        fields:[{label:'Your Faith / Tradition', ph:'e.g. Christian, Muslim, or general'}, {label:'Your Goals', ph:'What you want to grow in', type:'textarea', rows:4, required:true}, {label:'Current Practice', ph:'Your current habits and routines'}],
         ph:'e.g. Muslim wanting to pray more consistently, read the Quran daily, and deepen my understanding of Islam / Christian wanting to strengthen my prayer life, study the Bible more seriously, and serve more / Seeking to reconnect with faith after a period of distance',
         tpl:`Act as a spiritual guide and life coach deeply versed in spiritual traditions. Create a complete SPIRITUAL DEVELOPMENT PLAN for: "{INPUT}".
 
@@ -5172,6 +5316,7 @@ Write the complete spiritual development plan now.` },
         label:'Mentorship Programme',
         sub:'Design a structured mentorship programme as mentor or mentee',
         ask:'Are you setting up a mentorship as a mentor or seeking one as a mentee? Describe the context, goals, and relationship.',
+        fields:[{label:'Programme Purpose', ph:'What the mentorship aims to achieve', type:'textarea', rows:4, required:true}, {label:'Who It Is For', ph:'e.g. Young professionals, students'}, {label:'Duration', ph:'e.g. 6 months'}, {label:'Organisation', ph:'Running the programme'}],
         ph:'e.g. I want to mentor 3 young entrepreneurs — need a structured programme for monthly meetings / I am seeking a mentor in Islamic scholarship and want to design what to ask for / A company wanting to create a formal staff mentorship programme',
         tpl:`Act as an expert in mentorship design and human development. Create a complete MENTORSHIP PROGRAMME for: "{INPUT}".
 
@@ -5226,7 +5371,8 @@ Write the complete mentorship programme now.` }
         label:'Financial Goals Plan',
         sub:'A complete personal financial goals and strategy document',
         ask:'What are your financial goals, your current income/savings situation, and your timeline?',
-        ph:'e.g. Earn ₦300k/month currently, want to save ₦5M in 3 years, buy land, and start a business / Single parent earning $2500/month, want to clear debt in 2 years, build emergency fund, and invest for retirement',
+        fields:[{label:'Current Income', ph:'e.g. $3,000/month'}, {label:'Your Goals', ph:'e.g. Save $50,000, buy land, start a business', type:'textarea', rows:4, required:true}, {label:'Time Frame', ph:'e.g. 3 years'}],
+        ph:'e.g. Earn $3,000/month currently, want to save $50,000 in 3 years, buy land, and start a business / Single parent earning $2500/month, want to clear debt in 2 years, build emergency fund, and invest for retirement',
         tpl:`Act as a certified financial planner and wealth coach. Create a complete FINANCIAL GOALS PLAN for: "{INPUT}".
 
 ## Financial Vision
@@ -5278,7 +5424,8 @@ Write the complete financial goals plan now.` },
         label:'Personal Budget Plan',
         sub:'A detailed, realistic monthly budget template',
         ask:'What is your monthly income, your key expenses, and your financial situation?',
-        ph:'e.g. Earn ₦250,000/month, pay ₦60k rent, feed family of 4, send child to school, want to save more / Single person earning $3000/month in the UK, rent £900, want to save £500/month and clear a credit card',
+        fields:[{label:'Monthly Income', ph:'e.g. $2,500/month', required:true}, {label:'Main Expenses', ph:'e.g. Rent, food, school, transport', type:'textarea', rows:4, required:true}, {label:'Savings Goal', ph:'e.g. Save $500/month'}],
+        ph:'e.g. Earn $2,500/month, pay $600 rent, feed family of 4, send child to school, want to save more / Single person earning $3000/month in the UK, rent £900, want to save £500/month and clear a credit card',
         tpl:`Act as a personal finance expert. Create a complete PERSONAL BUDGET PLAN for: "{INPUT}".
 
 ## Budget Philosophy
@@ -5343,7 +5490,8 @@ Write the complete personal budget plan now.` },
         label:'Investment Strategy Plan',
         sub:'A personalised investment strategy and action plan',
         ask:'What is your investment goal, timeline, risk tolerance, and what capital do you have available?',
-        ph:'e.g. Want to invest ₦500k for the first time, 30 years old, medium risk tolerance, 10-year horizon / Have $10,000 to invest, want passive income, risk-averse, 5-year horizon / Want to build a stock portfolio for retirement in 20 years',
+        fields:[{label:'Amount to Invest', ph:'e.g. $10,000', required:true}, {label:'Risk Tolerance', ph:'e.g. Low / Medium / High'}, {label:'Time Horizon', ph:'e.g. 10 years'}, {label:'Goals', ph:'e.g. Passive income, retirement', type:'textarea', rows:3}],
+        ph:'e.g. Want to invest $5,000 for the first time, 30 years old, medium risk tolerance, 10-year horizon / Have $10,000 to invest, want passive income, risk-averse, 5-year horizon / Want to build a stock portfolio for retirement in 20 years',
         tpl:`Act as a certified investment advisor. Create a complete INVESTMENT STRATEGY PLAN for: "{INPUT}".
 
 *Disclaimer: This plan is educational and informational. Always consult a licensed financial advisor before making investment decisions.*
@@ -5393,7 +5541,8 @@ Write the complete investment strategy plan now.` },
         label:'Business Financial Projection',
         sub:'Revenue, cost, and profit projections for a business',
         ask:'Describe your business and provide key financial assumptions — pricing, expected sales volume, costs.',
-        ph:'e.g. Cleaning service charging ₦20,000 per clean, aiming for 5 clients/week, overhead ₦80k/month / Online store selling at $50 average, 30% margin, targeting 100 orders/month, $2000 monthly costs',
+        fields:[{label:'Business Type', ph:'e.g. Online store / Cleaning service', required:true}, {label:'Pricing / Revenue Model', ph:'How you make money', type:'textarea', rows:4, required:true}, {label:'Costs', ph:'e.g. $2,000/month overhead'}, {label:'Targets', ph:'e.g. 100 orders/month'}],
+        ph:'e.g. Cleaning service charging $200 per clean, aiming for 5 clients/week, overhead $800/month / Online store selling at $50 average, 30% margin, targeting 100 orders/month, $2000 monthly costs',
         tpl:`Act as a certified financial analyst and business finance expert. Produce a complete BUSINESS FINANCIAL PROJECTION for: "{INPUT}".
 
 ## Business Overview
@@ -5462,7 +5611,8 @@ Write the complete financial projection now.` },
         label:'Loan Request Letter',
         sub:'Formal letter requesting a loan from a bank or institution',
         ask:'What loan are you requesting, from whom, for what purpose, and what is your ability to repay?',
-        ph:'e.g. Requesting ₦2 million business loan from our bank to purchase equipment, business has been operating 2 years / Requesting a personal loan of $5,000 from my employer / Applying for a microfinance loan to expand my trading business',
+        fields:[{label:'Applicant / Business', ph:'Your name or business', required:true}, {label:'Lender', ph:'e.g. Your bank / employer', required:true}, {label:'Amount & Purpose', ph:'How much and what for', type:'textarea', rows:4, required:true}, {label:'Repayment Ability', ph:'Why you can repay'}],
+        ph:'e.g. Requesting $20,000 business loan from our bank to purchase equipment, business has been operating 2 years / Requesting a personal loan of $5,000 from my employer / Applying for a microfinance loan to expand my trading business',
         tpl:`Act as a professional financial writer and credit specialist. Write a formal LOAN REQUEST LETTER for: "{INPUT}".
 
 ---
@@ -6129,9 +6279,66 @@ function updateProfileSideBtn(){
 }
 
 /* ─── Download as Professional Document ─── */
-function buildCleanDoc(html){
-  // Build a clean, brandless, print-ready HTML document
+/* ─── Document type detection for cover pages ─── */
+function detectDocType(html){
+  const t = (html||'').toLowerCase();
+  if(/\b(curriculum vitae|résumé|resume)\b/.test(t)) return 'cv';
+  if(/\bcover letter\b/.test(t)) return 'cover-letter';
+  if(/\bbusiness plan\b/.test(t)) return 'business-plan';
+  if(/\b(proposal|project proposal)\b/.test(t)) return 'proposal';
+  if(/\b(report|executive summary)\b/.test(t)) return 'report';
+  if(/\b(contract|agreement|memorandum of understanding|mou)\b/.test(t)) return 'contract';
+  if(/\b(invoice|quotation|purchase order)\b/.test(t)) return 'invoice';
+  if(/\b(reference letter|recommendation letter)\b/.test(t)) return 'reference';
+  return 'general';
+}
+
+function buildCleanDoc(html, opts){
+  opts = opts || {};
   const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const docType = opts.docType || detectDocType(html);
+  const noCover = ['cv','cover-letter'].includes(docType); // CVs/letters don't get cover pages — they ARE the header
+  const p = noriaProfile || {};
+  const userName2 = p.name || '';
+
+  /* ── Cover page HTML — ONLY for substantial formal documents.
+     'general' replies (casual answers) get NO cover page so a simple
+     conversational response never gets a misleading title page. ── */
+  const coverTypes = ['business-plan','proposal','report','contract','reference'];
+  // Structural guard: only a long, section-structured document earns a cover page.
+  const headingCount = (html.match(/<h[123][^>]*>/gi) || []).length;
+  const isSubstantial = html.length > 1400 && headingCount >= 2;
+  let coverHtml = '';
+  if(!noCover && coverTypes.includes(docType) && isSubstantial){
+    // Extract document title from first h1/h2 in content or fallback
+    const titleMatch = html.match(/<h[12][^>]*>([\s\S]*?)<\/h[12]>/i);
+    const rawTitle = titleMatch ? titleMatch[1].replace(/<[^>]+>/g,'').trim() : 'Document';
+    const subtitleMap = {
+      'business-plan':'Business Plan',
+      'proposal':'Project Proposal',
+      'report':'Report',
+      'contract':'Agreement & Contract',
+      'reference':'Reference Letter',
+      'general':'Professional Document',
+    };
+    const typeLabel = subtitleMap[docType] || 'Professional Document';
+    coverHtml = `
+<div class="cover-page">
+  <div class="cover-stripe"></div>
+  <div class="cover-body">
+    <div class="cover-label">${typeLabel.toUpperCase()}</div>
+    <h1 class="cover-title">${esc2(rawTitle)}</h1>
+    <div class="cover-rule"></div>
+    <div class="cover-meta">
+      ${userName2 ? `<div class="cover-meta-row"><span class="cover-meta-key">Prepared by</span><span class="cover-meta-val">${esc2(userName2)}</span></div>` : ''}
+      <div class="cover-meta-row"><span class="cover-meta-key">Date</span><span class="cover-meta-val">${dateStr}</span></div>
+    </div>
+  </div>
+  <div class="cover-footer-bar"></div>
+</div>
+<div class="page-break"></div>`;
+  }
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6139,73 +6346,342 @@ function buildCleanDoc(html){
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Document</title>
 <style>
-  @page{margin:2.5cm 2.8cm}
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+  @page{margin:0;size:A4}
+  @page:not(:first){margin:2.8cm 3cm 3.2cm;}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Arial',Helvetica,sans-serif;color:#111;max-width:820px;margin:0 auto;padding:48px 44px 60px;line-height:1.7;font-size:13.5px;background:#fff}
-  h1{font-size:1.55em;font-weight:700;margin:0 0 6px;letter-spacing:.01em;border-bottom:2px solid #111;padding-bottom:10px}
-  h2{font-size:1.15em;font-weight:700;margin:26px 0 8px;border-bottom:1.5px solid #ddd;padding-bottom:5px;text-transform:uppercase;letter-spacing:.06em;color:#222}
-  h3{font-size:1.02em;font-weight:700;margin:18px 0 6px;color:#222}
-  h4{font-size:.93em;font-weight:700;margin:14px 0 5px;text-transform:uppercase;letter-spacing:.05em;color:#444}
-  p{margin:0 0 10px}
-  ul,ol{padding-left:22px;margin:0 0 12px}
-  li{margin-bottom:5px}
-  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
-  th{background:#f0f0f0;font-weight:700;border:1px solid #ccc;padding:8px 12px;text-align:left}
-  td{border:1px solid #ccc;padding:8px 12px;vertical-align:top}
-  tr:nth-child(even) td{background:#fafafa}
-  blockquote{border-left:3px solid #555;padding-left:16px;color:#444;margin:14px 0;font-style:italic}
-  strong{font-weight:700}
+
+  /* ── Cover page ── */
+  .cover-page{
+    width:210mm;min-height:297mm;
+    background:#0d1b3e;
+    display:flex;flex-direction:column;
+    position:relative;
+    page-break-after:always;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .cover-stripe{
+    width:100%;height:7px;
+    background:linear-gradient(90deg,#c9972a 0%,#e8b84b 40%,#4a7fd4 100%);
+    flex-shrink:0;
+  }
+  .cover-body{
+    flex:1;display:flex;flex-direction:column;
+    justify-content:center;
+    padding:60mm 52px 40px;
+  }
+  .cover-label{
+    font-family:'Inter',sans-serif;
+    font-size:9px;font-weight:700;letter-spacing:.22em;
+    color:rgba(255,255,255,.45);margin-bottom:20px;
+  }
+  .cover-title{
+    font-family:'EB Garamond','Georgia',serif;
+    font-size:38px;font-weight:700;line-height:1.15;
+    color:#fff;max-width:520px;margin-bottom:22px;
+  }
+  .cover-rule{width:56px;height:3px;background:#c9972a;margin-bottom:32px;}
+  .cover-meta{display:flex;flex-direction:column;gap:10px;}
+  .cover-meta-row{display:flex;align-items:baseline;gap:16px;}
+  .cover-meta-key{
+    font-family:'Inter',sans-serif;font-size:8.5px;font-weight:700;
+    letter-spacing:.15em;text-transform:uppercase;
+    color:rgba(255,255,255,.4);width:90px;flex-shrink:0;
+  }
+  .cover-meta-val{
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:400;
+    color:rgba(255,255,255,.85);
+  }
+  .cover-footer-bar{
+    height:4px;
+    background:rgba(255,255,255,.08);
+    flex-shrink:0;
+  }
+  .page-break{page-break-after:always;height:0;display:block;}
+
+  /* ── Body / main content ── */
+  body{
+    font-family:'Inter','Helvetica Neue',Arial,sans-serif;
+    color:#1a1a1a;background:#fff;
+    max-width:790px;margin:0 auto;
+    padding:52px 52px 80px;
+    line-height:1.8;font-size:13.5px;font-weight:400;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    counter-reset:page;
+  }
+
+  /* ── Running page footer with page numbers (screen only; print via @page) ── */
+  @media screen{
+    body::after{
+      content:'';display:block;height:40px;
+    }
+  }
+
+  /* ── Headings ── */
+  h1{
+    font-family:'EB Garamond','Georgia',serif;
+    font-size:2em;font-weight:700;
+    color:#0d1b3e;letter-spacing:.015em;
+    margin:0 0 8px;line-height:1.2;
+  }
+  h2{
+    font-size:.72em;font-weight:700;
+    color:#0d1b3e;
+    text-transform:uppercase;letter-spacing:.13em;
+    margin:36px 0 12px;
+    padding-bottom:8px;
+    border-bottom:2.5px solid #0d1b3e;
+    page-break-after:avoid;
+  }
+  h3{
+    font-size:.99em;font-weight:600;
+    color:#0d1b3e;margin:22px 0 6px;
+    page-break-after:avoid;
+  }
+  h4{
+    font-size:.86em;font-weight:600;
+    color:#5a6782;margin:16px 0 5px;
+    text-transform:uppercase;letter-spacing:.07em;
+    page-break-after:avoid;
+  }
+
+  /* ── Body text ── */
+  p{margin:0 0 11px;orphans:3;widows:3}
+  ul,ol{padding-left:22px;margin:5px 0 13px}
+  li{margin-bottom:7px;line-height:1.7}
+  strong{font-weight:600;color:#0d1b3e}
   em{font-style:italic}
-  hr{border:none;border-top:1.5px solid #ddd;margin:20px 0}
-  code{background:#f3f3f3;padding:2px 5px;border-radius:3px;font-family:monospace;font-size:12px}
-  pre{background:#f3f3f3;padding:14px;border-radius:5px;overflow-x:auto;margin:0 0 12px;font-size:12px}
-  .cv-header{border-bottom:2px solid #111;padding-bottom:14px;margin-bottom:24px}
-  .cv-name{font-size:2em;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
-  .cv-sub{font-size:1em;color:#444;margin-bottom:8px}
-  .cv-contact{font-size:12px;color:#555;display:flex;flex-wrap:wrap;gap:0 20px}
+  a{color:#2a5db0;text-decoration:underline}
+
+  /* ── Dividers ── */
+  hr{border:none;border-top:1px solid #e0e5ef;margin:26px 0}
+
+  /* ── Section divider accent ── */
+  .divider{
+    display:flex;align-items:center;gap:12px;
+    margin:32px 0 18px;
+  }
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:#dde2ec}
+  .divider-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:#0d1b3e;flex-shrink:0;
+  }
+
+  /* ── Tables ── */
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12.5px;page-break-inside:auto}
+  thead tr{page-break-inside:avoid;page-break-after:avoid}
+  th{
+    background:#0d1b3e;color:#fff;
+    font-weight:700;font-size:.68em;text-transform:uppercase;letter-spacing:.08em;
+    padding:10px 14px;text-align:left;border:none;
+  }
+  td{padding:9px 14px;border-bottom:1px solid #eaecf4;vertical-align:top}
+  tr:nth-child(even) td{background:#f5f7fb}
+  tr:last-child td{border-bottom:2px solid #0d1b3e}
+
+  /* ── Blockquote ── */
+  blockquote{
+    border-left:3.5px solid #0d1b3e;
+    padding:10px 0 10px 20px;
+    color:#444;margin:16px 0;
+    font-style:italic;font-size:.96em;
+    background:#f8f9fc;
+  }
+
+  /* ── Highlight box ── */
+  .highlight-box{
+    background:#f0f4fc;border-left:4px solid #2a5db0;
+    padding:14px 18px;margin:18px 0;border-radius:0 4px 4px 0;
+  }
+
+  /* ── Code ── */
+  code{background:#f2f4f8;padding:2px 7px;border-radius:3px;font-family:'Courier New',monospace;font-size:11.5px;color:#333}
+  pre{background:#f2f4f8;padding:16px 18px;border-radius:5px;overflow-x:auto;margin:0 0 14px;font-size:11px;line-height:1.65}
+
+  /* ── CV / Résumé ── */
+  .doc-name{
+    font-family:'EB Garamond','Georgia',serif;
+    font-size:2.3em;font-weight:700;
+    color:#0d1b3e;letter-spacing:.02em;
+    margin-bottom:4px;line-height:1.1;
+  }
+  .doc-title{font-size:.97em;color:#5a6782;margin-bottom:8px;font-weight:400;letter-spacing:.02em}
+  .doc-contact{
+    font-size:.79em;color:#444;
+    display:flex;flex-wrap:wrap;gap:3px 20px;
+    margin-top:10px;padding-top:12px;
+    border-top:1.5px solid #dde2ec;
+  }
+  .doc-contact span{white-space:nowrap;display:flex;align-items:center;gap:4px}
+  .doc-header{margin-bottom:32px;padding-bottom:4px}
+
+  /* ── Letter ── */
+  .letter-sender{text-align:right;margin-bottom:26px;font-size:.88em;color:#333;line-height:1.7}
+  .letter-recipient{margin-bottom:22px;font-size:.88em;color:#333;line-height:1.7}
+  .letter-subject{
+    font-weight:700;font-size:.9em;margin-bottom:20px;
+    text-transform:uppercase;letter-spacing:.06em;
+    color:#0d1b3e;padding-bottom:6px;border-bottom:2px solid #0d1b3e;
+  }
+  .letter-sign{margin-top:36px;font-size:.9em}
+
+  /* ── Signature block ── */
+  .sig-block{
+    margin-top:48px;padding-top:20px;
+    border-top:1px solid #dde2ec;
+    display:grid;grid-template-columns:1fr 1fr;gap:40px;
+  }
+  .sig-party{display:flex;flex-direction:column;gap:4px}
+  .sig-name{font-weight:700;font-size:.88em;color:#0d1b3e;margin-top:2px}
+  .sig-role{font-size:.78em;color:#777}
+  .sig-line{
+    width:200px;height:1px;border-bottom:1.5px solid #aab0c2;
+    margin:36px 0 8px;
+  }
+  .sig-date-label{font-size:.72em;color:#999;text-transform:uppercase;letter-spacing:.08em}
+
+  /* ── Section label accent ── */
+  .section-label{
+    display:block;font-size:.67em;font-weight:700;
+    text-transform:uppercase;letter-spacing:.16em;
+    color:#5a6782;margin-bottom:4px;
+  }
+
+  /* ── Page footer (screen) ── */
+  .doc-footer{
+    margin-top:60px;padding-top:14px;
+    border-top:1px solid #e0e5ef;
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:.7em;color:#aaa;letter-spacing:.03em;
+  }
+
+  /* ── Print ── */
   @media print{
-    body{padding:0;font-size:12.5px}
+    html,body{width:210mm}
+    body{padding:0;max-width:none;font-size:12px}
+    .cover-page{width:210mm;min-height:297mm}
     h2{page-break-after:avoid}
-    h3{page-break-after:avoid}
-    tr{page-break-inside:avoid}
+    h3,h4{page-break-after:avoid}
+    tr,li{page-break-inside:avoid}
+    .no-print{display:none!important}
+    a{color:inherit;text-decoration:none}
+    .doc-footer{position:running(footer)}
+    @page:not(:first){
+      margin:2.8cm 3cm 3.2cm;
+      @bottom-center{
+        content:counter(page);
+        font-family:'Inter',sans-serif;
+        font-size:9px;color:#aaa;
+      }
+    }
   }
 </style>
 </head>
 <body>
+${coverHtml}
 ${html}
+<div class="doc-footer no-print">
+  <span>${dateStr}</span>
+  <span>CONFIDENTIAL</span>
+</div>
 </body>
 </html>`;
 }
 
-function downloadDoc(btn){
+/* small escape for cover page text (no DOMPurify in that context) */
+function esc2(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function _getDocHtmlAndName(btn){
   const contentEl = btn.closest('.msg-body').querySelector('.content');
   const html = contentEl.innerHTML;
-  const doc = buildCleanDoc(html);
-  const p = noriaProfile;
-  const name = (p.name || userName || 'Document').replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'-');
+  const p = noriaProfile || {};
+  const safeName = (p.name || userName || 'Document').replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'-');
+  const slug = safeName + '-' + new Date().toISOString().slice(0,10);
+  const docType = detectDocType(html);
+  return {html, slug, docType};
+}
+
+function downloadDoc(btn){
+  const {html, slug, docType} = _getDocHtmlAndName(btn);
+  const doc = buildCleanDoc(html, {docType});
   const blob = new Blob([doc], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `${name}-${new Date().toISOString().slice(0,10)}.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = slug + '.html';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
   const orig = btn.innerHTML;
   btn.innerHTML = '✓ Downloaded';
   setTimeout(()=>{ btn.innerHTML = orig; }, 2000);
 }
 
+function exportPDF(btn){
+  const {html, slug, docType} = _getDocHtmlAndName(btn);
+  const doc = buildCleanDoc(html, {docType});
+  const orig = btn.innerHTML;
+  btn.innerHTML = '⏳ Generating…';
+  btn.disabled = true;
+
+  /* Load html2pdf on first use */
+  function _doPDF(){
+    // Render the full standalone document inside an isolated, off-screen iframe
+    // so the document's own <style> (including body{} rules) applies cleanly and
+    // nothing is inherited from the app's dark theme.
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;height:1123px;border:0;background:#fff';
+    document.body.appendChild(iframe);
+
+    const cleanup = ()=>{ if(iframe.parentNode) document.body.removeChild(iframe); };
+    const fail = ()=>{ cleanup(); btn.innerHTML='PDF Error'; btn.disabled=false; setTimeout(()=>{btn.innerHTML=orig;},2000); };
+
+    const idoc = iframe.contentDocument || iframe.contentWindow.document;
+    idoc.open();
+    idoc.write(doc);
+    idoc.close();
+
+    // Wait for fonts + layout to settle, then render the iframe body.
+    const run = ()=>{
+      try{
+        const opt = {
+          margin:0,
+          filename: slug + '.pdf',
+          image:{type:'jpeg',quality:.98},
+          html2canvas:{scale:2,useCORS:true,letterRendering:true,backgroundColor:'#ffffff',windowWidth:794},
+          jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+          pagebreak:{mode:['css','legacy']},
+        };
+        window.html2pdf().set(opt).from(idoc.body).save().then(()=>{
+          cleanup();
+          btn.innerHTML = '✓ PDF Saved';
+          btn.disabled = false;
+          setTimeout(()=>{ btn.innerHTML = orig; }, 2500);
+        }).catch(fail);
+      }catch(e){ fail(); }
+    };
+
+    const fontsReady = (idoc.fonts && idoc.fonts.ready) ? idoc.fonts.ready : Promise.resolve();
+    fontsReady.then(()=> setTimeout(run, 400)).catch(()=> setTimeout(run, 600));
+  }
+
+  if(window.html2pdf){
+    _doPDF();
+  } else {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    s.onload = _doPDF;
+    s.onerror = ()=>{ btn.innerHTML='PDF unavailable'; btn.disabled=false; setTimeout(()=>btn.innerHTML=orig,2000); };
+    document.head.appendChild(s);
+  }
+}
+
 function printDoc(btn){
-  const contentEl = btn.closest('.msg-body').querySelector('.content');
-  const html = contentEl.innerHTML;
-  const doc = buildCleanDoc(html);
+  const {html, docType} = _getDocHtmlAndName(btn);
+  const doc = buildCleanDoc(html, {docType});
   const win = window.open('','_blank','width=900,height=700');
   win.document.write(doc);
   win.document.close();
   win.focus();
-  setTimeout(()=>{ win.print(); }, 400);
+  setTimeout(()=>{ win.print(); }, 500);
   const orig = btn.innerHTML;
   btn.innerHTML = '✓ Printing…';
   setTimeout(()=>{ btn.innerHTML = orig; }, 2000);
@@ -6392,9 +6868,35 @@ function openActionModal(action, titleOrMi, ai){
   // others (e.g. Legacy) generate directly from profile — input is optional.
   const tmpl = action.tpl || action.prompt || '';
   const needsInput = tmpl.includes('{INPUT}');
+  const fieldsBox = document.getElementById('actionModalFields');
+  const inp = document.getElementById('actionModalInput');
+
+  // ── Structured form mode: template provides labelled fields ──
+  if(action.fields && action.fields.length){
+    document.getElementById('actionModalAsk').textContent = action.ask || 'Fill in the details below';
+    inp.style.display = 'none';
+    inp.value = '';
+    fieldsBox.style.display = 'flex';
+    fieldsBox.innerHTML = action.fields.map((f,i)=>{
+      const id = 'af_'+i;
+      const opt = f.required ? '' : ' <span class="af-opt">(optional)</span>';
+      const ph = (f.ph||'').replace(/"/g,'&quot;');
+      const control = f.type === 'textarea'
+        ? `<textarea class="af-textarea" id="${id}" placeholder="${ph}" rows="${f.rows||3}"></textarea>`
+        : `<input class="af-input" id="${id}" type="${f.type||'text'}" placeholder="${ph}"/>`;
+      return `<div class="af-field"><label class="af-label" for="${id}">${esc(f.label)}${opt}</label>${control}</div>`;
+    }).join('');
+    document.getElementById('actionModal').classList.add('show');
+    setTimeout(()=>{ const first = fieldsBox.querySelector('.af-input,.af-textarea'); if(first) first.focus(); }, 60);
+    return;
+  }
+
+  // ── Free-text mode (default) ──
+  fieldsBox.style.display = 'none';
+  fieldsBox.innerHTML = '';
+  inp.style.display = 'block';
   document.getElementById('actionModalAsk').textContent =
     action.ask || (needsInput ? 'What would you like?' : 'Add any specific details to personalise this (optional — leave blank to use your profile):');
-  const inp = document.getElementById('actionModalInput');
   inp.value = '';
   inp.placeholder = action.ph || (needsInput ? 'Type here…' : 'Optional — names, dates, or specifics…');
   document.getElementById('actionModal').classList.add('show');
@@ -6409,10 +6911,26 @@ function submitActionModal(){
   const {action} = pendingAction;
   const tmpl = action.tpl || action.prompt || '';
   const needsInput = tmpl.includes('{INPUT}');
-  const val = document.getElementById('actionModalInput').value.trim();
+  let val;
 
-  // Templates with {INPUT} require an answer; profile-driven templates (Legacy) don't.
-  if(needsInput && !val){ document.getElementById('actionModalInput').focus(); return; }
+  // ── Structured form mode: gather labelled fields into one clean block ──
+  if(action.fields && action.fields.length){
+    const parts = [];
+    let firstMissing = null;
+    action.fields.forEach((f,i)=>{
+      const el = document.getElementById('af_'+i);
+      const v = (el.value||'').trim();
+      el.classList.remove('af-error');
+      if(f.required && !v){ if(!firstMissing) firstMissing = el; el.classList.add('af-error'); }
+      if(v) parts.push(`${f.label}: ${v}`);
+    });
+    if(firstMissing){ firstMissing.focus(); return; }
+    val = parts.join('\n');
+  } else {
+    val = document.getElementById('actionModalInput').value.trim();
+    // Templates with {INPUT} require an answer; profile-driven templates (Legacy) don't.
+    if(needsInput && !val){ document.getElementById('actionModalInput').focus(); return; }
+  }
 
   // Save-a-memory: store on device + confirm instantly
   if(action.special === 'savePref'){
@@ -6438,7 +6956,13 @@ function submitActionModal(){
   closeActionModal();
   // Show a clean label in the chat; send the engineered prompt to Noria.
   const askLabel = (action.ask || action.label || 'Request').replace(/\?$/,'');
-  const display = val ? `${askLabel}: ${val}` : (action.label || askLabel);
+  let display;
+  if(action.fields && action.fields.length){
+    // Multi-field forms: show a tidy single-line summary, not the raw block
+    display = `${action.label || askLabel}`;
+  } else {
+    display = val ? `${askLabel}: ${val}` : (action.label || askLabel);
+  }
   send(fullPrompt, display);
 }
 
@@ -6706,7 +7230,8 @@ function renderMsg(role, content, animate=true){
       <div class="content">${html}</div>
       ${isAI?`<div class="msg-acts">
         <button class="act" onclick="copyMsg(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
-        <button class="act" onclick="downloadDoc(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</button>
+        <button class="act act-pdf" onclick="exportPDF(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15v-4m0 4h1.5a1.5 1.5 0 0 0 0-3H9"/><path d="M13 15v-4h1a2 2 0 0 1 0 4h-1"/><path d="M17 11v4m-1-2h2"/></svg> PDF</button>
+        <button class="act" onclick="downloadDoc(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> HTML</button>
         <button class="act" onclick="printDoc(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>
         <button class="act" onclick="refineMsg(this,'longer')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Lengthen</button>
         <button class="act" onclick="refineMsg(this,'shorter')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg> Shorten</button>
@@ -6794,9 +7319,31 @@ function pickVoice(){
          voices[0] || null;
 }
 
+// Split text into sentence-level chunks to avoid Chrome/Safari 15-second TTS cutoff.
+// Each chunk is spoken as its own utterance in a queue — seamless to the listener.
+function splitTTSChunks(text){
+  // Split at sentence-ending punctuation, keeping the punctuation with its sentence
+  const raw = text.match(/[^.!?…]+[.!?…]+(?:\s|$)|[^.!?…]+$/g) || [text];
+  const chunks = [];
+  let buf = '';
+  for(const s of raw){
+    if((buf + s).length > 220 && buf){
+      chunks.push(buf.trim());
+      buf = s;
+    } else {
+      buf += s;
+    }
+  }
+  if(buf.trim()) chunks.push(buf.trim());
+  return chunks.filter(Boolean);
+}
+
+let ttsKeepAlive = null;
+
 function readAloud(btn){
   if(!('speechSynthesis' in window)) return;
   if(speaking){
+    clearInterval(ttsKeepAlive);
     speechSynthesis.cancel();
     speaking = false;
     btn.innerHTML = SPEAKER_ICON;
@@ -6806,20 +7353,46 @@ function readAloud(btn){
   const text = cleanForSpeech(rawHtml);
   if(!text) return;
 
-  const u = new SpeechSynthesisUtterance(text);
-  // Eloquent, measured speech — like a BBC presenter or academic
-  const voice = pickVoice();
-  if(voice) u.voice = voice;
-  u.rate  = 0.92;   // slightly slower than default — deliberate, authoritative
-  u.pitch = 1.05;   // slightly warm
-  u.volume = 1;
+  const chunks = splitTTSChunks(text);
+  let idx = 0;
 
-  u.onend = ()=>{ speaking=false; btn.innerHTML = SPEAKER_ICON; };
-  u.onerror = ()=>{ speaking=false; btn.innerHTML = SPEAKER_ICON; };
+  function speakNext(){
+    if(!speaking || idx >= chunks.length){
+      clearInterval(ttsKeepAlive);
+      speaking = false;
+      btn.innerHTML = SPEAKER_ICON;
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(chunks[idx++]);
+    const voice = pickVoice();
+    if(voice) u.voice = voice;
+    u.rate   = 0.92;
+    u.pitch  = 1.05;
+    u.volume = 1;
+    u.onend  = speakNext;
+    u.onerror = (e) => {
+      // 'interrupted' fires when user stops — not an error, just exit cleanly
+      if(e.error === 'interrupted') return;
+      clearInterval(ttsKeepAlive);
+      speaking = false;
+      btn.innerHTML = SPEAKER_ICON;
+    };
+    speechSynthesis.speak(u);
+  }
 
   speaking = true;
   btn.innerHTML = STOP_ICON;
-  speechSynthesis.speak(u);
+
+  // Chrome/Safari bug: speechSynthesis silently stops after ~15s.
+  // Keep it alive by pausing/resuming every 10s — inaudible to the user.
+  ttsKeepAlive = setInterval(()=>{
+    if(speaking && speechSynthesis.speaking && !speechSynthesis.paused){
+      speechSynthesis.pause();
+      speechSynthesis.resume();
+    }
+  }, 10000);
+
+  speakNext();
 }
 
 // Ensure voices load before first use (some browsers need this)
@@ -6937,6 +7510,20 @@ async function send(engineeredPrompt, displayOverride){
   const typingEl = showTyping();
   const history = chats[activeId].messages.slice(0,-1).slice(-14).map(m=>({role:m.role, content:m.content}));
 
+  // Detect when the user is requesting a document so we can boost the system prompt
+  function isDocumentRequest(text){
+    const t = text.toLowerCase();
+    const docKeywords = [
+      /\b(write|create|generate|produce|draft|make|prepare|build)\b.{0,40}\b(cv|résumé|resume|cover letter|letter|report|proposal|business plan|contract|agreement|essay|application|reference|recommendation|invitation|memo|memorandum|email|certificate|policy|plan|brief|pitch deck|press release|statement|biography|bio)\b/i,
+      /\b(cv|résumé|resume)\b.{0,30}\b(for|of|me|my|his|her|our)\b/i,
+      /\bcover letter\b/i,
+      /\bbusiness plan\b/i,
+      /\b(write|draft|prepare).{0,20}\b(letter|report|proposal|document|doc)\b/i,
+      /\bi need a\b.{0,30}\b(letter|cv|resume|report|proposal|plan|document)\b/i,
+    ];
+    return docKeywords.some(p => p.test(t));
+  }
+
   function isFallbackResponse(text){
     if(!text) return true;
     const t = text.trim();
@@ -6957,6 +7544,13 @@ async function send(engineeredPrompt, displayOverride){
   async function callEngine(query, hist, unlockMode){
     const ctrl = new AbortController();
     const to = setTimeout(()=>ctrl.abort(), 80000);
+
+    // Document-mode boost: when the user is requesting a document, add a hard
+    // directive so the model generates the complete document immediately.
+    const docBoost = isDocumentRequest(query)
+      ? '\n\nDOCUMENT MODE ACTIVE: The user has requested a document. Generate the COMPLETE, FINISHED, PRINT-READY document right now in this response. Do NOT ask questions. Do NOT discuss. Do NOT offer a draft. Produce the full document from the very first word — formatted, structured, professional, and ready to download or print. Every section must be filled in with real content. No placeholder brackets.'
+      : '';
+
     // On unlock retries: append a direct override to the system and prime the
     // model by injecting a partial assistant turn so it cannot output a refusal.
     const sysExtra = unlockMode
@@ -6968,7 +7562,7 @@ async function send(engineeredPrompt, displayOverride){
     const res = await fetch(ENGINE, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query, history:histForEngine, system:SYSTEM_PROMPT + memoryPromptBlock() + sysExtra}),
+      body:JSON.stringify({query, history:histForEngine, system:SYSTEM_PROMPT + memoryPromptBlock() + docBoost + sysExtra}),
       signal:ctrl.signal
     });
     clearTimeout(to);
@@ -6980,17 +7574,25 @@ async function send(engineeredPrompt, displayOverride){
     // First attempt — normal call
     let answer = await callEngine(q, history, false);
     if(isFallbackResponse(answer)){
-      // Retries with unlock mode: changed system + primed history break the refusal loop
-      const delays = [1800, 3500, 6000];
+      // Backend is cold-starting (Render.com takes ~30s). Retry with unlock mode
+      // using delays that cover the full cold-start window. Each retry also changes
+      // the system prompt + primes the assistant turn to break any refusal pattern.
+      const delays = [3000, 7000, 12000, 18000];
       for(let i=0; i<delays.length && isFallbackResponse(answer); i++){
         await new Promise(r => setTimeout(r, delays[i]));
         try{
           const retry = await callEngine(q, history, true);
-          if(retry) answer = retry;
+          if(retry && !isFallbackResponse(retry)) answer = retry;
         } catch(e){ /* keep latest; try next delay */ }
       }
     }
-    if(!answer) answer = 'I encountered an issue. Please try again.';
+    // If STILL a fallback after all retries, never show it — tell user to retry
+    if(!answer || isFallbackResponse(answer)){
+      typingEl.remove();
+      renderMsg('assistant', '⏳ Noria is just waking up — the engine needs a moment. Please resend your message in about 15 seconds.');
+      busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
+      return;
+    }
     typingEl.remove();
     const aiDiv = renderMsg('assistant','');
     revealWords(aiDiv.querySelector('.content'), answer, ()=>{
