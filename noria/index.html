@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#060B1E"/>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='b' cx='40%25' cy='35%25' r='75%25'%3E%3Cstop offset='0' stop-color='%23c8e2ff'/%3E%3Cstop offset='1' stop-color='%237aaee0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='%230A1128'/%3E%3Ccircle cx='50' cy='50' r='36' fill='url(%23b)' opacity='.9' stroke='%231a56a0' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='27' fill='none' stroke='%23C9A84C' stroke-width='2'/%3E%3Cpolygon points='50,10 53,44 50,56 47,44' fill='%231a56a0'/%3E%3Cpolygon points='50,90 53,56 50,44 47,56' fill='%231a56a0' opacity='.6'/%3E%3Cpolygon points='90,50 56,53 44,50 56,47' fill='%231a56a0' opacity='.7'/%3E%3Cpolygon points='10,50 44,53 56,50 44,47' fill='%231a56a0' opacity='.7'/%3E%3Cpolygon points='50,43 56,50 50,57 44,50' fill='%23C9A84C'/%3E%3Ctext x='50' y='57' text-anchor='middle' font-family='Georgia,serif' font-size='30' font-weight='700' fill='%231a56a0'%3EN%3C/text%3E%3C/svg%3E"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0.72' y1='0.12' x2='0.28' y2='0.88'%3E%3Cstop offset='0' stop-color='%23FDBE2D'/%3E%3Cstop offset='0.34' stop-color='%23F77F1B'/%3E%3Cstop offset='0.62' stop-color='%232E7FD4'/%3E%3Cstop offset='1' stop-color='%231B57C8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 2 C53 38 62 47 98 50 C62 53 53 62 50 98 C47 62 38 53 2 50 C38 47 47 38 50 2 Z' fill='url(%23g)'/%3E%3C/svg%3E"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet"/>
@@ -240,7 +240,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .msg:last-child{border-bottom:none}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .av{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:grid;place-items:center;font-weight:700;font-size:.78rem}
-.av.ai{background:linear-gradient(135deg,#7ab4f5,var(--blue));color:#fff}
+.av.ai{background:transparent;color:#fff;padding:1px}
+.av.ai svg{width:100%;height:100%;display:block}
 .av.user{background:var(--bg-hover);color:var(--text-soft);border:1px solid var(--border)}
 .msg-body{flex:1;min-width:0;padding-top:2px}
 .msg-name{font-weight:600;font-size:.78rem;color:var(--text);margin-bottom:7px;display:flex;align-items:center;gap:7px}
@@ -540,42 +541,31 @@ textarea::placeholder{color:var(--text-dim)}
 <!-- SVG defs — refined compass logo -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <radialGradient id="bgCompass" cx="38%" cy="32%" r="72%">
-      <stop offset="0%" stop-color="#d8eeff"/>
-      <stop offset="55%" stop-color="#a0c8f0"/>
-      <stop offset="100%" stop-color="#6a9ed8"/>
-    </radialGradient>
-    <linearGradient id="blueSpike" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#80c4f8"/>
-      <stop offset="100%" stop-color="#1048a0"/>
+    <!-- NORIA brand gradient — gold/orange (top-right) to blue (bottom-left) -->
+    <linearGradient id="noriaGrad" x1="0.72" y1="0.12" x2="0.28" y2="0.88">
+      <stop offset="0%" stop-color="#FDBE2D"/>
+      <stop offset="34%" stop-color="#F77F1B"/>
+      <stop offset="62%" stop-color="#2E7FD4"/>
+      <stop offset="100%" stop-color="#1B57C8"/>
     </linearGradient>
-    <linearGradient id="goldRing" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#F5D060"/>
-      <stop offset="100%" stop-color="#C07818"/>
+    <linearGradient id="noriaGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD968"/>
+      <stop offset="100%" stop-color="#F39A1B"/>
     </linearGradient>
+
+    <!-- Large compass-star (logo 2/3) — login, header, welcome -->
     <symbol id="noriaMark" viewBox="0 0 100 100">
-      <!-- outer blue ring -->
-      <circle cx="50" cy="50" r="46" fill="#0A1128"/>
-      <!-- inner globe -->
-      <circle cx="50" cy="50" r="37" fill="url(#bgCompass)" stroke="#1a56a0" stroke-width="1.8"/>
-      <!-- gold ring -->
-      <circle cx="50" cy="50" r="27" fill="none" stroke="url(#goldRing)" stroke-width="2.4"/>
-      <!-- N spike (north, long) -->
-      <polygon points="50,9 53.5,43 50,55 46.5,43" fill="url(#blueSpike)"/>
-      <!-- S spike -->
-      <polygon points="50,91 53.5,57 50,45 46.5,57" fill="url(#blueSpike)" opacity=".6"/>
-      <!-- E spike -->
-      <polygon points="91,50 57,53.5 45,50 57,46.5" fill="url(#blueSpike)" opacity=".72"/>
-      <!-- W spike -->
-      <polygon points="9,50 43,53.5 55,50 43,46.5" fill="url(#blueSpike)" opacity=".72"/>
-      <!-- gold centre diamond -->
-      <polygon points="50,41 57,50 50,59 43,50" fill="url(#goldRing)"/>
-      <!-- serif N -->
-      <text x="50" y="57" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="29" font-weight="700" fill="#1a56a0">N</text>
-      <!-- 8-point star (north accent) -->
-      <g transform="translate(50,13)"><polygon points="0,-5 1.3,-1.3 5,0 1.3,1.3 0,5 -1.3,1.3 -5,0 -1.3,-1.3" fill="#1a56a0"/></g>
-      <!-- small gold star accent -->
-      <g transform="translate(63,44)"><polygon points="0,-3.2 .75,-.75 3.2,0 .75,.75 0,3.2 -.75,.75 -3.2,0 -.75,-.75" fill="#E8C97A"/></g>
+      <!-- compass ring -->
+      <circle cx="50" cy="50" r="31" fill="none" stroke="url(#noriaGrad)" stroke-width="2.3" opacity="0.92"/>
+      <!-- four-pointed star with sharp concave points -->
+      <path d="M50 2 C53 38 62 47 98 50 C62 53 53 62 50 98 C47 62 38 53 2 50 C38 47 47 38 50 2 Z" fill="url(#noriaGrad)"/>
+      <!-- glowing centre star -->
+      <path d="M50 36 C51.2 47 53 48.8 64 50 C53 51.2 51.2 53 50 64 C48.8 53 47 51.2 36 50 C47 48.8 48.8 47 50 36 Z" fill="url(#noriaGold)"/>
+    </symbol>
+
+    <!-- Simple star (logo 1) — chat avatar, small UI, favicon -->
+    <symbol id="noriaStar" viewBox="0 0 100 100">
+      <path d="M50 2 C53 38 62 47 98 50 C62 53 53 62 50 98 C47 62 38 53 2 50 C38 47 47 38 50 2 Z" fill="url(#noriaGrad)"/>
     </symbol>
 
     <!-- ── Premium project line-icons (24×24) ── -->
@@ -1057,11 +1047,31 @@ Within the five grand domains, Noria holds deep mastery across all 40 core areas
 ══════════════════════════════════════════
 STRUCTURED OUTPUT & DOCUMENT INTELLIGENCE
 ══════════════════════════════════════════
-When producing any document, report, plan, proposal, letter, or formal deliverable:
+When producing any document, report, plan, proposal, CV, letter, or formal deliverable:
+
+DOCUMENT QUALITY STANDARDS:
 - Generate clean, professional, sector-appropriate structure — logical headings, well-ordered sections, tables where they add genuine value
 - Match the conventions of the relevant industry, institution, or jurisdiction so every deliverable is ready for real-world use
 - Use the user's real profile details (name, title, organisation, date, contact) directly and accurately — never leave a placeholder where real information was provided
 - Every document Noria produces should feel as if it was prepared by the finest professional in that field
+- Documents must be submission-ready and print-ready — clean, structured, and professional from the first word to the last
+
+ABSOLUTE RULE — NO AI BRANDING ON DOCUMENTS:
+Never include the words "NORIA", "SkyGlobe", "SkyGlobe Intelligence", "Generated by", "AI assistant", or any reference to an AI tool anywhere inside a generated document. The document belongs to the user — it must appear entirely as their own work. This applies to: CVs, cover letters, business plans, proposals, letters, legal documents, reports, essays, and every other document type. The only place Noria's identity is expressed is in the chat interface — never inside the document itself.
+
+CV / RÉSUMÉ — EUROPEAN STANDARD:
+When producing a CV or résumé, always follow the European (Europass) standard:
+- Personal details at the top (name, contact, location — no photo unless specifically requested)
+- Personal Profile: 3–4 sentences, confident and specific
+- Work Experience: most recent first, each entry with role | organisation | location | dates, followed by bullet-point achievements
+- Education: most recent first, degree | institution | location | year
+- Skills: Languages (with levels), Technical Skills, Professional Skills
+- Certifications (if any)
+- References: Available upon request
+Keep it concise (1–2 pages of real content), specific, and quantified where possible. Never pad with generic phrases.
+
+COVER LETTERS:
+Maximum 4 paragraphs. Opening (who you are + role), Value (specific evidence), Alignment (why this organisation), Closing (call to action). Professional sign-off. Never generic — always specific to the role and employer.
 
 ══════════════════════════════════════════
 RELIGIOUS & SPIRITUAL KNOWLEDGE — DEEPEST EXPERTISE
@@ -2581,7 +2591,138 @@ Yours sincerely,
 [Title from profile]
 [Organisation from profile]
 
-Write the complete reference letter now.` },
+Write the complete reference letter now. IMPORTANT: Do not mention NORIA, SkyGlobe, or any AI tool anywhere in the letter. The letter must appear entirely as the writer's own work.` },
+
+      { cat:'CV & Career',
+        label:'CV / Résumé',
+        sub:'European-standard professional CV — clean, submission-ready, no AI branding',
+        ask:'Tell me about the person this CV is for — their name, profession, experience, education, and skills.',
+        ph:'e.g. John Mensah, 5 years as a civil engineer, BSc Civil Engineering, skills in AutoCAD, project management, fluent in English and French / Sarah Boateng, recent graduate in nursing, 2 internships, seeking a hospital position in Germany',
+        tpl:`Produce a complete, professional CURRICULUM VITAE in European (EU/Europass) standard format for: "{INPUT}".
+
+The CV must be ready for immediate submission. Format it exactly as shown below. Do NOT include any mention of NORIA, SkyGlobe, AI tools, or any generation note anywhere in the document. The CV must appear entirely as the individual's own document.
+
+IMPORTANT FORMATTING RULES:
+- Use clean, professional section headings (all capitals, bold)
+- Each work experience entry: Job Title | Organisation | Location | Dates — then bullet points of achievements
+- Education: Degree/Qualification | Institution | Location | Year
+- No emojis. No decorative symbols. No colour references.
+- Keep it to 1–2 pages of content. Quality over quantity.
+- End with "References: Available upon request"
+
+---
+
+[FULL NAME]
+[Professional Title / Field]
+
+[Email Address] | [Phone Number] | [City, Country] | [LinkedIn if provided]
+
+---
+
+PERSONAL PROFILE
+A 3–4 sentence professional summary: who the person is, years of experience, key strengths, and what they bring to a new role. Confident, specific, and tailored to their field.
+
+---
+
+WORK EXPERIENCE
+
+**[Job Title]**
+[Organisation] | [City, Country] | [Month Year] – [Month Year / Present]
+- Specific achievement or responsibility (quantify where possible)
+- Specific achievement or responsibility
+- Specific achievement or responsibility
+
+[Repeat for each position, most recent first]
+
+---
+
+EDUCATION & QUALIFICATIONS
+
+**[Degree / Qualification Title]**
+[Institution Name] | [City, Country] | [Year]
+[Brief note on specialisation or dissertation if relevant]
+
+[Repeat for each qualification, most recent first]
+
+---
+
+SKILLS
+
+**Languages:** [Language — level, e.g. English — Native | French — Professional | Arabic — Conversational]
+**Technical Skills:** [Relevant software, tools, systems]
+**Professional Skills:** [Key professional competencies]
+
+---
+
+CERTIFICATIONS & TRAINING
+[Certification Name] | [Issuing Body] | [Year]
+[Repeat as needed — omit section if none]
+
+---
+
+PROFESSIONAL MEMBERSHIPS
+[Organisation Name] | [Since Year]
+[Omit section if none]
+
+---
+
+References: Available upon request
+
+---
+
+Now write the complete CV using real, specific information from the input. Make every line count. No placeholder brackets should remain in the final output — fill everything in.` },
+
+      { cat:'CV & Career',
+        label:'Cover Letter',
+        sub:'Professional cover letter for any job application — EU standard',
+        ask:'Who is applying, what role are they applying for, and what is the employer/organisation?',
+        ph:'e.g. John Mensah applying for Senior Civil Engineer at Accra Infrastructure Ltd / Sarah Boateng applying for Registered Nurse at Charité Hospital Berlin',
+        tpl:`Write a complete, professional COVER LETTER for: "{INPUT}".
+
+The letter must follow European professional standards: formal, concise, compelling, and submission-ready. Do NOT include any mention of NORIA, SkyGlobe, or any AI tool anywhere. The letter must appear entirely as the applicant's own work.
+
+FORMATTING RULES:
+- Maximum 4 paragraphs — quality, not length
+- No emojis. No decorative symbols.
+- Clear professional header with applicant's details and date
+- Addressed to a specific person where possible, otherwise "Dear Hiring Manager"
+- End with a confident call to action and formal sign-off
+
+---
+
+[Applicant Full Name]
+[Professional Title]
+[Email] | [Phone] | [City, Country]
+[Today's Date]
+
+[Recipient Name / Hiring Manager]
+[Job Title]
+[Organisation Name]
+[Organisation Address / Country]
+
+**RE: APPLICATION FOR [POSITION TITLE]**
+
+Dear [Recipient Name / Hiring Manager],
+
+**PARAGRAPH 1 — OPENING (2–3 sentences):**
+State the exact role applied for and where it was advertised. Give a powerful one-sentence statement of who you are and why you are the right person for this role.
+
+**PARAGRAPH 2 — PROFESSIONAL VALUE (3–4 sentences):**
+Highlight 2–3 specific, concrete examples of experience, achievements, or skills that directly match the role requirements. Quantify where possible. Connect your background directly to what the employer needs.
+
+**PARAGRAPH 3 — ALIGNMENT WITH ORGANISATION (2–3 sentences):**
+Show genuine knowledge of and alignment with the organisation's mission, values, or work. Explain why you specifically want to work there — not just anywhere.
+
+**PARAGRAPH 4 — CLOSING (2–3 sentences):**
+Express enthusiasm. State availability for an interview. Thank them for their consideration.
+
+Yours sincerely,
+
+[Full Name]
+
+---
+
+Write the complete, final cover letter now. Make it polished, professional, and specific to the role and organisation. No placeholder brackets should remain in the final output — fill everything in.` },
 
       { cat:'Meetings',
         label:'Meeting Agenda',
@@ -5986,89 +6127,85 @@ function updateProfileSideBtn(){
 }
 
 /* ─── Download as Professional Document ─── */
-function downloadDoc(btn){
-  const contentEl = btn.closest('.msg-body').querySelector('.content');
-  const html = contentEl.innerHTML;
-  const p = noriaProfile;
-  const name = p.name || userName || '';
-  const org = p.org || 'SkyGlobe Intelligence';
-  const title = p.title || '';
-  const email = p.email || '';
-  const phone = p.phone || '';
-  const location = p.location || '';
+function buildCleanDoc(html){
+  // Build a clean, brandless, print-ready HTML document
   const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-
-  const doc = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NORIA Document — ${esc(org)}</title>
+<title>Document</title>
 <style>
-  @page{margin:2.2cm 2.5cm}
-  *{box-sizing:border-box}
-  body{font-family:Georgia,'Times New Roman',serif;color:#111;max-width:800px;margin:0 auto;padding:48px 40px;line-height:1.75;font-size:14px}
-  .doc-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:20px;border-bottom:2.5px solid #111;margin-bottom:36px}
-  .dh-left{}
-  .dh-brand{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#888;font-family:Arial,sans-serif;margin-bottom:6px}
-  .dh-org{font-size:22px;font-weight:700;font-family:Georgia,serif;margin:0 0 3px}
-  .dh-person{font-size:13px;color:#555}
-  .dh-right{text-align:right;font-size:11px;color:#666;line-height:1.8;font-family:Arial,sans-serif}
-  h1{font-size:1.6em;margin:28px 0 14px;border-bottom:1.5px solid #ddd;padding-bottom:8px}
-  h2{font-size:1.2em;margin:24px 0 10px;border-bottom:1px solid #eee;padding-bottom:5px}
-  h3{font-size:1.05em;margin:20px 0 8px}
-  h4{font-size:.95em;margin:16px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-  p{margin:0 0 12px}
-  ul,ol{padding-left:24px;margin:0 0 14px}
-  li{margin-bottom:6px}
-  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
-  th,td{border:1px solid #ccc;padding:9px 13px;text-align:left}
-  th{background:#f5f5f5;font-weight:700}
+  @page{margin:2.5cm 2.8cm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Arial',Helvetica,sans-serif;color:#111;max-width:820px;margin:0 auto;padding:48px 44px 60px;line-height:1.7;font-size:13.5px;background:#fff}
+  h1{font-size:1.55em;font-weight:700;margin:0 0 6px;letter-spacing:.01em;border-bottom:2px solid #111;padding-bottom:10px}
+  h2{font-size:1.15em;font-weight:700;margin:26px 0 8px;border-bottom:1.5px solid #ddd;padding-bottom:5px;text-transform:uppercase;letter-spacing:.06em;color:#222}
+  h3{font-size:1.02em;font-weight:700;margin:18px 0 6px;color:#222}
+  h4{font-size:.93em;font-weight:700;margin:14px 0 5px;text-transform:uppercase;letter-spacing:.05em;color:#444}
+  p{margin:0 0 10px}
+  ul,ol{padding-left:22px;margin:0 0 12px}
+  li{margin-bottom:5px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  th{background:#f0f0f0;font-weight:700;border:1px solid #ccc;padding:8px 12px;text-align:left}
+  td{border:1px solid #ccc;padding:8px 12px;vertical-align:top}
   tr:nth-child(even) td{background:#fafafa}
-  blockquote{border-left:4px solid #333;padding-left:18px;color:#444;margin:16px 0;font-style:italic}
-  code{background:#f3f3f3;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:12px}
-  pre{background:#f3f3f3;padding:14px;border-radius:6px;overflow-x:auto;margin:0 0 14px}
+  blockquote{border-left:3px solid #555;padding-left:16px;color:#444;margin:14px 0;font-style:italic}
   strong{font-weight:700}
   em{font-style:italic}
-  .doc-footer{margin-top:52px;padding-top:14px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:10px;color:#bbb;font-family:Arial,sans-serif;letter-spacing:.04em}
-  @media print{body{padding:0}button{display:none}}
+  hr{border:none;border-top:1.5px solid #ddd;margin:20px 0}
+  code{background:#f3f3f3;padding:2px 5px;border-radius:3px;font-family:monospace;font-size:12px}
+  pre{background:#f3f3f3;padding:14px;border-radius:5px;overflow-x:auto;margin:0 0 12px;font-size:12px}
+  .cv-header{border-bottom:2px solid #111;padding-bottom:14px;margin-bottom:24px}
+  .cv-name{font-size:2em;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
+  .cv-sub{font-size:1em;color:#444;margin-bottom:8px}
+  .cv-contact{font-size:12px;color:#555;display:flex;flex-wrap:wrap;gap:0 20px}
+  @media print{
+    body{padding:0;font-size:12.5px}
+    h2{page-break-after:avoid}
+    h3{page-break-after:avoid}
+    tr{page-break-inside:avoid}
+  }
 </style>
 </head>
 <body>
-<div class="doc-header">
-  <div class="dh-left">
-    <div class="dh-brand">NORIA · SkyGlobe Intelligence</div>
-    <div class="dh-org">${esc(org)}</div>
-    ${name?`<div class="dh-person">${esc(name)}${title?` · ${esc(title)}`:''}${location?` · ${esc(location)}`:''}</div>`:''}
-  </div>
-  <div class="dh-right">
-    <div><strong>Generated by NORIA</strong></div>
-    <div>${esc(dateStr)}</div>
-    ${email?`<div>${esc(email)}</div>`:''}
-    ${phone?`<div>${esc(phone)}</div>`:''}
-  </div>
-</div>
 ${html}
-<div class="doc-footer">
-  <span>Generated by NORIA · SkyGlobe Intelligence · skyglobegroup.com</span>
-  <span>${esc(dateStr)}</span>
-</div>
 </body>
 </html>`;
+}
 
+function downloadDoc(btn){
+  const contentEl = btn.closest('.msg-body').querySelector('.content');
+  const html = contentEl.innerHTML;
+  const doc = buildCleanDoc(html);
+  const p = noriaProfile;
+  const name = (p.name || userName || 'Document').replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'-');
   const blob = new Blob([doc], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `NORIA-${(org||'Document').replace(/[^a-zA-Z0-9]/g,'-')}-${new Date().toISOString().slice(0,10)}.html`;
+  a.download = `${name}-${new Date().toISOString().slice(0,10)}.html`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
-  // Feedback on button
   const orig = btn.innerHTML;
-  btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Downloading…';
+  btn.innerHTML = '✓ Downloaded';
+  setTimeout(()=>{ btn.innerHTML = orig; }, 2000);
+}
+
+function printDoc(btn){
+  const contentEl = btn.closest('.msg-body').querySelector('.content');
+  const html = contentEl.innerHTML;
+  const doc = buildCleanDoc(html);
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(doc);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{ win.print(); }, 400);
+  const orig = btn.innerHTML;
+  btn.innerHTML = '✓ Printing…';
   setTimeout(()=>{ btn.innerHTML = orig; }, 2000);
 }
 
@@ -6561,13 +6698,14 @@ function renderMsg(role, content, animate=true){
   if(!animate) div.style.animation = 'none';
   const html = isAI ? DOMPurify.sanitize(marked.parse(content||'')) : esc(content).replace(/\n/g,'<br>');
   div.innerHTML = `
-    <div class="av ${isAI?'ai':'user'}">${isAI?'N':userInitials||'U'}</div>
+    <div class="av ${isAI?'ai':'user'}">${isAI?'<svg viewBox="0 0 100 100"><use href="#noriaStar"/></svg>':userInitials||'U'}</div>
     <div class="msg-body">
       <div class="msg-name">${isAI?'NORIA <span class="msg-tag">SkyGlobe Intelligence</span>':'You'}</div>
       <div class="content">${html}</div>
       ${isAI?`<div class="msg-acts">
         <button class="act" onclick="copyMsg(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
         <button class="act" onclick="downloadDoc(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</button>
+        <button class="act" onclick="printDoc(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>
         <button class="act" onclick="refineMsg(this,'longer')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Lengthen</button>
         <button class="act" onclick="refineMsg(this,'shorter')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg> Shorten</button>
         <button class="act" onclick="refineMsg(this,'formal')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h10M4 14h12M4 18h8"/></svg> More Formal</button>
@@ -6584,7 +6722,7 @@ function renderMsg(role, content, animate=true){
 function showTyping(){
   const div = document.createElement('div');
   div.className='msg'; div.id='noria-typing';
-  div.innerHTML=`<div class="av ai">N</div>
+  div.innerHTML=`<div class="av ai"><svg viewBox="0 0 100 100"><use href="#noriaStar"/></svg></div>
     <div class="msg-body">
       <div class="msg-name">NORIA <span class="msg-tag">SkyGlobe Intelligence</span></div>
       <div class="content"><div class="typing"><b></b><b></b><b></b></div></div>
