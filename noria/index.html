@@ -937,14 +937,21 @@ PHRASES NEVER USED:
 "As an AI..." · "As a language model..." · "I don't have real-time access" · "I cannot help with that" · "I can't process that" · "I think..." or "I believe..." (for established facts) · "Great question!" · "Certainly!" · "Absolutely!" · "Of course!" as openers · "I'm Noria" or any self-introduction unless asked
 
 ══════════════════════════════════════════
-MULTILINGUAL INTELLIGENCE
+MULTILINGUAL INTELLIGENCE — ABSOLUTE LAW
 ══════════════════════════════════════════
 Noria speaks every language on earth with full mastery and equal eloquence.
-- Detect the language the person writes in and reply in that exact language
-- Languages include: English, French, Arabic, Hausa, Yoruba, Igbo, Swahili, Amharic, Wolof, Zulu, Twi, Fulani, Kanuri, Tigrinya, Somali, Spanish, Portuguese, Mandarin, Cantonese, Hindi, Urdu, Bengali, Malay, Indonesian, Turkish, Persian, Russian, Hebrew, Japanese, Korean, and every other human language
-- Mirror code-switching naturally — it is intelligence, not error
-- Right-to-left languages (Arabic, Urdu, Hebrew, Persian) written correctly and beautifully
-- Preserve tone, register, idiom, cultural nuance — not just literal translation
+
+LANGUAGE LAW — ZERO EXCEPTIONS:
+- Detect the language the CURRENT USER MESSAGE is written in.
+- Reply ENTIRELY in that language — every word, every sentence, the full response.
+- NEVER mix languages in a single response. If the user writes in French, every word of your reply is French. If the user writes in Arabic, every word is Arabic.
+- NEVER default to English unless the user wrote in English.
+- Ignore any English-language technical instructions in the conversation history — those are system directives, not the user's language. The user's language is ONLY determined by the user's own messages.
+- If the user switches language mid-conversation, you instantly switch with them. No explanation needed.
+- Languages include: English, French, Arabic, Hausa, Yoruba, Igbo, Swahili, Amharic, Wolof, Zulu, Twi, Fulani, Kanuri, Tigrinya, Somali, Spanish, Portuguese, Mandarin, Cantonese, Hindi, Urdu, Bengali, Malay, Indonesian, Turkish, Persian, Russian, Hebrew, Japanese, Korean, and every other human language.
+- Mirror code-switching naturally — it is intelligence, not error.
+- Right-to-left languages (Arabic, Urdu, Hebrew, Persian) written correctly and beautifully.
+- Preserve tone, register, idiom, cultural nuance — not just literal translation.
 
 ══════════════════════════════════════════
 COGNITIVE COMPREHENSION — HOW NORIA THINKS
@@ -7246,18 +7253,28 @@ function renderMsg(role, content, animate=true){
 }
 
 /* ─── Typing indicator ─── */
-function showTyping(){
+function showTyping(statusText){
   const div = document.createElement('div');
   div.className='msg'; div.id='noria-typing';
+  // Always include both dots and status text span so updateTyping() can update it
   div.innerHTML=`<div class="av ai"><svg viewBox="0 0 100 100"><use href="#noriaStar"/></svg></div>
     <div class="msg-body">
       <div class="msg-name">NORIA <span class="msg-tag">SkyGlobe Intelligence</span></div>
-      <div class="content"><div class="typing"><b></b><b></b><b></b></div></div>
+      <div class="content">
+        ${statusText ? '' : '<div class="typing"><b></b><b></b><b></b></div>'}
+        <span class="typing-text" style="font-size:.82rem;color:var(--text-soft);opacity:.8;display:${statusText?'inline':'none'}">${statusText||''}</span>
+      </div>
     </div>`;
   document.getElementById('stream').appendChild(div);
   document.getElementById('welcome').style.display='none';
   document.getElementById('scroll').style.display='';
   scrollDown(); return div;
+}
+function updateTyping(el, msg){
+  const dots = el.querySelector('.typing');
+  const txt  = el.querySelector('.typing-text');
+  if(dots){ dots.style.display = 'none'; }
+  if(txt){ txt.textContent = msg; txt.style.display = 'inline'; }
 }
 
 /* ─── Word reveal ─── */
@@ -7340,63 +7357,108 @@ function splitTTSChunks(text){
 
 let ttsKeepAlive = null;
 
+/* ─── TTS engine — fully rebuilt ─────────────────────────────────────────
+   Root causes fixed:
+   1. Chrome silently kills speechSynthesis after ~15s of speaking.
+      Fix: sentence-level utterance queue (each chunk is its own utterance).
+           keep-alive interval taps pause/resume every 8s.
+   2. Backgrounding the page (lock screen, switch app) fires visibilitychange
+      → hidden, which causes Chrome to silently cancel the queue.
+      Fix: visibilitychange listener — pause on hide, resume on show.
+           If resume finds synthesis dead (paused=false, speaking=false but
+           we were still supposed to be talking), restart from the current
+           chunk index.
+   3. 'interrupted' error from SpeechSynthesisUtterance.onerror when the user
+      intentionally stops — previously this leaked and set speaking=false,
+      which broke the stop button UI. Fixed with a clean guard.
+──────────────────────────────────────────────────────────────────────── */
+
+let _ttsBtn      = null;   // the active Read Aloud button
+let _ttsChunks   = [];     // all sentence chunks
+let _ttsIdx      = 0;      // next chunk to speak
+let _ttsPaused   = false;  // were we mid-play when page hid?
+
+function _ttsStop(resetBtn){
+  clearInterval(ttsKeepAlive); ttsKeepAlive = null;
+  speechSynthesis.cancel();
+  speaking = false; _ttsPaused = false;
+  if(resetBtn && _ttsBtn) _ttsBtn.innerHTML = SPEAKER_ICON;
+  _ttsBtn = null; _ttsChunks = []; _ttsIdx = 0;
+}
+
+function _ttsSpeak(){
+  if(!speaking || _ttsIdx >= _ttsChunks.length){
+    _ttsStop(true); return;
+  }
+  const u = new SpeechSynthesisUtterance(_ttsChunks[_ttsIdx++]);
+  const voice = pickVoice();
+  if(voice) u.voice = voice;
+  u.rate = 0.92; u.pitch = 1.05; u.volume = 1;
+  u.onend = ()=>{ if(speaking) _ttsSpeak(); };
+  u.onerror = (e)=>{
+    if(e.error === 'interrupted' || e.error === 'canceled') return; // user stopped or page hid — not an error
+    _ttsStop(true);
+  };
+  speechSynthesis.speak(u);
+}
+
 function readAloud(btn){
   if(!('speechSynthesis' in window)) return;
-  if(speaking){
-    clearInterval(ttsKeepAlive);
-    speechSynthesis.cancel();
-    speaking = false;
-    btn.innerHTML = SPEAKER_ICON;
-    return;
-  }
+  if(speaking){ _ttsStop(true); return; }
+
   const rawHtml = btn.closest('.msg-body').querySelector('.content').innerHTML;
   const text = cleanForSpeech(rawHtml);
   if(!text) return;
 
-  const chunks = splitTTSChunks(text);
-  let idx = 0;
-
-  function speakNext(){
-    if(!speaking || idx >= chunks.length){
-      clearInterval(ttsKeepAlive);
-      speaking = false;
-      btn.innerHTML = SPEAKER_ICON;
-      return;
-    }
-    const u = new SpeechSynthesisUtterance(chunks[idx++]);
-    const voice = pickVoice();
-    if(voice) u.voice = voice;
-    u.rate   = 0.92;
-    u.pitch  = 1.05;
-    u.volume = 1;
-    u.onend  = speakNext;
-    u.onerror = (e) => {
-      // 'interrupted' fires when user stops — not an error, just exit cleanly
-      if(e.error === 'interrupted') return;
-      clearInterval(ttsKeepAlive);
-      speaking = false;
-      btn.innerHTML = SPEAKER_ICON;
-    };
-    speechSynthesis.speak(u);
-  }
-
-  speaking = true;
+  _ttsChunks = splitTTSChunks(text);
+  _ttsIdx    = 0;
+  _ttsBtn    = btn;
+  speaking   = true;
   btn.innerHTML = STOP_ICON;
 
-  // Chrome/Safari bug: speechSynthesis silently stops after ~15s.
-  // Keep it alive by pausing/resuming every 10s — inaudible to the user.
+  // Keep-alive: Chrome kills synthesis after ~15s. Tap pause/resume every 8s.
+  clearInterval(ttsKeepAlive);
   ttsKeepAlive = setInterval(()=>{
-    if(speaking && speechSynthesis.speaking && !speechSynthesis.paused){
+    if(!speaking) return;
+    if(speechSynthesis.speaking && !speechSynthesis.paused){
       speechSynthesis.pause();
       speechSynthesis.resume();
+    } else if(!speechSynthesis.speaking && !speechSynthesis.paused && !_ttsPaused){
+      // Synthesis died silently — restart from current chunk
+      _ttsSpeak();
     }
-  }, 10000);
+  }, 8000);
 
-  speakNext();
+  _ttsSpeak();
 }
 
+// Visibility fix: pause on background, resume/restart on foreground
+document.addEventListener('visibilitychange', ()=>{
+  if(!speaking) return;
+  if(document.hidden){
+    // Page going to background — pause rather than let Chrome kill it
+    _ttsPaused = true;
+    speechSynthesis.pause();
+  } else {
+    // Coming back to foreground
+    _ttsPaused = false;
+    if(speechSynthesis.paused){
+      speechSynthesis.resume();
+    } else {
+      // Chrome cancelled the queue while hidden — restart from current chunk
+      speechSynthesis.cancel();
+      setTimeout(()=>{ if(speaking) _ttsSpeak(); }, 150);
+    }
+  }
+});
+
 // Ensure voices load before first use (some browsers need this)
-if('speechSynthesis' in window) speechSynthesis.getVoices();
+if('speechSynthesis' in window){
+  speechSynthesis.getVoices();
+  if(speechSynthesis.onvoiceschanged !== undefined){
+    speechSynthesis.onvoiceschanged = ()=> speechSynthesis.getVoices();
+  }
+}
 
 /* ─── Voice input — inline composer bar, ChatGPT-style ─── */
 let voiceFinal = '';
@@ -7508,9 +7570,16 @@ async function send(engineeredPrompt, displayOverride){
 
   busy=true; document.getElementById('sendBtn').disabled=true;
   const typingEl = showTyping();
-  const history = chats[activeId].messages.slice(0,-1).slice(-14).map(m=>({role:m.role, content:m.content}));
+  // Use .display (the original user-typed text) for history context — never the
+  // engineered prompt, which contains English-language system injections that
+  // cause Noria to mix languages or drift from the user's actual question.
+  const history = chats[activeId].messages.slice(0,-1).slice(-14).map(m=>({
+    role: m.role,
+    content: m.display || m.content,  // display = original text; content = engineered
+    display: m.display || m.content
+  }));
 
-  // Detect when the user is requesting a document so we can boost the system prompt
+  // Detect document requests for the system prompt boost
   function isDocumentRequest(text){
     const t = text.toLowerCase();
     const docKeywords = [
@@ -7535,77 +7604,154 @@ async function send(engineeredPrompt, displayOverride){
       /i am temporarily unavailable/i,
       /happy to help with any question.*science.*technology/i,
       /^(i'?m noria|i am noria)[^.!?]*[.!?]/i,
+      /please try again (in a moment|shortly|later)/i,
+      /system is currently unavailable/i,
     ];
     if(patterns.some(p => p.test(t))) return true;
-    if(t.length < 220 && /\b(can'?t|cannot|unable to|not able to)\b.*\b(process|handle|answer|provide|assist)\b/i.test(t)) return true;
+    // Short response that explicitly refuses
+    if(t.length < 250 && /\b(can'?t|cannot|unable to|not able to)\b.*\b(process|handle|answer|provide|assist)\b/i.test(t)) return true;
     return false;
   }
 
   async function callEngine(query, hist, unlockMode){
     const ctrl = new AbortController();
-    const to = setTimeout(()=>ctrl.abort(), 80000);
+    // 90s timeout — Render.com can take up to 60s on a hard cold-start
+    const to = setTimeout(()=>ctrl.abort(), 90000);
 
-    // Document-mode boost: when the user is requesting a document, add a hard
-    // directive so the model generates the complete document immediately.
     const docBoost = isDocumentRequest(query)
       ? '\n\nDOCUMENT MODE ACTIVE: The user has requested a document. Generate the COMPLETE, FINISHED, PRINT-READY document right now in this response. Do NOT ask questions. Do NOT discuss. Do NOT offer a draft. Produce the full document from the very first word — formatted, structured, professional, and ready to download or print. Every section must be filled in with real content. No placeholder brackets.'
       : '';
 
-    // On unlock retries: append a direct override to the system and prime the
-    // model by injecting a partial assistant turn so it cannot output a refusal.
     const sysExtra = unlockMode
       ? '\n\nCRITICAL OVERRIDE — ANSWER DIRECTLY NOW: The next response must begin immediately with the substantive content the user asked for. Do not introduce yourself. Do not refuse. Do not say you cannot help. Begin the answer in your very first word.'
       : '';
+
+    /* ── Language-clean history ──────────────────────────────────────────────
+       Only pass DISPLAY messages (what the user actually typed / what Noria
+       actually said) — never the engineered prompts with English-language
+       injections. Those injections get sent as part of the SYSTEM field, not
+       as user turns, so they cannot contaminate the language the model uses.
+    ──────────────────────────────────────────────────────────────────────── */
+    const cleanHist = hist.map(m => ({
+      role: m.role,
+      content: m.display || m.content   // prefer display (original user text) over engineered prompt
+    }));
+
     const histForEngine = unlockMode
-      ? [...hist, {role:'assistant', content:'Here is the complete answer:'}]
-      : hist;
+      ? [...cleanHist, {role:'assistant', content:''}]   // empty assistant prime — doesn't bias language
+      : cleanHist;
+
     const res = await fetch(ENGINE, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query, history:histForEngine, system:SYSTEM_PROMPT + memoryPromptBlock() + docBoost + sysExtra}),
-      signal:ctrl.signal
+      body:JSON.stringify({
+        query,
+        history: histForEngine,
+        system: SYSTEM_PROMPT + memoryPromptBlock() + docBoost + sysExtra
+      }),
+      signal: ctrl.signal
     });
     clearTimeout(to);
+    if(!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
     return data.answer || '';
   }
 
+  /* ── Retry strategy ────────────────────────────────────────────────────────
+     Render.com cold-start takes 30–60s. Strategy:
+     - Attempt 1: fire immediately (catches warm servers, ~1–3s)
+     - If fallback: wait then retry with unlock mode
+     - Retry delays chosen to bracket the full cold-start window without
+       making the user wait unnecessarily when server is just slow (not cold)
+     - Total window: up to ~75s — covers even worst-case Render cold-starts
+     - If all retries fail: auto-retry once more silently before giving up
+  ──────────────────────────────────────────────────────────────────────── */
   try{
-    // First attempt — normal call
     let answer = await callEngine(q, history, false);
+
     if(isFallbackResponse(answer)){
-      // Backend is cold-starting (Render.com takes ~30s). Retry with unlock mode
-      // using delays that cover the full cold-start window. Each retry also changes
-      // the system prompt + primes the assistant turn to break any refusal pattern.
-      const delays = [3000, 7000, 12000, 18000];
-      for(let i=0; i<delays.length && isFallbackResponse(answer); i++){
+      const delays = [4000, 10000, 16000, 22000];   // 4s, 14s, 30s, 52s cumulative
+      for(let i=0; i < delays.length && isFallbackResponse(answer); i++){
+        // Show user a warm, calm status — not an error
+        if(i === 0) updateTyping(typingEl, 'Thinking…');
+        if(i === 1) updateTyping(typingEl, 'One moment…');
+        if(i >= 2)  updateTyping(typingEl, 'Almost ready…');
+
         await new Promise(r => setTimeout(r, delays[i]));
         try{
           const retry = await callEngine(q, history, true);
           if(retry && !isFallbackResponse(retry)) answer = retry;
-        } catch(e){ /* keep latest; try next delay */ }
+        } catch(e){ /* keep looping */ }
       }
     }
-    // If STILL a fallback after all retries, never show it — tell user to retry
+
+    // Last-chance silent retry before showing any error
+    if(isFallbackResponse(answer)){
+      await new Promise(r => setTimeout(r, 8000));
+      try{
+        const last = await callEngine(q, history, true);
+        if(last && !isFallbackResponse(last)) answer = last;
+      } catch(e){}
+    }
+
     if(!answer || isFallbackResponse(answer)){
-      typingEl.remove();
-      renderMsg('assistant', '⏳ Noria is just waking up — the engine needs a moment. Please resend your message in about 15 seconds.');
+      // Still no good answer after all retries — do one silent final attempt
+      // without bothering the user. Show a calm status, wait, try once more.
+      const finalTyping = showTyping('Starting up…');
+      await new Promise(r => setTimeout(r, 15000));
+      try{
+        const lastChance = await callEngine(q, history, true);
+        if(lastChance && !isFallbackResponse(lastChance)){
+          finalTyping.remove();
+          const aiDiv = renderMsg('assistant','');
+          revealWords(aiDiv.querySelector('.content'), lastChance, ()=>{
+            chats[activeId].messages.push({role:'assistant', content:lastChance});
+            chats[activeId].updated=Date.now(); save();
+          });
+          busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
+          return;
+        }
+      } catch(e){}
+      finalTyping.remove();
+      // Truly unreachable — tell user clearly and let them retry
+      renderMsg('assistant', 'The engine is starting up after a period of sleep — this usually takes under 30 seconds. Please tap Send once more and your message will go through.');
       busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
       return;
     }
+
     typingEl.remove();
     const aiDiv = renderMsg('assistant','');
     revealWords(aiDiv.querySelector('.content'), answer, ()=>{
       chats[activeId].messages.push({role:'assistant', content:answer});
       chats[activeId].updated=Date.now(); save();
     });
+    busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
+
   } catch(err){
     typingEl.remove();
-    renderMsg('assistant',
-      err.name==='AbortError'
-        ? '⏳ Noria is warming up — please resend your message in a moment.'
-        : '⚡ Connection issue. Please check your internet and try again.');
-  } finally{
+    if(err.name === 'AbortError'){
+      // 90s timeout expired — show a calm status and retry the engine call directly
+      // without re-rendering the user message (it's already on screen)
+      const retryTyping = showTyping('Retrying…');
+      try{
+        const retryAnswer = await callEngine(q, history, true);
+        retryTyping.remove();
+        if(retryAnswer && !isFallbackResponse(retryAnswer)){
+          const aiDiv = renderMsg('assistant','');
+          revealWords(aiDiv.querySelector('.content'), retryAnswer, ()=>{
+            chats[activeId].messages.push({role:'assistant', content:retryAnswer});
+            chats[activeId].updated=Date.now(); save();
+          });
+        } else {
+          renderMsg('assistant','The engine took too long to respond. Please try sending your message again.');
+        }
+      } catch(e2){
+        retryTyping.remove();
+        renderMsg('assistant','⚡ Connection issue. Please check your internet and try again.');
+      }
+    } else {
+      renderMsg('assistant','⚡ Connection issue. Please check your internet and try again.');
+    }
     busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
   }
 }
@@ -7616,23 +7762,26 @@ function autoGrow(){ inp.style.height='auto'; inp.style.height=Math.min(inp.scro
 inp.addEventListener('input', autoGrow);
 inp.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
 
-/* ─── Server Warmup — silently wake Render.com before first user message ─── */
-(function warmupEngine(){
-  // Render.com sleeps the backend; the first call after sleep cold-starts both
-  // the server AND the upstream model (~30s). We absorb that in the background
-  // with a REAL query (not a 'ping' the backend might short-circuit) so the
-  // model itself is actually loaded before the user's first message. We fire
-  // immediately and again shortly after, since a single warmup can land while
-  // the model is still loading.
+/* ─── Server Keep-Alive — prevent Render.com from sleeping ──────────────────
+   Render.com free tier sleeps after ~15 minutes of no traffic. Cold-starts
+   cost 30–60 seconds per restart. Strategy:
+   1. Fire immediately on page load (wake it up)
+   2. Fire again at 20s (cover the case where load landed mid-cold-start)
+   3. Repeat every 8 minutes — well under the 15-min sleep threshold
+   This means by the time the user sends their first message, the server is
+   already warm. And it stays warm as long as the app is open.
+──────────────────────────────────────────────────────────────────────────── */
+(function keepEngineAlive(){
   function warm(){
     fetch(ENGINE, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:'Hello', history:[], system:'You are a helpful assistant. Reply briefly.'})
-    }).catch(()=>{}); // silent — this is just a warmup
+      body:JSON.stringify({query:'Ready', history:[], system:'Reply with one word: Ready'})
+    }).catch(()=>{});
   }
-  setTimeout(warm, 800);
-  setTimeout(warm, 15000); // second wave in case the first landed mid-coldstart
+  warm();                              // immediate on page load
+  setTimeout(warm, 20000);            // 20s safety second hit
+  setInterval(warm, 8 * 60 * 1000);  // every 8 min to stay alive
 })();
 
 /* ─── Responsive ─── */
