@@ -150,12 +150,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .user-avatar:hover::after{content:attr(data-name);position:absolute;top:calc(100% + 8px);right:0;background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:500;color:var(--text);white-space:nowrap;box-shadow:var(--shadow);z-index:50}
 
 /* ─── Toolbar ─── */
-.toolbar{grid-column:2;grid-row:2;display:flex;align-items:center;gap:4px;background:var(--bg-soft);border-bottom:1px solid var(--border);padding:0 20px;z-index:10}
-.tool-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--text-soft);font-family:var(--font);font-size:.83rem;font-weight:500;cursor:pointer;transition:var(--ease);white-space:nowrap}
-.tool-btn:hover{background:var(--bg-hover);color:var(--text)}
-.tool-btn.active{background:var(--accent-glow);color:var(--accent);font-weight:600}
-.tool-btn svg{flex-shrink:0}
-.tool-sep{width:1px;height:22px;background:var(--border);margin:0 6px}
+.toolbar{grid-column:2;grid-row:2;display:flex;align-items:center;gap:6px;background:var(--bg-soft);border-bottom:1px solid var(--border);padding:0 20px;z-index:10}
+.tool-btn{display:flex;align-items:center;gap:8px;padding:8px 17px;border-radius:11px;border:1px solid transparent;background:transparent;color:var(--text-soft);font-family:var(--font);font-size:.86rem;font-weight:600;letter-spacing:.01em;cursor:pointer;transition:var(--ease);white-space:nowrap}
+.tool-btn:hover{background:var(--bg-hover);color:var(--text);transform:translateY(-1px)}
+.tool-btn.active{background:var(--accent-glow);color:var(--accent);font-weight:700;border-color:var(--accent-glow);box-shadow:0 1px 8px var(--accent-glow)}
+.tool-btn svg{flex-shrink:0;width:18px;height:18px;stroke-width:1.8}
+.tool-btn.active svg{stroke-width:2}
+.tool-sep{width:1px;height:24px;background:var(--border);margin:0 6px}
 .upgrade-btn{margin-left:auto;display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--gold);background:rgba(201,168,76,.06);color:var(--gold);font-family:var(--font);font-size:.82rem;font-weight:600;cursor:pointer;transition:var(--ease)}
 .upgrade-btn:hover{background:rgba(201,168,76,.14);box-shadow:0 2px 14px rgba(201,168,76,.2)}
 
@@ -192,7 +193,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 
 /* ─── Welcome / Dashboard ─── */
 .welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px 16px;overflow-y:auto}
-.w-greeting{font-family:var(--serif);font-size:1.85rem;font-weight:700;color:var(--text);margin-bottom:28px;letter-spacing:.02em;text-align:center}
+.w-hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:30px}
+.w-mark{
+  width:62px;height:62px;margin-bottom:18px;
+  display:grid;place-items:center;
+  border-radius:18px;
+  background:linear-gradient(150deg,rgba(201,168,76,.14),rgba(74,127,212,.10));
+  border:1px solid var(--border-glass);
+  box-shadow:0 6px 26px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.06);
+  animation:heroFloat 5s ease-in-out infinite;
+}
+.w-mark svg{width:40px;height:40px;filter:drop-shadow(0 2px 6px rgba(201,168,76,.3))}
+@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.w-greeting{font-family:var(--serif);font-size:2.05rem;font-weight:700;color:var(--text);margin-bottom:9px;letter-spacing:.01em;text-align:center;line-height:1.2}
+.w-sub{font-size:.9rem;color:var(--text-soft);letter-spacing:.02em;max-width:420px;font-weight:400}
 
 /* ─── Module cards ─── */
 .modules{display:flex;flex-direction:column;gap:9px;width:100%;max-width:520px}
@@ -533,7 +547,11 @@ textarea::placeholder{color:var(--text-dim)}
   :root{--sidebar:84vw;--topbar:54px;--toolbar:46px}
   .stream{padding:14px 14px 6px}
   .welcome{padding:24px 16px 12px}
-  .w-greeting{font-size:1.45rem;margin-bottom:20px}
+  .w-hero{margin-bottom:22px}
+  .w-mark{width:54px;height:54px;border-radius:15px;margin-bottom:14px}
+  .w-mark svg{width:34px;height:34px}
+  .w-greeting{font-size:1.6rem;margin-bottom:7px}
+  .w-sub{font-size:.82rem;max-width:300px}
   .modules,.proj-welcome{max-width:100%}
   .proj-actions-grid{grid-template-columns:1fr}
   .proj-title{font-size:1.3rem}
@@ -553,7 +571,10 @@ textarea::placeholder{color:var(--text-dim)}
 /* Small phones (≤380px) — protect from cramping */
 @media(max-width:380px){
   :root{--sidebar:88vw}
-  .w-greeting{font-size:1.25rem}
+  .w-greeting{font-size:1.4rem}
+  .w-sub{font-size:.78rem}
+  .w-mark{width:48px;height:48px}
+  .w-mark svg{width:30px;height:30px}
   .tb-name{font-size:1.1rem}
   .tb-badge{display:none}
   .stream{padding:12px 11px 6px}
@@ -791,7 +812,11 @@ textarea::placeholder{color:var(--text-dim)}
 
     <!-- Dashboard / Welcome -->
     <div class="welcome" id="welcome" style="display:flex">
-      <div class="w-greeting" id="wGreeting">How can I help?</div>
+      <div class="w-hero">
+        <div class="w-mark"><svg viewBox="0 0 100 100"><use href="#noriaStar"/></svg></div>
+        <div class="w-greeting" id="wGreeting">How can I help?</div>
+        <div class="w-sub">Sovereign intelligence — across every domain, every language.</div>
+      </div>
       <div class="modules" id="moduleCards"></div>
     </div>
 
@@ -7237,8 +7262,7 @@ function renderMsg(role, content, animate=true){
       <div class="content">${html}</div>
       ${isAI?`<div class="msg-acts">
         <button class="act" onclick="copyMsg(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
-        <button class="act act-pdf" onclick="exportPDF(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15v-4m0 4h1.5a1.5 1.5 0 0 0 0-3H9"/><path d="M13 15v-4h1a2 2 0 0 1 0 4h-1"/><path d="M17 11v4m-1-2h2"/></svg> PDF</button>
-        <button class="act" onclick="downloadDoc(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> HTML</button>
+        <button class="act act-pdf" onclick="exportPDF(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15v-4m0 4h1.5a1.5 1.5 0 0 0 0-3H9"/><path d="M13 15v-4h1a2 2 0 0 1 0 4h-1"/><path d="M17 11v4m-1-2h2"/></svg> Download PDF</button>
         <button class="act" onclick="printDoc(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>
         <button class="act" onclick="refineMsg(this,'longer')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Lengthen</button>
         <button class="act" onclick="refineMsg(this,'shorter')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg> Shorten</button>
@@ -7657,64 +7681,35 @@ async function send(engineeredPrompt, displayOverride){
     return data.answer || '';
   }
 
-  /* ── Retry strategy ────────────────────────────────────────────────────────
-     Render.com cold-start takes 30–60s. Strategy:
-     - Attempt 1: fire immediately (catches warm servers, ~1–3s)
-     - If fallback: wait then retry with unlock mode
-     - Retry delays chosen to bracket the full cold-start window without
-       making the user wait unnecessarily when server is just slow (not cold)
-     - Total window: up to ~75s — covers even worst-case Render cold-starts
-     - If all retries fail: auto-retry once more silently before giving up
+  /* ── Persistent retry — the user NEVER has to resend ────────────────────────
+     The Render.com backend can be asleep (cold-start 30–60s). Rather than ever
+     telling the user to "tap Send again", we keep the typing indicator alive and
+     retry automatically in the background with gentle backoff until a real answer
+     arrives. The status text reassures without alarming. Only after a very long
+     window (~2.5 min — far beyond any real cold-start) do we surface a calm note.
   ──────────────────────────────────────────────────────────────────────── */
   try{
     let answer = await callEngine(q, history, false);
 
     if(isFallbackResponse(answer)){
-      const delays = [4000, 10000, 16000, 22000];   // 4s, 14s, 30s, 52s cumulative
+      // Backoff schedule covering the full cold-start window, then steady retries.
+      const delays = [3000, 6000, 9000, 12000, 15000, 15000, 15000, 15000, 15000, 15000];
+      const statuses = ['Thinking…','Warming up…','Almost there…','Just a moment…','Preparing your answer…'];
       for(let i=0; i < delays.length && isFallbackResponse(answer); i++){
-        // Show user a warm, calm status — not an error
-        if(i === 0) updateTyping(typingEl, 'Thinking…');
-        if(i === 1) updateTyping(typingEl, 'One moment…');
-        if(i >= 2)  updateTyping(typingEl, 'Almost ready…');
-
+        updateTyping(typingEl, statuses[Math.min(i, statuses.length-1)]);
         await new Promise(r => setTimeout(r, delays[i]));
         try{
           const retry = await callEngine(q, history, true);
-          if(retry && !isFallbackResponse(retry)) answer = retry;
-        } catch(e){ /* keep looping */ }
+          if(retry && !isFallbackResponse(retry)){ answer = retry; break; }
+        } catch(e){ /* network blip — keep looping */ }
       }
     }
 
-    // Last-chance silent retry before showing any error
-    if(isFallbackResponse(answer)){
-      await new Promise(r => setTimeout(r, 8000));
-      try{
-        const last = await callEngine(q, history, true);
-        if(last && !isFallbackResponse(last)) answer = last;
-      } catch(e){}
-    }
-
     if(!answer || isFallbackResponse(answer)){
-      // Still no good answer after all retries — do one silent final attempt
-      // without bothering the user. Show a calm status, wait, try once more.
-      const finalTyping = showTyping('Starting up…');
-      await new Promise(r => setTimeout(r, 15000));
-      try{
-        const lastChance = await callEngine(q, history, true);
-        if(lastChance && !isFallbackResponse(lastChance)){
-          finalTyping.remove();
-          const aiDiv = renderMsg('assistant','');
-          revealWords(aiDiv.querySelector('.content'), lastChance, ()=>{
-            chats[activeId].messages.push({role:'assistant', content:lastChance});
-            chats[activeId].updated=Date.now(); save();
-          });
-          busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
-          return;
-        }
-      } catch(e){}
-      finalTyping.remove();
-      // Truly unreachable — tell user clearly and let them retry
-      renderMsg('assistant', 'The engine is starting up after a period of sleep — this usually takes under 30 seconds. Please tap Send once more and your message will go through.');
+      // Extremely rare — backend unreachable for >2 min. Keep the conversation
+      // intact (don't lose the user's message) and show one calm, premium note.
+      typingEl.remove();
+      renderMsg('assistant', 'I needed a little longer than usual to come online. I\'m ready now — please send your message again and I\'ll answer right away.');
       busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
       return;
     }
