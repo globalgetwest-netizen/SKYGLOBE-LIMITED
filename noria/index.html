@@ -386,6 +386,17 @@ textarea::placeholder{color:var(--text-dim)}
 .is-result{width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;padding:14px}
 .is-result img{max-width:100%;border-radius:var(--radius-sm);box-shadow:var(--shadow);background:#0a0a0a}
 .is-result-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.is-ref-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.is-ref-btn{display:flex;align-items:center;gap:8px;background:transparent;border:1px dashed var(--border);color:var(--text-soft);border-radius:var(--radius-sm);padding:9px 14px;font-size:.82rem;cursor:pointer;font-family:inherit;transition:.15s}
+.is-ref-btn:hover{border-color:var(--accent);color:var(--text)}
+.is-ref-preview{position:relative;display:inline-flex}
+.is-ref-preview img{width:46px;height:46px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+.is-ref-clear{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.is-brief{width:100%;max-width:640px;font-size:.8rem;color:var(--text-soft)}
+.is-brief summary{cursor:pointer;opacity:.7;font-weight:500;list-style:none;padding:6px 0}
+.is-brief summary::-webkit-details-marker{display:none}
+.is-brief summary::before{content:'✦ ';opacity:.6}
+.is-brief p{margin:6px 0 0;padding:12px 14px;background:var(--surface-2,rgba(255,255,255,.04));border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.55;font-style:italic}
 .is-loading{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--text-soft);font-size:.88rem;padding:50px}
 .is-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:isSpin .9s linear infinite}
 @keyframes isSpin{to{transform:rotate(360deg)}}
@@ -868,7 +879,7 @@ textarea::placeholder{color:var(--text-dim)}
       <div class="img-studio-inner">
         <div class="is-hero">
           <div class="is-title">Image Studio</div>
-          <div class="is-sub">Describe anything — Noria will create a beautiful, original image.</div>
+          <div class="is-sub">Describe any scene or real place — or upload a photo to transform. Noria creates beautiful, photoreal images.</div>
         </div>
 
         <div class="is-controls">
@@ -899,6 +910,18 @@ textarea::placeholder{color:var(--text-dim)}
                 <option value="1216x832">Photo (3:2)</option>
                 <option value="832x1216">Portrait (2:3)</option>
               </select>
+            </div>
+          </div>
+
+          <input type="file" id="imgRefInput" accept="image/*" style="display:none" onchange="onRefImagePicked(this)"/>
+          <div class="is-ref-row">
+            <button type="button" class="is-ref-btn" id="imgRefBtn" onclick="document.getElementById('imgRefInput').click()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Upload a photo to transform (optional)</span>
+            </button>
+            <div class="is-ref-preview" id="imgRefPreview" style="display:none">
+              <img id="imgRefThumb" alt="reference"/>
+              <button type="button" class="is-ref-clear" onclick="clearRefImage()" title="Remove">×</button>
             </div>
           </div>
 
@@ -7329,9 +7352,121 @@ function setTool(btn, tool){
 /* ─── Image Generation — free, unlimited, no API key (Pollinations / Flux) ───
    Images are generated on Pollinations' servers and streamed directly to the
    user's browser. Zero cost to us, no key, works globally — perfect for scale.
+
+   THE NORIA PROMPT ARCHITECT
+   ──────────────────────────
+   ChatGPT's images look great because GPT writes a brilliant, detailed prompt
+   before generating. Noria does the same: her own intelligence (the engine)
+   rewrites every request into a full professional photography / art-direction
+   brief, then Flux renders it. If the engine is slow/asleep, we fall back
+   instantly to local quality engineering so the user is never blocked.
 ──────────────────────────────────────────────────────────────────────────── */
+
+// Detect when the subject is a person, so we can protect the face.
+function _imgIsPerson(prompt){
+  return /\b(person|people|man|men|woman|women|boy|girl|child|children|kid|baby|face|portrait|headshot|model|ceo|executive|lady|gentleman|human|he|she|himself|herself|guy|teacher|doctor|nurse|student|worker|family|couple|crowd|king|queen|warrior|soldier)\b/i.test(prompt);
+}
+
+// Local fallback: master-grade realism cues + face protection (no engine needed).
+function _imgLocalEnhance(prompt, style){
+  const QUALITY = 'photorealistic, indistinguishable from a real photograph, shot on Canon EOS R5, professional photography, 8k uhd, extremely detailed, sharp focus, natural lighting with consistent direction, accurate soft shadows and contact shadows, realistic textures and materials, fine micro-details, proper depth of field, optical bokeh, high dynamic range, true-to-life natural colours, correct white balance, subtle natural imperfections, faint camera grain, physically plausible, correct perspective and scale, rule of thirds, award-winning, no AI artifacts';
+  const FACE = 'full face clearly visible and centered, complete head and shoulders in frame, not cropped, symmetrical natural face, realistic skin texture with visible pores, detailed realistic eyes with catchlights, natural hair strands, correct anatomy, perfect hands';
+  const parts = [prompt];
+  if(style) parts.push(style);
+  if(_imgIsPerson(prompt)) parts.push(FACE);
+  parts.push(QUALITY);
+  return parts.join(', ');
+}
+
+/* Ask Noria's engine to rewrite the request as a professional Flux prompt.
+   Returns the enhanced prompt, or null if the engine is unavailable in time. */
+async function _imgArchitect(prompt, style){
+  const personRule = _imgIsPerson(prompt)
+    ? ' Because the subject includes a person, you MUST ensure the full face is clearly visible and centered, the complete head is in frame (never cropped at the top), with natural symmetrical features, detailed eyes, realistic skin, and correct anatomy and hands.'
+    : '';
+  const styleLine = style ? ` The desired visual style is: ${style}.` : '';
+  const system = `You are a world-class photographer and art director writing prompts for the Flux image model. Transform the user's short idea into ONE single richly detailed image prompt (about 70-110 words). Specify: subject and setting; camera and lens (e.g. Canon EOS R5, 85mm portrait lens f/1.8, or 24mm wide-angle for architecture); lighting (golden hour, studio three-point, soft window light, cinematic); composition (rule of thirds, golden ratio, leading lines, negative space); colour palette and mood.
+
+PHOTOGRAPHIC REALISM MANDATE — the image must look like a genuine photograph, indistinguishable from reality, NOT digital art: natural lighting with one consistent direction; accurate soft shadows, contact shadows and ambient occlusion; correct reflections and refractions; realistic material textures (skin with visible pores, fabric folds and weave, wood grain, brushed metal, glass); fine micro-details that hold up when zoomed in; proper depth of field with optical bokeh; high dynamic range with smooth tonal transitions; true-to-life natural colour and white balance; subtle real-world imperfections and faint camera grain; physically plausible scene with correct scale and perspective; absolutely no AI artifacts, no distorted hands, no melted faces, no warped edges.
+
+REAL-LOCATION ACCURACY — if the user names a real place, city, country, or landmark, depict that EXACT location authentically: its real architecture, streets, landscape, vegetation, signage style, atmosphere, and the natural light typical for that latitude and time of day, including recognisable landmarks — so the image looks exactly as if it were truly photographed on location there.${personRule}${styleLine}
+
+Output ONLY the final prompt as plain text — no preamble, no quotes, no explanation, no lists.`;
+
+  const ctrl = new AbortController();
+  const to = setTimeout(()=>ctrl.abort(), 18000); // 18s — don't keep the user waiting
+  try{
+    const res = await fetch(ENGINE, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ query: prompt, history: [], system }),
+      signal: ctrl.signal
+    });
+    clearTimeout(to);
+    if(!res.ok) return null;
+    const data = await res.json();
+    let out = (data.answer || '').trim();
+    // Guard against fallbacks / refusals / engine error strings.
+    if(!out || out.length < 20 || /temporarily unavailable|try again|high demand|momentarily/i.test(out)) return null;
+    // Strip any accidental wrapping quotes or "Prompt:" labels.
+    out = out.replace(/^["'`]|["'`]$/g,'').replace(/^(prompt|image prompt)\s*[:\-]\s*/i,'').trim();
+    return out;
+  }catch(e){
+    clearTimeout(to);
+    return null;
+  }
+}
+
+/* ── Reference photo (image-to-image) — stays on YOUR engine, never a public host ──
+   The selected file is held only in the browser until generation, then uploaded
+   to your own noria-engine which serves it at a short-lived private URL (auto-
+   deleted after ~10 min) so the image model can read it once. No third party. */
+let _imgRefDataUrl = null;
+const UPLOAD_ENDPOINT = ENGINE.replace(/\/v1\/ask\/?$/, '/v1/upload-image');
+
+function onRefImagePicked(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  if(!/^image\//.test(file.type)){ alert('Please choose an image file.'); input.value=''; return; }
+  if(file.size > 12 * 1024 * 1024){ alert('That image is too large (max 12MB). Please choose a smaller one.'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    _imgRefDataUrl = reader.result;
+    document.getElementById('imgRefThumb').src = _imgRefDataUrl;
+    document.getElementById('imgRefPreview').style.display = '';
+    document.getElementById('imgRefBtn').querySelector('span').textContent = 'Photo ready — describe the changes';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearRefImage(){
+  _imgRefDataUrl = null;
+  const inp = document.getElementById('imgRefInput'); if(inp) inp.value='';
+  document.getElementById('imgRefPreview').style.display = 'none';
+  document.getElementById('imgRefBtn').querySelector('span').textContent = 'Upload a photo to transform (optional)';
+}
+
+// Upload the held photo to your engine; returns a private URL or null on failure.
+async function _imgUploadRef(){
+  if(!_imgRefDataUrl) return null;
+  try{
+    const ctrl = new AbortController();
+    const to = setTimeout(()=>ctrl.abort(), 30000);
+    const res = await fetch(UPLOAD_ENDPOINT, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: _imgRefDataUrl }),
+      signal: ctrl.signal
+    });
+    clearTimeout(to);
+    if(!res.ok) return null;
+    const data = await res.json();
+    return data.url || null;
+  }catch(e){ return null; }
+}
+
 let _imgBusy = false;
-function generateImage(){
+async function generateImage(){
   if(_imgBusy) return;
   const promptEl = document.getElementById('imgPrompt');
   const prompt = (promptEl.value||'').trim();
@@ -7341,36 +7476,46 @@ function generateImage(){
   const aspect = document.getElementById('imgAspect').value;
   const [w,h]  = aspect.split('x');
 
-  // ── Professional quality engineering ──────────────────────────────────────
-  // Flux produces flat or distorted results from bare prompts. We enrich every
-  // prompt with master-grade quality cues, and — when a person is involved —
-  // explicit framing cues so faces are never cropped, melted, or malformed.
-  const QUALITY = 'masterpiece, ultra realistic, professional photography, 8k uhd, extremely detailed, sharp focus, perfect composition, natural lighting, cinematic, lifelike textures, depth of field, award-winning';
+  const hasRef = !!_imgRefDataUrl;
+  const stagePre = document.getElementById('imgStage');
+  const btnPre = document.getElementById('imgGenBtn');
+  _imgBusy = true;
+  btnPre.disabled = true;
+  btnPre.querySelector('span').textContent = 'Designing…';
+  stagePre.innerHTML = `<div class="is-loading"><div class="is-spinner"></div><span>${hasRef ? 'Preparing your photo…' : 'Noria is designing your image…'}</span></div>`;
 
-  // Detect when the subject is a person, so we can protect the face.
-  const isPerson = /\b(person|people|man|men|woman|women|boy|girl|child|children|kid|baby|face|portrait|headshot|model|ceo|executive|lady|gentleman|human|he|she|himself|herself|guy|teacher|doctor|nurse|student|worker|family|couple|crowd|king|queen|warrior|soldier)\b/i.test(prompt);
-  const FACE = ', full face clearly visible and centered, complete head and shoulders in frame, not cropped, symmetrical natural face, detailed realistic eyes, flawless skin, correct anatomy, perfect hands';
+  // STEP 0 — if a reference photo was uploaded, send it to YOUR engine (private,
+  // auto-expiring) and get a URL the image model can read for image-to-image.
+  let refUrl = null;
+  if(hasRef){
+    refUrl = await _imgUploadRef();
+    stagePre.innerHTML = `<div class="is-loading"><div class="is-spinner"></div><span>Noria is designing your image…</span></div>`;
+  }
 
-  const parts = [prompt];
-  if(style) parts.push(style);
-  if(isPerson) parts.push(FACE.replace(/^,\s*/,''));
-  parts.push(QUALITY);
-  const fullPrompt = parts.join(', ');
+  // STEP 1 — Noria's intelligence engineers a professional prompt.
+  let fullPrompt = await _imgArchitect(prompt, style);
+  const architected = !!fullPrompt;
+  // STEP 2 — fall back instantly to local quality engineering if needed.
+  if(!fullPrompt) fullPrompt = _imgLocalEnhance(prompt, style);
 
   // Random seed each time so repeated generations differ
   const seed = Math.floor(performance.now() * 1000) % 1000000 + (new Date().getSeconds() * 7919);
-  // enhance=true → Pollinations expands the prompt with an LLM for far richer,
-  // more beautiful images. nologo + private for a clean professional result.
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true&enhance=true&private=true&model=flux`;
+  // When Noria already wrote a rich prompt, skip Pollinations' own enhancer so it
+  // renders her brief faithfully. For the local fallback, enable enhance=true for
+  // an extra richness boost. nologo + private keep the result clean.
+  const enhance = architected ? 'false' : 'true';
+  // If we have a private ref URL, add image-to-image params so Flux transforms
+  // the user's actual photo rather than inventing a new scene.
+  const refParam = refUrl ? `&image=${encodeURIComponent(refUrl)}&strength=0.65` : '';
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true&enhance=${enhance}&private=true&model=flux${refParam}`;
 
-  const stage = document.getElementById('imgStage');
-  const btn = document.getElementById('imgGenBtn');
-  _imgBusy = true;
-  btn.disabled = true;
+  const stage = stagePre;
+  const btn = btnPre;
   btn.querySelector('span').textContent = 'Generating…';
 
-  stage.innerHTML = `<div class="is-loading"><div class="is-spinner"></div><span>Creating your image — this can take 10–25 seconds…</span></div>`;
+  stage.innerHTML = `<div class="is-loading"><div class="is-spinner"></div><span>Painting your image — this can take 10–25 seconds…</span></div>`;
 
+  const safePrompt = fullPrompt.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
   const img = new Image();
   img.onload = ()=>{
     stage.innerHTML = '';
@@ -7383,6 +7528,10 @@ function generateImage(){
       <button class="act act-pdf" onclick="downloadImage('${url.replace(/'/g,"\\'")}')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</button>
       <button class="act" onclick="generateImage()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.65 4.36A9 9 0 0 0 20.5 15"/></svg> Regenerate</button>`;
     wrap.appendChild(acts);
+    const brief = document.createElement('details');
+    brief.className = 'is-brief';
+    brief.innerHTML = `<summary>How Noria designed this image</summary><p>${safePrompt}</p>`;
+    wrap.appendChild(brief);
     stage.appendChild(wrap);
     _imgBusy = false;
     btn.disabled = false;
