@@ -1030,6 +1030,8 @@ MULTILINGUAL LAW — ABSOLUTE, ZERO EXCEPTIONS
 - NEVER mix languages in one response. NEVER default to English unless the user wrote in English.
 - Ignore English technical instructions in the history when judging language — the user's language is set ONLY by the user's own messages.
 - If the user switches language, switch instantly with no explanation.
+- EXPLICIT LANGUAGE OVERRIDE — HIGHEST PRIORITY: If the user says "speak in [language]", "write in [language]", "say this in [language]", "respond in [language]", "translate to [language]", or any equivalent request to use a specific language — you MUST switch to that language immediately and reply ENTIRELY in that language, even if the request itself was written in English or any other language. The explicitly requested language overrides everything else.
+- AMBIGUOUS SINGLE WORDS: If the user sends only one or two words that exist identically in multiple languages (e.g. "hello", "ok", "yes", "no", "hi", "bye", "thanks", "good") — default to English unless prior conversation clearly established a different language. Do NOT guess or assume a non-English language from these words alone.
 - Full mastery of every human language including English, French, Arabic, Hausa, Yoruba, Igbo, Swahili, Amharic, Wolof, Zulu, Twi, Fulani, Spanish, Portuguese, Mandarin, Hindi, Urdu, Bengali, Malay, Indonesian, Turkish, Persian, Russian, Hebrew, Japanese, Korean, and all others. Right-to-left languages (Arabic, Urdu, Hebrew, Persian) written correctly. Preserve tone, register, idiom, and cultural nuance — not literal translation.
 
 ══════════════════════════════════════════
@@ -7460,181 +7462,246 @@ function cleanForSpeech(html){
   return t;
 }
 
-/* ── Language detection for TTS ──────────────────────────────────────────────
-   Detects the dominant script/language of the text so we can pick a matching
-   voice. Uses Unicode ranges for scripts and word-patterns for Latin languages.
-   Returns a BCP-47 language tag (e.g. "ar", "fr", "de", "ur") or "en" default.
-──────────────────────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   TTS ENGINE — NORIA Multilingual Speech
+   ────────────────────────────────────────────────────────────────────────
+   Two-tier system:
+     Tier 1 — Web Speech API (native browser voices, best quality when available)
+     Tier 2 — Google Translate TTS audio (free, 100+ languages, no API key)
+              Used automatically when no native voice exists for a language.
+   Supports: all major world languages + African languages (Hausa, Yoruba,
+   Igbo, Swahili, Twi/Akan, Amharic, Zulu, Wolof, and many more)
+══════════════════════════════════════════════════════════════════════════ */
+
+// ── Voice cache — fixes Chrome's async voice loading ──────────────────────
+// Chrome returns [] from getVoices() until voiceschanged fires. Cache on load.
+let _voiceCache = [];
+function _loadVoices(){ const v = speechSynthesis.getVoices(); if(v.length) _voiceCache = v; }
+if('speechSynthesis' in window){
+  _loadVoices();
+  speechSynthesis.addEventListener('voiceschanged', _loadVoices);
+}
+function _getVoices(){ return _voiceCache.length ? _voiceCache : speechSynthesis.getVoices(); }
+
+// ── Google Translate TTS language codes ───────────────────────────────────
+// Maps our BCP-47 tags to Google TTS lang codes (most are identical).
+const GTTS_LANGS = {
+  ha:'ha', yo:'yo', ig:'ig', ak:'ak', zu:'zu', am:'am', wo:'wo',
+  sw:'sw', ff:'ff', ln:'ln', rw:'rw', so:'so', om:'om', mg:'mg',
+  ny:'ny', sn:'sn', st:'st', xh:'xh', tn:'tn', ti:'ti', sg:'sg',
+  ar:'ar', he:'he', fa:'fa', ur:'ur', hi:'hi', bn:'bn', ta:'ta',
+  te:'te', ml:'ml', kn:'kn', gu:'gu', mr:'mr', pa:'pa', si:'si',
+  th:'th', lo:'lo', my:'my', km:'km', ka:'ka', hy:'hy', az:'az',
+  kk:'kk', ky:'ky', tg:'tg', tk:'tk', uz:'uz', mn:'mn',
+  zh:'zh-CN', ja:'ja', ko:'ko',
+  ru:'ru', uk:'uk', be:'be', bg:'bg', mk:'mk', sr:'sr', hr:'hr',
+  bs:'bs', sl:'sl', sk:'sk', cs:'cs', pl:'pl',
+  ro:'ro', hu:'hu', fi:'fi', et:'et', lv:'lv', lt:'lt',
+  el:'el', tr:'tr', id:'id', ms:'ms', tl:'tl', vi:'vi',
+  fr:'fr', es:'es', pt:'pt', de:'de', it:'it', nl:'nl',
+  sv:'sv', da:'da', no:'no', is:'is', ga:'ga', cy:'cy',
+  ca:'ca', gl:'gl', la:'la', eo:'eo', en:'en'
+};
+
+// Languages where Web Speech API reliably covers most devices
+const WSA_WELL_SUPPORTED = new Set([
+  'en','fr','es','de','it','pt','nl','sv','da','no','fi','pl','cs','ro','hu',
+  'ru','ar','hi','zh','ja','ko','tr','id','ms','th','vi','el','he','uk','sk','bg','bn','ur'
+]);
+
+// ── Language detection ────────────────────────────────────────────────────
 function detectTextLang(text){
-  const s = text.slice(0, 300); // sample first 300 chars — enough for detection
-  // Script-based detection (unambiguous Unicode ranges)
+  const s = text.slice(0, 400);
+
+  // Script-based (unambiguous Unicode ranges — highest confidence)
   if(/[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(s)){
-    // Arabic script — could be Arabic or Urdu (Nastaliq uses same block)
-    // Urdu-specific letters (ڈ ڑ ں ٹ ک گ ی پ چ ژ etc.)
     if(/[ٹڈڑںھہیپچژ]/.test(s)) return 'ur';
     return 'ar';
   }
-  if(/[ऀ-ॿ]/.test(s)) return 'hi';       // Devanagari → Hindi
-  if(/[ঀ-৿]/.test(s)) return 'bn';       // Bengali
-  if(/[฀-๿]/.test(s)) return 'th';       // Thai
-  if(/[一-鿿㐀-䶿]/.test(s)) return 'zh'; // CJK → Chinese
-  if(/[぀-ゟ゠-ヿ]/.test(s)) return 'ja'; // Hiragana/Katakana → Japanese
-  if(/[가-힯ᄀ-ᇿ]/.test(s)) return 'ko'; // Hangul → Korean
-  if(/[Ѐ-ӿ]/.test(s)) return 'ru';       // Cyrillic → Russian
-  if(/[Ԁ-ԯⷠ-ⷿ]/.test(s)) return 'ru'; // Extended Cyrillic
-  if(/[א-תיִ-ﭏ]/.test(s)) return 'he'; // Hebrew
-  if(/[Ͱ-Ͽ]/.test(s)) return 'el';       // Greek
-  if(/[຀-໿]/.test(s)) return 'lo';       // Lao
+  if(/[ऀ-ॿ]/.test(s)) return 'hi';
+  if(/[ঀ-৿]/.test(s)) return 'bn';
+  if(/[฀-๿]/.test(s)) return 'th';
+  if(/[຀-໿]/.test(s)) return 'lo';
+  if(/[က-႟]/.test(s)) return 'my';
+  if(/[ក-៿]/.test(s)) return 'km';
+  if(/[一-鿿㐀-䶿]/.test(s)) return 'zh';
+  if(/[぀-ゟ゠-ヿ]/.test(s)) return 'ja';
+  if(/[가-힯ᄀ-ᇿ]/.test(s)) return 'ko';
+  if(/[Ѐ-ӿ]/.test(s)) return 'ru';
+  if(/[Ⴀ-ჿ]/.test(s)) return 'ka';
+  if(/[԰-֏]/.test(s)) return 'hy';
+  if(/[ሀ-፿]/.test(s)) return 'am';
+  if(/[א-ת]/.test(s)) return 'he';
+  if(/[Ͱ-Ͽ]/.test(s)) return 'el';
+  if(/[਀-੿]/.test(s)) return 'pa';
+  if(/[઀-૿]/.test(s)) return 'gu';
+  if(/[଀-୿]/.test(s)) return 'or';
+  if(/[ఀ-౿]/.test(s)) return 'te';
+  if(/[ಀ-೿]/.test(s)) return 'kn';
+  if(/[ഀ-ൿ]/.test(s)) return 'ml';
+  if(/[඀-෿]/.test(s)) return 'si';
+  if(/[஀-௿]/.test(s)) return 'ta';
 
-  // Latin-script language detection by distinctive vocabulary/patterns
-  // French: accented vowels + common words
-  if(/\b(le|la|les|de|du|des|est|sont|avec|pour|dans|sur|qui|que|une?|ce|je|nous|vous|ils|elles|très|aussi|mais|donc|car|ou|et|en|au|aux)\b/i.test(s) &&
+  // Latin-script — detect by vocabulary + distinctive diacritics
+  // Yoruba: letters e with dot below, o with dot below, s with dot below
+  if(/[ẹọṣ]/.test(s) ||
+     /\b(ati|tabi|nitori|nigba|jẹ|ọdọlọ|wọn|oun|eyi|rẹ|pẹlú|sibẹ|sugbon)\b/i.test(s)) return 'yo';
+  // Igbo: i with dot below, u with dot below, o with dot below
+  if(/[ịụ]/.test(s) ||
+     /\b(nke|bụ|dị|nọ|ọ|ya|ha|maka|ihe|oge|bia|aga|ndi|isi)\b/i.test(s)) return 'ig';
+  // Twi/Akan: epsilon + open-o
+  if(/[ɛɔƐƆ]/.test(s) &&
+     /\b(na|ne|so|wo|mo|yɛ|de|kɔ|nso|nti|sɛ|ɔkwan|wɔ)\b/i.test(s)) return 'ak';
+  // Hausa: very distinctive vocabulary (no special chars needed)
+  if(/\b(da|na|ta|ya|su|mu|ba|ko|ne|ce|shi|ita|suna|yana|tana|don|kuma|amma|tare|cikin|akan|daga|zuwa|wanda|wacce|wadanda|kamar|saboda|lokaci|mutum|gida|yara|ƙasa|kashe)\b/i.test(s)) return 'ha';
+  // Swahili: highly distinctive vocabulary
+  if(/\b(na|ya|wa|kwa|ni|si|la|za|katika|pia|lakini|au|hii|hiyo|yeye|sisi|wao|habari|asante|karibu|pamoja|kwamba|wakati|kama|kabla|baada|chakula|mtu|watu|nchi)\b/i.test(s)) return 'sw';
+  // Yoruba (Latin fallback without special chars)
+  if(/\b(ati|tabi|nitori|nigba|jẹ|wọn|oun|eyi|pẹlú|sibẹ|sugbon|nípa|mọ|bẹẹ|bẹ|kò|àti|tàbí)\b/i.test(s)) return 'yo';
+  // Zulu/Xhosa
+  if(/\b(ukuthi|ukuba|futhi|kodwa|ngoba|noma|uma|njalo|nje|yonke|bonke|laba|ngale|ukuze|ukusho|abantu|izinto)\b/i.test(s)) return 'zu';
+  // Wolof
+  if(/\b(ak|bu|bi|gi|mi|si|yi|li|ci|fi|di|mu|nu|lay|dafa|xam|def|jëf|ndax|waaye|woon|doon|bëgg)\b/i.test(s)) return 'wo';
+  // Somali
+  if(/\b(iyo|ama|lakin|haddii|markaa|waxa|ayaa|baa|waxay|waxuu|waxaan|dadka|dalka|qofka|magaca|waqtiga)\b/i.test(s)) return 'so';
+  // French
+  if(/\b(le|la|les|de|du|des|est|sont|avec|pour|dans|sur|qui|que|une?|ce|je|nous|vous|ils|elles|très|aussi|mais|donc|car|et|en|au|aux)\b/i.test(s) &&
      /[àâäéèêëîïôùûüç]/.test(s)) return 'fr';
-  // Spanish: ñ + common words
+  // Spanish
   if(/[ñ¿¡]/.test(s) ||
-     (/\b(el|la|los|las|de|del|es|son|con|por|para|en|que|una?|se|su|al|yo|tú|él|nosotros|ellos|pero|como|más|muy)\b/i.test(s) &&
+     (/\b(el|la|los|las|de|del|es|son|con|por|para|en|que|una?|se|su|al|yo|pero|como|más|muy)\b/i.test(s) &&
       /[áéíóúü]/.test(s))) return 'es';
-  // Portuguese: ã/õ + common words
+  // Portuguese
   if(/[ãõ]/.test(s) ||
-     (/\b(o|a|os|as|de|do|da|dos|das|é|são|com|para|em|que|uma?|se|seu|ao|eu|nós|eles|mas|como|mais|muito)\b/i.test(s) &&
+     (/\b(o|a|os|as|de|do|da|é|são|com|para|em|que|se|eu|nós|mas|como|mais|muito)\b/i.test(s) &&
       /[áâàéêíóôúç]/.test(s))) return 'pt';
-  // German: ß + common words + umlauts
+  // German
   if(/ß/.test(s) ||
-     (/\b(der|die|das|den|dem|des|ein|eine|ist|sind|mit|für|auf|bei|von|zu|ich|wir|sie|aber|auch|noch|nicht|und|oder|als|wenn|dann)\b/i.test(s) &&
+     (/\b(der|die|das|den|dem|ein|eine|ist|sind|mit|für|auf|von|zu|ich|wir|sie|aber|auch|nicht|und|oder|wenn)\b/i.test(s) &&
       /[äöü]/.test(s))) return 'de';
-  // Norwegian/Scandinavian: å + common words
-  if(/[åÅ]/.test(s) && /\b(og|er|det|en|ei|et|jeg|vi|de|men|for|med|til|fra|på|ikke|som|kan|har|var)\b/i.test(s)){
-    if(/\b(och|är|ett|jag|vi|de|men|för|med|till)\b/i.test(s)) return 'sv'; // Swedish
-    if(/\b(og|er|det|jeg|vi|de|ikke|for|med|til|fra|kan|har)\b/i.test(s)) return 'no'; // Norwegian
-    return 'da'; // Danish
+  // Scandinavian
+  if(/[åÅ]/.test(s) && /\b(og|er|det|en|jeg|vi|de|men|for|med|til|fra|ikke|som|kan|har)\b/i.test(s)){
+    if(/\b(och|är|ett|jag|för|till)\b/i.test(s)) return 'sv';
+    return 'no';
   }
-  // Turkish: ğ/İ/ş + common words
+  // Turkish
   if(/[ğışİŞÇÖÜ]/.test(s) &&
-     /\b(ve|bir|bu|için|ile|de|da|ne|ben|biz|onlar|ama|gibi|çok|daha|en)\b/i.test(s)) return 'tr';
-  // Indonesian/Malay: common words (no distinctive chars)
-  if(/\b(dan|yang|di|ke|dari|untuk|ini|itu|dengan|akan|ada|tidak|juga|bisa|saya|kami|mereka|tapi|atau|pada)\b/i.test(s)) return 'id';
-  // Swahili: common words
-  if(/\b(na|ya|wa|kwa|ni|si|la|za|katika|pia|lakini|au|hii|hiyo|yeye|sisi|wao|bali|pia)\b/i.test(s)) return 'sw';
+     /\b(ve|bir|bu|için|ile|de|da|ne|ben|biz|ama|gibi|çok|daha|en)\b/i.test(s)) return 'tr';
+  // Indonesian/Malay
+  if(/\b(dan|yang|di|ke|dari|untuk|ini|itu|dengan|akan|ada|tidak|juga|bisa|saya|kami|tapi|atau|pada)\b/i.test(s)) return 'id';
+  // Filipino/Tagalog
+  if(/\b(ang|ng|sa|na|ay|mga|ko|mo|siya|kami|kayo|sila|ito|iyon|kung|pero|at|o|dahil|para|nang)\b/i.test(s)) return 'tl';
+  // Vietnamese
+  if(/[ắằẳẵặấầẩẫậếềểễệ]/.test(s)) return 'vi';
+  // Italian
+  if(/\b(il|lo|la|gli|le|di|del|della|è|sono|con|per|nel|che|una?|si|ma|anche|come|più|molto)\b/i.test(s) &&
+     /[àèéìîòóùú]/.test(s)) return 'it';
 
-  // Default to English for Latin script without strong signals
   return 'en';
 }
 
-/* ── Voice picker — multilingual ─────────────────────────────────────────────
-   Given a detected language tag, finds the best available system voice for
-   that language. Falls back gracefully: exact locale → language prefix → English.
-──────────────────────────────────────────────────────────────────────────── */
+// ── Voice picker (Web Speech API) ─────────────────────────────────────────
 function pickVoice(lang){
-  const voices = speechSynthesis.getVoices();
+  const voices = _getVoices();
   if(!voices.length) return null;
 
-  // For English, keep the original premium voice preferences
   if(!lang || lang === 'en'){
-    const preferred = [
-      'Google UK English Female','Google UK English Male',
-      'Samantha','Alex','Karen','Daniel','Moira','Rishi'
-    ];
-    for(const name of preferred){
-      const v = voices.find(v => v.name === name);
-      if(v) return v;
-    }
-    return voices.find(v => v.lang.startsWith('en-GB')) ||
-           voices.find(v => v.lang.startsWith('en'))    ||
-           voices[0];
+    const preferred = ['Google UK English Female','Google UK English Male','Samantha','Alex','Karen','Daniel','Moira','Rishi'];
+    for(const name of preferred){ const v = voices.find(v=>v.name===name); if(v) return v; }
+    return voices.find(v=>v.lang.startsWith('en-GB')) || voices.find(v=>v.lang.startsWith('en')) || voices[0];
   }
-
-  // For non-English: try Google voices first (best quality + widest language support)
-  // then any voice matching the language prefix
-  const googleVoice = voices.find(v =>
-    v.name.toLowerCase().includes('google') && v.lang.startsWith(lang)
-  );
-  if(googleVoice) return googleVoice;
-
-  // Any voice matching this language
-  const langVoice = voices.find(v => v.lang.startsWith(lang));
-  if(langVoice) return langVoice;
-
-  // Special case: zh → try zh-CN, zh-TW, zh-HK
-  if(lang === 'zh'){
-    const zhVoice = voices.find(v => v.lang.startsWith('zh'));
-    if(zhVoice) return zhVoice;
-  }
-
-  // Fallback to English rather than a random voice (better than wrong language)
-  return voices.find(v => v.lang.startsWith('en-GB')) ||
-         voices.find(v => v.lang.startsWith('en'))    ||
-         voices[0] || null;
+  // Google voices → Microsoft voices → any native voice
+  const gv = voices.find(v=>v.name.toLowerCase().includes('google') && v.lang.startsWith(lang));
+  if(gv) return gv;
+  const mv = voices.find(v=>v.name.toLowerCase().includes('microsoft') && v.lang.startsWith(lang));
+  if(mv) return mv;
+  const nv = voices.find(v=>v.lang.startsWith(lang));
+  if(nv) return nv;
+  if(lang==='zh'){ const zv = voices.find(v=>v.lang.startsWith('zh')); if(zv) return zv; }
+  return null; // no match — caller uses Google TTS fallback
 }
 
-// Split text into sentence-level chunks to avoid Chrome/Safari 15-second TTS cutoff.
-// Each chunk is spoken as its own utterance in a queue — seamless to the listener.
-function splitTTSChunks(text){
-  // Split at sentence-ending punctuation, keeping the punctuation with its sentence
-  const raw = text.match(/[^.!?…]+[.!?…]+(?:\s|$)|[^.!?…]+$/g) || [text];
+// ── Sentence splitter — all scripts ───────────────────────────────────────
+function splitTTSChunks(text, maxLen=200){
+  // Latin .!?  Arabic ?. (U+061F U+06D4)  CJK endings  newlines
+  const raw = text.match(/[^.!?…。？！؟۔\n]+[.!?…。？！؟۔\n]+(?:\s|$)|[^.!?…。？！؟۔\n]+$/gu) || [text];
   const chunks = [];
   let buf = '';
   for(const s of raw){
-    if((buf + s).length > 220 && buf){
-      chunks.push(buf.trim());
-      buf = s;
-    } else {
-      buf += s;
-    }
+    if((buf+s).length > maxLen && buf){ chunks.push(buf.trim()); buf=s; }
+    else buf+=s;
   }
   if(buf.trim()) chunks.push(buf.trim());
-  return chunks.filter(Boolean);
+  // Force-split remaining long chunks (no punctuation at all)
+  const out = [];
+  for(const c of chunks){
+    if(c.length > maxLen){ for(let i=0;i<c.length;i+=maxLen) out.push(c.slice(i,i+maxLen)); }
+    else out.push(c);
+  }
+  return out.filter(Boolean);
 }
 
-let ttsKeepAlive = null;
+// ── Google Translate TTS fallback ─────────────────────────────────────────
+// Free, no API key. Used when Web Speech API has no voice for a language.
+// Audio element bypasses CORS — works in all browsers.
+let _gttsActive = false;
+let _gttsAudio  = null;
 
-/* ─── TTS engine — fully rebuilt ─────────────────────────────────────────
-   Root causes fixed:
-   1. Chrome silently kills speechSynthesis after ~15s of speaking.
-      Fix: sentence-level utterance queue (each chunk is its own utterance).
-           keep-alive interval taps pause/resume every 8s.
-   2. Backgrounding the page (lock screen, switch app) fires visibilitychange
-      → hidden, which causes Chrome to silently cancel the queue.
-      Fix: visibilitychange listener — pause on hide, resume on show.
-           If resume finds synthesis dead (paused=false, speaking=false but
-           we were still supposed to be talking), restart from the current
-           chunk index.
-   3. 'interrupted' error from SpeechSynthesisUtterance.onerror when the user
-      intentionally stops — previously this leaked and set speaking=false,
-      which broke the stop button UI. Fixed with a clean guard.
-──────────────────────────────────────────────────────────────────────── */
+function _gttsStop(){
+  _gttsActive = false;
+  if(_gttsAudio){ _gttsAudio.pause(); _gttsAudio.src=''; _gttsAudio=null; }
+}
 
-let _ttsBtn      = null;   // the active Read Aloud button
-let _ttsChunks   = [];     // all sentence chunks
-let _ttsIdx      = 0;      // next chunk to speak
-let _ttsPaused   = false;  // were we mid-play when page hid?
+async function _gttsPlayChunks(chunks, langCode){
+  _gttsActive = true;
+  for(let i=0; i<chunks.length; i++){
+    if(!_gttsActive || !speaking) break;
+    const chunk = chunks[i].trim();
+    if(!chunk) continue;
+    const url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl='
+              + encodeURIComponent(langCode)
+              + '&q=' + encodeURIComponent(chunk)
+              + '&client=tw-ob';
+    await new Promise(resolve=>{
+      const audio = new Audio(url);
+      _gttsAudio = audio;
+      audio.onended  = resolve;
+      audio.onerror  = resolve; // skip failed chunk, continue
+      audio.play().catch(resolve);
+    });
+  }
+  _gttsActive = false;
+  _ttsStop(true);
+}
+
 let _ttsLang     = 'en';   // detected language of current TTS session
+let _ttsUseGTTS  = false;  // whether current session routes to Google TTS
 
 function _ttsStop(resetBtn){
   clearInterval(ttsKeepAlive); ttsKeepAlive = null;
   speechSynthesis.cancel();
+  _gttsStop();
   speaking = false; _ttsPaused = false;
   if(resetBtn && _ttsBtn) _ttsBtn.innerHTML = SPEAKER_ICON;
-  _ttsBtn = null; _ttsChunks = []; _ttsIdx = 0; _ttsLang = 'en';
+  _ttsBtn = null; _ttsChunks = []; _ttsIdx = 0;
+  _ttsLang = 'en'; _ttsUseGTTS = false;
 }
 
 function _ttsSpeak(){
-  if(!speaking || _ttsIdx >= _ttsChunks.length){
-    _ttsStop(true); return;
-  }
+  if(!speaking || _ttsIdx >= _ttsChunks.length){ _ttsStop(true); return; }
   const chunk = _ttsChunks[_ttsIdx++];
   const u = new SpeechSynthesisUtterance(chunk);
-  // Setting u.lang is the most reliable way to get correct pronunciation.
-  // The browser uses this even when a matching voice isn't installed —
-  // it will use its built-in pronunciation rules for that language.
   u.lang = _ttsLang;
   const voice = pickVoice(_ttsLang);
-  if(voice) u.voice = voice;
-  // Slightly slower rate for non-Latin scripts to improve intelligibility
-  const isLatinLang = /^(en|fr|es|pt|de|no|sv|da|tr|id|sw)/.test(_ttsLang);
-  u.rate  = isLatinLang ? 0.92 : 0.85;
-  u.pitch = 1.05;
+  // Only assign voice object if it genuinely matches the target language.
+  // Assigning a wrong-language voice alongside u.lang causes hooking/freezing.
+  if(voice && voice.lang.startsWith(_ttsLang)) u.voice = voice;
+  const isRTL = /^(ar|he|fa|ur)/.test(_ttsLang);
+  const isCJK = /^(zh|ja|ko)/.test(_ttsLang);
+  u.rate  = isRTL || isCJK ? 0.82 : 0.92;
+  u.pitch = 1.0;
   u.volume = 1;
-  u.onend = ()=>{ if(speaking) _ttsSpeak(); };
+  u.onend  = ()=>{ if(speaking) _ttsSpeak(); };
   u.onerror = (e)=>{
     if(e.error === 'interrupted' || e.error === 'canceled') return;
     _ttsStop(true);
@@ -7643,14 +7710,12 @@ function _ttsSpeak(){
 }
 
 function readAloud(btn){
-  if(!('speechSynthesis' in window)) return;
   if(speaking){ _ttsStop(true); return; }
 
   const rawHtml = btn.closest('.msg-body').querySelector('.content').innerHTML;
   const text = cleanForSpeech(rawHtml);
   if(!text) return;
 
-  // Detect language ONCE for the whole message and store it for every chunk
   _ttsLang   = detectTextLang(text);
   _ttsChunks = splitTTSChunks(text);
   _ttsIdx    = 0;
@@ -7658,15 +7723,29 @@ function readAloud(btn){
   speaking   = true;
   btn.innerHTML = STOP_ICON;
 
-  // Keep-alive: Chrome kills synthesis after ~15s. Tap pause/resume every 8s.
+  // Decide tier: use Google TTS if no native Web Speech voice available for language
+  const nativeVoice = pickVoice(_ttsLang);
+  const hasNativeVoice = nativeVoice && nativeVoice.lang.startsWith(_ttsLang);
+  const gttsCode = GTTS_LANGS[_ttsLang];
+
+  if(!hasNativeVoice && gttsCode && gttsCode !== 'en'){
+    // Tier 2: Google Translate TTS — handles Hausa, Yoruba, Igbo, Twi, Swahili, etc.
+    _ttsUseGTTS = true;
+    _gttsPlayChunks(_ttsChunks, gttsCode);
+    return;
+  }
+
+  // Tier 1: Web Speech API
+  _ttsUseGTTS = false;
+  if(!('speechSynthesis' in window)){ _ttsStop(true); return; }
+
   clearInterval(ttsKeepAlive);
   ttsKeepAlive = setInterval(()=>{
-    if(!speaking) return;
+    if(!speaking || _ttsUseGTTS) return;
     if(speechSynthesis.speaking && !speechSynthesis.paused){
       speechSynthesis.pause();
       speechSynthesis.resume();
     } else if(!speechSynthesis.speaking && !speechSynthesis.paused && !_ttsPaused){
-      // Synthesis died silently — restart from current chunk
       _ttsSpeak();
     }
   }, 8000);
@@ -7674,33 +7753,25 @@ function readAloud(btn){
   _ttsSpeak();
 }
 
-// Visibility fix: pause on background, resume/restart on foreground
+
+
+// Visibility fix: pause Web Speech on background, resume on foreground
+// (Google TTS audio pauses automatically when page is hidden)
 document.addEventListener('visibilitychange', ()=>{
-  if(!speaking) return;
+  if(!speaking || _ttsUseGTTS) return;
   if(document.hidden){
-    // Page going to background — pause rather than let Chrome kill it
     _ttsPaused = true;
     speechSynthesis.pause();
   } else {
-    // Coming back to foreground
     _ttsPaused = false;
     if(speechSynthesis.paused){
       speechSynthesis.resume();
     } else {
-      // Chrome cancelled the queue while hidden — restart from current chunk
       speechSynthesis.cancel();
-      setTimeout(()=>{ if(speaking) _ttsSpeak(); }, 150);
+      setTimeout(()=>{ if(speaking && !_ttsUseGTTS) _ttsSpeak(); }, 150);
     }
   }
 });
-
-// Ensure voices load before first use (some browsers need this)
-if('speechSynthesis' in window){
-  speechSynthesis.getVoices();
-  if(speechSynthesis.onvoiceschanged !== undefined){
-    speechSynthesis.onvoiceschanged = ()=> speechSynthesis.getVoices();
-  }
-}
 
 /* ─── Voice input — inline composer bar, ChatGPT-style ─── */
 let voiceFinal = '';
