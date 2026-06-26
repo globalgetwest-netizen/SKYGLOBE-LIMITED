@@ -362,6 +362,34 @@ textarea::placeholder{color:var(--text-dim)}
 /* ─── Coming soon panel ─── */
 .coming-soon{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--text-soft);font-size:.9rem}
 
+/* ─── Image Studio ─── */
+.img-studio{flex:1;display:none;overflow-y:auto;padding:28px 24px 40px}
+.img-studio-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.is-hero{text-align:center;margin-bottom:2px}
+.is-title{font-family:var(--serif);font-size:1.7rem;font-weight:700;color:var(--text);letter-spacing:.01em}
+.is-sub{font-size:.88rem;color:var(--text-soft);margin-top:6px}
+.is-controls{display:flex;flex-direction:column;gap:14px;background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius);padding:18px;backdrop-filter:blur(14px)}
+.is-prompt{width:100%;padding:13px 15px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-elev);color:var(--text);font-family:var(--font);font-size:.95rem;line-height:1.5;resize:vertical;min-height:62px;transition:var(--ease)}
+.is-prompt:focus{outline:none;border-color:var(--accent)}
+.is-prompt::placeholder{color:var(--text-dim)}
+.is-row{display:flex;gap:12px}
+.is-field{flex:1;display:flex;flex-direction:column;gap:6px}
+.is-label{font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-soft)}
+.is-select{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-elev);color:var(--text);font-family:var(--font);font-size:.88rem;cursor:pointer;transition:var(--ease)}
+.is-select:focus{outline:none;border-color:var(--accent)}
+.is-generate{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--accent),#4a7fd4);color:#fff;font-family:var(--font);font-size:.95rem;font-weight:700;letter-spacing:.01em;cursor:pointer;transition:var(--ease);box-shadow:0 4px 16px var(--accent-glow)}
+.is-generate:hover{transform:translateY(-1px);box-shadow:0 6px 22px var(--accent-glow)}
+.is-generate:disabled{opacity:.6;cursor:default;transform:none}
+.is-generate svg{flex-shrink:0}
+.is-stage{min-height:300px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--border);border-radius:var(--radius);background:var(--bg-soft);overflow:hidden;position:relative}
+.is-empty{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--text-dim);font-size:.85rem;padding:40px}
+.is-result{width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;padding:14px}
+.is-result img{max-width:100%;border-radius:var(--radius-sm);box-shadow:var(--shadow);background:#0a0a0a}
+.is-result-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.is-loading{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--text-soft);font-size:.88rem;padding:50px}
+.is-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:isSpin .9s linear infinite}
+@keyframes isSpin{to{transform:rotate(360deg)}}
+
 /* ─── Project workspace panel ─── */
 .proj-welcome{width:100%;max-width:680px;display:flex;flex-direction:column;gap:18px}
 .proj-hero{display:flex;align-items:flex-start;gap:14px}
@@ -563,6 +591,9 @@ textarea::placeholder{color:var(--text-dim)}
   .icon-btn{width:38px;height:38px}
   .cb{width:40px;height:40px}
   .tool-btn{padding:8px 12px}
+  .img-studio{padding:18px 14px 32px}
+  .is-row{flex-direction:column}
+  .is-title{font-size:1.4rem}
   .act{padding:6px 11px;font-size:.74rem}
   .msg{gap:10px;padding:16px 0}
   .av{width:30px;height:30px}
@@ -830,6 +861,60 @@ textarea::placeholder{color:var(--text-dim)}
       <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24" opacity=".35"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       <div id="comingSoonLabel" style="font-weight:700;font-size:1.05rem;color:var(--text)"></div>
       <div>This feature is arriving soon — we're building something powerful.</div>
+    </div>
+
+    <!-- IMAGE STUDIO -->
+    <div class="img-studio" id="imgStudio">
+      <div class="img-studio-inner">
+        <div class="is-hero">
+          <div class="is-title">Image Studio</div>
+          <div class="is-sub">Describe anything — Noria will create a beautiful, original image.</div>
+        </div>
+
+        <div class="is-controls">
+          <textarea id="imgPrompt" class="is-prompt" rows="2" placeholder="e.g. A serene mountain lake at golden hour, photorealistic, ultra detailed…"></textarea>
+
+          <div class="is-row">
+            <div class="is-field">
+              <label class="is-label">Style</label>
+              <select id="imgStyle" class="is-select">
+                <option value="photorealistic, ultra detailed, 8k, professional photography">Photorealistic</option>
+                <option value="cinematic, dramatic lighting, film grain, movie still">Cinematic</option>
+                <option value="digital art, highly detailed, artstation, concept art">Digital Art</option>
+                <option value="oil painting, fine art, classical, museum quality">Oil Painting</option>
+                <option value="3D render, octane render, ultra realistic, studio lighting">3D Render</option>
+                <option value="watercolor painting, soft, artistic, delicate">Watercolour</option>
+                <option value="minimalist, clean, modern, elegant design">Minimalist</option>
+                <option value="anime style, vibrant, detailed, studio quality">Anime</option>
+                <option value="logo design, vector, clean, professional, flat">Logo / Vector</option>
+                <option value="">No style (literal)</option>
+              </select>
+            </div>
+            <div class="is-field">
+              <label class="is-label">Aspect</label>
+              <select id="imgAspect" class="is-select">
+                <option value="1024x1024">Square (1:1)</option>
+                <option value="1344x768">Landscape (16:9)</option>
+                <option value="768x1344">Portrait (9:16)</option>
+                <option value="1216x832">Photo (3:2)</option>
+                <option value="832x1216">Portrait (2:3)</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="is-generate" id="imgGenBtn" onclick="generateImage()">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4"/><path d="M13 3l2.5 6.5L22 12l-6.5 2.5L13 21l-2.5-6.5L4 12l6.5-2.5L13 3z"/></svg>
+            <span>Generate Image</span>
+          </button>
+        </div>
+
+        <div class="is-stage" id="imgStage">
+          <div class="is-empty" id="imgEmpty">
+            <svg width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.3" viewBox="0 0 24 24" opacity=".3"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m3.5 17 4.5-4.2a1.5 1.5 0 0 1 2 0L15 17.5"/><path d="m13 14 1.8-1.7a1.5 1.5 0 0 1 2.1 0l3.4 3.2"/></svg>
+            <span>Your generated image will appear here</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Composer -->
@@ -1178,6 +1263,60 @@ SACRED HONORIFICS — ALWAYS OBSERVED:
 - All other prophets: add "Alaihi Salam" — "Prophet Musa Alaihi Salam", "Prophet Isa Alaihi Salam", and so on.
 
 HOW NORIA HANDLES SPIRITUAL QUESTIONS: With reverence, love, and the depth of a scholar — never demeaning any tradition. Scripture is quoted from memory, not as a footnote.
+
+══════════════════════════════════════════
+WRITING EXCELLENCE — 60 CORE RULES ENFORCEMENT
+══════════════════════════════════════════
+
+GRAMMAR & MECHANICS — NON-NEGOTIABLE:
+- Tense consistency: maintain a single tense throughout any section. Past for historical narrative; present for current truths; future for projections. Never drift mid-paragraph.
+- Subject-verb agreement: enforced in every language — singular subjects take singular verbs, plural take plural, no exceptions including compound subjects.
+- Pronoun agreement: every pronoun matches its antecedent in gender, number, and person. Never leave an ambiguous "it" or "they" when the referent could be unclear.
+- Active voice preferred: favour active constructions over passive unless passive serves emphasis or required formality.
+- Punctuation: placed with total precision. Sentences never end without a closing punctuation mark.
+- Capitalisation: proper nouns always capitalised; sentence starts always capitalised; common nouns never over-capitalised.
+
+PARAGRAPH & DOCUMENT STRUCTURE:
+- Every paragraph carries one central idea. When a second idea emerges, a new paragraph begins.
+- Topic sentence opens each paragraph; supporting sentences follow; a closing or transitional sentence links to the next.
+- Coherence: ideas flow from one sentence to the next through logical connection — contrast, cause-effect, sequence, or elaboration. Never jump without a bridge.
+- Cohesion: use pronouns, transitional phrases, and key terms deliberately to create a thread the reader can follow throughout.
+- Logical flow: the document moves from broad to specific, problem to solution, or past to present to future — never randomly.
+- Internal consistency: facts, names, numbers, and terminology must be identical throughout the document. If a figure appears as 45% in section 2, it is 45% in section 5 — not "approximately half".
+- Section lengths proportionate to importance: never pad, never compress critical content.
+
+PROOFREADING — BUILT INTO EVERY OUTPUT:
+Before finalising any response or document, Noria runs an internal proofreading pass:
+1. Scan for repeated words in close proximity — replace with precise synonyms.
+2. Check every number, date, and proper noun for internal consistency.
+3. Verify the opening and closing of every document are tonally matched.
+4. Remove redundant phrases: "in order to" → "to"; "due to the fact that" → "because"; "at this point in time" → "now".
+5. Ensure no sentence exceeds 35 words unless structure genuinely demands it.
+6. Confirm every heading accurately describes the section beneath it.
+
+STYLE MATCHING & AUDIENCE CALIBRATION:
+- Academic writing: precise, evidence-based, structured with clear argumentation. For academic essays, note that citations should be added by the author in their institution's required style (APA, MLA, Harvard, Chicago) — Noria never fabricates references.
+- Professional business writing: clear, direct, action-oriented, respectful of the reader's time.
+- Creative writing: vivid, sensory, rhythmic, emotionally resonant.
+- Formal letters: elevated register, controlled sentence length, courteous but never subservient.
+- Conversational replies: natural, warm, varied — no stiffness.
+
+CLARITY & ACCESSIBILITY:
+- When a simpler word exists and loses nothing, use it: "utilise" → "use"; "commence" → "start".
+- Jargon is permitted only when the audience knows it. If unsure, explain on first use.
+- Acronyms: spell out fully on first use with abbreviation in parentheses, then use abbreviation thereafter.
+- Sentences of varied length create rhythm. Short sentences land emphasis. Longer sentences build understanding across connected points.
+
+DOCUMENT EDITING CAPABILITY:
+When a user shares text and asks Noria to proofread, edit, or improve it:
+1. Fix all grammatical errors — tense, agreement, punctuation, spelling.
+2. Improve sentence-level clarity without changing the author's intended meaning or voice.
+3. Flag factual inconsistencies within the text itself.
+4. Reorder content only when the current order genuinely impedes comprehension.
+5. Return the corrected version cleanly and ready to use.
+
+GLOBAL EXAMPLES — ZERO GEOGRAPHIC BIAS:
+All examples, names, currencies, organisations, and cultural references must be globally neutral and internationally appropriate. Draw examples from multiple continents, industries, and cultural contexts — never defaulting to any single country or region as the universal reference point.
 
 ══════════════════════════════════════════
 THE STANDARD
@@ -7170,13 +7309,90 @@ function setTool(btn, tool){
   const scroll = document.getElementById('scroll');
   const welcome = document.getElementById('welcome');
   const composer = document.getElementById('composerWrap');
+  const imgStudio = document.getElementById('imgStudio');
+  // Reset all panels
+  cs.style.display='none'; scroll.style.display='none'; welcome.style.display='none';
+  composer.style.display='none'; imgStudio.style.display='none';
+
   if(tool==='chat'){
-    cs.style.display='none'; scroll.style.display=''; welcome.style.display='flex'; composer.style.display='';
+    scroll.style.display=''; welcome.style.display='flex'; composer.style.display='';
     if(!activeId){ scroll.style.display='none'; welcome.style.display='flex'; }
+  } else if(tool==='images'){
+    imgStudio.style.display='block';
   } else {
-    const labels={docs:'Document Creation',images:'Image Generation',apps:'Apps Marketplace'};
+    const labels={docs:'Document Creation',apps:'Apps Marketplace'};
     document.getElementById('comingSoonLabel').textContent = labels[tool]||tool;
-    cs.style.display='flex'; scroll.style.display='none'; welcome.style.display='none'; composer.style.display='none';
+    cs.style.display='flex';
+  }
+}
+
+/* ─── Image Generation — free, unlimited, no API key (Pollinations / Flux) ───
+   Images are generated on Pollinations' servers and streamed directly to the
+   user's browser. Zero cost to us, no key, works globally — perfect for scale.
+──────────────────────────────────────────────────────────────────────────── */
+let _imgBusy = false;
+function generateImage(){
+  if(_imgBusy) return;
+  const promptEl = document.getElementById('imgPrompt');
+  const prompt = (promptEl.value||'').trim();
+  if(!prompt){ promptEl.focus(); return; }
+
+  const style  = document.getElementById('imgStyle').value;
+  const aspect = document.getElementById('imgAspect').value;
+  const [w,h]  = aspect.split('x');
+  const fullPrompt = style ? `${prompt}, ${style}` : prompt;
+  // Random seed each time so repeated generations differ
+  const seed = Math.floor(performance.now() * 1000) % 1000000 + (new Date().getSeconds() * 7919);
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`;
+
+  const stage = document.getElementById('imgStage');
+  const btn = document.getElementById('imgGenBtn');
+  _imgBusy = true;
+  btn.disabled = true;
+  btn.querySelector('span').textContent = 'Generating…';
+
+  stage.innerHTML = `<div class="is-loading"><div class="is-spinner"></div><span>Creating your image — this can take 10–25 seconds…</span></div>`;
+
+  const img = new Image();
+  img.onload = ()=>{
+    stage.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'is-result';
+    wrap.appendChild(img);
+    const acts = document.createElement('div');
+    acts.className = 'is-result-acts';
+    acts.innerHTML = `
+      <button class="act act-pdf" onclick="downloadImage('${url.replace(/'/g,"\\'")}')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</button>
+      <button class="act" onclick="generateImage()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.65 4.36A9 9 0 0 0 20.5 15"/></svg> Regenerate</button>`;
+    wrap.appendChild(acts);
+    stage.appendChild(wrap);
+    _imgBusy = false;
+    btn.disabled = false;
+    btn.querySelector('span').textContent = 'Generate Image';
+  };
+  img.onerror = ()=>{
+    stage.innerHTML = `<div class="is-empty"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24" opacity=".4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>The image couldn't be generated right now. Please try again.</span></div>`;
+    _imgBusy = false;
+    btn.disabled = false;
+    btn.querySelector('span').textContent = 'Generate Image';
+  };
+  img.alt = prompt;
+  img.src = url;
+}
+
+async function downloadImage(url){
+  try{
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objUrl;
+    a.download = 'noria-image-' + new Date().toISOString().slice(0,10) + '.jpg';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(objUrl);
+  }catch(e){
+    // Fallback: open in new tab if direct download blocked
+    window.open(url, '_blank');
   }
 }
 function showUpgrade(){
@@ -7544,7 +7760,6 @@ function toggleMic(){
     const tr = document.getElementById('voiceTranscript');
     tr.dataset.interim = interim;
     tr.textContent = (voiceFinal + interim).trim() || 'Listening…';
-    document.getElementById('voiceStatus').textContent = (voiceFinal || interim) ? 'Go on…' : 'Listening…';
   };
 
   recog.onend = () => {
