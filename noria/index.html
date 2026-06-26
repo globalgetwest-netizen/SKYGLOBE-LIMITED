@@ -7798,12 +7798,15 @@ let _ttsChunks   = [];     // sentence chunks queued for speaking
 let _ttsIdx      = 0;      // index of next chunk to speak
 let _ttsPaused   = false;  // whether speech is paused (e.g. tab hidden)
 let ttsKeepAlive = null;   // interval that keeps Chrome from cutting off speech
+let _ttsUtterance = null;  // GLOBAL ref — without this Chrome garbage-collects the
+                           // utterance mid-speech → "no sound" / "cracking" voice.
 
 function _ttsStop(resetBtn){
   clearInterval(ttsKeepAlive); ttsKeepAlive = null;
   speechSynthesis.cancel();
   _gttsStop();
   speaking = false; _ttsPaused = false;
+  _ttsUtterance = null;
   if(resetBtn && _ttsBtn) _ttsBtn.innerHTML = SPEAKER_ICON;
   _ttsBtn = null; _ttsChunks = []; _ttsIdx = 0;
   _ttsLang = 'en'; _ttsUseGTTS = false;
@@ -7813,6 +7816,7 @@ function _ttsSpeak(){
   if(!speaking || _ttsIdx >= _ttsChunks.length){ _ttsStop(true); return; }
   const chunk = _ttsChunks[_ttsIdx++];
   const u = new SpeechSynthesisUtterance(chunk);
+  _ttsUtterance = u;          // keep a hard reference (Chrome GC fix)
   u.lang = _ttsLang;
   const voice = pickVoice(_ttsLang);
   // Only assign voice object if it genuinely matches the target language.
@@ -7828,6 +7832,9 @@ function _ttsSpeak(){
     if(e.error === 'interrupted' || e.error === 'canceled') return;
     _ttsStop(true);
   };
+  // Chrome can be left in a paused state from a previous session — clear it,
+  // then speak. resume() is harmless if not paused.
+  if(speechSynthesis.paused) speechSynthesis.resume();
   speechSynthesis.speak(u);
 }
 
@@ -7860,6 +7867,9 @@ function readAloud(btn){
   // Tier 1: Web Speech API
   _ttsUseGTTS = false;
   if(!('speechSynthesis' in window)){ _ttsStop(true); return; }
+
+  // Reset any stuck engine state from a previous utterance (Chrome quirk).
+  speechSynthesis.cancel();
 
   clearInterval(ttsKeepAlive);
   ttsKeepAlive = setInterval(()=>{
@@ -8177,13 +8187,12 @@ inp.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.prevent
    already warm. And it stays warm as long as the app is open.
 ──────────────────────────────────────────────────────────────────────────── */
 (function keepEngineAlive(){
-  function warm(){
-    fetch(ENGINE, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:'Ready', history:[], system:'Reply with one word: Ready'})
-    }).catch(()=>{});
-  }
+  // Ping the lightweight /health endpoint — it wakes the Render service WITHOUT
+  // running the LLM (so it never wastes API quota). This keeps the engine warm
+  // while the app is open; for true 24/7 warmth use an external uptime monitor
+  // pointed at:  https://noria-engine.onrender.com/health
+  const HEALTH = ENGINE.replace(/\/v1\/ask\/?$/, '/health');
+  function warm(){ fetch(HEALTH, {method:'GET', cache:'no-store'}).catch(()=>{}); }
   warm();                              // immediate on page load
   setTimeout(warm, 20000);            // 20s safety second hit
   setInterval(warm, 8 * 60 * 1000);  // every 8 min to stay alive
