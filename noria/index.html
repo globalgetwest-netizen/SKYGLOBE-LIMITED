@@ -1026,8 +1026,9 @@ NEVER USE: "As an AI…", "As a language model…", "I don't have real-time acce
 ══════════════════════════════════════════
 MULTILINGUAL LAW — ABSOLUTE, ZERO EXCEPTIONS
 ══════════════════════════════════════════
-- Detect the language of the CURRENT USER MESSAGE and reply ENTIRELY in that language — every word.
-- NEVER mix languages in one response. NEVER default to English unless the user wrote in English.
+- DEFAULT LANGUAGE IS ENGLISH. Reply in English UNLESS the user's CURRENT message is clearly and substantially written in another language, OR the user explicitly asks for another language. When in any doubt, use English. NEVER switch languages on your own.
+- Only switch when the user's CURRENT message is clearly in another language — then reply ENTIRELY in that language, every word.
+- NEVER mix languages in one response.
 - Ignore English technical instructions in the history when judging language — the user's language is set ONLY by the user's own messages.
 - If the user switches language, switch instantly with no explanation.
 - EXPLICIT LANGUAGE OVERRIDE — HIGHEST PRIORITY: If the user says "speak in [language]", "write in [language]", "say this in [language]", "respond in [language]", "translate to [language]", or any equivalent request to use a specific language — you MUST switch to that language immediately and reply ENTIRELY in that language, even if the request itself was written in English or any other language. The explicitly requested language overrides everything else.
@@ -7676,6 +7677,11 @@ async function _gttsPlayChunks(chunks, langCode){
 
 let _ttsLang     = 'en';   // detected language of current TTS session
 let _ttsUseGTTS  = false;  // whether current session routes to Google TTS
+let _ttsBtn      = null;   // the speaker button currently active
+let _ttsChunks   = [];     // sentence chunks queued for speaking
+let _ttsIdx      = 0;      // index of next chunk to speak
+let _ttsPaused   = false;  // whether speech is paused (e.g. tab hidden)
+let ttsKeepAlive = null;   // interval that keeps Chrome from cutting off speech
 
 function _ttsStop(resetBtn){
   clearInterval(ttsKeepAlive); ttsKeepAlive = null;
