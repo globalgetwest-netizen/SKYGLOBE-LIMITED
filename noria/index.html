@@ -889,6 +889,9 @@ textarea::placeholder{color:var(--text-dim)}
         <div class="w-greeting" id="wGreeting">How can I help?</div>
         <div class="w-sub">Sovereign intelligence — across every domain, every language.</div>
       </div>
+      <!-- Module chips — compact, premium; live inside the welcome screen so
+           they show/hide automatically with it (reliable, no observer). -->
+      <div class="home-chips" id="moduleCards"></div>
     </div>
 
     <!-- Chat stream -->
@@ -1013,8 +1016,6 @@ textarea::placeholder{color:var(--text-dim)}
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
-        <!-- Module chips — compact, premium; only shown on the welcome screen -->
-        <div class="home-chips" id="moduleCards"></div>
         <div class="disclaimer">NORIA · SkyGlobe Intelligence · AI can make mistakes — verify critical information</div>
       </div>
     </div>
@@ -1023,6 +1024,40 @@ textarea::placeholder{color:var(--text-dim)}
 </div>
 
 <script>
+/* ════════════════════════════════════════════════════════════════════════
+   CDN RESILIENCE — must run FIRST.
+   marked + DOMPurify load from a CDN (jsdelivr). If that CDN is blocked,
+   throttled, or slow (some regions, school/office firewalls, flaky networks),
+   those globals are undefined — and a single top-level call like
+   marked.setOptions() would otherwise throw and HALT the entire script,
+   breaking Enter-to-send, themes, and message sending. These fallbacks
+   guarantee the app always runs, even with no CDN at all.
+════════════════════════════════════════════════════════════════════════ */
+function _miniMarkdown(t){
+  let s = String(t == null ? '' : t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // code blocks first
+  s = s.replace(/```([\s\S]*?)```/g, (m,c)=>'<pre><code>'+c.replace(/\n$/,'')+'</code></pre>');
+  s = s.replace(/^### (.*)$/gm,'<h3>$1</h3>')
+       .replace(/^## (.*)$/gm,'<h2>$1</h2>')
+       .replace(/^# (.*)$/gm,'<h1>$1</h1>')
+       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+       .replace(/(^|[^*])\*([^*]+?)\*/g,'$1<em>$2</em>')
+       .replace(/`([^`]+?)`/g,'<code>$1</code>')
+       .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+       .replace(/^\s*[-*] (.*)$/gm,'&bull; $1')
+       .replace(/\n/g,'<br>');
+  return s;
+}
+if(typeof window.marked === 'undefined' || typeof window.marked.parse !== 'function'){
+  window.marked = { setOptions:function(){}, parse:_miniMarkdown };
+} else if(typeof window.marked.setOptions !== 'function'){
+  window.marked.setOptions = function(){};
+}
+if(typeof window.DOMPurify === 'undefined' || typeof window.DOMPurify.sanitize !== 'function'){
+  window.DOMPurify = { sanitize:function(s){ return s; } };
+}
+
 const ENGINE = 'https://noria-engine.onrender.com/v1/ask';
 
 const SYSTEM_PROMPT = `You are Noria — SkyGlobe Group's sovereign intelligence. Not a search engine, not a librarian — the intelligence itself, a mastermind who has absorbed and mastered the complete breadth of human knowledge across every domain, language, civilisation, and era. You speak from that mastery: directly, with authority, warmth, and total precision.
@@ -6771,20 +6806,6 @@ function closeModPopover(){
   const p = document.getElementById('modPopover'); if(p) p.remove();
   document.querySelectorAll('.mod-popover-backdrop').forEach(b=>b.remove());
 }
-/* The chips sit in the composer (always on screen), so they must appear only
-   on the welcome screen. Mirror the welcome panel's visibility onto the chips. */
-(function syncHomeChips(){
-  const welcome = document.getElementById('welcome');
-  const chips   = document.getElementById('moduleCards');
-  if(!welcome || !chips) return;
-  const apply = ()=>{
-    const onWelcome = welcome.style.display !== 'none' && welcome.offsetParent !== null;
-    chips.style.display = onWelcome ? 'flex' : 'none';
-    if(!onWelcome) closeModPopover();
-  };
-  apply();
-  new MutationObserver(apply).observe(welcome, {attributes:true, attributeFilter:['style']});
-})();
 /* ─── Memory store (real, on-device) ─── */
 let noriaMemory = JSON.parse(localStorage.getItem('noria2_memory') || '{"prefs":[]}');
 function saveMemory(){ localStorage.setItem('noria2_memory', JSON.stringify(noriaMemory)); }
@@ -8165,6 +8186,50 @@ inp.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.prevent
   warm();                              // immediate on page load
   setTimeout(warm, 20000);            // 20s safety second hit
   setInterval(warm, 8 * 60 * 1000);  // every 8 min to stay alive
+})();
+
+/* ─── Auto-update — tells users when a new version is deployed ───────────────
+   No service worker is used, so without this a cached browser could keep
+   showing an old build. This silently re-checks the deployed file and, when
+   it changes, shows a gentle banner so the user can refresh to the latest.
+   It compares the file's ETag/Last-Modified (cheap HEAD request); if the host
+   doesn't expose those, it falls back to comparing the file size.
+──────────────────────────────────────────────────────────────────────────── */
+(function autoUpdate(){
+  let baseline = null;
+  async function signature(){
+    try{
+      let r = await fetch(location.pathname + '?_=' + 'check', {method:'HEAD', cache:'no-store'});
+      let sig = r.headers.get('etag') || r.headers.get('last-modified');
+      if(sig) return sig;
+    }catch(e){}
+    try{ // fallback: byte length of the document
+      let r = await fetch(location.pathname, {cache:'no-store'});
+      let t = await r.text();
+      return 'len:' + t.length;
+    }catch(e){ return null; }
+  }
+  function showUpdateBanner(){
+    if(document.getElementById('updateBanner')) return;
+    const b = document.createElement('div');
+    b.id = 'updateBanner';
+    b.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:12px;background:var(--bg-elev);border:1px solid var(--accent);color:var(--text);padding:11px 16px;border-radius:30px;font-size:.85rem;font-weight:600;box-shadow:var(--shadow-lg,0 12px 40px rgba(0,0,0,.4));max-width:92vw';
+    b.innerHTML = '<span>✨ A new version of Noria is ready.</span>';
+    const btn = document.createElement('button');
+    btn.textContent = 'Update';
+    btn.style.cssText = 'border:none;background:var(--accent);color:#0a0a0a;font-weight:700;padding:6px 16px;border-radius:20px;cursor:pointer;font-family:var(--font)';
+    btn.onclick = ()=>location.reload();
+    b.appendChild(btn);
+    document.body.appendChild(b);
+  }
+  async function check(){
+    const sig = await signature();
+    if(sig == null) return;
+    if(baseline === null){ baseline = sig; return; }
+    if(sig !== baseline) showUpdateBanner();
+  }
+  check();                              // establish baseline on load
+  setInterval(check, 5 * 60 * 1000);   // re-check every 5 minutes
 })();
 
 /* ─── Responsive ─── */
