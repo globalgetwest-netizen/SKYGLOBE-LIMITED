@@ -2,6 +2,12 @@
 <html lang="en" data-theme="navy">
 <head>
 <meta charset="UTF-8"/>
+<script>
+/* Restore the saved theme BEFORE anything else paints, and before the main
+   script runs — so the choice always survives a reload even if a later
+   script error occurs. This is the single source of truth on load. */
+try{var _t=localStorage.getItem('noria2_theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>NORIA</title>
 <meta name="description" content="NORIA — SkyGlobe Group's AI intelligence assistant."/>
@@ -208,46 +214,71 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .w-greeting{font-family:var(--serif);font-size:2.05rem;font-weight:700;color:var(--text);margin-bottom:9px;letter-spacing:.01em;text-align:center;line-height:1.2}
 .w-sub{font-size:.9rem;color:var(--text-soft);letter-spacing:.02em;max-width:420px;font-weight:400}
 
-/* ─── Module cards ─── */
-.modules{display:flex;flex-direction:column;gap:9px;width:100%;max-width:520px}
-.module-card{
+/* ─── Module chips — compact icon pills under the input ─── */
+@keyframes dotPulse{0%,100%{box-shadow:0 0 4px #22C55E}50%{box-shadow:0 0 14px #22C55E,0 0 28px rgba(34,197,94,.3)}}
+.home-chips{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:8px;
+  max-width:560px;margin:10px auto 4px;width:100%;
+}
+.mod-chip{
+  position:relative;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 14px 7px 12px;
+  border-radius:999px;
   background:var(--bg-glass);
   border:1px solid var(--border-glass);
-  border-radius:var(--radius);
-  padding:14px 18px 14px 16px;
-  display:flex;align-items:center;gap:14px;
-  cursor:pointer;
-  transition:border-color var(--ease),background var(--ease),transform var(--ease),box-shadow var(--ease);
+  color:var(--text-soft);
+  font-family:var(--font);font-size:.8rem;font-weight:600;letter-spacing:.01em;
+  cursor:pointer;white-space:nowrap;
+  transition:border-color var(--ease),background var(--ease),color var(--ease),transform var(--ease),box-shadow var(--ease);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
 }
-.module-card:hover{
-  border-color:var(--accent);
-  background:rgba(201,168,76,.04);
-  transform:translateX(5px);
+.mod-chip:hover,.mod-chip.open{
+  border-color:var(--accent);color:var(--text);
+  background:rgba(201,168,76,.06);
+  transform:translateY(-1px);
   box-shadow:0 0 0 1px var(--accent-glow),var(--shadow-sm);
 }
-.mod-left{display:flex;flex-direction:column;align-items:center;gap:4px;width:48px;flex-shrink:0}
-.mod-dot{width:9px;height:9px;border-radius:50%}
-.mod-dot.s-active{background:#22C55E;box-shadow:0 0 8px #22C55E;animation:dotPulse 2.2s infinite}
-.mod-dot.s-learning{background:#5AB4F5;box-shadow:0 0 6px #5AB4F5}
-.mod-dot.s-connected{background:#06B6D4;box-shadow:0 0 6px #06B6D4}
-.mod-dot.s-ready{background:var(--text-dim)}
-.mod-dot.s-protected{background:var(--gold);box-shadow:0 0 6px var(--gold)}
-@keyframes dotPulse{0%,100%{box-shadow:0 0 4px #22C55E}50%{box-shadow:0 0 14px #22C55E,0 0 28px rgba(34,197,94,.3)}}
-.mod-status-txt{font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:1}
-.s-active~.mod-status-txt,.s-active+.mod-status-txt{color:#22C55E}
-.mod-info{flex:1;min-width:0}
-.mod-name{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:2px}
-.mod-role{font-size:.76rem;color:var(--text-soft);margin-bottom:3px}
-.mod-tagline{font-size:.71rem;color:var(--accent);font-style:italic}
-.mod-arrow{color:var(--text-dim);flex-shrink:0;transition:transform var(--ease),color var(--ease)}
-.module-card:hover .mod-arrow{color:var(--accent);transform:translateX(3px)}
+.mod-chip svg{width:16px;height:16px;flex-shrink:0;stroke:var(--accent)}
+.mod-chip .chip-dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-left:1px;
+}
+.chip-dot.s-active{background:#22C55E;box-shadow:0 0 7px #22C55E;animation:dotPulse 2.2s infinite}
+.chip-dot.s-learning{background:#5AB4F5;box-shadow:0 0 5px #5AB4F5}
+.chip-dot.s-connected{background:#06B6D4;box-shadow:0 0 5px #06B6D4}
+.chip-dot.s-ready{background:var(--text-dim)}
+.chip-dot.s-protected{background:var(--gold);box-shadow:0 0 5px var(--gold)}
+@media (max-width:480px){
+  .mod-chip{padding:6px 12px 6px 10px;font-size:.74rem;gap:5px}
+  .mod-chip svg{width:14px;height:14px}
+}
 
-/* ─── Module expanded actions ─── */
-.mod-actions{display:none;gap:7px;margin-top:10px;flex-wrap:wrap}
-.module-card.expanded .mod-actions{display:flex}
-.mod-act-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-soft);font-family:var(--font);font-size:.75rem;font-weight:500;cursor:pointer;transition:var(--ease)}
-.mod-act-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+/* ─── Module action popover ─── */
+.mod-popover{
+  position:fixed;z-index:120;
+  min-width:210px;max-width:280px;
+  background:var(--bg-glass);
+  border:1px solid var(--border-glass);
+  border-radius:14px;
+  box-shadow:var(--shadow-lg,0 18px 50px rgba(0,0,0,.4));
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  padding:8px;
+  opacity:0;transform:translateY(6px) scale(.98);pointer-events:none;
+  transition:opacity .16s ease,transform .16s ease;
+}
+.mod-popover.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.mp-head{display:flex;align-items:center;gap:8px;padding:6px 8px 8px;border-bottom:1px solid var(--border-glass);margin-bottom:6px}
+.mp-head svg{width:16px;height:16px;stroke:var(--accent);flex-shrink:0}
+.mp-title{font-size:.82rem;font-weight:700;color:var(--text)}
+.mp-tag{font-size:.68rem;color:var(--accent);font-style:italic;margin-left:auto}
+.mp-act{
+  display:block;width:100%;text-align:left;
+  padding:9px 11px;border-radius:9px;border:none;background:transparent;
+  color:var(--text-soft);font-family:var(--font);font-size:.82rem;font-weight:500;
+  cursor:pointer;transition:var(--ease);
+}
+.mp-act:hover{background:var(--accent-glow);color:var(--text)}
+.mod-popover-backdrop{position:fixed;inset:0;z-index:119;background:transparent}
 
 /* ─── Chat stream ─── */
 .scroll{flex:1;overflow-y:auto}
@@ -507,8 +538,7 @@ textarea::placeholder{color:var(--text-dim)}
   .toolbar{grid-column:1/-1}
   .welcome{padding:24px 16px 12px}
   .w-greeting{font-size:1.5rem;margin-bottom:20px}
-  .modules{max-width:100%}
-  .module-card{padding:12px 14px}
+  .home-chips{max-width:100%}
   .proj-title{font-size:1.25rem}
   .proj-hero{gap:10px}
   .proj-icon-lg{width:42px;height:42px}
@@ -591,7 +621,7 @@ textarea::placeholder{color:var(--text-dim)}
   .w-mark svg{width:34px;height:34px}
   .w-greeting{font-size:1.6rem;margin-bottom:7px}
   .w-sub{font-size:.82rem;max-width:300px}
-  .modules,.proj-welcome{max-width:100%}
+  .home-chips,.proj-welcome{max-width:100%}
   .proj-actions-grid{grid-template-columns:1fr}
   .proj-title{font-size:1.3rem}
   .proj-icon-lg{width:44px;height:44px}
@@ -859,7 +889,6 @@ textarea::placeholder{color:var(--text-dim)}
         <div class="w-greeting" id="wGreeting">How can I help?</div>
         <div class="w-sub">Sovereign intelligence — across every domain, every language.</div>
       </div>
-      <div class="modules" id="moduleCards"></div>
     </div>
 
     <!-- Chat stream -->
@@ -984,6 +1013,8 @@ textarea::placeholder{color:var(--text-dim)}
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
+        <!-- Module chips — compact, premium; only shown on the welcome screen -->
+        <div class="home-chips" id="moduleCards"></div>
         <div class="disclaimer">NORIA · SkyGlobe Intelligence · AI can make mistakes — verify critical information</div>
       </div>
     </div>
@@ -1024,16 +1055,13 @@ Eloquent, confident (never hedge), warm and human, structured, direct, varied (n
 NEVER USE: "As an AI…", "As a language model…", "I don't have real-time access", "I cannot help with that", "I can't process that", "I think/I believe" (for established facts), "Great question!", "Certainly!/Absolutely!/Of course!" as openers, or any self-introduction unless asked.
 
 ══════════════════════════════════════════
-MULTILINGUAL LAW — ABSOLUTE, ZERO EXCEPTIONS
+MULTILINGUAL LAW — read the rules IN ORDER; the first that applies wins
 ══════════════════════════════════════════
-- DEFAULT LANGUAGE IS ENGLISH. Reply in English UNLESS the user's CURRENT message is clearly and substantially written in another language, OR the user explicitly asks for another language. When in any doubt, use English. NEVER switch languages on your own.
-- Only switch when the user's CURRENT message is clearly in another language — then reply ENTIRELY in that language, every word.
-- NEVER mix languages in one response.
-- Ignore English technical instructions in the history when judging language — the user's language is set ONLY by the user's own messages.
-- If the user switches language, switch instantly with no explanation.
-- EXPLICIT LANGUAGE OVERRIDE — HIGHEST PRIORITY: If the user says "speak in [language]", "write in [language]", "say this in [language]", "respond in [language]", "translate to [language]", or any equivalent request to use a specific language — you MUST switch to that language immediately and reply ENTIRELY in that language, even if the request itself was written in English or any other language. The explicitly requested language overrides everything else.
-- AMBIGUOUS SINGLE WORDS: If the user sends only one or two words that exist identically in multiple languages (e.g. "hello", "ok", "yes", "no", "hi", "bye", "thanks", "good") — default to English unless prior conversation clearly established a different language. Do NOT guess or assume a non-English language from these words alone.
-- Full mastery of every human language including English, French, Arabic, Hausa, Yoruba, Igbo, Swahili, Amharic, Wolof, Zulu, Twi, Fulani, Spanish, Portuguese, Mandarin, Hindi, Urdu, Bengali, Malay, Indonesian, Turkish, Persian, Russian, Hebrew, Japanese, Korean, and all others. Right-to-left languages (Arabic, Urdu, Hebrew, Persian) written correctly. Preserve tone, register, idiom, and cultural nuance — not literal translation.
+RULE 1 (HIGHEST PRIORITY) — EXPLICIT LANGUAGE REQUEST. If the user asks you to write/say/respond/speak/translate in a named language — e.g. "write in Arabic", "say this in French", "respond in Hausa", "translate to Urdu", "in Spanish please" — you MUST produce your ENTIRE reply in that language, EVEN IF the request was typed in English. Output ONLY that language: no English preface, no English translation alongside, no "Here is the Arabic:" — just the content, fully in the requested language. This rule overrides Rule 2 and Rule 3 completely. Example: user types in English "Write me a thank-you note in Arabic" → your whole reply is in Arabic script. user types in English "Reply to me in French from now on" → every following reply is in French until told otherwise.
+RULE 2 — MATCH THE USER'S LANGUAGE. If Rule 1 does not apply and the user's CURRENT message is clearly written in another language, reply ENTIRELY in that same language — every word, no mixing.
+RULE 3 — DEFAULT TO ENGLISH. If neither Rule 1 nor Rule 2 applies (English message, or a short/ambiguous word like "hello", "ok", "yes", "hi", "bye" that exists in many languages), reply in English. Never switch languages on your own guess.
+- Ignore English technical instructions in the conversation history when judging language — only the user's own words set the language.
+- Full mastery of every human language: English, French, Arabic, Hausa, Yoruba, Igbo, Swahili, Amharic, Wolof, Zulu, Twi, Fulani, Spanish, Portuguese, Mandarin, Hindi, Urdu, Bengali, Malay, Indonesian, Turkish, Persian, Russian, Hebrew, Japanese, Korean, and all others. Write right-to-left languages (Arabic, Urdu, Hebrew, Persian) correctly in their own script. Preserve tone, register, idiom, and cultural nuance — never literal word-for-word translation.
 
 ══════════════════════════════════════════
 HOW NORIA THINKS (internal, before every response)
@@ -6677,36 +6705,86 @@ function doLogin(override){
 document.getElementById('loginName').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 
 /* ─── Module cards ─── */
+/* Compact, premium presentation: each module is shown as an icon + one short
+   word. Icon and short label are mapped by index so the rich MODULES data
+   (actions, taglines, prompts) stays untouched. */
+const MOD_ICONS = [
+  // 0 Create — lightning bolt
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  // 1 Memory — bookmark
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>',
+  // 2 Connect — globe
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  // 3 Build — cube
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+  // 4 Ethics — shield
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+];
+const MOD_SHORT = ['Create','Memory','Connect','Build','Ethics'];
+
 function renderModuleCards(){
   document.getElementById('moduleCards').innerHTML = MODULES.map((m,i)=>`
-    <div class="module-card" id="mod-${i}" onclick="toggleModule(${i})">
-      <div class="mod-left">
-        <div class="mod-dot ${m.status}"></div>
-        <div class="mod-status-txt" style="color:${statusColor(m.status)}">${m.statusLabel}</div>
-      </div>
-      <div class="mod-info">
-        <div class="mod-name">${m.name}</div>
-        <div class="mod-role">${m.codename} · Intelligence Module</div>
-        <div class="mod-tagline">${m.tagline}</div>
-        <div class="mod-actions" id="modact-${i}">
-          ${m.actions.map((a,j)=>`<button class="mod-act-btn" onclick="runModuleAction(event,${i},${j})">${a.label}</button>`).join('')}
-        </div>
-      </div>
-      <svg class="mod-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>`).join('');
+    <button class="mod-chip" id="mod-${i}" onclick="toggleModule(event,${i})" aria-label="${m.name}">
+      ${MOD_ICONS[i]||''}
+      <span>${MOD_SHORT[i]||m.name}</span>
+      <span class="chip-dot ${m.status}"></span>
+    </button>`).join('');
 }
-function statusColor(s){
-  return {
-    's-active':'#22C55E','s-learning':'#5AB4F5',
-    's-connected':'#06B6D4','s-ready':'var(--text-dim)','s-protected':'var(--gold)'
-  }[s] || 'var(--text-dim)';
+
+/* Tapping a chip opens a small premium popover listing that module's actions. */
+function toggleModule(ev,i){
+  ev.stopPropagation();
+  const open = document.querySelector('.mod-chip.open');
+  closeModPopover();
+  if(open && open.id === 'mod-'+i) return; // tapping the open chip closes it
+
+  const chip = document.getElementById('mod-'+i);
+  const m = MODULES[i];
+  chip.classList.add('open');
+
+  const back = document.createElement('div');
+  back.className = 'mod-popover-backdrop';
+  back.onclick = closeModPopover;
+  document.body.appendChild(back);
+
+  const pop = document.createElement('div');
+  pop.className = 'mod-popover';
+  pop.id = 'modPopover';
+  pop.innerHTML = `
+    <div class="mp-head">${MOD_ICONS[i]||''}<span class="mp-title">${m.name}</span><span class="mp-tag">${(m.tagline||'').replace(/"/g,'')}</span></div>
+    ${m.actions.map((a,j)=>`<button class="mp-act" onclick="runModuleAction(event,${i},${j})">${a.label}</button>`).join('')}`;
+  document.body.appendChild(pop);
+
+  // Position the popover above the chip, kept within the viewport.
+  const r = chip.getBoundingClientRect();
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = r.left + r.width/2 - pw/2;
+  left = Math.max(10, Math.min(left, window.innerWidth - pw - 10));
+  let top = r.top - ph - 10;
+  if(top < 10) top = r.bottom + 10; // not enough room above → drop below
+  pop.style.left = left + 'px';
+  pop.style.top  = top + 'px';
+  requestAnimationFrame(()=>pop.classList.add('show'));
 }
-function toggleModule(i){
-  const card = document.getElementById('mod-'+i);
-  const wasExpanded = card.classList.contains('expanded');
-  document.querySelectorAll('.module-card').forEach(c=>c.classList.remove('expanded'));
-  if(!wasExpanded) card.classList.add('expanded');
+function closeModPopover(){
+  document.querySelectorAll('.mod-chip.open').forEach(c=>c.classList.remove('open'));
+  const p = document.getElementById('modPopover'); if(p) p.remove();
+  document.querySelectorAll('.mod-popover-backdrop').forEach(b=>b.remove());
 }
+/* The chips sit in the composer (always on screen), so they must appear only
+   on the welcome screen. Mirror the welcome panel's visibility onto the chips. */
+(function syncHomeChips(){
+  const welcome = document.getElementById('welcome');
+  const chips   = document.getElementById('moduleCards');
+  if(!welcome || !chips) return;
+  const apply = ()=>{
+    const onWelcome = welcome.style.display !== 'none' && welcome.offsetParent !== null;
+    chips.style.display = onWelcome ? 'flex' : 'none';
+    if(!onWelcome) closeModPopover();
+  };
+  apply();
+  new MutationObserver(apply).observe(welcome, {attributes:true, attributeFilter:['style']});
+})();
 /* ─── Memory store (real, on-device) ─── */
 let noriaMemory = JSON.parse(localStorage.getItem('noria2_memory') || '{"prefs":[]}');
 function saveMemory(){ localStorage.setItem('noria2_memory', JSON.stringify(noriaMemory)); }
@@ -6773,6 +6851,7 @@ let pendingAction = null; // {tpl}
 
 function runModuleAction(e, mi, ai){
   e.stopPropagation();
+  closeModPopover();
   const action = MODULES[mi].actions[ai];
 
   // Special memory actions — instant, no backend needed
@@ -7653,8 +7732,23 @@ function _gttsStop(){
   if(_gttsAudio){ _gttsAudio.pause(); _gttsAudio.src=''; _gttsAudio=null; }
 }
 
+function _setMediaSession(){
+  if(!('mediaSession' in navigator)) return;
+  try{
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: 'Noria — Reading aloud',
+      artist: 'Noria',
+      artwork: [{ src: './icon.png', sizes: '512x512', type: 'image/png' }]
+    });
+    navigator.mediaSession.setActionHandler('pause', ()=>{ _ttsStop(true); });
+    navigator.mediaSession.setActionHandler('stop',  ()=>{ _ttsStop(true); });
+    navigator.mediaSession.playbackState = 'playing';
+  }catch(e){}
+}
+
 async function _gttsPlayChunks(chunks, langCode){
   _gttsActive = true;
+  _setMediaSession(); // OS media controls + keeps audio alive when app is backgrounded
   for(let i=0; i<chunks.length; i++){
     if(!_gttsActive || !speaking) break;
     const chunk = chunks[i].trim();
