@@ -7340,10 +7340,28 @@ function generateImage(){
   const style  = document.getElementById('imgStyle').value;
   const aspect = document.getElementById('imgAspect').value;
   const [w,h]  = aspect.split('x');
-  const fullPrompt = style ? `${prompt}, ${style}` : prompt;
+
+  // ── Professional quality engineering ──────────────────────────────────────
+  // Flux produces flat or distorted results from bare prompts. We enrich every
+  // prompt with master-grade quality cues, and — when a person is involved —
+  // explicit framing cues so faces are never cropped, melted, or malformed.
+  const QUALITY = 'masterpiece, ultra realistic, professional photography, 8k uhd, extremely detailed, sharp focus, perfect composition, natural lighting, cinematic, lifelike textures, depth of field, award-winning';
+
+  // Detect when the subject is a person, so we can protect the face.
+  const isPerson = /\b(person|people|man|men|woman|women|boy|girl|child|children|kid|baby|face|portrait|headshot|model|ceo|executive|lady|gentleman|human|he|she|himself|herself|guy|teacher|doctor|nurse|student|worker|family|couple|crowd|king|queen|warrior|soldier)\b/i.test(prompt);
+  const FACE = ', full face clearly visible and centered, complete head and shoulders in frame, not cropped, symmetrical natural face, detailed realistic eyes, flawless skin, correct anatomy, perfect hands';
+
+  const parts = [prompt];
+  if(style) parts.push(style);
+  if(isPerson) parts.push(FACE.replace(/^,\s*/,''));
+  parts.push(QUALITY);
+  const fullPrompt = parts.join(', ');
+
   // Random seed each time so repeated generations differ
   const seed = Math.floor(performance.now() * 1000) % 1000000 + (new Date().getSeconds() * 7919);
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`;
+  // enhance=true → Pollinations expands the prompt with an LLM for far richer,
+  // more beautiful images. nologo + private for a clean professional result.
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true&enhance=true&private=true&model=flux`;
 
   const stage = document.getElementById('imgStage');
   const btn = document.getElementById('imgGenBtn');
