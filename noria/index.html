@@ -7739,12 +7739,12 @@ async function send(engineeredPrompt, displayOverride){
       /i can'?t process that request/i,
       /i cannot process that request/i,
       /i'?m noria.*i can'?t/i,
-      /i'?m temporarily unavailable/i,
-      /i am temporarily unavailable/i,
+      /(i'?m|i am|noria is) (temporarily|momentarily) unavailable/i,
       /happy to help with any question.*science.*technology/i,
       /^(i'?m noria|i am noria)[^.!?]*[.!?]/i,
-      /please try again (in a moment|shortly|later)/i,
+      /please try again (in a (moment|few seconds)|shortly|later)/i,
       /system is currently unavailable/i,
+      /contact (our team|support).*skyglobegroup/i,
     ];
     if(patterns.some(p => p.test(t))) return true;
     // Short response that explicitly refuses
