@@ -8096,6 +8096,7 @@ async function send(engineeredPrompt, displayOverride){
       signal: ctrl.signal
     });
     clearTimeout(to);
+    if(res.status === 429) throw new Error('RATE_LIMIT');
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
     return data.answer || '';
@@ -8125,6 +8126,7 @@ async function send(engineeredPrompt, displayOverride){
       body:JSON.stringify({ query, history: histForEngine, system: SYSTEM_PROMPT + memoryPromptBlock() + docBoost + sysExtra }),
       signal: ctrl.signal
     });
+    if(res.status === 429){ clearTimeout(to); throw new Error('RATE_LIMIT'); }
     if(!res.ok || !res.body) { clearTimeout(to); throw new Error('stream HTTP '+res.status); }
 
     const reader = res.body.getReader();
@@ -8193,13 +8195,33 @@ async function send(engineeredPrompt, displayOverride){
       // and fall back to the classic non-streaming flow.
       if(streamBubble) streamBubble.remove();
       typingEl.style.display='';
+      // If we're being rate-limited, do NOT hammer the server with retries —
+      // that only deepens the limit. Show a calm message and stop.
+      if(streamErr && streamErr.message === 'RATE_LIMIT'){
+        typingEl.remove();
+        renderMsg('assistant','A lot of people are using Noria right now. Please wait a few seconds and send again — your message is safe.');
+        busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
+        return;
+      }
     }
 
-    let answer = await callEngine(q, history, false);
+    let answer = '';
+    try{
+      answer = await callEngine(q, history, false);
+    }catch(firstErr){
+      if(firstErr && firstErr.message === 'RATE_LIMIT'){
+        typingEl.remove();
+        renderMsg('assistant','A lot of people are using Noria right now. Please wait a few seconds and send again — your message is safe.');
+        busy=false; document.getElementById('sendBtn').disabled=false; inp.focus();
+        return;
+      }
+      throw firstErr; // real network/timeout error → handled by outer catch
+    }
 
     if(isFallbackResponse(answer)){
-      // Backoff schedule covering the full cold-start window, then steady retries.
-      const delays = [3000, 6000, 9000, 12000, 15000, 15000, 15000, 15000, 15000, 15000];
+      // Backoff schedule covering the cold-start window. Fewer, gentler retries
+      // so we never storm the engine (which can trip rate limits).
+      const delays = [3000, 6000, 10000, 15000, 15000];
       const statuses = ['Thinking…','Warming up…','Almost there…','Just a moment…','Preparing your answer…'];
       for(let i=0; i < delays.length && isFallbackResponse(answer); i++){
         updateTyping(typingEl, statuses[Math.min(i, statuses.length-1)]);
@@ -8207,7 +8229,9 @@ async function send(engineeredPrompt, displayOverride){
         try{
           const retry = await callEngine(q, history, true);
           if(retry && !isFallbackResponse(retry)){ answer = retry; break; }
-        } catch(e){ /* network blip — keep looping */ }
+        } catch(e){
+          if(e && e.message === 'RATE_LIMIT') break; // stop hammering when limited
+        }
       }
     }
 
