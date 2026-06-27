@@ -357,6 +357,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
   box-shadow:0 3px 10px var(--accent-glow);
 }
 .act:hover svg{stroke:var(--accent)}
+.act.fb-active{border-color:var(--accent);color:var(--text);background:var(--accent-glow)}
+.act.fb-active svg{fill:var(--accent);stroke:var(--accent)}
 .act-pdf{
   background:linear-gradient(135deg,#0d1b3e 0%,#1a3166 100%);
   border-color:#2a5db0;color:#e8b84b;
@@ -1069,6 +1071,8 @@ LAWS (every response):
 4. Speak from your own mastery — NEVER cite sources. No "According to…/Research shows…/Studies suggest…", no footnotes [1], no References/Bibliography/Works Cited list, no URLs as citations. Where a template wants references, use "Key Principles". Exception: quote scripture from memory, woven naturally (e.g. "As the Quran says in Al-Baqarah 286: …").
 5. Answer what is asked, immediately — no preamble, no "Great question!", no repeating the question.
 6. Never give wrong or outdated info. For fast-changing topics give the durable fundamentals and note they move quickly. Never say "I don't have real-time access". When a LIVE REFERENCE block is provided, use it for current facts.
+
+ACCURACY — NEVER FABRICATE. For specific facts (names, dates, numbers, statistics, prices, laws, scientific values, current office-holders, quotes), be exact. If you are not genuinely certain of a specific detail, say so plainly ("I'm not fully certain of the exact figure, but…") rather than inventing one — a careful, honest answer is better than a confident wrong one. Never invent a statistic, quote, study, law, citation, date, or event. Prefer the well-established answer over a risky precise-sounding guess. When a LIVE REFERENCE block is present, base current facts on it.
 
 NAME: Noria, pronounced NOR-ee-ah (from the water wheel that nourishes the land). Always write "Noria" — never all-caps or hyphenated.
 
@@ -7441,11 +7445,41 @@ function renderMsg(role, content, animate=true){
         <button class="act" onclick="refineMsg(this,'formal')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h10M4 14h12M4 18h8"/></svg> More Formal</button>
         <button class="act" onclick="refineMsg(this,'translate')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8h8M9 5v3"/><path d="M3 14s1.5 2.5 6 2.5M15 14s-1.5 2.5-6 2.5"/><path d="M13 20l4-8 4 8"/><path d="M14.5 17h5"/></svg> Translate</button>
         <button class="act" onclick="readAloud(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Read Aloud</button>
+        <button class="act fb-up" title="Helpful" onclick="sendFeedback(this,'up')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+        <button class="act fb-down" title="Not accurate" onclick="sendFeedback(this,'down')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
       </div>`:''}
     </div>`;
   stream.appendChild(div);
   scrollDown();
   return div;
+}
+
+/* ─── Answer feedback (👍/👎) ───────────────────────────────────────────────
+   Sends a lightweight signal to the engine so the team can review answers
+   marked inaccurate and improve them (e.g. ingest a correction). Fire-and-
+   forget — never blocks or breaks the chat. */
+function sendFeedback(btn, rating){
+  const body = btn.closest('.msg-body');
+  if(!body) return;
+  const answer = (body.querySelector('.content')?.textContent || '').slice(0, 2000);
+  // The question = the nearest preceding user message.
+  let question = '';
+  let prev = btn.closest('.msg')?.previousElementSibling;
+  while(prev){
+    if(prev.querySelector('.av.user')){ question = (prev.querySelector('.content')?.textContent || '').slice(0, 2000); break; }
+    prev = prev.previousElementSibling;
+  }
+  const acts = btn.closest('.msg-acts');
+  if(acts) acts.querySelectorAll('.fb-up,.fb-down').forEach(b=>b.classList.remove('fb-active'));
+  btn.classList.add('fb-active');
+  try{
+    fetch(ENGINE.replace(/\/v1\/ask\/?$/, '/v1/feedback'), {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ rating, question, answer })
+    }).catch(()=>{});
+  }catch(_){}
+  if(typeof showThemeToast === 'function')
+    showThemeToast(rating === 'up' ? 'Thank you — glad it helped' : 'Thank you — we\'ll improve this');
 }
 
 /* ─── Typing indicator ─── */
