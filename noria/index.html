@@ -799,7 +799,7 @@ textarea::placeholder{color:var(--text-dim)}
     <div class="tb-brand">
       <div class="tb-logo-wrap"><svg viewBox="0 0 100 100"><use href="#noriaMark"/></svg></div>
       <span class="tb-name">NORIA</span>
-      <span class="tb-badge">V1</span>
+      <span class="tb-badge" id="buildBadge" title="Build version">B27·3</span>
     </div>
     <div class="tb-right">
       <button class="icon-btn" id="menuBtn" onclick="toggleSidebar()" style="display:none" aria-label="Menu">
@@ -8120,38 +8120,61 @@ async function send(engineeredPrompt, displayOverride){
     const cleanHist = hist.map(m => ({ role: m.role, content: m.display || m.content }));
     const histForEngine = unlockMode ? [...cleanHist, {role:'assistant', content:''}] : cleanHist;
 
-    const res = await fetch(STREAM_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ query, history: histForEngine, system: SYSTEM_PROMPT + memoryPromptBlock() + docBoost + sysExtra }),
-      signal: ctrl.signal
-    });
-    if(res.status === 429){ clearTimeout(to); throw new Error('RATE_LIMIT'); }
-    if(!res.ok || !res.body) { clearTimeout(to); throw new Error('stream HTTP '+res.status); }
+    // First-token watchdog: if the SSE produces NO token within this window
+    // (e.g. a proxy is buffering the stream, so it "remains searching…"), abort
+    // and let the caller fall back to the proven non-streaming path.
+    const FIRST_TOKEN_MS = 9000;
+    let gotFirst = false;
+    let firstTimer = setTimeout(()=>{ if(!gotFirst) ctrl.abort(); }, FIRST_TOKEN_MS);
+
+    let res;
+    try{
+      res = await fetch(STREAM_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ query, history: histForEngine, system: SYSTEM_PROMPT + memoryPromptBlock() + docBoost + sysExtra }),
+        signal: ctrl.signal
+      });
+    }catch(e){ clearTimeout(to); clearTimeout(firstTimer); throw new Error('stream unavailable'); }
+    if(res.status === 429){ clearTimeout(to); clearTimeout(firstTimer); throw new Error('RATE_LIMIT'); }
+    if(!res.ok || !res.body) { clearTimeout(to); clearTimeout(firstTimer); throw new Error('stream HTTP '+res.status); }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buf = '', full = '', sawError = false;
-    while(true){
-      const {done, value} = await reader.read();
-      if(done) break;
-      buf += decoder.decode(value, {stream:true});
-      let nl;
-      while((nl = buf.indexOf('\n')) >= 0){
-        const line = buf.slice(0, nl).trim();
-        buf = buf.slice(nl+1);
-        if(!line.startsWith('data:')) continue;
-        const data = line.slice(5).trim();
-        if(!data) continue;
-        try{
-          const obj = JSON.parse(data);
-          if(obj.token){ full += obj.token; if(onProgress) onProgress(full); }
-          else if(obj.error){ sawError = true; full = obj.answer || full; }
-          // obj.done → stream finished
-        }catch(_){ /* ignore partial/keepalive */ }
+    try{
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        // ANY bytes (even the ': open' primer/heartbeat) prove the proxy is
+        // passing the stream through — cancel the first-byte watchdog. If the
+        // proxy buffers everything, no bytes arrive in time and we abort → the
+        // caller falls back to the reliable non-streaming path.
+        if(!gotFirst){ gotFirst = true; clearTimeout(firstTimer); }
+        buf += decoder.decode(value, {stream:true});
+        let nl;
+        while((nl = buf.indexOf('\n')) >= 0){
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl+1);
+          if(!line.startsWith('data:')) continue;
+          const data = line.slice(5).trim();
+          if(!data) continue;
+          try{
+            const obj = JSON.parse(data);
+            if(obj.token){ full += obj.token; if(onProgress) onProgress(full); }
+            else if(obj.error){ sawError = true; full = obj.answer || full; }
+            // obj.done → stream finished
+          }catch(_){ /* ignore partial/keepalive */ }
+        }
       }
+    }catch(readErr){
+      clearTimeout(to); clearTimeout(firstTimer);
+      // Aborted by the watchdog (no first token) or a mid-stream drop. If we
+      // already have text, keep it; otherwise signal the caller to fall back.
+      if(full.trim()) return full;
+      throw new Error('stream stalled');
     }
-    clearTimeout(to);
+    clearTimeout(to); clearTimeout(firstTimer);
     if(sawError && !full.trim()) throw new Error('stream reported error');
     return full;
   }
@@ -8175,7 +8198,10 @@ async function send(engineeredPrompt, displayOverride){
       let firstToken = true;
       const streamed = await callEngineStream(q, history, false, (full)=>{
         if(firstToken){ typingEl.style.display='none'; firstToken = false; }
-        contentEl.innerHTML = DOMPurify.sanitize(marked.parse(full));
+        // Render PLAIN text while streaming — parsing half-written markdown on
+        // every token causes reflow/jumping/disappearing words. textContent is
+        // smooth and loses nothing; full markdown is applied once at the end.
+        contentEl.textContent = full;
         scrollDown();
       });
       if(streamed && !isFallbackResponse(streamed)){
@@ -8219,9 +8245,9 @@ async function send(engineeredPrompt, displayOverride){
     }
 
     if(isFallbackResponse(answer)){
-      // Backoff schedule covering the cold-start window. Fewer, gentler retries
-      // so we never storm the engine (which can trip rate limits).
-      const delays = [3000, 6000, 10000, 15000, 15000];
+      // Patient backoff covering a full Render free-tier cold start (can be
+      // 60–90s). Gentle spacing so we never storm the engine (rate limits).
+      const delays = [3000, 6000, 10000, 15000, 20000, 20000, 20000];
       const statuses = ['Thinking…','Warming up…','Almost there…','Just a moment…','Preparing your answer…'];
       for(let i=0; i < delays.length && isFallbackResponse(answer); i++){
         updateTyping(typingEl, statuses[Math.min(i, statuses.length-1)]);
