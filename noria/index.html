@@ -8342,6 +8342,7 @@ inp.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.prevent
       return 'len:' + t.length;
     }catch(e){ return null; }
   }
+  let updateReady = false;
   function showUpdateBanner(){
     if(document.getElementById('updateBanner')) return;
     const b = document.createElement('div');
@@ -8349,20 +8350,39 @@ inp.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.prevent
     b.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:12px;background:var(--bg-elev);border:1px solid var(--accent);color:var(--text);padding:11px 16px;border-radius:30px;font-size:.85rem;font-weight:600;box-shadow:var(--shadow-lg,0 12px 40px rgba(0,0,0,.4));max-width:92vw';
     b.innerHTML = '<span>✨ A new version of Noria is ready.</span>';
     const btn = document.createElement('button');
-    btn.textContent = 'Update';
+    btn.textContent = 'Update now';
     btn.style.cssText = 'border:none;background:var(--accent);color:#0a0a0a;font-weight:700;padding:6px 16px;border-radius:20px;cursor:pointer;font-family:var(--font)';
-    btn.onclick = ()=>location.reload();
+    btn.onclick = ()=>location.reload(true);
     b.appendChild(btn);
     document.body.appendChild(b);
+  }
+  // Auto-refresh when it's SAFE — i.e. the user isn't mid-task: not waiting on a
+  // reply (busy), input box empty, and the tab is in the background. Otherwise
+  // the banner stays so they can update with one tap without losing their work.
+  function maybeAutoReload(){
+    if(!updateReady) return;
+    const inputEl = document.getElementById('input');
+    const typing = inputEl && inputEl.value.trim().length > 0;
+    const isBusy = (typeof busy !== 'undefined' && busy);
+    if(!isBusy && !typing && document.hidden){ location.reload(true); }
+  }
+  function onUpdateFound(){
+    if(updateReady) return;
+    updateReady = true;
+    showUpdateBanner();   // always show the banner immediately
+    maybeAutoReload();    // and silently refresh if the user is idle/away
   }
   async function check(){
     const sig = await signature();
     if(sig == null) return;
     if(baseline === null){ baseline = sig; return; }
-    if(sig !== baseline) showUpdateBanner();
+    if(sig !== baseline) onUpdateFound();
   }
-  check();                              // establish baseline on load
-  setInterval(check, 5 * 60 * 1000);   // re-check every 5 minutes
+  check();                                 // establish baseline on load
+  setInterval(check, 2 * 60 * 1000);       // re-check every 2 minutes
+  // Re-check the moment the user returns to the tab, and auto-reload if idle.
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ maybeAutoReload(); } else { check(); } });
+  window.addEventListener('focus', check);
 })();
 
 /* ─── Responsive ─── */
