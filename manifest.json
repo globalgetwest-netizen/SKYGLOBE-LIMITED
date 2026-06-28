@@ -1,24 +1,16 @@
 {
-  "name": "SkyGlobe Group — One World. Unlimited Opportunities.",
+  "name": "SkyGlobe Group",
   "short_name": "SkyGlobe",
-  "description": "Premium global travel, immigration and education consultancy. Visas, university admissions, work relocation and travel documentation.",
+  "description": "SkyGlobe Group — visas, study abroad, work permits, travel documents, scholarships and global mobility. One World. One Mission.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a1628",
-  "theme_color": "#0a1628",
-  "orientation": "portrait-primary",
-  "categories": ["travel", "education", "business"],
-  "lang": "en",
-  "dir": "ltr",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0a1c3e",
   "icons": [
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ],
-  "shortcuts": [
-    { "name": "Apply for a Service", "short_name": "Apply", "url": "/#apply" },
-    { "name": "Explore Countries", "short_name": "Countries", "url": "/#countries" },
-    { "name": "AI Document Generator", "short_name": "AI Tools", "url": "/#tools" }
   ]
 }
