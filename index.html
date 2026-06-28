@@ -10302,9 +10302,42 @@ document.addEventListener('click', (e) => {
 <!-- PWA Service Worker registration + Install prompt -->
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+  let _sgReloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (_sgReloading) return; _sgReloading = true; location.reload();
   });
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      if (reg.waiting && navigator.serviceWorker.controller) sgShowUpdate(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing; if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) sgShowUpdate(nw);
+        });
+      });
+      const check = () => reg.update().catch(() => {});
+      check();
+      setInterval(check, 60000); // re-check every minute
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+    } catch (err) { console.log('SW registration failed:', err); }
+  });
+}
+// Small, premium "update available" banner — lets returning users jump to the newest version instantly.
+function sgShowUpdate(worker) {
+  if (document.getElementById('sgUpdateBar')) return;
+  const bar = document.createElement('div');
+  bar.id = 'sgUpdateBar';
+  bar.style.cssText = 'position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:99999;display:flex;align-items:center;gap:14px;background:#0a1c3e;color:#fff;padding:12px 16px 12px 20px;border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.3);font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:.9rem;max-width:92vw';
+  bar.innerHTML = '<span>A new version of SkyGlobe is available.</span>' +
+    '<button id="sgUpdateBtn" style="background:linear-gradient(135deg,#C8962A,#e7c46a);color:#0a1c3e;border:none;border-radius:980px;padding:8px 18px;font-weight:700;cursor:pointer;font-size:.86rem;white-space:nowrap">Update</button>' +
+    '<button id="sgUpdateX" style="background:none;border:none;color:#9fb0d6;font-size:1.1rem;cursor:pointer;line-height:1">\u2715</button>';
+  document.body.appendChild(bar);
+  document.getElementById('sgUpdateBtn').onclick = () => {
+    document.getElementById('sgUpdateBtn').textContent = 'Updating\u2026';
+    worker.postMessage({ type: 'SKIP_WAITING' });
+  };
+  document.getElementById('sgUpdateX').onclick = () => bar.remove();
 }
 // Custom "Install app" experience
 let _deferredInstall = null;
