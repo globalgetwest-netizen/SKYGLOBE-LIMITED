@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SkyGlobe Group — One World. One Mission.</title>
-<link rel="icon" type="image/svg+xml" href="icon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg?v=3">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=3">
+<link rel="manifest" href="/manifest.json?v=3">
 <meta name="theme-color" content="#041022">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,7 +22,7 @@
 <meta property="og:url" content="https://skyglobegroup.com/">
 <meta property="og:title" content="SkyGlobe Group — Your Gateway to Global Opportunity">
 <meta property="og:description" content="Premium visa processing, university admissions, EU employment & travel consultancy. 12,000+ visas approved. 98% success rate. Start your global journey today.">
-<meta property="og:image" content="https://skyglobegroup.com/icon-512.png">
+<meta property="og:image" content="https://skyglobegroup.com/icon-512.png?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="SkyGlobe Group">
@@ -30,7 +30,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SkyGlobe Group — Your Gateway to Global Opportunity">
 <meta name="twitter:description" content="Premium visa processing, university admissions & EU employment. 12,000+ visas approved. 98% success rate.">
-<meta name="twitter:image" content="https://skyglobegroup.com/icon-512.png">
+<meta name="twitter:image" content="https://skyglobegroup.com/icon-512.png?v=3">
 <!-- JSON-LD Structured Data -->
 <script type="application/ld+json">
 {
@@ -38,7 +38,7 @@
   "@type":"TravelAgency",
   "name":"SkyGlobe Group",
   "url":"https://skyglobegroup.com",
-  "logo":"https://skyglobegroup.com/icon-512.png",
+  "logo":"https://skyglobegroup.com/icon-512.png?v=3",
   "description":"Premium visa processing, university admissions, work relocation and travel documentation services.",
   "email":"support@skyglobegroup.com",
   "areaServed":"Worldwide",
@@ -1272,7 +1272,7 @@ body.wc-active .page-back-bar{padding-top:138px}
 <!-- NAV -->
 <nav id="navbar">
   <div class="nav-logo" onclick="showPage('home')" style="flex-shrink:0;display:flex;align-items:center;gap:10px">
-    <img src="icon-192.png" alt="SkyGlobe Group" style="height:44px;width:44px;border-radius:11px">
+    <img src="icon-192.png?v=3" alt="SkyGlobe Group" style="height:44px;width:44px;border-radius:11px">
     <span style="display:flex;flex-direction:column;line-height:1.08">
       <span style="font-family:'SF Pro Display','SF Pro Text','Segoe UI',sans-serif;font-size:1.18rem;font-weight:700;color:#041022;letter-spacing:0.03em">Sky<span style="color:#D4A73A">Globe</span> Group</span>
       <span style="font-size:0.54rem;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#9fb0d6">One World. One Mission.</span>
@@ -1353,7 +1353,7 @@ body.wc-active .page-back-bar{padding-top:138px}
   <!-- Brand + close -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:2px solid rgba(212,167,58,.2)">
     <div onclick="showPage('home');toggleMenu()" style="display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent">
-      <img src="icon-192.png" alt="SkyGlobe Group" style="height:42px;width:42px;border-radius:11px">
+      <img src="icon-192.png?v=3" alt="SkyGlobe Group" style="height:42px;width:42px;border-radius:11px">
       <span style="display:flex;flex-direction:column;line-height:1.1">
         <span style="font-size:1.15rem;font-weight:700;color:#041022;letter-spacing:.02em">Sky<span style="color:#D4A73A">Globe</span> Group</span>
         <span style="font-size:.55rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#9fb0d6">One World. One Mission.</span>
@@ -3283,7 +3283,7 @@ body.wc-active .page-back-bar{padding-top:138px}
   <div class="footer-grid">
     <div class="footer-brand">
       <div class="nav-logo" style="cursor:default;display:flex;align-items:center;gap:12px">
-        <img src="icon.svg" onerror="this.src='icon-192.png'" alt="SkyGlobe Group" style="height:64px;width:64px;border-radius:14px">
+        <img src="icon.svg?v=3" onerror="this.src='icon-192.png?v=3'" alt="SkyGlobe Group" style="height:64px;width:64px;border-radius:14px">
         <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:1.7rem;font-weight:700;color:#fff">Sky<span style="color:#D4A73A">Globe</span> Group</span>
       </div>
       <p>Your trusted partner for global travel, immigration, and education. Turning international ambitions into lived realities since 2016.</p>
@@ -6452,7 +6452,7 @@ function printApp(cardId) {
   const { app, responses, date } = data;
   const esc = v => String(v == null ? '' : v).replace(/</g, '&lt;');
   const row = (label, val) => val ? `<tr><td>${label}</td><td>${esc(val)}</td></tr>` : '';
-  const logo = location.origin + '/icon.svg';
+  const logo = location.origin + '/icon.svg?v=3';
   const w = window.open('', '_blank', 'width=860,height=760');
   w.document.write(`<!DOCTYPE html><html><head><title>SkyGlobe Group — Official Application Document</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -7400,7 +7400,7 @@ if (isLoggedIn()) connectSSE();
   <!-- Staff/CEO gate — hidden once authenticated -->
   <div id="toolsGate" style="display:none;position:fixed;inset:0;z-index:900;background:linear-gradient(160deg,#041022,#071B3B);align-items:center;justify-content:center;padding:20px">
     <div style="background:#fff;border-radius:20px;padding:44px 38px;width:100%;max-width:380px;text-align:center;box-shadow:0 40px 100px rgba(0,0,0,.5)">
-      <img src="icon-512.png" style="height:64px;width:64px;border-radius:14px;margin-bottom:14px" onerror="this.style.display='none'">
+      <img src="icon-512.png?v=3" style="height:64px;width:64px;border-radius:14px;margin-bottom:14px" onerror="this.style.display='none'">
       <h2 style="font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:1.5rem;font-weight:700;color:#041022;letter-spacing:.06em;text-transform:uppercase">SKYGLOBE <span style="color:#D4A73A">GROUP</span></h2>
       <p style="font-size:.72rem;color:#64748b;letter-spacing:.2em;text-transform:uppercase;margin:8px 0 24px">Staff &amp; CEO Access Only</p>
       <input type="password" id="toolsGatePw" placeholder="Enter your staff or CEO password" style="width:100%;padding:13px 15px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.93rem;margin-bottom:12px" onkeydown="if(event.key==='Enter')toolsGateLogin()">
@@ -9172,7 +9172,7 @@ function printDoc() {
   const isSkyConf = selectedDocType === 'skyconference';
 
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  const logoUrl = location.origin + '/icon.svg';
+  const logoUrl = location.origin + '/icon.svg?v=3';
   const sigUrl = location.origin + '/signature.png';
   const stampUrl = location.origin + '/stamp.png';
 
@@ -9596,7 +9596,7 @@ function buildInvoice() {
 <!-- LETTERHEAD -->
 <div class="lh">
   <div class="lh-brand" style="display:flex;align-items:center;gap:12px">
-    <img src="${location.origin}/icon.svg" alt="SkyGlobe Group" style="height:64px;width:64px;display:block">
+    <img src="${location.origin}/icon.svg?v=3" alt="SkyGlobe Group" style="height:64px;width:64px;display:block">
     <div>
       <div class="brand-name" style="font-size:17pt">SkyGlobe Group</div>
       <div class="brand-tag">Global Immigration &amp; Education Consultancy</div>
