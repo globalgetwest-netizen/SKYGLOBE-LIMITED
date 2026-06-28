@@ -1282,27 +1282,12 @@ nav#navbar.scrolled{background:rgba(255,255,255,.85);border-bottom:1px solid var
 
     <!-- NORIA brand mark -->
     <div class="noria-brand" title="NORIA · Intelligence · Innovation · Impact">
-      <svg class="noria-logo-svg" width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="nLg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D4A73A"/><stop offset="50%" stop-color="#F4D77A"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient>
-          <linearGradient id="nG1" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#b8841e"/><stop offset="100%" stop-color="#F4D77A"/></linearGradient>
-          <linearGradient id="nG2" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient>
-          <radialGradient id="nGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#D4A73A" stop-opacity="0.18"/><stop offset="100%" stop-color="#D4A73A" stop-opacity="0"/></radialGradient>
-        </defs>
-        <!-- Outer glow -->
-        <circle cx="20" cy="20" r="20" fill="url(#nGlow)"/>
-        <!-- Base circle -->
-        <circle cx="20" cy="20" r="18.5" fill="#0a1525" stroke="rgba(212,167,58,0.32)" stroke-width="1"/>
-        <!-- Gold swirl — 3 arcs radiating from center-left, curling top-right -->
-        <path d="M8 17 C8 10, 14 5, 20 5" stroke="url(#nG1)" stroke-width="3" stroke-linecap="round" fill="none"/>
-        <path d="M5.5 22 C5 12, 12 4, 20 3.5" stroke="#D4A73A" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.45"/>
-        <path d="M7 13 C9 7, 15 4, 21 4.2" stroke="#F4D77A" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.3"/>
-        <!-- Blue swirl — 3 arcs radiating from center-right, curling bottom-left -->
-        <path d="M32 23 C32 30, 26 35, 20 35" stroke="url(#nG2)" stroke-width="3" stroke-linecap="round" fill="none"/>
-        <path d="M34.5 18 C35 28, 28 36, 20 36.5" stroke="#0ea5e9" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.45"/>
-        <path d="M33 27 C31 33, 25 36, 19 35.8" stroke="#38bdf8" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.3"/>
-        <!-- N lettermark — strong, gradient, centered -->
-        <text x="20" y="25.5" text-anchor="middle" font-size="15" font-weight="900" font-family="Inter,SF Pro Display,system-ui,sans-serif" fill="url(#nLg)" letter-spacing="-0.5">N</text>
+      <svg class="noria-logo-svg" width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs><linearGradient id="nSpark" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#F6A21E"/><stop offset="42%" stop-color="#F2671F"/>
+          <stop offset="68%" stop-color="#7B5BE0"/><stop offset="100%" stop-color="#2E7BF6"/>
+        </linearGradient></defs>
+        <path d="M50 2 C54 30 70 46 98 50 C70 54 54 70 50 98 C46 70 30 54 2 50 C30 46 46 30 50 2 Z" fill="url(#nSpark)"/>
       </svg>
       <div>
         <div class="noria-wordmark">NORIA</div>
@@ -1393,79 +1378,38 @@ nav#navbar.scrolled{background:rgba(255,255,255,.85);border-bottom:1px solid var
        FUTURISTIC HERO — Clean, premium, always readable
        Dark navy base · Aurora glows · Smaller globe · 85vh
        ═══════════════════════════════════════════════════════════════ -->
-  <section id="cosmicHero" style="position:relative;width:100%;height:85vh;min-height:560px;max-height:900px;overflow:hidden;background:linear-gradient(160deg,#030b1c 0%,#041022 28%,#071630 58%,#0a1c3e 100%)">
+  <section id="cosmicHero" style="position:relative;width:100%;min-height:92vh;display:flex;align-items:center;overflow:hidden;background:radial-gradient(120% 95% at 50% -10%,#eef4ff 0%,#ffffff 58%)">
+    <div style="position:absolute;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(10,28,62,0.05) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse 75% 60% at 50% 35%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 75% 60% at 50% 35%,#000 30%,transparent 75%)"></div>
+    <div style="position:absolute;left:-12%;top:-18%;width:52vw;height:52vw;max-width:680px;max-height:680px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.12),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
+    <div style="position:absolute;right:-10%;bottom:-22%;width:48vw;height:48vw;max-width:640px;max-height:640px;border-radius:50%;background:radial-gradient(circle,rgba(10,46,101,0.09),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
 
-    <!-- Dot-grid overlay (futuristic Vercel/Linear aesthetic) -->
-    <div style="position:absolute;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(99,179,237,0.13) 1px,transparent 1px);background-size:38px 38px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,#000 40%,transparent 100%)"></div>
+    <div style="position:relative;z-index:2;width:100%;max-width:1280px;margin:0 auto;padding:130px clamp(1.5rem,6vw,5rem) 70px">
+      <h1 style="font-weight:780;letter-spacing:-0.045em;line-height:0.94;color:#0b1220;font-size:clamp(3.2rem,12.5vw,9rem);margin:0">
+        Move the<br><span style="background:linear-gradient(115deg,#D4A73A 0%,#e7c46a 45%,#0A2E65 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">World.</span>
+      </h1>
 
-    <!-- Aurora glow — electric blue left -->
-    <div style="position:absolute;left:-14%;top:-20%;width:55vw;height:55vw;max-width:700px;max-height:700px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,0.22) 0%,rgba(37,99,235,0.10) 45%,transparent 72%);filter:blur(36px);pointer-events:none;z-index:0"></div>
-
-    <!-- Aurora glow — gold bottom-left accent -->
-    <div style="position:absolute;left:5%;bottom:-18%;width:40vw;height:40vw;max-width:520px;max-height:520px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.16) 0%,rgba(212,167,58,0.06) 48%,transparent 72%);filter:blur(32px);pointer-events:none;z-index:0"></div>
-
-    <!-- Aurora glow — subtle teal right -->
-    <div style="position:absolute;right:20%;top:-10%;width:38vw;height:38vw;max-width:480px;max-height:480px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,0.11) 0%,rgba(14,165,233,0.05) 50%,transparent 72%);filter:blur(28px);pointer-events:none;z-index:0"></div>
-
-    <!-- 3-D Globe — smaller, positioned right -->
-    <div id="globeContainer" style="position:absolute;right:-2%;top:50%;transform:translateY(-50%);width:min(42vw,460px);aspect-ratio:1/1;z-index:3;opacity:.92"></div>
-    <div id="globeAtmo" style="position:absolute;right:-2%;top:50%;transform:translateY(-50%);width:min(42vw,460px);aspect-ratio:1/1;z-index:2;border-radius:50%;background:radial-gradient(circle,transparent 46%,rgba(14,165,233,0.18) 58%,rgba(37,99,235,0.08) 70%,transparent 78%);pointer-events:none"></div>
-
-    <!-- Hero copy layer -->
-    <div style="position:absolute;inset:0;z-index:10;display:flex;align-items:center;padding:0 clamp(1.5rem,6vw,5rem)">
-      <div style="max-width:clamp(280px,46vw,580px)">
-
-        <!-- Eyebrow -->
-        <div style="display:inline-flex;align-items:center;gap:.55em;background:rgba(212,167,58,.12);border:1px solid rgba(212,167,58,.3);border-radius:100px;padding:.4em 1.1em;margin-bottom:1.4rem">
-          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#D4A73A;animation:pulseDot 2s ease-in-out infinite"></span>
-          <span class="he-eyebrow" style="font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#F4D77A">One World. One Mission.</span>
-        </div>
-
-        <!-- Headline — clean, futuristic, always white -->
-        <h1 style="font-family:'SF Pro Display','SF Pro Text','Segoe UI',sans-serif;font-size:clamp(2rem,4.4vw,3.6rem);font-weight:700;line-height:1.08;letter-spacing:-.022em;color:#ffffff;margin-bottom:1.2rem">
-          The Platform<br>
-          <span style="background:linear-gradient(90deg,#D4A73A,#F4D77A 50%,#fbbf24);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Built to Move</span><br>
-          the World.
-        </h1>
-
-        <!-- Sub -->
-        <p style="font-size:clamp(.9rem,1.4vw,1.08rem);line-height:1.7;color:rgba(186,210,240,.78);margin-bottom:1.8rem;max-width:50ch">
-          Global mobility, education, intelligence and digital innovation — unified under one name.
-        </p>
-
-        <!-- Search -->
-        <form style="position:relative;display:flex;align-items:center;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(212,167,58,.28);border-radius:100px;padding:6px 6px 6px 18px;box-shadow:0 8px 32px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.04);margin-bottom:1.4rem;max-width:480px;transition:border-color .2s" onsubmit="heroSearch(event)" onfocusin="this.style.borderColor='rgba(212,167,58,.55)'" onfocusout="this.style.borderColor='rgba(212,167,58,.28)'">
-          <span style="margin-right:8px;opacity:.5;font-size:.95rem">🔍</span>
-          <input id="heroSearchInput" type="text" placeholder="Search any country — Canada, UK, Germany…" autocomplete="off"
+      <div style="display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;max-width:560px;margin-top:2.2rem">
+        <form style="position:relative;display:flex;align-items:center;flex:1;min-width:260px;background:#fff;border:1px solid #e7e9ee;border-radius:980px;padding:6px 6px 6px 18px;box-shadow:0 8px 30px rgba(16,24,40,.08)" onsubmit="heroSearch(event)">
+          <span style="margin-right:8px;opacity:.5;font-size:.95rem">&#128269;</span>
+          <input id="heroSearchInput" type="text" placeholder="Search any country &mdash; Canada, UK, Germany&hellip;" autocomplete="off"
             oninput="acInput('heroSearchInput','heroAcDrop')" onkeydown="acKey(event,'heroSearchInput','heroAcDrop')"
-            style="border:none;outline:none;background:transparent;color:#ffffff;font-size:.9rem;font-family:inherit;flex:1;min-width:0">
-          <input type="submit" value="Search" style="background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;border:none;border-radius:100px;padding:10px 20px;font-weight:700;font-size:.86rem;cursor:pointer;flex-shrink:0">
+            style="border:none;outline:none;background:transparent;color:#0b1220;font-size:.92rem;flex:1;min-width:0">
+          <input type="submit" value="Search" style="background:#0a1c3e;color:#fff;border:none;border-radius:980px;padding:10px 20px;font-weight:600;font-size:.86rem;cursor:pointer;flex-shrink:0">
           <div class="ac-drop" id="heroAcDrop"></div>
         </form>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.9rem">
+        <button onclick="showPage('countries')" class="btn-primary">&#127757; Explore the World</button>
+        <button onclick="showPage('apply')" class="btn-outline">Begin Your Journey</button>
+      </div>
 
-        <!-- CTAs -->
-        <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:2rem">
-          <button onclick="showPage('countries')" style="display:inline-flex;align-items:center;gap:.5em;background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;border:none;border-radius:10px;padding:12px 24px;font-weight:700;font-size:.9rem;cursor:pointer;min-height:46px;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 18px rgba(212,167,58,.3)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 32px rgba(212,167,58,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 18px rgba(212,167,58,.3)'">🌍 Explore the World</button>
-          <button onclick="showPage('apply')" style="display:inline-flex;align-items:center;gap:.5em;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);color:#e2eeff;border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:12px 24px;font-weight:600;font-size:.9rem;cursor:pointer;min-height:46px;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.14)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.transform=''">📋 Begin Your Journey</button>
+      <div style="display:flex;justify-content:flex-end;margin-top:3.2rem">
+        <div style="text-align:right;max-width:34ch">
+          <p style="font-size:.86rem;color:#5b6573;line-height:1.5;margin:0">Global mobility, education and opportunity &mdash; unified.</p>
+          <div style="margin-top:.45rem;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:#C8962A;font-weight:800">One World. One Mission.</div>
         </div>
-
-        <!-- Live stats — always gold on dark -->
-        <div style="display:flex;flex-wrap:wrap;gap:1.6rem;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,.08)">
-          <div><div style="font-size:clamp(1.3rem,2.6vw,1.8rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="12" data-suffix="K+">0</span></div><div class="he-statlabel" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(180,205,240,.5);margin-top:.3rem">Visas Processed</div></div>
-          <div><div style="font-size:clamp(1.3rem,2.6vw,1.8rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="98" data-suffix="%">0</span></div><div class="he-statlabel" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(180,205,240,.5);margin-top:.3rem">Success Rate</div></div>
-          <div><div style="font-size:clamp(1.3rem,2.6vw,1.8rem);font-weight:700;color:#F4D77A;line-height:1"><span class="count-up" data-count="195" data-suffix="">0</span></div><div class="he-statlabel" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(180,205,240,.5);margin-top:.3rem">Countries</div></div>
-          <div><div style="font-size:clamp(1.3rem,2.6vw,1.8rem);font-weight:700;color:#F4D77A;line-height:1" id="liveTime"></div><div class="he-statlabel" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(180,205,240,.5);margin-top:.3rem">UTC Live</div></div>
-        </div>
-
       </div>
     </div>
-
-    <!-- Scroll cue -->
-    <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:5px;opacity:.45">
-      <span class="he-scroll" style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(180,210,240,.7)">Explore</span>
-      <div style="width:1px;height:32px;background:linear-gradient(to bottom,rgba(212,167,58,.6),transparent);animation:scrollPulse 1.8s ease-in-out infinite"></div>
-    </div>
-
   </section>
 
   <!-- COSMIC HERO STYLES + ASTRONOMY ENGINE -->
@@ -1585,6 +1529,7 @@ nav#navbar.scrolled{background:rgba(255,255,255,.85);border-bottom:1px solid var
 
     /* ── 1. STAR FIELD + MILKY WAY ──────────────────────────────── */
     const canvas = document.getElementById('starCanvas');
+    if(!canvas) return;
     const ctx = canvas.getContext('2d');
     let W, H, stars=[], shooters=[];
 
@@ -6168,9 +6113,33 @@ function addChatMsg(containerId,text,type){
   if(!c)return;
   const d=document.createElement('div');
   d.className='chat-msg '+type;
-  d.innerHTML=text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  const _html=text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  if(type==='bot'){
+    d.innerHTML='<span class="cm-text">'+_html+'</span>'+
+      '<button class="cm-listen" onclick="chatSpeak(this)" title="Listen with NORIA voice" style="display:block;margin-top:7px;background:none;border:none;color:#2563EB;font-size:.72rem;font-weight:600;cursor:pointer;padding:2px 0;letter-spacing:.02em">&#128266; Listen</button>';
+  } else { d.innerHTML=_html; }
   c.appendChild(d);
   c.scrollTop=c.scrollHeight;
+}
+let _chatUtter=null;
+function chatSpeak(btn){
+  if(!('speechSynthesis' in window)){alert('Audio is not supported in this browser. Please use Chrome, Edge or Safari.');return;}
+  const span=btn.previousElementSibling;
+  const text=(span?span.textContent:'').trim();
+  if(!text)return;
+  const speaking=window.speechSynthesis.speaking;
+  window.speechSynthesis.cancel();
+  document.querySelectorAll('.cm-listen.on').forEach(b=>{b.classList.remove('on');b.innerHTML='\uD83D\uDD0A Listen';});
+  if(speaking&&btn.classList.contains('_was')){btn.classList.remove('_was');return;}
+  document.querySelectorAll('.cm-listen._was').forEach(b=>b.classList.remove('_was'));
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=1;u.pitch=1.03;
+  const vs=window.speechSynthesis.getVoices();
+  const pref=vs.find(v=>/Samantha|Google US English|Microsoft Aria|en-US/i.test(v.name))||vs.find(v=>v.lang&&v.lang.startsWith('en'));
+  if(pref)u.voice=pref;
+  u.onstart=()=>{btn.classList.add('on','_was');btn.innerHTML='\u23F9 Stop';};
+  u.onend=u.onerror=()=>{btn.classList.remove('on');btn.innerHTML='\uD83D\uDD0A Listen';};
+  _chatUtter=u;window.speechSynthesis.speak(u);
 }
 let aiChatHistory=[];
 async function askAI(preset){
@@ -6189,7 +6158,7 @@ async function askAI(preset){
     const r=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:q,history:aiChatHistory})
+      body:JSON.stringify({message:q,history:aiChatHistory,lang:(navigator.language||'en').split('-')[0],instruction:'You are NORIA, the SkyGlobe Group AI assistant. Answer ONLY about SkyGlobe Group services (visas, study abroad, work permits, travel documents, scholarships, conferences). Reply in the same language the user wrote in (default English) and never switch languages mid-answer. Give accurate, verifiable information; if unsure, say so and suggest contacting SkyGlobe.'})
     });
     const data=await r.json();
     document.getElementById('aiTyping')?.remove();
