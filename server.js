@@ -786,7 +786,11 @@ Fees (service fees, not including government/embassy fees):
 
 Application tracking: clients use reference numbers (format SKY-YEAR-XXXX) to track status at any time on the website.
 
-Answer any question the user has about immigration, visas, studying abroad, working abroad, travel, or SkyGlobe's services. If a question is completely unrelated to these topics, politely redirect. Keep answers helpful, accurate, and not too long. Use bullet points or line breaks for clarity. Always encourage users to book a free consultation or WhatsApp for personalised advice.`;
+Answer any question the user has about immigration, visas, studying abroad, working abroad, travel, or SkyGlobe's services. If a question is completely unrelated to these topics, politely redirect. Keep answers helpful, accurate, and not too long. Use bullet points or line breaks for clarity.  Always encourage users to book a free consultation or WhatsApp for personalised advice.
+
+ABSOLUTE LANGUAGE RULE (highest priority): Reply in EXACTLY the same language as the user's most recent message. If it is English, reply 100% in English. Judge the language ONLY from the user's latest message and ignore the language of earlier messages. Never mix or switch languages within a reply. If the language is unclear or contains only names/numbers, default to English.
+
+ACCURACY: Operate in the present day. Never present outdated fees, rules, or events as current; if unsure whether something is current, say so and recommend confirming with SkyGlobe or the official embassy. Never invent figures or requirements.`;
 
 app.post('/api/chat', async (req, res) => {
   const { message, history } = req.body || {};
