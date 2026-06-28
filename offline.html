@@ -5,69 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>You're Offline — SkyGlobe Group</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
-<meta name="theme-color" content="#041022">
+<meta name="theme-color" content="#ffffff">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#0b1220;--muted:#5b6573;--gold:#C8962A;--navy:#0a1c3e;--line:#e7e9ee}
   body{
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     min-height:100vh;min-height:100svh;
     display:flex;align-items:center;justify-content:center;
     padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));
-    background:radial-gradient(ellipse at top,#0d2347,#041022 70%);
-    color:#fff;text-align:center;overflow:hidden;position:relative;
+    background:radial-gradient(120% 90% at 50% -10%,#eef4ff 0%,#f4f6f9 60%);
+    color:var(--ink);text-align:center;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;letter-spacing:-.011em;
   }
-  .stars{position:fixed;inset:0;z-index:0;opacity:.5}
-  .card{position:relative;z-index:1;max-width:440px;width:100%}
-  .globe{
-    width:96px;height:96px;margin:0 auto 28px;border-radius:50%;
-    background:radial-gradient(circle at 35% 30%,#1d5fc4,#0a1f44);
-    box-shadow:0 0 60px rgba(61,130,247,.4),inset -8px -8px 24px rgba(0,0,0,.5);
-    display:flex;align-items:center;justify-content:center;font-size:2.6rem;
-    animation:float 4s ease-in-out infinite;
+  .card{max-width:460px;width:100%}
+  .logo{
+    width:88px;height:88px;margin:0 auto 26px;border-radius:22px;display:flex;align-items:center;justify-content:center;
+    background:#fff;border:1px solid var(--line);box-shadow:0 18px 44px rgba(16,24,40,.12);overflow:hidden;
+    animation:float 4.5s ease-in-out infinite;
   }
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-  h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;letter-spacing:-.01em}
-  .gold{color:#D4A73A}
-  p{color:#9fb2d4;font-size:.96rem;line-height:1.6;margin-bottom:28px}
+  .logo img{width:84%;height:84%;object-fit:contain}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  h1{font-size:clamp(1.5rem,5vw,2rem);font-weight:700;margin-bottom:12px;letter-spacing:-.03em}
+  .gold{color:var(--gold)}
+  p{color:var(--muted);font-size:1rem;line-height:1.6;margin-bottom:28px}
   .btn{
     display:inline-flex;align-items:center;gap:8px;
-    background:linear-gradient(135deg,#D4A73A,#f0c969);color:#041022;
-    border:none;border-radius:100px;padding:14px 30px;
-    font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;
-    box-shadow:0 10px 30px rgba(212,167,58,.3);transition:transform .15s,box-shadow .15s;
+    background:var(--navy);color:#fff;border:none;border-radius:980px;padding:14px 30px;
+    font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;
+    box-shadow:0 12px 30px rgba(10,28,62,.22);transition:transform .15s,box-shadow .15s;
     min-height:48px;-webkit-tap-highlight-color:transparent;
   }
-  .btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(212,167,58,.4)}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(10,28,62,.3)}
   .btn:active{transform:translateY(0)}
-  .hint{margin-top:22px;font-size:.8rem;color:#5f74a0}
-  .brand{margin-top:40px;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:#4a5d85}
+  .hint{margin-top:20px;font-size:.82rem;color:#94a3b8}
+  .brand{margin-top:40px;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-weight:800}
 </style>
 </head>
 <body>
-  <canvas class="stars" id="stars"></canvas>
   <div class="card">
-    <div class="globe">🌍</div>
+    <div class="logo"><img src="icon.svg" onerror="this.src='icon-192.png'" alt="SkyGlobe Group"></div>
     <h1>You're <span class="gold">Offline</span></h1>
-    <p>It looks like your connection dropped. SkyGlobe needs the internet to load fresh content — but don't worry, your journey is still on track.</p>
-    <button class="btn" onclick="location.reload()">↻ Try Again</button>
+    <p>Your connection dropped. SkyGlobe needs the internet to load fresh content — but don't worry, your journey is still on track.</p>
+    <button class="btn" onclick="location.reload()">&#8635; Try Again</button>
     <div class="hint">We'll reconnect you automatically once your network is back.</div>
     <div class="brand">SkyGlobe Group · One World. One Mission.</div>
   </div>
 <script>
-  // Auto-reload the moment the connection returns
   window.addEventListener('online', () => location.reload());
-  // Lightweight starfield to match the brand's cosmic hero
-  (function(){
-    const c=document.getElementById('stars'),x=c.getContext('2d');
-    function size(){c.width=innerWidth;c.height=innerHeight;}
-    size();addEventListener('resize',size);
-    const stars=Array.from({length:90},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.4+.3,t:Math.random()*Math.PI*2}));
-    (function draw(){
-      x.clearRect(0,0,c.width,c.height);
-      for(const s of stars){s.t+=.02;const a=.4+Math.sin(s.t)*.4;x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fillStyle='rgba(255,255,255,'+a+')';x.fill();}
-      requestAnimationFrame(draw);
-    })();
-  })();
 </script>
 </body>
 </html>
