@@ -1129,6 +1129,8 @@ nav#navbar.scrolled{background:rgba(255,255,255,.85);border-bottom:1px solid var
 #noriaPanel .noria-close-btn{background:#f4f6f9;border:1px solid #e2e5ea;color:#475569}
 #noriaPanel .noria-auto-speak-btn{border:1px solid #e2e5ea;color:#475569}
 #noriaPanel .noria-speak-btn{color:#2563EB}
+#noriaBar .noria-wordmark,#noriaBar .noria-tagline{display:none!important}
+#noriaBar .noria-brand{gap:0}
 /* ── Premium soft canvas (not stark white) ── */
 body{background:#f4f6f9}
 /* ── Hero 2-column layout ── */
@@ -1136,12 +1138,12 @@ body{background:#f4f6f9}
 /* ── Premium crystalline rotating showcase ── */
 .sg-showcase{position:relative;min-height:330px;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(238,244,255,.72));border:1px solid rgba(10,28,62,.08);box-shadow:0 30px 70px rgba(16,24,40,.12),inset 0 1px 0 rgba(255,255,255,.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .sg-showcase::before{content:'';position:absolute;inset:0;background:linear-gradient(130deg,transparent 28%,rgba(212,167,58,.10),transparent 68%);pointer-events:none}
-.sg-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:.7rem;padding:2.4rem 2.4rem 3rem;opacity:0;transform:translateY(14px) scale(.985);transition:opacity .8s ease,transform .8s ease;pointer-events:none}
+.sg-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:.55rem;padding:2rem 2rem 2.8rem;opacity:0;transform:translateY(14px) scale(.985);transition:opacity .8s ease,transform .8s ease;pointer-events:none}
 .sg-slide.active{opacity:1;transform:none;pointer-events:auto}
-.sg-ico{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.65rem;background:linear-gradient(135deg,#0a1c3e,#15418c);box-shadow:0 10px 24px rgba(10,28,62,.25)}
+.sg-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.45rem;background:linear-gradient(135deg,#0a1c3e,#15418c);box-shadow:0 10px 24px rgba(10,28,62,.25)}
 .sg-tag{font-size:.66rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C8962A}
-.sg-title{font-size:clamp(1.35rem,2.3vw,1.85rem);font-weight:720;letter-spacing:-.02em;color:#0b1220;line-height:1.1}
-.sg-desc{font-size:.96rem;color:#5b6573;line-height:1.5;max-width:34ch}
+.sg-title{font-size:clamp(1.1rem,1.8vw,1.45rem);font-weight:700;letter-spacing:-.02em;color:#0b1220;line-height:1.15}
+.sg-desc{font-size:.88rem;color:#5b6573;line-height:1.5;max-width:36ch}
 .sg-link{margin-top:.35rem;align-self:flex-start;font-size:.84rem;font-weight:600;color:#0a1c3e;background:#fff;border:1px solid #e7e9ee;border-radius:980px;padding:9px 18px;cursor:pointer;box-shadow:0 6px 16px rgba(16,24,40,.06);transition:.2s}
 .sg-link:hover{border-color:#C8962A;color:#7a5b00;transform:translateY(-1px)}
 .sg-dots{position:absolute;bottom:16px;left:2.4rem;display:flex;gap:7px;z-index:3}
@@ -1449,9 +1451,9 @@ body.wc-active .page-back-bar{padding-top:138px}
     <div style="position:absolute;left:-12%;top:-18%;width:50vw;height:50vw;max-width:640px;max-height:640px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.12),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
     <div style="position:absolute;right:-10%;bottom:-22%;width:46vw;height:46vw;max-width:620px;max-height:620px;border-radius:50%;background:radial-gradient(circle,rgba(10,46,101,0.09),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
 
-    <div class="hero-wrap" style="position:relative;z-index:2;width:100%;max-width:1280px;margin:0 auto;padding:118px clamp(1.5rem,6vw,5rem) 64px">
+    <div class="hero-wrap" style="position:relative;z-index:2;width:100%;max-width:none;margin:0;padding:104px clamp(1.1rem,3.5vw,2.6rem) 56px">
       <div class="hero-left">
-        <h1 style="font-weight:780;letter-spacing:-0.04em;line-height:0.96;color:#0b1220;font-size:clamp(2.7rem,7vw,5.6rem);margin:0">
+        <h1 style="font-weight:780;letter-spacing:-0.04em;line-height:0.96;color:#0b1220;font-size:clamp(2rem,4.6vw,3.7rem);margin:0">
           Move the<br><span style="background:linear-gradient(115deg,#C8962A 0%,#e7c46a 45%,#0A2E65 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">World.</span>
         </h1>
         <div style="display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;max-width:560px;margin-top:1.9rem">
@@ -1476,30 +1478,35 @@ body.wc-active .page-back-bar{padding-top:138px}
 
       <!-- Premium rotating product/service showcase (right side) -->
       <aside class="sg-showcase" id="sgShowcase" aria-label="SkyGlobe services">
-        <div class="sg-slide"><div class="sg-ico">&#127891;</div><div class="sg-tag">Study Abroad</div><div class="sg-title">Student Visas &amp; Admissions</div><div class="sg-desc">From university shortlisting to visa approval &mdash; UK, USA, Canada, Europe &amp; beyond.</div><button class="sg-link" onclick="showPage('services')">Explore &rarr;</button></div>
-        <div class="sg-slide"><div class="sg-ico">&#128188;</div><div class="sg-tag">Work in Europe</div><div class="sg-title">Work Visas &amp; EU Jobs</div><div class="sg-desc">Verified employers across 17 countries &mdash; permit &amp; visa handled end-to-end.</div><button class="sg-link" onclick="showPage('recruitment')">View jobs &rarr;</button></div>
-        <div class="sg-slide"><div class="sg-ico">&#9992;</div><div class="sg-tag">Travel Ready</div><div class="sg-title">Flight &amp; Hotel Letters</div><div class="sg-desc">Embassy-accepted reservation letters, issued the same day for your application.</div><button class="sg-link" onclick="showPage('services')">Get yours &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#127891;</div><div class="sg-tag">Study Abroad</div><div class="sg-title">Student Visas &amp; Admissions</div><div class="sg-desc">University shortlisting to visa approval &mdash; UK, USA, Canada, Europe &amp; beyond.</div><button class="sg-link" onclick="showPage('services')">Explore &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#127979;</div><div class="sg-tag">Admissions</div><div class="sg-title">University Placement</div><div class="sg-desc">Offers from top universities worldwide, with personal-statement support.</div><button class="sg-link" onclick="showPage('services')">Get placed &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#128188;</div><div class="sg-tag">Work in Europe</div><div class="sg-title">Work Visas &amp; EU Jobs</div><div class="sg-desc">Verified employers in 17 countries &mdash; permit &amp; visa handled end-to-end.</div><button class="sg-link" onclick="showPage('recruitment')">View jobs &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#129650;</div><div class="sg-tag">Kids Academy</div><div class="sg-title">SkyGlobe Kids Academy</div><div class="sg-desc">A premium learning space preparing young global minds for the world.</div><button class="sg-link" onclick="location.href='https://app.skyglobegroup.com/kids-academy'">Enter &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#9992;</div><div class="sg-tag">Travel Ready</div><div class="sg-title">Flight &amp; Hotel Letters</div><div class="sg-desc">Embassy-accepted reservation letters, issued the same day.</div><button class="sg-link" onclick="showPage('services')">Get yours &rarr;</button></div>
         <div class="sg-slide"><div class="sg-ico">&#128737;</div><div class="sg-tag">Protected</div><div class="sg-title">Travel Insurance</div><div class="sg-desc">Schengen-compliant cover with &euro;30,000+ medical protection in minutes.</div><button class="sg-link" onclick="showPage('services')">Get covered &rarr;</button></div>
-        <div class="sg-slide"><div class="sg-ico">&#127758;</div><div class="sg-tag">Explore</div><div class="sg-title">195 Country Guides</div><div class="sg-desc">Visas, costs, universities, jobs &amp; live data for every country on earth.</div><button class="sg-link" onclick="showPage('countries')">Browse &rarr;</button></div>
         <div class="sg-slide"><div class="sg-ico">&#127942;</div><div class="sg-tag">Funded Study</div><div class="sg-title">Scholarships</div><div class="sg-desc">Merit &amp; need-based scholarships, expertly matched and applied for you.</div><button class="sg-link" onclick="showPage('blog')">Discover &rarr;</button></div>
-        <div class="sg-dots">
-          <span class="sg-dot"></span><span class="sg-dot"></span><span class="sg-dot"></span><span class="sg-dot"></span><span class="sg-dot"></span><span class="sg-dot"></span>
-        </div>
+        <div class="sg-slide"><div class="sg-ico">&#127758;</div><div class="sg-tag">Explore</div><div class="sg-title">195 Country Guides</div><div class="sg-desc">Visas, costs, universities, jobs &amp; live data for every country.</div><button class="sg-link" onclick="showPage('countries')">Browse &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#128221;</div><div class="sg-tag">Free Tool</div><div class="sg-title">CV / R&eacute;sum&eacute; Builder</div><div class="sg-desc">Build a clean, professional international CV in minutes &mdash; free.</div><button class="sg-link" onclick="showPage('cv-builder')">Build CV &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#128203;</div><div class="sg-tag">Verified</div><div class="sg-title">Documents &amp; Apostille</div><div class="sg-desc">Notarisation, apostille &amp; legalisation for use anywhere in the world.</div><button class="sg-link" onclick="showPage('services')">Verify &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#127908;</div><div class="sg-tag">Events</div><div class="sg-title">Conferences &amp; Invitations</div><div class="sg-desc">Conference sourcing &amp; official invitation letters for your visa.</div><button class="sg-link" onclick="location.href='/conferences'">See events &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#128710;</div><div class="sg-tag">Visit</div><div class="sg-title">Tourist &amp; Visit Visas</div><div class="sg-desc">Schengen, USA, UK &amp; more &mdash; prepared for the highest approval odds.</div><button class="sg-link" onclick="showPage('services')">Apply &rarr;</button></div>
+        <div class="sg-dots" id="sgDots"></div>
       </aside>
     </div>
   </section>
   <script>
   (function(){
     var box=document.getElementById('sgShowcase'); if(!box)return;
-    var slides=box.querySelectorAll('.sg-slide'),dots=box.querySelectorAll('.sg-dot');
-    if(!slides.length)return;
+    var slides=box.querySelectorAll('.sg-slide'); if(!slides.length)return;
+    var dotsBox=document.getElementById('sgDots'),dots=[];
+    slides.forEach(function(_,k){ var d=document.createElement('span'); d.className='sg-dot';
+      d.addEventListener('click',function(){ go(k); reset(); }); dotsBox.appendChild(d); dots.push(d); });
     var i=0,timer=null;
-    function go(n){ slides[i].classList.remove('active'); if(dots[i])dots[i].classList.remove('active');
-      i=(n+slides.length)%slides.length; slides[i].classList.add('active'); if(dots[i])dots[i].classList.add('active'); }
+    function go(n){ slides[i].classList.remove('active'); dots[i].classList.remove('active');
+      i=(n+slides.length)%slides.length; slides[i].classList.add('active'); dots[i].classList.add('active'); }
     function next(){ go(i+1); }
-    function reset(){ if(timer)clearInterval(timer); timer=setInterval(next,3800); }
-    dots.forEach(function(d,k){ d.addEventListener('click',function(){ go(k); reset(); }); });
-    slides[0].classList.add('active'); if(dots[0])dots[0].classList.add('active'); reset();
+    function reset(){ if(timer)clearInterval(timer); timer=setInterval(next,4200); }
+    slides[0].classList.add('active'); dots[0].classList.add('active'); reset();
     box.addEventListener('mouseenter',function(){ if(timer)clearInterval(timer); });
     box.addEventListener('mouseleave',reset);
   })();
