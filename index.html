@@ -1129,6 +1129,40 @@ nav#navbar.scrolled{background:rgba(255,255,255,.85);border-bottom:1px solid var
 #noriaPanel .noria-close-btn{background:#f4f6f9;border:1px solid #e2e5ea;color:#475569}
 #noriaPanel .noria-auto-speak-btn{border:1px solid #e2e5ea;color:#475569}
 #noriaPanel .noria-speak-btn{color:#2563EB}
+/* ── Premium soft canvas (not stark white) ── */
+body{background:#f4f6f9}
+/* ── Hero 2-column layout ── */
+.hero-wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(1.5rem,4vw,3.4rem);align-items:center}
+/* ── Premium crystalline rotating showcase ── */
+.sg-showcase{position:relative;min-height:330px;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(238,244,255,.72));border:1px solid rgba(10,28,62,.08);box-shadow:0 30px 70px rgba(16,24,40,.12),inset 0 1px 0 rgba(255,255,255,.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.sg-showcase::before{content:'';position:absolute;inset:0;background:linear-gradient(130deg,transparent 28%,rgba(212,167,58,.10),transparent 68%);pointer-events:none}
+.sg-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:.7rem;padding:2.4rem 2.4rem 3rem;opacity:0;transform:translateY(14px) scale(.985);transition:opacity .8s ease,transform .8s ease;pointer-events:none}
+.sg-slide.active{opacity:1;transform:none;pointer-events:auto}
+.sg-ico{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.65rem;background:linear-gradient(135deg,#0a1c3e,#15418c);box-shadow:0 10px 24px rgba(10,28,62,.25)}
+.sg-tag{font-size:.66rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C8962A}
+.sg-title{font-size:clamp(1.35rem,2.3vw,1.85rem);font-weight:720;letter-spacing:-.02em;color:#0b1220;line-height:1.1}
+.sg-desc{font-size:.96rem;color:#5b6573;line-height:1.5;max-width:34ch}
+.sg-link{margin-top:.35rem;align-self:flex-start;font-size:.84rem;font-weight:600;color:#0a1c3e;background:#fff;border:1px solid #e7e9ee;border-radius:980px;padding:9px 18px;cursor:pointer;box-shadow:0 6px 16px rgba(16,24,40,.06);transition:.2s}
+.sg-link:hover{border-color:#C8962A;color:#7a5b00;transform:translateY(-1px)}
+.sg-dots{position:absolute;bottom:16px;left:2.4rem;display:flex;gap:7px;z-index:3}
+.sg-dot{width:7px;height:7px;border-radius:50%;background:rgba(10,28,62,.18);transition:.3s;cursor:pointer}
+.sg-dot.active{background:#C8962A;width:22px;border-radius:6px}
+@media(max-width:900px){
+  .hero-wrap{grid-template-columns:1fr!important}
+  .sg-showcase{min-height:230px;margin-top:2rem}
+}
+/* ── Mobile back-bar clears the fixed top stack ── */
+.page-back-bar{padding-top:96px}
+body.wc-active .page-back-bar{padding-top:138px}
+@media(max-width:600px){.page-back-bar{padding-top:118px}body.wc-active .page-back-bar{padding-top:166px}}
+/* ── WhatsApp-style chat sheet on phones ── */
+@media(max-width:560px){
+  .chat-panel{display:flex!important;position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:88vh;max-height:88vh;border-radius:22px 22px 0 0;transform:translateY(102%);transition:transform .38s cubic-bezier(.32,.72,0,1);box-shadow:0 -10px 40px rgba(0,0,0,.28)}
+  .chat-panel.open{transform:translateY(0)}
+  .chat-panel:not(.open){pointer-events:none}
+  .chat-body{max-height:none!important;flex:1}
+  .chat-fab{bottom:18px;right:18px}
+}
 </style>
 </head>
 <body>
@@ -1410,39 +1444,66 @@ nav#navbar.scrolled{background:rgba(255,255,255,.85);border-bottom:1px solid var
        FUTURISTIC HERO — Clean, premium, always readable
        Dark navy base · Aurora glows · Smaller globe · 85vh
        ═══════════════════════════════════════════════════════════════ -->
-  <section id="cosmicHero" style="position:relative;width:100%;min-height:92vh;display:flex;align-items:center;overflow:hidden;background:radial-gradient(120% 95% at 50% -10%,#eef4ff 0%,#ffffff 58%)">
+  <section id="cosmicHero" style="position:relative;width:100%;min-height:90vh;display:flex;align-items:center;overflow:hidden;background:radial-gradient(120% 95% at 50% -10%,#eef4ff 0%,#f4f6f9 60%)">
     <div style="position:absolute;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(10,28,62,0.05) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse 75% 60% at 50% 35%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 75% 60% at 50% 35%,#000 30%,transparent 75%)"></div>
-    <div style="position:absolute;left:-12%;top:-18%;width:52vw;height:52vw;max-width:680px;max-height:680px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.12),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
-    <div style="position:absolute;right:-10%;bottom:-22%;width:48vw;height:48vw;max-width:640px;max-height:640px;border-radius:50%;background:radial-gradient(circle,rgba(10,46,101,0.09),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
+    <div style="position:absolute;left:-12%;top:-18%;width:50vw;height:50vw;max-width:640px;max-height:640px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.12),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
+    <div style="position:absolute;right:-10%;bottom:-22%;width:46vw;height:46vw;max-width:620px;max-height:620px;border-radius:50%;background:radial-gradient(circle,rgba(10,46,101,0.09),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
 
-    <div style="position:relative;z-index:2;width:100%;max-width:1280px;margin:0 auto;padding:130px clamp(1.5rem,6vw,5rem) 70px">
-      <h1 style="font-weight:780;letter-spacing:-0.045em;line-height:0.94;color:#0b1220;font-size:clamp(3.2rem,12.5vw,9rem);margin:0">
-        Move the<br><span style="background:linear-gradient(115deg,#D4A73A 0%,#e7c46a 45%,#0A2E65 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">World.</span>
-      </h1>
-
-      <div style="display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;max-width:560px;margin-top:2.2rem">
-        <form style="position:relative;display:flex;align-items:center;flex:1;min-width:260px;background:#fff;border:1px solid #e7e9ee;border-radius:980px;padding:6px 6px 6px 18px;box-shadow:0 8px 30px rgba(16,24,40,.08)" onsubmit="heroSearch(event)">
-          <span style="margin-right:8px;opacity:.5;font-size:.95rem">&#128269;</span>
-          <input id="heroSearchInput" type="text" placeholder="Search any country &mdash; Canada, UK, Germany&hellip;" autocomplete="off"
-            oninput="acInput('heroSearchInput','heroAcDrop')" onkeydown="acKey(event,'heroSearchInput','heroAcDrop')"
-            style="border:none;outline:none;background:transparent;color:#0b1220;font-size:.92rem;flex:1;min-width:0">
-          <input type="submit" value="Search" style="background:#0a1c3e;color:#fff;border:none;border-radius:980px;padding:10px 20px;font-weight:600;font-size:.86rem;cursor:pointer;flex-shrink:0">
-          <div class="ac-drop" id="heroAcDrop"></div>
-        </form>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.9rem">
-        <button onclick="showPage('countries')" class="btn-primary">&#127757; Explore the World</button>
-        <button onclick="showPage('apply')" class="btn-outline">Begin Your Journey</button>
-      </div>
-
-      <div style="display:flex;justify-content:flex-end;margin-top:3.2rem">
-        <div style="text-align:right;max-width:34ch">
-          <p style="font-size:.86rem;color:#5b6573;line-height:1.5;margin:0">Global mobility, education and opportunity &mdash; unified.</p>
-          <div style="margin-top:.45rem;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:#C8962A;font-weight:800">One World. One Mission.</div>
+    <div class="hero-wrap" style="position:relative;z-index:2;width:100%;max-width:1280px;margin:0 auto;padding:118px clamp(1.5rem,6vw,5rem) 64px">
+      <div class="hero-left">
+        <h1 style="font-weight:780;letter-spacing:-0.04em;line-height:0.96;color:#0b1220;font-size:clamp(2.7rem,7vw,5.6rem);margin:0">
+          Move the<br><span style="background:linear-gradient(115deg,#C8962A 0%,#e7c46a 45%,#0A2E65 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">World.</span>
+        </h1>
+        <div style="display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;max-width:560px;margin-top:1.9rem">
+          <form style="position:relative;display:flex;align-items:center;flex:1;min-width:240px;background:#fff;border:1px solid #e7e9ee;border-radius:980px;padding:6px 6px 6px 18px;box-shadow:0 8px 30px rgba(16,24,40,.08)" onsubmit="heroSearch(event)">
+            <span style="margin-right:8px;opacity:.5;font-size:.95rem">&#128269;</span>
+            <input id="heroSearchInput" type="text" placeholder="Search any country &mdash; Canada, UK, Germany&hellip;" autocomplete="off"
+              oninput="acInput('heroSearchInput','heroAcDrop')" onkeydown="acKey(event,'heroSearchInput','heroAcDrop')"
+              style="border:none;outline:none;background:transparent;color:#0b1220;font-size:.92rem;flex:1;min-width:0">
+            <input type="submit" value="Search" style="background:#0a1c3e;color:#fff;border:none;border-radius:980px;padding:10px 20px;font-weight:600;font-size:.86rem;cursor:pointer;flex-shrink:0">
+            <div class="ac-drop" id="heroAcDrop"></div>
+          </form>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.9rem">
+          <button onclick="showPage('countries')" class="btn-primary">&#127757; Explore the World</button>
+          <button onclick="showPage('apply')" class="btn-outline">Begin Your Journey</button>
+        </div>
+        <div style="margin-top:2rem">
+          <p style="font-size:.9rem;color:#5b6573;line-height:1.5;margin:0">Global mobility, education and opportunity &mdash; unified.</p>
+          <div style="margin-top:.4rem;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:#C8962A;font-weight:800">One World. One Mission.</div>
         </div>
       </div>
+
+      <!-- Premium rotating product/service showcase (right side) -->
+      <aside class="sg-showcase" id="sgShowcase" aria-label="SkyGlobe services">
+        <div class="sg-slide"><div class="sg-ico">&#127891;</div><div class="sg-tag">Study Abroad</div><div class="sg-title">Student Visas &amp; Admissions</div><div class="sg-desc">From university shortlisting to visa approval &mdash; UK, USA, Canada, Europe &amp; beyond.</div><button class="sg-link" onclick="showPage('services')">Explore &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#128188;</div><div class="sg-tag">Work in Europe</div><div class="sg-title">Work Visas &amp; EU Jobs</div><div class="sg-desc">Verified employers across 17 countries &mdash; permit &amp; visa handled end-to-end.</div><button class="sg-link" onclick="showPage('recruitment')">View jobs &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#9992;</div><div class="sg-tag">Travel Ready</div><div class="sg-title">Flight &amp; Hotel Letters</div><div class="sg-desc">Embassy-accepted reservation letters, issued the same day for your application.</div><button class="sg-link" onclick="showPage('services')">Get yours &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#128737;</div><div class="sg-tag">Protected</div><div class="sg-title">Travel Insurance</div><div class="sg-desc">Schengen-compliant cover with &euro;30,000+ medical protection in minutes.</div><button class="sg-link" onclick="showPage('services')">Get covered &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#127758;</div><div class="sg-tag">Explore</div><div class="sg-title">195 Country Guides</div><div class="sg-desc">Visas, costs, universities, jobs &amp; live data for every country on earth.</div><button class="sg-link" onclick="showPage('countries')">Browse &rarr;</button></div>
+        <div class="sg-slide"><div class="sg-ico">&#127942;</div><div class="sg-tag">Funded Study</div><div class="sg-title">Scholarships</div><div class="sg-desc">Merit &amp; need-based scholarships, expertly matched and applied for you.</div><button class="sg-link" onclick="showPage('blog')">Discover &rarr;</button></div>
+        <div class="sg-dots">
+          <span class="sg-dot"></span><span class="sg-dot"></span><span class="sg-dot"></span><span class="sg-dot"></span><span class="sg-dot"></span><span class="sg-dot"></span>
+        </div>
+      </aside>
     </div>
   </section>
+  <script>
+  (function(){
+    var box=document.getElementById('sgShowcase'); if(!box)return;
+    var slides=box.querySelectorAll('.sg-slide'),dots=box.querySelectorAll('.sg-dot');
+    if(!slides.length)return;
+    var i=0,timer=null;
+    function go(n){ slides[i].classList.remove('active'); if(dots[i])dots[i].classList.remove('active');
+      i=(n+slides.length)%slides.length; slides[i].classList.add('active'); if(dots[i])dots[i].classList.add('active'); }
+    function next(){ go(i+1); }
+    function reset(){ if(timer)clearInterval(timer); timer=setInterval(next,3800); }
+    dots.forEach(function(d,k){ d.addEventListener('click',function(){ go(k); reset(); }); });
+    slides[0].classList.add('active'); if(dots[0])dots[0].classList.add('active'); reset();
+    box.addEventListener('mouseenter',function(){ if(timer)clearInterval(timer); });
+    box.addEventListener('mouseleave',reset);
+  })();
+  </script>
 
   <!-- COSMIC HERO STYLES + ASTRONOMY ENGINE -->
   <style>
