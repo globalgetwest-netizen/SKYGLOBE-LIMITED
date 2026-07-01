@@ -375,7 +375,8 @@ app.post('/api/apply', applyLimiter, async (req, res) => {
   const {
     service, fname, lname, email, phone, dob, nationality, passport, passportExpiry,
     destination, travelDate, duration, purpose, institution, employer,
-    hotelCity, checkin, checkout, coverage, docType, scholarship, notes
+    hotelCity, checkin, checkout, coverage, docType, scholarship, notes,
+    provider, currency
   } = req.body;
 
   if (!fname || !email || !service)
@@ -477,6 +478,30 @@ app.post('/api/apply', applyLimiter, async (req, res) => {
 
   try { await sendEmail(email, `Application Confirmed [${ref}] — SkyGlobe Group`, userHtml); }
   catch (e) { console.error('User email failed:', e.message); }
+
+  // If this service carries a real fee and the client chose a payment method,
+  // hand back a payment link the same way conferences/work-permit/legal-docs do.
+  // Free-consultation services (not in SERVICE_PRODUCT_MAP) just get the plain
+  // "team will contact you" confirmation below — no fee to fake.
+  const product = SERVICE_PRODUCT_MAP[service];
+  if (product && PRICING[product] && provider && PAY[provider] && PAY[provider].secret) {
+    const cur = (currency || 'USD').toUpperCase();
+    const amount = PRICING[product][cur];
+    if (amount != null && PAY[provider].currencies.includes(cur)) {
+      try {
+        const reference = genPayRef();
+        await insertPayment({ reference, product, provider, currency: cur, amount, email, app_ref: ref, status: 'pending', meta: { service } });
+        const { authorization_url } = await providerInit(provider, {
+          reference, amount, currency: cur, email, product, appRef: ref,
+          label: `${PRICING[product].label} — ${ref}`, callbackUrl: `${baseUrl(req)}/pay/callback`,
+        });
+        return res.json({ success: true, ref, status: 'Received', payment: { reference, authorization_url } });
+      } catch (e) {
+        console.error('apply pay init failed:', e.message);
+        return res.json({ success: true, ref, status: 'Received', paymentError: 'Application saved, but payment could not start. We will email you a payment link.' });
+      }
+    }
+  }
 
   res.json({ success: true, ref, status: 'Received' });
 });
@@ -2196,6 +2221,47 @@ const PRICING = {
   legal_doc_standard:    { label: 'Legal Document — Standard', instant: true, kind: 'legal', USD: 29, EUR: 27, GBP: 24 },
   legal_doc_premium:     { label: 'Legal Document — Premium',  instant: true, kind: 'legal', USD: 59, EUR: 55, GBP: 49 },
   legal_doc_priority:    { label: 'Legal Document — Priority', instant: true, kind: 'legal', USD: 99, EUR: 92, GBP: 79 },
+  // ── Global Mobility — visas, PR & jobs (Apply page) ─────────────────────────
+  student_visa_processing: { label: 'Student Visa Processing — Full Application Support',      instant: false, USD: 179, EUR: 165, GBP: 145 },
+  work_visa_processing:    { label: 'Work Visa Processing — Full Application Support',          instant: false, USD: 199, EUR: 185, GBP: 159 },
+  tourist_visa_processing: { label: 'Tourist & Schengen Visa Processing',                       instant: false, USD: 129, EUR: 119, GBP: 99  },
+  express_entry_pr:        { label: 'Express Entry / PR Pathway — Full Case Management',        instant: false, USD: 349, EUR: 325, GBP: 279 },
+  eu_direct_employment:    { label: 'EU Direct Employment — Job Placement + Work Permit',        instant: false, USD: 249, EUR: 229, GBP: 199 },
+  recruitment_placement:   { label: 'Recruitment & Overseas Jobs — Placement Service',           instant: false, USD: 199, EUR: 185, GBP: 159 },
+  // ── Education ────────────────────────────────────────────────────────────
+  university_admission:    { label: 'University Admission Assistance',                          instant: false, USD: 149, EUR: 139, GBP: 119 },
+  scholarship_support:     { label: 'Scholarship Application Support',                           instant: false, USD: 99,  EUR: 92,  GBP: 79  },
+  // ── Travel Services ──────────────────────────────────────────────────────
+  flight_reservation_letter: { label: 'Flight Reservation Letter (visa itinerary)',              instant: false, USD: 39,  EUR: 35,  GBP: 29  },
+  real_flight_booking:     { label: 'Real Flight Booking — Service Fee (ticket cost billed separately)', instant: false, USD: 49,  EUR: 45,  GBP: 39  },
+  hotel_reservation_letter:{ label: 'Hotel Reservation / Accommodation Letter',                  instant: false, USD: 39,  EUR: 35,  GBP: 29  },
+  real_hotel_booking:      { label: 'Real Hotel Booking — Service Fee (room cost billed separately)', instant: false, USD: 39,  EUR: 35,  GBP: 29  },
+  travel_insurance:        { label: 'Travel Insurance — Coverage Certificate',                   instant: false, USD: 59,  EUR: 55,  GBP: 49  },
+  document_authentication: { label: 'Document Authentication / Apostille',                       instant: false, USD: 59,  EUR: 55,  GBP: 49  },
+  // ── Digitalization — Identity & Presence (Web/App Dev and Business Automation
+  // stay quote-based on their pages — genuinely custom scope, no fixed fee yet) ─
+  digital_identity_service:{ label: 'Digital Identity & e-Docs — Starting Fee',                  instant: false, USD: 79,  EUR: 73,  GBP: 63  },
+  digital_presence_starter:{ label: 'Digital Presence & AI — Starting Fee',                      instant: false, USD: 149, EUR: 139, GBP: 119 },
+};
+
+// Maps the free-text "service" values sent by the main Apply form (index.html)
+// to a PRICING product key, so /api/apply can offer secure payment for any
+// service that carries a real fee. Services not listed here (free consultation
+// requests, or Web & App Development / Business Automation which are
+// genuinely custom-quoted) stay as plain lead capture — no fixed price to fake.
+const SERVICE_PRODUCT_MAP = {
+  'Student Visa Processing':               'student_visa_processing',
+  'Work Visa Processing':                  'work_visa_processing',
+  'Tourist / Visit Visa':                  'tourist_visa_processing',
+  'University Admission Assistance':       'university_admission',
+  'Scholarship Application Support':       'scholarship_support',
+  'Flight Reservation Letter':             'flight_reservation_letter',
+  'Flight Booking':                        'real_flight_booking',
+  'Hotel Booking / Accommodation Letter':  'hotel_reservation_letter',
+  'Travel Insurance':                      'travel_insurance',
+  'Document Authentication / Apostille':   'document_authentication',
+  'Express Entry / PR Pathway':            'express_entry_pr',
+  'EU Direct Employment':                  'eu_direct_employment',
 };
 
 const PAY = {
