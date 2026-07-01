@@ -347,6 +347,7 @@
         <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
         <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
         <button class="sb-link" data-view="payments" onclick="switchView('payments')"><span class="ic">💳</span> Payments</button>
+        <button class="sb-link" data-view="pricing" onclick="switchView('pricing')"><span class="ic">🏷️</span> Pricing</button>
         <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
         <button class="sb-link" data-view="payroll" onclick="switchView('payroll')"><span class="ic">👥</span> Payroll</button>
@@ -455,6 +456,19 @@
             <div id="paymentsTable" style="overflow-x:auto">
               <p style="color:var(--muted);font-size:0.9rem">Loading payments…</p>
             </div>
+          </div>
+        </section>
+
+        <!-- PRICING -->
+        <section class="view" id="view-pricing">
+          <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px">
+              <h3 style="margin:0">🏷️ Service Pricing</h3>
+              <button onclick="loadPricing()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
+            </div>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Change a price here and it goes live immediately across the whole site — work permit, legal documents, conferences, checkout — no redeploy needed.</p>
+            <div id="pricingMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
+            <div id="pricingTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading pricing…</p></div>
           </div>
         </section>
 
@@ -1083,11 +1097,12 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
   if(v==='payments') loadPayments();
+  if(v==='pricing') loadPricing();
   if(v==='legaldocs') loadLegalDocs();
   if(v==='finance') loadFinance();
   if(v==='payroll') loadPayroll();
@@ -1404,6 +1419,56 @@ async function loadErrors(){
 
 /* ── LOAD ── */
 async function loadAll(){ await loadApps(); await loadMessages(true); await pollTeamBadge(); }
+
+async function loadPricing(){
+  const el=document.getElementById('pricingTable');
+  if(!el)return;
+  try{
+    const r=await fetch(API+'/api/admin/pricing',{headers:{'x-admin-key':KEY}});
+    if(r.status===401){el.innerHTML='<p style="color:#e57373">Unauthorized.</p>';return;}
+    const rows=await r.json();
+    if(!Array.isArray(rows)||!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No priced services found.</p>';return;}
+    const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+      <thead><tr style="text-align:left;color:var(--muted);text-transform:uppercase;font-size:0.7rem;letter-spacing:.06em">
+        <th style="padding:8px">Service</th><th style="padding:8px">USD</th><th style="padding:8px">EUR</th><th style="padding:8px">GBP</th><th style="padding:8px"></th>
+      </tr></thead><tbody>
+      ${rows.map(p=>`
+        <tr style="border-top:1px solid var(--line)">
+          <td style="padding:8px;min-width:220px">
+            <div style="font-weight:700">${esc(p.label)}</div>
+            <div style="color:var(--muted);font-size:0.72rem">${esc(p.id)}${p.instant?' · instant delivery':''}</div>
+          </td>
+          <td style="padding:8px"><input type="number" min="0" step="0.01" id="pr_${esc(p.id)}_USD" value="${p.USD!=null?p.USD:''}" style="width:90px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.85rem"></td>
+          <td style="padding:8px"><input type="number" min="0" step="0.01" id="pr_${esc(p.id)}_EUR" value="${p.EUR!=null?p.EUR:''}" style="width:90px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.85rem"></td>
+          <td style="padding:8px"><input type="number" min="0" step="0.01" id="pr_${esc(p.id)}_GBP" value="${p.GBP!=null?p.GBP:''}" style="width:90px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.85rem"></td>
+          <td style="padding:8px"><button onclick="savePricing('${esc(p.id)}',this)" style="background:var(--gold);color:#1a1300;border:none;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem">Save</button></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  }catch(e){ el.innerHTML='<p style="color:#e57373">Could not load pricing.</p>'; }
+}
+
+async function savePricing(id, btn){
+  const msg=document.getElementById('pricingMsg');
+  const usd=document.getElementById(`pr_${id}_USD`).value;
+  const eur=document.getElementById(`pr_${id}_EUR`).value;
+  const gbp=document.getElementById(`pr_${id}_GBP`).value;
+  btn.disabled=true; const orig=btn.textContent; btn.textContent='Saving…';
+  try{
+    const r=await fetch(API+'/api/admin/pricing/'+encodeURIComponent(id),{
+      method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({USD:usd===''?undefined:Number(usd),EUR:eur===''?undefined:Number(eur),GBP:gbp===''?undefined:Number(gbp)})
+    });
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not update price.');
+    msg.style.color='#4caf50'; msg.textContent=`✓ ${id} updated — live sitewide now.`;
+  }catch(e){
+    msg.style.color='#e57373'; msg.textContent='Error: '+e.message;
+  }finally{
+    btn.disabled=false; btn.textContent=orig;
+    setTimeout(()=>{ if(msg.textContent.startsWith('✓'))msg.textContent=''; },4000);
+  }
+}
 
 async function loadPayments(){
   const el=document.getElementById('paymentsTable');
