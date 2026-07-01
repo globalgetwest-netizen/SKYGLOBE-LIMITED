@@ -3062,6 +3062,27 @@ body.wc-active .page-back-bar{padding-top:138px}
     <div class="form-step" id="applyStep4">
       <h3 style="margin-bottom:1rem">Review Your Application</h3>
       <div id="reviewSummary" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.5rem;font-size:0.9rem;color:var(--text-body);line-height:2"></div>
+      <div id="applyPayBox" style="display:none;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.5rem">
+        <p style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;margin-bottom:0.9rem">Service Fee</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.9rem">
+          <div>
+            <label style="display:block;font-size:0.78rem;color:var(--muted);margin-bottom:0.3rem">Currency</label>
+            <select id="apPayCurrency" onchange="refreshApplyPay()" style="width:100%;padding:0.7rem;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:#fff">
+              <option value="USD">USD — US Dollar</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="GBP">GBP — British Pound</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.78rem;color:var(--muted);margin-bottom:0.3rem">Pay with</label>
+            <select id="apPayProvider" style="width:100%;padding:0.7rem;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:#fff"><option value="">Loading…</option></select>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,167,58,0.08);border-radius:8px;padding:0.8rem 1rem">
+          <span style="font-size:0.85rem;color:var(--muted)">Total</span>
+          <strong id="apPayAmount" style="color:var(--gold-light);font-size:1.1rem">—</strong>
+        </div>
+      </div>
       <div style="padding:1rem;background:rgba(212,167,58,0.06);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem">
         <p style="font-size:0.85rem;color:var(--text-body)">✅ By submitting, you agree that SkyGlobe Group may contact you about your application via email or phone. Your data is kept securely and used only to process your request. You will receive a reference number for tracking.</p>
       </div>
@@ -5100,7 +5121,58 @@ function buildReview() {
   document.getElementById('reviewSummary').innerHTML = rows.filter(r=>r[1]&&r[1]!=='—').map(r =>
     `<span style="color:var(--gold);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em">${r[0]}</span>: <strong style="color:var(--white)">${r[1]}</strong><br>`
   ).join('');
+  refreshApplyPay();
 }
+
+// Services that carry a real fee (mirrors server.js SERVICE_PRODUCT_MAP).
+// This is display-only — the server independently re-validates the price,
+// so nothing here can be tampered with client-side.
+const SERVICE_PRODUCT_MAP = {
+  'Student Visa Processing':               'student_visa_processing',
+  'Work Visa Processing':                  'work_visa_processing',
+  'Tourist / Visit Visa':                  'tourist_visa_processing',
+  'University Admission Assistance':       'university_admission',
+  'Scholarship Application Support':       'scholarship_support',
+  'Flight Reservation Letter':             'flight_reservation_letter',
+  'Flight Booking':                        'real_flight_booking',
+  'Hotel Booking / Accommodation Letter':  'hotel_reservation_letter',
+  'Travel Insurance':                      'travel_insurance',
+  'Document Authentication / Apostille':   'document_authentication',
+  'Express Entry / PR Pathway':            'express_entry_pr',
+  'EU Direct Employment':                  'eu_direct_employment',
+};
+const APPLY_PROVIDER_LABELS = {
+  grey: '🏦 Bank Transfer / USDC / USDT',
+  paystack: '💳 Card (Paystack)',
+  stripe: '💳 Card (Stripe)',
+  flutterwave: '💳 Card (Flutterwave)',
+};
+let APPLY_PAY_CFG = { providers: [], pricing: {} };
+async function loadApplyPayCfg() {
+  try { APPLY_PAY_CFG = await (await fetch('/api/pay/config')).json(); } catch (e) {}
+}
+
+function refreshApplyPay() {
+  const box = document.getElementById('applyPayBox');
+  const product = SERVICE_PRODUCT_MAP[selectedService];
+  if (!box) return;
+  if (!product) { box.style.display = 'none'; if (window.applyNav) { applyNav.labels.submit = 'Submit Application'; applyNav.update(); } return; }
+  box.style.display = 'block';
+  if (window.applyNav) { applyNav.labels.submit = 'Continue to Secure Payment'; applyNav.update(); }
+  const cur = document.getElementById('apPayCurrency')?.value || 'USD';
+  const entry = APPLY_PAY_CFG.pricing[product];
+  const amt = entry ? entry[cur] : null;
+  const amtEl = document.getElementById('apPayAmount');
+  if (amtEl) amtEl.textContent = amt != null ? `${cur} ${Number(amt).toLocaleString()}` : '—';
+  const sel = document.getElementById('apPayProvider');
+  if (sel) {
+    const active = (APPLY_PAY_CFG.providers || []).filter(p => p.currencies.includes(cur));
+    sel.innerHTML = active.length
+      ? active.map(p => `<option value="${p.name}">${APPLY_PROVIDER_LABELS[p.name] || p.name}</option>`).join('')
+      : '<option value="">No payment method available yet — contact us</option>';
+  }
+}
+loadApplyPayCfg();
 
 async function submitApplication() {
   const payload = {
@@ -5127,6 +5199,12 @@ async function submitApplication() {
     scholarship: document.getElementById('ap_scholarship').value,
     notes: document.getElementById('ap_notes').value.trim()
   };
+  if (SERVICE_PRODUCT_MAP[selectedService]) {
+    const provEl = document.getElementById('apPayProvider');
+    if (provEl && !provEl.value) { showToast('⚠️ Please choose a payment method to continue.', true); return; }
+    payload.provider = provEl ? provEl.value : '';
+    payload.currency = document.getElementById('apPayCurrency')?.value || 'USD';
+  }
   // New service-specific fields are appended to notes (no DB changes needed)
   const extras = [];
   const flightFrom = document.getElementById('ap_flightFrom').value.trim();
@@ -5149,6 +5227,7 @@ async function submitApplication() {
     const data = await res.json();
     if (!res.ok && !data.ref) throw new Error(data.error || 'Server error');
     const ref = data.ref || ('SKY-' + new Date().getFullYear() + '-SAVE');
+    if (data.payment?.authorization_url) { window.location.href = data.payment.authorization_url; return; }
     document.getElementById('appRefDisplay').textContent = ref;
     trackEvent('application_submit', 'apply', { service: payload.service, destination: payload.destination });
     // Save to localStorage so tracking works even after server restarts
