@@ -503,11 +503,14 @@
             <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">A role only appears on the public work permit page once it's saved here and marked Active. Turn a country or role off anytime — it disappears from the public site instantly, no redeploy.</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px">
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Country Code *</label>
-                <input type="text" id="wpCode" maxlength="2" placeholder="e.g. DE" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem;text-transform:uppercase"></div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <input type="text" id="wpCode" maxlength="2" placeholder="e.g. DE" oninput="this.value=this.value.toUpperCase();document.getElementById('wpFlagPreview').textContent=codeToFlag(this.value)" style="flex:1;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem;text-transform:uppercase">
+                  <span id="wpFlagPreview" style="font-size:1.6rem;line-height:1">🏳️</span>
+                </div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:4px">Flag is generated automatically from the code — no need to find or type an emoji.</div>
+              </div>
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Country Name *</label>
                 <input type="text" id="wpName" placeholder="e.g. Germany" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
-              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Flag emoji</label>
-                <input type="text" id="wpFlag" placeholder="🇩🇪" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Occupation *</label>
                 <input type="text" id="wpOcc" placeholder="e.g. Registered Nurse" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Skill Level</label>
@@ -1610,6 +1613,14 @@ async function loadWpRates(){
   }catch(e){ el.innerHTML='<p style="color:#e57373">Could not load rates.</p>'; }
 }
 
+// Same logic as server.js flagFromCode() — turns "NO" into 🇳🇴, purely for
+// the live preview as the CEO types; the server is still the source of truth.
+function codeToFlag(code){
+  const cc=String(code||'').trim().toUpperCase();
+  if(!/^[A-Z]{2}$/.test(cc)) return '🏳️';
+  return String.fromCodePoint(...[...cc].map(c=>127397+c.charCodeAt(0)));
+}
+
 async function addWpRate(){
   const msg=document.getElementById('wpAddMsg');
   const code=document.getElementById('wpCode').value.trim().toUpperCase();
@@ -1622,7 +1633,7 @@ async function addWpRate(){
     const r=await fetch(API+'/api/admin/work-permit-rates',{
       method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
       body:JSON.stringify({
-        country_code:code, country_name:name, flag:document.getElementById('wpFlag').value.trim(),
+        country_code:code, country_name:name,
         occupation:occ, skill_level:document.getElementById('wpSkill').value,
         usd:Number(usd),
         eur:document.getElementById('wpEur').value?Number(document.getElementById('wpEur').value):null,
@@ -1633,7 +1644,8 @@ async function addWpRate(){
     const d=await r.json();
     if(!r.ok) throw new Error(d.error||'Could not add rate.');
     msg.style.color='#4caf50'; msg.textContent='✓ Rate added — live on the public site now.';
-    ['wpCode','wpName','wpFlag','wpOcc','wpUsd','wpEur','wpGbp','wpWeeks'].forEach(id=>document.getElementById(id).value='');
+    ['wpCode','wpName','wpOcc','wpUsd','wpEur','wpGbp','wpWeeks'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('wpFlagPreview').textContent='🏳️';
     document.getElementById('wpSkill').value='';
     loadWpRates();
   }catch(e){

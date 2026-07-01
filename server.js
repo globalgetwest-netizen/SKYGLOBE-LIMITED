@@ -2860,6 +2860,15 @@ app.get('/api/work-permit/requirements', (req, res) => {
   res.json(WORK_PERMIT_DOCS);
 });
 
+// Turns a 2-letter ISO country code into its flag emoji (e.g. "NO" → 🇳🇴).
+// Means nobody ever has to hunt down or type a flag emoji by hand — the CEO
+// portal only needs the country code, the flag is always correct and free.
+function flagFromCode(code) {
+  const cc = String(code || '').trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(cc)) return '';
+  return String.fromCodePoint(...[...cc].map(c => 127397 + c.charCodeAt(0)));
+}
+
 // ── Work permit rates: country × occupation, each with its own fee & on/off
 // switch ─────────────────────────────────────────────────────────────────────
 // A "Construction Helper" permit and a "Registered Nurse" permit are entirely
@@ -2883,7 +2892,7 @@ async function seedWorkPermitRatesIfEmpty() {
     for (const [code, c] of Object.entries(WORK_PERMIT_DOCS)) {
       for (const role of starterRoles) {
         rows.push({
-          country_code: code, country_name: c.name, flag: c.flag,
+          country_code: code, country_name: c.name, flag: c.flag || flagFromCode(code),
           occupation: role.occupation, skill_level: role.skill_level, active: true,
           usd: Math.round(base.USD * role.mult), eur: Math.round(base.EUR * role.mult), gbp: Math.round(base.GBP * role.mult),
           processing_weeks: c.processingWeeks, notes: '',
@@ -2903,7 +2912,8 @@ app.get('/api/work-permit/rates', async (req, res) => {
   try {
     const params = { active: 'eq.true', order: 'country_name.asc,occupation.asc' };
     if (req.query.country) params.country_code = `eq.${req.query.country.toUpperCase()}`;
-    res.json(await dbQuery('GET', 'work_permit_rates', null, params));
+    const rows = await dbQuery('GET', 'work_permit_rates', null, params);
+    res.json(rows.map(r => ({ ...r, flag: r.flag || flagFromCode(r.country_code) })));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -2911,7 +2921,8 @@ app.get('/api/work-permit/rates', async (req, res) => {
 app.get('/api/admin/work-permit-rates', async (req, res) => {
   if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    res.json(await dbQuery('GET', 'work_permit_rates', null, { order: 'country_name.asc,occupation.asc' }));
+    const rows = await dbQuery('GET', 'work_permit_rates', null, { order: 'country_name.asc,occupation.asc' });
+    res.json(rows.map(r => ({ ...r, flag: r.flag || flagFromCode(r.country_code) })));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -2924,7 +2935,7 @@ app.post('/api/admin/work-permit-rates', async (req, res) => {
     if (!b.country_code || !b.country_name || !b.occupation)
       return res.status(400).json({ error: 'Country code, country name and occupation are required.' });
     const row = {
-      country_code: String(b.country_code).toUpperCase(), country_name: b.country_name, flag: b.flag || '',
+      country_code: String(b.country_code).toUpperCase(), country_name: b.country_name, flag: b.flag || flagFromCode(b.country_code),
       occupation: b.occupation, skill_level: b.skill_level || '', active: b.active !== false,
       usd: b.usd != null ? Number(b.usd) : null, eur: b.eur != null ? Number(b.eur) : null, gbp: b.gbp != null ? Number(b.gbp) : null,
       processing_weeks: b.processing_weeks || '', notes: b.notes || '',
