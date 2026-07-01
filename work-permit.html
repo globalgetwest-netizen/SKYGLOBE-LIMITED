@@ -289,21 +289,24 @@ window.noriaOvSend=function(){var i=document.getElementById('noriaOvInput');var 
           <div class="step-tab" id="tab4">4. Pay &amp; Submit</div>
         </div>
 
-        <!-- ── STEP 1: country + package ── -->
+        <!-- ── STEP 1: country + occupation (each has its own fee) ── -->
         <div id="step1">
           <label>Destination country <span class="req">*</span></label>
           <select id="s1country" onchange="onCountryChange()">
             <option value="">— Select a country —</option>
           </select>
           <div id="s1processingEst" class="processing-est"></div>
-          <label style="margin-top:18px">Service package <span class="req">*</span></label>
-          <select id="s1package">
-            <option value="work_permit_standard">🔷 Standard — Full Application Service</option>
-            <option value="work_permit_express">⚡ Express — Priority + Dedicated Agent</option>
-            <option value="migration_premium">🌟 Premium Migration — Permit + Relocation Support</option>
+          <label style="margin-top:18px">Role / occupation <span class="req">*</span></label>
+          <select id="s1occupation" onchange="onOccupationChange()" disabled>
+            <option value="">— Select a country first —</option>
           </select>
+          <div id="s1occPrice" class="pricebar" style="display:none">
+            <div><div class="lbl">Service fee for this role</div><div id="s1occAmt" class="amt">—</div></div>
+            <div style="text-align:right"><div class="lbl">Est. processing</div><div id="s1occWeeks" style="color:#60aeff;font-weight:700">—</div></div>
+          </div>
+          <p id="s1noRoles" style="display:none;font-size:.85rem;color:var(--muted);margin-top:8px">This country isn't currently open for applications. Please choose another destination or WhatsApp us to be notified when it reopens.</p>
           <div class="form-nav">
-            <button class="btn-next" onclick="goStep(2)">Next: Document Check →</button>
+            <button class="btn-next" id="s1NextBtn" onclick="goStep(2)" disabled>Next: Document Check →</button>
           </div>
         </div>
 
@@ -384,16 +387,16 @@ window.noriaOvSend=function(){var i=document.getElementById('noriaOvInput');var 
   </div>
 </section>
 
-<!-- PACKAGES TEASER -->
+<!-- PRICING MODEL EXPLAINER -->
 <section class="section" style="background:#fff">
   <div class="wrap">
-    <div class="section-label">Our Packages</div>
-    <h2 class="section-h">Choose the right level of support</h2>
-    <p class="section-sub">All packages include document review, application preparation and portal delivery. Express and Premium add faster turnaround and extended support.</p>
+    <div class="section-label">Transparent, Role-Based Pricing</div>
+    <h2 class="section-h">Every country and role is priced individually</h2>
+    <p class="section-sub">A Construction Helper permit and a Registered Nurse permit involve very different work — so we don't charge one flat fee for every role. Select your destination country above to see the exact service fee for your specific occupation, in USD, EUR or GBP.</p>
     <div class="packages-grid">
       <div class="pkg">
-        <span class="badge">Standard</span>
-        <h3>Work Permit Application</h3>
+        <span class="badge">Unskilled / General Labour</span>
+        <h3>General Labour &amp; Construction</h3>
         <p class="tagline">Full professional application service</p>
         <ul>
           <li><span class="ck">✔</span>Document eligibility check</li>
@@ -402,36 +405,33 @@ window.noriaOvSend=function(){var i=document.getElementById('noriaOvInput');var 
           <li><span class="ck">✔</span>Progress updates via portal</li>
           <li><span class="ck">✔</span>Permit delivery to you</li>
         </ul>
-        <div class="price-row"><span class="cur">from</span><span class="amt">$499</span><small>/ €459 · £399</small></div>
-        <button class="btn-pkg" onclick="selectPackage('work_permit_standard')">Apply Standard →</button>
+        <button class="btn-pkg" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})">Select Country &amp; Role →</button>
       </div>
       <div class="pkg featured">
-        <span class="badge">⚡ Express</span>
-        <h3>Priority Work Permit</h3>
-        <p class="tagline" style="color:#9ab2cc">Dedicated agent + faster handling</p>
+        <span class="badge">⚡ Skilled Trade</span>
+        <h3>Skilled Trade &amp; Drivers</h3>
+        <p class="tagline" style="color:#9ab2cc">Electricians, welders, technicians, drivers</p>
         <ul>
-          <li><span class="ck">✔</span>Everything in Standard</li>
-          <li><span class="ck">✔</span>Dedicated personal agent</li>
+          <li><span class="ck">✔</span>Everything in General Labour</li>
+          <li><span class="ck">✔</span>Trade qualification verification support</li>
           <li><span class="ck">✔</span>Priority queue submission</li>
           <li><span class="ck">✔</span>WhatsApp direct agent access</li>
           <li><span class="ck">✔</span>Employer liaison support</li>
         </ul>
-        <div class="price-row"><span class="cur">from</span><span class="amt">$749</span><small>/ €699 · £599</small></div>
-        <button class="btn-pkg" onclick="selectPackage('work_permit_express')">Apply Express →</button>
+        <button class="btn-pkg" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})">Select Country &amp; Role →</button>
       </div>
       <div class="pkg">
-        <span class="badge" style="background:var(--navy);color:var(--gold)">🌟 Premium</span>
-        <h3>Full Migration Package</h3>
-        <p class="tagline">Permit + complete relocation support</p>
+        <span class="badge" style="background:var(--navy);color:var(--gold)">🌟 Professional</span>
+        <h3>Nursing, Engineering &amp; IT</h3>
+        <p class="tagline">Full case management for professional roles</p>
         <ul>
-          <li><span class="ck">✔</span>Everything in Express</li>
-          <li><span class="ck">✔</span>Accommodation sourcing guidance</li>
+          <li><span class="ck">✔</span>Everything in Skilled Trade</li>
+          <li><span class="ck">✔</span>Credential recognition guidance</li>
           <li><span class="ck">✔</span>Settlement &amp; registration support</li>
-          <li><span class="ck">✔</span>Banking &amp; NIN/NI setup guidance</li>
+          <li><span class="ck">✔</span>Banking &amp; local ID setup guidance</li>
           <li><span class="ck">✔</span>90-day post-arrival support</li>
         </ul>
-        <div class="price-row"><span class="cur">from</span><span class="amt">$1,299</span><small>/ €1,199 · £1,049</small></div>
-        <button class="btn-pkg" onclick="selectPackage('migration_premium')">Apply Premium →</button>
+        <button class="btn-pkg" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})">Select Country &amp; Role →</button>
       </div>
     </div>
     <p style="text-align:center;margin-top:28px"><a href="/packages" style="color:var(--gold);font-weight:600">→ See all packages including Travel Preparation</a></p>
@@ -447,36 +447,51 @@ window.noriaOvSend=function(){var i=document.getElementById('noriaOvInput');var 
 <script>
 let COUNTRIES = {};
 let CFG = { providers: [], pricing: {} };
+let RATES = [];               // active work_permit_rates rows, live from the CEO portal
 let checkedDocs = new Set();
 let selectedCountry = '';
+let selectedRate = null;      // the chosen {id, country_code, occupation, usd, eur, gbp, ...}
 
 async function init() {
-  const [cRes, pRes] = await Promise.all([
+  const [cRes, pRes, rRes] = await Promise.all([
     fetch('/api/work-permit/requirements').then(r=>r.json()).catch(()=>({})),
     fetch('/api/pay/config').then(r=>r.json()).catch(()=>({providers:[],pricing:{}})),
+    fetch('/api/work-permit/rates').then(r=>r.json()).catch(()=>[]),
   ]);
   COUNTRIES = cRes;
   CFG = pRes;
+  RATES = Array.isArray(rRes) ? rRes : [];
 
-  // country selector
+  // Only countries with at least one active rate are open for applications —
+  // closing a country in the CEO portal removes it here automatically.
+  const openCodes = [...new Set(RATES.map(r=>r.country_code))];
+
   const sel = document.getElementById('s1country');
-  Object.entries(COUNTRIES).forEach(([code,c])=>{
+  openCodes.forEach(code=>{
+    const c = COUNTRIES[code] || RATES.find(r=>r.country_code===code);
     const o = document.createElement('option');
     o.value = code;
-    o.textContent = `${c.flag} ${c.name}`;
+    o.textContent = `${c.flag||''} ${c.name||c.country_name}`;
     sel.appendChild(o);
   });
 
-  // country cards
   const grid = document.getElementById('countriesGrid');
-  grid.innerHTML = Object.entries(COUNTRIES).map(([code,c])=>`
-    <div class="country-card" id="cc_${code}" onclick="pickCountry('${code}')">
-      <div class="country-flag">${c.flag}</div>
-      <h3>${c.name}</h3>
-      <div class="weeks">Est. <b>${c.processingWeeks} wks</b></div>
-    </div>`).join('');
-
-  refreshPay();
+  if (!openCodes.length) {
+    grid.innerHTML = '<p style="color:var(--muted)">No countries are currently open for work permit applications. Please check back soon or WhatsApp us.</p>';
+  } else {
+    grid.innerHTML = openCodes.map(code=>{
+      const c = COUNTRIES[code] || {};
+      const rateInfo = RATES.find(r=>r.country_code===code) || {};
+      const flag = c.flag || rateInfo.flag || '';
+      const name = c.name || rateInfo.country_name;
+      const roles = RATES.filter(r=>r.country_code===code).length;
+      return `<div class="country-card" id="cc_${code}" onclick="pickCountry('${code}')">
+        <div class="country-flag">${flag}</div>
+        <h3>${name}</h3>
+        <div class="weeks">${roles} role${roles===1?'':'s'} open</div>
+      </div>`;
+    }).join('');
+  }
 }
 
 function pickCountry(code) {
@@ -488,14 +503,10 @@ function pickCountry(code) {
   document.getElementById('apply').scrollIntoView({behavior:'smooth'});
 }
 
-function selectPackage(pkg) {
-  document.getElementById('s1package').value = pkg;
-  document.getElementById('apply').scrollIntoView({behavior:'smooth'});
-}
-
 function onCountryChange() {
   const code = document.getElementById('s1country').value.toUpperCase();
   selectedCountry = code;
+  selectedRate = null;
   const info = COUNTRIES[code];
   const est = document.getElementById('s1processingEst');
   if(info){
@@ -504,10 +515,37 @@ function onCountryChange() {
   } else {
     est.style.display='none';
   }
-  // update country card highlighting
   document.querySelectorAll('.country-card').forEach(el=>el.classList.remove('selected'));
   if(code){const c=document.getElementById('cc_'+code); if(c)c.classList.add('selected');}
+
+  // build the occupation dropdown from this country's active rates
+  const occSel = document.getElementById('s1occupation');
+  const roles = RATES.filter(r=>r.country_code===code);
+  document.getElementById('s1noRoles').style.display = code && !roles.length ? 'block' : 'none';
+  if (!code || !roles.length) {
+    occSel.innerHTML = '<option value="">— Select a country first —</option>';
+    occSel.disabled = true;
+  } else {
+    occSel.disabled = false;
+    occSel.innerHTML = '<option value="">— Select your role —</option>' +
+      roles.map(r=>`<option value="${r.id}">${esc(r.occupation)}${r.skill_level?' ('+esc(r.skill_level)+')':''}</option>`).join('');
+  }
+  document.getElementById('s1occPrice').style.display='none';
+  document.getElementById('s1NextBtn').disabled = true;
   buildDocChecklist(code);
+}
+
+function onOccupationChange() {
+  const id = document.getElementById('s1occupation').value;
+  selectedRate = RATES.find(r=>String(r.id)===String(id)) || null;
+  const box = document.getElementById('s1occPrice');
+  const nextBtn = document.getElementById('s1NextBtn');
+  if (!selectedRate) { box.style.display='none'; nextBtn.disabled = true; return; }
+  box.style.display='flex';
+  document.getElementById('s1occAmt').textContent = selectedRate.usd!=null ? `USD ${Number(selectedRate.usd).toLocaleString()}` : '—';
+  document.getElementById('s1occWeeks').textContent = (selectedRate.processing_weeks || COUNTRIES[selectedCountry]?.processingWeeks || '—') + ' wks';
+  nextBtn.disabled = false;
+  refreshPay();
 }
 
 function buildDocChecklist(code) {
@@ -558,9 +596,7 @@ function updateProgress(have, total) {
 
 function refreshPay() {
   const cur = document.getElementById('s4currency')?.value || 'USD';
-  const pkg = document.getElementById('s1package')?.value || 'work_permit_standard';
-  const pricingEntry = CFG.pricing[pkg];
-  const amt = pricingEntry ? pricingEntry[cur] : null;
+  const amt = selectedRate ? selectedRate[cur.toLowerCase()] : null;
   const priceEl = document.getElementById('s4price');
   if(priceEl) priceEl.textContent = amt!=null ? `${cur} ${Number(amt).toLocaleString()}` : '—';
 
@@ -575,16 +611,15 @@ function refreshPay() {
 }
 
 function buildSummary() {
-  const pkg = document.getElementById('s1package').value;
   const ccode = document.getElementById('s1country').value.toUpperCase();
   const ci = COUNTRIES[ccode];
-  const pLabel = CFG.pricing[pkg]?.label || pkg;
+  const pLabel = selectedRate ? `${selectedRate.occupation}${selectedRate.skill_level?' ('+selectedRate.skill_level+')':''}` : '—';
   const docs = ci ? Array.from(checkedDocs).map(i=>ci.docs[i]) : [];
   const el = document.getElementById('s4summary');
-  const weeks = ci?.processingWeeks;
+  const weeks = selectedRate?.processing_weeks || ci?.processingWeeks;
   el.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:14px">
-      <div style="flex:1;min-width:180px"><div style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Package</div><div style="font-weight:700">${esc(pLabel)}</div></div>
+      <div style="flex:1;min-width:180px"><div style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Role</div><div style="font-weight:700">${esc(pLabel)}</div></div>
       <div style="flex:1;min-width:140px"><div style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Destination</div><div style="font-weight:700">${ci?ci.flag+' '+ci.name:'—'}</div></div>
       ${weeks?`<div style="flex:1;min-width:140px"><div style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Est. Processing</div><div style="font-weight:700;color:#1a5c9e">${weeks} weeks</div></div>`:''}
     </div>
@@ -598,6 +633,8 @@ function goStep(n) {
   // validation
   if(n===2 && !document.getElementById('s1country').value)
     { alert('Please select a destination country.'); return; }
+  if(n===2 && !selectedRate)
+    { alert('Please select your role/occupation.'); return; }
   if(n===3){
     if(!document.getElementById('s1country').value){ alert('Please select a country.'); return; }
     // warn if no docs checked
@@ -627,11 +664,12 @@ async function submitApplication() {
   if(!provider){ msg.className='msg err'; msg.textContent='Payment is not available yet. Please WhatsApp us to arrange manual payment.'; return; }
   btn.disabled=true; btn.textContent='Starting secure payment…'; msg.className='msg';
 
+  if(!selectedRate){ msg.className='msg err'; msg.textContent='Please go back and select your destination and role.'; btn.disabled=false; btn.textContent='🔒 Continue to Secure Payment →'; return; }
   const ccode = selectedCountry;
   const ci = COUNTRIES[ccode];
   const docsConfirmed = ci ? Array.from(checkedDocs).map(i=>ci.docs[i]) : [];
   const body = {
-    product: document.getElementById('s1package').value,
+    rateId: selectedRate.id,
     provider, currency: document.getElementById('s4currency').value,
     fname: v('s3fname'), lname: v('s3lname'), email: v('s3email'), phone: v('s3phone'),
     nationality: v('s3nationality'), travel_date: v('s3travel'), notes: v('s3notes'),

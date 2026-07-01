@@ -2419,11 +2419,11 @@ async function fulfilPayment(payment) {
         // tell the CEO/team there is paid work waiting
         const team = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
         try {
-          await sendEmail(team, `💰 PAID request ${payment.app_ref} — ${PRICING[payment.product]?.label || payment.product}`,
+          await sendEmail(team, `💰 PAID request ${payment.app_ref} — ${PRICING[payment.product]?.label || payment.meta?.label || payment.product}`,
             `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
               <h2 style="color:#c9a84c">Paid request needs action</h2>
               <p><strong>Reference:</strong> ${payment.app_ref}</p>
-              <p><strong>Service:</strong> ${PRICING[payment.product]?.label || payment.product}</p>
+              <p><strong>Service:</strong> ${PRICING[payment.product]?.label || payment.meta?.label || payment.product}</p>
               <p><strong>Client:</strong> ${app_.fname} ${app_.lname || ''} — ${app_.email}</p>
               <p><strong>Amount:</strong> ${payment.currency} ${payment.amount} via ${payment.provider}</p>
               <p>Open the CEO portal to source/verify and deliver the document.</p>
@@ -2552,7 +2552,7 @@ app.post('/api/pay/grey/notify', contactLimiter, async (req, res) => {
     });
 
     const team = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
-    const prodLabel = PRICING[payment.product]?.label || payment.product;
+    const prodLabel = PRICING[payment.product]?.label || payment.meta?.label || payment.product;
     try {
       await sendEmail(team, `💰 Grey transfer to confirm — ${payment.reference} (${prodLabel})`,
         `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
@@ -2590,7 +2590,7 @@ app.post('/api/admin/payments/:reference/confirm', async (req, res) => {
     if (PRICING[payment.product]?.instant) {
       unlock = signUnlock(payment.reference, payment.product);
       try {
-        await sendEmail(payment.email, `Payment confirmed — ${PRICING[payment.product]?.label || payment.product}`,
+        await sendEmail(payment.email, `Payment confirmed — ${PRICING[payment.product]?.label || payment.meta?.label || payment.product}`,
           `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
             <h2 style="color:#c9a84c">Payment Confirmed ✅</h2>
             <p>Thank you — we've confirmed your payment (reference <strong>${payment.reference}</strong>).</p>
@@ -2860,33 +2860,146 @@ app.get('/api/work-permit/requirements', (req, res) => {
   res.json(WORK_PERMIT_DOCS);
 });
 
-// Client submits eligibility + requests a work permit / migration service
-// body: { product, provider, currency, fname, lname, email, phone, nationality,
-//         destination_country, docs_confirmed (array), notes, package? }
+// ── Work permit rates: country × occupation, each with its own fee & on/off
+// switch ─────────────────────────────────────────────────────────────────────
+// A "Construction Helper" permit and a "Registered Nurse" permit are entirely
+// different pieces of work (and risk) — one flat fee per country was never
+// accurate. This table lets the CEO price every country/role combination
+// independently, and flip a country or role off the moment it stops taking
+// applications, with zero code changes or redeploys.
+async function seedWorkPermitRatesIfEmpty() {
+  try {
+    const existing = await dbQuery('GET', 'work_permit_rates', null, { limit: 1 });
+    if (Array.isArray(existing) && existing.length) return; // already seeded
+    const starterRoles = [
+      { occupation: 'General Labour / Construction Helper', skill_level: 'Unskilled',   mult: 0.8  },
+      { occupation: 'Skilled Trade (Electrician, Welder, Technician)', skill_level: 'Skilled', mult: 1.2 },
+      { occupation: 'Truck / Heavy Vehicle Driver',          skill_level: 'Skilled',     mult: 1.2  },
+      { occupation: 'Registered Nurse / Healthcare Worker',  skill_level: 'Professional', mult: 1.8  },
+      { occupation: 'Engineer / IT Professional',            skill_level: 'Professional', mult: 1.8  },
+    ];
+    const base = PRICING.work_permit_standard; // USD 499 / EUR 459 / GBP 399 baseline
+    const rows = [];
+    for (const [code, c] of Object.entries(WORK_PERMIT_DOCS)) {
+      for (const role of starterRoles) {
+        rows.push({
+          country_code: code, country_name: c.name, flag: c.flag,
+          occupation: role.occupation, skill_level: role.skill_level, active: true,
+          usd: Math.round(base.USD * role.mult), eur: Math.round(base.EUR * role.mult), gbp: Math.round(base.GBP * role.mult),
+          processing_weeks: c.processingWeeks, notes: '',
+        });
+      }
+    }
+    await dbQuery('POST', 'work_permit_rates', rows);
+    console.log(`✓ Seeded ${rows.length} starter work permit rates`);
+  } catch (e) {
+    console.log('• Work permit rates not seeded (table missing?) —', e.message);
+  }
+}
+seedWorkPermitRatesIfEmpty();
+
+// Public: only active rates, so a closed country/role simply never appears.
+app.get('/api/work-permit/rates', async (req, res) => {
+  try {
+    const params = { active: 'eq.true', order: 'country_name.asc,occupation.asc' };
+    if (req.query.country) params.country_code = `eq.${req.query.country.toUpperCase()}`;
+    res.json(await dbQuery('GET', 'work_permit_rates', null, params));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// CEO/staff: full list including inactive, for the admin Work Permit Rates tab.
+app.get('/api/admin/work-permit-rates', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    res.json(await dbQuery('GET', 'work_permit_rates', null, { order: 'country_name.asc,occupation.asc' }));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// CEO only: add a new country/occupation rate row.
+app.post('/api/admin/work-permit-rates', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    const b = req.body || {};
+    if (!b.country_code || !b.country_name || !b.occupation)
+      return res.status(400).json({ error: 'Country code, country name and occupation are required.' });
+    const row = {
+      country_code: String(b.country_code).toUpperCase(), country_name: b.country_name, flag: b.flag || '',
+      occupation: b.occupation, skill_level: b.skill_level || '', active: b.active !== false,
+      usd: b.usd != null ? Number(b.usd) : null, eur: b.eur != null ? Number(b.eur) : null, gbp: b.gbp != null ? Number(b.gbp) : null,
+      processing_weeks: b.processing_weeks || '', notes: b.notes || '',
+    };
+    const created = await dbQuery('POST', 'work_permit_rates', row);
+    logActivity(who, 'ceo', 'work_permit_rate_create', `Added rate: ${row.country_name} — ${row.occupation}`, row.country_code);
+    res.json({ success: true, rate: Array.isArray(created) ? created[0] : created });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// CEO only: edit a rate — price, active flag, occupation label, etc. Takes
+// effect on the public site immediately, no redeploy.
+app.patch('/api/admin/work-permit-rates/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    const b = req.body || {};
+    const patch = { updated_at: new Date().toISOString() };
+    ['country_code','country_name','flag','occupation','skill_level','processing_weeks','notes'].forEach(k => { if (b[k] !== undefined) patch[k] = b[k]; });
+    if (b.active !== undefined) patch.active = !!b.active;
+    if (b.usd !== undefined) patch.usd = b.usd === null ? null : Number(b.usd);
+    if (b.eur !== undefined) patch.eur = b.eur === null ? null : Number(b.eur);
+    if (b.gbp !== undefined) patch.gbp = b.gbp === null ? null : Number(b.gbp);
+    const updated = await dbQuery('PATCH', 'work_permit_rates', patch, { id: `eq.${req.params.id}` });
+    logActivity(who, 'ceo', 'work_permit_rate_update', `Updated rate #${req.params.id}: ${JSON.stringify(patch)}`, String(req.params.id));
+    res.json({ success: true, rate: Array.isArray(updated) ? updated[0] : updated });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// CEO only: remove a rate row entirely (prefer toggling "active" off instead —
+// this is for genuine mistakes/duplicates).
+app.delete('/api/admin/work-permit-rates/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    await dbQuery('DELETE', 'work_permit_rates', null, { id: `eq.${req.params.id}` });
+    logActivity(who, 'ceo', 'work_permit_rate_delete', `Deleted rate #${req.params.id}`, String(req.params.id));
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Client submits eligibility + requests a work permit for a specific
+// country + occupation rate. body: { rateId, provider, currency, fname,
+// lname, email, phone, nationality, travel_date, notes, docs_confirmed[] }
+// The fee is looked up from work_permit_rates by rateId — never trusted
+// from the client — and the rate must still be active at submit time
+// (closing a country/role mid-application is respected).
 app.post('/api/work-permit/apply', async (req, res) => {
   try {
     const b = req.body || {};
-    const product = PRICING[b.product] ? b.product : 'work_permit_standard';
     if (!b.fname || !b.email) return res.status(400).json({ error: 'Name and email are required.' });
+    if (!b.rateId) return res.status(400).json({ error: 'Please select a destination country and role.' });
     if (!b.docs_confirmed || b.docs_confirmed.length === 0)
       return res.status(400).json({ error: 'Please confirm which documents you hold before proceeding.' });
 
-    const country = (b.destination_country || '').toUpperCase();
-    const countryInfo = WORK_PERMIT_DOCS[country] || {};
+    const rateRows = await dbQuery('GET', 'work_permit_rates', null, { id: `eq.${b.rateId}`, limit: 1 });
+    const rate = rateRows[0];
+    if (!rate || !rate.active)
+      return res.status(400).json({ error: 'This country/role is not currently open for applications. Please choose another.' });
+
+    const countryInfo = WORK_PERMIT_DOCS[rate.country_code] || {};
     const ref = genRef();
+    const serviceLabel = `Europe Work Permit — ${rate.country_name} · ${rate.occupation}`;
     const application = {
       ref,
-      service: PRICING[product].label,
+      service: serviceLabel,
       fname: b.fname, lname: b.lname || '', email: b.email, phone: b.phone || '',
       nationality: b.nationality || '',
-      destination: countryInfo.name || b.destination_country || '',
-      travel_date: b.travel_date || '',
-      purpose: `Work Permit / Migration — ${countryInfo.name || b.destination_country || 'Europe'}`,
+      destination: rate.country_name, travel_date: b.travel_date || '',
+      purpose: `Work Permit — ${rate.country_name} (${rate.occupation})`,
       notes: [
         b.notes ? `Client notes: ${b.notes}` : '',
         `Documents confirmed: ${(b.docs_confirmed || []).join(' | ')}`,
-        `Package: ${PRICING[product].label}`,
-        countryInfo.processingWeeks ? `Official processing estimate: ${countryInfo.processingWeeks} weeks` : '',
+        `Occupation: ${rate.occupation}${rate.skill_level ? ' (' + rate.skill_level + ')' : ''}`,
+        (rate.processing_weeks || countryInfo.processingWeeks) ? `Official processing estimate: ${rate.processing_weeks || countryInfo.processingWeeks} weeks` : '',
       ].filter(Boolean).join('\n\n'),
       status: 'Awaiting Payment', paid: false, responses: [],
     };
@@ -2896,24 +3009,25 @@ app.post('/api/work-permit/apply', async (req, res) => {
 
     const provider = b.provider;
     const cur = (b.currency || 'USD').toUpperCase();
+    const rateAmount = { USD: rate.usd, EUR: rate.eur, GBP: rate.gbp }[cur];
     if (provider && PAY[provider] && PAY[provider].secret) {
-      const amount = PRICING[product][cur];
-      if (amount != null && PAY[provider].currencies.includes(cur)) {
+      if (rateAmount != null && PAY[provider].currencies.includes(cur)) {
         const reference = genPayRef();
-        await insertPayment({ reference, product, provider, currency: cur, amount, email: b.email, app_ref: ref, status: 'pending', meta: { country, docs: b.docs_confirmed } });
+        const product = `wp_rate_${rate.id}`;
+        await insertPayment({ reference, product, provider, currency: cur, amount: rateAmount, email: b.email, app_ref: ref, status: 'pending', meta: { label: serviceLabel, country: rate.country_code, occupation: rate.occupation, docs: b.docs_confirmed } });
         try {
           const { authorization_url } = await providerInit(provider, {
-            reference, amount, currency: cur, email: b.email,
-            label: `${PRICING[product].label} — ${ref}`, callbackUrl: `${baseUrl(req)}/pay/callback`,
+            reference, amount: rateAmount, currency: cur, email: b.email,
+            label: `${serviceLabel} — ${ref}`, callbackUrl: `${baseUrl(req)}/pay/callback`,
           });
-          return res.json({ success: true, ref, processingWeeks: countryInfo.processingWeeks, payment: { reference, authorization_url } });
+          return res.json({ success: true, ref, processingWeeks: rate.processing_weeks || countryInfo.processingWeeks, payment: { reference, authorization_url } });
         } catch (e) {
           console.error('work-permit pay init failed:', e.message);
-          return res.json({ success: true, ref, processingWeeks: countryInfo.processingWeeks, paymentError: 'Application saved but payment could not start. We will send you a payment link.' });
+          return res.json({ success: true, ref, processingWeeks: rate.processing_weeks || countryInfo.processingWeeks, paymentError: 'Application saved but payment could not start. We will send you a payment link.' });
         }
       }
     }
-    res.json({ success: true, ref, processingWeeks: countryInfo.processingWeeks });
+    res.json({ success: true, ref, processingWeeks: rate.processing_weeks || countryInfo.processingWeeks });
   } catch (e) {
     console.error('work-permit/apply error:', e.message);
     res.status(500).json({ error: e.message });

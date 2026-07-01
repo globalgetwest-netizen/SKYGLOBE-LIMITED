@@ -348,6 +348,7 @@
         <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
         <button class="sb-link" data-view="payments" onclick="switchView('payments')"><span class="ic">💳</span> Payments</button>
         <button class="sb-link" data-view="pricing" onclick="switchView('pricing')"><span class="ic">🏷️</span> Pricing</button>
+        <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
         <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
         <button class="sb-link" data-view="payroll" onclick="switchView('payroll')"><span class="ic">👥</span> Payroll</button>
@@ -469,6 +470,47 @@
             <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Change a price here and it goes live immediately across the whole site — work permit, legal documents, conferences, checkout — no redeploy needed.</p>
             <div id="pricingMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
             <div id="pricingTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading pricing…</p></div>
+          </div>
+        </section>
+
+        <!-- WORK PERMIT RATES -->
+        <section class="view" id="view-wprates">
+          <div class="panel" style="margin-bottom:22px">
+            <h3 style="margin:0 0 6px">➕ Add Country / Role Rate</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">A role only appears on the public work permit page once it's saved here and marked Active. Turn a country or role off anytime — it disappears from the public site instantly, no redeploy.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px">
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Country Code *</label>
+                <input type="text" id="wpCode" maxlength="2" placeholder="e.g. DE" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem;text-transform:uppercase"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Country Name *</label>
+                <input type="text" id="wpName" placeholder="e.g. Germany" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Flag emoji</label>
+                <input type="text" id="wpFlag" placeholder="🇩🇪" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Occupation *</label>
+                <input type="text" id="wpOcc" placeholder="e.g. Registered Nurse" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Skill Level</label>
+                <select id="wpSkill" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem">
+                  <option value="">—</option><option>Unskilled</option><option>Skilled</option><option>Professional</option>
+                </select></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">USD Fee *</label>
+                <input type="number" min="0" id="wpUsd" placeholder="499" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">EUR Fee</label>
+                <input type="number" min="0" id="wpEur" placeholder="459" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">GBP Fee</label>
+                <input type="number" min="0" id="wpGbp" placeholder="399" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Processing (weeks)</label>
+                <input type="text" id="wpWeeks" placeholder="e.g. 8–12" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <button class="btn" onclick="addWpRate()">➕ Add Rate</button>
+              <div id="wpAddMsg" style="font-size:0.85rem;color:var(--muted)"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <h3 style="margin:0">🌍 Country / Role Rates</h3>
+              <button onclick="loadWpRates()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
+            </div>
+            <div id="wpRatesTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading rates…</p></div>
           </div>
         </section>
 
@@ -1097,12 +1139,13 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
   if(v==='payments') loadPayments();
   if(v==='pricing') loadPricing();
+  if(v==='wprates') loadWpRates();
   if(v==='legaldocs') loadLegalDocs();
   if(v==='finance') loadFinance();
   if(v==='payroll') loadPayroll();
@@ -1468,6 +1511,108 @@ async function savePricing(id, btn){
     btn.disabled=false; btn.textContent=orig;
     setTimeout(()=>{ if(msg.textContent.startsWith('✓'))msg.textContent=''; },4000);
   }
+}
+
+async function loadWpRates(){
+  const el=document.getElementById('wpRatesTable');
+  if(!el)return;
+  try{
+    const r=await fetch(API+'/api/admin/work-permit-rates',{headers:{'x-admin-key':KEY}});
+    if(r.status===401){el.innerHTML='<p style="color:#e57373">Unauthorized.</p>';return;}
+    const rows=await r.json();
+    if(!Array.isArray(rows)||!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No rates yet — add one above.</p>';return;}
+    const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const grouped={};
+    rows.forEach(r=>{ (grouped[r.country_code]=grouped[r.country_code]||[]).push(r); });
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+      <thead><tr style="text-align:left;color:var(--muted);text-transform:uppercase;font-size:0.7rem;letter-spacing:.06em">
+        <th style="padding:8px">Country</th><th style="padding:8px">Occupation</th><th style="padding:8px">USD</th><th style="padding:8px">EUR</th><th style="padding:8px">GBP</th><th style="padding:8px">Active</th><th style="padding:8px"></th>
+      </tr></thead><tbody>
+      ${Object.values(grouped).flat().map(r=>`
+        <tr style="border-top:1px solid var(--line)">
+          <td style="padding:8px;white-space:nowrap">${esc(r.flag)} ${esc(r.country_name)}</td>
+          <td style="padding:8px;min-width:200px">
+            <input value="${esc(r.occupation)}" id="wp_${r.id}_occ" style="width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.82rem;margin-bottom:3px">
+            <div style="color:var(--muted);font-size:0.7rem">${esc(r.skill_level||'')}</div>
+          </td>
+          <td style="padding:8px"><input type="number" min="0" id="wp_${r.id}_USD" value="${r.usd!=null?r.usd:''}" style="width:80px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.82rem"></td>
+          <td style="padding:8px"><input type="number" min="0" id="wp_${r.id}_EUR" value="${r.eur!=null?r.eur:''}" style="width:80px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.82rem"></td>
+          <td style="padding:8px"><input type="number" min="0" id="wp_${r.id}_GBP" value="${r.gbp!=null?r.gbp:''}" style="width:80px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.82rem"></td>
+          <td style="padding:8px">
+            <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" id="wp_${r.id}_active" ${r.active?'checked':''} style="accent-color:var(--gold);width:16px;height:16px">
+              <span style="font-size:0.78rem;color:${r.active?'#4caf50':'var(--muted)'}">${r.active?'Open':'Closed'}</span>
+            </label>
+          </td>
+          <td style="padding:8px;white-space:nowrap">
+            <button onclick="saveWpRate(${r.id},this)" style="background:var(--gold);color:#1a1300;border:none;padding:7px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.78rem;margin-right:4px">Save</button>
+            <button onclick="deleteWpRate(${r.id})" style="background:transparent;border:1px solid var(--line);color:#e57373;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:0.78rem">✕</button>
+          </td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  }catch(e){ el.innerHTML='<p style="color:#e57373">Could not load rates.</p>'; }
+}
+
+async function addWpRate(){
+  const msg=document.getElementById('wpAddMsg');
+  const code=document.getElementById('wpCode').value.trim().toUpperCase();
+  const name=document.getElementById('wpName').value.trim();
+  const occ=document.getElementById('wpOcc').value.trim();
+  const usd=document.getElementById('wpUsd').value;
+  if(!code||!name||!occ||!usd){ msg.style.color='#e57373'; msg.textContent='Country code, country name, occupation and USD fee are required.'; return; }
+  msg.style.color='var(--muted)'; msg.textContent='Adding…';
+  try{
+    const r=await fetch(API+'/api/admin/work-permit-rates',{
+      method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({
+        country_code:code, country_name:name, flag:document.getElementById('wpFlag').value.trim(),
+        occupation:occ, skill_level:document.getElementById('wpSkill').value,
+        usd:Number(usd),
+        eur:document.getElementById('wpEur').value?Number(document.getElementById('wpEur').value):null,
+        gbp:document.getElementById('wpGbp').value?Number(document.getElementById('wpGbp').value):null,
+        processing_weeks:document.getElementById('wpWeeks').value.trim(),
+      })
+    });
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not add rate.');
+    msg.style.color='#4caf50'; msg.textContent='✓ Rate added — live on the public site now.';
+    ['wpCode','wpName','wpFlag','wpOcc','wpUsd','wpEur','wpGbp','wpWeeks'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('wpSkill').value='';
+    loadWpRates();
+  }catch(e){
+    msg.style.color='#e57373'; msg.textContent='Error: '+e.message;
+  }
+}
+
+async function saveWpRate(id,btn){
+  btn.disabled=true; const orig=btn.textContent; btn.textContent='Saving…';
+  try{
+    const r=await fetch(API+'/api/admin/work-permit-rates/'+id,{
+      method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({
+        occupation:document.getElementById(`wp_${id}_occ`).value.trim(),
+        usd:Number(document.getElementById(`wp_${id}_USD`).value)||null,
+        eur:document.getElementById(`wp_${id}_EUR`).value?Number(document.getElementById(`wp_${id}_EUR`).value):null,
+        gbp:document.getElementById(`wp_${id}_GBP`).value?Number(document.getElementById(`wp_${id}_GBP`).value):null,
+        active:document.getElementById(`wp_${id}_active`).checked,
+      })
+    });
+    if(!r.ok){ const d=await r.json(); throw new Error(d.error||'Could not save.'); }
+    btn.textContent='Saved ✓';
+    setTimeout(()=>loadWpRates(),700);
+  }catch(e){
+    alert('Error: '+e.message);
+    btn.disabled=false; btn.textContent=orig;
+  }
+}
+
+async function deleteWpRate(id){
+  if(!confirm('Delete this rate permanently? (Prefer switching it to Closed if you might reopen this role later.)'))return;
+  try{
+    const r=await fetch(API+'/api/admin/work-permit-rates/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}});
+    if(!r.ok){ const d=await r.json(); throw new Error(d.error||'Could not delete.'); }
+    loadWpRates();
+  }catch(e){ alert('Error: '+e.message); }
 }
 
 async function loadPayments(){

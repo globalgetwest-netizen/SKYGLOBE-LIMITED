@@ -146,20 +146,20 @@ const PACKAGES = [
   {
     id:'work_permit_standard', cat:'permit',
     tag:'🔷 Work Permit', ribbon:null,
-    title:'Europe Work Permit — Standard',
-    tagline:'Full professional application service',
+    title:'Europe Work Permit — General Labour & Skilled Trade',
+    tagline:'Full professional application service — priced by country & role',
     features:['Document eligibility assessment','Complete application preparation','Submission to government authority','Progress updates via SKYGLOBE portal','Permit delivery to you'],
-    usdAmt:'499', eurAmt:'459', gbpAmt:'399',
+    variable:true,
     href:'/work-permit',
     premium:false
   },
   {
     id:'work_permit_express', cat:'permit',
-    tag:'⚡ Work Permit Express', ribbon:'MOST POPULAR',
-    title:'Europe Work Permit — Express',
-    tagline:'Priority handling + dedicated personal agent',
-    features:['Everything in Standard','Dedicated personal agent assigned','Priority queue submission','WhatsApp direct agent access','Employer liaison & support letters'],
-    usdAmt:'749', eurAmt:'699', gbpAmt:'599',
+    tag:'⚡ Work Permit — Professional', ribbon:'PRIORITY',
+    title:'Europe Work Permit — Nursing, Engineering & IT',
+    tagline:'Priority handling + dedicated personal agent — priced by country & role',
+    features:['Everything in General Labour tier','Dedicated personal agent assigned','Priority queue submission','WhatsApp direct agent access','Employer liaison & support letters'],
+    variable:true,
     href:'/work-permit',
     premium:true
   },
@@ -167,9 +167,9 @@ const PACKAGES = [
     id:'migration_premium', cat:'migration',
     tag:'🌟 Full Migration', ribbon:'PREMIUM',
     title:'Premium Migration Package',
-    tagline:'Complete relocation support — permit to settlement',
+    tagline:'Complete relocation support — permit to settlement, priced by country & role',
     features:['Everything in Work Permit Express','Accommodation sourcing guidance','Banking & NIN/NI setup guidance','School & healthcare registration help','90-day post-arrival support'],
-    usdAmt:'1,299', eurAmt:'1,199', gbpAmt:'1,049',
+    variable:true,
     href:'/work-permit',
     premium:true
   },
@@ -244,11 +244,11 @@ function render() {
       <p class="tagline">${p.tagline}</p>
       <ul>${p.features.map(f=>`<li><span class="ck">✔</span>${f}</li>`).join('')}</ul>
       <div class="price-block">
-        <div class="from">from</div>
-        <div class="amt">$${p.usdAmt}</div>
-        <small>€${p.eurAmt} &nbsp;·&nbsp; £${p.gbpAmt}</small>
+        ${p.variable
+          ? `<div class="from">Priced by</div><div class="amt" style="font-size:1.1rem">Country &amp; Role</div><small>select your destination to see the exact fee</small>`
+          : `<div class="from">from</div><div class="amt">$${p.usdAmt}</div><small>€${p.eurAmt} &nbsp;·&nbsp; £${p.gbpAmt}</small>`}
       </div>
-      <button class="btn-apply" onclick="location.href='${p.href}'">Apply Now →</button>
+      <button class="btn-apply" onclick="location.href='${p.href}'">${p.variable?'See Country & Role Pricing →':'Apply Now →'}</button>
     </div>`).join('');
 }
 
