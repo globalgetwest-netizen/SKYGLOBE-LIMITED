@@ -309,9 +309,9 @@ let PAY_CFG=null;
 async function loadPayCfg(){ try{ PAY_CFG=await (await fetch('/api/pay/config')).json(); }catch(e){} }
 function pickProvider(){
   const provs=(PAY_CFG&&PAY_CFG.providers)||[];
-  const order=['stripe','flutterwave','paystack'];
-  for(const p of order){ const m=provs.find(x=>(x.id||x)===p); if(m) return p; }
-  return provs[0]?(provs[0].id||provs[0]):'stripe';
+  const order=['stripe','flutterwave','paystack','grey'];
+  for(const p of order){ const m=provs.find(x=>x.name===p); if(m) return p; }
+  return provs[0]?.name || 'grey';
 }
 
 // ---- Resume + generate after payment ----

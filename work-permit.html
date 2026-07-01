@@ -566,7 +566,7 @@ function refreshPay() {
 
   const provSel = document.getElementById('s4provider');
   if(provSel){
-    const nice = {paystack:'Card / Bank Transfer (Paystack)',stripe:'Card (Stripe)',flutterwave:'Mobile Money / Card (Flutterwave)'};
+    const nice = {grey:'🏦 Bank Transfer / USDC / USDT',paystack:'Card / Bank Transfer (Paystack)',stripe:'Card (Stripe)',flutterwave:'Mobile Money / Card (Flutterwave)'};
     const active = CFG.providers.filter(p=>p.currencies.includes(cur));
     provSel.innerHTML = active.length
       ? active.map(p=>`<option value="${p.name}">${nice[p.name]||p.name}</option>`).join('')
