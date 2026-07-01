@@ -606,6 +606,9 @@ body.wc-active #noriaBar{top:114px}
 .svc-card .sc-icon{font-size:2rem;display:block;margin-bottom:0.6rem}
 .svc-card h4{font-size:0.88rem;font-weight:600;color:#041022;margin-bottom:0.3rem}
 .svc-card p{font-size:0.75rem;color:#64748b}
+.svc-price{display:block;margin-top:0.5rem;font-size:0.72rem;font-weight:700;color:#a87016;background:rgba(212,167,58,0.12);border-radius:980px;padding:3px 10px}
+.wp-open-chip{background:#fff;border:1px solid #e7e9ee;color:#0b1220;font-size:.78rem;font-weight:600;padding:5px 12px;border-radius:980px;box-shadow:0 2px 8px rgba(16,24,40,.05);cursor:pointer;transition:.15s}
+.wp-open-chip:hover{border-color:#C8962A;background:#fffaf0}
 .app-ref-card{background:linear-gradient(135deg,#f0f5ff,#fdf9f0);border:2px solid var(--gold);border-radius:var(--radius-xl);padding:3rem;text-align:center;max-width:560px;margin:2rem auto;box-shadow:0 8px 32px rgba(0,0,0,0.08)}
 .app-ref-number{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:2.4rem;color:var(--gold);font-weight:600;letter-spacing:0.06em;margin:1rem 0}
 .app-tracker{background:#ffffff;border:1px solid rgba(0,0,0,0.08);border-radius:var(--radius-lg);padding:2rem;margin-top:2rem;max-width:560px;margin-left:auto;margin-right:auto;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
@@ -1544,6 +1547,12 @@ body.wc-active .page-back-bar{padding-top:138px}
           <button onclick="showPage('countries')" class="btn-primary">&#127757; Explore the World</button>
           <button onclick="showPage('apply')" class="btn-outline">Begin Your Journey</button>
         </div>
+        <!-- Live work permit country availability — pulled straight from the CEO
+             portal, so opening/closing a country there shows up here instantly. -->
+        <div id="wpOpenStrip" style="display:none;margin-top:1.1rem;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <span style="font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#16a34a;display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#16a34a;display:inline-block"></span>Now accepting work permits</span>
+          <div id="wpOpenChips" style="display:flex;flex-wrap:wrap;gap:.4rem"></div>
+        </div>
         <div style="margin-top:2rem">
           <p style="font-size:.9rem;color:#5b6573;line-height:1.5;margin:0">Global mobility, education and opportunity &mdash; unified.</p>
           <div style="margin-top:.4rem;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:#C8962A;font-weight:800">One World. One Mission.</div>
@@ -1556,7 +1565,7 @@ body.wc-active .page-back-bar{padding-top:138px}
         <div class="sg-slide"><div class="sg-ico">&#127979;</div><div class="sg-tag">Admissions</div><div class="sg-title">University Placement</div><div class="sg-desc">Offers from top universities worldwide, with personal-statement support.</div><button class="sg-link" onclick="showPage('services')">Get placed &rarr;</button></div>
         <div class="sg-slide"><div class="sg-ico">&#128188;</div><div class="sg-tag">Work in Europe</div><div class="sg-title">Work Visas &amp; EU Jobs</div><div class="sg-desc">Verified employers in 17 countries &mdash; permit &amp; visa handled end-to-end.</div><button class="sg-link" onclick="showPage('recruitment')">View jobs &rarr;</button></div>
         <div class="sg-slide"><div class="sg-ico">&#129650;</div><div class="sg-tag">Kids Academy</div><div class="sg-title">SkyGlobe Kids Academy</div><div class="sg-desc">A premium learning space preparing young global minds for the world.</div><button class="sg-link" onclick="location.href='https://app.skyglobegroup.com/kids-academy'">Enter &rarr;</button></div>
-        <div class="sg-slide"><div class="sg-ico">&#9992;</div><div class="sg-tag">Travel Ready</div><div class="sg-title">Flight &amp; Hotel Letters</div><div class="sg-desc">Embassy-accepted reservation letters, issued the same day.</div><button class="sg-link" onclick="showPage('services')">Get yours &rarr;</button></div>
+        <div class="sg-slide" id="sgAnnounceSlide"><div class="sg-ico" id="sgAnIco">&#128226;</div><div class="sg-tag" id="sgAnTag">Travel Ready</div><div class="sg-title" id="sgAnTitle">Flight &amp; Hotel Letters</div><div class="sg-desc" id="sgAnDesc">Embassy-accepted reservation letters, issued the same day.</div><button class="sg-link" id="sgAnBtn" onclick="showPage('services')">Get yours &rarr;</button></div>
         <div class="sg-slide"><div class="sg-ico">&#128737;</div><div class="sg-tag">Protected</div><div class="sg-title">Travel Insurance</div><div class="sg-desc">Schengen-compliant cover with &euro;30,000+ medical protection in minutes.</div><button class="sg-link" onclick="showPage('services')">Get covered &rarr;</button></div>
         <div class="sg-slide"><div class="sg-ico">&#127942;</div><div class="sg-tag">Funded Study</div><div class="sg-title">Scholarships</div><div class="sg-desc">Merit &amp; need-based scholarships, expertly matched and applied for you.</div><button class="sg-link" onclick="showPage('blog')">Discover &rarr;</button></div>
         <div class="sg-slide"><div class="sg-ico">&#127758;</div><div class="sg-tag">Explore</div><div class="sg-title">195 Country Guides</div><div class="sg-desc">Visas, costs, universities, jobs &amp; live data for every country.</div><button class="sg-link" onclick="showPage('countries')">Browse &rarr;</button></div>
@@ -1583,6 +1592,38 @@ body.wc-active .page-back-bar{padding-top:138px}
     slides[0].classList.add('active'); dots[0].classList.add('active'); reset();
     box.addEventListener('mouseenter',function(){ if(timer)clearInterval(timer); });
     box.addEventListener('mouseleave',reset);
+  })();
+  // Live, CEO-editable announcement — a new country opening, a deadline, an
+  // offer — swapped into the showcase slide the moment it's marked Live in
+  // the admin portal. Falls back to the default copy above if none is set.
+  (function(){
+    fetch('/api/announcements').then(r=>r.json()).then(list=>{
+      if (!Array.isArray(list) || !list.length) return;
+      const a = list[0];
+      const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+      set('sgAnIco', a.icon); set('sgAnTag', a.tag); set('sgAnTitle', a.headline); set('sgAnDesc', a.subtext);
+      const btn = document.getElementById('sgAnBtn');
+      if (btn && a.button_text) {
+        btn.textContent = a.button_text + ' →';
+        btn.onclick = a.button_link ? function(){ location.href = a.button_link; } : btn.onclick;
+      }
+    }).catch(()=>{});
+  })();
+  // Live "now open" country strip — reads directly from work_permit_rates,
+  // so adding/closing a country in the CEO portal appears here immediately,
+  // right on the homepage, with no separate step needed.
+  (function(){
+    fetch('/api/work-permit/rates').then(r=>r.json()).then(rows=>{
+      if (!Array.isArray(rows) || !rows.length) return;
+      const byCountry = {};
+      rows.forEach(r => { if (!byCountry[r.country_code]) byCountry[r.country_code] = r; });
+      const chips = Object.values(byCountry);
+      const box = document.getElementById('wpOpenChips');
+      const strip = document.getElementById('wpOpenStrip');
+      if (!box || !strip || !chips.length) return;
+      box.innerHTML = chips.map(c => `<span class="wp-open-chip" onclick="location.href='/work-permit?country=${c.country_code}'">${(c.flag||'').trim()} ${c.country_name}</span>`).join('');
+      strip.style.display = 'flex';
+    }).catch(()=>{});
   })();
   </script>
 
@@ -2988,18 +3029,18 @@ body.wc-active .page-back-bar{padding-top:138px}
       <h3 style="margin-bottom:0.4rem">What service do you need?</h3>
       <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1rem">Select one to continue. You can apply for multiple services by submitting separate applications.</p>
       <div class="service-select-grid" id="serviceGrid">
-        <div class="svc-card" onclick="selectService('Student Visa Processing',this)"><span class="sc-icon">🎓</span><h4>Student Visa</h4><p>Study abroad application</p></div>
-        <div class="svc-card" onclick="selectService('Work Visa Processing',this)"><span class="sc-icon">💼</span><h4>Work Visa</h4><p>Employment abroad</p></div>
-        <div class="svc-card" onclick="selectService('Tourist / Visit Visa',this)"><span class="sc-icon">🌴</span><h4>Tourist Visa</h4><p>Travel & visit</p></div>
-        <div class="svc-card" onclick="selectService('University Admission Assistance',this)"><span class="sc-icon">🏛️</span><h4>University Admission</h4><p>Enrolment support</p></div>
-        <div class="svc-card" onclick="selectService('Flight Reservation Letter',this)"><span class="sc-icon">✈️</span><h4>Flight Reservation</h4><p>Visa itinerary letter</p></div>
-        <div class="svc-card" onclick="selectService('Hotel Booking / Accommodation Letter',this)"><span class="sc-icon">🏨</span><h4>Hotel Booking</h4><p>Accommodation proof</p></div>
-        <div class="svc-card" onclick="selectService('Travel Insurance',this)"><span class="sc-icon">🛡️</span><h4>Travel Insurance</h4><p>Coverage certificate</p></div>
-        <div class="svc-card" onclick="selectService('Document Authentication / Apostille',this)"><span class="sc-icon">📋</span><h4>Document Auth</h4><p>Apostille & notarization</p></div>
-        <div class="svc-card" onclick="selectService('Scholarship Application Support',this)"><span class="sc-icon">🌟</span><h4>Scholarship</h4><p>Funding assistance</p></div>
-        <div class="svc-card" onclick="selectService('Express Entry / PR Pathway',this)"><span class="sc-icon">🍁</span><h4>Express Entry / PR</h4><p>Permanent residence</p></div>
-        <div class="svc-card" onclick="selectService('Flight Booking',this)"><span class="sc-icon">🎫</span><h4>Flight Booking</h4><p>Ticket purchase & booking</p></div>
-        <div class="svc-card" onclick="selectService('EU Direct Employment',this)"><span class="sc-icon">🇪🇺</span><h4>EU Direct Employment</h4><p>Jobs in Europe + work permit</p></div>
+        <div class="svc-card" onclick="selectService('Student Visa Processing',this)"><span class="sc-icon">🎓</span><h4>Student Visa</h4><p>Study abroad application</p><span class="svc-price" data-svc="Student Visa Processing"></span></div>
+        <div class="svc-card" onclick="selectService('Work Visa Processing',this)"><span class="sc-icon">💼</span><h4>Work Visa</h4><p>Employment abroad</p><span class="svc-price" data-svc="Work Visa Processing"></span></div>
+        <div class="svc-card" onclick="selectService('Tourist / Visit Visa',this)"><span class="sc-icon">🌴</span><h4>Tourist Visa</h4><p>Travel & visit</p><span class="svc-price" data-svc="Tourist / Visit Visa"></span></div>
+        <div class="svc-card" onclick="selectService('University Admission Assistance',this)"><span class="sc-icon">🏛️</span><h4>University Admission</h4><p>Enrolment support</p><span class="svc-price" data-svc="University Admission Assistance"></span></div>
+        <div class="svc-card" onclick="selectService('Flight Reservation Letter',this)"><span class="sc-icon">✈️</span><h4>Flight Reservation</h4><p>Visa itinerary letter</p><span class="svc-price" data-svc="Flight Reservation Letter"></span></div>
+        <div class="svc-card" onclick="selectService('Hotel Booking / Accommodation Letter',this)"><span class="sc-icon">🏨</span><h4>Hotel Booking</h4><p>Accommodation proof</p><span class="svc-price" data-svc="Hotel Booking / Accommodation Letter"></span></div>
+        <div class="svc-card" onclick="selectService('Travel Insurance',this)"><span class="sc-icon">🛡️</span><h4>Travel Insurance</h4><p>Coverage certificate</p><span class="svc-price" data-svc="Travel Insurance"></span></div>
+        <div class="svc-card" onclick="selectService('Document Authentication / Apostille',this)"><span class="sc-icon">📋</span><h4>Document Auth</h4><p>Apostille & notarization</p><span class="svc-price" data-svc="Document Authentication / Apostille"></span></div>
+        <div class="svc-card" onclick="selectService('Scholarship Application Support',this)"><span class="sc-icon">🌟</span><h4>Scholarship</h4><p>Funding assistance</p><span class="svc-price" data-svc="Scholarship Application Support"></span></div>
+        <div class="svc-card" onclick="selectService('Express Entry / PR Pathway',this)"><span class="sc-icon">🍁</span><h4>Express Entry / PR</h4><p>Permanent residence</p><span class="svc-price" data-svc="Express Entry / PR Pathway"></span></div>
+        <div class="svc-card" onclick="selectService('Flight Booking',this)"><span class="sc-icon">🎫</span><h4>Flight Booking</h4><p>Ticket purchase & booking</p><span class="svc-price" data-svc="Flight Booking"></span></div>
+        <div class="svc-card" onclick="selectService('EU Direct Employment',this)"><span class="sc-icon">🇪🇺</span><h4>EU Direct Employment</h4><p>Jobs in Europe + work permit</p><span class="svc-price" data-svc="EU Direct Employment"></span></div>
       </div>
     </div>
 
@@ -5150,6 +5191,18 @@ const APPLY_PROVIDER_LABELS = {
 let APPLY_PAY_CFG = { providers: [], pricing: {} };
 async function loadApplyPayCfg() {
   try { APPLY_PAY_CFG = await (await fetch('/api/pay/config')).json(); } catch (e) {}
+  paintSvcPriceBadges();
+}
+
+// Shows the real fee on each service card BEFORE the client even opens the
+// form — pulled live from the same admin-editable pricing every checkout
+// uses, so a price change in the CEO portal shows up here automatically.
+function paintSvcPriceBadges() {
+  document.querySelectorAll('.svc-price[data-svc]').forEach(el => {
+    const product = SERVICE_PRODUCT_MAP[el.dataset.svc];
+    const entry = product ? APPLY_PAY_CFG.pricing[product] : null;
+    el.textContent = entry && entry.USD != null ? `from $${Number(entry.USD).toLocaleString()}` : '';
+  });
 }
 
 function refreshApplyPay() {

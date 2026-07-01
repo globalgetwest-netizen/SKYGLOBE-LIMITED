@@ -492,6 +492,13 @@ async function init() {
       </div>`;
     }).join('');
   }
+
+  // Deep-link support: /work-permit?country=NO pre-selects that country
+  // (used by the homepage "Now accepting work permits" strip).
+  const preselect = new URLSearchParams(location.search).get('country');
+  if (preselect && openCodes.includes(preselect.toUpperCase())) {
+    pickCountry(preselect.toUpperCase());
+  }
 }
 
 function pickCountry(code) {

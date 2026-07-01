@@ -349,6 +349,7 @@
         <button class="sb-link" data-view="payments" onclick="switchView('payments')"><span class="ic">💳</span> Payments</button>
         <button class="sb-link" data-view="pricing" onclick="switchView('pricing')"><span class="ic">🏷️</span> Pricing</button>
         <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
+        <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
         <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
         <button class="sb-link" data-view="payroll" onclick="switchView('payroll')"><span class="ic">👥</span> Payroll</button>
@@ -449,6 +450,28 @@
 
         <!-- PAYMENTS -->
         <section class="view" id="view-payments">
+          <div class="panel" style="margin-bottom:22px">
+            <h3 style="margin:0 0 6px">✈️ Send a Custom Payment Link</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">For real flight tickets, real hotel rooms and travel insurance premiums — costs set by the actual airline/hotel/insurer, not by us. Get the real quote first, then send the client this link for that exact amount (separate from our fixed facilitation fee they already paid).</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px">
+              <div style="grid-column:span 2"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Client Email *</label>
+                <input type="email" id="cplEmail" placeholder="client@email.com" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div style="grid-column:span 2"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Description *</label>
+                <input type="text" id="cplDesc" placeholder="e.g. Flight ticket — Lagos to London, 14 Aug" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Amount *</label>
+                <input type="number" min="0" id="cplAmount" placeholder="612" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Currency</label>
+                <select id="cplCurrency" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem">
+                  <option>USD</option><option>EUR</option><option>GBP</option>
+                </select></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">App Reference (optional)</label>
+                <input type="text" id="cplRef" placeholder="SKY-2026-XXXX" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <button class="btn" onclick="sendCustomPaymentLink()">✈️ Send Payment Link</button>
+              <div id="cplMsg" style="font-size:0.85rem;color:var(--muted)"></div>
+            </div>
+          </div>
           <div class="panel">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
               <h3 style="margin:0">💳 Payment Records</h3>
@@ -511,6 +534,39 @@
               <button onclick="loadWpRates()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
             </div>
             <div id="wpRatesTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading rates…</p></div>
+          </div>
+        </section>
+
+        <!-- ANNOUNCEMENTS -->
+        <section class="view" id="view-announcements">
+          <div class="panel" style="margin-bottom:22px">
+            <h3 style="margin:0 0 6px">➕ Add Announcement</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Appears live on the homepage showcase the moment it's saved and Active — a new country opening, a deadline, an offer. No redeploy needed.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px">
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Icon (emoji)</label>
+                <input type="text" id="anIcon" placeholder="🇳🇴" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Tag</label>
+                <input type="text" id="anTag" placeholder="New Destination" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div style="grid-column:span 2"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Headline *</label>
+                <input type="text" id="anHeadline" placeholder="Norway is now open" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div style="grid-column:span 2"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Subtext</label>
+                <input type="text" id="anSubtext" placeholder="Work permits now processing for Norway — apply today." style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Button text</label>
+                <input type="text" id="anBtnText" placeholder="Apply now" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Button link</label>
+                <input type="text" id="anBtnLink" placeholder="/work-permit" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <button class="btn" onclick="addAnnouncement()">➕ Add Announcement</button>
+              <div id="anAddMsg" style="font-size:0.85rem;color:var(--muted)"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <h3 style="margin:0">📣 Live Announcements</h3>
+              <button onclick="loadAnnouncements()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
+            </div>
+            <div id="announcementsTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
           </div>
         </section>
 
@@ -1139,13 +1195,14 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
   if(v==='payments') loadPayments();
   if(v==='pricing') loadPricing();
   if(v==='wprates') loadWpRates();
+  if(v==='announcements') loadAnnouncements();
   if(v==='legaldocs') loadLegalDocs();
   if(v==='finance') loadFinance();
   if(v==='payroll') loadPayroll();
@@ -1613,6 +1670,95 @@ async function deleteWpRate(id){
     if(!r.ok){ const d=await r.json(); throw new Error(d.error||'Could not delete.'); }
     loadWpRates();
   }catch(e){ alert('Error: '+e.message); }
+}
+
+async function loadAnnouncements(){
+  const el=document.getElementById('announcementsTable');
+  if(!el)return;
+  try{
+    const r=await fetch(API+'/api/admin/announcements',{headers:{'x-admin-key':KEY}});
+    if(r.status===401){el.innerHTML='<p style="color:#e57373">Unauthorized.</p>';return;}
+    const rows=await r.json();
+    if(!Array.isArray(rows)||!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No announcements yet — add one above.</p>';return;}
+    const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+      <thead><tr style="text-align:left;color:var(--muted);text-transform:uppercase;font-size:0.7rem;letter-spacing:.06em">
+        <th style="padding:8px">Announcement</th><th style="padding:8px">Button</th><th style="padding:8px">Active</th><th style="padding:8px"></th>
+      </tr></thead><tbody>
+      ${rows.map(a=>`
+        <tr style="border-top:1px solid var(--line)">
+          <td style="padding:8px;min-width:260px">
+            <div style="font-weight:700">${esc(a.icon)} ${esc(a.headline)}</div>
+            <div style="color:var(--muted);font-size:0.78rem;margin-top:2px">${esc(a.tag)}${a.tag&&a.subtext?' · ':''}${esc(a.subtext)}</div>
+          </td>
+          <td style="padding:8px;color:var(--muted);font-size:0.8rem">${esc(a.button_text)||'—'}${a.button_link?' → '+esc(a.button_link):''}</td>
+          <td style="padding:8px">
+            <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" ${a.active?'checked':''} onchange="toggleAnnouncement(${a.id},this.checked)" style="accent-color:var(--gold);width:16px;height:16px">
+              <span style="font-size:0.78rem;color:${a.active?'#4caf50':'var(--muted)'}">${a.active?'Live':'Hidden'}</span>
+            </label>
+          </td>
+          <td style="padding:8px"><button onclick="deleteAnnouncement(${a.id})" style="background:transparent;border:1px solid var(--line);color:#e57373;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:0.78rem">✕</button></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  }catch(e){ el.innerHTML='<p style="color:#e57373">Could not load announcements.</p>'; }
+}
+
+async function addAnnouncement(){
+  const msg=document.getElementById('anAddMsg');
+  const headline=document.getElementById('anHeadline').value.trim();
+  if(!headline){ msg.style.color='#e57373'; msg.textContent='Headline is required.'; return; }
+  msg.style.color='var(--muted)'; msg.textContent='Adding…';
+  try{
+    const r=await fetch(API+'/api/admin/announcements',{
+      method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({
+        icon:document.getElementById('anIcon').value.trim(), tag:document.getElementById('anTag').value.trim(),
+        headline, subtext:document.getElementById('anSubtext').value.trim(),
+        button_text:document.getElementById('anBtnText').value.trim(), button_link:document.getElementById('anBtnLink').value.trim(),
+      })
+    });
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not add announcement.');
+    msg.style.color='#4caf50'; msg.textContent='✓ Live on the homepage now.';
+    ['anIcon','anTag','anHeadline','anSubtext','anBtnText','anBtnLink'].forEach(id=>document.getElementById(id).value='');
+    loadAnnouncements();
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+}
+
+async function toggleAnnouncement(id,active){
+  try{
+    await fetch(API+'/api/admin/announcements/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({active})});
+    loadAnnouncements();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function deleteAnnouncement(id){
+  if(!confirm('Delete this announcement?'))return;
+  try{
+    const r=await fetch(API+'/api/admin/announcements/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}});
+    if(!r.ok){ const d=await r.json(); throw new Error(d.error||'Could not delete.'); }
+    loadAnnouncements();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function sendCustomPaymentLink(){
+  const msg=document.getElementById('cplMsg');
+  const email=document.getElementById('cplEmail').value.trim();
+  const desc=document.getElementById('cplDesc').value.trim();
+  const amount=document.getElementById('cplAmount').value;
+  if(!email||!desc||!amount){ msg.style.color='#e57373'; msg.textContent='Email, description and amount are required.'; return; }
+  msg.style.color='var(--muted)'; msg.textContent='Sending…';
+  try{
+    const r=await fetch(API+'/api/admin/send-payment-link',{
+      method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({email,description:desc,amount:Number(amount),currency:document.getElementById('cplCurrency').value,appRef:document.getElementById('cplRef').value.trim()||undefined})
+    });
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not send payment link.');
+    msg.style.color='#4caf50'; msg.innerHTML=`✓ Sent to ${email}. Link: <a href="${d.authorization_url}" target="_blank" style="color:var(--gold)">${d.authorization_url}</a>`;
+    ['cplEmail','cplDesc','cplAmount','cplRef'].forEach(id=>document.getElementById(id).value='');
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
 }
 
 async function loadPayments(){

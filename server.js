@@ -2966,6 +2966,116 @@ app.delete('/api/admin/work-permit-rates/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Live announcements — CEO-editable homepage highlight slot ────────────────
+// Replaces a fixed marketing slide with something the CEO can push instantly:
+// a new country opening, a World Cup deadline, a seasonal offer. No redeploy.
+app.get('/api/announcements', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'announcements', null, { active: 'eq.true', order: 'priority.asc,created_at.desc' });
+    const now = new Date().toISOString();
+    // Respect optional start/end dates if the CEO scheduled the announcement.
+    res.json(rows.filter(a => (!a.starts_at || a.starts_at <= now) && (!a.ends_at || a.ends_at >= now)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/admin/announcements', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try { res.json(await dbQuery('GET', 'announcements', null, { order: 'priority.asc,created_at.desc' })); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/announcements', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    const b = req.body || {};
+    if (!b.headline) return res.status(400).json({ error: 'Headline is required.' });
+    const row = {
+      icon: b.icon || '📣', tag: b.tag || '', headline: b.headline, subtext: b.subtext || '',
+      button_text: b.button_text || '', button_link: b.button_link || '',
+      active: b.active !== false, priority: b.priority != null ? Number(b.priority) : 0,
+      starts_at: b.starts_at || null, ends_at: b.ends_at || null,
+    };
+    const created = await dbQuery('POST', 'announcements', row);
+    logActivity(who, 'ceo', 'announcement_create', `Added announcement: ${row.headline}`, '');
+    res.json({ success: true, announcement: Array.isArray(created) ? created[0] : created });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/announcements/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    const b = req.body || {};
+    const patch = { updated_at: new Date().toISOString() };
+    ['icon','tag','headline','subtext','button_text','button_link','starts_at','ends_at'].forEach(k => { if (b[k] !== undefined) patch[k] = b[k]; });
+    if (b.active !== undefined) patch.active = !!b.active;
+    if (b.priority !== undefined) patch.priority = Number(b.priority);
+    const updated = await dbQuery('PATCH', 'announcements', patch, { id: `eq.${req.params.id}` });
+    logActivity(who, 'ceo', 'announcement_update', `Updated announcement #${req.params.id}`, String(req.params.id));
+    res.json({ success: true, announcement: Array.isArray(updated) ? updated[0] : updated });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/announcements/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    await dbQuery('DELETE', 'announcements', null, { id: `eq.${req.params.id}` });
+    logActivity(who, 'ceo', 'announcement_delete', `Deleted announcement #${req.params.id}`, String(req.params.id));
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── Custom payment link — for services whose real cost isn't fixed ──────────
+// Real flight tickets, real hotel rooms and travel insurance premiums are set
+// by the airline/hotel/insurer, not by us — we're the facilitator between the
+// client and that real provider. Once staff has the real quote, this creates
+// a proper payment record and a secure Grey checkout link to send the client
+// (email + returned directly so staff can also share it on WhatsApp). This
+// keeps the fixed facilitation fee (already charged via the normal checkout)
+// completely separate from the variable provider cost billed here.
+app.post('/api/admin/send-payment-link', async (req, res) => {
+  const who = checkStaffOrAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const b = req.body || {};
+    if (!b.email || !b.description || !b.amount) return res.status(400).json({ error: 'Email, description and amount are required.' });
+    const cur = (b.currency || 'USD').toUpperCase();
+    const amount = Number(b.amount);
+    if (!(amount > 0)) return res.status(400).json({ error: 'Amount must be a positive number.' });
+
+    const reference = genPayRef();
+    const product = `custom_${reference}`;
+    await insertPayment({
+      reference, product, provider: 'grey', currency: cur, amount, email: b.email,
+      app_ref: b.appRef || null, status: 'pending',
+      meta: { label: b.description, custom: true, sentBy: who },
+    });
+    const { authorization_url } = await providerInit('grey', {
+      reference, amount, currency: cur, email: b.email, product, appRef: b.appRef || reference,
+      label: b.description, callbackUrl: `${baseUrl(req)}/pay/callback`,
+    });
+
+    try {
+      await sendEmail(b.email, `Payment request — ${b.description}`,
+        `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#c9a84c">Payment Request</h2>
+          <p>${sanitize(b.description, 300)}</p>
+          <p><strong>Amount:</strong> ${cur} ${amount.toLocaleString()}</p>
+          <p><a href="${authorization_url}" style="display:inline-block;background:#C8962A;color:#1a1300;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:10px">Pay Securely →</a></p>
+          <p style="color:#888;font-size:0.85rem;margin-top:20px">Reference: ${reference} · SkyGlobe Group</p>
+        </div>`);
+    } catch (e) { console.error('send-payment-link email failed:', e.message); }
+
+    logActivity(who, getRole(req)?.role || 'staff', 'custom_payment_link', `Sent payment link to ${b.email}: ${cur} ${amount} — ${b.description}`, reference);
+    res.json({ success: true, reference, authorization_url });
+  } catch (e) {
+    console.error('send-payment-link error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Client submits eligibility + requests a work permit for a specific
 // country + occupation rate. body: { rateId, provider, currency, fname,
 // lname, email, phone, nationality, travel_date, notes, docs_confirmed[] }
