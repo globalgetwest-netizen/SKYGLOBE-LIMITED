@@ -8564,18 +8564,47 @@ const WE_DATA={
     }
   },
 };
-// Defaults for countries without detailed data
+// Only a handful of countries have hand-curated data below (WE_DATA). Every
+// other country is fetched live from AI the first time it's opened, then
+// cached for the rest of the session — no more permanent "coming soon".
+let WE_LIVE_CACHE={};
+let WE_LOADING=new Set();
+
 function getWeCountryData(code){
-  return WE_DATA[code]||{
-    name:document.getElementById('weCountrySelect')?.querySelector(`option[value="${code}"]`)?.textContent?.replace(/^[^ ]+ /,'')||code,
-    flag:'🌍',currency:'Local currency',language:'Local language',population:'—',gdp:'—',
-    universities:[{name:'Data coming soon',rank:'—',type:'—',intake:'—',tuition:'—',note:'Detailed university data for this country will be added soon.'}],
-    airlines:[{name:'Data coming soon',hub:'—',type:'—',coverage:'—',note:'Airline data coming soon.'}],
-    hospitals:[{name:'Data coming soon',location:'—',type:'—',note:'Hospital data coming soon.'}],
-    hotels:[{name:'Data coming soon',location:'—',stars:'—',price:'—',note:'Hotel data coming soon.'}],
-    infrastructure:[{name:'Data coming soon',type:'—',note:'Infrastructure data coming soon.'}],
-    worldstatus:{safety:'—',healthcare:'—',economy:'—',climate:'—',cost:'—',immigration:'—'}
+  if (WE_DATA[code]) return WE_DATA[code];
+  if (WE_LIVE_CACHE[code]) return WE_LIVE_CACHE[code];
+  const opt = document.getElementById('weCountrySelect')?.querySelector(`option[value="${code}"]`)?.textContent || '';
+  return {
+    name:opt.replace(/^[^ ]+ /,'')||code, flag:opt.match(/^[^\s]+/)?.[0]||'🌍',
+    currency:'…',language:'…',population:'…',gdp:'…',
+    universities:[{name:'Fetching live data…',rank:'—',type:'—',intake:'—',tuition:'—',note:'Pulling real, current information for this country — one moment.'}],
+    airlines:[{name:'Fetching live data…',hub:'—',type:'—',coverage:'—',note:'Pulling real, current information for this country — one moment.'}],
+    hospitals:[{name:'Fetching live data…',location:'—',type:'—',note:'Pulling real, current information for this country — one moment.'}],
+    hotels:[{name:'Fetching live data…',location:'—',stars:'—',price:'—',note:'Pulling real, current information for this country — one moment.'}],
+    infrastructure:[{name:'Fetching live data…',type:'—',note:'Pulling real, current information for this country — one moment.'}],
+    worldstatus:{safety:'…',healthcare:'…',economy:'…',climate:'…',cost:'…',immigration:'…'}
   };
+}
+
+// Fetches and caches live World Explorer data for a country not in WE_DATA.
+// Re-renders automatically once it arrives, if the user is still viewing it.
+async function ensureWeCountryData(code){
+  if (!code || WE_DATA[code] || WE_LIVE_CACHE[code] || WE_LOADING.has(code)) return;
+  WE_LOADING.add(code);
+  try {
+    const opt = document.getElementById('weCountrySelect')?.querySelector(`option[value="${code}"]`)?.textContent || code;
+    const name = opt.replace(/^[^ ]+ /,'') || code;
+    const flag = opt.match(/^[^\s]+/)?.[0] || '🌍';
+    const r = await fetch('/api/world-explorer-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,name})});
+    const d = await r.json();
+    if (d && d.data) {
+      WE_LIVE_CACHE[code] = { name, flag, ...d.data };
+    }
+  } catch(e) { /* leave uncached — next view will retry */ }
+  finally {
+    WE_LOADING.delete(code);
+    if (document.getElementById('weCountrySelect')?.value === code) { renderWeStats(); renderWePanel(); }
+  }
 }
 
 let weCurrentPanel='universities';
@@ -8592,6 +8621,7 @@ function showWePanel(name,btn){
 function onWeCountryChange(){
   renderWeStats();
   renderWePanel();
+  ensureWeCountryData(document.getElementById('weCountrySelect')?.value);
 }
 
 function renderWeStats(){
@@ -8802,6 +8832,7 @@ function closeWeDetail(){
 function initWorldExplorer(){
   renderWeStats();
   renderWePanel();
+  ensureWeCountryData(document.getElementById('weCountrySelect')?.value);
 }
 
 // ═══════════════════════════════════════════════════════

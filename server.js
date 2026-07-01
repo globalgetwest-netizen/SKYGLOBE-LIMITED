@@ -2032,6 +2032,55 @@ Be specific with real numbers and real university names. Keep each section conci
   } catch (e) { clearTimeout(timer); res.json({ html: null }); }
 });
 
+// ── WORLD EXPLORER — live data for countries without hand-curated entries ────
+// Only a handful of countries (GB, US, CA, AU...) have hand-written universities/
+// airlines/hospitals/hotels/infrastructure data baked into index.html. Every
+// other country used to show a static "Data coming soon" placeholder. This
+// generates the same structure live via AI, on demand, the first time someone
+// opens that country — so all ~195 countries have real, current information
+// with zero manual data entry.
+app.post('/api/world-explorer-data', aiLimiter, async (req, res) => {
+  const { code, name } = req.body || {};
+  if (!code || !name) return res.status(400).json({ error: 'country code and name are required.' });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.json({ data: null });
+
+  const prompt = `You are an expert international relocation consultant. Give real, accurate, current information about ${name} (ISO code ${code}) for someone considering studying, working or relocating there.
+
+Return ONLY a JSON object (no markdown, no code fences) with this exact shape:
+{
+  "currency": "e.g. EUR (€)", "language": "main language(s)", "population": "e.g. 5.4M", "gdp": "e.g. $450B",
+  "universities": [ {"name":"real university name","rank":"e.g. QS #120 or National #1","type":"Public/Private","intake":"e.g. Sep","tuition":"realistic intl fee range","note":"1 short sentence"} ],
+  "airlines": [ {"name":"real airline","hub":"main hub airport","type":"Full-service/Low-cost","coverage":"route coverage summary","note":"1 short sentence"} ],
+  "hospitals": [ {"name":"real hospital","location":"city","type":"Public/Private/Teaching","note":"1 short sentence"} ],
+  "hotels": [ {"name":"real hotel or chain","location":"city","stars":"e.g. ★★★★","price":"realistic nightly range","note":"1 short sentence"} ],
+  "infrastructure": [ {"name":"real transport/utility system","type":"Public Transport/Internet/Healthcare System/etc","note":"1 short sentence"} ],
+  "worldstatus": {"safety":"1 short phrase with any known index rank","healthcare":"1 short phrase","economy":"1 short phrase","climate":"1 short phrase","cost":"1 short phrase","immigration":"1 short phrase on the main PR/residency pathway"}
+}
+
+Give exactly 3-5 items per array. Use REAL, verifiable names — real universities, real airlines, real hospitals, real hotel chains that actually operate in ${name}. If you are not confident of a specific real name for a category (e.g. a very small country with limited international hotel chains), use the best real regional/national option you know rather than inventing one. Be concise — each "note" is one short sentence, max ~18 words.`;
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 35000);
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 3072, temperature: 0.4 } }),
+        signal: ctrl.signal }
+    );
+    clearTimeout(timer);
+    const raw = await r.json();
+    let text = (raw.candidates?.[0]?.content?.parts?.[0]?.text || '').replace(/```json|```/g, '').trim();
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      return res.json({ data: parsed });
+    }
+    res.json({ data: null });
+  } catch (e) { clearTimeout(timer); res.json({ data: null }); }
+});
+
 // ── COUNTRY COMPARISON ────────────────────────────────────────────────────────
 app.post('/api/country-compare', async (req, res) => {
   const { countries = [] } = req.body || {};
