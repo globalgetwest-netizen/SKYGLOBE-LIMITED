@@ -2199,6 +2199,10 @@ const PRICING = {
 };
 
 const PAY = {
+  // Grey — SkyGlobe's own bank/crypto receiving accounts (USD, EUR, GBP, USDC, USDT).
+  // Always available: no external API key required, so it never goes "not configured".
+  // Confirmed manually by CEO/staff once the transfer is verified in the Grey app.
+  grey:        { secret: 'manual', pub: null, currencies: ['USD','EUR','GBP','USDC','USDT'], manual: true },
   paystack:    { secret: process.env.PAYSTACK_SECRET_KEY,    pub: process.env.PAYSTACK_PUBLIC_KEY,    currencies: ['USD'] },
   stripe:      { secret: process.env.STRIPE_SECRET_KEY,      pub: process.env.STRIPE_PUBLIC_KEY,      currencies: ['USD','EUR','GBP'] },
   flutterwave: { secret: process.env.FLUTTERWAVE_SECRET_KEY, pub: process.env.FLUTTERWAVE_PUBLIC_KEY, currencies: ['USD','EUR','GBP'] },
@@ -2234,7 +2238,21 @@ async function updatePayment(reference, patch) {
 
 // ── provider dispatch: initialise a checkout ─────────────────────────────────
 // Returns { authorization_url } the browser should be redirected to.
-async function providerInit(provider, { reference, amount, currency, email, label, callbackUrl }) {
+async function providerInit(provider, { reference, amount, currency, email, label, callbackUrl, product, appRef }) {
+  if (provider === 'grey') {
+    // No external checkout — send the client to our own bank/crypto payment page,
+    // pre-filled with their reference, amount, currency and the product they're buying.
+    const base = callbackUrl.replace(/\/pay\/callback\/?$/, '');
+    const qs = new URLSearchParams({
+      payref: reference,
+      ref: appRef || reference,
+      amount: String(amount),
+      cur: currency,
+      product: product || '',
+      service: label || '',
+    });
+    return { authorization_url: `${base}/pay.html?${qs.toString()}` };
+  }
   if (provider === 'paystack') {
     const r = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
@@ -2293,6 +2311,7 @@ async function providerInit(provider, { reference, amount, currency, email, labe
 
 // ── provider dispatch: verify a payment really succeeded ─────────────────────
 async function providerVerify(provider, payment) {
+  if (provider === 'grey') return false; // manual confirmation only — see /api/admin/payments/:reference/confirm
   if (provider === 'paystack') {
     const r = await fetch(`https://api.paystack.co/transaction/verify/${payment.reference}`, {
       headers: { Authorization: `Bearer ${PAY.paystack.secret}` },
@@ -2354,6 +2373,63 @@ app.get('/api/pay/config', (_req, res) => {
   res.json({ providers: activeProviders(), pricing: PRICING });
 });
 
+// ── Live-editable pricing (CEO portal) ───────────────────────────────────────
+// PRICING above holds the defaults. On startup we overlay any saved overrides
+// from Supabase so a price change made in the CEO portal takes effect
+// everywhere instantly — no redeploy, no code edit — because every route
+// (checkout.js, work-permit, legal docs, conferences...) reads PRICING by
+// reference, so mutating the entries in place is enough.
+async function loadPricingOverrides() {
+  try {
+    const rows = await dbQuery('GET', 'pricing_overrides', null, {});
+    for (const row of rows) {
+      const p = PRICING[row.product];
+      if (!p) continue;
+      if (row.usd != null) p.USD = Number(row.usd);
+      if (row.eur != null) p.EUR = Number(row.eur);
+      if (row.gbp != null) p.GBP = Number(row.gbp);
+      if (row.label) p.label = row.label;
+    }
+    console.log(`✓ Pricing overrides loaded (${rows.length})`);
+  } catch (e) {
+    console.log('• No pricing overrides loaded (table missing or empty) — using code defaults.');
+  }
+}
+loadPricingOverrides();
+
+// CEO/staff: view every service with its live price
+app.get('/api/admin/pricing', (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  res.json(Object.entries(PRICING).map(([id, p]) => ({ id, ...p })));
+});
+
+// CEO only: change a service's price. Takes effect immediately, sitewide.
+app.patch('/api/admin/pricing/:product', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  const product = req.params.product;
+  const entry = PRICING[product];
+  if (!entry) return res.status(404).json({ error: 'Unknown product.' });
+
+  const { USD, EUR, GBP, label } = req.body || {};
+  const patch = { product };
+  if (USD != null && !isNaN(USD)) { entry.USD = Number(USD); patch.usd = entry.USD; }
+  if (EUR != null && !isNaN(EUR)) { entry.EUR = Number(EUR); patch.eur = entry.EUR; }
+  if (GBP != null && !isNaN(GBP)) { entry.GBP = Number(GBP); patch.gbp = entry.GBP; }
+  if (label && String(label).trim()) { entry.label = String(label).trim(); patch.label = entry.label; }
+
+  try {
+    const updated = await dbQuery('PATCH', 'pricing_overrides', patch, { product: `eq.${product}` });
+    if (!Array.isArray(updated) || !updated.length) await dbQuery('POST', 'pricing_overrides', patch);
+  } catch (e) {
+    console.error('pricing_overrides persist failed:', e.message);
+    return res.status(500).json({ error: 'Price updated live, but could not be saved permanently — it will reset next restart. Check the pricing_overrides table exists in Supabase.' });
+  }
+
+  logActivity(who, 'ceo', 'pricing_update', `Updated price for ${product}: ${JSON.stringify(patch)}`, product);
+  res.json({ success: true, product: { id: product, ...entry } });
+});
+
 // ── initialise a payment ─────────────────────────────────────────────────────
 // body: { product, provider, email, currency, app_ref?, meta? }
 app.post('/api/pay/init', async (req, res) => {
@@ -2365,7 +2441,9 @@ app.post('/api/pay/init', async (req, res) => {
     if (!PAY[provider] || !PAY[provider].secret)
       return res.status(400).json({ error: `Payment provider "${provider}" is not available yet. Please choose another or contact us on WhatsApp.` });
     const cur = (currency || 'USD').toUpperCase();
-    const amount = prod[cur];
+    // Stablecoins (USDC/USDT) are priced 1:1 with the USD rate — no separate table needed.
+    const isCrypto = cur === 'USDC' || cur === 'USDT';
+    const amount = isCrypto ? prod.USD : prod[cur];
     if (amount == null) return res.status(400).json({ error: `${prod.label} is not priced in ${cur}.` });
     if (!PAY[provider].currencies.includes(cur))
       return res.status(400).json({ error: `${provider} does not support ${cur}.` });
@@ -2379,11 +2457,87 @@ app.post('/api/pay/init', async (req, res) => {
     const callbackUrl = `${baseUrl(req)}/pay/callback`;
     const { authorization_url } = await providerInit(provider, {
       reference, amount, currency: cur, email, label: prod.label, callbackUrl,
+      product, appRef: app_ref || reference,
     });
     res.json({ success: true, reference, provider, authorization_url });
   } catch (e) {
     console.error('pay/init error:', e.message);
     res.status(500).json({ error: 'Could not start payment. Please try again or contact us on WhatsApp.' });
+  }
+});
+
+// ── Grey (manual): client tells us they've sent the transfer ────────────────
+// This does NOT mark the payment as paid — it flags it "awaiting_confirmation"
+// and alerts the team so a human confirms it against the Grey app, same as any
+// professional manual-transfer flow (Wise, bank desks, etc. all work this way).
+app.post('/api/pay/grey/notify', contactLimiter, async (req, res) => {
+  try {
+    const { reference, name, email, phone, note } = req.body || {};
+    if (!reference) return res.status(400).json({ error: 'Missing payment reference.' });
+    const payment = await getPayment(String(reference).trim());
+    if (!payment) return res.status(404).json({ error: 'We could not find that payment reference. Please check it or contact us on WhatsApp.' });
+    if (payment.status === 'paid')
+      return res.json({ success: true, alreadyPaid: true });
+
+    await updatePayment(payment.reference, {
+      status: 'awaiting_confirmation',
+      notified_at: new Date().toISOString(),
+      notified_by: { name: name || '', email: email || payment.email, phone: phone || '', note: note || '' },
+    });
+
+    const team = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
+    const prodLabel = PRICING[payment.product]?.label || payment.product;
+    try {
+      await sendEmail(team, `💰 Grey transfer to confirm — ${payment.reference} (${prodLabel})`,
+        `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#c9a84c">Bank/Crypto Payment Notification</h2>
+          <p><strong>Payment reference:</strong> ${payment.reference}</p>
+          <p><strong>Application reference:</strong> ${payment.app_ref || '—'}</p>
+          <p><strong>Service:</strong> ${prodLabel}</p>
+          <p><strong>Amount:</strong> ${payment.currency} ${payment.amount}</p>
+          <p><strong>Client:</strong> ${name || '—'} — ${email || payment.email}${phone ? ' · ' + phone : ''}</p>
+          ${note ? `<p><strong>Note from client:</strong> ${note}</p>` : ''}
+          <p>Verify this transfer landed in the Grey account, then confirm it from the CEO portal (Payments) to unlock the client's service automatically.</p>
+        </div>`);
+    } catch (e) { console.error('grey/notify email failed:', e.message); }
+
+    res.json({ success: true });
+  } catch (e) {
+    console.error('pay/grey/notify error:', e.message);
+    res.status(500).json({ error: 'Could not record your notification. Please message us on WhatsApp instead.' });
+  }
+});
+
+// ── CEO/staff: confirm a manual (Grey) payment once verified in the bank/wallet ──
+app.post('/api/admin/payments/:reference/confirm', async (req, res) => {
+  const who = checkStaffOrAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const payment = await getPayment(req.params.reference);
+    if (!payment) return res.status(404).json({ error: 'Payment not found.' });
+    if (payment.status === 'paid') return res.json({ success: true, alreadyPaid: true });
+
+    await updatePayment(payment.reference, { status: 'paid', paid_at: new Date().toISOString(), confirmed_by: who });
+    await fulfilPayment(payment);
+
+    let unlock = null;
+    if (PRICING[payment.product]?.instant) {
+      unlock = signUnlock(payment.reference, payment.product);
+      try {
+        await sendEmail(payment.email, `Payment confirmed — ${PRICING[payment.product]?.label || payment.product}`,
+          `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+            <h2 style="color:#c9a84c">Payment Confirmed ✅</h2>
+            <p>Thank you — we've confirmed your payment (reference <strong>${payment.reference}</strong>).</p>
+            <p>Please reply to this email or WhatsApp us at +1 737-399-8522 with your reference so we can complete your request right away.</p>
+          </div>`);
+      } catch (e) { console.error('confirm email failed:', e.message); }
+    }
+
+    logActivity(who, getRole(req)?.role || 'staff', 'payment_confirm', `Confirmed Grey payment ${payment.reference} (${payment.currency} ${payment.amount})`, payment.reference);
+    res.json({ success: true, unlock });
+  } catch (e) {
+    console.error('payment confirm error:', e.message);
+    res.status(500).json({ error: e.message });
   }
 });
 
