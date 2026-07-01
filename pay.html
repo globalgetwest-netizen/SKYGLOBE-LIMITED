@@ -58,6 +58,11 @@
   .soon{margin-top:18px;text-align:center;color:#94a3b8;font-size:.82rem}
   footer{background:#0a1c3e;color:#9fb0c9;text-align:center;padding:26px;font-size:.84rem;margin-top:30px}
   .motto{color:var(--gold);font-weight:700;letter-spacing:.08em}
+  .netsel{display:flex;gap:8px;margin:2px 0 6px}
+  .net-tab{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;font:inherit;font-weight:600;font-size:.82rem;color:#475569;cursor:pointer;transition:.2s}
+  .net-tab.active{background:#eef4ff;border-color:#bcd0ff;color:#0a1c3e}
+  .netblk{display:none}
+  .netblk.active{display:block}
 </style>
 </head>
 <body>
@@ -126,27 +131,55 @@
       <div class="warn">For a UK (Faster Payments) transfer use the <strong>account number + sort code</strong>. Add your reference <strong id="refEchoGBP">(your SKY reference)</strong> to the description.</div>
     </div>
 
-    <!-- USDC — BEP20 -->
+    <!-- USDC — BEP20 / Solana -->
     <div class="rail" id="rail-USDC">
-      <div class="warn red">⚠ Send <strong>only USDC on the BNB Smart Chain (BEP20)</strong> network to this address. Any other coin or network will incur a recovery fee or permanent loss.</div>
-      <div class="qrbox">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&margin=0&data=0xD49777a1b204e5C7A972242da8C0c40946A1d032" alt="USDC BEP20 wallet QR" onerror="this.style.display='none'">
-        <div class="net">Network: BNB Smart Chain · BEP20</div>
-      </div>
       <div class="field"><div class="l"><div class="k">Asset</div><div class="v">USDC (USD Coin)</div></div></div>
-      <div class="field"><div class="l"><div class="k">Wallet address</div><div class="v" data-c>0xD49777a1b204e5C7A972242da8C0c40946A1d032</div></div><button class="copy" onclick="cp(this)">Copy</button></div>
+      <div class="netsel">
+        <button class="net-tab active" onclick="pickNet('USDC','BEP20',this)">BEP20 (BNB Smart Chain)</button>
+        <button class="net-tab" onclick="pickNet('USDC','SOL',this)">Solana</button>
+      </div>
+      <div class="netblk active" id="USDC-BEP20">
+        <div class="warn red">⚠ Send <strong>only USDC on the BNB Smart Chain (BEP20)</strong> network to this address. Any other coin or network will incur a recovery fee or permanent loss.</div>
+        <div class="qrbox">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&margin=0&data=0xD49777a1b204e5C7A972242da8C0c40946A1d032" alt="USDC BEP20 wallet QR" onerror="this.style.display='none'">
+          <div class="net">Network: BNB Smart Chain · BEP20</div>
+        </div>
+        <div class="field"><div class="l"><div class="k">Wallet address (BEP20)</div><div class="v" data-c>0xD49777a1b204e5C7A972242da8C0c40946A1d032</div></div><button class="copy" onclick="cp(this)">Copy</button></div>
+      </div>
+      <div class="netblk" id="USDC-SOL">
+        <div class="warn red">⚠ Send <strong>only USDC on the Solana</strong> network to this address. Any other coin or network will incur a recovery fee or permanent loss.</div>
+        <div class="qrbox">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&margin=0&data=w866VJjRxxfYd88DUxUAvpgV6iQnEw7Xi7bVnZs3ED5" alt="USDC Solana wallet QR" onerror="this.style.display='none'">
+          <div class="net">Network: Solana</div>
+        </div>
+        <div class="field"><div class="l"><div class="k">Wallet address (Solana)</div><div class="v" data-c>w866VJjRxxfYd88DUxUAvpgV6iQnEw7Xi7bVnZs3ED5</div></div><button class="copy" onclick="cp(this)">Copy</button></div>
+      </div>
       <div class="warn">After sending, share your transaction hash / screenshot with us using the button below (with your reference). Deposits usually confirm within minutes.</div>
     </div>
 
-    <!-- USDT — BEP20 -->
+    <!-- USDT — BEP20 / TRC20 -->
     <div class="rail" id="rail-USDT">
-      <div class="warn red">⚠ Send <strong>only USDT on the BNB Smart Chain (BEP20)</strong> network to this address. Any other coin or network will incur a recovery fee or permanent loss.</div>
-      <div class="qrbox">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&margin=0&data=0xD49777a1b204e5C7A972242da8C0c40946A1d032" alt="USDT BEP20 wallet QR" onerror="this.style.display='none'">
-        <div class="net">Network: BNB Smart Chain · BEP20</div>
-      </div>
       <div class="field"><div class="l"><div class="k">Asset</div><div class="v">USDT (Tether)</div></div></div>
-      <div class="field"><div class="l"><div class="k">Wallet address</div><div class="v" data-c>0xD49777a1b204e5C7A972242da8C0c40946A1d032</div></div><button class="copy" onclick="cp(this)">Copy</button></div>
+      <div class="netsel">
+        <button class="net-tab active" onclick="pickNet('USDT','BEP20',this)">BEP20 (BNB Smart Chain)</button>
+        <button class="net-tab" onclick="pickNet('USDT','TRC20',this)">TRC20 (TRON)</button>
+      </div>
+      <div class="netblk active" id="USDT-BEP20">
+        <div class="warn red">⚠ Send <strong>only USDT on the BNB Smart Chain (BEP20)</strong> network to this address. Any other coin or network will incur a recovery fee or permanent loss.</div>
+        <div class="qrbox">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&margin=0&data=0xD49777a1b204e5C7A972242da8C0c40946A1d032" alt="USDT BEP20 wallet QR" onerror="this.style.display='none'">
+          <div class="net">Network: BNB Smart Chain · BEP20</div>
+        </div>
+        <div class="field"><div class="l"><div class="k">Wallet address (BEP20)</div><div class="v" data-c>0xD49777a1b204e5C7A972242da8C0c40946A1d032</div></div><button class="copy" onclick="cp(this)">Copy</button></div>
+      </div>
+      <div class="netblk" id="USDT-TRC20">
+        <div class="warn red">⚠ Send <strong>only USDT on the TRON (TRC20)</strong> network to this address. Any other coin or network will incur a recovery fee or permanent loss.</div>
+        <div class="qrbox">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&margin=0&data=TMiGzDK134DqGf54AivbaLyVYGud4xaJUC" alt="USDT TRC20 wallet QR" onerror="this.style.display='none'">
+          <div class="net">Network: TRON · TRC20</div>
+        </div>
+        <div class="field"><div class="l"><div class="k">Wallet address (TRC20)</div><div class="v" data-c>TMiGzDK134DqGf54AivbaLyVYGud4xaJUC</div></div><button class="copy" onclick="cp(this)">Copy</button></div>
+      </div>
       <div class="warn">After sending, share your transaction hash / screenshot with us using the button below (with your reference). Deposits usually confirm within minutes.</div>
     </div>
   </div>
@@ -168,7 +201,7 @@
     <div class="msg" id="pmsg"></div>
   </div>
 
-  <div class="soon">💳 Card payments (Stripe · Wise · Paystack · Flutterwave) coming soon for instant checkout. USDT/USDC also available on TRC20 &amp; Solana on request.</div>
+  <div class="soon">💳 Card payments (Stripe · Wise · Paystack · Flutterwave) coming soon for instant checkout. USDC on BEP20 &amp; Solana · USDT on BEP20 &amp; TRC20.</div>
 </div></main>
 
 <footer>
@@ -177,10 +210,18 @@
 </footer>
 
 <script>
+  var PAYREF = '', SERVICE_LABEL = '';
   (function(){
     var p = new URLSearchParams(location.search);
     if (p.get('ref')) document.getElementById('ref').value = p.get('ref');
     if (p.get('amount')) document.getElementById('amount').value = p.get('amount');
+    PAYREF = p.get('payref') || '';
+    SERVICE_LABEL = p.get('service') || '';
+    if (SERVICE_LABEL) {
+      var h1 = document.querySelector('.hero h1');
+      var pEl = document.querySelector('.hero p');
+      if (pEl) pEl.textContent = 'You are paying for: ' + SERVICE_LABEL + '. Choose your currency, transfer to the matching account, then tell us you\'ve paid so we can confirm it fast.';
+    }
     var cur = (p.get('cur') || '').toUpperCase();
     if (['USD','EUR','GBP','USDC','USDT'].includes(cur)) {
       var t = document.querySelector('.tab[data-rail="'+cur+'"]');
@@ -204,6 +245,16 @@
     if (btn) btn.classList.add('active');
     var el = document.getElementById('rail-'+rail);
     if (el) el.classList.add('active');
+  }
+
+  function pickNet(coin, net, btn){
+    var rail = document.getElementById('rail-'+coin);
+    if (!rail) return;
+    rail.querySelectorAll('.net-tab').forEach(function(t){ t.classList.remove('active'); });
+    rail.querySelectorAll('.netblk').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    var blk = document.getElementById(coin+'-'+net);
+    if (blk) blk.classList.add('active');
   }
 
   function cp(btn){
@@ -230,22 +281,35 @@
     var msg = document.getElementById('pmsg'), btn = document.getElementById('notifyBtn');
     if (!name || !email){ msg.className='msg err'; msg.textContent='Please enter your name and email.'; return; }
     btn.disabled = true; btn.textContent = 'Sending…'; msg.className='msg';
-    var body = {
-      fname: name,
-      email: email,
-      phone: phone,
-      service: 'Payment Notification — ' + (rail || 'Transfer') + (amount ? ' ' + amount : ''),
-      destination: '',
-      message: 'PAYMENT NOTIFICATION\nReference: ' + (ref || '(none given)') +
-               '\nMethod/Currency: ' + (rail || 'Transfer') +
-               '\nAmount: ' + (amount || '(not stated)') +
-               (note ? '\nNote: ' + note : '') +
-               '\n\nThe client says they have sent this payment. Please verify it in the Grey account and mark the application as Paid.'
-    };
     try {
-      var r = await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-      var d = await r.json();
-      if (!r.ok) throw new Error(d.error || 'Could not send.');
+      var r, d;
+      if (PAYREF) {
+        // Real checkout: tied to a payment record created by /api/pay/init — this
+        // flags it "awaiting confirmation" so it shows up in Payments for the team.
+        r = await fetch('/api/pay/grey/notify', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ reference: PAYREF, name: name, email: email, phone: phone,
+            note: (note || '') + (ref ? ' | App ref: ' + ref : '') })
+        });
+        d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Could not send.');
+      } else {
+        // Direct visit without a payment record (e.g. shared link, WhatsApp) —
+        // fall back to a plain email notice to the team.
+        var body = {
+          fname: name, email: email, phone: phone,
+          service: 'Payment Notification — ' + (rail || 'Transfer') + (amount ? ' ' + amount : ''),
+          destination: '',
+          message: 'PAYMENT NOTIFICATION\nReference: ' + (ref || '(none given)') +
+                   '\nMethod/Currency: ' + (rail || 'Transfer') +
+                   '\nAmount: ' + (amount || '(not stated)') +
+                   (note ? '\nNote: ' + note : '') +
+                   '\n\nThe client says they have sent this payment. Please verify it in the Grey account and mark the application as Paid.'
+        };
+        r = await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Could not send.');
+      }
       msg.className='msg ok';
       msg.innerHTML = '✅ Thank you! We\'ve received your payment notice and will confirm it shortly. Keep your proof of transfer safe.';
       btn.textContent = 'Sent ✓';
