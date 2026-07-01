@@ -445,6 +445,15 @@ window.noriaOvSend=function(){var i=document.getElementById('noriaOvInput');var 
 </footer>
 
 <script>
+// Real flag icon images instead of flag emoji — Windows (and some Android
+// builds) don't render regional-indicator flag emoji as flags, only as plain
+// letters or boxes. A crisp flag image looks premium everywhere.
+function flagImg(countryCode, w) {
+  const cc = String(countryCode || '').trim().toLowerCase();
+  if (!/^[a-z]{2}$/.test(cc)) return '';
+  w = w || 22;
+  return `<img src="https://flagcdn.com/${cc}.svg" alt="" loading="lazy" style="width:${w}px;height:${Math.round(w*0.75)}px;object-fit:cover;border-radius:2px;vertical-align:-3px;box-shadow:0 0 0 1px rgba(0,0,0,.06)">`;
+}
 let COUNTRIES = {};
 let CFG = { providers: [], pricing: {} };
 let RATES = [];               // active work_permit_rates rows, live from the CEO portal
@@ -471,7 +480,7 @@ async function init() {
     const c = COUNTRIES[code] || RATES.find(r=>r.country_code===code);
     const o = document.createElement('option');
     o.value = code;
-    o.textContent = `${c.flag||''} ${c.name||c.country_name}`;
+    o.textContent = c.name || c.country_name; // <option> can't show images — plain text here
     sel.appendChild(o);
   });
 
@@ -482,11 +491,10 @@ async function init() {
     grid.innerHTML = openCodes.map(code=>{
       const c = COUNTRIES[code] || {};
       const rateInfo = RATES.find(r=>r.country_code===code) || {};
-      const flag = c.flag || rateInfo.flag || '';
       const name = c.name || rateInfo.country_name;
       const roles = RATES.filter(r=>r.country_code===code).length;
       return `<div class="country-card" id="cc_${code}" onclick="pickCountry('${code}')">
-        <div class="country-flag">${flag}</div>
+        <div class="country-flag">${flagImg(code, 40)}</div>
         <h3>${name}</h3>
         <div class="weeks">${roles} role${roles===1?'':'s'} open</div>
       </div>`;
@@ -518,7 +526,7 @@ function onCountryChange() {
   const est = document.getElementById('s1processingEst');
   if(info){
     est.style.display='block';
-    est.innerHTML = `<strong>${info.flag} ${info.name}</strong> — Official government processing estimate: <strong>${info.processingWeeks} weeks</strong>. Requirements: ${info.docs.length} documents.`;
+    est.innerHTML = `<strong>${flagImg(code)} ${info.name}</strong> — Official government processing estimate: <strong>${info.processingWeeks} weeks</strong>. Requirements: ${info.docs.length} documents.`;
   } else {
     est.style.display='none';
   }
@@ -627,7 +635,7 @@ function buildSummary() {
   el.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:14px">
       <div style="flex:1;min-width:180px"><div style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Role</div><div style="font-weight:700">${esc(pLabel)}</div></div>
-      <div style="flex:1;min-width:140px"><div style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Destination</div><div style="font-weight:700">${ci?ci.flag+' '+ci.name:'—'}</div></div>
+      <div style="flex:1;min-width:140px"><div style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Destination</div><div style="font-weight:700">${ci?flagImg(ccode)+' '+ci.name:'—'}</div></div>
       ${weeks?`<div style="flex:1;min-width:140px"><div style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Est. Processing</div><div style="font-weight:700;color:#1a5c9e">${weeks} weeks</div></div>`:''}
     </div>
     ${docs.length?`<div style="margin-top:12px;font-size:.82rem;color:var(--muted)"><strong style="color:var(--ink)">Documents confirmed (${docs.length}):</strong> ${docs.map(d=>`<span style="display:inline-block;background:#e9f0fd;color:#1a3670;border-radius:20px;padding:2px 8px;margin:2px">${esc(d.slice(0,40))}…</span>`).join('')}</div>`:''}`;

@@ -1609,6 +1609,16 @@ body.wc-active .page-back-bar{padding-top:138px}
       }
     }).catch(()=>{});
   })();
+  // Real flag icon images instead of flag emoji — Windows (and some Android
+  // builds) don't render regional-indicator flag emoji as flags at all, only
+  // as plain letters or boxes. A crisp, consistent flag image looks premium
+  // everywhere and never depends on the visitor's OS/font.
+  window.flagImg = function(countryCode, w) {
+    const cc = String(countryCode || '').trim().toLowerCase();
+    if (!/^[a-z]{2}$/.test(cc)) return '';
+    w = w || 20;
+    return `<img src="https://flagcdn.com/${cc}.svg" alt="" loading="lazy" style="width:${w}px;height:${Math.round(w*0.75)}px;object-fit:cover;border-radius:2px;vertical-align:-3px;box-shadow:0 0 0 1px rgba(0,0,0,.06)">`;
+  };
   // Live "now open" country strip — reads directly from work_permit_rates,
   // so adding/closing a country in the CEO portal appears here immediately,
   // right on the homepage, with no separate step needed.
@@ -1621,7 +1631,7 @@ body.wc-active .page-back-bar{padding-top:138px}
       const box = document.getElementById('wpOpenChips');
       const strip = document.getElementById('wpOpenStrip');
       if (!box || !strip || !chips.length) return;
-      box.innerHTML = chips.map(c => `<span class="wp-open-chip" onclick="location.href='/work-permit?country=${c.country_code}'">${(c.flag||'').trim()} ${c.country_name}</span>`).join('');
+      box.innerHTML = chips.map(c => `<span class="wp-open-chip" onclick="location.href='/work-permit?country=${c.country_code}'">${flagImg(c.country_code)} ${c.country_name}</span>`).join('');
       strip.style.display = 'flex';
     }).catch(()=>{});
   })();
@@ -7785,8 +7795,8 @@ if (isLoggedIn()) connectSSE();
         <h3 class="section-title" style="font-size:1.6rem">More <strong>AI Tools</strong></h3>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem">
-        <div class="we-card" style="opacity:0.75">
-          <div class="we-card-head"><div class="we-card-icon">📄</div><div><h4>CV / Resume Builder</h4><div class="we-sub">Coming soon</div></div></div>
+        <div class="we-card" style="cursor:pointer" onclick="showPage('cv-builder')">
+          <div class="we-card-head"><div class="we-card-icon">📄</div><div><h4>CV / Resume Builder</h4><div class="we-sub" style="color:#16a34a;font-weight:700">Available now →</div></div></div>
           <p>Build an ATS-optimised CV tailored to international job markets in UK, Canada & Europe.</p>
         </div>
         <div class="we-card" style="opacity:0.75">

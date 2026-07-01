@@ -504,8 +504,8 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px">
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Country Code *</label>
                 <div style="display:flex;align-items:center;gap:8px">
-                  <input type="text" id="wpCode" maxlength="2" placeholder="e.g. DE" oninput="this.value=this.value.toUpperCase();document.getElementById('wpFlagPreview').textContent=codeToFlag(this.value)" style="flex:1;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem;text-transform:uppercase">
-                  <span id="wpFlagPreview" style="font-size:1.6rem;line-height:1">🏳️</span>
+                  <input type="text" id="wpCode" maxlength="2" placeholder="e.g. DE" oninput="this.value=this.value.toUpperCase();document.getElementById('wpFlagPreview').innerHTML=flagImg(this.value,28)" style="flex:1;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem;text-transform:uppercase">
+                  <span id="wpFlagPreview" style="display:inline-block;width:28px"></span>
                 </div>
                 <div style="font-size:0.7rem;color:var(--muted);margin-top:4px">Flag is generated automatically from the code — no need to find or type an emoji.</div>
               </div>
@@ -1590,7 +1590,7 @@ async function loadWpRates(){
       </tr></thead><tbody>
       ${Object.values(grouped).flat().map(r=>`
         <tr style="border-top:1px solid var(--line)">
-          <td style="padding:8px;white-space:nowrap">${esc(r.flag)} ${esc(r.country_name)}</td>
+          <td style="padding:8px;white-space:nowrap">${flagImg(r.country_code,22)} ${esc(r.country_name)}</td>
           <td style="padding:8px;min-width:200px">
             <input value="${esc(r.occupation)}" id="wp_${r.id}_occ" style="width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.82rem;margin-bottom:3px">
             <div style="color:var(--muted);font-size:0.7rem">${esc(r.skill_level||'')}</div>
@@ -1613,12 +1613,13 @@ async function loadWpRates(){
   }catch(e){ el.innerHTML='<p style="color:#e57373">Could not load rates.</p>'; }
 }
 
-// Same logic as server.js flagFromCode() — turns "NO" into 🇳🇴, purely for
-// the live preview as the CEO types; the server is still the source of truth.
-function codeToFlag(code){
-  const cc=String(code||'').trim().toUpperCase();
-  if(!/^[A-Z]{2}$/.test(cc)) return '🏳️';
-  return String.fromCodePoint(...[...cc].map(c=>127397+c.charCodeAt(0)));
+// Real flag icon image instead of flag emoji — Windows (and some Android
+// builds) don't render regional-indicator flag emoji as flags at all.
+function flagImg(countryCode, w){
+  const cc=String(countryCode||'').trim().toLowerCase();
+  if(!/^[a-z]{2}$/.test(cc)) return '';
+  w=w||20;
+  return `<img src="https://flagcdn.com/${cc}.svg" alt="" loading="lazy" style="width:${w}px;height:${Math.round(w*0.75)}px;object-fit:cover;border-radius:2px;vertical-align:-3px;box-shadow:0 0 0 1px rgba(255,255,255,.15)">`;
 }
 
 async function addWpRate(){
@@ -1645,7 +1646,7 @@ async function addWpRate(){
     if(!r.ok) throw new Error(d.error||'Could not add rate.');
     msg.style.color='#4caf50'; msg.textContent='✓ Rate added — live on the public site now.';
     ['wpCode','wpName','wpOcc','wpUsd','wpEur','wpGbp','wpWeeks'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('wpFlagPreview').textContent='🏳️';
+    document.getElementById('wpFlagPreview').innerHTML='';
     document.getElementById('wpSkill').value='';
     loadWpRates();
   }catch(e){
