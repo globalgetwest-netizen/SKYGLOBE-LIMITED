@@ -5816,8 +5816,16 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   .glyph-wrap svg{width:100%;height:100%}
   .glyph-lbl{position:absolute;z-index:3;right:18px;bottom:16px;font-size:.32rem;color:#a08a5a;letter-spacing:.08em;text-transform:uppercase;width:38px;text-align:center}
   .note{color:#a08a5a;font-size:.78rem;text-align:center;max-width:480px}
+  .card.back{padding:18px 20px}
+  .backhd{position:relative;z-index:3;display:flex;align-items:center;gap:9px;color:#fff6dd;font-size:.66rem;letter-spacing:.06em;font-family:'Cormorant Garamond',serif;font-weight:700}
+  .backbody{position:relative;z-index:3;margin-top:12px}
+  .backbody p{color:#c9bda0;font-size:.56rem;line-height:1.55;margin-bottom:8px;font-family:Inter,sans-serif}
+  .backsig{position:relative;z-index:3;display:flex;align-items:flex-end;gap:12px;margin-top:8px}
+  .backsig-lbl{font-size:.5rem;color:#a08a5a;border-top:1px solid rgba(255,222,138,.3);padding-top:3px;letter-spacing:.05em;text-transform:uppercase;font-family:'Space Mono',monospace}
+  .backfoot{position:absolute;left:20px;right:20px;bottom:12px;z-index:3;font-size:.44rem;color:#7a6a44;letter-spacing:.04em;font-family:'Space Mono',monospace;text-align:center}
 </style></head><body>
 
+<div class="hdr-lbl" style="color:#a08a5a;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase">Front</div>
 <div class="stack">
   <div class="layer l3"></div>
   <div class="layer l2"></div>
@@ -5838,9 +5846,8 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
     <div class="microtext"></div>
     <div class="hd">
       <div class="brand">
-        <svg width="24" height="24" viewBox="0 0 40 40"><defs><linearGradient id="bg1" x1="0.72" y1="0.12" x2="0.28" y2="0.88"><stop offset="0%" stop-color="#FDBE2D"/><stop offset="34%" stop-color="#F77F1B"/><stop offset="62%" stop-color="#2E7FD4"/><stop offset="100%" stop-color="#1B57C8"/></linearGradient></defs>
-          <path d="M20 0.8 C21.2 15.2,24.8 18.8,39.2 20 C24.8 21.2,21.2 24.8,20 39.2 C18.8 24.8,15.2 21.2,0.8 20 C15.2 18.8,18.8 15.2,20 0.8 Z" fill="url(#bg1)"/></svg>
-        <b>SKY<span>GLOBE</span></b>
+        <img src="${origin}/icon-192.png" alt="SkyGlobe Group" style="width:24px;height:24px;border-radius:6px">
+        <b>SKYGLOBE GROUP</b>
       </div>
       <div class="toprow">
         <div class="status"><span class="dot"></span><span>Live · Verified</span></div>
@@ -5876,7 +5883,43 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
     <div class="mrz"><div class="lbl">Machine-Readable Zone</div>${mrz1}<br>${mrz2}</div>
   </div>
 </div>
-<div class="note">🔒 Encrypted at rest · circuit-trace security print · biometric scan-frame · SkyGlobe issuing seal · security glyph derived from this card's own access-code hash (unique per card, verifiable) · dual machine-readable layers (QR + MRZ) · full record accessible only to the holder's private access code or authenticated staff.</div>
+
+<div class="hdr-lbl" style="color:#a08a5a;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase">Back</div>
+<div class="stack">
+  <div class="layer l3"></div>
+  <div class="layer l2"></div>
+  <div class="card back">
+    <svg class="circuit" viewBox="0 0 440 277" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="circ2" width="55" height="55" patternUnits="userSpaceOnUse">
+          <path d="M0 27 H20 M20 10 V44 M20 10 H55 M20 44 H40 M40 44 V55" fill="none" stroke="#FFDE8A" stroke-width="0.6" opacity="0.5"/>
+          <circle cx="20" cy="10" r="1.6" fill="#FFDE8A" opacity="0.6"/>
+          <circle cx="20" cy="44" r="1.6" fill="#FFDE8A" opacity="0.6"/>
+          <circle cx="40" cy="44" r="1.2" fill="#FFDE8A" opacity="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="440" height="277" fill="url(#circ2)"/>
+    </svg>
+    <div class="vignette"></div>
+    <div class="sheen"></div>
+    <div class="microtext"></div>
+    <div class="backhd">
+      <img src="${origin}/icon-192.png" alt="SkyGlobe Group" style="width:20px;height:20px;border-radius:5px">
+      <b>SKYGLOBE GROUP · FOUNDER IDENTITY</b>
+    </div>
+    <div class="backbody">
+      <p>This card certifies the holder as the Founder &amp; Chief Executive Officer of SkyGlobe Group. It is issued, encrypted at rest and verified by SkyGlobe Group. It is not a government-issued identity document and does not confer any legal identity status outside SkyGlobe Group's own systems.</p>
+      <p>Full record access — including photograph and personal details — requires the holder's private access code or authenticated SkyGlobe staff login. This card's authenticity can be independently confirmed at any time via the QR code on the front, which resolves to a public verification page showing name, role and validity only.</p>
+    </div>
+    <div class="backsig">
+      <img src="${sigUrl}" alt="" style="height:34px;filter:brightness(1.4)">
+      <div class="backsig-lbl">Authorised Signatory<br>SkyGlobe Group</div>
+      <img src="${stampUrl}" alt="" style="height:52px;width:52px;opacity:.85;margin-left:auto">
+    </div>
+    <div class="backfoot">${cardNumber} · Reproduction or alteration of this card is prohibited · skyglobegroup.com</div>
+  </div>
+</div>
+<div class="note">🔒 Encrypted at rest · circuit-trace security print · biometric scan-frame · SkyGlobe issuing seal · security glyph derived from this card's own access-code hash (unique per card, verifiable) · QR code is a genuine, independently scannable verification link; the MRZ line is a stylistic passport-style layout, not a certified ICAO machine-readable travel document zone · full record accessible only to the holder's private access code or authenticated staff.</div>
 </body></html>`;
 }
 
@@ -5942,9 +5985,8 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
   <div class="microtext"></div>
   <div class="hd">
     <div class="brand">
-      <svg width="26" height="26" viewBox="0 0 40 40"><defs><linearGradient id="bg1" x1="0.72" y1="0.12" x2="0.28" y2="0.88"><stop offset="0%" stop-color="#FDBE2D"/><stop offset="34%" stop-color="#F77F1B"/><stop offset="62%" stop-color="#2E7FD4"/><stop offset="100%" stop-color="#1B57C8"/></linearGradient></defs>
-        <path d="M20 0.8 C21.2 15.2,24.8 18.8,39.2 20 C24.8 21.2,21.2 24.8,20 39.2 C18.8 24.8,15.2 21.2,0.8 20 C15.2 18.8,18.8 15.2,20 0.8 Z" fill="url(#bg1)"/></svg>
-      <b>SKY<span>GLOBE</span></b>
+      <img src="${origin}/icon-192.png" alt="SkyGlobe Group" style="width:26px;height:26px;border-radius:6px">
+      <b>SKYGLOBE GROUP</b>
     </div>
     <div class="tier">${t.badge}</div>
   </div>
