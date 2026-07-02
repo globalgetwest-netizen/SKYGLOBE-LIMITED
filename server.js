@@ -5750,8 +5750,11 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   // The Founder ID defaults to the CEO's own uploaded photo (ceo.png in the
   // repo root) unless a specific photo was passed at issuance time.
   const photoTag = `<img class="photo" src="${data.photoDataUrl || (origin + '/ceo.png')}" alt="">`;
-  const mrz1 = `SGID<<${(data.fullName || '').toUpperCase().replace(/[^A-Z ]/g, '').replace(/\s+/g, '<<')}<<CEO<<TIER0`.padEnd(44, '<').slice(0, 44);
-  const mrz2 = `${data.ref}<<${(data.nationality || 'XXX').slice(0, 3).toUpperCase()}<<ACTIVE<<VERIFIED`.padEnd(44, '<').slice(0, 44);
+  // MRZ uses '<' as its filler character (passport convention) — it MUST be
+  // HTML-escaped or the browser parses runs of "<NAME" as broken tags that
+  // swallow the closing </div>s after them and corrupt the whole page layout.
+  const mrz1 = `SGID<<${(data.fullName || '').toUpperCase().replace(/[^A-Z ]/g, '').replace(/\s+/g, '<<')}<<CEO<<TIER0`.padEnd(44, '<').slice(0, 44).replace(/</g, '&lt;');
+  const mrz2 = `${data.ref}<<${(data.nationality || 'XXX').slice(0, 3).toUpperCase()}<<ACTIVE<<VERIFIED`.padEnd(44, '<').slice(0, 44).replace(/</g, '&lt;');
   const glyphSeed = crypto.createHash('sha256').update(data.ref + (data.accessCodeHash || '')).digest('hex');
   const glyphSvg = securityGlyphSvg(glyphSeed, '#FFDE8A');
   const cardNumber = formatCardNumber(data.ref);
