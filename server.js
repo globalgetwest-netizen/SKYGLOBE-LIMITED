@@ -6145,6 +6145,48 @@ app.post('/api/identity/:ref/full', async (req, res) => {
 });
 
 app.get('/verify-id/:ref', (req, res) => res.sendFile(path.join(__dirname, 'id-verify.html')));
+
+// High-resolution PNG export — for a real card printer, not a browser print
+// dialog. Renders the card's actual stored HTML in a real headless browser
+// (so every gradient, font and effect matches the design exactly) and
+// screenshots the front and back separately at CR80 print resolution
+// (300 DPI, ~1013×638px). Staff/admin only — this touches the full stored
+// record, including photo.
+app.get('/api/identity/:ref/export.png', async (req, res) => {
+  if (!checkStaffOrAdmin(req, res)) return;
+  try {
+    const side = req.query.side === 'back' ? 'back' : 'front';
+    const rows = await dbQuery('GET', 'documents', null, { ref: `eq.${req.params.ref}`, uploaded_by: 'eq.ai:identity', limit: 1 });
+    const docRow = rows[0];
+    if (!docRow) return res.status(404).json({ error: 'Card not found.' });
+    const upstream = await fetch(storagePublicUrl(docRow.path));
+    if (!upstream.ok) return res.status(404).json({ error: 'Card file not found in storage.' });
+    const html = await upstream.text();
+
+    let puppeteer;
+    try { puppeteer = require('puppeteer'); }
+    catch { return res.status(503).json({ error: 'High-resolution export is not available on this deployment yet (Puppeteer not installed). Please contact support.' }); }
+
+    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 1400, height: 1400, deviceScaleFactor: 3 }); // 3x for ~300 DPI at CR80 scale
+      await page.setContent(html, { waitUntil: 'networkidle0', timeout: 20000 });
+      const stacks = await page.$$('.stack');
+      const target = side === 'back' ? (stacks[1] || stacks[0]) : stacks[0];
+      if (!target) throw new Error('Could not locate the card element to export.');
+      const png = await target.screenshot({ type: 'png' });
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Content-Disposition', `attachment; filename="${req.params.ref}-${side}.png"`);
+      res.send(png);
+    } finally {
+      await browser.close();
+    }
+  } catch (e) {
+    console.error('Identity export error:', e.message);
+    res.status(500).json({ error: 'Could not generate the high-resolution export: ' + e.message });
+  }
+});
 app.get('/digital-id', (req, res) => res.sendFile(path.join(__dirname, 'digital-id.html')));
 app.get('/courses', (req, res) => res.sendFile(path.join(__dirname, 'courses.html')));
 app.get('/courses/learn', (req, res) => res.sendFile(path.join(__dirname, 'course-learn.html')));

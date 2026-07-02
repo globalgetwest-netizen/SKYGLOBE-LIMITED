@@ -559,6 +559,12 @@
                 <input type="text" id="ceoIdName" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Nationality</label>
                 <input type="text" id="ceoIdNationality" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Date of Birth</label>
+                <input type="date" id="ceoIdDob" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Title / Role Line</label>
+                <input type="text" id="ceoIdRole" placeholder="Founder & Chief Executive Officer" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Photo</label>
+                <input type="file" accept="image/png,image/jpeg" id="ceoIdPhoto" onchange="onCeoPhoto(this)" style="width:100%;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.82rem"></div>
             </div>
             <button onclick="issueCeoId()" style="background:var(--gold);color:#1a1300;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer">+ Issue Founder ID</button>
             <div id="ceoIdMsg" style="font-size:0.85rem;margin-top:10px"></div>
@@ -1649,6 +1655,16 @@ async function deleteOffering(id){
 }
 
 /* ── DIGITAL ID ISSUANCE (staff / CEO — CEO-only) ── */
+async function downloadIdCard(ref, side){
+  try{
+    const r=await fetch(API+'/api/identity/'+ref+'/export.png?side='+side,{headers:{'x-admin-key':KEY}});
+    if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.error||'Export failed.');}
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=ref+'-'+side+'.png';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+  }catch(e){alert('Could not download: '+e.message);}
+}
 async function issueStaffId(){
   const msg=document.getElementById('staffIdMsg');
   const fullName=document.getElementById('sidName').value.trim();
@@ -1659,10 +1675,22 @@ async function issueStaffId(){
       body:JSON.stringify({fullName, roleLine:document.getElementById('sidRole').value.trim(), email:document.getElementById('sidEmail').value.trim(), nationality:document.getElementById('sidNationality').value.trim()})});
     const d=await r.json();
     if(!r.ok)throw new Error(d.error||'Could not issue ID.');
-    msg.innerHTML=`✓ Issued — Ref <b>${d.ref}</b> · Access code <b>${d.accessCode}</b> (save this, shown once) · <a href="${d.viewUrl}" target="_blank" style="color:var(--gold)">Open card</a>`;
+    msg.innerHTML=`✓ Issued — Ref <b>${d.ref}</b> · Access code <b>${d.accessCode}</b> (save this, shown once) · <a href="${d.viewUrl}" target="_blank" style="color:var(--gold)">Open card</a> · <a href="#" onclick="downloadIdCard('${d.ref}','front');return false" style="color:var(--gold)">Download Front (PNG)</a> · <a href="#" onclick="downloadIdCard('${d.ref}','back');return false" style="color:var(--gold)">Download Back (PNG)</a>`;
     msg.style.color='#66bb6a';
     ['sidName','sidRole','sidEmail','sidNationality'].forEach(id=>document.getElementById(id).value='');
   }catch(e){msg.textContent=e.message;msg.style.color='#e57373';}
+}
+function formatDobForCard(iso){
+  if(!iso)return '';
+  const d=new Date(iso+'T00:00:00');
+  return isNaN(d)?iso:d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+let CEO_PHOTO_DATA_URL=null;
+function onCeoPhoto(input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{ CEO_PHOTO_DATA_URL=reader.result; };
+  reader.readAsDataURL(file);
 }
 async function issueCeoId(){
   const msg=document.getElementById('ceoIdMsg');
@@ -1672,10 +1700,14 @@ async function issueCeoId(){
   msg.textContent='Issuing…';msg.style.color='var(--muted)';
   try{
     const r=await fetch(API+'/api/admin/identity/ceo/issue',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
-      body:JSON.stringify({fullName, nationality:document.getElementById('ceoIdNationality').value.trim()})});
+      body:JSON.stringify({
+        fullName, nationality:document.getElementById('ceoIdNationality').value.trim(),
+        dob:formatDobForCard(document.getElementById('ceoIdDob').value), roleLine:document.getElementById('ceoIdRole').value.trim(),
+        photoDataUrl:CEO_PHOTO_DATA_URL,
+      })});
     const d=await r.json();
     if(!r.ok)throw new Error(d.error||'Could not issue ID.');
-    msg.innerHTML=`✓ Issued — Ref <b>${d.ref}</b> · Access code <b>${d.accessCode}</b> (save this, shown once) · <a href="${d.viewUrl}" target="_blank" style="color:var(--gold)">Open card</a>`;
+    msg.innerHTML=`✓ Issued — Ref <b>${d.ref}</b> · Access code <b>${d.accessCode}</b> (save this, shown once) · <a href="${d.viewUrl}" target="_blank" style="color:var(--gold)">Open card</a> · <a href="#" onclick="downloadIdCard('${d.ref}','front');return false" style="color:var(--gold)">Download Front (PNG)</a> · <a href="#" onclick="downloadIdCard('${d.ref}','back');return false" style="color:var(--gold)">Download Back (PNG)</a>`;
     msg.style.color='#66bb6a';
   }catch(e){msg.textContent=e.message;msg.style.color='#e57373';}
 }
