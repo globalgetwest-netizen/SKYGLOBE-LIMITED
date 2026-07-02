@@ -1698,6 +1698,26 @@ const LEGAL_DOC_TYPES = {
     { id: 'itinerary_explain',   name: 'Itinerary Explanation Letter',   desc: 'Explains a travel itinerary, routing and purpose for a consulate.' },
     { id: 'travel_purpose',      name: 'Travel Purpose Statement',       desc: 'A concise statement of the purpose and plan of a trip.' },
   ],
+  'Education & Academic': [
+    { id: 'academic_reference',  name: 'Academic Reference Letter',      desc: 'A referee\'s formal letter supporting a student\'s application or record.' },
+    { id: 'gap_year_explain',    name: 'Gap Year / Study Break Letter',  desc: 'Explains a gap in academic history to an admissions or visa officer.' },
+    { id: 'study_plan',          name: 'Study Plan Statement',           desc: 'Sets out an applicant\'s intended course of study and academic goals.' },
+  ],
+  'Real Estate & Property': [
+    { id: 'tenancy_reference',   name: 'Tenancy Reference Letter',       desc: 'A landlord or agent confirms a tenant\'s tenancy history and standing.' },
+    { id: 'property_ownership',  name: 'Property Ownership Declaration', desc: 'A sworn declaration of ownership or interest in a named property.' },
+    { id: 'property_noc',        name: 'No Objection Certificate (Property)', desc: 'Confirms no objection to a stated use, stay, or transaction involving a property.' },
+  ],
+  'Corporate & Compliance': [
+    { id: 'good_standing_req',   name: 'Certificate of Good Standing Request Letter', desc: 'A company\'s formal request/cover letter for a good-standing certificate.' },
+    { id: 'company_authorization', name: 'Company Authorization Letter', desc: 'Authorises a named person to act or transact on behalf of a company.' },
+    { id: 'poa_cover',           name: 'Power of Attorney Cover Letter', desc: 'A cover letter accompanying and explaining a power of attorney arrangement.' },
+  ],
+  'Personal & Family': [
+    { id: 'minor_travel_consent', name: 'Consent Letter for Minor Travel', desc: 'A parent/guardian\'s consent for a minor to travel without them.' },
+    { id: 'marital_status_decl', name: 'Marital Status Declaration',     desc: 'A sworn declaration of a person\'s current marital status.' },
+    { id: 'guardianship_decl',   name: 'Guardianship Declaration',       desc: 'Declares and describes a guardianship arrangement over a named minor or dependant.' },
+  ],
 };
 
 // Flat lookup id → {name, kind(group)}
@@ -1722,6 +1742,18 @@ const LEGAL_DOC_GUIDANCE = {
   visa_cover:         'Write a Visa Application Cover Letter in the first person to the visa officer. State the visa type/purpose, the travel plan and dates, funding, ties to the home country and intent to return, and politely request the visa.',
   itinerary_explain:  'Write an Itinerary Explanation Letter in the first person to the consulate, explaining the routing, stops, dates and the reason for the chosen itinerary.',
   travel_purpose:     'Write a concise Travel Purpose Statement in the first person, clearly setting out the purpose of the trip, the plan and dates, and intent to return.',
+  academic_reference: 'Write a formal Academic Reference Letter in the third person from the referee (teacher, supervisor, or academic contact). State the student\'s standing, performance, and character, and support their application. Never invent grades, scores, or institution names not supplied.',
+  gap_year_explain:   'Write a Gap Year / Study Break Explanation Letter in the first person, clearly and honestly setting out the period covered, what the applicant did during the break, and how it relates to their continued studies.',
+  study_plan:         'Write a Study Plan Statement in the first person, setting out the intended course/programme, the institution, the academic goals, and how the study aligns with the applicant\'s background and future plans.',
+  tenancy_reference:  'Write a formal Tenancy Reference Letter in the third person from the landlord/agent. Confirm the tenant\'s name, tenancy period, address, and standing (rent payment history, condition of property) as supplied — never invent figures or dates not provided.',
+  property_ownership: 'Write the BODY of a Property Ownership Declaration as a solemn first-person statement ("I, NAME, do solemnly declare..."), stating the property address, the nature of the ownership/interest, and the period held.',
+  property_noc:       'Write a formal No Objection Certificate in the third person, stating the property address, the party granting no objection, and the specific use/stay/transaction to which no objection is raised.',
+  good_standing_req:  'Write a formal Certificate of Good Standing Request Letter in the first person plural from the company, addressed to the relevant registrar/authority, requesting confirmation of the company\'s good standing and stating the purpose.',
+  company_authorization: 'Write a formal Company Authorization Letter in the first person plural from the company, naming the authorised person, the scope of what they are authorised to do, and the period of authorisation.',
+  poa_cover:          'Write a Power of Attorney Cover Letter in the first person, explaining the relationship between the grantor and attorney, the scope of the power being granted, and the purpose of enclosing the power of attorney.',
+  minor_travel_consent: 'Write the BODY of a Consent Letter for Minor Travel as a solemn first-person statement from the parent/guardian, naming the minor, the travel details/destination/dates, the accompanying adult (if any), and clear consent for the travel.',
+  marital_status_decl: 'Write the BODY of a Marital Status Declaration as a solemn first-person sworn statement ("I, NAME, do solemnly declare that my marital status is..."), stating the current marital status and any relevant supporting facts supplied.',
+  guardianship_decl:  'Write the BODY of a Guardianship Declaration as a solemn first-person statement, naming the guardian, the minor/dependant, the nature and basis of the guardianship, and the responsibilities undertaken.',
 };
 
 function buildLegalPrompt(docId, fields) {
