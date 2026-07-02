@@ -1783,6 +1783,13 @@ const FIELD_LIB = {
   cpNationality:   { label: "Other party's nationality",     placeholder: 'e.g. Brazilian' },
   cpRelationship:  { label: 'Relationship to you',           placeholder: 'e.g. daughter, tenant, employee' },
   cpDob:           { label: "Other party's date of birth", type: 'date' },
+  employerProof:   { label: 'Employer / proof of employment',   placeholder: 'Company name + your position' },
+  incomeSource:    { label: 'Source of income',                 placeholder: 'e.g. salaried employment, business, investments' },
+  monthlyIncome:   { label: 'Approximate monthly income',        placeholder: 'e.g. $3,500' },
+  witnessName:     { label: "Witness's full legal name",         placeholder: 'Person who witnessed the signing' },
+  witnessAddress:  { label: "Witness's address",                 placeholder: 'Full residential address' },
+  witnessId:       { label: "Witness's ID / passport number",    placeholder: 'e.g. C55219034' },
+  witnessOccupation: { label: "Witness's occupation",            placeholder: 'e.g. Solicitor, Notary, Accountant' },
 };
 
 // docId → [{ id, section, required }]. `section` groups fields in the UI.
@@ -1808,13 +1815,16 @@ const LEGAL_DOC_FIELDS = {
   ],
   affidavit_support: [
     { id: 'name', section: 'Your Details (Deponent)', required: true }, { id: 'address', section: 'Your Details (Deponent)', required: true },
-    { id: 'idNumber', section: 'Your Details (Deponent)' }, { id: 'phone', section: 'Your Details (Deponent)' }, { id: 'employer', section: 'Your Details (Deponent)' },
+    { id: 'idNumber', section: 'Your Details (Deponent)', required: true }, { id: 'phone', section: 'Your Details (Deponent)' },
+    { id: 'employerProof', section: 'Your Details (Deponent)' }, { id: 'incomeSource', section: 'Your Details (Deponent)' }, { id: 'monthlyIncome', section: 'Your Details (Deponent)' },
     { id: 'cpName', section: 'Person Supported', required: true }, { id: 'cpRelationship', section: 'Person Supported' }, { id: 'cpNationality', section: 'Person Supported' },
     { id: 'dates', section: 'Support Period' },
+    { id: 'witnessName', section: 'Witness Details', required: true }, { id: 'witnessAddress', section: 'Witness Details' }, { id: 'witnessId', section: 'Witness Details' }, { id: 'witnessOccupation', section: 'Witness Details' },
   ],
   statutory_decl: [
     { id: 'name', section: 'Your Details (Declarant)', required: true }, { id: 'address', section: 'Your Details (Declarant)', required: true },
-    { id: 'idNumber', section: 'Your Details (Declarant)' }, { id: 'phone', section: 'Your Details (Declarant)' },
+    { id: 'idNumber', section: 'Your Details (Declarant)', required: true }, { id: 'phone', section: 'Your Details (Declarant)' },
+    { id: 'witnessName', section: 'Witness Details', required: true }, { id: 'witnessAddress', section: 'Witness Details' }, { id: 'witnessId', section: 'Witness Details' }, { id: 'witnessOccupation', section: 'Witness Details' },
   ],
   identity_decl: [
     { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details', required: true },
@@ -1833,7 +1843,8 @@ const LEGAL_DOC_FIELDS = {
   ],
   proof_of_funds: [
     { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details', required: true },
-    { id: 'idNumber', section: 'Your Details' }, { id: 'phone', section: 'Your Details' },
+    { id: 'idNumber', section: 'Your Details', required: true }, { id: 'phone', section: 'Your Details' },
+    { id: 'employerProof', section: 'Your Details' }, { id: 'incomeSource', section: 'Your Details', required: true }, { id: 'monthlyIncome', section: 'Your Details' },
   ],
   visa_cover: [
     { id: 'name', section: 'Your Details', required: true }, { id: 'nationality', section: 'Your Details', required: true },
@@ -1869,8 +1880,9 @@ const LEGAL_DOC_FIELDS = {
   ],
   property_ownership: [
     { id: 'name', section: 'Your Details (Declarant)', required: true }, { id: 'address', section: 'Your Details (Declarant)' },
-    { id: 'idNumber', section: 'Your Details (Declarant)' },
+    { id: 'idNumber', section: 'Your Details (Declarant)', required: true },
     { id: 'propertyAddress', section: 'Property Details', required: true }, { id: 'dates', section: 'Property Details' },
+    { id: 'witnessName', section: 'Witness Details', required: true }, { id: 'witnessId', section: 'Witness Details' }, { id: 'witnessOccupation', section: 'Witness Details' },
   ],
   property_noc: [
     { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details' },
@@ -1889,8 +1901,9 @@ const LEGAL_DOC_FIELDS = {
   ],
   poa_cover: [
     { id: 'name', section: 'Grantor Details', required: true }, { id: 'address', section: 'Grantor Details' },
-    { id: 'idNumber', section: 'Grantor Details' }, { id: 'phone', section: 'Grantor Details' },
+    { id: 'idNumber', section: 'Grantor Details', required: true }, { id: 'phone', section: 'Grantor Details' },
     { id: 'cpName', section: "Attorney's Details", required: true }, { id: 'cpIdNumber', section: "Attorney's Details" },
+    { id: 'witnessName', section: 'Witness Details', required: true }, { id: 'witnessId', section: 'Witness Details' }, { id: 'witnessOccupation', section: 'Witness Details' },
   ],
   minor_travel_consent: [
     { id: 'name', section: 'Parent / Guardian Details', required: true }, { id: 'address', section: 'Parent / Guardian Details' },
@@ -1900,12 +1913,14 @@ const LEGAL_DOC_FIELDS = {
   ],
   marital_status_decl: [
     { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details' },
-    { id: 'idNumber', section: 'Your Details' }, { id: 'dob', section: 'Your Details' },
+    { id: 'idNumber', section: 'Your Details', required: true }, { id: 'dob', section: 'Your Details' },
+    { id: 'witnessName', section: 'Witness Details', required: true }, { id: 'witnessId', section: 'Witness Details' },
   ],
   guardianship_decl: [
     { id: 'name', section: 'Guardian Details', required: true }, { id: 'address', section: 'Guardian Details' },
-    { id: 'idNumber', section: 'Guardian Details' }, { id: 'phone', section: 'Guardian Details' },
+    { id: 'idNumber', section: 'Guardian Details', required: true }, { id: 'phone', section: 'Guardian Details' },
     { id: 'cpName', section: "Minor / Dependant's Details", required: true }, { id: 'cpDob', section: "Minor / Dependant's Details" }, { id: 'cpRelationship', section: "Minor / Dependant's Details" },
+    { id: 'witnessName', section: 'Witness Details', required: true }, { id: 'witnessId', section: 'Witness Details' },
   ],
 };
 
