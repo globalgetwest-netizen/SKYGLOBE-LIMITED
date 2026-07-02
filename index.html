@@ -1748,272 +1748,6 @@ body.wc-active .page-back-bar{padding-top:138px}
   }
   </style>
 
-  <script>
-  /* ── COSMIC HERO ENGINE ─────────────────────────────────────────── */
-  (function(){
-
-    /* ── 1. STAR FIELD + MILKY WAY ──────────────────────────────── */
-    const canvas = document.getElementById('starCanvas');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let W, H, stars=[], shooters=[];
-
-    /* The whole celestial sphere slowly rotates around the celestial pole,
-       exactly like a real long-exposure of the night sky (Earth's spin).
-       One full turn ≈ 12 minutes — visible but calm and premium. */
-    const SKY_PERIOD = 720;                       /* seconds per full rotation */
-    const SKY_RAD_PER_SEC = (Math.PI*2)/SKY_PERIOD;
-    let poleX, poleY;                             /* celestial pole on screen */
-    const EXP = 0.75;                             /* over-scan so corners never go blank */
-
-    function resize(){
-      /* Retina / high-DPI scaling so stars stay razor-sharp on Apple
-         Liquid-Retina & Samsung AMOLED panels (devicePixelRatio up to 3-4). */
-      const dpr = Math.min(window.devicePixelRatio || 1, 3);
-      W = canvas.offsetWidth;
-      H = canvas.offsetHeight;
-      canvas.width  = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);   /* draw in CSS px, render at device px */
-      /* Celestial pole sits high to the upper-right, off-screen — stars
-         arc around it just like Polaris in the northern sky. */
-      poleX=W*0.82;
-      poleY=-H*0.25;
-    }
-
-    function mkStars(){
-      stars=[];
-      /* Generate stars across an over-scanned field so the rotating sky
-         always has stars filling the visible viewport. */
-      const x0=-W*EXP, y0=-H*EXP, fw=W*(1+2*EXP), fh=H*(1+2*EXP);
-      const count = Math.min(Math.floor(fw*fh/1100), 2600);
-      for(let i=0;i<count;i++){
-        const r=Math.random();
-        stars.push({
-          x:x0+Math.random()*fw, y:y0+Math.random()*fh,
-          r: r<.6 ? Math.random()*.8+.3 : r<.85 ? Math.random()*1.2+.8 : Math.random()*1.8+1.2,
-          a: Math.random()*.6+.4,
-          twinkleSpeed: Math.random()*.02+.005,
-          twinklePhase: Math.random()*Math.PI*2,
-          color: ['#ffffff','#eaf0ff','#fff8e8','#e8f0ff','#ffe8e8'][Math.floor(Math.random()*5)]
-        });
-      }
-    }
-
-    function drawMilkyWay(){
-      /* Milky Way arc — scientifically positioned band across sky */
-      const grd=ctx.createLinearGradient(W*.1,H*.8,W*.9,H*.1);
-      grd.addColorStop(0,'rgba(80,100,180,0)');
-      grd.addColorStop(.2,'rgba(100,120,200,0.04)');
-      grd.addColorStop(.35,'rgba(160,140,220,0.09)');
-      grd.addColorStop(.5,'rgba(180,160,230,0.13)');
-      grd.addColorStop(.65,'rgba(160,140,220,0.09)');
-      grd.addColorStop(.8,'rgba(100,120,200,0.04)');
-      grd.addColorStop(1,'rgba(80,100,180,0)');
-      ctx.save();
-      ctx.translate(W/2,H/2);
-      ctx.rotate(-.42);  /* ~24° tilt, Milky Way plane inclination */
-      ctx.fillStyle=grd;
-      ctx.fillRect(-W*.7,-H*.22,W*1.4,H*.44);
-      /* Dense core cluster */
-      const core=ctx.createRadialGradient(W*.08,H*.12,0,W*.08,H*.12,W*.18);
-      core.addColorStop(0,'rgba(255,240,180,0.12)');
-      core.addColorStop(.5,'rgba(200,180,255,0.06)');
-      core.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=core;
-      ctx.fillRect(-W*.7,-H*.22,W*1.4,H*.44);
-      ctx.restore();
-    }
-
-    let animT=0;
-    function drawStars(){
-      animT+=.016;
-      ctx.clearRect(0,0,W,H);
-
-      /* Background void */
-      const bg=ctx.createRadialGradient(W*.5,H*.4,0,W*.5,H*.4,Math.max(W,H)*.7);
-      bg.addColorStop(0,'#02050f');
-      bg.addColorStop(.5,'#010308');
-      bg.addColorStop(1,'#000002');
-      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-
-      /* ── Rotate the whole celestial sphere around the pole ── */
-      const skyAngle=(Date.now()/1000)*SKY_RAD_PER_SEC;
-      ctx.save();
-      ctx.translate(poleX,poleY);
-      ctx.rotate(skyAngle);
-      ctx.translate(-poleX,-poleY);
-
-      drawMilkyWay();
-
-      /* Stars */
-      for(const s of stars){
-        const twinkle=Math.sin(animT*s.twinkleSpeed*60+s.twinklePhase)*.35+.65;
-        ctx.globalAlpha=s.a*twinkle;
-        ctx.fillStyle=s.color;
-        ctx.beginPath();
-        ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-        ctx.fill();
-        /* Bloom for bright stars */
-        if(s.r>1.5){
-          ctx.globalAlpha=s.a*twinkle*.25;
-          ctx.beginPath();
-          ctx.arc(s.x,s.y,s.r*3,0,Math.PI*2);
-          ctx.fill();
-        }
-      }
-      ctx.globalAlpha=1;
-      ctx.restore();   /* end celestial rotation — shooting stars stay in view space */
-
-      /* Shooting stars */
-      if(Math.random()<.004) spawnShooter();
-      for(let i=shooters.length-1;i>=0;i--){
-        const sh=shooters[i];
-        sh.x+=sh.vx; sh.y+=sh.vy; sh.life--;
-        if(sh.life<=0){shooters.splice(i,1);continue}
-        const p=sh.life/sh.maxLife;
-        ctx.globalAlpha=p*.85;
-        ctx.strokeStyle=`rgba(255,248,220,${p})`;
-        ctx.lineWidth=sh.r;
-        ctx.shadowBlur=6;ctx.shadowColor='rgba(255,240,180,.6)';
-        ctx.beginPath();
-        ctx.moveTo(sh.x,sh.y);
-        ctx.lineTo(sh.x-sh.vx*8,sh.y-sh.vy*8);
-        ctx.stroke();
-        ctx.shadowBlur=0;ctx.globalAlpha=1;
-      }
-
-      requestAnimationFrame(drawStars);
-    }
-
-    function spawnShooter(){
-      const angle=(Math.random()*.4+.1)*Math.PI;
-      const speed=Math.random()*4+3;
-      shooters.push({
-        x:Math.random()*W*.7, y:Math.random()*H*.4,
-        vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed,
-        r:Math.random()+.5,
-        life:60, maxLife:60
-      });
-    }
-
-    /* ── 2. REAL-TIME ASTRONOMY ─────────────────────────────────── */
-    /* Sun + Moon positions via simplified VSOP87 approximations.
-       Accurate to within ~1° for the period 2000-2100. */
-
-    function julianDay(d){ return d.valueOf()/86400000 + 2440587.5 }
-
-    function sunPosition(now){
-      const JD=julianDay(now);
-      const n=JD-2451545.0;          /* days since J2000 */
-      const L=(280.460+0.9856474*n)%360;
-      const g=((357.528+0.9856003*n)%360)*Math.PI/180;
-      const lambda=(L+1.915*Math.sin(g)+0.02*Math.sin(2*g))*Math.PI/180;
-      const eps=23.439*Math.PI/180;
-      const ra=Math.atan2(Math.cos(eps)*Math.sin(lambda),Math.cos(lambda));
-      const dec=Math.asin(Math.sin(eps)*Math.sin(lambda));
-      return {ra:ra*180/Math.PI, dec:dec*180/Math.PI};
-    }
-
-    function moonPosition(now){
-      const JD=julianDay(now);
-      const T=(JD-2451545.0)/36525;
-      const L=(218.3165+13.1763966*T*(JD-2451545.0/36525*36525))%360;
-      const M=(134.9634+13.0649929*T*(JD-2451545.0/36525*36525))%360;
-      const Mv=(M*Math.PI/180);
-      const lat=5.1282*Math.sin((93.272+13.2293*T*(JD-2451545.0/36525*36525))*Math.PI/180);
-      const lng=(L+6.289*Math.sin(Mv))%360;
-      return {lng:lng, lat:lat};
-    }
-
-    function positionCelestial(){
-      const now=new Date();
-      const sun=sunPosition(now);
-      const moon=moonPosition(now);
-      const hero=document.getElementById('cosmicHero');
-      if(!hero) return;
-      const hw=hero.offsetWidth, hh=hero.offsetHeight;
-
-      /* Sun: place on opposite side of globe (light source) */
-      const sunAz=((sun.ra+180)%360)/360;  /* normalise 0-1 */
-      const sunEl=((90-sun.dec)/180);       /* 0=top,1=bottom */
-      const sg=document.getElementById('sunGlow');
-      if(sg){
-        sg.style.left=(sunAz*hw*.55)+'px';
-        sg.style.top=(sunEl*hh*.7+hh*.05)+'px';
-        sg.style.transform='translate(-50%,-50%)';
-        /* Sun shines by day, fully sets at night (local time) */
-        const hr=now.getHours();
-        sg.style.opacity=(hr>=7&&hr<17)?'1':(hr>=5&&hr<20)?'0.5':'0';
-      }
-
-      /* Moon: orbit position */
-      const mAz=((moon.lng+60)%360)/360;
-      const mEl=Math.max(.06,Math.min(.88,(.5-moon.lat/90*.4)));
-      const mo=document.getElementById('moonObj');
-      if(mo){
-        mo.style.left=(mAz*hw*.72+hw*.08)+'px';
-        mo.style.top=(mEl*hh)+'px';
-        mo.style.transform='translate(-50%,-50%)';
-        /* Moon phase illumination — roughly correct */
-        const phase=((now-new Date('2000-01-06'))/2551442779)%1; /* synodic month */
-        const moonDiv=mo.firstElementChild;
-        const angle=phase*360;
-        moonDiv.style.background=`radial-gradient(circle at ${38+Math.cos(angle*Math.PI/180)*20}% 35%,#f5f0e0 0%,#d8cfa0 45%,#a89060 100%)`;
-      }
-    }
-
-    /* ── 3. LIVE UTC CLOCK ───────────────────────────────────────── */
-    function tickClock(){
-      const el=document.getElementById('liveTime');
-      if(!el) return;
-      const n=new Date();
-      el.textContent=n.getUTCHours().toString().padStart(2,'0')+':'+
-        n.getUTCMinutes().toString().padStart(2,'0')+':'+
-        n.getUTCSeconds().toString().padStart(2,'0');
-    }
-    setInterval(tickClock,1000); tickClock();
-    setInterval(positionCelestial,60000); positionCelestial();
-
-    /* ── 3b. TIME-OF-DAY SKY ─────────────────────────────────────── */
-    /* Picks a sky phase from the visitor's LOCAL hour and paints a
-       premium gradient. Dawn/Day = light (dark text); Dusk/Night = dark
-       (galaxy + stars + moon revealed, luminous text via .sky-dark).   */
-    /* Sky gradients: many stops with tiny perceptual steps — no visible banding.
-       Uses background with two stacked radial-gradient overlays rendered via
-       CSS multi-background (canvas handles stars separately). */
-    const SKY = {
-      dawn:  'linear-gradient(170deg,#1a0a3c 0%,#3d1758 8%,#7a2e6a 16%,#c05060 24%,#e8784a 32%,#f4a040 40%,#ffd080 50%,#fff5d6 62%,#fef0e8 76%,#fde8f0 88%,#f8eeff 100%)',
-      day:   'linear-gradient(170deg,#c8deff 0%,#d8eaff 12%,#e4f0ff 24%,#eef6ff 36%,#f5f9ff 48%,#fafcff 58%,#fdf8ff 68%,#fef5f0 80%,#fef8ea 90%,#fffcf0 100%)',
-      dusk:  'linear-gradient(170deg,#04041a 0%,#0c0830 10%,#1e0f48 20%,#3a1558 30%,#5e2060 40%,#8c2d5a 50%,#bc4040 62%,#d46030 74%,#e0864a 84%,#eda060 92%,#f5c080 100%)',
-      night: 'linear-gradient(170deg,#00000a 0%,#020410 8%,#040818 18%,#060c22 30%,#080e28 44%,#0a1030 58%,#0c1236 72%,#0e1440 86%,#101545 100%)'
-    };
-    function skyPhase(h){
-      if(h>=5 && h<8)  return 'dawn';
-      if(h>=8 && h<17) return 'day';
-      if(h>=17 && h<20)return 'dusk';
-      return 'night';
-    }
-    function applyHeroSky(){
-      const hero=document.getElementById('cosmicHero');
-      if(!hero) return;
-      const phase=skyPhase(new Date().getHours());
-      hero.style.background=SKY[phase];
-      const dark = (phase==='dusk' || phase==='night');
-      hero.classList.toggle('sky-dark', dark);
-      /* Star intensity: full at night, gentle at dusk, none by day */
-      const sc=document.getElementById('starCanvas');
-      if(sc) sc.style.opacity = phase==='night' ? '1' : phase==='dusk' ? '0.6' : '0';
-    }
-
-    /* ── 4. INIT ─────────────────────────────────────────────────── */
-    window.addEventListener('resize',()=>{resize();mkStars()});
-    resize(); mkStars(); drawStars();
-    // Hero is now always futuristic dark — no time-of-day switching needed
-    // applyHeroSky(); setInterval(applyHeroSky,60000);
-
-  })();
-  </script>
 
   <!-- FLAG STRIP -->
   <div style="background:#041022;padding:14px 0;overflow:hidden;border-top:1px solid rgba(212,167,58,0.15);border-bottom:1px solid rgba(212,167,58,0.15)">
@@ -3055,6 +2789,9 @@ body.wc-active .page-back-bar{padding-top:138px}
         <div class="svc-card" onclick="selectService('Recruitment & Overseas Jobs',this)"><span class="sc-icon">🤝</span><h4>Recruitment &amp; Overseas Jobs</h4><p>Verified employer placement</p><span class="svc-price" data-svc="Recruitment & Overseas Jobs"></span></div>
         <div class="svc-card" onclick="selectService('Digital Identity & e-Docs',this)"><span class="sc-icon">🪪</span><h4>Digital Identity &amp; e-Docs</h4><p>Verified identity &amp; secure e-docs</p><span class="svc-price" data-svc="Digital Identity & e-Docs"></span></div>
         <div class="svc-card" onclick="selectService('Digital Presence & AI',this)"><span class="sc-icon">📈</span><h4>Digital Presence &amp; AI</h4><p>Branding, SEO &amp; AI integration</p><span class="svc-price" data-svc="Digital Presence & AI"></span></div>
+        <div class="svc-card" onclick="selectService('Premium Travel Preparation — Europe',this)"><span class="sc-icon">🧳</span><h4>Travel Prep — Europe</h4><p>Full travel readiness package</p><span class="svc-price" data-svc="Premium Travel Preparation — Europe"></span></div>
+        <div class="svc-card" onclick="selectService('Premium Travel Preparation — Global',this)"><span class="sc-icon">🌍</span><h4>Travel Prep — Global</h4><p>Any destination readiness package</p><span class="svc-price" data-svc="Premium Travel Preparation — Global"></span></div>
+        <div class="svc-card" onclick="selectService('Official Company Letter',this)"><span class="sc-icon">📄</span><h4>Official Company Letter</h4><p>Stamped &amp; verified letter</p><span class="svc-price" data-svc="Official Company Letter"></span></div>
       </div>
     </div>
 
@@ -5198,6 +4935,9 @@ const SERVICE_PRODUCT_MAP = {
   'Recruitment & Overseas Jobs':           'recruitment_placement',
   'Digital Identity & e-Docs':             'digital_identity_service',
   'Digital Presence & AI':                 'digital_presence_starter',
+  'Premium Travel Preparation — Europe':   'travel_prep_europe',
+  'Premium Travel Preparation — Global':   'travel_prep_global',
+  'Official Company Letter':               'official_letter',
 };
 const APPLY_PROVIDER_LABELS = {
   grey: '🏦 Bank Transfer / USDC / USDT',
@@ -5257,6 +4997,9 @@ const APPLY_DEEPLINKS = {
   'recruitment':      'Recruitment & Overseas Jobs',
   'digital-identity': 'Digital Identity & e-Docs',
   'digital-presence': 'Digital Presence & AI',
+  'travel-europe':    'Premium Travel Preparation — Europe',
+  'travel-global':    'Premium Travel Preparation — Global',
+  'letter':           'Official Company Letter',
 };
 function runApplyDeeplink() {
   const key = new URLSearchParams(location.search).get('apply');

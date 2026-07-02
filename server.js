@@ -1747,22 +1747,26 @@ STRICT RULES:
 }
 
 // Branded, verified HTML wrapper rendered into the secure viewer.
-function wrapLegalDoc(title, bodyText, ref) {
+function wrapLegalDoc(title, bodyText, ref, req) {
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const paras = String(bodyText).trim().split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</p>`).join('\n');
+  const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
+  const sigUrl = origin + '/signature.png';
+  const stampUrl = origin + '/stamp.png';
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title} — SkyGlobe Group</title>
 <style>
-  body{font-family:"Georgia","Times New Roman",serif;color:#1a2233;background:#fff;margin:0;padding:48px 56px;line-height:1.7;max-width:820px;margin:0 auto}
+  body{font-family:"Georgia","Times New Roman",serif;color:#1a2233;background:#fff;margin:0;padding:48px 56px;line-height:1.7;max-width:820px;margin:0 auto;position:relative}
   .lh{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #D4A73A;padding-bottom:16px;margin-bottom:8px}
   .lh .b{font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;color:#041022;font-size:1.3rem}
   .lh .b small{display:block;color:#a87016;font-size:.6rem;letter-spacing:.24em;font-weight:600}
   .lh .meta{text-align:right;font-family:Arial,sans-serif;font-size:.72rem;color:#6b7689;line-height:1.5}
   h1{font-size:1.2rem;text-transform:uppercase;letter-spacing:.06em;color:#041022;margin:26px 0 18px;font-family:Arial,sans-serif}
   p{margin:0 0 14px}
-  .stamp{margin-top:46px;border-top:1px solid #e6e9ef;padding-top:18px;display:flex;align-items:center;gap:14px}
-  .seal{width:64px;height:64px;border-radius:50%;border:2px solid #D4A73A;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Arial,sans-serif;font-size:.52rem;font-weight:700;color:#a87016;letter-spacing:.04em;line-height:1.25;flex:none}
-  .stamp .t{font-family:Arial,sans-serif;font-size:.78rem;color:#3c465a}
+  .stamp{margin-top:46px;border-top:1px solid #e6e9ef;padding-top:18px;display:flex;align-items:flex-end;gap:18px;position:relative}
+  .stamp img.sig{display:block;height:62px;width:auto;margin:6px 0 -6px -4px}
+  .stamp img.seal{position:absolute;top:14px;right:10px;height:120px;width:120px;opacity:0.92}
+  .stamp .t{font-family:Arial,sans-serif;font-size:.78rem;color:#3c465a;max-width:560px}
   .stamp .t strong{color:#041022}
   .foot{margin-top:30px;font-family:Arial,sans-serif;font-size:.66rem;color:#9aa3b2;border-top:1px solid #eef1f6;padding-top:12px}
   @media print{body{padding:24px}}
@@ -1774,8 +1778,9 @@ function wrapLegalDoc(title, bodyText, ref) {
   <h1>${title}</h1>
   ${paras}
   <div class="stamp">
-    <div class="seal">FACILITATED &amp; VERIFIED · SKYGLOBE GROUP</div>
+    <img class="sig" src="${sigUrl}" alt="">
     <div class="t"><strong>Facilitated &amp; Verified by SkyGlobe Group</strong><br>This document was prepared and verified by SkyGlobe Group. SkyGlobe does not issue or certify instruments it did not witness.</div>
+    <img class="seal" src="${stampUrl}" alt="Official Stamp">
   </div>
   <div class="foot">© ${new Date().getFullYear()} SkyGlobe Group · Global Operations · support@skyglobegroup.com · One World. One Mission.</div>
 </body></html>`;
@@ -1809,7 +1814,7 @@ app.post('/api/legal-docs/generate', async (req, res) => {
 
     const body = await generateText(buildLegalPrompt(docId, f), { maxTokens: 2048, temperature: 0.55 });
     const ref = 'SGL-' + crypto.randomBytes(4).toString('hex').toUpperCase();
-    const html = wrapLegalDoc(meta.name, body, ref);
+    const html = wrapLegalDoc(meta.name, body, ref, req);
 
     // Store as an encrypted-at-rest HTML artifact and gate it behind a token.
     const safeName = `${meta.id}_${ref}.html`;
@@ -2331,6 +2336,9 @@ const SERVICE_PRODUCT_MAP = {
   'Recruitment & Overseas Jobs':           'recruitment_placement',
   'Digital Identity & e-Docs':             'digital_identity_service',
   'Digital Presence & AI':                 'digital_presence_starter',
+  'Premium Travel Preparation — Europe':   'travel_prep_europe',
+  'Premium Travel Preparation — Global':   'travel_prep_global',
+  'Official Company Letter':               'official_letter',
 };
 
 const PAY = {
