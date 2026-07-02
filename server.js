@@ -1756,24 +1756,176 @@ const LEGAL_DOC_GUIDANCE = {
   guardianship_decl:  'Write the BODY of a Guardianship Declaration as a solemn first-person statement, naming the guardian, the minor/dependant, the nature and basis of the guardianship, and the responsibilities undertaken.',
 };
 
+// ── Structured identification fields, per document type ──────────────────────
+// Legal/identity documents need real identification, not a generic name box —
+// address, ID/passport number, phone, employer — for both the requester and
+// the other party where the document names one. Each entry references the
+// shared FIELD_LIB below and assigns a section so the client can render two
+// clearly separated blocks (e.g. "Your Details" / "Other Party's Details").
+const FIELD_LIB = {
+  name:            { label: 'Full legal name',            placeholder: 'As it appears on official ID' },
+  address:         { label: 'Full residential address',   placeholder: 'Street, city, postal code, country' },
+  idNumber:        { label: 'National ID / Passport number', placeholder: 'e.g. A12345678' },
+  phone:           { label: 'Phone number',                placeholder: '+1 000 000 0000' },
+  dob:             { label: 'Date of birth', type: 'date' },
+  nationality:     { label: 'Nationality', placeholder: 'e.g. Nigerian' },
+  employer:        { label: 'Employer name',               placeholder: 'Company you work for' },
+  jobTitle:        { label: 'Job title',                   placeholder: 'e.g. Operations Manager' },
+  companyName:     { label: 'Company name',                placeholder: 'Registered company name' },
+  regNumber:       { label: 'Company registration number', placeholder: 'e.g. RC1234567' },
+  propertyAddress: { label: 'Property address',             placeholder: 'Full address of the property' },
+  dates:           { label: 'Relevant dates / period',      placeholder: 'e.g. 14–28 September 2026' },
+  location:        { label: 'Destination / place',          placeholder: 'e.g. city, country' },
+  cpName:          { label: "Other party's full legal name", placeholder: 'Guest, tenant, employee, minor, etc.' },
+  cpAddress:       { label: "Other party's address",         placeholder: 'Full residential address' },
+  cpIdNumber:      { label: "Other party's ID / passport number", placeholder: 'e.g. B98765432' },
+  cpPhone:         { label: "Other party's phone number",    placeholder: '+1 000 000 0000' },
+  cpNationality:   { label: "Other party's nationality",     placeholder: 'e.g. Brazilian' },
+  cpRelationship:  { label: 'Relationship to you',           placeholder: 'e.g. daughter, tenant, employee' },
+  cpDob:           { label: "Other party's date of birth", type: 'date' },
+};
+
+// docId → [{ id, section, required }]. `section` groups fields in the UI.
+const LEGAL_DOC_FIELDS = {
+  visa_invitation: [
+    { id: 'name', section: 'Your Details (Host)', required: true }, { id: 'address', section: 'Your Details (Host)', required: true },
+    { id: 'idNumber', section: 'Your Details (Host)' }, { id: 'phone', section: 'Your Details (Host)' },
+    { id: 'cpName', section: "Visitor's Details", required: true }, { id: 'cpNationality', section: "Visitor's Details", required: true },
+    { id: 'cpIdNumber', section: "Visitor's Details" }, { id: 'cpAddress', section: "Visitor's Details" },
+    { id: 'dates', section: 'Visit Details', required: true }, { id: 'location', section: 'Visit Details', required: true },
+  ],
+  sponsorship_decl: [
+    { id: 'name', section: 'Your Details (Sponsor)', required: true }, { id: 'address', section: 'Your Details (Sponsor)', required: true },
+    { id: 'idNumber', section: 'Your Details (Sponsor)' }, { id: 'phone', section: 'Your Details (Sponsor)' }, { id: 'employer', section: 'Your Details (Sponsor)' },
+    { id: 'cpName', section: 'Person Sponsored', required: true }, { id: 'cpRelationship', section: 'Person Sponsored' }, { id: 'cpNationality', section: 'Person Sponsored' },
+    { id: 'dates', section: 'Sponsorship Details' }, { id: 'location', section: 'Sponsorship Details' },
+  ],
+  host_accommodation: [
+    { id: 'name', section: 'Your Details (Host)', required: true }, { id: 'address', section: 'Your Details (Host)', required: true },
+    { id: 'phone', section: 'Your Details (Host)' }, { id: 'idNumber', section: 'Your Details (Host)' },
+    { id: 'cpName', section: "Guest's Details", required: true }, { id: 'cpNationality', section: "Guest's Details" }, { id: 'cpIdNumber', section: "Guest's Details" },
+    { id: 'dates', section: 'Stay Details', required: true },
+  ],
+  affidavit_support: [
+    { id: 'name', section: 'Your Details (Deponent)', required: true }, { id: 'address', section: 'Your Details (Deponent)', required: true },
+    { id: 'idNumber', section: 'Your Details (Deponent)' }, { id: 'phone', section: 'Your Details (Deponent)' }, { id: 'employer', section: 'Your Details (Deponent)' },
+    { id: 'cpName', section: 'Person Supported', required: true }, { id: 'cpRelationship', section: 'Person Supported' }, { id: 'cpNationality', section: 'Person Supported' },
+    { id: 'dates', section: 'Support Period' },
+  ],
+  statutory_decl: [
+    { id: 'name', section: 'Your Details (Declarant)', required: true }, { id: 'address', section: 'Your Details (Declarant)', required: true },
+    { id: 'idNumber', section: 'Your Details (Declarant)' }, { id: 'phone', section: 'Your Details (Declarant)' },
+  ],
+  identity_decl: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details', required: true },
+    { id: 'idNumber', section: 'Your Details' }, { id: 'dob', section: 'Your Details' },
+  ],
+  employment_verify: [
+    { id: 'companyName', section: 'Employer Details', required: true }, { id: 'regNumber', section: 'Employer Details' },
+    { id: 'address', section: 'Employer Details' }, { id: 'phone', section: 'Employer Details' },
+    { id: 'cpName', section: "Employee's Details", required: true }, { id: 'jobTitle', section: "Employee's Details", required: true },
+    { id: 'dates', section: "Employee's Details" },
+  ],
+  business_intro: [
+    { id: 'companyName', section: 'Company Details', required: true }, { id: 'regNumber', section: 'Company Details' },
+    { id: 'address', section: 'Company Details' }, { id: 'phone', section: 'Company Details' },
+    { id: 'cpName', section: 'Recipient', required: true },
+  ],
+  proof_of_funds: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details', required: true },
+    { id: 'idNumber', section: 'Your Details' }, { id: 'phone', section: 'Your Details' },
+  ],
+  visa_cover: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'nationality', section: 'Your Details', required: true },
+    { id: 'idNumber', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details' }, { id: 'phone', section: 'Your Details' },
+    { id: 'dates', section: 'Travel Details' }, { id: 'location', section: 'Travel Details' },
+  ],
+  itinerary_explain: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'idNumber', section: 'Your Details' }, { id: 'phone', section: 'Your Details' },
+    { id: 'dates', section: 'Travel Details' }, { id: 'location', section: 'Travel Details' },
+  ],
+  travel_purpose: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'idNumber', section: 'Your Details' },
+    { id: 'dates', section: 'Travel Details' }, { id: 'location', section: 'Travel Details' },
+  ],
+  academic_reference: [
+    { id: 'name', section: 'Referee Details', required: true }, { id: 'jobTitle', section: 'Referee Details' },
+    { id: 'companyName', section: 'Referee Details' }, { id: 'phone', section: 'Referee Details' },
+    { id: 'cpName', section: "Student's Details", required: true }, { id: 'cpNationality', section: "Student's Details" },
+  ],
+  gap_year_explain: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details' }, { id: 'phone', section: 'Your Details' },
+    { id: 'dates', section: 'Gap Period' },
+  ],
+  study_plan: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'nationality', section: 'Your Details' }, { id: 'address', section: 'Your Details' },
+    { id: 'location', section: 'Study Details' },
+  ],
+  tenancy_reference: [
+    { id: 'name', section: 'Landlord / Agent Details', required: true }, { id: 'address', section: 'Landlord / Agent Details' },
+    { id: 'phone', section: 'Landlord / Agent Details' }, { id: 'companyName', section: 'Landlord / Agent Details' },
+    { id: 'cpName', section: "Tenant's Details", required: true },
+    { id: 'propertyAddress', section: 'Tenancy Details', required: true }, { id: 'dates', section: 'Tenancy Details' },
+  ],
+  property_ownership: [
+    { id: 'name', section: 'Your Details (Declarant)', required: true }, { id: 'address', section: 'Your Details (Declarant)' },
+    { id: 'idNumber', section: 'Your Details (Declarant)' },
+    { id: 'propertyAddress', section: 'Property Details', required: true }, { id: 'dates', section: 'Property Details' },
+  ],
+  property_noc: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details' },
+    { id: 'idNumber', section: 'Your Details' }, { id: 'phone', section: 'Your Details' },
+    { id: 'cpName', section: 'Other Party' },
+    { id: 'propertyAddress', section: 'Property Details', required: true },
+  ],
+  good_standing_req: [
+    { id: 'companyName', section: 'Company Details', required: true }, { id: 'regNumber', section: 'Company Details', required: true },
+    { id: 'address', section: 'Company Details' }, { id: 'phone', section: 'Company Details' },
+  ],
+  company_authorization: [
+    { id: 'companyName', section: 'Company Details', required: true }, { id: 'regNumber', section: 'Company Details' }, { id: 'address', section: 'Company Details' },
+    { id: 'cpName', section: 'Authorised Person', required: true }, { id: 'cpIdNumber', section: 'Authorised Person' }, { id: 'cpPhone', section: 'Authorised Person' },
+    { id: 'dates', section: 'Authorisation Period' },
+  ],
+  poa_cover: [
+    { id: 'name', section: 'Grantor Details', required: true }, { id: 'address', section: 'Grantor Details' },
+    { id: 'idNumber', section: 'Grantor Details' }, { id: 'phone', section: 'Grantor Details' },
+    { id: 'cpName', section: "Attorney's Details", required: true }, { id: 'cpIdNumber', section: "Attorney's Details" },
+  ],
+  minor_travel_consent: [
+    { id: 'name', section: 'Parent / Guardian Details', required: true }, { id: 'address', section: 'Parent / Guardian Details' },
+    { id: 'idNumber', section: 'Parent / Guardian Details' }, { id: 'phone', section: 'Parent / Guardian Details' },
+    { id: 'cpName', section: "Minor's Details", required: true }, { id: 'cpDob', section: "Minor's Details" }, { id: 'cpIdNumber', section: "Minor's Details" },
+    { id: 'dates', section: 'Travel Details' }, { id: 'location', section: 'Travel Details' },
+  ],
+  marital_status_decl: [
+    { id: 'name', section: 'Your Details', required: true }, { id: 'address', section: 'Your Details' },
+    { id: 'idNumber', section: 'Your Details' }, { id: 'dob', section: 'Your Details' },
+  ],
+  guardianship_decl: [
+    { id: 'name', section: 'Guardian Details', required: true }, { id: 'address', section: 'Guardian Details' },
+    { id: 'idNumber', section: 'Guardian Details' }, { id: 'phone', section: 'Guardian Details' },
+    { id: 'cpName', section: "Minor / Dependant's Details", required: true }, { id: 'cpDob', section: "Minor / Dependant's Details" }, { id: 'cpRelationship', section: "Minor / Dependant's Details" },
+  ],
+};
+
 function buildLegalPrompt(docId, fields) {
-  const meta = LEGAL_DOC_INDEX[docId];
   const guidance = LEGAL_DOC_GUIDANCE[docId];
+  const schema = LEGAL_DOC_FIELDS[docId] || [];
   const f = fields || {};
+  const factsList = schema
+    .map(s => `- ${(FIELD_LIB[s.id] || { label: s.id }).label}: ${f[s.id] || 'Not provided'}`)
+    .join('\n');
   return `You are a senior legal documentation specialist at SkyGlobe Group. ${guidance}
 
-Use ONLY these real details supplied by the client — never invent names, institutions, figures, registration numbers, dates or facts that are not provided:
-- Full name of the principal person: ${f.fullName || 'Not provided'}
-- Nationality / country: ${f.nationality || 'Not provided'}
-- Other party (host / employer / sponsor / organisation / recipient): ${f.counterparty || 'Not provided'}
-- Relevant dates / period: ${f.dates || 'Not provided'}
-- Place / destination / address: ${f.location || 'Not provided'}
-- Specific facts and details for this document: ${f.details || 'Not provided'}
+Use ONLY these real details supplied by the client — never invent names, addresses, ID numbers, institutions, figures, registration numbers, dates or facts that are not provided:
+${factsList}
+- Additional specific facts and details for this document: ${f.details || 'Not provided'}
 
 STRICT RULES:
 - NEVER use bracketed placeholders such as [Name], [Date], [Address]. The body must read as complete prose.
 - Do NOT write a sender address block, date line, letterhead, reference number, signature name or job title — these are added automatically by our system. Begin directly with the salutation or opening line.
-- Do NOT fabricate any qualification, employment, enrolment, financial figure or official outcome that was not supplied. If a detail is missing, write gracefully around it.
+- Do NOT fabricate any qualification, employment, enrolment, financial figure, ID number or official outcome that was not supplied. If a detail is missing, write gracefully around it.
 - Never claim that SkyGlobe Group issues, certifies or guarantees the instrument — SkyGlobe only facilitates and verifies the document.
 - Output plain text only: no markdown, asterisks or headings. Separate paragraphs with a blank line. Keep it formal, precise and well-structured.`;
 }
@@ -1830,7 +1982,7 @@ app.get('/api/legal-docs/catalog', (_req, res) => {
     id: t.id, name: t.name, product: t.product, blurb: t.blurb, perks: t.perks,
     price: { USD: PRICING[t.product].USD, EUR: PRICING[t.product].EUR, GBP: PRICING[t.product].GBP },
   }));
-  res.json({ groups: LEGAL_DOC_TYPES, tiers });
+  res.json({ groups: LEGAL_DOC_TYPES, tiers, fields: LEGAL_DOC_FIELDS, fieldLib: FIELD_LIB });
 });
 
 // Generate a paid legal document. Requires a valid instant-unlock token proving
@@ -1845,8 +1997,11 @@ app.post('/api/legal-docs/generate', async (req, res) => {
     const meta = LEGAL_DOC_INDEX[docId];
     if (!meta) return res.status(400).json({ error: 'Unknown document type.' });
     const f = fields || {};
-    if (!f.fullName || !f.details)
-      return res.status(400).json({ error: 'Full name and document details are required.' });
+    const schema = LEGAL_DOC_FIELDS[docId] || [];
+    const missing = schema.filter(s => s.required && !String(f[s.id] || '').trim());
+    if (missing.length)
+      return res.status(400).json({ error: `Please fill in: ${missing.map(s => (FIELD_LIB[s.id] || {}).label || s.id).join(', ')}.` });
+    if (!f.details) return res.status(400).json({ error: 'Please describe the specific facts this document must state.' });
     if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY)
       return res.status(500).json({ error: 'AI not configured. Please contact support.' });
 

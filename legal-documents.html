@@ -79,6 +79,8 @@
 
   /* form */
   .form{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(22px,4vw,34px);max-width:640px;margin:0 auto}
+  .doc-guidance{background:#fff8e6;border:1px solid #ead9a6;border-radius:14px;padding:14px 18px;max-width:640px;margin:0 auto 18px;font-size:.86rem;color:#5a4a16;line-height:1.6}
+  .doc-guidance b{color:#3a2f0a;display:block;margin-bottom:3px}
   .field{margin-bottom:16px}
   .field label{display:block;font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:6px}
   .field label .req{color:#c0392b}
@@ -161,14 +163,11 @@
   <div class="panel" id="panel3">
     <div class="p-head"><h2>Document details</h2><p>Give us the real facts. We never invent names, figures or institutions — only what you provide is used.</p></div>
     <div class="err" id="formErr"></div>
+    <div class="doc-guidance" id="docGuidance"></div>
     <div class="form">
-      <div class="field"><label>Full name of the person <span class="req">*</span></label><input id="f_fullName" placeholder="e.g. the applicant, sponsor or employee" autocomplete="off"></div>
-      <div class="field"><label>Nationality / country</label><input id="f_nationality" placeholder="e.g. nationality of the person" autocomplete="off"></div>
       <div class="field"><label>Your email (for secure delivery) <span class="req">*</span></label><input id="f_email" type="email" placeholder="you@example.com" autocomplete="off"></div>
-      <div class="field"><label>Other party</label><input id="f_counterparty" placeholder="Host, employer, sponsor, organisation or recipient" autocomplete="off"><div class="hint">Whoever the document is from or addressed to, if applicable.</div></div>
-      <div class="field"><label>Relevant dates / period</label><input id="f_dates" placeholder="e.g. travel dates, employment period" autocomplete="off"></div>
-      <div class="field"><label>Place / destination / address</label><input id="f_location" placeholder="e.g. destination country, city or address" autocomplete="off"></div>
-      <div class="field"><label>Specific facts &amp; details <span class="req">*</span></label><textarea id="f_details" placeholder="Describe exactly what this document must say — the situation, the people involved, what is being declared or requested, and any specifics. The more accurate detail you give, the better the document."></textarea></div>
+      <div id="dynamicFields"></div>
+      <div class="field"><label>Specific facts &amp; details <span class="req">*</span></label><textarea id="f_details" placeholder="Describe exactly what this document must say — the situation, what is being declared or requested, and any specifics beyond the fields above. The more accurate detail you give, the better the document."></textarea></div>
     </div>
     <div class="actions"><button class="btn ghost" onclick="goStep(2)">← Back</button><button class="btn" onclick="goStep(4)">Review &amp; Continue →</button></div>
   </div>
@@ -201,7 +200,7 @@
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-const state = { docId:null, docName:null, product:null, tierName:null, currency:'USD', catalog:null };
+const state = { docId:null, docName:null, docDesc:null, product:null, tierName:null, currency:'USD', catalog:null };
 
 function goStep(n){
   for(let i=1;i<=5;i++){
@@ -211,6 +210,7 @@ function goStep(n){
     const s=document.getElementById('st'+i); if(!s)continue;
     s.classList.toggle('active',i===n); s.classList.toggle('done',i<n);
   }
+  if(n===3) renderGuidance();
   if(n===4) renderSummary();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -231,13 +231,42 @@ function renderDocs(){
     items.forEach(it=>{
       const c=document.createElement('div'); c.className='doc-card'; c.dataset.id=it.id;
       c.innerHTML='<h3>'+it.name+'</h3><p>'+it.desc+'</p>';
-      c.onclick=()=>{ state.docId=it.id; state.docName=it.name;
+      c.onclick=()=>{ state.docId=it.id; state.docName=it.name; state.docDesc=it.desc;
         document.querySelectorAll('.doc-card').forEach(x=>x.classList.remove('sel'));
         c.classList.add('sel'); setTimeout(()=>goStep(2),180); };
       grid.appendChild(c);
     });
     wrap.appendChild(grid);
   }
+}
+
+// Shows the client that the SAME AI drafts a document-specific instrument —
+// and, critically, renders that document's OWN field schema: real
+// identification (address, ID/passport number, phone) for whoever the
+// document names, grouped into clear sections. Not a one-size-fits-all form.
+function renderGuidance(){
+  const box=document.getElementById('docGuidance'); if(!box) return;
+  box.innerHTML = `<b>You selected: ${state.docName}</b>${state.docDesc || ''} — our AI drafts this document in the correct legal voice and structure for this specific document type, using only the identification and facts you enter below.`;
+  renderDynamicFields();
+}
+
+function renderDynamicFields(){
+  const wrap=document.getElementById('dynamicFields'); wrap.innerHTML='';
+  const schema=(state.catalog.fields && state.catalog.fields[state.docId]) || [];
+  const lib=state.catalog.fieldLib || {};
+  let lastSection=null;
+  schema.forEach(s=>{
+    const def=lib[s.id]||{label:s.id};
+    if(s.section!==lastSection){
+      const h=document.createElement('div'); h.className='grp-label'; h.style.margin='18px 0 8px'; h.textContent=s.section;
+      wrap.appendChild(h); lastSection=s.section;
+    }
+    const f=document.createElement('div'); f.className='field';
+    const inputType=def.type==='date'?'date':'text';
+    f.innerHTML=`<label>${def.label}${s.required?' <span class="req">*</span>':''}</label>`+
+      `<input id="dyn_${s.id}" type="${inputType}" placeholder="${def.placeholder||''}" autocomplete="off">`;
+    wrap.appendChild(f);
+  });
 }
 
 function renderTiers(){
@@ -265,20 +294,22 @@ document.getElementById('curSwitch').addEventListener('click',e=>{
 });
 
 function collectFields(){
-  return {
-    fullName:val('f_fullName'), nationality:val('f_nationality'), email:val('f_email'),
-    counterparty:val('f_counterparty'), dates:val('f_dates'), location:val('f_location'), details:val('f_details'),
-  };
+  const schema=(state.catalog.fields && state.catalog.fields[state.docId]) || [];
+  const f={ email:val('f_email'), details:val('f_details') };
+  schema.forEach(s=>{ const el=document.getElementById('dyn_'+s.id); if(el) f[s.id]=el.value.trim(); });
+  return f;
 }
-function val(id){return document.getElementById(id).value.trim();}
+function val(id){const el=document.getElementById(id); return el?el.value.trim():'';}
 
 function renderSummary(){
   const f=collectFields(); const sym={USD:'$',EUR:'€',GBP:'£'}[state.currency];
   const tier=state.catalog.tiers.find(t=>t.product===state.product);
+  const lib=state.catalog.fieldLib||{};
+  const nameField=f.name||f.companyName||f.cpName||'';
   document.getElementById('paySummary').innerHTML=
     '<b>Document:</b> '+state.docName+'<br>'+
     '<b>Service level:</b> '+state.tierName+'<br>'+
-    '<b>For:</b> '+(f.fullName||'—')+'<br>'+
+    '<b>Primary name:</b> '+(nameField||'—')+'<br>'+
     '<b>Delivery email:</b> '+(f.email||'—')+'<br>'+
     '<b>Total:</b> '+sym+(tier?tier.price[state.currency]:'')+' '+state.currency;
 }
@@ -287,7 +318,15 @@ function renderSummary(){
 async function startPayment(){
   const f=collectFields();
   const fe=document.getElementById('payErr'); fe.style.display='none';
-  if(!f.fullName||!f.email||!f.details){ goStep(3); const e=document.getElementById('formErr'); e.textContent='Please fill in the full name, email and details.'; e.style.display='block'; return; }
+  const schema=(state.catalog.fields && state.catalog.fields[state.docId]) || [];
+  const missing=schema.filter(s=>s.required && !f[s.id]);
+  if(!f.email||missing.length||!f.details){
+    goStep(3); const e=document.getElementById('formErr');
+    const lib=state.catalog.fieldLib||{};
+    e.textContent = missing.length ? ('Please fill in: '+missing.map(s=>(lib[s.id]||{}).label||s.id).join(', ')+'.')
+      : 'Please fill in your email and the specific facts &amp; details.';
+    e.style.display='block'; return;
+  }
   const btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Starting secure payment…';
   // persist so we can resume generation after the payment redirect
   try{ localStorage.setItem('sky_legal_pending', JSON.stringify({product:state.product,docId:state.docId,docName:state.docName,tierName:state.tierName,fields:f})); }catch(e){}
