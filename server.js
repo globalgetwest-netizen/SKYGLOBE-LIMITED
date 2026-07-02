@@ -6167,11 +6167,19 @@ app.get('/api/identity/:ref/export.png', async (req, res) => {
     if (!upstream.ok) return res.status(404).json({ error: 'Card file not found in storage.' });
     const html = await upstream.text();
 
-    let puppeteer;
-    try { puppeteer = require('puppeteer'); }
-    catch { return res.status(503).json({ error: 'High-resolution export is not available on this deployment yet (Puppeteer not installed). Please contact support.' }); }
+    let puppeteer, chromium;
+    try {
+      puppeteer = require('puppeteer-core');
+      chromium = require('@sparticuz/chromium');
+    } catch {
+      return res.status(503).json({ error: 'High-resolution export is not available on this deployment yet (dependencies not installed). Please contact support.' });
+    }
 
-    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+    });
     try {
       const page = await browser.newPage();
       await page.setViewport({ width: 1400, height: 1400, deviceScaleFactor: 3 }); // 3x for ~300 DPI at CR80 scale
