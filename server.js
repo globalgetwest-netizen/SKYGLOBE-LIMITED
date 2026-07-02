@@ -5745,7 +5745,9 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   const sigUrl = origin + '/signature.png';
   const stampUrl = origin + '/stamp.png';
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=1&ecc=H&data=${encodeURIComponent(verifyUrl)}`;
-  const photoTag = data.photoDataUrl ? `<img class="photo" src="${data.photoDataUrl}" alt="">` : `<div class="photo"></div>`;
+  // The Founder ID defaults to the CEO's own uploaded photo (ceo.png in the
+  // repo root) unless a specific photo was passed at issuance time.
+  const photoTag = `<img class="photo" src="${data.photoDataUrl || (origin + '/ceo.png')}" alt="">`;
   const mrz1 = `SGID<<${(data.fullName || '').toUpperCase().replace(/[^A-Z ]/g, '').replace(/\s+/g, '<<')}<<CEO<<TIER0`.padEnd(44, '<').slice(0, 44);
   const mrz2 = `${data.ref}<<${(data.nationality || 'XXX').slice(0, 3).toUpperCase()}<<ACTIVE<<VERIFIED`.padEnd(44, '<').slice(0, 44);
   const glyphSeed = crypto.createHash('sha256').update(data.ref + (data.accessCodeHash || '')).digest('hex');
