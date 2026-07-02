@@ -27,6 +27,16 @@
 </div>
 <script>
 function qs(k){return new URLSearchParams(location.search).get(k);}
+// Where to send the client after an instant, unlock-token product is paid.
+// Legal documents live on their own page; the AI Document Generator and
+// Interview Prep Coach live inside the main site's AI Tools page and need
+// the SPA to know which tool to resume and generate automatically.
+const DOCGEN_PRODUCTS = ['sop','coverletter','visaletter','experience','invitation','skyconference'];
+function instantResumeUrl(product){
+  if ((product||'').indexOf('legal_doc_')===0) return '/legal-documents?resume=1';
+  if (DOCGEN_PRODUCTS.includes(product) || product==='interview_prep') return '/?resume=1&tool='+encodeURIComponent(product);
+  return '/';
+}
 // Paystack returns ?reference / ?trxref ; our own callback uses ?reference ; Flutterwave ?tx_ref
 const ref = qs('reference') || qs('trxref') || qs('tx_ref');
 const cancelled = qs('cancelled');
@@ -55,7 +65,7 @@ async function run(){
         <h1>Payment successful</h1>
         <p>Thank you! Your payment has been received and your request is now with our team.</p>
         ${appRef?`<div class="ref">${appRef}</div><p>Save this reference to track your request.</p>`:''}
-        ${d.instant?`<a class="btn" href="${(d.product||'').indexOf('legal_doc_')===0?'/legal-documents?resume=1':'/'}">Access your purchase</a>`:`<a class="btn" href="/?track=${encodeURIComponent(appRef||'')}">Track my request</a>`}
+        ${d.instant?`<a class="btn" href="${instantResumeUrl(d.product)}">Access your purchase</a>`:`<a class="btn" href="/?track=${encodeURIComponent(appRef||'')}">Track my request</a>`}
         <a class="btn ghost" href="https://wa.me/17373998522?text=Hi, I just paid. Ref: ${encodeURIComponent(appRef||ref)}">WhatsApp us</a>
         <p class="muted">A confirmation email is on its way.</p>`);
     } else {

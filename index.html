@@ -3657,7 +3657,7 @@ function showPage(page, mode) {
   if (page === 'countries') renderAllCountries();
   if (page === 'blog') initBlog();
   if (page === 'world') initWorldExplorer();
-  if (page === 'tools') { warmUpServer(); showToolsGateIfNeeded(); }
+  if (page === 'tools') { warmUpServer(); }
   if (page === 'invoice') initInvoicePage();
   injectBackBar(page);
   updateNavArrows();
@@ -5236,6 +5236,12 @@ function refreshApplyPay() {
   }
 }
 loadApplyPayCfg();
+function _runResumeFlows() {
+  if (typeof resumeDocGenIfPaid === 'function') resumeDocGenIfPaid();
+  if (typeof resumeIpIfPaid === 'function') resumeIpIfPaid();
+}
+if (typeof resumeDocGenIfPaid === 'function') _runResumeFlows();
+else document.addEventListener('DOMContentLoaded', _runResumeFlows);
 
 async function submitApplication() {
   const payload = {
@@ -7535,19 +7541,6 @@ if (isLoggedIn()) connectSSE();
 <div class="page" id="page-tools">
   <div id="toolsPageNav-top"></div>
 
-  <!-- Staff/CEO gate — hidden once authenticated -->
-  <div id="toolsGate" style="display:none;position:fixed;inset:0;z-index:900;background:linear-gradient(160deg,#041022,#071B3B);align-items:center;justify-content:center;padding:20px">
-    <div style="background:#fff;border-radius:20px;padding:44px 38px;width:100%;max-width:380px;text-align:center;box-shadow:0 40px 100px rgba(0,0,0,.5)">
-      <img src="icon-512.png?v=3" style="height:64px;width:64px;border-radius:14px;margin-bottom:14px" onerror="this.style.display='none'">
-      <h2 style="font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:1.5rem;font-weight:700;color:#041022;letter-spacing:.06em;text-transform:uppercase">SKYGLOBE <span style="color:#D4A73A">GROUP</span></h2>
-      <p style="font-size:.72rem;color:#64748b;letter-spacing:.2em;text-transform:uppercase;margin:8px 0 24px">Staff &amp; CEO Access Only</p>
-      <input type="password" id="toolsGatePw" placeholder="Enter your staff or CEO password" style="width:100%;padding:13px 15px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.93rem;margin-bottom:12px" onkeydown="if(event.key==='Enter')toolsGateLogin()">
-      <button onclick="toolsGateLogin()" style="width:100%;padding:13px;background:#D4A73A;color:#041022;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.93rem">Access AI Tools</button>
-      <div id="toolsGateErr" style="color:#dc2626;font-size:.8rem;min-height:18px;margin-top:10px"></div>
-      <p style="font-size:.7rem;color:#94a3b8;margin-top:16px">🔒 This tool is for internal staff use only. Not for public access.</p>
-    </div>
-  </div>
-
   <section style="padding:120px 5% 40px;background:linear-gradient(135deg,#fff,#f0f5ff)">
     <div class="text-center">
       <span class="section-tag">✨ Powered by Gemini AI</span>
@@ -7678,14 +7671,45 @@ if (isLoggedIn()) connectSSE();
           <label>Additional Notes (optional)</label>
           <textarea id="docExtra" rows="2" placeholder="Any awards, publications, special achievements, or extra context..."></textarea>
         </div>
-        <button class="btn-primary" onclick="generateDoc()" id="docGenBtn" style="width:100%;justify-content:center;font-size:1rem;padding:16px">
-          ✨ Generate My Document
+        <button class="btn-primary" onclick="proceedToDocPayment()" id="docGenBtn" style="width:100%;justify-content:center;font-size:1rem;padding:16px">
+          🔒 Continue to Secure Payment →
         </button>
+      </div>
+
+      <!-- Step 2.5: Secure payment — this document is generated instantly the
+           moment payment is confirmed (auto for card, or the moment staff/CEO
+           confirms a bank/crypto transfer from the CEO portal). -->
+      <div class="doc-step" id="docPayStep" style="display:none">
+        <h4><span>3</span> Secure Payment</h4>
+        <p style="margin:-6px 0 16px;font-size:0.85rem;color:var(--muted,#8a94a6)">Your document is written by AI and delivered instantly once payment is confirmed.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Currency</label>
+            <select id="docPayCurrency" onchange="refreshDocPay()">
+              <option value="USD">USD — US Dollar</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="GBP">GBP — British Pound</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pay with</label>
+            <select id="docPayProvider"><option value="">Loading…</option></select>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,167,58,0.08);border-radius:10px;padding:0.9rem 1.1rem;margin:0.5rem 0 1.2rem">
+          <span style="font-size:0.85rem;color:var(--muted,#8a94a6)">Total</span>
+          <strong id="docPayAmount" style="color:var(--gold);font-size:1.15rem">—</strong>
+        </div>
+        <div id="docPayErr" style="color:#c62828;font-size:0.85rem;margin-bottom:10px"></div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap">
+          <button class="btn-outline" onclick="document.getElementById('docPayStep').style.display='none';document.getElementById('docStep2').scrollIntoView({behavior:'smooth'})" style="padding:12px 22px">← Back</button>
+          <button class="btn-primary" id="docPayBtn" onclick="payForDoc()" style="flex:1;justify-content:center;padding:14px">🔒 Pay &amp; Generate →</button>
+        </div>
       </div>
 
       <!-- Step 3: Output -->
       <div class="doc-step" id="docStep3" style="display:none">
-        <h4><span>3</span> Your Generated Document</h4>
+        <h4><span>4</span> Your Generated Document</h4>
         <div id="docOutputArea"></div>
       </div>
 
@@ -7771,18 +7795,50 @@ if (isLoggedIn()) connectSSE();
           </div>
         </div>
         <div class="form-group">
+          <label>Your Email Address * <span style="font-weight:400;color:var(--muted,#8a94a6)">(for secure delivery &amp; receipt)</span></label>
+          <input type="email" id="ipEmail" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
           <label id="ipContextLabel">Additional context (optional)</label>
           <textarea id="ipBackground" rows="3" id="ipBackground" placeholder="e.g. Applying for UK Student Visa for MSc Data Science at UCL, I have a BSc in Computer Science, IELTS 7.0, sufficient funds..."></textarea>
         </div>
         <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:0.4rem">
           <button class="btn-outline" onclick="ipBack()" style="padding:12px 22px">← Back</button>
-          <button class="btn-primary" id="ipGenBtn" onclick="generateInterviewPrep()" style="flex:1;justify-content:center;padding:14px">🎤 Generate My Interview Guide</button>
+          <button class="btn-primary" id="ipGenBtn" onclick="proceedToIpPayment()" style="flex:1;justify-content:center;padding:14px">🔒 Continue to Secure Payment →</button>
+        </div>
+      </div>
+
+      <!-- Step 2.5: Secure payment — guide unlocks instantly once paid. -->
+      <div class="doc-step" id="ipPayStep" style="display:none">
+        <h4><span>3</span> Secure Payment</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Currency</label>
+            <select id="ipPayCurrency" onchange="refreshIpPay()">
+              <option value="USD">USD — US Dollar</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="GBP">GBP — British Pound</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pay with</label>
+            <select id="ipPayProvider"><option value="">Loading…</option></select>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,167,58,0.08);border-radius:10px;padding:0.9rem 1.1rem;margin:0.5rem 0 1.2rem">
+          <span style="font-size:0.85rem;color:var(--muted,#8a94a6)">Total</span>
+          <strong id="ipPayAmount" style="color:var(--gold);font-size:1.15rem">—</strong>
+        </div>
+        <div id="ipPayErr" style="color:#c62828;font-size:0.85rem;margin-bottom:10px"></div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap">
+          <button class="btn-outline" onclick="document.getElementById('ipPayStep').style.display='none';document.getElementById('ipStep2').scrollIntoView({behavior:'smooth'})" style="padding:12px 22px">← Back</button>
+          <button class="btn-primary" id="ipPayBtn" onclick="payForIp()" style="flex:1;justify-content:center;padding:14px">🔒 Pay &amp; Generate →</button>
         </div>
       </div>
 
       <!-- Step 3: Results -->
       <div class="doc-step" id="ipStep3" style="display:none">
-        <h4><span>3</span> Your Personalised Interview Guide</h4>
+        <h4><span>4</span> Your Personalised Interview Guide</h4>
         <div id="ipOutput"></div>
         <button class="btn-outline" onclick="ipReset()" style="margin-top:1.4rem;padding:11px 24px">← Start Over</button>
       </div>
@@ -9003,34 +9059,6 @@ function injectBackBar(page) {
   pageEl.prepend(bar);
 }
 
-/* ── Tools page staff/CEO gate ── */
-function showToolsGateIfNeeded() {
-  if (sessionStorage.getItem('sg_tools_auth')) return; // already authenticated this session
-  const gate = document.getElementById('toolsGate');
-  if (gate) { gate.style.display = 'flex'; setTimeout(() => { const i = document.getElementById('toolsGatePw'); if(i) i.focus(); }, 100); }
-}
-async function toolsGateLogin() {
-  const pw = (document.getElementById('toolsGatePw').value || '').trim();
-  const err = document.getElementById('toolsGateErr');
-  if (!pw) { err.textContent = 'Please enter your password.'; return; }
-  err.textContent = 'Checking…';
-  try {
-    // try staff login first, then CEO
-    let ok = false;
-    const r = await fetch('/api/staff/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: pw }) });
-    if (r.ok) ok = true;
-    if (!ok) {
-      const r2 = await fetch('/api/admin/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: pw }) });
-      if (r2.ok) ok = true;
-    }
-    if (!ok) { err.textContent = 'Wrong password. Staff or CEO password required.'; document.getElementById('toolsGatePw').value = ''; return; }
-    sessionStorage.setItem('sg_tools_auth', '1');
-    const gate = document.getElementById('toolsGate');
-    if (gate) gate.style.display = 'none';
-    err.textContent = '';
-  } catch(e) { err.textContent = 'Network error — try again.'; }
-}
-
 function selectDocType(type, el) {
   selectedDocType = type;
   document.querySelectorAll('.doc-type-card').forEach(c => c.classList.remove('selected'));
@@ -9188,7 +9216,9 @@ function onVisaPurposeChange() {
   hintEl.textContent = '💡 ' + c.hint;
 }
 
-async function generateDoc() {
+// Validates the document form; shows a toast and returns false on the first
+// problem found. Shared by the payment step and the post-payment generation.
+function validateDocForm() {
   const fullName = document.getElementById('docFullName').value.trim();
   const destination = document.getElementById('docDestination').value.trim();
   const email = document.getElementById('docEmail').value.trim();
@@ -9199,30 +9229,126 @@ async function generateDoc() {
   const program = document.getElementById('docProgram').value.trim();
   const isIssuerDoc = selectedDocType === 'experience' || selectedDocType === 'invitation';
   const isSkyConf = selectedDocType === 'skyconference';
-  if (!fullName) {
-    showToast('Please fill in the full name.'); return;
-  }
-  if (!isIssuerDoc && !isSkyConf && !destination) {
-    showToast('Please fill in your destination country.'); return;
-  }
-  if (isSkyConf && (!institution || !destination)) {
-    showToast('Please fill in the conference name and the country where it is held.'); return;
-  }
+  if (!fullName) { showToast('Please fill in the full name.'); return false; }
+  if (!isIssuerDoc && !isSkyConf && !destination) { showToast('Please fill in your destination country.'); return false; }
+  if (isSkyConf && (!institution || !destination)) { showToast('Please fill in the conference name and the country where it is held.'); return false; }
   if (isIssuerDoc && (!institution || !program)) {
     showToast(selectedDocType === 'experience'
       ? 'Please fill in the company name and job title.'
-      : 'Please fill in the host organisation and event name.'); return;
+      : 'Please fill in the host organisation and event name.'); return false;
   }
-  if (!email || !phone || !address || !city) {
-    showToast('Please fill in all the required contact details so your document is complete and professional.'); return;
-  }
+  if (!email || !phone || !address || !city) { showToast('Please fill in all the required contact details so your document is complete and professional.'); return false; }
   if (selectedDocType === 'visaletter' && !document.getElementById('docPurpose').value) {
-    showToast('Please select the type of visa / purpose of your travel so we can write the right letter.'); return;
+    showToast('Please select the type of visa / purpose of your travel so we can write the right letter.'); return false;
   }
+  return true;
+}
 
+function collectDocFields() {
+  return {
+    docType: selectedDocType,
+    fullName: document.getElementById('docFullName').value.trim(),
+    nationality: document.getElementById('docNationality').value.trim(),
+    email: document.getElementById('docEmail').value.trim(),
+    phone: document.getElementById('docPhone').value.trim(),
+    address: document.getElementById('docAddress').value.trim(),
+    city: document.getElementById('docCity').value.trim(),
+    visaPurpose: document.getElementById('docPurpose')?.value || '',
+    destination: document.getElementById('docDestination').value.trim(),
+    institution: document.getElementById('docInstitution').value.trim(),
+    program: document.getElementById('docProgram').value.trim(),
+    background: document.getElementById('docBackground').value.trim(),
+    experience: document.getElementById('docExperience').value.trim(),
+    whyHere: document.getElementById('docWhy').value.trim(),
+    goals: document.getElementById('docGoals').value.trim(),
+    extraNotes: document.getElementById('docExtra').value.trim(),
+  };
+}
+
+// Called once payment is confirmed (either instantly via card, or after the
+// user returns from checkout) — actually generates the document.
+const DOC_TYPE_LABELS = { sop: 'Statement of Purpose', coverletter: 'Cover Letter', visaletter: 'Visa Cover Letter', experience: 'Experience Certificate (Draft)', invitation: 'Conference Invitation', skyconference: 'SkyGlobe Conference Invitation' };
+
+// Validate, then reveal the payment step instead of generating directly.
+function proceedToDocPayment() {
+  if (!validateDocForm()) return;
+  document.getElementById('docPayStep').style.display = 'block';
+  document.getElementById('docPayStep').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  refreshDocPay();
+}
+
+function refreshDocPay() {
+  const cur = document.getElementById('docPayCurrency')?.value || 'USD';
+  const entry = APPLY_PAY_CFG.pricing[selectedDocType];
+  const amt = entry ? entry[cur] : null;
+  const amtEl = document.getElementById('docPayAmount');
+  if (amtEl) amtEl.textContent = amt != null ? `${cur} ${Number(amt).toLocaleString()}` : '—';
+  const sel = document.getElementById('docPayProvider');
+  if (sel) {
+    const active = (APPLY_PAY_CFG.providers || []).filter(p => p.currencies.includes(cur));
+    sel.innerHTML = active.length
+      ? active.map(p => `<option value="${p.name}">${APPLY_PROVIDER_LABELS[p.name] || p.name}</option>`).join('')
+      : '<option value="">No payment method available yet — contact us</option>';
+  }
+}
+
+// Saves the filled-in document so it survives the redirect to checkout, then
+// starts the payment. On return, index.html's boot logic picks this back up
+// and generates automatically — the user never re-types anything.
+async function payForDoc() {
+  const err = document.getElementById('docPayErr');
+  const provider = document.getElementById('docPayProvider')?.value;
+  if (!provider) { err.textContent = 'Please choose a payment method to continue.'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('docPayBtn');
+  btn.disabled = true; btn.textContent = 'Starting secure payment…';
+
+  const fields = collectDocFields();
+  try { localStorage.setItem('sky_docgen_pending', JSON.stringify(fields)); } catch (e) {}
+
+  try {
+    const r = await fetch('/api/pay/init', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product: selectedDocType, provider, email: fields.email, currency: document.getElementById('docPayCurrency').value }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.authorization_url) throw new Error(d.error || 'Could not start payment.');
+    window.location.href = d.authorization_url;
+  } catch (e) {
+    err.textContent = e.message;
+    btn.disabled = false; btn.textContent = '🔒 Pay & Generate →';
+  }
+}
+
+// On load, resume a document generation that was paused for checkout — reads
+// the unlock token the payment callback stored, restores the exact details
+// the user typed, and generates automatically. Runs once, quietly, on boot.
+function resumeDocGenIfPaid() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('resume') !== '1') return;
+  const tool = params.get('tool');
+  if (!tool || !DOC_TYPE_LABELS[tool]) return;
+  let pending = null;
+  try { pending = JSON.parse(localStorage.getItem('sky_docgen_pending') || 'null'); } catch (e) {}
+  const unlock = sessionStorage.getItem('sky_unlock_' + tool);
+  if (!pending || !unlock || pending.docType !== tool) return;
+  try { localStorage.removeItem('sky_docgen_pending'); sessionStorage.removeItem('sky_unlock_' + tool); } catch (e) {}
+  selectedDocType = tool;
+  showPage('tools');
+  document.getElementById('docStep2').style.display = 'block';
+  runDocGeneration(unlock, pending);
+}
+
+function retryDocGeneration() {
+  const a = window._lastDocGenArgs;
+  if (a) runDocGeneration(a.unlock, a.fields);
+}
+
+async function runDocGeneration(unlock, savedFields) {
+  const fields = savedFields || collectDocFields();
+  window._lastDocGenArgs = { unlock, fields };
   const btn = document.getElementById('docGenBtn');
-  btn.disabled = true;
-  btn.textContent = '✨ Generating…';
+  if (btn) { btn.disabled = true; btn.textContent = '✨ Generating…'; }
 
   document.getElementById('docStep3').style.display = 'block';
   const progressMsg = (txt) => { document.getElementById('docOutputArea').innerHTML = `
@@ -9233,21 +9359,8 @@ async function generateDoc() {
   progressMsg('Gemini AI is writing your document… this takes 10–20 seconds');
   document.getElementById('docStep3').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  const payload = JSON.stringify({
-    docType: selectedDocType,
-    fullName,
-    nationality: document.getElementById('docNationality').value.trim(),
-    email, phone, address, city,
-    visaPurpose: document.getElementById('docPurpose')?.value || '',
-    destination,
-    institution: document.getElementById('docInstitution').value.trim(),
-    program: document.getElementById('docProgram').value.trim(),
-    background: document.getElementById('docBackground').value.trim(),
-    experience: document.getElementById('docExperience').value.trim(),
-    whyHere: document.getElementById('docWhy').value.trim(),
-    goals: document.getElementById('docGoals').value.trim(),
-    extraNotes: document.getElementById('docExtra').value.trim(),
-  });
+  const { fullName, destination, email, phone, address, city, institution, program } = fields;
+  const payload = JSON.stringify({ ...fields, unlock });
 
   // Render's free tier sleeps and is slow to wake, which drops the first connection
   // (Firefox: "NetworkError"). So we retry on network failure, warming the server.
@@ -9307,12 +9420,11 @@ async function generateDoc() {
     document.getElementById('docOutputArea').innerHTML = `
       <div style="background:#fff0f0;border:1px solid #fca5a5;border-radius:10px;padding:1.2rem;color:#c62828;font-size:0.88rem">
         ⚠️ ${msg}
-        <br><br><button class="btn-primary" onclick="generateDoc()" style="font-size:0.82rem;padding:8px 16px">🔄 Try Again</button>
+        <br><br><button class="btn-primary" onclick="retryDocGeneration()" style="font-size:0.82rem;padding:8px 16px">🔄 Try Again</button>
         &nbsp;<button class="btn-outline" onclick="showPage('contact')" style="font-size:0.82rem;padding:8px 16px">Contact Support</button>
       </div>`;
   } finally {
-    btn.disabled = false;
-    btn.textContent = '✨ Generate My Document';
+    if (btn) { btn.disabled = false; btn.textContent = '🔒 Continue to Secure Payment →'; }
   }
 }
 
@@ -9583,33 +9695,106 @@ function toggleIpQ(card) {
   card.classList.toggle('open');
 }
 
-async function generateInterviewPrep() {
+function validateIpForm() {
   const target     = document.getElementById('ipTarget').value.trim();
   const nationality= document.getElementById('ipNationality').value.trim();
-  const background = document.getElementById('ipBackground').value.trim();
+  const email      = document.getElementById('ipEmail').value.trim();
+  if (!target) { showToast('Please enter your target country / company / university.', true); return false; }
+  if (!nationality) { showToast('Please enter your nationality.', true); return false; }
+  if (!email) { showToast('Please enter your email so we can deliver your guide securely.', true); return false; }
+  return true;
+}
 
-  if (!target) { showToast('Please enter your target country / company / university.', true); return; }
-  if (!nationality) { showToast('Please enter your nationality.', true); return; }
+function collectIpFields() {
+  return {
+    type: _ipType,
+    target: document.getElementById('ipTarget').value.trim(),
+    nationality: document.getElementById('ipNationality').value.trim(),
+    email: document.getElementById('ipEmail').value.trim(),
+    background: document.getElementById('ipBackground').value.trim(),
+  };
+}
 
+function proceedToIpPayment() {
+  if (!validateIpForm()) return;
+  document.getElementById('ipPayStep').style.display = 'block';
+  document.getElementById('ipPayStep').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  refreshIpPay();
+}
+
+function refreshIpPay() {
+  const cur = document.getElementById('ipPayCurrency')?.value || 'USD';
+  const entry = APPLY_PAY_CFG.pricing['interview_prep'];
+  const amt = entry ? entry[cur] : null;
+  const amtEl = document.getElementById('ipPayAmount');
+  if (amtEl) amtEl.textContent = amt != null ? `${cur} ${Number(amt).toLocaleString()}` : '—';
+  const sel = document.getElementById('ipPayProvider');
+  if (sel) {
+    const active = (APPLY_PAY_CFG.providers || []).filter(p => p.currencies.includes(cur));
+    sel.innerHTML = active.length
+      ? active.map(p => `<option value="${p.name}">${APPLY_PROVIDER_LABELS[p.name] || p.name}</option>`).join('')
+      : '<option value="">No payment method available yet — contact us</option>';
+  }
+}
+
+async function payForIp() {
+  const err = document.getElementById('ipPayErr');
+  const provider = document.getElementById('ipPayProvider')?.value;
+  if (!provider) { err.textContent = 'Please choose a payment method to continue.'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('ipPayBtn');
+  btn.disabled = true; btn.textContent = 'Starting secure payment…';
+
+  const fields = collectIpFields();
+  try { localStorage.setItem('sky_ipprep_pending', JSON.stringify(fields)); } catch (e) {}
+
+  try {
+    const r = await fetch('/api/pay/init', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product: 'interview_prep', provider, email: fields.email, currency: document.getElementById('ipPayCurrency').value }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.authorization_url) throw new Error(d.error || 'Could not start payment.');
+    window.location.href = d.authorization_url;
+  } catch (e) {
+    err.textContent = e.message;
+    btn.disabled = false; btn.textContent = '🔒 Pay & Generate →';
+  }
+}
+
+function resumeIpIfPaid() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('resume') !== '1' || params.get('tool') !== 'interview_prep') return;
+  let pending = null;
+  try { pending = JSON.parse(localStorage.getItem('sky_ipprep_pending') || 'null'); } catch (e) {}
+  const unlock = sessionStorage.getItem('sky_unlock_interview_prep');
+  if (!pending || !unlock) return;
+  try { localStorage.removeItem('sky_ipprep_pending'); sessionStorage.removeItem('sky_unlock_interview_prep'); } catch (e) {}
+  _ipType = pending.type || 'visa';
+  showPage('tools');
+  document.getElementById('ipStep2').style.display = 'block';
+  runIpGeneration(unlock, pending);
+}
+
+async function runIpGeneration(unlock, savedFields) {
+  const fields = savedFields || collectIpFields();
   const btn = document.getElementById('ipGenBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Generating your guide…';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating your guide…'; }
 
   try {
     const res = await fetch('/api/interview-prep', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ type: _ipType, target, nationality, background })
+      body: JSON.stringify({ ...fields, payToken: unlock })
     });
     if (!res.ok) throw new Error('Server error');
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    _renderInterviewPrep(data, target);
+    _renderInterviewPrep(data, fields.target);
   } catch(e) {
     showToast('Could not generate guide: ' + e.message + '. Please try again.', true);
   } finally {
-    btn.disabled = false;
-    btn.textContent = '🎤 Generate My Interview Guide';
+    if (btn) { btn.disabled = false; btn.textContent = '🔒 Continue to Secure Payment →'; }
   }
 }
 

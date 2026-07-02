@@ -1465,7 +1465,16 @@ app.get('/api/sse', (req, res) => {
 app.post('/api/generate-doc', async (req, res) => {
   const { docType, fullName, nationality, email, phone, address, city,
           visaPurpose, destination, institution, program,
-          background, experience, whyHere, goals, extraNotes } = req.body || {};
+          background, experience, whyHere, goals, extraNotes, unlock } = req.body || {};
+
+  // Paid, self-service document generation — docType IS the PRICING product
+  // key (sop/coverletter/visaletter/experience/invitation/skyconference).
+  // Requires a signed unlock token proving payment, same mechanism as legal
+  // documents. This replaced an internal-only staff/CEO password wall that
+  // made these documents unreachable (and unpayable) by real clients.
+  if (!PRICING[docType]) return res.status(400).json({ error: 'Unknown document type.' });
+  if (!unlock || !verifyUnlock(unlock, docType))
+    return res.status(402).json({ error: 'Payment required', pay: { product: docType } });
 
   // Global rule applied to every document so the AI never leaves blanks for the user to fill.
   const NO_PLACEHOLDERS = `
@@ -2169,9 +2178,8 @@ Give exactly 5 personalised, actionable tips. Respond with ONLY a JSON array, no
 // ── AI INTERVIEW PREP ─────────────────────────────────────────────────────────
 app.post('/api/interview-prep', async (req, res) => {
   const { type = 'visa', target = '', nationality = '', background = '', payToken = '' } = req.body || {};
-  // Optional paywall: set PAYWALL_INTERVIEW=on in Render to require payment.
-  // Off by default so the current free experience is unchanged.
-  if (process.env.PAYWALL_INTERVIEW === 'on' && !verifyUnlock(payToken, 'interview_prep'))
+  // Paid, self-service — same signed-unlock pattern as the document generator.
+  if (!verifyUnlock(payToken, 'interview_prep'))
     return res.status(402).json({ error: 'Payment required', pay: { product: 'interview_prep' } });
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(503).json({ error: 'AI unavailable' });
@@ -2270,6 +2278,15 @@ const PRICING = {
   legal_doc_standard:    { label: 'Legal Document — Standard', instant: true, kind: 'legal', USD: 29, EUR: 27, GBP: 24 },
   legal_doc_premium:     { label: 'Legal Document — Premium',  instant: true, kind: 'legal', USD: 59, EUR: 55, GBP: 49 },
   legal_doc_priority:    { label: 'Legal Document — Priority', instant: true, kind: 'legal', USD: 99, EUR: 92, GBP: 79 },
+  // ── AI Document Generator (public self-service — was previously locked behind
+  // a staff/CEO password with no way for a client to ever reach or pay for it).
+  // Same instant-unlock pattern as legal docs: pay → signed token → generate.
+  sop:            { label: 'Statement of Purpose (SOP) — AI Draft',       instant: true, USD: 29, EUR: 27, GBP: 24 },
+  coverletter:    { label: 'Job Cover Letter — AI Draft',                 instant: true, USD: 19, EUR: 18, GBP: 15 },
+  visaletter:     { label: 'Visa Cover Letter — AI Draft',                instant: true, USD: 19, EUR: 18, GBP: 15 },
+  experience:     { label: 'Experience Certificate Draft — AI Draft',     instant: true, USD: 29, EUR: 27, GBP: 24 },
+  invitation:     { label: 'Conference Invitation Letter (Your Org) — AI Draft', instant: true, USD: 29, EUR: 27, GBP: 24 },
+  skyconference:  { label: 'SkyGlobe Conference Invitation — AI Instant Draft',  instant: true, USD: 49, EUR: 45, GBP: 39 },
   // ── Global Mobility — visas, PR & jobs (Apply page) ─────────────────────────
   student_visa_processing: { label: 'Student Visa Processing — Full Application Support',      instant: false, USD: 179, EUR: 165, GBP: 145 },
   work_visa_processing:    { label: 'Work Visa Processing — Full Application Support',          instant: false, USD: 199, EUR: 185, GBP: 159 },
@@ -2638,12 +2655,17 @@ app.post('/api/admin/payments/:reference/confirm', async (req, res) => {
     let unlock = null;
     if (PRICING[payment.product]?.instant) {
       unlock = signUnlock(payment.reference, payment.product);
+      // A real, working link — not just "reply to this email". Clicking it
+      // verifies the payment and automatically unlocks + generates/delivers
+      // the document, exactly like a card payment would, no extra steps.
+      const accessUrl = `${baseUrl(req)}/pay/callback?reference=${encodeURIComponent(payment.reference)}`;
       try {
         await sendEmail(payment.email, `Payment confirmed — ${PRICING[payment.product]?.label || payment.meta?.label || payment.product}`,
           `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
             <h2 style="color:#c9a84c">Payment Confirmed ✅</h2>
             <p>Thank you — we've confirmed your payment (reference <strong>${payment.reference}</strong>).</p>
-            <p>Please reply to this email or WhatsApp us at +1 737-399-8522 with your reference so we can complete your request right away.</p>
+            <p><a href="${accessUrl}" style="display:inline-block;background:#C8962A;color:#1a1300;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:8px">Access Your Document →</a></p>
+            <p style="color:#888;font-size:0.85rem;margin-top:16px">Trouble with the link? Reply to this email or WhatsApp us at +1 737-399-8522 with your reference.</p>
           </div>`);
       } catch (e) { console.error('confirm email failed:', e.message); }
     }
@@ -2661,8 +2683,12 @@ app.get('/api/pay/verify/:reference', async (req, res) => {
   try {
     const payment = await getPayment(req.params.reference);
     if (!payment) return res.status(404).json({ error: 'Payment not found.' });
-    if (payment.status === 'paid')
-      return res.json({ paid: true, product: payment.product, app_ref: payment.app_ref, instant: !!PRICING[payment.product]?.instant });
+    if (payment.status === 'paid') {
+      const instant = !!PRICING[payment.product]?.instant;
+      // Reissue a fresh token even on repeat visits — e.g. a Grey payment
+      // confirmed by staff earlier, opened via the email link days later.
+      return res.json({ paid: true, product: payment.product, app_ref: payment.app_ref, instant, unlock: instant ? signUnlock(payment.reference, payment.product) : null });
+    }
 
     const ok = await providerVerify(payment.provider, payment);
     if (!ok) return res.json({ paid: false });
