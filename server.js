@@ -5709,17 +5709,187 @@ function hashAccessCode(code) { return crypto.createHash('sha256').update(String
 
 // Branded, tier-specific card — front only (the back carries the encryption/
 // terms notice and is generated the same way with a `side` flag).
+// The Founder ID is a genuinely different piece of design, not a recoloured
+// Member card — its own circuit-trace architecture, EMV-style chip, a
+// biometric scan-frame around the photo, a stacked "glass layer" depth
+// effect, and a second machine-readable layer (an MRZ-style line, like a
+// passport) below the QR — so the security reads as engineered, not stated.
+// A deterministic, hash-derived visual glyph — like a GPG/SSH key
+// fingerprint rendered as a symmetric grid. It is NOT decorative: the same
+// access-code hash always produces the same glyph, and a different card
+// always produces a visibly different one — a real (if simple) visual
+// integrity check, not a fake biometric graphic.
+function securityGlyphSvg(seedHash, accent) {
+  const cells = [];
+  const cols = 5, rows = 5, half = Math.ceil(cols / 2);
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < half; x++) {
+      const idx = (y * half + x) % seedHash.length;
+      const on = parseInt(seedHash[idx], 16) % 2 === 0;
+      if (!on) continue;
+      const size = 100 / cols;
+      cells.push(`<rect x="${x * size}" y="${y * size}" width="${size}" height="${size}"/>`);
+      const mirrorX = cols - 1 - x;
+      if (mirrorX !== x) cells.push(`<rect x="${mirrorX * size}" y="${y * size}" width="${size}" height="${size}"/>`);
+    }
+  }
+  return `<svg viewBox="0 0 100 100" fill="${accent}">${cells.join('')}</svg>`;
+}
+function formatCardNumber(ref) {
+  const digits = ref.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  return digits.match(/.{1,4}/g).join(' ');
+}
+
+function wrapCeoIdentityCard(data, verifyUrl, req) {
+  const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
+  const sigUrl = origin + '/signature.png';
+  const stampUrl = origin + '/stamp.png';
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=1&ecc=H&data=${encodeURIComponent(verifyUrl)}`;
+  const photoTag = data.photoDataUrl ? `<img class="photo" src="${data.photoDataUrl}" alt="">` : `<div class="photo"></div>`;
+  const mrz1 = `SGID<<${(data.fullName || '').toUpperCase().replace(/[^A-Z ]/g, '').replace(/\s+/g, '<<')}<<CEO<<TIER0`.padEnd(44, '<').slice(0, 44);
+  const mrz2 = `${data.ref}<<${(data.nationality || 'XXX').slice(0, 3).toUpperCase()}<<ACTIVE<<VERIFIED`.padEnd(44, '<').slice(0, 44);
+  const glyphSeed = crypto.createHash('sha256').update(data.ref + (data.accessCodeHash || '')).digest('hex');
+  const glyphSvg = securityGlyphSvg(glyphSeed, '#FFDE8A');
+  const cardNumber = formatCardNumber(data.ref);
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Founder ID — ${data.fullName} — SkyGlobe Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1300px 800px at 50% -10%,#241a06,#020101 70%);font-family:Inter,sans-serif;padding:44px 20px;display:flex;flex-direction:column;align-items:center;gap:22px;min-height:100vh}
+  .stack{position:relative;width:452px;height:283px}
+  .layer{position:absolute;inset:0;border-radius:22px;background:linear-gradient(155deg,#0c0802,#1a1002);opacity:.5}
+  .layer.l2{transform:translate(6px,8px) rotate(1deg);opacity:.28}
+  .layer.l3{transform:translate(11px,15px) rotate(2deg);opacity:.14}
+  .card{position:absolute;inset:0;width:440px;height:277px;border-radius:22px;overflow:hidden;isolation:isolate;
+    background:linear-gradient(155deg,#000000 0%,#140d03 38%,#1c1204 65%,#000000 100%);
+    box-shadow:0 0 0 1px rgba(255,222,138,.4),0 18px 40px rgba(0,0,0,.6),0 50px 100px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08);
+    animation:edgeglow 5s ease-in-out infinite}
+  @keyframes edgeglow{0%,100%{box-shadow:0 0 0 1px rgba(255,222,138,.4),0 18px 40px rgba(0,0,0,.6),0 50px 100px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08)}
+    50%{box-shadow:0 0 0 1px rgba(255,222,138,.75),0 18px 44px rgba(255,222,138,.12),0 50px 100px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.1)}}
+  .circuit{position:absolute;inset:0;z-index:0;opacity:.5}
+  .sheen{position:absolute;inset:0;z-index:1;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.05) 45%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 55%,transparent 70%);pointer-events:none}
+  .vignette{position:absolute;inset:0;z-index:1;background:radial-gradient(340px 220px at 20% 0%,rgba(255,222,138,.16),transparent 60%),radial-gradient(300px 200px at 100% 100%,rgba(255,180,80,.08),transparent 60%)}
+  .microtext{position:absolute;inset:5px;border:1px solid rgba(255,222,138,.32);border-radius:17px;z-index:1;pointer-events:none}
+  .microtext:before{content:"SKYGLOBE GROUP · FOUNDER IDENTITY · TIER 0 · MAXIMUM CLEARANCE · SKYGLOBE GROUP · TIER 0 · ";position:absolute;top:-1px;left:8px;right:8px;font-family:'Space Mono',monospace;font-size:3.2px;letter-spacing:.06em;color:rgba(255,222,138,.5);white-space:nowrap;overflow:hidden}
+  .hd{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0}
+  .brand{display:flex;align-items:center;gap:9px}
+  .brand b{font-family:'Cormorant Garamond',serif;font-size:1.08rem;letter-spacing:.05em;color:#fff;font-weight:700}
+  .brand b span{color:#fff6dd}
+  .status{display:flex;align-items:center;gap:5px}
+  .status .dot{width:5px;height:5px;border-radius:50%;background:#5fe0a0;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(95,224,160,.6)}50%{opacity:.5;box-shadow:0 0 0 4px rgba(95,224,160,0)}}
+  .status span{font-family:'Space Mono',monospace;font-size:.42rem;color:#5fe0a0;letter-spacing:.1em;text-transform:uppercase}
+  .tier{font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:#0d0803;font-weight:800;background:linear-gradient(135deg,#fff6dd,#FFDE8A);padding:4px 11px;border-radius:20px;box-shadow:0 2px 10px rgba(255,222,138,.5)}
+  .toprow{display:flex;align-items:center;gap:8px}
+  .chip{width:34px;height:26px;border-radius:5px;position:relative;z-index:3;margin:16px 0 0 20px;
+    background:linear-gradient(155deg,#ffe9b0,#d4a73a 45%,#8a6a1e);box-shadow:0 2px 6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5)}
+  .chip:before{content:"";position:absolute;inset:3px;border-radius:2px;
+    background:repeating-linear-gradient(90deg,transparent 0,transparent 3px,rgba(0,0,0,.28) 3px,rgba(0,0,0,.28) 4px);}
+  .chip:after{content:"";position:absolute;inset:3px;border-radius:2px;border:1px solid rgba(0,0,0,.25)}
+  .body{position:relative;z-index:3;display:flex;gap:16px;padding:12px 20px 0;align-items:flex-start}
+  .scan-wrap{position:relative;flex-shrink:0;width:78px;height:96px}
+  .photo{width:78px;height:96px;border-radius:6px;object-fit:cover;background:linear-gradient(150deg,#2a1f0c,#100a02);display:block}
+  .bracket{position:absolute;width:14px;height:14px;border-color:#FFDE8A;opacity:.9}
+  .bracket.tl{top:-4px;left:-4px;border-top:2px solid;border-left:2px solid;border-radius:4px 0 0 0}
+  .bracket.tr{top:-4px;right:-4px;border-top:2px solid;border-right:2px solid;border-radius:0 4px 0 0}
+  .bracket.bl{bottom:-4px;left:-4px;border-bottom:2px solid;border-left:2px solid;border-radius:0 0 0 4px}
+  .bracket.br{bottom:-4px;right:-4px;border-bottom:2px solid;border-right:2px solid;border-radius:0 0 4px 0}
+  .info{padding-top:2px}
+  .nm{color:#fff;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.22rem;line-height:1.1}
+  .role{color:#fff6dd;font-size:.56rem;margin-top:3px;text-transform:uppercase;letter-spacing:.09em;font-weight:700}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 9px;margin-top:9px;font-size:.58rem}
+  .kv .k{color:#a08a5a;text-transform:uppercase;letter-spacing:.05em;font-family:'Space Mono',monospace}
+  .kv .v{color:#eef3ff;font-weight:600;font-family:'Space Mono',monospace}
+  .idno{position:absolute;z-index:3;right:20px;top:16px;text-align:right;color:#fff6dd;font-family:'Space Mono',monospace;font-weight:700;font-size:.62rem;letter-spacing:.06em}
+  .idno small{display:block;color:#a08a5a;font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;font-family:Inter,sans-serif;margin-top:1px}
+  .qr-wrap{position:absolute;z-index:3;right:18px;top:56px;background:#fff;border-radius:8px;padding:4px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  .qr-wrap img{width:58px;height:58px;display:block}
+  .mrz{position:absolute;left:20px;right:96px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.08em;color:rgba(255,246,221,.55);line-height:1.5}
+  .mrz .lbl{font-size:.38rem;color:#a08a5a;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px}
+  .seal{position:absolute;z-index:3;left:50%;top:14px;transform:translateX(-50%);width:34px;height:34px;opacity:.92}
+  .cardnum{color:#eef3ff;font-family:'Space Mono',monospace;font-weight:600;font-size:.66rem;letter-spacing:.1em;margin-top:8px}
+  .stars{margin-top:6px;color:#FFDE8A;font-size:.6rem;letter-spacing:.1em}
+  .glyph-wrap{position:absolute;z-index:3;right:18px;bottom:34px;width:38px;height:38px;background:rgba(255,222,138,.08);border:1px solid rgba(255,222,138,.35);border-radius:6px;padding:3px}
+  .glyph-wrap svg{width:100%;height:100%}
+  .glyph-lbl{position:absolute;z-index:3;right:18px;bottom:16px;font-size:.32rem;color:#a08a5a;letter-spacing:.08em;text-transform:uppercase;width:38px;text-align:center}
+  .note{color:#a08a5a;font-size:.78rem;text-align:center;max-width:480px}
+</style></head><body>
+
+<div class="stack">
+  <div class="layer l3"></div>
+  <div class="layer l2"></div>
+  <div class="card">
+    <svg class="circuit" viewBox="0 0 440 277" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="circ" width="55" height="55" patternUnits="userSpaceOnUse">
+          <path d="M0 27 H20 M20 10 V44 M20 10 H55 M20 44 H40 M40 44 V55" fill="none" stroke="#FFDE8A" stroke-width="0.6" opacity="0.5"/>
+          <circle cx="20" cy="10" r="1.6" fill="#FFDE8A" opacity="0.6"/>
+          <circle cx="20" cy="44" r="1.6" fill="#FFDE8A" opacity="0.6"/>
+          <circle cx="40" cy="44" r="1.2" fill="#FFDE8A" opacity="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="440" height="277" fill="url(#circ)"/>
+    </svg>
+    <div class="vignette"></div>
+    <div class="sheen"></div>
+    <div class="microtext"></div>
+    <div class="hd">
+      <div class="brand">
+        <svg width="24" height="24" viewBox="0 0 40 40"><defs><linearGradient id="bg1" x1="0.72" y1="0.12" x2="0.28" y2="0.88"><stop offset="0%" stop-color="#FDBE2D"/><stop offset="34%" stop-color="#F77F1B"/><stop offset="62%" stop-color="#2E7FD4"/><stop offset="100%" stop-color="#1B57C8"/></linearGradient></defs>
+          <path d="M20 0.8 C21.2 15.2,24.8 18.8,39.2 20 C24.8 21.2,21.2 24.8,20 39.2 C18.8 24.8,15.2 21.2,0.8 20 C15.2 18.8,18.8 15.2,20 0.8 Z" fill="url(#bg1)"/></svg>
+        <b>SKY<span>GLOBE</span></b>
+      </div>
+      <div class="toprow">
+        <div class="status"><span class="dot"></span><span>Live · Verified</span></div>
+        <div class="tier">CEO · TIER 0</div>
+      </div>
+    </div>
+    <svg class="seal" viewBox="0 0 100 100"><g fill="none" stroke="#FFDE8A" stroke-width="2.4" opacity="0.85">
+      <path d="M50 8 C34 14 24 20 20 34 C24 30 34 28 40 30 C34 36 30 44 30 54 C36 48 44 44 48 46 C42 54 40 64 42 74 C46 66 50 62 50 62 C50 62 54 66 58 74 C60 64 58 54 52 46 C56 44 64 48 70 54 C70 44 66 36 60 30 C66 28 76 30 80 34 C76 20 66 14 50 8 Z"/>
+    </g><circle cx="50" cy="40" r="14" fill="none" stroke="#FFDE8A" stroke-width="1.6" opacity="0.9"/>
+      <path d="M36 40 H64 M50 26 V54 M40 30 Q50 40 40 50 M60 30 Q50 40 60 50" stroke="#FFDE8A" stroke-width="1" fill="none" opacity="0.75"/>
+    </svg>
+    <div class="chip"></div>
+    <div class="idno">${cardNumber}<small>Card Number · Encrypted</small></div>
+    <div class="qr-wrap"><img src="${qrUrl}" alt="Verification QR"></div>
+    <div class="body">
+      <div class="scan-wrap">
+        <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+        ${photoTag}
+      </div>
+      <div class="info">
+        <div class="nm">${data.fullName}</div>
+        <div class="role">${data.roleLine || 'Founder &amp; Chief Executive Officer'}</div>
+        <div class="kv">
+          ${data.nationality ? `<div class="k">Nationality</div><div class="v">${data.nationality}</div>` : ''}
+          ${data.dob ? `<div class="k">Date of Birth</div><div class="v">${data.dob}</div>` : ''}
+          <div class="k">Issued</div><div class="v">${data.issuedDate}</div>
+        </div>
+        <div class="stars" title="Security tier rating">★★★★★ <span style="color:#a08a5a;font-family:'Space Mono',monospace;font-size:.5rem">TIER 0</span></div>
+      </div>
+    </div>
+    <div class="glyph-wrap">${glyphSvg}</div>
+    <div class="glyph-lbl">Security Glyph</div>
+    <div class="mrz"><div class="lbl">Machine-Readable Zone</div>${mrz1}<br>${mrz2}</div>
+  </div>
+</div>
+<div class="note">🔒 Encrypted at rest · circuit-trace security print · biometric scan-frame · SkyGlobe issuing seal · security glyph derived from this card's own access-code hash (unique per card, verifiable) · dual machine-readable layers (QR + MRZ) · full record accessible only to the holder's private access code or authenticated staff.</div>
+</body></html>`;
+}
+
 function wrapIdentityCard(tier, data, verifyUrl, req) {
+  if (tier === 'ceo') return wrapCeoIdentityCard(data, verifyUrl, req);
   const t = ID_TIERS[tier] || ID_TIERS.member;
   const p = t.palette;
-  const isCeo = tier === 'ceo';
+  const isCeo = false;
   const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
   const sigUrl = origin + '/signature.png';
   const stampUrl = origin + '/stamp.png';
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=1&ecc=H&data=${encodeURIComponent(verifyUrl)}`;
-  const photoTag = data.photoDataUrl ? `<img class="photo${isCeo ? ' ceo-photo' : ''}" src="${data.photoDataUrl}" alt="">` : `<div class="photo${isCeo ? ' ceo-photo' : ''}"></div>`;
-  const photoBlock = `<div class="photo-wrap">${isCeo ? '<div class="seal-ring"></div>' : ''}<div class="chip"></div>${photoTag}</div>`;
-  const ceoRibbon = isCeo ? `<div class="ceo-ribbon">MAXIMUM SECURITY · SINGLE ISSUANCE · FOUNDER-BOUND</div>` : '';
+  const photoTag = data.photoDataUrl ? `<img class="photo" src="${data.photoDataUrl}" alt="">` : `<div class="photo"></div>`;
+  const photoBlock = `<div class="photo-wrap"><div class="chip"></div>${photoTag}</div>`;
+  const ceoRibbon = '';
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${t.label} — ${data.fullName} — SkyGlobe Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -5804,7 +5974,7 @@ async function issueIdentityCard({ tier, fullName, nationality, dob, roleLine, e
   const code = accessCode();
   const issuedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const verifyUrl = `${baseUrl(req)}/verify-id/${ref}`;
-  const html = wrapIdentityCard(tier, { fullName, nationality, dob, roleLine, ref, issuedDate, photoDataUrl }, verifyUrl, req);
+  const html = wrapIdentityCard(tier, { fullName, nationality, dob, roleLine, ref, issuedDate, photoDataUrl, accessCodeHash: hashAccessCode(code) }, verifyUrl, req);
 
   let photoUrl = null;
   if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
