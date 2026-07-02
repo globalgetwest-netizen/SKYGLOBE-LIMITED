@@ -1785,6 +1785,8 @@ function wrapLegalDoc(title, bodyText, ref, req) {
   const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
   const sigUrl = origin + '/signature.png';
   const stampUrl = origin + '/stamp.png';
+  const verifyUrl = origin + '/verify-document/' + ref;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=4&data=${encodeURIComponent(verifyUrl)}`;
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title} — SkyGlobe Group</title>
 <style>
@@ -1797,9 +1799,12 @@ function wrapLegalDoc(title, bodyText, ref, req) {
   p{margin:0 0 14px}
   .stamp{margin-top:46px;border-top:1px solid #e6e9ef;padding-top:18px;display:flex;align-items:flex-end;gap:18px;position:relative}
   .stamp img.sig{display:block;height:62px;width:auto;margin:6px 0 -6px -4px}
-  .stamp img.seal{position:absolute;top:14px;right:10px;height:120px;width:120px;opacity:0.92}
-  .stamp .t{font-family:Arial,sans-serif;font-size:.78rem;color:#3c465a;max-width:560px}
+  .stamp img.seal{position:absolute;top:14px;right:76px;height:110px;width:110px;opacity:0.92}
+  .stamp .t{font-family:Arial,sans-serif;font-size:.78rem;color:#3c465a;max-width:520px}
   .stamp .t strong{color:#041022}
+  .qr-block{position:absolute;top:14px;right:-2px;text-align:center}
+  .qr-block img{width:64px;height:64px}
+  .qr-block .lbl{font-size:.55rem;color:#9aa3b2;margin-top:2px;letter-spacing:.04em;text-transform:uppercase;font-family:Arial,sans-serif}
   .foot{margin-top:30px;font-family:Arial,sans-serif;font-size:.66rem;color:#9aa3b2;border-top:1px solid #eef1f6;padding-top:12px}
   @media print{body{padding:24px}}
 </style></head><body>
@@ -1813,8 +1818,9 @@ function wrapLegalDoc(title, bodyText, ref, req) {
     <img class="sig" src="${sigUrl}" alt="">
     <div class="t"><strong>Facilitated &amp; Verified by SkyGlobe Group</strong><br>This document was prepared and verified by SkyGlobe Group. SkyGlobe does not issue or certify instruments it did not witness.</div>
     <img class="seal" src="${stampUrl}" alt="Official Stamp">
+    <div class="qr-block"><img src="${qrUrl}" alt="Verification QR"><div class="lbl">Verify</div></div>
   </div>
-  <div class="foot">© ${new Date().getFullYear()} SkyGlobe Group · Global Operations · support@skyglobegroup.com · One World. One Mission.</div>
+  <div class="foot">© ${new Date().getFullYear()} SkyGlobe Group · Global Operations · support@skyglobegroup.com · One World. One Mission. · Verify this document at ${verifyUrl}</div>
 </body></html>`;
 }
 
@@ -5390,6 +5396,26 @@ app.get('/api/certificates/verify/:certRef', async (req, res) => {
   } catch (e) { res.status(500).json({ valid: false, error: e.message }); }
 });
 app.get('/verify/:certRef', (req, res) => res.sendFile(path.join(__dirname, 'certificate-verify.html')));
+
+// Public legal-document verification — deliberately minimal (document type,
+// issue date, validity only). Never exposes the client's name, email or the
+// document's actual content — the document itself stays token-gated.
+app.get('/api/legal-docs/verify/:ref', async (req, res) => {
+  try {
+    const ref = req.params.ref;
+    const rows = await dbQuery('GET', 'documents', null, { ref: `eq.${ref}`, limit: 1 });
+    const d = rows[0];
+    if (!d || !String(d.uploaded_by || '').startsWith('ai:legal-docs'))
+      return res.status(404).json({ valid: false, error: 'No document found with this reference.' });
+    const typeId = String(d.filename || '').split('_')[0];
+    const meta = LEGAL_DOC_INDEX[typeId];
+    res.json({
+      valid: true, ref: d.ref, docType: meta ? meta.name : typeId,
+      issuedDate: (d.created_at || '').slice(0, 10), issuedBy: 'SkyGlobe Group',
+    });
+  } catch (e) { res.status(500).json({ valid: false, error: e.message }); }
+});
+app.get('/verify-document/:ref', (req, res) => res.sendFile(path.join(__dirname, 'document-verify.html')));
 app.get('/courses', (req, res) => res.sendFile(path.join(__dirname, 'courses.html')));
 app.get('/courses/learn', (req, res) => res.sendFile(path.join(__dirname, 'course-learn.html')));
 
