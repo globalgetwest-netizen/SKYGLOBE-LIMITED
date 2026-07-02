@@ -5783,6 +5783,8 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   .brand{display:flex;align-items:center;gap:9px}
   .brand b{font-family:'Cormorant Garamond',serif;font-size:1.08rem;letter-spacing:.05em;color:#fff;font-weight:700}
   .brand b span{color:#fff6dd}
+  .noria-mark{display:flex;align-items:center;gap:4px}
+  .noria-mark span{font-family:'Space Mono',monospace;font-size:.42rem;letter-spacing:.14em;font-weight:700;background:linear-gradient(135deg,#FDBE2D,#F77F1B 40%,#2E7FD4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
   .status{display:flex;align-items:center;gap:5px}
   .status .dot{width:5px;height:5px;border-radius:50%;background:#5fe0a0;animation:pulse 1.6s infinite}
   @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(95,224,160,.6)}50%{opacity:.5;box-shadow:0 0 0 4px rgba(95,224,160,0)}}
@@ -5863,6 +5865,11 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
         <b>SKYGLOBE GROUP</b>
       </div>
       <div class="toprow">
+        <div class="noria-mark" title="Secured by NORIA — SkyGlobe AI Intelligence">
+          <svg width="15" height="15" viewBox="0 0 40 40"><defs><linearGradient id="noriaCeo" x1="0.72" y1="0.12" x2="0.28" y2="0.88"><stop offset="0%" stop-color="#FDBE2D"/><stop offset="34%" stop-color="#F77F1B"/><stop offset="62%" stop-color="#2E7FD4"/><stop offset="100%" stop-color="#1B57C8"/></linearGradient></defs>
+            <path d="M20 0.8 C21.2 15.2,24.8 18.8,39.2 20 C24.8 21.2,21.2 24.8,20 39.2 C18.8 24.8,15.2 21.2,0.8 20 C15.2 18.8,18.8 15.2,20 0.8 Z" fill="url(#noriaCeo)"/></svg>
+          <span>NORIA</span>
+        </div>
         <div class="status"><span class="dot"></span><span>Live · Verified</span></div>
         <div class="tier">CEO · TIER 0</div>
       </div>
