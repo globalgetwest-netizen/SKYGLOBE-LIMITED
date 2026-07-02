@@ -2570,7 +2570,9 @@ function activeProviders() {
 }
 
 function baseUrl(req) {
-  return process.env.RENDER_EXTERNAL_URL || `${req.protocol}://${req.get('host')}`;
+  if (process.env.RENDER_EXTERNAL_URL) return process.env.RENDER_EXTERNAL_URL;
+  if (req) return `${req.protocol}://${req.get('host')}`;
+  return 'https://skyglobegroup.com';
 }
 
 function genPayRef() {
@@ -2721,6 +2723,20 @@ async function fulfilPayment(payment) {
       }
     } catch (e) { console.error('fulfilPayment app update failed:', e.message); }
   }
+
+  // Auto-issue a SkyGlobe Member ID for every confirmed paid service — one
+  // per email, so a repeat customer keeps the same card. Never blocks the
+  // payment flow: any failure here is logged and swallowed, not surfaced.
+  try {
+    if (payment.email) {
+      const existing = await dbQuery('GET', 'identity_cards', null, { email: `eq.${payment.email}`, tier: 'eq.member', limit: 1 });
+      if (!existing[0]) {
+        const label = PRICING[payment.product]?.label || payment.meta?.label || payment.product;
+        const fullName = payment.meta?.fullName || payment.app_ref || payment.email.split('@')[0];
+        await issueIdentityCard({ tier: 'member', fullName, roleLine: `Enrolled · ${label}`, email: payment.email, req: null });
+      }
+    }
+  } catch (e) { console.error('Auto member-ID issuance failed (non-blocking):', e.message); }
 }
 
 // ── public: what can the browser use? ────────────────────────────────────────
@@ -5676,11 +5692,16 @@ app.get('/more-services', (req, res) => res.sendFile(path.join(__dirname, 'more-
 //  the chat explanation for what a build at that scale would actually take.
 // ════════════════════════════════════════════════════════════════════════════
 
+// Each tier is a genuinely distinct palette + treatment, not a recolour of
+// the same template — Member (sapphire blue), Staff (graphite steel, no
+// gold at all — deliberately restrained/internal), Premium (emerald & gold),
+// CEO (obsidian & solar gold, richest foil, extra security ring + public
+// photo on verification — see wrapIdentityCard's `ceo` branch).
 const ID_TIERS = {
-  member:  { label: 'Member ID',  badge: 'MEMBER',  palette: { a: '#050b18', b: '#0a1830', c: '#0d2044', accent: '#D4A73A', accent2: '#F4D77A' } },
-  staff:   { label: 'Staff ID',   badge: 'STAFF',    palette: { a: '#0c0c0e', b: '#1c1c22', c: '#141419', accent: '#8fa3c9', accent2: '#c7d3ea' } },
-  premium: { label: 'Premium ID', badge: 'PREMIUM',  palette: { a: '#050505', b: '#141008', c: '#0a0805', accent: '#F4D77A', accent2: '#fff2c9' } },
-  ceo:     { label: 'Founder ID', badge: 'FOUNDER',  palette: { a: '#04070d', b: '#120a02', c: '#1a1002', accent: '#FFDE8A', accent2: '#fff6dd' } },
+  member:  { label: 'Member ID',  badge: 'MEMBER',   palette: { a: '#020818', b: '#0a1f44', c: '#123166', accent: '#4DA3FF', accent2: '#BFE0FF' } },
+  staff:   { label: 'Staff ID',   badge: 'STAFF',     palette: { a: '#0a0a0c', b: '#1b1b21', c: '#26262e', accent: '#9fb0c9', accent2: '#e3e9f2' } },
+  premium: { label: 'Premium ID', badge: 'PREMIUM',   palette: { a: '#020e0a', b: '#0a2318', c: '#0d3320', accent: '#2ecc8f', accent2: '#F4D77A' } },
+  ceo:     { label: 'Founder ID', badge: 'CEO · TIER 0', palette: { a: '#000000', b: '#120a02', c: '#1a1002', accent: '#FFDE8A', accent2: '#fff6dd' } },
 };
 
 function accessCode() { return crypto.randomBytes(6).toString('hex').toUpperCase(); }
@@ -5691,13 +5712,14 @@ function hashAccessCode(code) { return crypto.createHash('sha256').update(String
 function wrapIdentityCard(tier, data, verifyUrl, req) {
   const t = ID_TIERS[tier] || ID_TIERS.member;
   const p = t.palette;
+  const isCeo = tier === 'ceo';
   const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
   const sigUrl = origin + '/signature.png';
   const stampUrl = origin + '/stamp.png';
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=1&ecc=H&data=${encodeURIComponent(verifyUrl)}`;
-  const photoBlock = data.photoDataUrl
-    ? `<div class="photo-wrap"><div class="chip"></div><img class="photo" src="${data.photoDataUrl}" alt=""></div>`
-    : `<div class="photo-wrap"><div class="chip"></div><div class="photo"></div></div>`;
+  const photoTag = data.photoDataUrl ? `<img class="photo${isCeo ? ' ceo-photo' : ''}" src="${data.photoDataUrl}" alt="">` : `<div class="photo${isCeo ? ' ceo-photo' : ''}"></div>`;
+  const photoBlock = `<div class="photo-wrap">${isCeo ? '<div class="seal-ring"></div>' : ''}<div class="chip"></div>${photoTag}</div>`;
+  const ceoRibbon = isCeo ? `<div class="ceo-ribbon">MAXIMUM SECURITY · SINGLE ISSUANCE · FOUNDER-BOUND</div>` : '';
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${t.label} — ${data.fullName} — SkyGlobe Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -5710,7 +5732,10 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
   .card .pattern{position:absolute;inset:0;opacity:.16;mix-blend-mode:screen;z-index:0}
   .card .foil{position:absolute;top:0;right:0;width:120px;height:100%;
     background:linear-gradient(160deg,#ffd98a 0%,#f7a8e0 14%,#a9c8ff 28%,#8affe0 42%,#ffd98a 56%,#f7a8e0 70%,#a9c8ff 84%,#ffd98a 100%);
-    opacity:.13;filter:blur(1px);z-index:1;mix-blend-mode:overlay}
+    opacity:${isCeo ? '.22' : '.13'};filter:blur(1px);z-index:1;mix-blend-mode:overlay}
+  .seal-ring{position:absolute;top:-9px;left:-9px;width:94px;height:110px;border-radius:13px;border:1.5px solid ${p.accent};opacity:.55;z-index:1;box-shadow:0 0 14px ${p.accent}55}
+  .ceo-photo{filter:saturate(1.05) contrast(1.04)}
+  .ceo-ribbon{position:absolute;bottom:-1px;left:0;right:0;text-align:center;padding:4px 0 5px;font-family:'Space Mono',monospace;font-size:.42rem;letter-spacing:.14em;color:#0d0803;background:linear-gradient(90deg,${p.accent},${p.accent2},${p.accent});z-index:4;font-weight:700}
   .card:before{content:"";position:absolute;inset:0;background:radial-gradient(280px 180px at 15% 0%,${p.accent}38,transparent 60%);z-index:1}
   .card:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;border:1px solid ${p.accent}20;top:-90px;right:-70px;z-index:1}
   .microtext{position:absolute;inset:6px;border:1px solid ${p.accent}48;border-radius:15px;z-index:1;pointer-events:none}
@@ -5729,7 +5754,7 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
   .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin-top:9px;font-size:.6rem}
   .kv .k{color:#7f93bd;text-transform:uppercase;letter-spacing:.06em;font-family:'Space Mono',monospace}
   .kv .v{color:#eef3ff;font-weight:600;font-family:'Space Mono',monospace}
-  .footrow{position:absolute;bottom:14px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-end;z-index:3}
+  .footrow{position:absolute;bottom:${isCeo ? '26px' : '14px'};left:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-end;z-index:3}
   .idno{color:${p.accent2};font-family:'Space Mono',monospace;font-weight:700;font-size:.8rem;letter-spacing:.08em}
   .idno small{display:block;color:#7f93bd;font-size:.48rem;letter-spacing:.14em;text-transform:uppercase;font-family:Inter,sans-serif;margin-top:2px}
   .qr-wrap{background:#fff;border-radius:8px;padding:5px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
@@ -5758,6 +5783,7 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
       <div class="role">${data.roleLine || ''}</div>
       <div class="kv">
         ${data.nationality ? `<div class="k">Nationality</div><div class="v">${data.nationality}</div>` : ''}
+        ${data.dob ? `<div class="k">Date of Birth</div><div class="v">${data.dob}</div>` : ''}
         <div class="k">Issued</div><div class="v">${data.issuedDate}</div>
         <div class="k">Status</div><div class="v">Active · Verified</div>
       </div>
@@ -5767,17 +5793,18 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
     <div class="idno">${data.ref}<small>Serial number</small></div>
     <div class="qr-wrap"><img src="${qrUrl}" alt="Verification QR"></div>
   </div>
+  ${ceoRibbon}
 </div>
-<div class="note">🔒 This card is encrypted at rest and its full record is accessible only to the holder (with their private access code) or SkyGlobe staff. Scan the QR to verify authenticity — the public verification page never shows personal details.</div>
+<div class="note">🔒 This card is encrypted at rest and its full record — including photo — is accessible only to the holder (with their private access code) or SkyGlobe staff. Scan the QR to verify authenticity — the public verification page never shows personal details, for every tier without exception.</div>
 </body></html>`;
 }
 
-async function issueIdentityCard({ tier, fullName, nationality, roleLine, email, photoDataUrl, req }) {
+async function issueIdentityCard({ tier, fullName, nationality, dob, roleLine, email, photoDataUrl, req }) {
   const ref = 'SGID-' + crypto.randomBytes(5).toString('hex').toUpperCase();
   const code = accessCode();
   const issuedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const verifyUrl = `${baseUrl(req)}/verify-id/${ref}`;
-  const html = wrapIdentityCard(tier, { fullName, nationality, roleLine, ref, issuedDate, photoDataUrl }, verifyUrl, req);
+  const html = wrapIdentityCard(tier, { fullName, nationality, dob, roleLine, ref, issuedDate, photoDataUrl }, verifyUrl, req);
 
   let photoUrl = null;
   if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
@@ -5800,7 +5827,7 @@ async function issueIdentityCard({ tier, fullName, nationality, roleLine, email,
   const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
 
   await dbQuery('POST', 'identity_cards', {
-    ref, tier, full_name: fullName, nationality: nationality || null, role_line: roleLine || null,
+    ref, tier, full_name: fullName, nationality: nationality || null, dob: dob || null, role_line: roleLine || null,
     email: email || null, photo_url: photoUrl, access_code_hash: hashAccessCode(code), status: 'valid',
   }).catch(e => console.error('Identity card record save warning:', e.message));
 
@@ -5856,9 +5883,9 @@ app.post('/api/admin/identity/staff/issue', async (req, res) => {
 app.post('/api/admin/identity/ceo/issue', async (req, res) => {
   if (!checkAdmin(req, res)) return;
   try {
-    const { fullName, nationality, photoDataUrl } = req.body || {};
+    const { fullName, nationality, dob, roleLine, photoDataUrl } = req.body || {};
     if (!fullName) return res.status(400).json({ error: 'Full name is required.' });
-    const result = await issueIdentityCard({ tier: 'ceo', fullName, nationality, roleLine: 'Founder & Chief Executive Officer', photoDataUrl, req });
+    const result = await issueIdentityCard({ tier: 'ceo', fullName, nationality, dob, roleLine: roleLine || 'Founder & Chief Executive Officer', photoDataUrl, req });
     res.json({ success: true, ref: result.ref, viewUrl: result.viewUrl, accessCode: result.code });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -5872,6 +5899,9 @@ app.get('/api/identity/verify/:ref', async (req, res) => {
     res.json({
       valid: c.status === 'valid', ref: c.ref, tier: ID_TIERS[c.tier]?.label || c.tier,
       fullName: c.full_name, roleLine: c.role_line, issuedBy: 'SkyGlobe Group',
+      // No tier ever exposes a photo, address, nationality, DOB or contact
+      // detail on this public, unauthenticated endpoint — including the CEO's
+      // own card. Full record (with photo) requires the access code or staff auth.
     });
   } catch (e) { res.status(500).json({ valid: false, error: e.message }); }
 });
