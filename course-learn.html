@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Programme — SkyGlobe Certificate Programs</title>
+<meta name="theme-color" content="#041022">
+<link rel="icon" href="/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#041022;--navy2:#071B3B;--gold:#D4A73A;--gold-hi:#F4D77A;--gold-deep:#a87016;
+    --ink:#1a2233;--muted:#6b7689;--line:#e6e9ef;--ok:#1f9d57;
+    --font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--ink);background:#f4f6fa;line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px}
+  header{background:var(--navy);color:#fff;padding:14px 0;position:sticky;top:0;z-index:40}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.06em}
+  .brand img{height:36px;width:36px;border-radius:8px}
+  .brand small{display:block;color:var(--gold);font-size:.6rem;letter-spacing:.22em;font-weight:600}
+  header .back{color:#cdd6e6;font-size:.88rem}
+
+  .hero{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#fff;padding:34px 0}
+  .hero .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .hero h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(1.4rem,3.4vw,1.9rem)}
+  .hero .sub{color:#c3cee0;font-size:.86rem;margin-top:4px}
+  .progress-ring{text-align:center}
+  .progress-ring .pct{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold-hi);font-weight:700}
+  .progress-ring .lbl{font-size:.68rem;color:#9fb0c9;text-transform:uppercase;letter-spacing:.1em}
+
+  .section{padding:30px 0 60px}
+  .steplist{display:flex;flex-direction:column;gap:10px}
+  .stepcard{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+  .stepcard:hover{border-color:rgba(212,167,58,.5);box-shadow:0 8px 20px rgba(4,16,34,.06)}
+  .stepcard.open{border-color:var(--gold)}
+  .stepcard .hd{display:flex;align-items:center;gap:12px}
+  .stepcard .num{width:32px;height:32px;border-radius:50%;background:#e6e9ef;color:#8a93a3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.86rem;flex-shrink:0}
+  .stepcard.done .num{background:var(--ok);color:#fff}
+  .stepcard h3{font-size:.98rem;color:var(--navy);flex:1}
+  .stepcard .chev{color:var(--muted);transition:transform .2s}
+  .stepcard.open .chev{transform:rotate(90deg)}
+  .stepcard .content{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);color:#3c465a;font-size:.9rem;line-height:1.75;white-space:pre-wrap}
+  .stepcard.open .content{display:block}
+  .stepcard .actions{margin-top:14px;display:flex;justify-content:flex-end}
+  .btn{display:inline-block;background:linear-gradient(180deg,var(--gold-hi),var(--gold));color:#1a1300;border:none;padding:11px 24px;border-radius:30px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:inherit}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.small{padding:8px 18px;font-size:.8rem}
+  .btn.ghost{background:transparent;border:1.5px solid rgba(4,16,34,.2);color:var(--navy)}
+
+  .cert-box{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:28px;text-align:center;margin-top:26px}
+  .cert-box.ready{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,167,58,.15)}
+  .cert-box h2{font-family:'Cormorant Garamond',serif;color:var(--navy);font-size:1.5rem;margin-bottom:8px}
+  .cert-box p{color:var(--muted);font-size:.9rem}
+  .photo-pick{margin:16px auto;max-width:320px}
+  .photo-pick img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);display:block;margin:0 auto 10px}
+  .spin{width:36px;height:36px;border:4px solid #e6e9ef;border-top-color:var(--gold);border-radius:50%;animation:s 1s linear infinite;margin:20px auto}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .doc-ref{display:inline-block;background:var(--navy);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.15rem;letter-spacing:.06em;padding:10px 20px;border-radius:12px;border:2px solid var(--gold);margin:10px 0}
+  footer{background:var(--navy);color:#9fb0c9;text-align:center;padding:28px 20px;font-size:.84rem;margin-top:40px}
+  footer .m{color:var(--gold);letter-spacing:.14em;font-size:.72rem;text-transform:uppercase;margin-top:8px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a href="/" class="brand"><img src="/icon-192.png" alt="SkyGlobe Group"><div>SKYGLOBE<small>GROUP</small></div></a>
+  <a class="back" href="/courses">← Certificate Programs</a>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <div>
+    <h1 id="hTrack">Loading your programme…</h1>
+    <div class="sub" id="hSub"></div>
+  </div>
+  <div class="progress-ring"><div class="pct" id="pct">0%</div><div class="lbl">Complete</div></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="steplist" id="steplist"><div class="spin"></div></div>
+
+  <div class="cert-box" id="certBox" style="display:none">
+    <h2>🏅 You've completed every lesson!</h2>
+    <p>Add a photo (optional) and generate your official, QR-verifiable certificate.</p>
+    <div class="photo-pick">
+      <img id="photoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e6e9ef'/%3E%3C/svg%3E">
+      <input type="file" id="photoInput" accept="image/png,image/jpeg" onchange="onPhoto(this)">
+    </div>
+    <button class="btn" id="genBtn" onclick="generateCertificate()">Generate My Certificate →</button>
+    <div id="certResult"></div>
+  </div>
+</div></section>
+
+<footer>© <span id="yr"></span> SkyGlobe Group · Knowledge Hub<div class="m">One World. One Mission.</div></footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+const ENR_ID = new URLSearchParams(location.search).get('id');
+let ENR = null, PHOTO_DATA_URL = null;
+
+if (!ENR_ID) document.body.innerHTML = '<div style="padding:60px;text-align:center;color:#6b7689">No enrolment found. <a href="/courses" style="color:#a87016">Go to Certificate Programs</a></div>';
+
+async function load(){
+  try{
+    const r = await fetch('/api/courses/enrollment/' + ENR_ID);
+    ENR = await r.json();
+    if (!r.ok) throw new Error(ENR.error || 'Could not load your programme.');
+    document.getElementById('hTrack').textContent = ENR.trackName || 'Your Programme';
+    document.getElementById('hSub').textContent = (ENR.tierName || '') + ' · ' + ENR.full_name;
+    renderSteps();
+  }catch(e){
+    document.getElementById('steplist').innerHTML = '<p style="color:#a93226">' + e.message + '</p>';
+  }
+}
+
+function renderSteps(){
+  const steps = ENR.steps || [];
+  const doneCount = steps.filter(s=>s.done).length;
+  document.getElementById('pct').textContent = steps.length ? Math.round(doneCount/steps.length*100)+'%' : '0%';
+  const list = document.getElementById('steplist'); list.innerHTML = '';
+  steps.forEach((s, i) => {
+    const c = document.createElement('div'); c.className = 'stepcard' + (s.done ? ' done' : '');
+    c.innerHTML = `<div class="hd"><div class="num">${s.done ? '✓' : (i+1)}</div><h3>${s.title}</h3><span class="chev">›</span></div>
+      <div class="content" id="content${i}">${s.content ? esc(s.content) : ''}</div>
+      <div class="actions" id="actions${i}" style="display:none">
+        ${s.done ? '' : `<button class="btn small" onclick="event.stopPropagation();markDone(${i})">Mark Complete</button>`}
+      </div>`;
+    c.onclick = (ev) => { if (ev.target.closest('button')) return; toggleStep(c, i); };
+    list.appendChild(c);
+  });
+  const allDone = steps.length && steps.every(s=>s.done);
+  document.getElementById('certBox').style.display = allDone ? 'block' : 'none';
+  if (allDone) document.getElementById('certBox').classList.add('ready');
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function toggleStep(card, i){
+  const wasOpen = card.classList.contains('open');
+  document.querySelectorAll('.stepcard').forEach(c=>c.classList.remove('open'));
+  document.querySelectorAll('[id^="actions"]').forEach(a=>a.style.display='none');
+  if (wasOpen) return;
+  card.classList.add('open');
+  document.getElementById('actions'+i).style.display = 'flex';
+  const contentEl = document.getElementById('content'+i);
+  if (!ENR.steps[i].content) {
+    contentEl.textContent = 'Loading your lesson…';
+    try{
+      const r = await fetch(`/api/courses/enrollment/${ENR_ID}/step/${i}/content`, { method: 'POST' });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Could not load lesson.');
+      ENR.steps[i].content = d.content;
+      contentEl.textContent = d.content;
+    }catch(e){ contentEl.textContent = 'Could not load this lesson: ' + e.message; }
+  }
+}
+
+async function markDone(i){
+  try{
+    const r = await fetch(`/api/courses/enrollment/${ENR_ID}/step/${i}/done`, { method: 'PATCH' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Could not update progress.');
+    ENR.steps = d.steps;
+    renderSteps();
+  }catch(e){ alert(e.message); }
+}
+
+function onPhoto(input){
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { PHOTO_DATA_URL = reader.result; document.getElementById('photoPreview').src = reader.result; };
+  reader.readAsDataURL(file);
+}
+
+async function generateCertificate(){
+  const btn = document.getElementById('genBtn'); btn.disabled = true; btn.textContent = 'Generating…';
+  const box = document.getElementById('certResult');
+  try{
+    const r = await fetch(`/api/courses/enrollment/${ENR_ID}/certificate`, { method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ photoDataUrl: PHOTO_DATA_URL }) });
+    const d = await r.json();
+    if (!r.ok || !d.success) throw new Error(d.error || 'Could not generate certificate.');
+    box.innerHTML = `<div class="doc-ref">${d.certRef}</div>
+      <p style="color:var(--muted);margin-bottom:14px">Your certificate is ready — verifiable by anyone, anywhere.</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        ${d.viewUrl ? `<a class="btn" href="${d.viewUrl}" target="_blank">Open &amp; Print Certificate</a>` : ''}
+        <a class="btn ghost" href="${d.verifyUrl}" target="_blank">View Public Verification</a>
+      </div>`;
+    btn.style.display = 'none';
+  }catch(e){
+    box.innerHTML = '<p style="color:#a93226">' + e.message + '</p>';
+    btn.disabled = false; btn.textContent = 'Generate My Certificate →';
+  }
+}
+
+load();
+</script>
+</body>
+</html>

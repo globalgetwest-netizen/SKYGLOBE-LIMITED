@@ -2315,6 +2315,9 @@ const PRICING = {
   legal_doc_standard:    { label: 'Legal Document — Standard', instant: true, kind: 'legal', USD: 29, EUR: 27, GBP: 24 },
   legal_doc_premium:     { label: 'Legal Document — Premium',  instant: true, kind: 'legal', USD: 59, EUR: 55, GBP: 49 },
   legal_doc_priority:    { label: 'Legal Document — Priority', instant: true, kind: 'legal', USD: 99, EUR: 92, GBP: 79 },
+  cert_amateur:          { label: '1-Month Amateur Certificate Program', instant: true, kind: 'certificate', USD: 49,  EUR: 45,  GBP: 39  },
+  cert_advanced:         { label: '2-Month Advanced Certificate Program', instant: true, kind: 'certificate', USD: 89,  EUR: 82,  GBP: 71  },
+  cert_pro:              { label: '3-Month Pro Certificate Program', instant: true, kind: 'certificate', USD: 149, EUR: 138, GBP: 119 },
   // ── AI Document Generator (public self-service — was previously locked behind
   // a staff/CEO password with no way for a client to ever reach or pay for it).
   // Same instant-unlock pattern as legal docs: pay → signed token → generate.
@@ -5131,6 +5134,264 @@ app.delete('/api/client/files/:id', async (req, res) => {
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
+
+// ════════════════════════════════════════════════════════════════════════════
+//  SKYGLOBE CERTIFICATE & COURSES PLATFORM
+//  Flow: register → pick track + tier (1/2/3-month) → pay → AI-guided
+//  step-by-step curriculum → tick progress → on 100% completion, upload a
+//  photo and pick a graduation year → premium QR-verifiable certificate.
+//  One payment = one enrolment. Pricing lives in PRICING (CEO-editable).
+// ════════════════════════════════════════════════════════════════════════════
+
+const COURSE_TIERS = [
+  { id: 'cert_amateur', name: '1-Month Amateur Certificate', product: 'cert_amateur', months: 1, steps: 6,
+    blurb: 'A focused one-month foundation — the essentials, fast.',
+    perks: ['AI-guided step-by-step lessons', 'Progress tracking', 'QR-verifiable digital certificate', 'Usable worldwide'] },
+  { id: 'cert_advanced', name: '2-Month Advanced Certificate', product: 'cert_advanced', months: 2, steps: 10,
+    blurb: 'Deeper skill-building with practical, portfolio-ready work.',
+    perks: ['Everything in Amateur', 'Practical project work', 'Case study analysis', 'QR-verifiable digital certificate'] },
+  { id: 'cert_pro', name: '3-Month Pro Certificate', product: 'cert_pro', months: 3, steps: 14,
+    blurb: 'Our most complete track — strategy, portfolio and career readiness.',
+    perks: ['Everything in Advanced', 'Advanced techniques', 'Capstone project', 'Career-readiness module', 'Priority QR-verifiable certificate'] },
+];
+
+const COURSE_TRACKS = [
+  { id: 'digital_marketing',     name: 'Digital Marketing',                     emoji: '📈' },
+  { id: 'content_creation',      name: 'Content Creation & Social Media',       emoji: '🎬' },
+  { id: 'entertainment_media',   name: 'Entertainment, Film & Media Production', emoji: '🎥' },
+  { id: 'business_entrepreneurship', name: 'Business & Entrepreneurship',       emoji: '💼' },
+  { id: 'tourism_hospitality',   name: 'Tourism & Hospitality Management',      emoji: '🌴' },
+  { id: 'surveying_built_env',   name: 'Surveying & the Built Environment',     emoji: '📐' },
+  { id: 'fashion_design',        name: 'Fashion & Design',                     emoji: '👗' },
+  { id: 'health_wellness',       name: 'Health & Wellness Coaching',            emoji: '🌿' },
+  { id: 'technology_coding',     name: 'Technology & Coding Fundamentals',      emoji: '💻' },
+];
+const COURSE_TRACK_INDEX = COURSE_TRACKS.reduce((a, t) => (a[t.id] = t, a), {});
+
+// Generic 14-phase outline, trimmed to the tier's step count. Deterministic
+// (no AI JSON parsing risk) — the AI is used per-step, on demand, to write the
+// actual lesson content in that track's specific context.
+const CURRICULUM_OUTLINE = [
+  'Foundations & Industry Overview', 'Core Terminology & Tools', 'Landscape & Key Players',
+  'Strategy Fundamentals', 'Practical Skill Building I', 'Practical Skill Building II',
+  'Case Study Analysis', 'Content / Deliverable Creation', 'Measurement & Analytics',
+  'Client / Audience Management', 'Advanced Techniques', 'Portfolio / Project Work',
+  'Professional Standards & Ethics', 'Capstone & Career Readiness',
+];
+
+app.get('/api/courses/catalog', (_req, res) => {
+  const tiers = COURSE_TIERS.map(t => ({
+    id: t.id, name: t.name, product: t.product, months: t.months, steps: t.steps, blurb: t.blurb, perks: t.perks,
+    price: { USD: PRICING[t.product].USD, EUR: PRICING[t.product].EUR, GBP: PRICING[t.product].GBP },
+  }));
+  res.json({ tracks: COURSE_TRACKS, tiers });
+});
+
+// Enrol — requires a valid instant-unlock token proving the tier was paid for.
+app.post('/api/courses/enroll', async (req, res) => {
+  try {
+    const { unlock, trackId, tierId, fullName, email, dob, nationality, address, graduationYear } = req.body || {};
+    const tier = COURSE_TIERS.find(t => t.id === tierId);
+    const track = COURSE_TRACK_INDEX[trackId];
+    if (!tier || !track) return res.status(400).json({ error: 'Invalid track or tier.' });
+    if (!unlock || !verifyUnlock(unlock, tier.product))
+      return res.status(402).json({ error: 'Payment required', pay: { product: tier.product } });
+    if (!fullName || !email) return res.status(400).json({ error: 'Full name and email are required.' });
+
+    const steps = CURRICULUM_OUTLINE.slice(0, tier.steps).map((title, i) => ({ index: i, title, done: false, content: null }));
+    const ref = 'CERT-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    const row = await dbQuery('POST', 'course_enrollments', {
+      ref, track_id: trackId, tier_id: tierId, full_name: fullName, email, dob: dob || null,
+      nationality: nationality || null, address: address || null,
+      graduation_year: graduationYear || new Date().getFullYear(), steps, status: 'in_progress',
+    }).catch(e => { throw new Error('Could not save enrolment: ' + e.message); });
+    const enrollment = Array.isArray(row) ? row[0] : row;
+    res.json({ success: true, ref, enrollmentId: enrollment?.id, track: track.name, tier: tier.name, steps });
+  } catch (e) {
+    console.error('Course enroll error:', e.message);
+    res.status(500).json({ error: 'Enrolment is temporarily unavailable. Please try again in a moment.' });
+  }
+});
+
+app.get('/api/courses/enrollment/:id', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const e = rows[0];
+    if (!e) return res.status(404).json({ error: 'Enrolment not found.' });
+    const track = COURSE_TRACK_INDEX[e.track_id];
+    const tier = COURSE_TIERS.find(t => t.id === e.tier_id);
+    res.json({ ...e, trackName: track?.name, tierName: tier?.name });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Generate (once, then cache) the AI lesson content for one curriculum step.
+app.post('/api/courses/enrollment/:id/step/:idx/content', async (req, res) => {
+  try {
+    const idx = parseInt(req.params.idx, 10);
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr) return res.status(404).json({ error: 'Enrolment not found.' });
+    const steps = enr.steps || [];
+    const step = steps[idx];
+    if (!step) return res.status(400).json({ error: 'Invalid step.' });
+    const track = COURSE_TRACK_INDEX[enr.track_id];
+    if (step.content) return res.json({ content: step.content });
+    if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY && !USE_GROQ && !USE_OLLAMA)
+      return res.status(500).json({ error: 'AI not configured. Please contact support.' });
+    const prompt = `You are an expert instructor writing lesson ${idx + 1} of a certificate programme in "${track?.name}", titled "${step.title}". Write a clear, practical, well-structured lesson (400-600 words) a self-study learner can follow step by step: explain the concept, give concrete real-world examples relevant to ${track?.name}, and end with 2-3 short practice actions the learner should do before ticking this step complete. Plain text only, no markdown headings or asterisks — use blank lines between paragraphs.`;
+    const content = await generateText(prompt, { maxTokens: 900, temperature: 0.6 });
+    steps[idx] = { ...step, content };
+    await dbQuery('PATCH', 'course_enrollments', { steps }, { id: `eq.${req.params.id}` }).catch(() => {});
+    res.json({ content });
+  } catch (e) {
+    console.error('Course step content error:', e.message);
+    res.status(500).json({ error: 'Could not generate this lesson right now. Please try again.' });
+  }
+});
+
+app.patch('/api/courses/enrollment/:id/step/:idx/done', async (req, res) => {
+  try {
+    const idx = parseInt(req.params.idx, 10);
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr) return res.status(404).json({ error: 'Enrolment not found.' });
+    const steps = enr.steps || [];
+    if (!steps[idx]) return res.status(400).json({ error: 'Invalid step.' });
+    steps[idx] = { ...steps[idx], done: true };
+    const allDone = steps.every(s => s.done);
+    await dbQuery('PATCH', 'course_enrollments',
+      { steps, status: allDone ? 'completed' : 'in_progress' }, { id: `eq.${req.params.id}` });
+    res.json({ ok: true, steps, allDone });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Premium certificate HTML — badge, gold seal, QR verification, real
+// stamp/signature images (same trust marks as legal documents).
+function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req) {
+  const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
+  const sigUrl = origin + '/signature.png';
+  const stampUrl = origin + '/stamp.png';
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&margin=6&data=${encodeURIComponent(verifyUrl)}`;
+  const issueDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Certificate — ${enr.full_name} — SkyGlobe Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e9edf3;font-family:Inter,sans-serif;padding:28px;display:flex;justify-content:center}
+  .cert{width:100%;max-width:980px;background:linear-gradient(155deg,#fffdf6,#fbf5e3);border:10px double #D4A73A;border-radius:6px;padding:56px 60px;position:relative;box-shadow:0 30px 70px rgba(4,16,34,.18)}
+  .cert:before{content:"";position:absolute;inset:14px;border:1px solid rgba(212,167,58,.5);border-radius:4px;pointer-events:none}
+  .hd{text-align:center;margin-bottom:10px}
+  .hd .brand{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.15rem;letter-spacing:.14em;color:#041022;text-transform:uppercase}
+  .hd .brand span{color:#a87016}
+  .hd .div{font-size:.66rem;letter-spacing:.24em;color:#8a7638;text-transform:uppercase;margin-top:4px}
+  .title{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:2.4rem;color:#041022;margin:26px 0 4px}
+  .sub{text-align:center;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:#a87016;margin-bottom:26px}
+  .presented{text-align:center;font-size:.86rem;color:#6b7689}
+  .name{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:2.1rem;color:#041022;margin:10px 0;border-bottom:2px solid #D4A73A;display:inline-block;padding:0 20px 8px;position:relative;left:50%;transform:translateX(-50%)}
+  .desc{text-align:center;max-width:640px;margin:16px auto 0;color:#3c465a;font-size:.94rem;line-height:1.7}
+  .desc strong{color:#041022}
+  .row{display:flex;align-items:center;justify-content:space-between;margin-top:48px;gap:20px}
+  .photo{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #D4A73A;box-shadow:0 6px 16px rgba(0,0,0,.15)}
+  .sig-block{text-align:center}
+  .sig-block img{height:52px}
+  .sig-block .ln{border-top:1px solid #8a93a3;margin-top:4px;padding-top:4px;font-size:.72rem;color:#6b7689}
+  .qr-block{text-align:center}
+  .qr-block img{width:82px;height:82px}
+  .qr-block .lbl{font-size:.6rem;color:#8a93a3;margin-top:4px;letter-spacing:.06em;text-transform:uppercase}
+  .stamp-img{position:absolute;bottom:56px;right:70px;height:100px;width:100px;opacity:.9;transform:rotate(-8deg)}
+  .ref{position:absolute;top:26px;right:36px;font-size:.68rem;color:#a87016;letter-spacing:.06em}
+  .foot{text-align:center;margin-top:34px;font-size:.68rem;color:#9aa3b2}
+  @media print{body{background:#fff;padding:0}.cert{box-shadow:none;border-width:6px}}
+</style></head><body>
+  <div class="cert">
+    <div class="ref">REF: ${enr.ref}</div>
+    <div class="hd"><div class="brand">SKY<span>GLOBE</span> GROUP</div><div class="div">Knowledge Hub · Professional Certification</div></div>
+    <div class="title">Certificate of Completion</div>
+    <div class="sub">${tier.name}</div>
+    <p class="presented">This is to certify that</p>
+    <div class="name">${enr.full_name}</div>
+    <p class="desc">has successfully completed the <strong>${track.name}</strong> programme, demonstrating diligence and competence across all required modules, and is hereby awarded this certificate — <strong>Class of ${enr.graduation_year}</strong>.</p>
+    <div class="row">
+      ${photoDataUrl ? `<img class="photo" src="${photoDataUrl}" alt="">` : '<div style="width:88px"></div>'}
+      <div class="sig-block"><img src="${sigUrl}" alt=""><div class="ln">Authorised Signatory<br>SkyGlobe Group</div></div>
+      <div class="qr-block"><img src="${qrUrl}" alt="Verification QR"><div class="lbl">Scan to verify</div></div>
+    </div>
+    <img class="stamp-img" src="${stampUrl}" alt="">
+    <div class="foot">Issued ${issueDate} · Facilitated &amp; Verified by SkyGlobe Group · Verify at ${verifyUrl}</div>
+  </div>
+</body></html>`;
+}
+
+app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
+  try {
+    const { photoDataUrl } = req.body || {};
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr) return res.status(404).json({ error: 'Enrolment not found.' });
+    const steps = enr.steps || [];
+    if (!steps.length || !steps.every(s => s.done))
+      return res.status(400).json({ error: 'Complete every lesson before generating your certificate.' });
+    const track = COURSE_TRACK_INDEX[enr.track_id];
+    const tier = COURSE_TIERS.find(t => t.id === enr.tier_id);
+
+    const certRef = 'SGC-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    const verifyUrl = `${baseUrl(req)}/verify/${certRef}`;
+    const html = wrapCertificate(enr, track, tier, photoDataUrl || null, verifyUrl, req);
+
+    let photoUrl = null;
+    if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
+      const b64 = photoDataUrl.split(',')[1];
+      const buf = Buffer.from(b64, 'base64');
+      if (buf.length <= 5 * 1024 * 1024) {
+        const ext = photoDataUrl.includes('image/png') ? 'png' : 'jpg';
+        const path_ = `certificates/${certRef}/photo.${ext}`;
+        await storageUpload(path_, buf, `image/${ext === 'jpg' ? 'jpeg' : 'png'}`).catch(() => {});
+        photoUrl = storagePublicUrl(path_);
+      }
+    }
+
+    const filePath = `certificates/${certRef}/certificate.html`;
+    await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8').catch(() => {});
+    const docRows = await dbQuery('POST', 'documents', {
+      ref: certRef, filename: `certificate_${certRef}.html`, path: filePath, uploaded_by: 'ai:certificates',
+    }).catch(() => null);
+    const docRow = Array.isArray(docRows) ? docRows[0] : docRows;
+    const viewToken = docRow ? await createDocToken(docRow.id, filePath, `certificate_${certRef}.html`, enr.email, certRef).catch(() => null) : null;
+    const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
+
+    await dbQuery('POST', 'certificates', {
+      cert_ref: certRef, enrollment_id: enr.id, full_name: enr.full_name, track_id: enr.track_id,
+      tier_id: enr.tier_id, graduation_year: enr.graduation_year, photo_url: photoUrl, status: 'valid',
+    }).catch(e => console.error('Certificate record save warning:', e.message));
+    await dbQuery('PATCH', 'course_enrollments', { status: 'certified', cert_ref: certRef }, { id: `eq.${req.params.id}` }).catch(() => {});
+
+    res.json({ success: true, certRef, viewUrl, verifyUrl, html });
+  } catch (e) {
+    console.error('Certificate generate error:', e.message);
+    res.status(500).json({ error: 'Certificate generation is temporarily unavailable. Please try again in a moment.' });
+  }
+});
+
+// Public verification — deliberately minimal: confirms authenticity without
+// exposing enrolment contact details (email, address, DOB, nationality).
+app.get('/api/certificates/verify/:certRef', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'certificates', null, { cert_ref: `eq.${req.params.certRef}`, limit: 1 });
+    const c = rows[0];
+    if (!c) return res.status(404).json({ valid: false, error: 'No certificate found with this reference.' });
+    const track = COURSE_TRACK_INDEX[c.track_id];
+    const tier = COURSE_TIERS.find(t => t.id === c.tier_id);
+    res.json({
+      valid: c.status === 'valid', certRef: c.cert_ref, fullName: c.full_name,
+      track: track?.name || c.track_id, tier: tier?.name || c.tier_id,
+      graduationYear: c.graduation_year, issuedBy: 'SkyGlobe Group',
+    });
+  } catch (e) { res.status(500).json({ valid: false, error: e.message }); }
+});
+app.get('/verify/:certRef', (req, res) => res.sendFile(path.join(__dirname, 'certificate-verify.html')));
+app.get('/courses', (req, res) => res.sendFile(path.join(__dirname, 'courses.html')));
+app.get('/courses/learn', (req, res) => res.sendFile(path.join(__dirname, 'course-learn.html')));
 
 // ── §14b SPA CATCH-ALL (must stay LAST so it never shadows API routes) ────────
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));

@@ -2805,20 +2805,21 @@ body.wc-active .page-back-bar{padding-top:138px}
         <div class="form-group"><label>Phone / WhatsApp *</label><input type="tel" id="ap_phone" placeholder="+1 000 000 0000"></div>
         <div class="form-group"><label>Date of Birth</label><input type="date" id="ap_dob"></div>
         <div class="form-group"><label>Nationality / Country of Origin *</label><input type="text" id="ap_nationality" placeholder="e.g. British, French, Indian, Brazilian"></div>
-        <div class="form-group"><label>Passport Number</label><input type="text" id="ap_passport" placeholder="A12345678 (optional)"></div>
-        <div class="form-group"><label>Passport Expiry Date</label><input type="date" id="ap_passportExpiry"></div>
+        <div class="form-group" id="fieldPassport"><label>Passport Number</label><input type="text" id="ap_passport" placeholder="A12345678 (optional)"></div>
+        <div class="form-group" id="fieldPassportExpiry"><label>Passport Expiry Date</label><input type="date" id="ap_passportExpiry"></div>
       </div>
     </div>
 
     <!-- STEP 3: Travel Details -->
     <div class="form-step" id="applyStep3">
-      <h3 style="margin-bottom:0.4rem">Travel & Service Details</h3>
+      <h3 style="margin-bottom:0.4rem" id="step3Heading">Travel & Service Details</h3>
       <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.2rem">Service selected: <strong id="selectedServiceLabel" style="color:var(--gold-light)">—</strong></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="form-group"><label>Destination Country *</label><input type="text" id="ap_destination" placeholder="e.g. United Kingdom, Canada"></div>
-        <div class="form-group"><label>Intended Travel / Start Date</label><input type="date" id="ap_travelDate"></div>
-        <div class="form-group"><label>Duration of Stay</label><input type="text" id="ap_duration" placeholder="e.g. 3 years, 2 weeks, 6 months"></div>
-        <div class="form-group"><label>Purpose</label><input type="text" id="ap_purpose" placeholder="e.g. Study, Work, Tourism, Business"></div>
+        <div class="form-group" id="fieldDestination"><label>Destination Country *</label><input type="text" id="ap_destination" placeholder="e.g. United Kingdom, Canada"></div>
+        <div class="form-group" id="fieldTravelDate"><label>Intended Travel / Start Date</label><input type="date" id="ap_travelDate"></div>
+        <div class="form-group" id="fieldDuration"><label>Duration of Stay</label><input type="text" id="ap_duration" placeholder="e.g. 3 years, 2 weeks, 6 months"></div>
+        <div class="form-group" id="fieldPurpose"><label>Purpose</label><input type="text" id="ap_purpose" placeholder="e.g. Study, Work, Tourism, Business"></div>
+        <div class="form-group" id="fieldProjectDetails" style="display:none;grid-column:1/-1"><label>Project / Service Details *</label><textarea id="ap_projectDetails" placeholder="Describe exactly what you need — for a digital service: your brand/company and goals; for a document: the facts it must contain." style="min-height:90px;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:#041022;font-family:inherit;font-size:0.9rem;outline:none;resize:vertical"></textarea></div>
         <div class="form-group" id="fieldInstitution"><label>University / Institution Name</label><input type="text" id="ap_institution" placeholder="e.g. University of Toronto"></div>
         <div class="form-group" id="fieldEmployer"><label>Employer / Company Name</label><input type="text" id="ap_employer" placeholder="e.g. Google UK Ltd (if known)"></div>
         <div class="form-group" id="fieldHotelCity"><label>City / Hotel Destination</label><input type="text" id="ap_hotelCity" placeholder="e.g. Paris, London, Dubai"></div>
@@ -2846,7 +2847,7 @@ body.wc-active .page-back-bar{padding-top:138px}
       </div>
       <div class="form-group" style="margin-top:0.5rem">
         <label>Additional Notes / Special Requirements</label>
-        <textarea id="ap_notes" placeholder="Any additional information we should know — previous visa refusals, specific requirements, timeline urgency, etc." style="min-height:100px;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:0.9rem;outline:none;resize:vertical"></textarea>
+        <textarea id="ap_notes" placeholder="Any additional information we should know — previous visa refusals, specific requirements, timeline urgency, etc." style="min-height:100px;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:#041022;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:0.9rem;outline:none;resize:vertical"></textarea>
       </div>
     </div>
 
@@ -2904,7 +2905,7 @@ body.wc-active .page-back-bar{padding-top:138px}
       <h2 class="section-title" style="margin-bottom:0.5rem">Check Your <strong>Application Status</strong></h2>
       <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem">Enter your reference number (e.g. SKY-2024-ABCD) or your email address to view all your submitted applications.</p>
       <div style="display:flex;gap:0.8rem;max-width:560px;flex-wrap:wrap">
-        <input type="text" id="trackInput" placeholder="SKY-2024-ABCD or your email" style="flex:1;min-width:200px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:0.9rem;outline:none">
+        <input type="text" id="trackInput" placeholder="SKY-2024-ABCD or your email" style="flex:1;min-width:200px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:#041022;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:0.9rem;outline:none">
         <button class="btn-primary" onclick="trackApplication()">🔍 Track</button>
       </div>
       <div id="trackResult" style="margin-top:1.2rem;max-width:560px"></div>
@@ -3236,7 +3237,7 @@ body.wc-active .page-back-bar{padding-top:138px}
     <div class="section-tag">Legal</div>
     <h1 class="section-title">Privacy <strong>Policy</strong></h1>
     <div class="policy-body">
-      <p><strong style="color:var(--white)">Last updated: June 2026</strong></p>
+      <p><strong style="color:#041022">Last updated: June 2026</strong></p>
       <h3>1. Information We Collect</h3>
       <p>We collect personal information you voluntarily provide when completing our application forms, including name, email address, phone number, date of birth, passport details, travel preferences, and uploaded documents. We also collect standard server log data when you visit our website.</p>
       <h3>2. How We Use Your Information</h3>
@@ -3267,7 +3268,7 @@ body.wc-active .page-back-bar{padding-top:138px}
     <div class="section-tag">Legal</div>
     <h1 class="section-title">Terms of <strong>Service</strong></h1>
     <div class="policy-body">
-      <p><strong style="color:var(--white)">Last updated: June 2026</strong></p>
+      <p><strong style="color:#041022">Last updated: June 2026</strong></p>
       <h3>1. Services</h3>
       <p>SkyGlobe Group provides visa consultancy, university admission assistance, travel documentation, and employment placement services. We act as a consultancy and intermediary — final visa decisions are made by the relevant government authority or institution, not by SkyGlobe.</p>
       <h3>2. Fees & Payment</h3>
@@ -4283,7 +4284,7 @@ function renderCountryCard(c, idx) {
         </div>
         <div style="color:var(--gold);font-size:1.2rem" id="arrow-c${idx}">▼</div>
       </div>
-      <div class="result-body">${official}${subregion ? ' — ' + subregion : ''}. Capital: <strong style="color:var(--white)">${capitalDisplay}</strong>. Population: <strong style="color:var(--white)">${population}</strong>.</div>
+      <div class="result-body">${official}${subregion ? ' — ' + subregion : ''}. Capital: <strong style="color:#041022">${capitalDisplay}</strong>. Population: <strong style="color:#041022">${population}</strong>.</div>
       <div class="result-tags">
         <span class="result-tag">${region}</span>
         ${subregion ? `<span class="result-tag">${subregion}</span>` : ''}
@@ -4582,9 +4583,32 @@ const serviceFields = {
   'Scholarship Application Support':  ['scholarship','institution'],
   'Express Entry / PR Pathway':       [],
   'Flight Booking':                   ['flightFrom','flightType'],
-  'EU Direct Employment':             ['euCountry','jobField']
+  'EU Direct Employment':             ['euCountry','jobField'],
+  'Recruitment & Overseas Jobs':      ['jobField'],
 };
 const allOptFields = ['institution','employer','hotelCity','checkIn','checkOut','coverage','docType','scholarship','flightFrom','flightType','euCountry','jobField'];
+
+// Services that are NOT travel/visa-related — for these, passport, destination,
+// travel date, duration and purpose don't apply. Instead we show one plain
+// "Project / Service Details" field so the client describes exactly what
+// they need, the same way the AI legal-docs form already works.
+const NON_TRAVEL_SERVICES = [
+  'Digital Identity & e-Docs',
+  'Digital Presence & AI',
+  'Official Company Letter',
+];
+const CORE_TRAVEL_FIELDS = ['Passport','PassportExpiry','Destination','TravelDate','Duration','Purpose'];
+function showCoreFields() {
+  const isNonTravel = NON_TRAVEL_SERVICES.includes(selectedService);
+  CORE_TRAVEL_FIELDS.forEach(f => {
+    const el = document.getElementById('field' + f);
+    if (el) el.style.display = isNonTravel ? 'none' : '';
+  });
+  const proj = document.getElementById('fieldProjectDetails');
+  if (proj) proj.style.display = isNonTravel ? '' : 'none';
+  const heading = document.getElementById('step3Heading');
+  if (heading) heading.textContent = isNonTravel ? 'Service Details' : 'Travel & Service Details';
+}
 
 const SERVICE_DETAILS = {
   'Student Visa Processing': {
@@ -4887,6 +4911,7 @@ function showServiceFields() {
     const el = document.getElementById('field' + f.charAt(0).toUpperCase() + f.slice(1));
     if (el) el.style.display = show.includes(f) ? '' : 'none';
   });
+  showCoreFields();
 }
 
 function buildReview() {
@@ -4908,10 +4933,11 @@ function buildReview() {
     ['Trip Type', document.getElementById('ap_flightType').value || '—'],
     ['Preferred Country', document.getElementById('ap_euCountry').value || '—'],
     ['Job Field', document.getElementById('ap_jobField').value || '—'],
+    ['Project / Service Details', document.getElementById('ap_projectDetails').value || '—'],
     ['Notes', document.getElementById('ap_notes').value || '—'],
   ];
   document.getElementById('reviewSummary').innerHTML = rows.filter(r=>r[1]&&r[1]!=='—').map(r =>
-    `<span style="color:var(--gold);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em">${r[0]}</span>: <strong style="color:var(--white)">${r[1]}</strong><br>`
+    `<span style="color:#a87016;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em">${r[0]}</span>: <strong style="color:#041022">${r[1]}</strong><br>`
   ).join('');
   refreshApplyPay();
 }
@@ -5516,7 +5542,7 @@ function openChecklist(service) {
   const cl = CHECKLISTS[service] || CHECKLISTS['Tourist / Visit Visa'];
   const cont = document.getElementById('checklistContent');
   let total = 0;
-  let html = `<h3 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:1.4rem;margin-bottom:0.3rem;color:var(--white)">${cl.title}</h3>
+  let html = `<h3 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:1.4rem;margin-bottom:0.3rem;color:#041022">${cl.title}</h3>
     <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem">Tick each item as you prepare it. Print or save for reference.</p>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(212,167,58,0.07);border-radius:8px;border:1px solid var(--border);margin-bottom:1.2rem">
       <span style="font-size:0.8rem;color:var(--gold-light)" id="clProgress">0 items checked</span>
@@ -7163,7 +7189,7 @@ async function loadInboxDocs() {
     if (!Array.isArray(docs) || !docs.length) {
       el.innerHTML = `<div style="text-align:center;padding:36px 20px;background:rgba(212,167,58,0.04);border:1px dashed rgba(212,167,58,0.25);border-radius:14px">
         <div style="font-size:2rem;margin-bottom:10px">📭</div>
-        <p style="font-weight:600;margin-bottom:6px;color:var(--white)">No files yet</p>
+        <p style="font-weight:600;margin-bottom:6px;color:#041022">No files yet</p>
         <p style="font-size:0.83rem;color:#64748b">When our team delivers a completed document to you it will appear here instantly — available to download anytime.</p>
       </div>`;
       return;
@@ -7173,7 +7199,7 @@ async function loadInboxDocs() {
       const expDate = d.token_expires ? new Date(d.token_expires).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
       return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 18px">
         <div style="min-width:0">
-          <div style="font-weight:600;font-size:0.9rem;color:var(--white);margin-bottom:3px">📄 ${esc(d.filename)}</div>
+          <div style="font-weight:600;font-size:0.9rem;color:#041022;margin-bottom:3px">📄 ${esc(d.filename)}</div>
           <div style="font-size:0.74rem;color:#64748b">Ref: ${esc(d.application_ref||'—')} · ${d.created_at?new Date(d.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
           ${hasToken?`<div style="font-size:0.7rem;color:#D4A73A;margin-top:3px">🔏 Secure link · expires ${expDate}</div>`:`<div style="font-size:0.7rem;color:#64748b;margin-top:3px">⚠ Link expired — contact us for a new link</div>`}
         </div>
