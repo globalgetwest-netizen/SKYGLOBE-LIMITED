@@ -2328,6 +2328,9 @@ const SERVICE_PRODUCT_MAP = {
   'Document Authentication / Apostille':   'document_authentication',
   'Express Entry / PR Pathway':            'express_entry_pr',
   'EU Direct Employment':                  'eu_direct_employment',
+  'Recruitment & Overseas Jobs':           'recruitment_placement',
+  'Digital Identity & e-Docs':             'digital_identity_service',
+  'Digital Presence & AI':                 'digital_presence_starter',
 };
 
 const PAY = {
@@ -3523,9 +3526,9 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
   try {
     // Pull live snapshot — keep row counts small so the prompt stays lean and fast.
     const _dbTimeout = (p) => Promise.race([p, new Promise(r => setTimeout(() => r([]), 10000))]);
-    const [apps, payments, staff, tasks, activity, conferences, legalDocs, clients, sessionLogs] = await Promise.all([
+    const [apps, payments, staff, tasks, activity, conferences, legalDocs, clients, sessionLogs, wpRates] = await Promise.all([
       _dbTimeout(dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
-      _dbTimeout(dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 100 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'staff_members', null, { limit: 100 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'tasks', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'activity_log', null, { order: 'created_at.desc', limit: 20 }).catch(() => [])),
@@ -3533,9 +3536,32 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
       _dbTimeout(dbQuery('GET', 'documents', null, { uploaded_by: 'eq.ai:legal-docs', order: 'created_at.desc', limit: 30 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'clients', null, { select: 'email,name,created_at', order: 'created_at.desc', limit: 50 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'session_logs', null, { order: 'logged_in_at.desc', limit: 30 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'work_permit_rates', null, { limit: 500 }).catch(() => [])),
     ]);
 
+    // ── AI-powered monitoring: payments health + ecosystem data integrity ────────
+    // The CEO Assistant surfaces these automatically instead of a staff member
+    // having to manually audit payments, pricing and country availability.
+    // It only ever *reports and flags* — confirming payments, editing prices and
+    // messaging clients stay deliberate human actions in their own portals.
     const now = new Date();
+    const HOURS = (ms) => ms / 3600000;
+    const stuckGrey = payments.filter(p =>
+      p.status === 'awaiting_confirmation' &&
+      HOURS(now - new Date(p.notified_at || p.created_at)) > 24
+    );
+    const pricingGaps = Object.entries(PRICING).filter(([, p]) => p.USD == null || p.EUR == null || p.GBP == null);
+    const closedCountries = Object.entries(WORK_PERMIT_DOCS)
+      .filter(([code]) => !wpRates.some(r => r.country_code === code && r.active))
+      .map(([, c]) => c.name);
+    const unrecognisedPayments = payments.filter(p => !PRICING[p.product] && !p.meta?.label);
+    const paymentsHealth = `PAYMENTS HEALTH:
+  Stuck Grey confirmations (>24h unconfirmed): ${stuckGrey.length}${stuckGrey.length ? ' — ' + stuckGrey.slice(0,5).map(p=>`${p.reference} ${p.currency}${p.amount} (${p.email}) since ${(p.notified_at||p.created_at||'').slice(0,16)}`).join(' | ') : ''}
+  Unrecognised product on a payment record: ${unrecognisedPayments.length}${unrecognisedPayments.length ? ' — ' + unrecognisedPayments.slice(0,5).map(p=>`${p.reference} product:"${p.product}"`).join(' | ') : ''}
+ECOSYSTEM DATA INTEGRITY:
+  Pricing entries missing a currency: ${pricingGaps.length ? pricingGaps.map(([k])=>k).join(', ') : 'none'}
+  Countries with zero active work-permit roles (invisible on public site): ${closedCountries.length ? closedCountries.join(', ') : 'none'}`;
+
     const todayStr = now.toISOString().slice(0, 10);
     const appsByStatus = apps.reduce((acc, a) => { acc[a.status] = (acc[a.status] || 0) + 1; return acc; }, {});
     const payToday = payments.filter(p => (p.paid_at || p.created_at || '').slice(0, 10) === todayStr);
@@ -3562,11 +3588,17 @@ CONFERENCES (${conferences.length}): ${conferences.slice(0,4).map(c=>`${c.title|
 LEGAL DOCS (${legalDocs.length} total, ${legalToday.length} today): ${legalDocs.slice(0,5).map(d=>`${d.ref} ${legalTypeName(d.filename)} ${(d.created_at||'').slice(0,10)}`).join(' | ')||'none'}
 CLIENTS (${clients.length} registered, ${clientsToday.length} today): ${clients.slice(0,4).map(c=>`${c.name||'?'} <${c.email}>`).join(', ')||'none'}
 LOGINS TODAY: ${uniqueLoginsToday.length} users | ${uniqueLoginsToday.slice(0,5).join(', ')||'none'}
-RECENT ACTIVITY: ${activity.slice(0,6).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} ${a.action} ${a.detail||''}`).join(' | ')||'none'}`;
+RECENT ACTIVITY: ${activity.slice(0,6).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} ${a.action} ${a.detail||''}`).join(' | ')||'none'}
+${paymentsHealth}`;
 
     const systemPrompt = `You are SKYGLOBE CORE Intelligence — private AI assistant to Saleh Shuaibu, Founder & CEO of SkyGlobe Group. Monitor, analyse, and report on the entire SkyGlobe Group ecosystem. Use the live data below. Be concise, precise, strategic. Use bullet points and numbers. Address the CEO efficiently. Never guess — say "not in current data" if needed.
 
 ABOUT SKYGLOBE GROUP: 5 divisions — Global Mobility, Travel Services, Events & Conferences, Knowledge Hub (incl. Kids Academy), Digitalization. Motto: One World. One Mission. Anchors: CONSTRUCT · TRUST · INTELLIGENCE · POWER. Pricing in USD/EUR/GBP only.
+
+YOUR MONITORING DUTIES (this is work a staff member would otherwise do manually):
+- Every response, silently check the PAYMENTS HEALTH and ECOSYSTEM DATA INTEGRITY sections of the live data. If anything is flagged there (stuck Grey confirmations, unrecognised payment products, pricing gaps, countries with zero active roles), open your reply by surfacing it BRIEFLY first — one line per issue — even if the CEO didn't ask about payments. If nothing is flagged, don't mention it.
+- When asked about payments, applications, tasks or pricing, give a precise operational read: what needs a decision, what's overdue, what's stuck, and a clear recommended next action.
+- You may DRAFT things for the CEO to review (a reply to a client, a task assignment, a pricing suggestion) — but you never take an action yourself. Confirming a payment, sending a client message, or changing a price are always done by a human clicking the button in the relevant portal, never by you. Say so plainly if asked to "just do it."
 
 LIVE DATA:
 ${ecosystemSnapshot}`;

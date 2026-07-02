@@ -2892,8 +2892,9 @@ body.wc-active .page-back-bar{padding-top:138px}
         <div class="form-group"><label>Your Profession / Skill *</label><input type="text" placeholder="e.g. Welder, Driver, Caregiver, Warehouse" id="rc_field"></div>
         <div class="form-group"><label>Preferred Country</label><input type="text" placeholder="e.g. Poland, Portugal, Germany" id="rc_country"></div>
         <div class="form-group"><label>Experience &amp; Notes</label><textarea placeholder="Years of experience, languages spoken, availability, passport status…" id="rc_message"></textarea></div>
-        <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitRecruitment()">✦ Register My Profile</button>
+        <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitRecruitment()">✦ Register My Profile (Free)</button>
         <p style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:1rem">🔒 Your details are confidential and used only for job matching.</p>
+        <button class="btn-outline" style="width:100%;justify-content:center;margin-top:0.8rem" onclick="applyForService('Recruitment & Overseas Jobs')">🔒 Skip to Paid Placement Service →</button>
       </div>
 
       <!-- Employers -->
@@ -3051,6 +3052,9 @@ body.wc-active .page-back-bar{padding-top:138px}
         <div class="svc-card" onclick="selectService('Express Entry / PR Pathway',this)"><span class="sc-icon">🍁</span><h4>Express Entry / PR</h4><p>Permanent residence</p><span class="svc-price" data-svc="Express Entry / PR Pathway"></span></div>
         <div class="svc-card" onclick="selectService('Flight Booking',this)"><span class="sc-icon">🎫</span><h4>Flight Booking</h4><p>Ticket purchase & booking</p><span class="svc-price" data-svc="Flight Booking"></span></div>
         <div class="svc-card" onclick="selectService('EU Direct Employment',this)"><span class="sc-icon">🇪🇺</span><h4>EU Direct Employment</h4><p>Jobs in Europe + work permit</p><span class="svc-price" data-svc="EU Direct Employment"></span></div>
+        <div class="svc-card" onclick="selectService('Recruitment & Overseas Jobs',this)"><span class="sc-icon">🤝</span><h4>Recruitment &amp; Overseas Jobs</h4><p>Verified employer placement</p><span class="svc-price" data-svc="Recruitment & Overseas Jobs"></span></div>
+        <div class="svc-card" onclick="selectService('Digital Identity & e-Docs',this)"><span class="sc-icon">🪪</span><h4>Digital Identity &amp; e-Docs</h4><p>Verified identity &amp; secure e-docs</p><span class="svc-price" data-svc="Digital Identity & e-Docs"></span></div>
+        <div class="svc-card" onclick="selectService('Digital Presence & AI',this)"><span class="sc-icon">📈</span><h4>Digital Presence &amp; AI</h4><p>Branding, SEO &amp; AI integration</p><span class="svc-price" data-svc="Digital Presence & AI"></span></div>
       </div>
     </div>
 
@@ -5191,6 +5195,9 @@ const SERVICE_PRODUCT_MAP = {
   'Document Authentication / Apostille':   'document_authentication',
   'Express Entry / PR Pathway':            'express_entry_pr',
   'EU Direct Employment':                  'eu_direct_employment',
+  'Recruitment & Overseas Jobs':           'recruitment_placement',
+  'Digital Identity & e-Docs':             'digital_identity_service',
+  'Digital Presence & AI':                 'digital_presence_starter',
 };
 const APPLY_PROVIDER_LABELS = {
   grey: '🏦 Bank Transfer / USDC / USDT',
@@ -5242,6 +5249,22 @@ function _runResumeFlows() {
 }
 if (typeof resumeDocGenIfPaid === 'function') _runResumeFlows();
 else document.addEventListener('DOMContentLoaded', _runResumeFlows);
+
+// Lets other pages (digitalization.html, recruitment page) deep-link straight
+// into the Apply flow with the right service pre-selected — e.g.
+// /?apply=digital-identity — instead of making the user hunt for the card.
+const APPLY_DEEPLINKS = {
+  'recruitment':      'Recruitment & Overseas Jobs',
+  'digital-identity': 'Digital Identity & e-Docs',
+  'digital-presence': 'Digital Presence & AI',
+};
+function runApplyDeeplink() {
+  const key = new URLSearchParams(location.search).get('apply');
+  const service = APPLY_DEEPLINKS[key];
+  if (service && typeof applyForService === 'function') applyForService(service);
+}
+if (typeof applyForService === 'function') runApplyDeeplink();
+else document.addEventListener('DOMContentLoaded', runApplyDeeplink);
 
 async function submitApplication() {
   const payload = {
