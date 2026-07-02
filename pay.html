@@ -63,6 +63,13 @@
   .net-tab.active{background:#eef4ff;border-color:#bcd0ff;color:#0a1c3e}
   .netblk{display:none}
   .netblk.active{display:block}
+  .filepick{display:flex;align-items:center;gap:10px;border:1.5px dashed var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;transition:.2s;background:#fafbfc}
+  .filepick:hover{border-color:var(--gold);background:#fffaf0}
+  .filepick input{display:none}
+  .filepick .fp-ic{font-size:1.3rem}
+  .filepick .fp-txt{font-size:.85rem;color:var(--muted);flex:1}
+  .filepick.has-file{border-style:solid;border-color:var(--ok);background:#f2fbf3}
+  .filepick.has-file .fp-txt{color:var(--ok);font-weight:600}
 </style>
 </head>
 <body>
@@ -196,6 +203,13 @@
     <input class="inp" id="pphone" placeholder="+1 000 000 0000">
     <label>Note (optional)</label>
     <input class="inp" id="pnote" placeholder="e.g. sent USDT (BEP20), tx hash 0x…">
+    <label>Payment slip / receipt (recommended — image or PDF, max 8MB)</label>
+    <label class="filepick" id="filepick" for="pslip">
+      <span class="fp-ic">📎</span>
+      <span class="fp-txt" id="fpTxt">Tap to attach your payment receipt or screenshot</span>
+      <input type="file" id="pslip" accept="image/*,.pdf" onchange="onSlipPicked(this)">
+    </label>
+    <p style="font-size:.76rem;color:var(--muted);margin-top:4px">🔒 Stored securely and only visible to SkyGlobe staff confirming your payment — never made public.</p>
     <button class="btn" id="notifyBtn" onclick="notifyPaid()">I have sent the payment →</button>
     <a class="btn wa" id="waBtn" href="https://wa.me/17373998522" target="_blank">💬 Send proof on WhatsApp</a>
     <div class="msg" id="pmsg"></div>
@@ -210,7 +224,7 @@
 </footer>
 
 <script>
-  var PAYREF = '', SERVICE_LABEL = '';
+  var PAYREF = '', SERVICE_LABEL = '', SLIP_FILE = null;
   (function(){
     var p = new URLSearchParams(location.search);
     if (p.get('ref')) document.getElementById('ref').value = p.get('ref');
@@ -273,6 +287,31 @@
     setTimeout(function(){ btn.textContent = old; btn.classList.remove('done'); }, 1600);
   }
 
+  function onSlipPicked(input){
+    var f = input.files && input.files[0];
+    var pick = document.getElementById('filepick'), txt = document.getElementById('fpTxt');
+    if (!f) { SLIP_FILE = null; pick.classList.remove('has-file'); txt.textContent = 'Tap to attach your payment receipt or screenshot'; return; }
+    if (f.size > 8 * 1024 * 1024) {
+      var msg = document.getElementById('pmsg');
+      msg.className = 'msg err'; msg.textContent = 'That file is too large — please attach a receipt under 8MB.';
+      input.value = ''; SLIP_FILE = null; pick.classList.remove('has-file');
+      txt.textContent = 'Tap to attach your payment receipt or screenshot';
+      return;
+    }
+    SLIP_FILE = f;
+    pick.classList.add('has-file');
+    txt.textContent = '✅ ' + f.name + ' (' + Math.round(f.size/1024) + ' KB) — tap to change';
+  }
+
+  function readFileAsBase64(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(String(reader.result).split(',')[1] || ''); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function notifyPaid(){
     var name = val('pname'), email = val('pemail'), phone = val('pphone'), note = val('pnote');
     var ref = val('ref'), amount = val('amount');
@@ -280,22 +319,29 @@
     var rail = activeTab ? activeTab.getAttribute('data-rail') : '';
     var msg = document.getElementById('pmsg'), btn = document.getElementById('notifyBtn');
     if (!name || !email){ msg.className='msg err'; msg.textContent='Please enter your name and email.'; return; }
-    btn.disabled = true; btn.textContent = 'Sending…'; msg.className='msg';
+    btn.disabled = true; btn.textContent = SLIP_FILE ? 'Uploading receipt & sending…' : 'Sending…'; msg.className='msg';
     try {
       var r, d;
       if (PAYREF) {
         // Real checkout: tied to a payment record created by /api/pay/init — this
         // flags it "awaiting confirmation" so it shows up in Payments for the team.
+        var payload = { reference: PAYREF, name: name, email: email, phone: phone,
+          note: (note || '') + (ref ? ' | App ref: ' + ref : '') };
+        if (SLIP_FILE) {
+          payload.slipData = await readFileAsBase64(SLIP_FILE);
+          payload.slipFilename = SLIP_FILE.name;
+          payload.slipContentType = SLIP_FILE.type || 'application/octet-stream';
+        }
         r = await fetch('/api/pay/grey/notify', {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ reference: PAYREF, name: name, email: email, phone: phone,
-            note: (note || '') + (ref ? ' | App ref: ' + ref : '') })
+          body: JSON.stringify(payload)
         });
         d = await r.json();
         if (!r.ok) throw new Error(d.error || 'Could not send.');
       } else {
         // Direct visit without a payment record (e.g. shared link, WhatsApp) —
-        // fall back to a plain email notice to the team.
+        // fall back to a plain email notice to the team. (Receipt upload needs
+        // a real payment reference — please attach it on WhatsApp instead here.)
         var body = {
           fname: name, email: email, phone: phone,
           service: 'Payment Notification — ' + (rail || 'Transfer') + (amount ? ' ' + amount : ''),
@@ -304,6 +350,7 @@
                    '\nMethod/Currency: ' + (rail || 'Transfer') +
                    '\nAmount: ' + (amount || '(not stated)') +
                    (note ? '\nNote: ' + note : '') +
+                   (SLIP_FILE ? '\n(Client has a receipt to share — ask them to send it on WhatsApp.)' : '') +
                    '\n\nThe client says they have sent this payment. Please verify it in the Grey account and mark the application as Paid.'
         };
         r = await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
@@ -311,7 +358,7 @@
         if (!r.ok) throw new Error(d.error || 'Could not send.');
       }
       msg.className='msg ok';
-      msg.innerHTML = '✅ Thank you! We\'ve received your payment notice and will confirm it shortly. Keep your proof of transfer safe.';
+      msg.innerHTML = '✅ Thank you! We\'ve received your payment notice' + (d.slipUploaded ? ' and your receipt' : '') + ' and will confirm it shortly. Keep your proof of transfer safe.';
       btn.textContent = 'Sent ✓';
     } catch(e){
       msg.className='msg err';

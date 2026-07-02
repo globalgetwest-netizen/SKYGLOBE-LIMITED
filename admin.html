@@ -1782,7 +1782,7 @@ async function loadPayments(){
     if(r.status===401){el.innerHTML='<p style="color:#e57373">Unauthorized.</p>';return;}
     const rows=await r.json();
     if(!Array.isArray(rows)||!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No payments yet.</p>';return;}
-    const statusColor={paid:'#2e7d32',pending:'#f57c00',failed:'#c62828'};
+    const statusColor={paid:'#2e7d32',pending:'#f57c00',awaiting_confirmation:'#f57c00',failed:'#c62828'};
     el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
       <thead><tr style="background:#f0f4ff;border-bottom:2px solid var(--line)">
         <th style="padding:10px 8px;text-align:left">Reference</th>
@@ -1790,8 +1790,10 @@ async function loadPayments(){
         <th style="padding:10px 8px;text-align:left">Client</th>
         <th style="padding:10px 8px;text-align:left">Amount</th>
         <th style="padding:10px 8px;text-align:left">Provider</th>
+        <th style="padding:10px 8px;text-align:left">Receipt</th>
         <th style="padding:10px 8px;text-align:left">Status</th>
         <th style="padding:10px 8px;text-align:left">Date</th>
+        <th style="padding:10px 8px"></th>
       </tr></thead>
       <tbody>${rows.map((p,i)=>`<tr style="border-bottom:1px solid var(--line);background:${i%2?'#fafbff':'#fff'}">
         <td style="padding:9px 8px;font-family:monospace;font-size:0.8rem">${p.reference||'—'}</td>
@@ -1799,11 +1801,27 @@ async function loadPayments(){
         <td style="padding:9px 8px">${p.email||'—'}</td>
         <td style="padding:9px 8px;font-weight:700">${p.currency||''} ${p.amount!=null?Number(p.amount).toLocaleString():'—'}</td>
         <td style="padding:9px 8px">${p.provider||'—'}</td>
-        <td style="padding:9px 8px"><span style="background:${statusColor[p.status]||'#999'};color:#fff;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:700">${p.status||'—'}</span></td>
+        <td style="padding:9px 8px">${p.meta?.slipUrl?`<a href="${p.meta.slipUrl}" target="_blank" style="color:var(--gold);font-weight:700">📎 View</a>`:'<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:9px 8px"><span style="background:${statusColor[p.status]||'#999'};color:#fff;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:700">${(p.status||'—').replace(/_/g,' ')}</span></td>
         <td style="padding:9px 8px;color:var(--muted)">${p.created_at?new Date(p.created_at).toLocaleDateString():''}</td>
+        <td style="padding:9px 8px">${p.status!=='paid'?`<button onclick="confirmPaymentRow('${p.reference}',this)" style="background:var(--gold);color:#1a1300;border:none;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.78rem">Confirm</button>`:''}</td>
       </tr>`).join('')}</tbody>
     </table>`;
   }catch(e){el.innerHTML='<p style="color:#e57373">Could not load payments: '+e.message+'</p>';}
+}
+
+async function confirmPaymentRow(reference, btn){
+  if(!confirm('Confirm you have verified this transfer landed in the Grey account? This marks it PAID and unlocks the client\'s service.'))return;
+  btn.disabled=true; btn.textContent='Confirming…';
+  try{
+    const r=await fetch(API+'/api/admin/payments/'+encodeURIComponent(reference)+'/confirm',{method:'POST',headers:{'x-admin-key':KEY}});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not confirm.');
+    loadPayments();
+  }catch(e){
+    alert('Error: '+e.message);
+    btn.disabled=false; btn.textContent='Confirm';
+  }
 }
 
 /* ── LEGAL DOCUMENTS ORDER DESK (CEO) ── */
