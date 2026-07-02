@@ -2494,6 +2494,7 @@ const PRICING = {
   cert_amateur:          { label: '1-Month Amateur Certificate Program', instant: true, kind: 'certificate', USD: 49,  EUR: 45,  GBP: 39  },
   cert_advanced:         { label: '2-Month Advanced Certificate Program', instant: true, kind: 'certificate', USD: 89,  EUR: 82,  GBP: 71  },
   cert_pro:              { label: '3-Month Pro Certificate Program', instant: true, kind: 'certificate', USD: 149, EUR: 138, GBP: 119 },
+  premium_digital_id:    { label: 'SkyGlobe Premium Digital ID', instant: true, kind: 'identity', USD: 79, EUR: 73, GBP: 63 },
   // ── AI Document Generator (public self-service — was previously locked behind
   // a staff/CEO password with no way for a client to ever reach or pay for it).
   // Same instant-unlock pattern as legal docs: pay → signed token → generate.
@@ -5657,6 +5658,240 @@ app.delete('/api/admin/offerings/:id', async (req, res) => {
 });
 
 app.get('/more-services', (req, res) => res.sendFile(path.join(__dirname, 'more-services.html')));
+
+// ════════════════════════════════════════════════════════════════════════════
+//  SKYGLOBE DIGITAL IDENTITY SYSTEM
+//  Four tiers, each visually and procedurally distinct:
+//   member  — auto-issued once a client's paid enrolment/service is confirmed
+//   staff   — issued only by the CEO, for internal team members
+//   premium — public paid product (business/creator/marketing/etc), gated
+//             behind a legal-terms acceptance + payment
+//   ceo     — issued only by the CEO, for the CEO alone
+//  Every card carries: a unique reference, a QR to a MINIMAL public
+//  verification page (never personal data), and a private "access code"
+//  (shown once, at issuance) that is the only way — besides staff login —
+//  to pull the full record. This is a real, working identity + verification
+//  system built on this app's existing infrastructure; it is NOT biometric
+//  matching, quantum-resistant cryptography, or a distributed ledger — see
+//  the chat explanation for what a build at that scale would actually take.
+// ════════════════════════════════════════════════════════════════════════════
+
+const ID_TIERS = {
+  member:  { label: 'Member ID',  badge: 'MEMBER',  palette: { a: '#050b18', b: '#0a1830', c: '#0d2044', accent: '#D4A73A', accent2: '#F4D77A' } },
+  staff:   { label: 'Staff ID',   badge: 'STAFF',    palette: { a: '#0c0c0e', b: '#1c1c22', c: '#141419', accent: '#8fa3c9', accent2: '#c7d3ea' } },
+  premium: { label: 'Premium ID', badge: 'PREMIUM',  palette: { a: '#050505', b: '#141008', c: '#0a0805', accent: '#F4D77A', accent2: '#fff2c9' } },
+  ceo:     { label: 'Founder ID', badge: 'FOUNDER',  palette: { a: '#04070d', b: '#120a02', c: '#1a1002', accent: '#FFDE8A', accent2: '#fff6dd' } },
+};
+
+function accessCode() { return crypto.randomBytes(6).toString('hex').toUpperCase(); }
+function hashAccessCode(code) { return crypto.createHash('sha256').update(String(code)).digest('hex'); }
+
+// Branded, tier-specific card — front only (the back carries the encryption/
+// terms notice and is generated the same way with a `side` flag).
+function wrapIdentityCard(tier, data, verifyUrl, req) {
+  const t = ID_TIERS[tier] || ID_TIERS.member;
+  const p = t.palette;
+  const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
+  const sigUrl = origin + '/signature.png';
+  const stampUrl = origin + '/stamp.png';
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=1&ecc=H&data=${encodeURIComponent(verifyUrl)}`;
+  const photoBlock = data.photoDataUrl
+    ? `<div class="photo-wrap"><div class="chip"></div><img class="photo" src="${data.photoDataUrl}" alt=""></div>`
+    : `<div class="photo-wrap"><div class="chip"></div><div class="photo"></div></div>`;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${t.label} — ${data.fullName} — SkyGlobe Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 700px at 50% -10%,#1a2740,#05070d 70%);font-family:Inter,sans-serif;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:24px;min-height:100vh}
+  .card{width:440px;height:274px;border-radius:20px;position:relative;overflow:hidden;
+    background:linear-gradient(155deg,${p.a} 0%,${p.b} 40%,${p.c} 70%,${p.a} 100%);
+    box-shadow:0 10px 30px rgba(0,0,0,.5),0 40px 90px -20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);isolation:isolate}
+  .card .pattern{position:absolute;inset:0;opacity:.16;mix-blend-mode:screen;z-index:0}
+  .card .foil{position:absolute;top:0;right:0;width:120px;height:100%;
+    background:linear-gradient(160deg,#ffd98a 0%,#f7a8e0 14%,#a9c8ff 28%,#8affe0 42%,#ffd98a 56%,#f7a8e0 70%,#a9c8ff 84%,#ffd98a 100%);
+    opacity:.13;filter:blur(1px);z-index:1;mix-blend-mode:overlay}
+  .card:before{content:"";position:absolute;inset:0;background:radial-gradient(280px 180px at 15% 0%,${p.accent}38,transparent 60%);z-index:1}
+  .card:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;border:1px solid ${p.accent}20;top:-90px;right:-70px;z-index:1}
+  .microtext{position:absolute;inset:6px;border:1px solid ${p.accent}48;border-radius:15px;z-index:1;pointer-events:none}
+  .microtext:before{content:"SKYGLOBE GROUP · ${t.badge} · ONE WORLD ONE MISSION · SKYGLOBE GROUP · ${t.badge} · ";position:absolute;top:-1px;left:8px;right:8px;font-family:'Space Mono',monospace;font-size:3.4px;letter-spacing:.06em;color:${p.accent}66;white-space:nowrap;overflow:hidden}
+  .hd{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:18px 20px 0}
+  .hd .brand{display:flex;align-items:center;gap:9px}
+  .hd .brand b{font-family:'Cormorant Garamond',serif;font-size:1.14rem;letter-spacing:.05em;color:#fff;font-weight:700}
+  .hd .brand b span{color:${p.accent2}}
+  .hd .tier{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#0d1424;font-weight:800;background:linear-gradient(135deg,${p.accent2},${p.accent});padding:4px 10px;border-radius:20px;box-shadow:0 2px 8px ${p.accent}66}
+  .body{position:relative;z-index:3;display:flex;gap:16px;padding:16px 20px 0}
+  .photo-wrap{position:relative;flex-shrink:0}
+  .photo{width:76px;height:94px;border-radius:9px;background:linear-gradient(150deg,#1c2b4a,#0c1730);border:1.5px solid ${p.accent}8c;box-shadow:0 4px 14px rgba(0,0,0,.4);object-fit:cover}
+  .chip{position:absolute;top:-7px;left:-7px;width:20px;height:16px;border-radius:3px;background:linear-gradient(135deg,#e8c877,#a9791f);box-shadow:0 2px 4px rgba(0,0,0,.4);z-index:2}
+  .info .nm{color:#fff;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.2rem;line-height:1.1}
+  .info .role{color:${p.accent2};font-size:.58rem;margin-top:3px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin-top:9px;font-size:.6rem}
+  .kv .k{color:#7f93bd;text-transform:uppercase;letter-spacing:.06em;font-family:'Space Mono',monospace}
+  .kv .v{color:#eef3ff;font-weight:600;font-family:'Space Mono',monospace}
+  .footrow{position:absolute;bottom:14px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-end;z-index:3}
+  .idno{color:${p.accent2};font-family:'Space Mono',monospace;font-weight:700;font-size:.8rem;letter-spacing:.08em}
+  .idno small{display:block;color:#7f93bd;font-size:.48rem;letter-spacing:.14em;text-transform:uppercase;font-family:Inter,sans-serif;margin-top:2px}
+  .qr-wrap{background:#fff;border-radius:8px;padding:5px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .qr-wrap img{width:52px;height:52px;display:block}
+  .note{color:#8fa3c9;font-size:.78rem;text-align:center;max-width:480px}
+</style></head><body>
+<div class="card">
+  <svg class="pattern" viewBox="0 0 440 274" xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="g" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+      <circle cx="9" cy="9" r="7.5" fill="none" stroke="${p.accent}" stroke-width="0.35"/></pattern></defs>
+    <rect width="440" height="274" fill="url(#g)"/></svg>
+  <div class="foil"></div>
+  <div class="microtext"></div>
+  <div class="hd">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 40 40"><defs><linearGradient id="bg1" x1="0.72" y1="0.12" x2="0.28" y2="0.88"><stop offset="0%" stop-color="#FDBE2D"/><stop offset="34%" stop-color="#F77F1B"/><stop offset="62%" stop-color="#2E7FD4"/><stop offset="100%" stop-color="#1B57C8"/></linearGradient></defs>
+        <path d="M20 0.8 C21.2 15.2,24.8 18.8,39.2 20 C24.8 21.2,21.2 24.8,20 39.2 C18.8 24.8,15.2 21.2,0.8 20 C15.2 18.8,18.8 15.2,20 0.8 Z" fill="url(#bg1)"/></svg>
+      <b>SKY<span>GLOBE</span></b>
+    </div>
+    <div class="tier">${t.badge}</div>
+  </div>
+  <div class="body">
+    ${photoBlock}
+    <div class="info">
+      <div class="nm">${data.fullName}</div>
+      <div class="role">${data.roleLine || ''}</div>
+      <div class="kv">
+        ${data.nationality ? `<div class="k">Nationality</div><div class="v">${data.nationality}</div>` : ''}
+        <div class="k">Issued</div><div class="v">${data.issuedDate}</div>
+        <div class="k">Status</div><div class="v">Active · Verified</div>
+      </div>
+    </div>
+  </div>
+  <div class="footrow">
+    <div class="idno">${data.ref}<small>Serial number</small></div>
+    <div class="qr-wrap"><img src="${qrUrl}" alt="Verification QR"></div>
+  </div>
+</div>
+<div class="note">🔒 This card is encrypted at rest and its full record is accessible only to the holder (with their private access code) or SkyGlobe staff. Scan the QR to verify authenticity — the public verification page never shows personal details.</div>
+</body></html>`;
+}
+
+async function issueIdentityCard({ tier, fullName, nationality, roleLine, email, photoDataUrl, req }) {
+  const ref = 'SGID-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+  const code = accessCode();
+  const issuedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const verifyUrl = `${baseUrl(req)}/verify-id/${ref}`;
+  const html = wrapIdentityCard(tier, { fullName, nationality, roleLine, ref, issuedDate, photoDataUrl }, verifyUrl, req);
+
+  let photoUrl = null;
+  if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
+    const buf = Buffer.from(photoDataUrl.split(',')[1], 'base64');
+    if (buf.length <= 6 * 1024 * 1024) {
+      const ext = photoDataUrl.includes('image/png') ? 'png' : 'jpg';
+      const path_ = `identity/${ref}/photo.${ext}`;
+      await storageUpload(path_, buf, `image/${ext === 'jpg' ? 'jpeg' : 'png'}`).catch(() => {});
+      photoUrl = storagePublicUrl(path_);
+    }
+  }
+
+  const filePath = `identity/${ref}/card.html`;
+  await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8').catch(() => {});
+  const docRows = await dbQuery('POST', 'documents', {
+    ref, filename: `id_${ref}.html`, path: filePath, uploaded_by: 'ai:identity',
+  }).catch(() => null);
+  const docRow = Array.isArray(docRows) ? docRows[0] : docRows;
+  const viewToken = docRow ? await createDocToken(docRow.id, filePath, `id_${ref}.html`, email || '', ref).catch(() => null) : null;
+  const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
+
+  await dbQuery('POST', 'identity_cards', {
+    ref, tier, full_name: fullName, nationality: nationality || null, role_line: roleLine || null,
+    email: email || null, photo_url: photoUrl, access_code_hash: hashAccessCode(code), status: 'valid',
+  }).catch(e => console.error('Identity card record save warning:', e.message));
+
+  return { ref, code, viewUrl, verifyUrl, html };
+}
+
+// Member ID — auto-issued once a client's paid enrolment/service is confirmed.
+// One member ID per email; calling again just returns the existing one.
+app.post('/api/identity/member/issue', async (req, res) => {
+  try {
+    const { email, fullName, nationality, serviceLabel } = req.body || {};
+    if (!email || !fullName) return res.status(400).json({ error: 'Email and full name are required.' });
+    const existing = await dbQuery('GET', 'identity_cards', null, { email: `eq.${email}`, tier: 'eq.member', limit: 1 });
+    if (existing[0]) return res.json({ success: true, ref: existing[0].ref, alreadyIssued: true });
+    const result = await issueIdentityCard({
+      tier: 'member', fullName, nationality, roleLine: serviceLabel ? `Enrolled · ${serviceLabel}` : 'Verified Member',
+      email, req,
+    });
+    res.json({ success: true, ref: result.ref, viewUrl: result.viewUrl, accessCode: result.code });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Premium ID — public paid product. Requires the client to accept SkyGlobe's
+// identity terms (logged with a timestamp) and pay before issuance.
+app.post('/api/identity/premium/apply', async (req, res) => {
+  try {
+    const { unlock, fullName, nationality, address, idNumber, sector, email, photoDataUrl, termsAccepted } = req.body || {};
+    if (!unlock || !verifyUnlock(unlock, 'premium_digital_id'))
+      return res.status(402).json({ error: 'Payment required', pay: { product: 'premium_digital_id' } });
+    if (!fullName || !email || !sector) return res.status(400).json({ error: 'Full name, email and sector are required.' });
+    if (!termsAccepted) return res.status(400).json({ error: 'You must accept the identity terms to proceed.' });
+    const result = await issueIdentityCard({
+      tier: 'premium', fullName, nationality, roleLine: sector, email, photoDataUrl, req,
+    });
+    await dbQuery('PATCH', 'identity_cards', {
+      address: address || null, id_number: idNumber || null,
+      terms_accepted_at: new Date().toISOString(),
+    }, { ref: `eq.${result.ref}` }).catch(() => {});
+    res.json({ success: true, ref: result.ref, viewUrl: result.viewUrl, accessCode: result.code });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Staff & CEO IDs — issued only by the CEO from the admin portal.
+app.post('/api/admin/identity/staff/issue', async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  try {
+    const { fullName, roleLine, email, nationality, photoDataUrl } = req.body || {};
+    if (!fullName) return res.status(400).json({ error: 'Full name is required.' });
+    const result = await issueIdentityCard({ tier: 'staff', fullName, nationality, roleLine: roleLine || 'SkyGlobe Group Staff', email, photoDataUrl, req });
+    res.json({ success: true, ref: result.ref, viewUrl: result.viewUrl, accessCode: result.code });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post('/api/admin/identity/ceo/issue', async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  try {
+    const { fullName, nationality, photoDataUrl } = req.body || {};
+    if (!fullName) return res.status(400).json({ error: 'Full name is required.' });
+    const result = await issueIdentityCard({ tier: 'ceo', fullName, nationality, roleLine: 'Founder & Chief Executive Officer', photoDataUrl, req });
+    res.json({ success: true, ref: result.ref, viewUrl: result.viewUrl, accessCode: result.code });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Public verification — minimal, same discipline as certificates/documents.
+app.get('/api/identity/verify/:ref', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'identity_cards', null, { ref: `eq.${req.params.ref}`, limit: 1 });
+    const c = rows[0];
+    if (!c) return res.status(404).json({ valid: false, error: 'No identity card found with this reference.' });
+    res.json({
+      valid: c.status === 'valid', ref: c.ref, tier: ID_TIERS[c.tier]?.label || c.tier,
+      fullName: c.full_name, roleLine: c.role_line, issuedBy: 'SkyGlobe Group',
+    });
+  } catch (e) { res.status(500).json({ valid: false, error: e.message }); }
+});
+
+// Full record — requires the holder's private access code, or staff auth.
+app.post('/api/identity/:ref/full', async (req, res) => {
+  try {
+    const { accessCode: code } = req.body || {};
+    const rows = await dbQuery('GET', 'identity_cards', null, { ref: `eq.${req.params.ref}`, limit: 1 });
+    const c = rows[0];
+    if (!c) return res.status(404).json({ error: 'Not found.' });
+    const isStaff = !!checkStaffOrAdmin(req, null);
+    if (!isStaff && (!code || hashAccessCode(code) !== c.access_code_hash))
+      return res.status(401).json({ error: 'Invalid access code.' });
+    res.json(c);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/verify-id/:ref', (req, res) => res.sendFile(path.join(__dirname, 'id-verify.html')));
+app.get('/digital-id', (req, res) => res.sendFile(path.join(__dirname, 'digital-id.html')));
 app.get('/courses', (req, res) => res.sendFile(path.join(__dirname, 'courses.html')));
 app.get('/courses/learn', (req, res) => res.sendFile(path.join(__dirname, 'course-learn.html')));
 

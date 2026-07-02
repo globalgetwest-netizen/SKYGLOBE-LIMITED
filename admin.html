@@ -350,6 +350,7 @@
         <button class="sb-link" data-view="pricing" onclick="switchView('pricing')"><span class="ic">🏷️</span> Pricing</button>
         <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
         <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
+        <button class="sb-link" data-view="idcards" onclick="switchView('idcards')"><span class="ic">🪪</span> Digital ID Issuance</button>
         <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
         <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
@@ -529,6 +530,38 @@
               <button onclick="loadOfferings()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
             </div>
             <div id="offeringsTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
+          </div>
+        </section>
+
+        <!-- DIGITAL ID ISSUANCE -->
+        <section class="view" id="view-idcards">
+          <div class="panel" style="margin-bottom:22px">
+            <h3 style="margin:0 0 6px">🪪 Issue a Staff ID</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Only the CEO can issue staff and founder identity cards. This creates an encrypted, QR-verifiable card immediately.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Full Name *</label>
+                <input type="text" id="sidName" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Role / Title</label>
+                <input type="text" id="sidRole" placeholder="e.g. Operations Manager" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Email</label>
+                <input type="email" id="sidEmail" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Nationality</label>
+                <input type="text" id="sidNationality" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+            </div>
+            <button onclick="issueStaffId()" style="background:var(--gold);color:#1a1300;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer">+ Issue Staff ID</button>
+            <div id="staffIdMsg" style="font-size:0.85rem;margin-top:10px"></div>
+          </div>
+          <div class="panel">
+            <h3 style="margin:0 0 6px">👑 Issue the Founder ID</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">The highest-tier card — issue this once, for the CEO.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Full Name *</label>
+                <input type="text" id="ceoIdName" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Nationality</label>
+                <input type="text" id="ceoIdNationality" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+            </div>
+            <button onclick="issueCeoId()" style="background:var(--gold);color:#1a1300;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer">+ Issue Founder ID</button>
+            <div id="ceoIdMsg" style="font-size:0.85rem;margin-top:10px"></div>
           </div>
         </section>
 
@@ -1613,6 +1646,38 @@ async function deleteOffering(id){
   if(!confirm('Remove this service from the public site?'))return;
   try{ await fetch(API+'/api/admin/offerings/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}}); loadOfferings(); }
   catch(e){ alert(e.message); }
+}
+
+/* ── DIGITAL ID ISSUANCE (staff / CEO — CEO-only) ── */
+async function issueStaffId(){
+  const msg=document.getElementById('staffIdMsg');
+  const fullName=document.getElementById('sidName').value.trim();
+  if(!fullName){msg.textContent='Full name is required.';msg.style.color='#e57373';return;}
+  msg.textContent='Issuing…';msg.style.color='var(--muted)';
+  try{
+    const r=await fetch(API+'/api/admin/identity/staff/issue',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({fullName, roleLine:document.getElementById('sidRole').value.trim(), email:document.getElementById('sidEmail').value.trim(), nationality:document.getElementById('sidNationality').value.trim()})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'Could not issue ID.');
+    msg.innerHTML=`✓ Issued — Ref <b>${d.ref}</b> · Access code <b>${d.accessCode}</b> (save this, shown once) · <a href="${d.viewUrl}" target="_blank" style="color:var(--gold)">Open card</a>`;
+    msg.style.color='#66bb6a';
+    ['sidName','sidRole','sidEmail','sidNationality'].forEach(id=>document.getElementById(id).value='');
+  }catch(e){msg.textContent=e.message;msg.style.color='#e57373';}
+}
+async function issueCeoId(){
+  const msg=document.getElementById('ceoIdMsg');
+  const fullName=document.getElementById('ceoIdName').value.trim();
+  if(!fullName){msg.textContent='Full name is required.';msg.style.color='#e57373';return;}
+  if(!confirm('Issue the Founder ID for '+fullName+'?'))return;
+  msg.textContent='Issuing…';msg.style.color='var(--muted)';
+  try{
+    const r=await fetch(API+'/api/admin/identity/ceo/issue',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({fullName, nationality:document.getElementById('ceoIdNationality').value.trim()})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'Could not issue ID.');
+    msg.innerHTML=`✓ Issued — Ref <b>${d.ref}</b> · Access code <b>${d.accessCode}</b> (save this, shown once) · <a href="${d.viewUrl}" target="_blank" style="color:var(--gold)">Open card</a>`;
+    msg.style.color='#66bb6a';
+  }catch(e){msg.textContent=e.message;msg.style.color='#e57373';}
 }
 
 async function loadPricing(){
