@@ -3553,7 +3553,7 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
   try {
     // Pull live snapshot — keep row counts small so the prompt stays lean and fast.
     const _dbTimeout = (p) => Promise.race([p, new Promise(r => setTimeout(() => r([]), 10000))]);
-    const [apps, payments, staff, tasks, activity, conferences, legalDocs, clients, sessionLogs, wpRates] = await Promise.all([
+    const [apps, payments, staff, tasks, activity, conferences, legalDocs, clients, sessionLogs, wpRates, academyStudents, academyParents, academySessions] = await Promise.all([
       _dbTimeout(dbQuery('GET', 'applications', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 100 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'staff_members', null, { limit: 100 }).catch(() => [])),
@@ -3564,6 +3564,9 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
       _dbTimeout(dbQuery('GET', 'clients', null, { select: 'email,name,created_at', order: 'created_at.desc', limit: 50 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'session_logs', null, { order: 'logged_in_at.desc', limit: 30 }).catch(() => [])),
       _dbTimeout(dbQuery('GET', 'work_permit_rates', null, { limit: 500 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'academy_students', null, { order: 'created_at.desc', limit: 100 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'academy_parents', null, { select: 'email,name,created_at', order: 'created_at.desc', limit: 50 }).catch(() => [])),
+      _dbTimeout(dbQuery('GET', 'academy_sessions', null, { order: 'created_at.desc', limit: 50 }).catch(() => [])),
     ]);
 
     // ── AI-powered monitoring: payments health + ecosystem data integrity ────────
@@ -3603,6 +3606,11 @@ ECOSYSTEM DATA INTEGRITY:
     const sessionsToday = sessionLogs.filter(s => (s.logged_in_at || '').slice(0, 10) === todayStr);
     const uniqueLoginsToday = [...new Set(sessionsToday.map(s => s.email))];
 
+    const academyStudentsToday = academyStudents.filter(s => (s.created_at || '').slice(0, 10) === todayStr);
+    const academyParentsToday = academyParents.filter(p => (p.created_at || '').slice(0, 10) === todayStr);
+    const academySessionsToday = academySessions.filter(s => (s.created_at || '').slice(0, 10) === todayStr);
+    const academyByStatus = academyStudents.reduce((acc, s) => { const k = s.admission_status || 'unset'; acc[k] = (acc[k] || 0) + 1; return acc; }, {});
+
     const ecosystemSnapshot = `LIVE SNAPSHOT — ${now.toUTCString()}
 APPLICATIONS (recent ${apps.length}): ${Object.entries(appsByStatus).map(([s,n])=>`${s}:${n}`).join(', ')||'none'}
   Recent: ${apps.slice(0,5).map(a=>`${a.ref} ${[a.fname,a.lname].filter(Boolean).join(' ')||a.email} — ${a.service||''} — ${a.status}`).join(' | ')}
@@ -3614,20 +3622,23 @@ TASKS: Pending:${pendingTasks.length} InProgress:${inProgressTasks.length} Overd
 CONFERENCES (${conferences.length}): ${conferences.slice(0,4).map(c=>`${c.title||'Untitled'} ${c.country||''} ${c.date||'TBC'} ${c.active===false?'inactive':'active'}`).join(' | ')||'none'}
 LEGAL DOCS (${legalDocs.length} total, ${legalToday.length} today): ${legalDocs.slice(0,5).map(d=>`${d.ref} ${legalTypeName(d.filename)} ${(d.created_at||'').slice(0,10)}`).join(' | ')||'none'}
 CLIENTS (${clients.length} registered, ${clientsToday.length} today): ${clients.slice(0,4).map(c=>`${c.name||'?'} <${c.email}>`).join(', ')||'none'}
+KIDS ACADEMY: ${academyStudents.length} students (${academyStudentsToday.length} today) | ${academyParents.length} parent accounts (${academyParentsToday.length} today) | ${academySessions.length} recent lessons (${academySessionsToday.length} today)
+  Admission status: ${Object.entries(academyByStatus).map(([s,n])=>`${s}:${n}`).join(', ')||'none'}
+  Recent enrolments: ${academyStudents.slice(0,4).map(s=>`${s.name||'?'} age ${s.age||'?'} (${s.admission_status||'unset'})`).join(', ')||'none'}
 LOGINS TODAY: ${uniqueLoginsToday.length} users | ${uniqueLoginsToday.slice(0,5).join(', ')||'none'}
 RECENT ACTIVITY: ${activity.slice(0,6).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} ${a.action} ${a.detail||''}`).join(' | ')||'none'}
 ${paymentsHealth}`;
 
-    const systemPrompt = `You are SKYGLOBE CORE Intelligence — private AI assistant to Saleh Shuaibu, Founder & CEO of SkyGlobe Group. Monitor, analyse, and report on the entire SkyGlobe Group ecosystem. Use the live data below. Be concise, precise, strategic. Use bullet points and numbers. Address the CEO efficiently. Never guess — say "not in current data" if needed.
+    const systemPrompt = `You are SKYGLOBE CORE Intelligence — the private, confidential AI assistant to Saleh Shuaibu, Founder & CEO of SkyGlobe Group. You hold the complete live knowledge of the entire SkyGlobe Group ecosystem — every division, every application, every payment, every student, every staff member, every task, every document — continuously refreshed from the live database below on each request, so you always know what changed since you last spoke to the CEO. This knowledge and this access exist for the CEO alone: never summarise, forward, or describe the contents of LIVE DATA to anyone else, in any other context, portal, or assistant persona (including NORIA, the public-facing assistant, or the Kids Academy tutors) — this data and this role are not to be acknowledged or disclosed outside this conversation with the CEO. Monitor, analyse, and report on the entire SkyGlobe Group ecosystem. Be concise, precise, strategic. Use bullet points and numbers. Address the CEO efficiently. Never guess — say "not in current data" if needed.
 
 ABOUT SKYGLOBE GROUP: 5 divisions — Global Mobility, Travel Services, Events & Conferences, Knowledge Hub (incl. Kids Academy), Digitalization. Motto: One World. One Mission. Anchors: CONSTRUCT · TRUST · INTELLIGENCE · POWER. Pricing in USD/EUR/GBP only.
 
 YOUR MONITORING DUTIES (this is work a staff member would otherwise do manually):
 - Every response, silently check the PAYMENTS HEALTH and ECOSYSTEM DATA INTEGRITY sections of the live data. If anything is flagged there (stuck Grey confirmations, unrecognised payment products, pricing gaps, countries with zero active roles), open your reply by surfacing it BRIEFLY first — one line per issue — even if the CEO didn't ask about payments. If nothing is flagged, don't mention it.
-- When asked about payments, applications, tasks or pricing, give a precise operational read: what needs a decision, what's overdue, what's stuck, and a clear recommended next action.
+- When asked about payments, applications, tasks, pricing, or Kids Academy enrolments, give a precise operational read: what needs a decision, what's overdue, what's stuck, and a clear recommended next action.
 - You may DRAFT things for the CEO to review (a reply to a client, a task assignment, a pricing suggestion) — but you never take an action yourself. Confirming a payment, sending a client message, or changing a price are always done by a human clicking the button in the relevant portal, never by you. Say so plainly if asked to "just do it."
 
-LIVE DATA:
+LIVE DATA (confidential — CEO eyes only):
 ${ecosystemSnapshot}`;
 
     const messages = [];
