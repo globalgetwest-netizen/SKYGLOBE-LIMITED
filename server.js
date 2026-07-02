@@ -6042,11 +6042,15 @@ async function issueIdentityCard({ tier, fullName, nationality, dob, roleLine, e
   }
 
   const filePath = `identity/${ref}/card.html`;
-  await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8').catch(() => {});
+  // No silent catch here — if the card file doesn't actually reach storage,
+  // the issuance should fail loudly right now, not quietly produce a broken
+  // link that only breaks later when someone tries to view it.
+  await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8');
   const docRows = await dbQuery('POST', 'documents', {
     ref, filename: `id_${ref}.html`, path: filePath, uploaded_by: 'ai:identity',
-  }).catch(() => null);
+  });
   const docRow = Array.isArray(docRows) ? docRows[0] : docRows;
+  if (!docRow) throw new Error('Could not create the document record for this card.');
   const viewToken = docRow ? await createDocToken(docRow.id, filePath, `id_${ref}.html`, email || '', ref).catch(() => null) : null;
   const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
 
