@@ -2607,17 +2607,35 @@ app.post('/api/pay/init', async (req, res) => {
 // professional manual-transfer flow (Wise, bank desks, etc. all work this way).
 app.post('/api/pay/grey/notify', contactLimiter, async (req, res) => {
   try {
-    const { reference, name, email, phone, note } = req.body || {};
+    const { reference, name, email, phone, note, slipData, slipFilename, slipContentType } = req.body || {};
     if (!reference) return res.status(400).json({ error: 'Missing payment reference.' });
     const payment = await getPayment(String(reference).trim());
     if (!payment) return res.status(404).json({ error: 'We could not find that payment reference. Please check it or contact us on WhatsApp.' });
     if (payment.status === 'paid')
       return res.json({ success: true, alreadyPaid: true });
 
+    // Optional payment slip / receipt upload — kept private (no public URL);
+    // only accessible via the CEO/staff Payments tab so proof of payment
+    // stays secure end-to-end, same storage bucket as client documents.
+    let slipUrl = null, slipFileName = null;
+    if (slipData && slipFilename) {
+      const buffer = Buffer.from(slipData, 'base64');
+      if (buffer.length > 8 * 1024 * 1024)
+        return res.status(400).json({ error: 'Receipt file is too large. Maximum size is 8 MB.' });
+      if (buffer.length > 0) {
+        const safeName = String(slipFilename).replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80);
+        const filePath = `payment-slips/${payment.reference}/${Date.now()}_${safeName}`;
+        await storageUpload(filePath, buffer, slipContentType || 'application/octet-stream');
+        slipUrl = storagePublicUrl(filePath);
+        slipFileName = safeName;
+      }
+    }
+
     await updatePayment(payment.reference, {
       status: 'awaiting_confirmation',
       notified_at: new Date().toISOString(),
       notified_by: { name: name || '', email: email || payment.email, phone: phone || '', note: note || '' },
+      meta: { ...(payment.meta || {}), ...(slipUrl ? { slipUrl, slipFileName, slipUploadedAt: new Date().toISOString() } : {}) },
     });
 
     const team = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
@@ -2632,11 +2650,12 @@ app.post('/api/pay/grey/notify', contactLimiter, async (req, res) => {
           <p><strong>Amount:</strong> ${payment.currency} ${payment.amount}</p>
           <p><strong>Client:</strong> ${name || '—'} — ${email || payment.email}${phone ? ' · ' + phone : ''}</p>
           ${note ? `<p><strong>Note from client:</strong> ${note}</p>` : ''}
+          ${slipUrl ? `<p><strong>Payment slip attached:</strong> <a href="${slipUrl}">${slipFileName}</a></p>` : `<p style="color:#a02020"><strong>No payment slip attached</strong> — client did not upload a receipt.</p>`}
           <p>Verify this transfer landed in the Grey account, then confirm it from the CEO portal (Payments) to unlock the client's service automatically.</p>
         </div>`);
     } catch (e) { console.error('grey/notify email failed:', e.message); }
 
-    res.json({ success: true });
+    res.json({ success: true, slipUploaded: !!slipUrl });
   } catch (e) {
     console.error('pay/grey/notify error:', e.message);
     res.status(500).json({ error: 'Could not record your notification. Please message us on WhatsApp instead.' });
