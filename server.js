@@ -5473,6 +5473,7 @@ function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req) {
     <p class="presented">This is to certify that</p>
     <div class="name">${enr.full_name}</div>
     <p class="desc">has successfully completed the <strong>${track.name}</strong> programme, demonstrating diligence and competence across all required modules, and is hereby awarded this certificate — <strong>Class of ${enr.graduation_year}</strong>.</p>
+    ${enr.nationality ? `<p style="text-align:center;font-size:.78rem;color:#8a93a3;margin-top:-8px">Nationality: ${enr.nationality}</p>` : ''}
     <div class="row">
       ${photoDataUrl ? `<img class="photo" src="${photoDataUrl}" alt="">` : '<div style="width:88px"></div>'}
       <div class="sig-block"><img src="${sigUrl}" alt=""><div class="ln">Authorised Signatory<br>SkyGlobe Group</div></div>
@@ -5524,6 +5525,7 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
     await dbQuery('POST', 'certificates', {
       cert_ref: certRef, enrollment_id: enr.id, full_name: enr.full_name, track_id: enr.track_id,
       tier_id: enr.tier_id, graduation_year: enr.graduation_year, photo_url: photoUrl, status: 'valid',
+      nationality: enr.nationality || null,
     }).catch(e => console.error('Certificate record save warning:', e.message));
     await dbQuery('PATCH', 'course_enrollments', { status: 'certified', cert_ref: certRef }, { id: `eq.${req.params.id}` }).catch(() => {});
 
@@ -5571,6 +5573,75 @@ app.get('/api/legal-docs/verify/:ref', async (req, res) => {
   } catch (e) { res.status(500).json({ valid: false, error: e.message }); }
 });
 app.get('/verify-document/:ref', (req, res) => res.sendFile(path.join(__dirname, 'document-verify.html')));
+
+// ════════════════════════════════════════════════════════════════════════════
+//  CEO-MANAGED SERVICE CATALOG
+//  The CEO can add a new future service/course/document from any sector
+//  straight from the admin portal — title, sector, description, price,
+//  and how the client should proceed (get in touch, or use an existing
+//  page) — and it appears live on /more-services immediately, with zero
+//  further coding. This is deliberately a lightweight "coming soon /
+//  bookable" listing, not a full custom AI-document pipeline — for a new
+//  service that genuinely needs its own guided flow, that's still a build.
+// ════════════════════════════════════════════════════════════════════════════
+app.get('/api/offerings', async (_req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'custom_offerings', null, { active: 'eq.true', order: 'sector.asc,created_at.desc', limit: 500 });
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/admin/offerings', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'custom_offerings', null, { order: 'created_at.desc', limit: 500 });
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/offerings', async (req, res) => {
+  const who = checkAdmin(req, res); if (!who) return;
+  try {
+    const { title, sector, description, priceUSD, priceEUR, priceGBP, ctaLabel, ctaLink } = req.body || {};
+    if (!title || !sector) return res.status(400).json({ error: 'Title and sector are required.' });
+    const row = await dbQuery('POST', 'custom_offerings', {
+      title, sector, description: description || '',
+      price_usd: priceUSD || null, price_eur: priceEUR || null, price_gbp: priceGBP || null,
+      cta_label: ctaLabel || 'Get in Touch', cta_link: ctaLink || '/#contact',
+      active: true, created_by: who,
+    });
+    res.json({ success: true, offering: Array.isArray(row) ? row[0] : row });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/offerings/:id', async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  try {
+    const { title, sector, description, priceUSD, priceEUR, priceGBP, ctaLabel, ctaLink, active } = req.body || {};
+    const patch = {};
+    if (title !== undefined) patch.title = title;
+    if (sector !== undefined) patch.sector = sector;
+    if (description !== undefined) patch.description = description;
+    if (priceUSD !== undefined) patch.price_usd = priceUSD;
+    if (priceEUR !== undefined) patch.price_eur = priceEUR;
+    if (priceGBP !== undefined) patch.price_gbp = priceGBP;
+    if (ctaLabel !== undefined) patch.cta_label = ctaLabel;
+    if (ctaLink !== undefined) patch.cta_link = ctaLink;
+    if (active !== undefined) patch.active = active;
+    await dbQuery('PATCH', 'custom_offerings', patch, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/offerings/:id', async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  try {
+    await dbQuery('DELETE', 'custom_offerings', null, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/more-services', (req, res) => res.sendFile(path.join(__dirname, 'more-services.html')));
 app.get('/courses', (req, res) => res.sendFile(path.join(__dirname, 'courses.html')));
 app.get('/courses/learn', (req, res) => res.sendFile(path.join(__dirname, 'course-learn.html')));
 
