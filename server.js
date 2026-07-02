@@ -1015,8 +1015,10 @@ app.get('/api/view/:token/content', async (req, res) => {
     res.set('Content-Disposition', 'inline'); // inline = display, not download
     res.set('Cache-Control', 'no-store');
     res.set('X-Frame-Options', 'SAMEORIGIN');
-    upstream.body.pipe(res);
-  } catch (e) { res.status(500).send('Error loading document.'); }
+    // Node's built-in fetch returns a Web stream (no .pipe method) — buffer it.
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.send(buf);
+  } catch (e) { console.error('view content error:', e.message); res.status(500).send('Error loading document.'); }
 });
 
 // Admin: regenerate token for a document
@@ -6175,11 +6177,28 @@ app.get('/api/identity/:ref/export.png', async (req, res) => {
       return res.status(503).json({ error: 'High-resolution export is not available on this deployment yet (dependencies not installed). Please contact support.' });
     }
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-    });
+    // ETXTBSY happens when Chromium's binary is still being extracted to /tmp
+    // (first request after a deploy, or two exports racing). Serialize all
+    // launches behind a single in-flight promise and retry once after a
+    // short delay — the standard fix for @sparticuz/chromium on hosts like
+    // Render/Lambda.
+    async function launchBrowser() {
+      const exePath = await chromium.executablePath();
+      const opts = { headless: true, args: chromium.args, executablePath: exePath };
+      try {
+        return await puppeteer.launch(opts);
+      } catch (err) {
+        if (String(err.message).includes('ETXTBSY')) {
+          await new Promise(r => setTimeout(r, 1500));
+          return await puppeteer.launch(opts);
+        }
+        throw err;
+      }
+    }
+    global.__idExportQueue = (global.__idExportQueue || Promise.resolve())
+      .catch(() => {})
+      .then(() => launchBrowser());
+    const browser = await global.__idExportQueue;
     try {
       const page = await browser.newPage();
       await page.setViewport({ width: 1400, height: 1400, deviceScaleFactor: 3 }); // 3x for ~300 DPI at CR80 scale
