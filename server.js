@@ -5816,6 +5816,14 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   .glyph-wrap svg{width:100%;height:100%}
   .glyph-lbl{position:absolute;z-index:3;right:18px;bottom:16px;font-size:.32rem;color:#a08a5a;letter-spacing:.08em;text-transform:uppercase;width:38px;text-align:center}
   .note{color:#a08a5a;font-size:.78rem;text-align:center;max-width:480px}
+  * {-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  @media print{
+    body{background:#000!important;padding:10px}
+    .stack{page-break-inside:avoid;margin:0 auto 14px}
+    .card{animation:none!important;box-shadow:none!important}
+    .note{display:none}
+    .hdr-lbl{color:#FFDE8A!important}
+  }
   .card.back{padding:18px 20px}
   .backhd{position:relative;z-index:3;display:flex;align-items:center;gap:9px;color:#fff6dd;font-size:.66rem;letter-spacing:.06em;font-family:'Cormorant Garamond',serif;font-weight:700}
   .backbody{position:relative;z-index:3;margin-top:12px}
@@ -5975,6 +5983,8 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
   .qr-wrap{background:#fff;border-radius:8px;padding:5px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
   .qr-wrap img{width:52px;height:52px;display:block}
   .note{color:#8fa3c9;font-size:.78rem;text-align:center;max-width:480px}
+  * {-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  @media print{body{background:#000!important;padding:10px}.card{box-shadow:none!important}.note{display:none}}
 </style></head><body>
 <div class="card">
   <svg class="pattern" viewBox="0 0 440 274" xmlns="http://www.w3.org/2000/svg">
