@@ -5749,7 +5749,20 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=1&ecc=H&data=${encodeURIComponent(verifyUrl)}`;
   // The Founder ID defaults to the CEO's own uploaded photo (ceo.png in the
   // repo root) unless a specific photo was passed at issuance time.
-  const photoTag = `<img class="photo" src="${data.photoDataUrl || (origin + '/ceo.png')}" alt="">`;
+  const photoSrc = data.photoDataUrl || (origin + '/ceo.png');
+  const photoTag = `<img class="photo" src="${photoSrc}" alt="">`;
+  const ghostPortrait = `<img class="ghost-portrait" src="${photoSrc}" alt="">`;
+  const contactLine = `<div class="contact-line">skyglobegroup.com · support@skyglobegroup.com</div>`;
+  // Guilloché lattice: two interleaved sine-wave families crossing at
+  // opposing phases — rendered as pure SVG so it stays crisp at any print
+  // resolution.
+  const guillocheSvg = `<svg class="guilloche" viewBox="0 0 440 277" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    ${Array.from({ length: 9 }, (_, i) => {
+      const y = 14 + i * 30;
+      return `<path d="M0 ${y} ${Array.from({ length: 23 }, (_, x) => `Q ${x * 20 + 10} ${y + (x % 2 ? 13 : -13)}, ${(x + 1) * 20} ${y}`).join(' ')}" fill="none" stroke="#FFDE8A" stroke-width="0.45" opacity="0.55"/>
+      <path d="M0 ${y} ${Array.from({ length: 23 }, (_, x) => `Q ${x * 20 + 10} ${y + (x % 2 ? -13 : 13)}, ${(x + 1) * 20} ${y}`).join(' ')}" fill="none" stroke="#F77F1B" stroke-width="0.35" opacity="0.4"/>`;
+    }).join('')}
+  </svg>`;
   // MRZ uses '<' as its filler character (passport convention) — it MUST be
   // HTML-escaped or the browser parses runs of "<NAME" as broken tags that
   // swallow the closing </div>s after them and corrupt the whole page layout.
@@ -5758,6 +5771,19 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   const glyphSeed = crypto.createHash('sha256').update(data.ref + (data.accessCodeHash || '')).digest('hex');
   const glyphSvg = securityGlyphSvg(glyphSeed, '#FFDE8A');
   const cardNumber = formatCardNumber(data.ref);
+  // Micro-text built from the holder's own credentials — repeated tiny print
+  // under each primary field (laser-microtext analogue), so tampering with a
+  // field visually mismatches its own micro-underline.
+  const nano = (s) => `<div class="nano-line">${(String(s || '').toUpperCase().replace(/[^A-Z0-9 ]/g, '') + ' · ').repeat(20)}</div>`;
+  const holoText = (`SKYGLOBEGROUP·${(data.fullName || '').toUpperCase().replace(/\s+/g, '')}·TIER0·` ).repeat(14);
+  // Covert machine-only layer: religion (and a copy of the identity fields)
+  // is NEVER rendered visually anywhere on the card — it exists solely as a
+  // base64 data attribute, readable by a scanner/machine inspecting the
+  // card's data layer, invisible to any human eye at any zoom.
+  const covertPayload = Buffer.from(JSON.stringify({
+    ref: data.ref, name: data.fullName, dob: data.dob || null,
+    nationality: data.nationality || null, religion: data.religion || null,
+  })).toString('base64');
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Founder ID — ${data.fullName} — SkyGlobe Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -5775,6 +5801,20 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   @keyframes edgeglow{0%,100%{box-shadow:0 0 0 1px rgba(255,222,138,.4),0 18px 40px rgba(0,0,0,.6),0 50px 100px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08)}
     50%{box-shadow:0 0 0 1px rgba(255,222,138,.75),0 18px 44px rgba(255,222,138,.12),0 50px 100px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.1)}}
   .circuit{position:absolute;inset:0;z-index:0;opacity:.5}
+  /* Guilloché security background — interwoven sine-wave lattice, the
+     classic banknote/passport anti-copy pattern, layered under the circuit
+     print. Fine intersecting curves are what photocopiers and scanners
+     blur into moiré artifacts. */
+  .guilloche{position:absolute;inset:0;z-index:0;opacity:.34}
+  /* Ghost portrait — faint second rendering of the holder's photo (passport
+     technique): duplicating the likeness makes photo-substitution forgery
+     visible immediately, since both instances must match. */
+  .ghost-portrait{position:absolute;right:92px;bottom:38px;width:58px;height:72px;object-fit:cover;z-index:1;
+    opacity:.14;filter:grayscale(1) contrast(1.2);border-radius:4px;pointer-events:none}
+  /* Contact line — nano-crisp but genuinely readable */
+  .contact-line{position:absolute;left:20px;bottom:55px;z-index:3;font-family:'Space Mono',monospace;font-size:4.8px;
+    letter-spacing:.12em;color:rgba(255,222,138,.75);font-weight:700}
+  .card.back .contact-line{bottom:24px}
   .sheen{position:absolute;inset:0;z-index:1;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.05) 45%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 55%,transparent 70%);pointer-events:none}
   .vignette{position:absolute;inset:0;z-index:1;background:radial-gradient(340px 220px at 20% 0%,rgba(255,222,138,.16),transparent 60%),radial-gradient(300px 200px at 100% 100%,rgba(255,180,80,.08),transparent 60%)}
   .microtext{position:absolute;inset:5px;border:1px solid rgba(255,222,138,.32);border-radius:17px;z-index:1;pointer-events:none}
@@ -5805,7 +5845,32 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
   .bracket.bl{bottom:-4px;left:-4px;border-bottom:2px solid;border-left:2px solid;border-radius:0 0 0 4px}
   .bracket.br{bottom:-4px;right:-4px;border-bottom:2px solid;border-right:2px solid;border-radius:0 0 4px 0}
   .info{padding-top:2px}
-  .nm{color:#fff;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.22rem;line-height:1.1}
+  /* Laser-engraved look: embossed text with a micro-text underline built
+     from the holder's own name repeated at ~3px — the digital analogue of
+     laser-engraved microtext under the primary credential fields. */
+  .nm{color:#fff;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.22rem;line-height:1.1;
+    text-shadow:0 1px 0 rgba(255,255,255,.12),0 -1px 1px rgba(0,0,0,.7)}
+  /* Ghost engraving: the name is cut into the surface, not printed — barely
+     perceptible in normal viewing (privacy by design), fully revealed only
+     under the UV layer or via the machine-readable layers. */
+  .nm.ghost{color:transparent;text-shadow:0 1px 1px rgba(255,255,255,.09),0 -1px 1px rgba(0,0,0,.55);
+    -webkit-text-stroke:0.4px rgba(255,222,138,.14)}
+  .nano-line{font-family:'Space Mono',monospace;font-size:3px;letter-spacing:.08em;color:rgba(255,222,138,.5);white-space:nowrap;overflow:hidden;max-width:190px;margin-top:1px}
+  /* Holographic microtext strip — shifting spectral gradient over repeating
+     micro-lettering, the analogue of a holographic microtext laminate band. */
+  .holo-strip{position:absolute;left:20px;right:96px;bottom:44px;z-index:2;height:8px;overflow:hidden;border-radius:2px;opacity:.85}
+  .holo-strip .txt{font-family:'Space Mono',monospace;font-size:4.6px;letter-spacing:.14em;white-space:nowrap;font-weight:700;
+    background:linear-gradient(90deg,#ffd98a,#f7a8e0,#a9c8ff,#8affe0,#ffd98a);background-size:300% 100%;
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:holo 6s linear infinite}
+  @keyframes holo{0%{background-position:0% 0}100%{background-position:300% 0}}
+  /* UV invisible-ink layer — fully invisible in normal viewing; hovering the
+     card = holding it under a UV lamp. Reveals a covert copy of the serial,
+     holder name and DOB in UV-blue. */
+  .uv-layer{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;
+    opacity:0;transition:opacity .6s;pointer-events:none;background:rgba(20,0,60,.42)}
+  .card:hover .uv-layer{opacity:1}
+  .uv-layer .uv-txt{font-family:'Space Mono',monospace;font-weight:700;color:#7db4ff;text-shadow:0 0 12px #4a7dff,0 0 30px #4a7dff;letter-spacing:.2em;font-size:.7rem;text-transform:uppercase}
+  .uv-layer .uv-sub{font-size:.44rem;color:#a9c8ff;letter-spacing:.14em;text-transform:uppercase;font-family:'Space Mono',monospace}
   .role{color:#fff6dd;font-size:.56rem;margin-top:3px;text-transform:uppercase;letter-spacing:.09em;font-weight:700}
   .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 9px;margin-top:9px;font-size:.58rem}
   .kv .k{color:#a08a5a;text-transform:uppercase;letter-spacing:.05em;font-family:'Space Mono',monospace}
@@ -5856,6 +5921,7 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
       </defs>
       <rect width="440" height="277" fill="url(#circ)"/>
     </svg>
+    ${guillocheSvg}
     <div class="vignette"></div>
     <div class="sheen"></div>
     <div class="microtext"></div>
@@ -5888,19 +5954,35 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
         ${photoTag}
       </div>
       <div class="info">
-        <div class="nm">${data.fullName}</div>
+        <!-- Identity fields are NOT printed in plain view on the front.
+             The name exists only as a ghost engraving (barely perceptible),
+             its own micro-text line, and the UV layer. Nationality and DOB
+             exist ONLY in micro-text, the UV layer, and the MRZ. -->
+        <div class="nm ghost">${data.fullName}</div>
+        ${nano(data.fullName)}
         <div class="role">${data.roleLine || 'Founder &amp; Chief Executive Officer'}</div>
+        ${data.nationality ? nano('NAT ' + data.nationality) : ''}
+        ${data.dob ? nano('DOB ' + data.dob) : ''}
         <div class="kv">
-          ${data.nationality ? `<div class="k">Nationality</div><div class="v">${data.nationality}</div>` : ''}
-          ${data.dob ? `<div class="k">Date of Birth</div><div class="v">${data.dob}</div>` : ''}
+          ${data.height ? `<div class="k">Height</div><div class="v">${data.height}</div>` : ''}
+          ${data.weight ? `<div class="k">Weight</div><div class="v">${data.weight}</div>` : ''}
+          ${data.skinColor ? `<div class="k">Complexion</div><div class="v">${data.skinColor}</div>` : ''}
           <div class="k">Issued</div><div class="v">${data.issuedDate}</div>
         </div>
         <div class="stars" title="Security tier rating">★★★★★ <span style="color:#a08a5a;font-family:'Space Mono',monospace;font-size:.5rem">TIER 0</span></div>
       </div>
     </div>
+    <div class="holo-strip"><div class="txt">${holoText}</div></div>
     <div class="glyph-wrap">${glyphSvg}</div>
     <div class="glyph-lbl">Security Glyph</div>
-    <div class="mrz"><div class="lbl">Machine-Readable Zone</div>${mrz1}<br>${mrz2}</div>
+    <div class="mrz" data-covert="${covertPayload}"><div class="lbl">Machine-Readable Zone</div>${mrz1}<br>${mrz2}</div>
+    ${ghostPortrait}
+    ${contactLine}
+    <div class="uv-layer">
+      <div class="uv-txt">${data.ref}</div>
+      <div class="uv-sub">${data.fullName}${data.dob ? ' · ' + data.dob : ''}${data.nationality ? ' · ' + data.nationality : ''}</div>
+      <div class="uv-sub">SKYGLOBE GROUP · UV AUTHENTICATION LAYER</div>
+    </div>
   </div>
 </div>
 
@@ -5920,23 +6002,29 @@ function wrapCeoIdentityCard(data, verifyUrl, req) {
       </defs>
       <rect width="440" height="277" fill="url(#circ2)"/>
     </svg>
+    ${guillocheSvg}
     <div class="vignette"></div>
     <div class="sheen"></div>
     <div class="microtext"></div>
+    ${ghostPortrait}
     <div class="backhd">
       <img src="${origin}/icon-192.png" alt="SkyGlobe Group" style="width:20px;height:20px;border-radius:5px">
       <b>SKYGLOBE GROUP · FOUNDER IDENTITY</b>
     </div>
     <div class="backbody">
       <p>This card certifies the holder as the Founder &amp; Chief Executive Officer of SkyGlobe Group. It is issued, encrypted at rest and verified by SkyGlobe Group. It is not a government-issued identity document and does not confer any legal identity status outside SkyGlobe Group's own systems.</p>
+      ${nano('SKYGLOBE GROUP FOUNDER IDENTITY ' + data.ref)}
       <p>Full record access — including photograph and personal details — requires the holder's private access code or authenticated SkyGlobe staff login. This card's authenticity can be independently confirmed at any time via the QR code on the front, which resolves to a public verification page showing name, role and validity only.</p>
+      ${nano(data.fullName + ' ' + (data.dob || '') + ' ' + (data.nationality || ''))}
     </div>
     <div class="backsig">
       <img src="${sigUrl}" alt="" style="height:34px;filter:brightness(1.4)">
       <div class="backsig-lbl">Authorised Signatory<br>SkyGlobe Group</div>
       <img src="${stampUrl}" alt="" style="height:52px;width:52px;opacity:.85;margin-left:auto">
     </div>
-    <div class="backfoot">${cardNumber} · Reproduction or alteration of this card is prohibited · skyglobegroup.com</div>
+    <div class="holo-strip" style="bottom:26px"><div class="txt">${holoText}</div></div>
+    ${contactLine.replace('bottom:36px', 'bottom:24px')}
+    <div class="backfoot">${cardNumber} · Reproduction or alteration of this card is prohibited · support@skyglobegroup.com</div>
   </div>
 </div>
 <div class="note">🔒 Encrypted at rest · circuit-trace security print · biometric scan-frame · SkyGlobe issuing seal · security glyph derived from this card's own access-code hash (unique per card, verifiable) · QR code is a genuine, independently scannable verification link; the MRZ line is a stylistic passport-style layout, not a certified ICAO machine-readable travel document zone · full record accessible only to the holder's private access code or authenticated staff.</div>
@@ -6035,12 +6123,12 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
 </body></html>`;
 }
 
-async function issueIdentityCard({ tier, fullName, nationality, dob, roleLine, email, photoDataUrl, req }) {
+async function issueIdentityCard({ tier, fullName, nationality, dob, roleLine, email, photoDataUrl, height, weight, skinColor, religion, req }) {
   const ref = 'SGID-' + crypto.randomBytes(5).toString('hex').toUpperCase();
   const code = accessCode();
   const issuedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const verifyUrl = `${baseUrl(req)}/verify-id/${ref}`;
-  const html = wrapIdentityCard(tier, { fullName, nationality, dob, roleLine, ref, issuedDate, photoDataUrl, accessCodeHash: hashAccessCode(code) }, verifyUrl, req);
+  const html = wrapIdentityCard(tier, { fullName, nationality, dob, roleLine, ref, issuedDate, photoDataUrl, height, weight, skinColor, religion, accessCodeHash: hashAccessCode(code) }, verifyUrl, req);
 
   let photoUrl = null;
   if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
@@ -6069,6 +6157,7 @@ async function issueIdentityCard({ tier, fullName, nationality, dob, roleLine, e
   await dbQuery('POST', 'identity_cards', {
     ref, tier, full_name: fullName, nationality: nationality || null, dob: dob || null, role_line: roleLine || null,
     email: email || null, photo_url: photoUrl, access_code_hash: hashAccessCode(code), status: 'valid',
+    height: height || null, weight: weight || null, skin_color: skinColor || null, religion: religion || null,
   }).catch(e => console.error('Identity card record save warning:', e.message));
 
   return { ref, code, viewUrl, verifyUrl, html };
@@ -6123,9 +6212,9 @@ app.post('/api/admin/identity/staff/issue', async (req, res) => {
 app.post('/api/admin/identity/ceo/issue', async (req, res) => {
   if (!checkAdmin(req, res)) return;
   try {
-    const { fullName, nationality, dob, roleLine, photoDataUrl } = req.body || {};
+    const { fullName, nationality, dob, roleLine, photoDataUrl, height, weight, skinColor, religion } = req.body || {};
     if (!fullName) return res.status(400).json({ error: 'Full name is required.' });
-    const result = await issueIdentityCard({ tier: 'ceo', fullName, nationality, dob, roleLine: roleLine || 'Founder & Chief Executive Officer', photoDataUrl, req });
+    const result = await issueIdentityCard({ tier: 'ceo', fullName, nationality, dob, roleLine: roleLine || 'Founder & Chief Executive Officer', photoDataUrl, height, weight, skinColor, religion, req });
     res.json({ success: true, ref: result.ref, viewUrl: result.viewUrl, accessCode: result.code });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
