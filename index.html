@@ -1190,6 +1190,30 @@ body{background:#f4f6f9}
 .sg-showcase{position:relative;min-height:330px;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(238,244,255,.72));border:1px solid rgba(10,28,62,.08);box-shadow:0 30px 70px rgba(16,24,40,.12),inset 0 1px 0 rgba(255,255,255,.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .sg-showcase::before{content:'';position:absolute;inset:0;background:linear-gradient(130deg,transparent 28%,rgba(212,167,58,.10),transparent 68%);pointer-events:none}
 .sg-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:.55rem;padding:2rem 2rem 2.8rem;opacity:0;transform:translateY(14px) scale(.985);transition:opacity .8s ease,transform .8s ease;pointer-events:none}
+/* ── Featured video panel — fills the right half of the showcase card ── */
+.sg-video{position:absolute;top:14px;right:14px;bottom:14px;width:46%;border-radius:18px;overflow:hidden;background:#0b1120;
+  border:1px solid rgba(10,28,62,.14);box-shadow:0 18px 44px rgba(16,24,40,.28),inset 0 1px 0 rgba(255,255,255,.06);z-index:3;display:none;
+  animation:sgvIn .7s cubic-bezier(.22,1.1,.36,1) both}
+@keyframes sgvIn{from{opacity:0;transform:translateX(18px) scale(.97)}to{opacity:1;transform:none}}
+.sg-showcase.sgv-on .sg-video{display:block}
+.sg-showcase.sgv-on .sg-slide{padding-right:calc(46% + 2.2rem)!important}
+.sg-video iframe,.sg-video video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:cover;background:#0b1120}
+.sgv-badges{position:absolute;top:10px;left:10px;z-index:4;display:flex;gap:6px;pointer-events:none}
+.sgv-badge{display:inline-flex;align-items:center;gap:5px;font-size:.6rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;color:#fff;background:rgba(10,16,32,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.16);font-family:inherit}
+.sgv-badge.live{background:linear-gradient(135deg,#e5484d,#c02a30);border-color:rgba(255,255,255,.25)}
+.sgv-badge.live .sgv-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:sgvPulse 1.4s ease-in-out infinite}
+@keyframes sgvPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,255,255,.5)}50%{opacity:.6;box-shadow:0 0 0 5px transparent}}
+.sgv-cap{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:30px 14px 11px;pointer-events:none;
+  background:linear-gradient(transparent,rgba(4,8,18,.88));color:#fff}
+.sgv-cap b{display:block;font-size:.8rem;font-weight:700;letter-spacing:.01em;line-height:1.3}
+.sgv-cap span{display:block;font-size:.68rem;color:#c4cde0;margin-top:2px;line-height:1.4}
+.sg-videomobile{display:none;position:relative;margin-top:1.05rem;border-radius:18px;overflow:hidden;aspect-ratio:16/9;background:#0b1120;
+  border:1px solid rgba(10,28,62,.14);box-shadow:0 16px 38px rgba(16,24,40,.22)}
+.sg-videomobile iframe,.sg-videomobile video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:cover;background:#0b1120}
+.sg-videomobile.sgv-show{display:block}
+@media(max-width:900px){.sg-showcase .sg-video{display:none!important}.sg-showcase.sgv-on .sg-slide{padding-right:2rem!important}}
 .sg-slide.active{opacity:1;transform:none;pointer-events:auto}
 .sg-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.45rem;background:linear-gradient(135deg,#0a1c3e,#15418c);box-shadow:0 10px 24px rgba(10,28,62,.25)}
 .sg-tag{font-size:.66rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C8962A}
@@ -1582,8 +1606,10 @@ body.wc-active .page-back-bar{padding-top:138px}
         <div class="sg-slide"><div class="sg-ico">&#127908;</div><div class="sg-tag">Events</div><div class="sg-title">Conferences &amp; Invitations</div><div class="sg-desc">Conference sourcing &amp; official invitation letters for your visa.</div><button class="sg-link" onclick="location.href='/conferences'">See events &rarr;</button></div>
         <div class="sg-slide"><div class="sg-ico">&#128710;</div><div class="sg-tag">Visit</div><div class="sg-title">Tourist &amp; Visit Visas</div><div class="sg-desc">Schengen, USA, UK &amp; more &mdash; prepared for the highest approval odds.</div><button class="sg-link" onclick="showPage('services')">Apply &rarr;</button></div>
         <div class="sg-dots" id="sgDots"></div>
+        <div class="sg-video" id="sgVideo"></div>
       </aside>
     </div>
+    <div class="sg-videomobile" id="sgVideoM"></div>
   </section>
   <script>
   (function(){
@@ -1616,6 +1642,59 @@ body.wc-active .page-back-bar{padding-top:138px}
         btn.onclick = a.button_link ? function(){ location.href = a.button_link; } : btn.onclick;
       }
     }).catch(()=>{});
+  })();
+  // Featured video panel — CEO-managed from the admin portal. Plays YouTube
+  // (incl. live streams) or direct MP4; a LIVE video always takes the slot.
+  // Desktop: fills the right half of the showcase card. Mobile: its own
+  // full-width panel right below the showcase.
+  (function(){
+    var escV = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];}); };
+    fetch('/api/videos').then(function(r){return r.json();}).then(function(list){
+      if (!Array.isArray(list) || !list.length) return;
+      var v = list[0];
+      var m = String(v.video_url||'').match(/(?:youtube\.com\/(?:watch\?v=|live\/|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+      var yt = m ? m[1] : null;
+      var isMp4 = /\.mp4(\?|$)/i.test(v.video_url||'');
+      var badge = v.is_live ? 'live' : (v.badge || 'featured');
+      var badgeText = { live:'LIVE', featured:'FEATURED', new:'NEW', testimonial:'TESTIMONIAL', update:'UPDATE' }[badge] || 'FEATURED';
+      var media;
+      if (yt) {
+        media = '<iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/'+yt+'?autoplay=1&mute=1&controls=1&rel=0&playsinline=1&modestbranding=1'
+              + (v.is_live ? '' : '&loop=1&playlist='+yt)
+              + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="'+escV(v.title)+'"></iframe>';
+      } else if (isMp4) {
+        media = '<video src="'+escV(v.video_url)+'" muted autoplay loop playsinline preload="metadata" controls></video>';
+      } else {
+        media = '<a href="'+escV(v.video_url)+'" target="_blank" rel="noopener" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;text-decoration:none;background:radial-gradient(110% 130% at 30% 20%,rgba(212,167,58,.22),transparent 55%),#0b1120">'
+              + '<span style="width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f7d774,#e4b132);color:#181000;font-size:1.3rem;box-shadow:0 8px 24px rgba(228,177,50,.45)">▶</span>'
+              + '<span style="font-size:.8rem;font-weight:700">Watch now →</span></a>';
+      }
+      var html = media
+        + '<div class="sgv-badges"><span class="sgv-badge '+badge+'">'+(badge==='live'?'<span class="sgv-dot"></span>':'')+badgeText+'</span></div>'
+        + '<div class="sgv-cap"><b>'+escV(v.title)+'</b>'+(v.description?'<span>'+escV(v.description)+'</span>':'')+'</div>';
+      var mobile = window.matchMedia('(max-width:900px)').matches;
+      if (mobile) {
+        var mBox = document.getElementById('sgVideoM');
+        if (mBox) { mBox.innerHTML = html; mBox.classList.add('sgv-show'); }
+      } else {
+        var dBox = document.getElementById('sgVideo'), aside = document.getElementById('sgShowcase');
+        if (dBox && aside) { dBox.innerHTML = html; aside.classList.add('sgv-on'); }
+      }
+      // Pause self-hosted video when scrolled out of view; resume when back.
+      var vid = document.querySelector('.sg-video video, .sg-videomobile video');
+      if (vid && 'IntersectionObserver' in window) {
+        new IntersectionObserver(function(es){ es.forEach(function(e){ e.isIntersecting ? vid.play().catch(function(){}) : vid.pause(); }); }, { threshold: 0.15 })
+          .observe(vid);
+      }
+      // One view per session per video.
+      try {
+        var k = 'sg_vid_seen_' + v.id;
+        if (!sessionStorage.getItem(k)) {
+          sessionStorage.setItem(k, '1');
+          fetch('/api/videos/'+v.id+'/track', { method:'POST' }).catch(function(){});
+        }
+      } catch (e) {}
+    }).catch(function(){});
   })();
   // Real flag icon images instead of flag emoji — Windows (and some Android
   // builds) don't render regional-indicator flag emoji as flags at all, only

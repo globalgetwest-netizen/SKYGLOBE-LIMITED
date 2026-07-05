@@ -3367,6 +3367,77 @@ app.patch('/api/admin/announcements/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Featured videos — CEO-managed video panel on the homepage showcase ──────
+// Live streams always outrank normal videos; otherwise priority then newest.
+app.get('/api/videos', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'featured_videos', null, { active: 'eq.true', order: 'is_live.desc,priority.asc,created_at.desc' });
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.json([]); }
+});
+
+app.get('/api/admin/videos', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'CEO only.' });
+  try { res.json(await dbQuery('GET', 'featured_videos', null, { order: 'is_live.desc,priority.asc,created_at.desc' })); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/videos', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    const b = req.body || {};
+    if (!b.title || !b.video_url) return res.status(400).json({ error: 'Title and video link are required.' });
+    const row = {
+      title: String(b.title).slice(0, 140),
+      description: b.description ? String(b.description).slice(0, 300) : null,
+      video_url: String(b.video_url).trim(),
+      badge: ['live','featured','new','testimonial','update'].includes(b.badge) ? b.badge : 'featured',
+      is_live: !!b.is_live,
+      active: b.active !== false,
+      priority: Number.isFinite(+b.priority) ? +b.priority : 10,
+    };
+    const created = await dbQuery('POST', 'featured_videos', row);
+    logActivity(who, 'ceo', 'video_add', `Added featured video: ${row.title}`, '');
+    res.json({ success: true, video: Array.isArray(created) ? created[0] : created });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/videos/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    const b = req.body || {}, patch = {};
+    ['title','description','video_url','priority'].forEach(k => { if (b[k] !== undefined) patch[k] = b[k]; });
+    if (b.active !== undefined) patch.active = !!b.active;
+    if (b.is_live !== undefined) patch.is_live = !!b.is_live;
+    if (['live','featured','new','testimonial','update'].includes(b.badge)) patch.badge = b.badge;
+    const updated = await dbQuery('PATCH', 'featured_videos', patch, { id: `eq.${req.params.id}` });
+    logActivity(who, 'ceo', 'video_update', `Updated featured video #${req.params.id}`, String(req.params.id));
+    res.json({ success: true, video: Array.isArray(updated) ? updated[0] : updated });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/videos/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  try {
+    await dbQuery('DELETE', 'featured_videos', null, { id: `eq.${req.params.id}` });
+    logActivity(who, 'ceo', 'video_delete', `Deleted featured video #${req.params.id}`, String(req.params.id));
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/videos/:id/track', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'featured_videos', null, { id: `eq.${req.params.id}` });
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (!row) return res.status(404).json({ error: 'Not found' });
+    await dbQuery('PATCH', 'featured_videos', { views: (Number(row.views) || 0) + 1 }, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Public, anonymous engagement counters — the widget on every public page
 // reports views/clicks/dismissals so the CEO can see which announcements
 // actually land. No visitor data stored, just three integers per row.

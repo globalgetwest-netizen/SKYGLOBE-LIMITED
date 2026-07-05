@@ -352,6 +352,7 @@
         <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
         <button class="sb-link" data-view="idcards" onclick="switchView('idcards')"><span class="ic">🪪</span> Digital ID Issuance</button>
         <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
+        <button class="sb-link" data-view="videos" onclick="switchView('videos')"><span class="ic">🎥</span> Featured Videos</button>
         <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
         <button class="sb-link" data-view="payroll" onclick="switchView('payroll')"><span class="ic">👥</span> Payroll</button>
@@ -662,6 +663,41 @@
               <button onclick="loadAnnouncements()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
             </div>
             <div id="announcementsTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
+          </div>
+        </section>
+
+        <!-- FEATURED VIDEOS -->
+        <section class="view" id="view-videos">
+          <div class="panel" style="margin-bottom:22px">
+            <h3 style="margin:0 0 6px">🎥 Add Featured Video</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Plays inside the homepage showcase — right half on desktop, its own panel on mobile. Paste a <b>YouTube link</b> (video, Short or live stream) or a direct <b>.mp4</b> URL. A video marked LIVE always takes the slot over everything else.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px">
+              <div style="grid-column:1/-1"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Video link (YouTube or .mp4) *</label>
+                <input type="text" id="fvUrl" placeholder="https://youtube.com/watch?v=…  ·  https://youtube.com/live/…  ·  https://…/video.mp4" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div style="grid-column:span 2"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Title *</label>
+                <input type="text" id="fvTitle" placeholder="Inside SkyGlobe: how we process your visa" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div style="grid-column:span 2"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Short description</label>
+                <input type="text" id="fvDesc" placeholder="A 2-minute look at the SkyGlobe process." style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Badge</label>
+                <select id="fvBadge" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem">
+                  <option value="featured">⭐ Featured</option><option value="new">🆕 New</option>
+                  <option value="testimonial">💬 Testimonial</option><option value="update">📰 Update</option>
+                </select></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Live stream?</label>
+                <label style="display:flex;align-items:center;gap:8px;padding:11px 14px;border:1px solid var(--line);border-radius:9px;background:var(--navy);cursor:pointer">
+                  <input type="checkbox" id="fvLive" style="accent-color:#e5484d;width:16px;height:16px"><span style="font-size:0.85rem">🔴 This is LIVE</span></label></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <button class="btn" onclick="addVideo()">🎥 Add Video</button>
+              <div id="fvAddMsg" style="font-size:0.85rem;color:var(--muted)"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <h3 style="margin:0">🎬 Video Library</h3>
+              <button onclick="loadVideos()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
+            </div>
+            <div id="videosTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
           </div>
         </section>
 
@@ -1299,6 +1335,7 @@ function switchView(v){
   if(v==='offerings') loadOfferings();
   if(v==='wprates') loadWpRates();
   if(v==='announcements') loadAnnouncements();
+  if(v==='videos') loadVideos();
   if(v==='legaldocs') loadLegalDocs();
   if(v==='finance') loadFinance();
   if(v==='payroll') loadPayroll();
@@ -1972,6 +2009,83 @@ async function deleteAnnouncement(id){
     const r=await fetch(API+'/api/admin/announcements/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}});
     if(!r.ok){ const d=await r.json(); throw new Error(d.error||'Could not delete.'); }
     loadAnnouncements();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function loadVideos(){
+  const el=document.getElementById('videosTable');
+  if(!el)return;
+  try{
+    const r=await fetch(API+'/api/admin/videos',{headers:{'x-admin-key':KEY}});
+    if(r.status===401){el.innerHTML='<p style="color:#e57373">Unauthorized.</p>';return;}
+    const rows=await r.json();
+    if(!Array.isArray(rows)||!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No videos yet — add one above.</p>';return;}
+    const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+      <thead><tr style="text-align:left;color:var(--muted);text-transform:uppercase;font-size:0.7rem;letter-spacing:.06em">
+        <th style="padding:8px">Video</th><th style="padding:8px">Badge</th><th style="padding:8px">Views</th><th style="padding:8px">Live</th><th style="padding:8px">Active</th><th style="padding:8px"></th>
+      </tr></thead><tbody>
+      ${rows.map(v=>`
+        <tr style="border-top:1px solid var(--line)">
+          <td style="padding:8px;min-width:240px">
+            <div style="font-weight:700">${v.is_live?'🔴 ':''}${esc(v.title)}</div>
+            <div style="color:var(--muted);font-size:0.75rem;margin-top:2px;word-break:break-all">${esc(v.video_url)}</div>
+          </td>
+          <td style="padding:8px"><span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:${v.is_live?'#e5484d22':'#d4a73a22'};color:${v.is_live?'#ff8a8e':'var(--gold)'}">${esc(v.is_live?'live':(v.badge||'featured'))}</span></td>
+          <td style="padding:8px;color:var(--muted)">👁 ${Number(v.views)||0}</td>
+          <td style="padding:8px">
+            <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" ${v.is_live?'checked':''} onchange="patchVideo(${v.id},{is_live:this.checked})" style="accent-color:#e5484d;width:16px;height:16px">
+            </label>
+          </td>
+          <td style="padding:8px">
+            <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" ${v.active?'checked':''} onchange="patchVideo(${v.id},{active:this.checked})" style="accent-color:var(--gold);width:16px;height:16px">
+              <span style="font-size:0.78rem;color:${v.active?'#4caf50':'var(--muted)'}">${v.active?'Showing':'Hidden'}</span>
+            </label>
+          </td>
+          <td style="padding:8px"><button onclick="deleteVideo(${v.id})" style="background:transparent;border:1px solid var(--line);color:#e57373;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:0.78rem">✕</button></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  }catch(e){ el.innerHTML='<p style="color:#e57373">Could not load videos.</p>'; }
+}
+
+async function addVideo(){
+  const msg=document.getElementById('fvAddMsg');
+  const title=document.getElementById('fvTitle').value.trim();
+  const url=document.getElementById('fvUrl').value.trim();
+  if(!title||!url){ msg.style.color='#e57373'; msg.textContent='Video link and title are both required.'; return; }
+  msg.style.color='var(--muted)'; msg.textContent='Adding…';
+  try{
+    const r=await fetch(API+'/api/admin/videos',{
+      method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({
+        title, video_url:url, description:document.getElementById('fvDesc').value.trim(),
+        badge:document.getElementById('fvBadge').value, is_live:document.getElementById('fvLive').checked,
+      })
+    });
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not add video.');
+    msg.style.color='#4caf50'; msg.textContent='✓ Live in the homepage showcase now.';
+    ['fvUrl','fvTitle','fvDesc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fvLive').checked=false;
+    loadVideos();
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+}
+
+async function patchVideo(id,patch){
+  try{
+    await fetch(API+'/api/admin/videos/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify(patch)});
+    loadVideos();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function deleteVideo(id){
+  if(!confirm('Delete this video?'))return;
+  try{
+    const r=await fetch(API+'/api/admin/videos/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}});
+    if(!r.ok){ const d=await r.json(); throw new Error(d.error||'Could not delete.'); }
+    loadVideos();
   }catch(e){ alert('Error: '+e.message); }
 }
 
