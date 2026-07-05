@@ -563,6 +563,14 @@
                 <input type="date" id="ceoIdDob" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Title / Role Line</label>
                 <input type="text" id="ceoIdRole" placeholder="Founder & Chief Executive Officer" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Height</label>
+                <input type="text" id="ceoIdHeight" placeholder="e.g. 180 cm" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Weight</label>
+                <input type="text" id="ceoIdWeight" placeholder="e.g. 75 kg" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Complexion / Skin Color</label>
+                <input type="text" id="ceoIdSkin" placeholder="e.g. Dark, Fair, Brown" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Religion (covert — machine layer only, never printed)</label>
+                <input type="text" id="ceoIdReligion" placeholder="Stored covert; not visible on card" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Photo</label>
                 <input type="file" accept="image/png,image/jpeg" id="ceoIdPhoto" onchange="onCeoPhoto(this)" style="width:100%;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.82rem"></div>
             </div>
@@ -619,7 +627,7 @@
         <section class="view" id="view-announcements">
           <div class="panel" style="margin-bottom:22px">
             <h3 style="margin:0 0 6px">➕ Add Announcement</h3>
-            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Appears live on the homepage showcase the moment it's saved and Active — a new country opening, a deadline, an offer. No redeploy needed.</p>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Appears live across all public pages the moment it's saved and Active — as a premium banner or slide-in toast. Visitors who dismiss it won't see it again, and views / clicks / dismissals are tracked below. No redeploy needed.</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px">
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Icon (emoji)</label>
                 <input type="text" id="anIcon" placeholder="🇳🇴" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
@@ -633,6 +641,15 @@
                 <input type="text" id="anBtnText" placeholder="Apply now" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
               <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Button link</label>
                 <input type="text" id="anBtnLink" placeholder="/work-permit" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Type</label>
+                <select id="anType" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem">
+                  <option value="info">🔵 Info / Update</option><option value="success">🟢 Good news</option>
+                  <option value="warning">🟡 Notice / Deadline</option><option value="urgent">🔴 Urgent</option>
+                </select></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Display style</label>
+                <select id="anMode" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem">
+                  <option value="banner">📌 Banner (top of page)</option><option value="toast">💬 Toast (slides in, corner)</option>
+                </select></div>
             </div>
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
               <button class="btn" onclick="addAnnouncement()">➕ Add Announcement</button>
@@ -1703,6 +1720,8 @@ async function issueCeoId(){
       body:JSON.stringify({
         fullName, nationality:document.getElementById('ceoIdNationality').value.trim(),
         dob:formatDobForCard(document.getElementById('ceoIdDob').value), roleLine:document.getElementById('ceoIdRole').value.trim(),
+        height:document.getElementById('ceoIdHeight').value.trim(), weight:document.getElementById('ceoIdWeight').value.trim(),
+        skinColor:document.getElementById('ceoIdSkin').value.trim(), religion:document.getElementById('ceoIdReligion').value.trim(),
         photoDataUrl:CEO_PHOTO_DATA_URL,
       })});
     const d=await r.json();
@@ -1885,13 +1904,24 @@ async function loadAnnouncements(){
     const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
       <thead><tr style="text-align:left;color:var(--muted);text-transform:uppercase;font-size:0.7rem;letter-spacing:.06em">
-        <th style="padding:8px">Announcement</th><th style="padding:8px">Button</th><th style="padding:8px">Active</th><th style="padding:8px"></th>
+        <th style="padding:8px">Announcement</th><th style="padding:8px">Style</th><th style="padding:8px">Engagement</th><th style="padding:8px">Button</th><th style="padding:8px">Active</th><th style="padding:8px"></th>
       </tr></thead><tbody>
-      ${rows.map(a=>`
+      ${rows.map(a=>{
+        const tc={info:'#4f8ef7',success:'#2ecc8f',warning:'#f5b942',urgent:'#f0564f'}[a.type]||'#4f8ef7';
+        const imp=Number(a.impressions)||0, clk=Number(a.clicks)||0, dis=Number(a.dismissals)||0;
+        const ctr=imp?Math.round(clk/imp*100):0;
+        return `
         <tr style="border-top:1px solid var(--line)">
           <td style="padding:8px;min-width:260px">
             <div style="font-weight:700">${esc(a.icon)} ${esc(a.headline)}</div>
             <div style="color:var(--muted);font-size:0.78rem;margin-top:2px">${esc(a.tag)}${a.tag&&a.subtext?' · ':''}${esc(a.subtext)}</div>
+          </td>
+          <td style="padding:8px;white-space:nowrap">
+            <span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:${tc}22;color:${tc}">${esc(a.type||'info')}</span>
+            <div style="color:var(--muted);font-size:0.72rem;margin-top:4px">${a.display_mode==='toast'?'💬 Toast':'📌 Banner'}</div>
+          </td>
+          <td style="padding:8px;font-size:0.78rem;color:var(--muted);white-space:nowrap">
+            👁 ${imp} &nbsp;·&nbsp; 🖱 ${clk}${imp?` <span style="color:var(--gold)">(${ctr}%)</span>`:''} &nbsp;·&nbsp; ✕ ${dis}
           </td>
           <td style="padding:8px;color:var(--muted);font-size:0.8rem">${esc(a.button_text)||'—'}${a.button_link?' → '+esc(a.button_link):''}</td>
           <td style="padding:8px">
@@ -1901,7 +1931,7 @@ async function loadAnnouncements(){
             </label>
           </td>
           <td style="padding:8px"><button onclick="deleteAnnouncement(${a.id})" style="background:transparent;border:1px solid var(--line);color:#e57373;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:0.78rem">✕</button></td>
-        </tr>`).join('')}
+        </tr>`;}).join('')}
       </tbody></table>`;
   }catch(e){ el.innerHTML='<p style="color:#e57373">Could not load announcements.</p>'; }
 }
@@ -1918,11 +1948,12 @@ async function addAnnouncement(){
         icon:document.getElementById('anIcon').value.trim(), tag:document.getElementById('anTag').value.trim(),
         headline, subtext:document.getElementById('anSubtext').value.trim(),
         button_text:document.getElementById('anBtnText').value.trim(), button_link:document.getElementById('anBtnLink').value.trim(),
+        type:document.getElementById('anType').value, display_mode:document.getElementById('anMode').value,
       })
     });
     const d=await r.json();
     if(!r.ok) throw new Error(d.error||'Could not add announcement.');
-    msg.style.color='#4caf50'; msg.textContent='✓ Live on the homepage now.';
+    msg.style.color='#4caf50'; msg.textContent='✓ Live across all public pages now.';
     ['anIcon','anTag','anHeadline','anSubtext','anBtnText','anBtnLink'].forEach(id=>document.getElementById(id).value='');
     loadAnnouncements();
   }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }

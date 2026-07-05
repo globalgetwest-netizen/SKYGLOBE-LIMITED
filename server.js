@@ -3341,6 +3341,8 @@ app.post('/api/admin/announcements', async (req, res) => {
       button_text: b.button_text || '', button_link: b.button_link || '',
       active: b.active !== false, priority: b.priority != null ? Number(b.priority) : 0,
       starts_at: b.starts_at || null, ends_at: b.ends_at || null,
+      type: ['info','success','warning','urgent'].includes(b.type) ? b.type : 'info',
+      display_mode: b.display_mode === 'toast' ? 'toast' : 'banner',
     };
     const created = await dbQuery('POST', 'announcements', row);
     logActivity(who, 'ceo', 'announcement_create', `Added announcement: ${row.headline}`, '');
@@ -3355,11 +3357,28 @@ app.patch('/api/admin/announcements/:id', async (req, res) => {
     const b = req.body || {};
     const patch = { updated_at: new Date().toISOString() };
     ['icon','tag','headline','subtext','button_text','button_link','starts_at','ends_at'].forEach(k => { if (b[k] !== undefined) patch[k] = b[k]; });
+    if (['info','success','warning','urgent'].includes(b.type)) patch.type = b.type;
+    if (b.display_mode !== undefined) patch.display_mode = b.display_mode === 'toast' ? 'toast' : 'banner';
     if (b.active !== undefined) patch.active = !!b.active;
     if (b.priority !== undefined) patch.priority = Number(b.priority);
     const updated = await dbQuery('PATCH', 'announcements', patch, { id: `eq.${req.params.id}` });
     logActivity(who, 'ceo', 'announcement_update', `Updated announcement #${req.params.id}`, String(req.params.id));
     res.json({ success: true, announcement: Array.isArray(updated) ? updated[0] : updated });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Public, anonymous engagement counters — the widget on every public page
+// reports views/clicks/dismissals so the CEO can see which announcements
+// actually land. No visitor data stored, just three integers per row.
+app.post('/api/announcements/:id/track', async (req, res) => {
+  try {
+    const col = { view: 'impressions', click: 'clicks', dismiss: 'dismissals' }[String((req.body || {}).action || '')];
+    if (!col) return res.status(400).json({ error: 'Bad action' });
+    const rows = await dbQuery('GET', 'announcements', null, { id: `eq.${req.params.id}` });
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (!row) return res.status(404).json({ error: 'Not found' });
+    await dbQuery('PATCH', 'announcements', { [col]: (Number(row[col]) || 0) + 1 }, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
