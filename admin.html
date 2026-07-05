@@ -351,6 +351,7 @@
         <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
         <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
         <button class="sb-link" data-view="idcards" onclick="switchView('idcards')"><span class="ic">🪪</span> Digital ID Issuance</button>
+        <button class="sb-link" data-view="reception" onclick="switchView('reception')"><span class="ic">🛎️</span> AI Reception</button>
         <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
         <button class="sb-link" data-view="videos" onclick="switchView('videos')"><span class="ic">🎥</span> Featured Videos</button>
         <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
@@ -622,6 +623,25 @@
             </div>
             <div id="wpRatesTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading rates…</p></div>
           </div>
+        </section>
+
+        <!-- AI RECEPTION -->
+        <section class="view" id="view-reception">
+          <div class="panel" style="margin-bottom:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px">
+              <div><h3 style="margin:0">🛎️ AI Reception</h3>
+                <p style="color:var(--muted);font-size:0.85rem;margin:4px 0 0">Every request across all departments is read by AI the moment it arrives — classified, summarised, drafted, and flagged if a human is needed. Escalations land in the right department queue automatically.</p></div>
+              <button onclick="loadReception()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
+            </div>
+            <div id="recStats" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px">
+            <div id="recFilters" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <span style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700">Department:</span>
+              <span id="recDeptChips" style="display:flex;gap:6px;flex-wrap:wrap"></span>
+            </div>
+          </div>
+          <div id="receptionFeed"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
         </section>
 
         <!-- ANNOUNCEMENTS -->
@@ -1328,7 +1348,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
@@ -1336,6 +1356,7 @@ function switchView(v){
   if(v==='pricing') loadPricing();
   if(v==='offerings') loadOfferings();
   if(v==='wprates') loadWpRates();
+  if(v==='reception') loadReception();
   if(v==='announcements') loadAnnouncements();
   if(v==='videos') loadVideos();
   if(v==='legaldocs') loadLegalDocs();
@@ -1626,6 +1647,95 @@ function renderAnalytics(rows,days){
 
 
 /* ── #23 ERROR LOGS ── */
+/* ══════════════════ AI RECEPTION ══════════════════ */
+let REC_DEPTS=[], REC_FILTER='';
+const REC_DEPT_META={
+  travel:{icon:'✈️',label:'Travel & Mobility'}, education:{icon:'🎓',label:'Education & Academy'},
+  legal:{icon:'📜',label:'Legal & Documents'}, identity:{icon:'🪪',label:'Digital Identity'},
+  finance:{icon:'💳',label:'Finance & Payments'}, general:{icon:'📨',label:'General / Reception'}
+};
+const REC_URG={critical:{c:'#f0564f',l:'Critical'},high:{c:'#f5b942',l:'High'},normal:{c:'#4f8ef7',l:'Normal'},low:{c:'#5f74a0',l:'Low'}};
+
+async function loadReception(){
+  const feed=document.getElementById('receptionFeed');
+  const statsBox=document.getElementById('recStats');
+  const chips=document.getElementById('recDeptChips');
+  feed.innerHTML='<p style="color:var(--muted);font-size:0.9rem">Loading…</p>';
+  // stats
+  try{
+    const s=await (await fetch(API+'/api/admin/reception/stats',{headers:{'x-admin-key':KEY}})).json();
+    if(s&&!s.error){
+      const tile=(n,l,c)=>`<div style="flex:1;min-width:120px;background:var(--navy);border:1px solid var(--line);border-radius:12px;padding:12px 14px"><div style="font-size:1.5rem;font-weight:800;color:${c||'#fff'}">${n}</div><div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:2px">${l}</div></div>`;
+      statsBox.innerHTML=tile(s.total||0,'Total requests','#fff')+tile(s.needsHuman||0,'Need a human','#f5b942')+tile(s.critical||0,'Critical','#f0564f')+tile((s.byStatus&&s.byStatus.resolved)||0,'Resolved','#2ecc8f');
+    }
+  }catch(e){ statsBox.innerHTML=''; }
+  // dept filter chips
+  const deptKeys=['',...Object.keys(REC_DEPT_META)];
+  chips.innerHTML=deptKeys.map(k=>{
+    const m=k?REC_DEPT_META[k]:{icon:'🌐',label:'All'};
+    const on=REC_FILTER===k;
+    return `<button onclick="REC_FILTER='${k}';loadReception()" style="cursor:pointer;border:1px solid ${on?'var(--gold)':'var(--line)'};background:${on?'rgba(212,167,58,.14)':'transparent'};color:${on?'var(--gold)':'var(--muted)'};font-size:0.78rem;font-weight:700;padding:6px 12px;border-radius:999px">${m.icon} ${m.label}</button>`;
+  }).join('');
+  // feed
+  try{
+    const q=REC_FILTER?('?dept='+REC_FILTER):'';
+    const r=await fetch(API+'/api/admin/reception'+q,{headers:{'x-admin-key':KEY}});
+    const rows=await r.json();
+    if(!r.ok) throw new Error((rows&&rows.error)||('HTTP '+r.status));
+    if(!Array.isArray(rows)||!rows.length){ feed.innerHTML='<div style="color:var(--muted);text-align:center;padding:40px">No requests in this queue yet.</div>'; return; }
+    feed.innerHTML=rows.map(recCard).join('');
+  }catch(err){
+    const missing=/relation|does not exist|PGRST/i.test(err.message||'');
+    feed.innerHTML='<div style="color:#e05c5c;padding:20px">Failed to load: '+esc(err.message)+
+      (missing?'<div style="color:var(--muted);font-size:0.8rem;margin-top:8px;font-weight:400">The <code>ai_reception</code> table isn\'t in Supabase yet — run the SQL in server.js (search "AI RECEPTION"), then refresh.</div>':'')+'</div>';
+  }
+}
+
+function recCard(r){
+  const m=REC_DEPT_META[r.department]||REC_DEPT_META.general;
+  const u=REC_URG[r.urgency]||REC_URG.normal;
+  const statusPill={new:['#f5b942','New'],ai_handled:['#4f8ef7','AI handled'],assigned:['#a78bfa','Assigned'],resolved:['#2ecc8f','Resolved']}[r.status]||['#5f74a0',r.status];
+  const sent={frustrated:'😟',positive:'😊',neutral:'😐'}[r.sentiment]||'';
+  return `<div style="border-radius:12px;background:var(--navy);border:1px solid var(--line);border-left:3px solid ${u.c};padding:14px 16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <span style="font-size:0.72rem;font-weight:800;color:var(--gold)">${m.icon} ${m.label}</span>
+      <span style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:${u.c};border:1px solid ${u.c}55;padding:2px 8px;border-radius:999px">${u.l}</span>
+      <span style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:${statusPill[0]};background:${statusPill[0]}22;padding:2px 8px;border-radius:999px">${statusPill[1]}</span>
+      ${r.needs_human?'<span style="font-size:0.66rem;font-weight:800;color:#f5b942">⚠ HUMAN NEEDED</span>':'<span style="font-size:0.66rem;font-weight:800;color:#2ecc8f">✓ AI can handle</span>'}
+      <span style="flex:1"></span>
+      <span style="font-size:0.7rem;color:var(--muted)">${sent} ${timeAgo(r.created_at)}</span>
+    </div>
+    <div style="font-weight:700;font-size:0.9rem;margin-bottom:2px">${esc(r.client_name||'—')} <span style="color:var(--muted);font-weight:400;font-size:0.8rem">&lt;${esc(r.client_email||'—')}&gt;</span></div>
+    ${r.service?`<div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px">${esc(r.service)}${r.ref?' · '+esc(r.ref):''}</div>`:''}
+    <div style="font-size:0.85rem;margin-bottom:8px"><b style="color:var(--gold)">Intent:</b> ${esc(r.intent||'—')}</div>
+    ${r.suggested_reply?`<textarea id="recReply${r.id}" style="width:100%;min-height:76px;background:#0d1526;color:#eef2fb;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:0.82rem;font-family:inherit;line-height:1.5">${esc(r.suggested_reply)}</textarea>`:''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      ${r.status!=='resolved'?`<button onclick="recSendReply(${r.id})" style="background:var(--gold);color:#1a1300;border:none;padding:7px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.78rem">✉ Send reply &amp; resolve</button>`:''}
+      ${r.status!=='resolved'?`<button onclick="recSetStatus(${r.id},'assigned')" style="background:transparent;border:1px solid var(--line);color:#a78bfa;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:0.78rem">👤 Assign to human</button>`:''}
+      ${r.status!=='resolved'?`<button onclick="recSetStatus(${r.id},'resolved')" style="background:transparent;border:1px solid var(--line);color:#2ecc8f;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:0.78rem">✓ Mark resolved</button>`:''}
+    </div>
+  </div>`;
+}
+
+async function recSetStatus(id,status){
+  try{
+    await fetch(API+'/api/admin/reception/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({status})});
+    loadReception();
+  }catch(e){ alert('Error: '+e.message); }
+}
+async function recSendReply(id){
+  const ta=document.getElementById('recReply'+id);
+  const reply=ta?ta.value.trim():'';
+  if(!reply){ alert('Reply is empty.'); return; }
+  if(!confirm('Send this reply to the client and mark resolved?'))return;
+  try{
+    const r=await fetch(API+'/api/admin/reception/'+id+'/reply',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({reply})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not send.');
+    loadReception();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
 async function loadErrors(){
   const feed=document.getElementById('errorFeed');
   const cnt=document.getElementById('errCount');

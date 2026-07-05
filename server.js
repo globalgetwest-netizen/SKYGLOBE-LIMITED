@@ -341,6 +341,14 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
     return res.status(400).json({ error: 'Name, email and service are required.' });
   if (!email)
     return res.status(400).json({ error: 'A valid email address is required.' });
+
+  // AI Reception — triage in the background, regardless of email configuration.
+  aiReceive({
+    source: 'contact', name: `${fname} ${lname || ''}`.trim(), email, service,
+    message: [destination && `Destination: ${destination}`, message].filter(Boolean).join(' · '),
+    deptHint: deptForService(service),
+  }).catch(() => {});
+
   if (!process.env.RESEND_API_KEY)
     return res.status(500).json({ error: 'Email service not configured. Contact us via WhatsApp.' });
 
@@ -406,6 +414,14 @@ app.post('/api/apply', applyLimiter, async (req, res) => {
     console.error('DB insert failed:', e.message);
     return res.status(500).json({ error: 'Could not save application. Please try again.' });
   }
+
+  // AI Reception — triage this request in the background (never blocks the reply).
+  aiReceive({
+    source: 'application', ref, name: `${fname} ${lname || ''}`.trim(), email, service,
+    message: [purpose && `Purpose: ${purpose}`, destination && `Destination: ${destination}`, notes]
+      .filter(Boolean).join(' · '),
+    deptHint: deptForService(service),
+  }).catch(() => {});
 
   const timestamp = new Date().toISOString();
   const recipientEmail = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
@@ -1435,6 +1451,78 @@ app.get('/api/admin/errors', async (req, res) => {
   try {
     const rows = await dbQuery('GET', 'error_logs', null, { order: 'created_at.desc', limit: 200 });
     res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── AI RECEPTION — CEO/staff queue ───────────────────────────────────────────
+// Departments config (public labels + future addresses) for the admin UI.
+app.get('/api/admin/departments', (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  res.json(Object.values(DEPARTMENTS));
+});
+
+app.get('/api/admin/reception', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const params = { order: 'created_at.desc', limit: 300 };
+    if (req.query.dept && VALID_DEPT_KEYS.includes(req.query.dept)) params.department = `eq.${req.query.dept}`;
+    if (req.query.status) params.status = `eq.${req.query.status}`;
+    const rows = await dbQuery('GET', 'ai_reception', null, params);
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/admin/reception/stats', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'ai_reception', null, { order: 'created_at.desc', limit: 1000 });
+    const list = Array.isArray(rows) ? rows : [];
+    const byDept = {}, byStatus = {};
+    let needsHuman = 0, critical = 0;
+    for (const r of list) {
+      byDept[r.department] = (byDept[r.department] || 0) + 1;
+      byStatus[r.status] = (byStatus[r.status] || 0) + 1;
+      if (r.needs_human && r.status !== 'resolved') needsHuman++;
+      if (r.urgency === 'critical' && r.status !== 'resolved') critical++;
+    }
+    res.json({ total: list.length, needsHuman, critical, byDept, byStatus });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/reception/:id', async (req, res) => {
+  const who = checkAdmin(req) || (checkStaffOrAdmin(req) ? { name: 'staff' } : null);
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const b = req.body || {}, patch = {};
+    if (['new','ai_handled','assigned','resolved'].includes(b.status)) patch.status = b.status;
+    if (b.assigned_to !== undefined) patch.assigned_to = String(b.assigned_to || '').slice(0, 120);
+    if (b.department !== undefined && VALID_DEPT_KEYS.includes(b.department)) patch.department = b.department;
+    if (typeof b.suggested_reply === 'string') patch.suggested_reply = b.suggested_reply.slice(0, 2000);
+    const updated = await dbQuery('PATCH', 'ai_reception', patch, { id: `eq.${req.params.id}` });
+    res.json({ success: true, record: Array.isArray(updated) ? updated[0] : updated });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Send the (optionally edited) AI reply to the client and mark it resolved.
+app.post('/api/admin/reception/:id/reply', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'ai_reception', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const rec = rows[0];
+    if (!rec) return res.status(404).json({ error: 'Not found.' });
+    const body = String((req.body || {}).reply || rec.suggested_reply || '').trim();
+    if (!body) return res.status(400).json({ error: 'Reply is empty.' });
+    if (!rec.client_email) return res.status(400).json({ error: 'No client email on file.' });
+    const dept = DEPARTMENTS[rec.department] || DEPARTMENTS.general;
+    await sendEmail(rec.client_email, `SkyGlobe Group — ${dept.label}`,
+      `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a2233">
+        <p>Dear ${rec.client_name || 'Client'},</p>
+        <div style="line-height:1.6">${body.replace(/\n/g,'<br>')}</div>
+        <p style="margin-top:18px;font-size:13px;color:#6b7689">${dept.icon} ${dept.label} · SkyGlobe Group · One World. One Mission.</p>
+      </div>`,
+      dept.live ? dept.email : undefined);
+    await dbQuery('PATCH', 'ai_reception', { status: 'resolved', suggested_reply: body }, { id: `eq.${req.params.id}` });
+    res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -2575,6 +2663,153 @@ const SERVICE_PRODUCT_MAP = {
   'Official Company Letter':               'official_letter',
 };
 
+// ════════════════════════════════════════════════════════════════════════════
+//  DEPARTMENT ROUTING + AI RECEPTION  (Phases B & C)
+//  Every inbound request is tagged to a department and read by AI, which
+//  classifies it, drafts a suggested reply, and decides whether a human is
+//  needed — then it lands in the department's queue in the CEO portal.
+//
+//  Required Supabase table (run once):
+//   create table if not exists ai_reception (
+//     id bigserial primary key,
+//     source text, ref text, client_name text, client_email text,
+//     service text, department text, urgency text, intent text,
+//     sentiment text, suggested_reply text, needs_human boolean,
+//     status text default 'new', assigned_to text, raw jsonb,
+//     created_at timestamptz default now()
+//   );
+//   create index on ai_reception (created_at desc);
+// ════════════════════════════════════════════════════════════════════════════
+
+// Public-facing departments. `email` is the professional address that will go
+// live in Phase A (Cloudflare Email Routing). Until each is created, `live`
+// stays false and notifications fall back to RECIPIENT_EMAIL — flip `live` to
+// true per department the moment its address forwards to a real inbox.
+const DEPARTMENTS = {
+  travel:    { key: 'travel',    label: 'Travel & Global Mobility', email: 'visas@skyglobegroup.com',     icon: '✈️', live: false },
+  education: { key: 'education', label: 'Education & Academy',       email: 'education@skyglobegroup.com', icon: '🎓', live: false },
+  legal:     { key: 'legal',     label: 'Legal & Documents',        email: 'legal@skyglobegroup.com',    icon: '📜', live: false },
+  identity:  { key: 'identity',  label: 'Digital Identity',         email: 'id@skyglobegroup.com',       icon: '🪪', live: false },
+  finance:   { key: 'finance',   label: 'Finance & Payments',       email: 'finance@skyglobegroup.com',  icon: '💳', live: false },
+  general:   { key: 'general',   label: 'General / Reception',      email: 'support@skyglobegroup.com',  icon: '📨', live: false },
+};
+const VALID_DEPT_KEYS = Object.keys(DEPARTMENTS);
+
+// Which department owns each priced product.
+const PRODUCT_DEPT = {
+  work_permit_standard:'travel', work_permit_express:'travel', migration_premium:'travel',
+  travel_prep_europe:'travel', travel_prep_global:'travel', student_visa_processing:'travel',
+  work_visa_processing:'travel', tourist_visa_processing:'travel', express_entry_pr:'travel',
+  eu_direct_employment:'travel', recruitment_placement:'travel', flight_reservation_letter:'travel',
+  real_flight_booking:'travel', hotel_reservation_letter:'travel', real_hotel_booking:'travel',
+  travel_insurance:'travel', document_authentication:'travel', conference_invitation:'travel',
+  conference_sourcing:'travel', skyconference:'travel', invitation:'travel', visaletter:'travel',
+  cert_amateur:'education', cert_advanced:'education', cert_pro:'education',
+  university_admission:'education', scholarship_support:'education', sop:'education',
+  interview_prep:'education', coverletter:'education', experience:'education',
+  legal_doc_standard:'legal', legal_doc_premium:'legal', legal_doc_priority:'legal', official_letter:'legal',
+  premium_digital_id:'identity', digital_identity_service:'identity', digital_presence_starter:'identity',
+};
+
+function deptForProduct(product) { return PRODUCT_DEPT[product] || 'general'; }
+function deptForService(service) {
+  const p = SERVICE_PRODUCT_MAP[service];
+  if (p) return deptForProduct(p);
+  const s = String(service || '').toLowerCase();
+  if (/visa|permit|migrat|travel|flight|hotel|relocat|recruit|tourist|schengen/.test(s)) return 'travel';
+  if (/course|academy|scholar|admission|student|university|tutor|cv|resume|sop/.test(s)) return 'education';
+  if (/legal|document|letter|apostille|notaris|affidavit|agreement|contract/.test(s)) return 'legal';
+  if (/identity|\bid\b|digital id|e-?doc|presence/.test(s)) return 'identity';
+  if (/payment|invoice|refund|billing|charge/.test(s)) return 'finance';
+  return 'general';
+}
+// Who to email for a department: its own address once live, else the team inbox.
+function deptInbox(deptKey) {
+  const team = process.env.RECIPIENT_EMAIL
+    ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim())
+    : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
+  const d = DEPARTMENTS[deptKey];
+  return (d && d.live && d.email) ? [d.email, ...team] : team;
+}
+
+// Pull the first JSON object out of an AI response (handles ```json fences).
+function parseAiJson(text) {
+  if (!text) return null;
+  let t = String(text).replace(/```json/gi, '').replace(/```/g, '').trim();
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a === -1 || b === -1 || b <= a) return null;
+  try { return JSON.parse(t.slice(a, b + 1)); } catch { return null; }
+}
+
+// The heart of the AI Reception. Fire-and-forget: never blocks or breaks the
+// client-facing request that triggered it. Classifies, drafts a reply, decides
+// escalation, stores the record, and notifies the owning department.
+async function aiReceive({ source, ref, name, email, service, message, deptHint }) {
+  let rec = {
+    source: source || 'request', ref: ref || null,
+    client_name: name || '', client_email: email || '',
+    service: service || '', department: deptHint || deptForService(service),
+    urgency: 'normal', intent: '', sentiment: 'neutral',
+    suggested_reply: '', needs_human: true, status: 'new',
+    raw: { source, ref, name, email, service, message: message || '' },
+  };
+  try {
+    const prompt = `You are the AI Reception for SkyGlobe Group, a global platform for travel & mobility, education, legal documents and digital identity. A new client request just arrived. Read it and reply with ONLY a JSON object (no prose, no markdown), exactly these keys:
+{"department": one of ["travel","education","legal","identity","finance","general"],
+ "urgency": one of ["low","normal","high","critical"],
+ "intent": "one concise sentence describing what the client wants",
+ "sentiment": one of ["positive","neutral","frustrated"],
+ "suggested_reply": "a warm, professional 2-4 sentence reply our team could send this client, signed as SkyGlobe Group",
+ "needs_human": true or false}
+Set needs_human=true for anything involving payment problems, complaints, legal/visa decisions, or complex or unclear cases; false only when a simple informational reply fully resolves it.
+
+REQUEST:
+Service: ${service || '(not specified)'}
+Client: ${name || '(unknown)'} <${email || 'no-email'}>
+Message: ${message || '(no message — form submission)'}`;
+    const out = await generateText(prompt, { maxTokens: 700, temperature: 0.3 });
+    const j = parseAiJson(out);
+    if (j) {
+      if (VALID_DEPT_KEYS.includes(j.department)) rec.department = j.department;
+      if (['low','normal','high','critical'].includes(j.urgency)) rec.urgency = j.urgency;
+      if (['positive','neutral','frustrated'].includes(j.sentiment)) rec.sentiment = j.sentiment;
+      if (typeof j.intent === 'string') rec.intent = j.intent.slice(0, 400);
+      if (typeof j.suggested_reply === 'string') rec.suggested_reply = j.suggested_reply.slice(0, 2000);
+      if (typeof j.needs_human === 'boolean') rec.needs_human = j.needs_human;
+      rec.status = rec.needs_human ? 'new' : 'ai_handled';
+    }
+  } catch (e) {
+    console.error('[ai-reception] triage failed, storing raw:', e.message);
+    rec.intent = 'AI triage unavailable — needs manual review.';
+  }
+  try {
+    const saved = await dbQuery('POST', 'ai_reception', rec);
+    const row = Array.isArray(saved) ? saved[0] : saved;
+    sseNotify('__admin__', 'reception-new', { id: row?.id, department: rec.department, urgency: rec.urgency });
+    // Notify the owning department (its own inbox once live, else the team).
+    const dept = DEPARTMENTS[rec.department] || DEPARTMENTS.general;
+    const flag = rec.urgency === 'critical' ? '🔴 ' : rec.urgency === 'high' ? '🟠 ' : '';
+    sendEmail(deptInbox(rec.department),
+      `${flag}${dept.icon} ${dept.label} — new request${ref ? ' ' + ref : ''}`,
+      `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1a2233">
+        <h2 style="color:#c9a84c">${dept.icon} ${dept.label}</h2>
+        <p><strong>Client:</strong> ${rec.client_name || '—'} &lt;${rec.client_email || '—'}&gt;</p>
+        ${service ? `<p><strong>Service:</strong> ${service}</p>` : ''}
+        ${ref ? `<p><strong>Reference:</strong> ${ref}</p>` : ''}
+        <p><strong>Urgency:</strong> ${rec.urgency} · <strong>Sentiment:</strong> ${rec.sentiment}</p>
+        <p><strong>AI summary:</strong> ${rec.intent || '—'}</p>
+        ${rec.suggested_reply ? `<div style="background:#fff8e6;border-left:4px solid #c9a84c;padding:12px 14px;margin:14px 0"><strong>AI suggested reply:</strong><br>${rec.suggested_reply.replace(/\n/g,'<br>')}</div>` : ''}
+        <p style="font-size:13px;color:#6b7689">${rec.needs_human ? '⚠ Flagged for a human agent.' : '✓ AI can auto-handle — review in the AI Reception panel.'}</p>
+        <p style="font-size:13px;color:#6b7689">Open the CEO portal → AI Reception to action this.</p>
+      </div>`
+    ).catch(err => console.error('[ai-reception] dept email failed:', err.message));
+    return row;
+  } catch (e) {
+    console.error('[ai-reception] save failed:', e.message);
+    return null;
+  }
+}
+
 const PAY = {
   // Grey — SkyGlobe's own bank/crypto receiving accounts (USD, EUR, GBP, USDC, USDT).
   // Always available: no external API key required, so it never goes "not configured".
@@ -2742,6 +2977,17 @@ async function fulfilPayment(payment) {
               <p>Open the CEO portal to source/verify and deliver the document.</p>
             </div>`);
         } catch (e) { console.error('Paid-work email failed:', e.message); }
+        // AI Reception — a paid, non-instant request enters the department queue
+        // pre-flagged for a human (real work is owed), so nothing slips.
+        if (!PRICING[payment.product]?.instant) {
+          aiReceive({
+            source: 'payment', ref: payment.app_ref,
+            name: `${app_.fname} ${app_.lname || ''}`.trim(), email: app_.email,
+            service: PRICING[payment.product]?.label || payment.product,
+            message: `PAID ${payment.currency} ${payment.amount} via ${payment.provider}. Client has paid and is awaiting fulfilment.`,
+            deptHint: deptForProduct(payment.product),
+          }).catch(() => {});
+        }
       }
     } catch (e) { console.error('fulfilPayment app update failed:', e.message); }
   }
