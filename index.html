@@ -1693,31 +1693,18 @@ body.wc-active .page-back-bar{padding-top:138px}
       var v = list[0];
       var m = String(v.video_url||'').match(/(?:youtube\.com\/(?:watch\?v=|live\/|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
       var yt = m ? m[1] : null;
-      var isMp4 = /\.mp4(\?|$)/i.test(v.video_url||'');
+      // YouTube-only panel — any non-YouTube row (legacy data) falls back to
+      // the SkyGlobe TV promo instead of a half-working player.
+      if (!yt) { mountPromo(); return; }
       var badge = v.is_live ? 'live' : (v.badge || 'featured');
       var badgeText = { live:'LIVE', featured:'FEATURED', new:'NEW', testimonial:'TESTIMONIAL', update:'UPDATE' }[badge] || 'FEATURED';
-      var media;
-      if (yt) {
-        media = '<iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/'+yt+'?autoplay=1&mute=1&controls=1&rel=0&playsinline=1&modestbranding=1'
-              + (v.is_live ? '' : '&loop=1&playlist='+yt)
-              + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="'+escV(v.title)+'"></iframe>';
-      } else if (isMp4) {
-        media = '<video src="'+escV(v.video_url)+'" muted autoplay loop playsinline preload="metadata" controls></video>';
-      } else {
-        media = '<a href="'+escV(v.video_url)+'" target="_blank" rel="noopener" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;text-decoration:none;background:radial-gradient(110% 130% at 30% 20%,rgba(212,167,58,.22),transparent 55%),#0b1120">'
-              + '<span style="width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f7d774,#e4b132);color:#181000;font-size:1.3rem;box-shadow:0 8px 24px rgba(228,177,50,.45)">▶</span>'
-              + '<span style="font-size:.8rem;font-weight:700">Watch now →</span></a>';
-      }
+      var media = '<iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/'+yt+'?autoplay=1&mute=1&controls=1&rel=0&playsinline=1&modestbranding=1'
+            + (v.is_live ? '' : '&loop=1&playlist='+yt)
+            + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="'+escV(v.title)+'"></iframe>';
       var html = media
         + '<div class="sgv-badges"><span class="sgv-badge '+badge+'">'+(badge==='live'?'<span class="sgv-dot"></span>':'')+badgeText+'</span></div>'
         + '<div class="sgv-cap"><b>'+escV(v.title)+'</b>'+(v.description?'<span>'+escV(v.description)+'</span>':'')+'</div>';
       mountPanel(html);
-      // Pause self-hosted video when scrolled out of view; resume when back.
-      var vid = document.querySelector('.sg-video video, .sg-videomobile video');
-      if (vid && 'IntersectionObserver' in window) {
-        new IntersectionObserver(function(es){ es.forEach(function(e){ e.isIntersecting ? vid.play().catch(function(){}) : vid.pause(); }); }, { threshold: 0.15 })
-          .observe(vid);
-      }
       // One view per session per video.
       try {
         var k = 'sg_vid_seen_' + v.id;

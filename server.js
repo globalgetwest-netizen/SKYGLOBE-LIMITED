@@ -3388,6 +3388,11 @@ app.post('/api/admin/videos', async (req, res) => {
   try {
     const b = req.body || {};
     if (!b.title || !b.video_url) return res.status(400).json({ error: 'Title and video link are required.' });
+    // YouTube-only: the homepage panel plays videos inline, and only YouTube
+    // embeds cleanly at full quality. Anything else is rejected up front.
+    if (!/(?:youtube\.com\/(?:watch\?v=|live\/|embed\/|shorts\/)|youtu\.be\/)[\w-]{6,}/.test(String(b.video_url))) {
+      return res.status(400).json({ error: 'Only YouTube links are supported (video, Short or live stream). Upload the video to the SkyGlobe YouTube channel first, then paste its link here.' });
+    }
     const row = {
       title: String(b.title).slice(0, 140),
       description: b.description ? String(b.description).slice(0, 300) : null,
