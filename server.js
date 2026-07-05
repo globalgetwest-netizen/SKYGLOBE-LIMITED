@@ -768,6 +768,7 @@ app.get('/staff', (req, res) => res.sendFile(path.join(__dirname, 'staff.html'))
 app.get('/letterhead', (req, res) => res.sendFile(path.join(__dirname, 'letterhead.html')));
 app.get('/digitalization', (req, res) => res.sendFile(path.join(__dirname, 'digitalization.html')));
 app.get('/conferences', (req, res) => res.sendFile(path.join(__dirname, 'conferences.html')));
+app.get('/showreel', (req, res) => res.sendFile(path.join(__dirname, 'showreel.html')));
 app.get('/packages', (req, res) => res.sendFile(path.join(__dirname, 'packages.html')));
 app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));
 app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));

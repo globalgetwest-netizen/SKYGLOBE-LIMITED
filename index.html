@@ -1660,33 +1660,11 @@ body.wc-active .page-back-bar{padding-top:138px}
       if (dBox && aside) { dBox.innerHTML = html; aside.classList.add('sgv-on'); }
       return dBox;
     }
-    // Fallback "SkyGlobe TV" promo — fills the panel with rotating service
-    // highlights until the CEO adds a real video from the admin portal.
+    // Fallback: the SkyGlobe Showreel — a cinematic, code-animated tour of
+    // every service (incl. the NORIA chapter). Plays in the panel until the
+    // CEO adds a real YouTube video from the admin portal.
     function mountPromo(){
-      var lines = [
-        '🎓 Student visas & university admissions',
-        '💼 Work permits across 17+ European countries',
-        '✈️ Flight & hotel reservation letters — same day',
-        '🛡️ Schengen-compliant travel insurance',
-        '📜 AI-powered legal documents in minutes',
-        '🌍 195 country guides — visas, costs & jobs',
-        '🎥 Live video updates coming right here'
-      ];
-      var html =
-        '<div style="position:absolute;inset:0;background:radial-gradient(120% 140% at 20% 10%,rgba(212,167,58,.24),transparent 52%),radial-gradient(130% 150% at 85% 90%,rgba(79,142,247,.16),transparent 55%),#0b1120"></div>'
-        + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;text-align:center;z-index:2">'
-        +   '<span style="width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f7d774,#e4b132);color:#181000;font-size:1.25rem;box-shadow:0 10px 28px rgba(228,177,50,.45)">▶</span>'
-        +   '<div style="font-size:.66rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#e9c86a">SkyGlobe&nbsp;TV</div>'
-        +   '<div id="sgvPromoLine" style="color:#eef2fb;font-size:.92rem;font-weight:700;line-height:1.45;min-height:2.7em;display:flex;align-items:center;transition:opacity .45s ease">'+lines[0]+'</div>'
-        +   '<a href="https://youtube.com/@SKYGLOBEGROUP" target="_blank" rel="noopener" style="font-size:.72rem;font-weight:700;color:#c4cde0;text-decoration:none;border:1px solid rgba(255,255,255,.18);padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.05)">Subscribe · @SKYGLOBEGROUP →</a>'
-        + '</div>'
-        + '<div class="sgv-badges"><span class="sgv-badge">CHANNEL</span></div>';
-      mountPanel(html);
-      var i = 0, el = document.getElementById('sgvPromoLine');
-      if (el) setInterval(function(){
-        el.style.opacity = 0;
-        setTimeout(function(){ i = (i+1) % lines.length; el.textContent = lines[i]; el.style.opacity = 1; }, 450);
-      }, 3600);
+      mountPanel('<iframe loading="lazy" src="/showreel.html?embed=1" title="SkyGlobe Group showreel" style="pointer-events:auto"></iframe>');
     }
     fetch('/api/videos').then(function(r){return r.json();}).then(function(list){
       if (!Array.isArray(list) || !list.length) { mountPromo(); return; }
