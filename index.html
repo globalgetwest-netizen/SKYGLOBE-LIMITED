@@ -7311,11 +7311,14 @@ async function loadMessages() {
       thread.innerHTML = '<p class="msg-empty">No messages yet. Say hello — our team replies fast! 👋</p>';
       return;
     }
-    thread.innerHTML = msgs.map(m => `
-      <div class="msg-bubble ${m.sender === 'admin' ? 'admin' : 'client'}">
+    thread.innerHTML = msgs.map(m => {
+      const isTeam = m.sender === 'admin' || m.sender === 'ai';
+      const who = m.sender === 'ai' ? 'SkyGlobe Assistant' : m.sender === 'admin' ? 'SkyGlobe' : 'You';
+      return `
+      <div class="msg-bubble ${isTeam ? 'admin' : 'client'}">
         ${m.body.replace(/</g,'&lt;').replace(/\n/g,'<br>')}
-        <span class="msg-time">${m.sender === 'admin' ? 'SkyGlobe' : 'You'} · ${new Date(m.created_at).toLocaleString()}</span>
-      </div>`).join('');
+        <span class="msg-time">${who} · ${new Date(m.created_at).toLocaleString()}</span>
+      </div>`; }).join('');
     thread.scrollTop = thread.scrollHeight;
   } catch { thread.innerHTML = '<p class="msg-empty">Could not load messages.</p>'; }
 }

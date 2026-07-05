@@ -1267,6 +1267,8 @@ app.post('/api/messages', async (req, res) => {
   try {
     const rows = await dbQuery('POST', 'messages', { client_email: email, sender: 'client', body: String(body).trim(), read: false });
     sseNotify('__admin__', 'new-client-message', { client_email: email, preview: String(body).trim().slice(0, 80) });
+    // AI answers live in the background — until it decides a human is needed.
+    aiChatReply(email).catch(() => {});
     // Notify the team by email
     try {
       const recipientEmail = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
@@ -1489,8 +1491,16 @@ app.get('/api/admin/reception/stats', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Staff list for the assignee picker (name · department · email).
+app.get('/api/admin/reception/staff', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'staff_members', null, { status: `eq.active`, order: 'name.asc', limit: 200 }).catch(() => []);
+    res.json((Array.isArray(rows) ? rows : []).map(s => ({ name: s.name, department: s.department || '', email: s.email || '' })));
+  } catch (e) { res.json([]); }
+});
+
 app.patch('/api/admin/reception/:id', async (req, res) => {
-  const who = checkAdmin(req) || (checkStaffOrAdmin(req) ? { name: 'staff' } : null);
   if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const b = req.body || {}, patch = {};
@@ -1499,7 +1509,28 @@ app.patch('/api/admin/reception/:id', async (req, res) => {
     if (b.department !== undefined && VALID_DEPT_KEYS.includes(b.department)) patch.department = b.department;
     if (typeof b.suggested_reply === 'string') patch.suggested_reply = b.suggested_reply.slice(0, 2000);
     const updated = await dbQuery('PATCH', 'ai_reception', patch, { id: `eq.${req.params.id}` });
-    res.json({ success: true, record: Array.isArray(updated) ? updated[0] : updated });
+    const rec = Array.isArray(updated) ? updated[0] : updated;
+    // When newly assigned to a named person, notify them (email + live badge).
+    if (b.assigned_to && patch.status === 'assigned') {
+      sseNotify('__admin__', 'reception-assigned', { id: req.params.id, assigned_to: b.assigned_to });
+      try {
+        const staff = await dbQuery('GET', 'staff_members', null, { name: `eq.${b.assigned_to}`, limit: 1 }).catch(() => []);
+        const to = staff[0]?.email;
+        if (to && rec) {
+          const dept = DEPARTMENTS[rec.department] || DEPARTMENTS.general;
+          await sendEmail(to, `${dept.icon} Assigned to you — ${rec.client_name || rec.client_email || 'client request'}`,
+            `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1a2233">
+              <h2 style="color:#c9a84c">A request has been assigned to you</h2>
+              <p><strong>Client:</strong> ${rec.client_name || '—'} &lt;${rec.client_email || '—'}&gt;</p>
+              <p><strong>Department:</strong> ${dept.label}</p>
+              ${rec.service ? `<p><strong>Service:</strong> ${rec.service}</p>` : ''}
+              <p><strong>What they need:</strong> ${rec.intent || '—'}</p>
+              <p style="font-size:13px;color:#6b7689">Open your Staff Portal → 🛎️ Reception to reply and resolve.</p>
+            </div>`).catch(() => {});
+        }
+      } catch { /* notification is best-effort */ }
+    }
+    res.json({ success: true, record: rec });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1514,13 +1545,20 @@ app.post('/api/admin/reception/:id/reply', async (req, res) => {
     if (!body) return res.status(400).json({ error: 'Reply is empty.' });
     if (!rec.client_email) return res.status(400).json({ error: 'No client email on file.' });
     const dept = DEPARTMENTS[rec.department] || DEPARTMENTS.general;
+    // Chat-sourced items: post the human's reply straight into the client's
+    // in-app thread (sender 'admin' = human takeover, which permanently stops
+    // the AI auto-replies for that thread) so the conversation stays in one place.
+    if (rec.source === 'chat') {
+      await dbQuery('POST', 'messages', { client_email: rec.client_email, sender: 'admin', body, read: false }).catch(() => {});
+      sseNotify(rec.client_email, 'new-message', { sender: 'admin', body, created_at: new Date().toISOString() });
+    }
     await sendEmail(rec.client_email, `SkyGlobe Group — ${dept.label}`,
       `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a2233">
         <p>Dear ${rec.client_name || 'Client'},</p>
         <div style="line-height:1.6">${body.replace(/\n/g,'<br>')}</div>
         <p style="margin-top:18px;font-size:13px;color:#6b7689">${dept.icon} ${dept.label} · SkyGlobe Group · One World. One Mission.</p>
       </div>`,
-      dept.live ? dept.email : undefined);
+      dept.live ? dept.email : undefined).catch(() => {});
     await dbQuery('PATCH', 'ai_reception', { status: 'resolved', suggested_reply: body }, { id: `eq.${req.params.id}` });
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -2807,6 +2845,62 @@ Message: ${message || '(no message — form submission)'}`;
   } catch (e) {
     console.error('[ai-reception] save failed:', e.message);
     return null;
+  }
+}
+
+// ── AI CONVERSATION LOOP ─────────────────────────────────────────────────────
+// When a logged-in client posts a message, the AI holds the conversation —
+// answering directly turn after turn — UNTIL it decides a human is needed, at
+// which point it posts a graceful hand-off, opens a flagged Reception item for
+// the right department, and goes silent. Once ANY human replies in the thread,
+// the AI stays silent permanently: the human owns it. Fully guarded so it can
+// never break the client's message flow.
+async function aiChatReply(clientEmail) {
+  try {
+    const thread = await dbQuery('GET', 'messages', null, { client_email: `eq.${clientEmail}`, order: 'created_at.asc', limit: 60 });
+    if (!Array.isArray(thread) || !thread.length) return;
+    // A human has taken over the moment any 'admin' message exists → AI silent.
+    if (thread.some(m => m.sender === 'admin')) return;
+    // Already escalated and still open? Let the human queue own it.
+    const openEsc = await dbQuery('GET', 'ai_reception', null,
+      { client_email: `eq.${clientEmail}`, source: 'eq.chat', status: `neq.resolved`, limit: 1 }).catch(() => []);
+    if (Array.isArray(openEsc) && openEsc.length) return;
+    // Nothing new from the client since the last AI turn? Don't double-reply.
+    if (thread[thread.length - 1].sender !== 'client') return;
+
+    const history = thread.slice(-16).map(m => `${m.sender === 'client' ? 'Client' : 'SkyGlobe'}: ${m.body}`).join('\n');
+    const prompt = `You are NORIA, SkyGlobe Group's warm, professional AI assistant, chatting live with a client in their account inbox. SkyGlobe offers travel & global mobility (visas, work permits, flights, hotels, insurance), education & academy (courses, admissions, scholarships), legal documents, and digital identity cards. Continue the conversation helpfully.
+
+Reply with ONLY a JSON object:
+{"reply": "your next message to the client — friendly, concise, useful",
+ "needs_human": true or false,
+ "department": one of ["travel","education","legal","identity","finance","general"],
+ "intent": "one short sentence summarising what the client ultimately needs"}
+Set needs_human=true (and keep "reply" as a brief, reassuring hand-off line) when the client needs a payment/refund action, a decision on their specific case, document review, a complaint resolved, or anything you cannot fully and safely resolve yourself. Otherwise keep helping.
+
+CONVERSATION SO FAR:
+${history}`;
+    const out = await generateText(prompt, { maxTokens: 700, temperature: 0.4 });
+    const j = parseAiJson(out);
+    if (!j || typeof j.reply !== 'string' || !j.reply.trim()) return; // AI unsure → leave for a human
+    const dept = VALID_DEPT_KEYS.includes(j.department) ? j.department : 'general';
+
+    // Post the AI's message to the thread (sender 'ai' → shown as SkyGlobe side).
+    const saved = await dbQuery('POST', 'messages', { client_email: clientEmail, sender: 'ai', body: j.reply.trim().slice(0, 2000), read: false });
+    sseNotify(clientEmail, 'new-message', { sender: 'ai', body: j.reply.trim(), created_at: new Date().toISOString() });
+
+    if (j.needs_human) {
+      // Open a flagged Reception item so a human picks it up, and alert the dept.
+      await aiReceive({
+        source: 'chat', name: '', email: clientEmail,
+        service: `Live chat — ${DEPARTMENTS[dept]?.label || 'General'}`,
+        message: history, deptHint: dept,
+      }).catch(() => {});
+      sseNotify('__admin__', 'reception-new', { department: dept, urgency: 'high', chat: true });
+    }
+    return Array.isArray(saved) ? saved[0] : saved;
+  } catch (e) {
+    console.error('[ai-chat] reply failed (left for human):', e.message);
   }
 }
 

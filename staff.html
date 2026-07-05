@@ -243,6 +243,7 @@
       </div>
       <nav class="sb-nav">
         <button class="sb-link active" data-view="queue" onclick="switchView('queue')"><span class="ic">📋</span> Work Queue <span class="badge-n" id="navAppsBadge"></span></button>
+        <button class="sb-link" data-view="reception" onclick="switchView('reception')"><span class="ic">🛎️</span> Reception <span class="badge-n" id="navRecBadge"></span></button>
         <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
         <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
         <button class="sb-link" data-view="mychannel" onclick="switchView('mychannel')"><span class="ic">💬</span> My Channel <span class="badge-n" id="navChanBadge"></span></button>
@@ -282,6 +283,12 @@
             <table><thead><tr><th>Reference</th><th>Name</th><th>Service</th><th>Submitted</th><th>Status</th></tr></thead>
             <tbody id="tbody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table>
           </div>
+        </section>
+
+        <!-- RECEPTION -->
+        <section class="view" id="view-reception">
+          <div class="note" style="margin-bottom:14px">🛎️ <strong style="color:var(--txt)">AI Reception.</strong> Requests our AI has flagged for a human. Items <strong>assigned to you</strong> appear first; the open queue below is anything unassigned you can claim.</div>
+          <div id="staffRecFeed"><div class="skeleton">Loading reception…</div></div>
         </section>
 
         <!-- MESSAGES -->
@@ -649,8 +656,9 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={queue:'Work Queue',messages:'Client Messages',team:'Team Chat',mychannel:'My Department Channel',mytasks:'My Tasks',attendance:'Attendance',tools:'Tools',org:'Org Structure'};
+  const titles={queue:'Work Queue',reception:'AI Reception',messages:'Client Messages',team:'Team Chat',mychannel:'My Department Channel',mytasks:'My Tasks',attendance:'Attendance',tools:'Tools',org:'Org Structure'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
+  if(v==='reception') loadStaffReception();
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
   if(v==='mychannel') loadStaffChannel();
@@ -782,6 +790,71 @@ function renderTable(){
 /* ── HELPERS ── */
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function badge(s){return `<span class="badge b-${(s||'Received').replace(/\s/g,'')}">${esc(s||'Received')}</span>`;}
+
+/* ══════════════ STAFF: AI RECEPTION ══════════════ */
+const SREC_DEPT={travel:{icon:'✈️',label:'Travel & Mobility'},education:{icon:'🎓',label:'Education & Academy'},legal:{icon:'📜',label:'Legal & Documents'},identity:{icon:'🪪',label:'Digital Identity'},finance:{icon:'💳',label:'Finance & Payments'},general:{icon:'📨',label:'General'}};
+const SREC_URG={critical:'#f0564f',high:'#f5b942',normal:'#4f8ef7',low:'#5f74a0'};
+function srecTime(d){ if(!d)return''; const s=(Date.now()-new Date(d))/1000; if(s<60)return'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+
+async function loadStaffReception(){
+  const feed=document.getElementById('staffRecFeed');
+  const me=sessionStorage.getItem('skystaff_name')||'';
+  feed.innerHTML='<div class="skeleton">Loading reception…</div>';
+  try{
+    const r=await fetch(API+'/api/admin/reception',{headers:{'x-admin-key':KEY,'x-staff-name':me}});
+    const rows=await r.json();
+    if(!r.ok) throw new Error((rows&&rows.error)||('HTTP '+r.status));
+    const open=(Array.isArray(rows)?rows:[]).filter(x=>x.status!=='resolved'&&x.needs_human);
+    const mine=open.filter(x=>x.assigned_to===me);
+    const queue=open.filter(x=>!x.assigned_to);
+    const badgeEl=document.getElementById('navRecBadge'); if(badgeEl) badgeEl.textContent=mine.length||'';
+    if(!mine.length&&!queue.length){ feed.innerHTML='<div style="color:var(--muted);text-align:center;padding:40px">Nothing waiting — you\'re all caught up. 🎉</div>'; return; }
+    feed.innerHTML=
+      (mine.length?`<h3 style="margin:0 0 10px;color:var(--txt);font-size:1rem">👤 Assigned to you (${mine.length})</h3>`+mine.map(srecCard).join(''):'')+
+      (queue.length?`<h3 style="margin:20px 0 10px;color:var(--txt);font-size:1rem">📥 Open queue — claim any (${queue.length})</h3>`+queue.map(x=>srecCard(x,true)).join(''):'');
+  }catch(err){
+    const missing=/relation|does not exist|PGRST/i.test(err.message||'');
+    feed.innerHTML='<div style="color:#e05c5c;padding:20px">Failed to load: '+esc(err.message)+(missing?'<div style="color:var(--muted);font-size:0.8rem;margin-top:8px">The AI Reception table isn\'t set up yet — ask the CEO to run the setup SQL.</div>':'')+'</div>';
+  }
+}
+function srecCard(r,claimable){
+  const m=SREC_DEPT[r.department]||SREC_DEPT.general;
+  const uc=SREC_URG[r.urgency]||SREC_URG.normal;
+  return `<div style="border-radius:12px;background:var(--navy2);border:1px solid var(--line);border-left:3px solid ${uc};padding:14px 16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+      <span style="font-size:0.72rem;font-weight:800;color:var(--gold)">${m.icon} ${m.label}</span>
+      <span style="font-size:0.64rem;font-weight:800;text-transform:uppercase;color:${uc};border:1px solid ${uc}55;padding:2px 8px;border-radius:999px">${esc(r.urgency||'normal')}</span>
+      <span style="flex:1"></span><span style="font-size:0.7rem;color:var(--muted)">${srecTime(r.created_at)}</span>
+    </div>
+    <div style="font-weight:700;font-size:0.9rem">${esc(r.client_name||'Client')} <span style="color:var(--muted);font-weight:400;font-size:0.8rem">&lt;${esc(r.client_email||'—')}&gt;</span></div>
+    ${r.service?`<div style="font-size:0.78rem;color:var(--muted);margin:2px 0 6px">${esc(r.service)}${r.ref?' · '+esc(r.ref):''}</div>`:''}
+    <div style="font-size:0.85rem;margin-bottom:8px"><b style="color:var(--gold)">Needs:</b> ${esc(r.intent||'—')}</div>
+    <textarea id="srecReply${r.id}" placeholder="Write your reply to the client…" style="width:100%;min-height:70px;background:var(--navy3,#0d1526);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:0.82rem;font-family:inherit;line-height:1.5">${esc(r.suggested_reply||'')}</textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      ${claimable?`<button class="btn btn-sm" onclick="srecClaim(${r.id})" style="background:transparent;border:1px solid var(--line);color:#a78bfa">✋ Claim</button>`:''}
+      <button class="btn btn-sm" onclick="srecReply(${r.id})">✉ Send reply &amp; resolve</button>
+      <button class="btn btn-sm" onclick="srecResolve(${r.id})" style="background:transparent;border:1px solid var(--line);color:#2ecc8f">✓ Resolve</button>
+    </div>
+  </div>`;
+}
+async function srecClaim(id){
+  const me=sessionStorage.getItem('skystaff_name')||'';
+  try{ await fetch(API+'/api/admin/reception/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY,'x-staff-name':me},body:JSON.stringify({status:'assigned',assigned_to:me})}); loadStaffReception(); }catch(e){ alert('Error: '+e.message); }
+}
+async function srecReply(id){
+  const ta=document.getElementById('srecReply'+id); const reply=ta?ta.value.trim():'';
+  if(!reply){ alert('Reply is empty.'); return; }
+  const me=sessionStorage.getItem('skystaff_name')||'';
+  try{
+    const r=await fetch(API+'/api/admin/reception/'+id+'/reply',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY,'x-staff-name':me},body:JSON.stringify({reply})});
+    if(!r.ok){ const d=await r.json(); throw new Error(d.error||'Could not send.'); }
+    loadStaffReception();
+  }catch(e){ alert('Error: '+e.message); }
+}
+async function srecResolve(id){
+  const me=sessionStorage.getItem('skystaff_name')||'';
+  try{ await fetch(API+'/api/admin/reception/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':KEY,'x-staff-name':me},body:JSON.stringify({status:'resolved'})}); loadStaffReception(); }catch(e){ alert('Error: '+e.message); }
+}
 
 /* ── MODAL NAV ── */
 function _navBar(){
@@ -939,7 +1012,7 @@ function renderThreads(){
         <span style="color:var(--muted);font-size:0.74rem">${new Date(last.created_at).toLocaleString()}</span>
       </div>
       <div id="thread-${esc(email)}" style="display:none">
-        <div class="chat">${thread.map(m=>`<div class="msg ${m.sender==='admin'?'admin':'client'}">${esc(m.body).replace(/\n/g,'<br>')}<div class="ts">${m.sender==='admin'?'You':'Client'} · ${new Date(m.created_at).toLocaleTimeString()}</div></div>`).join('')}</div>
+        <div class="chat">${thread.map(m=>{const team=m.sender==='admin'||m.sender==='ai';const who=m.sender==='ai'?'AI Assistant':m.sender==='admin'?'You':'Client';return `<div class="msg ${team?'admin':'client'}">${esc(m.body).replace(/\n/g,'<br>')}<div class="ts">${who} · ${new Date(m.created_at).toLocaleTimeString()}</div></div>`;}).join('')}</div>
         <div class="chat-input">
           <input type="text" id="reply-${esc(email)}" placeholder="Type a reply…" onkeydown="if(event.key==='Enter')sendReply('${esc(email)}')">
           <button class="btn btn-sm" onclick="sendReply('${esc(email)}')">Send</button>
