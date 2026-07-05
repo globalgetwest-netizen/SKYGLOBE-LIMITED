@@ -47,7 +47,10 @@ app.use((req, res, next) => {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
       "connect-src 'self' https://api.groq.com https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com http://localhost:*",
-      "frame-ancestors 'none'",
+      // Allow our own pages (e.g. the showreel) to be embedded in same-origin
+      // iframes, and allow YouTube video embeds in the homepage video panel.
+      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://youtube.com",
+      "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
     ].join('; ')
