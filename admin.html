@@ -1632,8 +1632,8 @@ async function loadErrors(){
   feed.innerHTML='<div class="skeleton">Loading error logs…</div>';
   try{
     const r=await fetch(API+'/api/admin/errors',{headers:{'x-admin-key':KEY}});
-    if(!r.ok) throw new Error('HTTP '+r.status);
     const rows=await r.json();
+    if(!r.ok) throw new Error((rows&&rows.error)||('HTTP '+r.status));
     cnt.textContent=rows.length+' record'+(rows.length===1?'':'s');
     const srcCol={server:'#e05c5c',client:'#D4A73A'};
     feed.innerHTML=rows.length?rows.map(e=>`
@@ -1648,7 +1648,10 @@ async function loadErrors(){
       </div>`).join('')
       :'<div style="color:var(--muted);text-align:center;padding:40px">No errors logged yet — great sign! 🎉</div>';
   }catch(err){
-    feed.innerHTML='<div style="color:#e05c5c;padding:20px">Failed to load: '+esc(err.message)+'</div>';
+    const isMissingTable=/relation|does not exist|PGRST/i.test(err.message||'');
+    feed.innerHTML='<div style="color:#e05c5c;padding:20px">Failed to load: '+esc(err.message)+
+      (isMissingTable?'<div style="color:var(--muted);font-size:0.8rem;margin-top:8px;font-weight:400">This usually means the <code>error_logs</code> table hasn\'t been created in Supabase yet — run the SQL in the server.js setup comments (search "ERROR MONITORING"), then refresh.</div>':'')+
+      '</div>';
   }
 }
 

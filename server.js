@@ -1193,26 +1193,42 @@ app.get('/api/auth/me', async (req, res) => {
 
 // ── CLIENT: GET MY MESSAGES ─────────────────────────────────────────────────────
 // ── CLIENT: MY DOCUMENTS FROM SKYGLOBE ────────────────────────────────────────
+// Every document ever handed to this email — staff-delivered files, AI legal
+// documents, and identity cards alike — found in one pass via document_tokens
+// (which every issuance path stamps with the recipient's email). Because the
+// caller already proved who they are by logging in, an expired 72-hour token
+// is transparently renewed here rather than left as a dead link — anonymous,
+// emailed links still expire on schedule, but the dashboard never dead-ends.
+const DOC_KIND_LABELS = { 'ai:identity': 'Identity Card', 'ai:legal-docs': 'Legal Document' };
 app.get('/api/client/documents', async (req, res) => {
   const email = clientAuth(req);
   if (!email) return res.status(401).json({ error: 'Not logged in.' });
   try {
-    const apps = await dbQuery('GET', 'applications', null, { email: `eq.${email}`, select: 'ref', limit: 100 });
-    if (!apps.length) return res.json([]);
-    const allDocs = [];
-    for (const app of apps) {
-      const docs = await dbQuery('GET', 'documents', null, { ref: `eq.${app.ref}`, order: 'created_at.desc', limit: 50 });
-      const staffDocs = docs.filter(d => d.uploaded_by && (String(d.uploaded_by).startsWith('admin') || String(d.uploaded_by).startsWith('staff')));
-      for (const d of staffDocs) {
-        // look up secure token for this doc
-        const trows = await dbQuery('GET', 'document_tokens', null, { document_id: `eq.${d.id}`, limit: 1 }).catch(() => []);
-        const tok = trows[0];
-        const expired = tok && new Date(tok.expires_at) < new Date();
-        allDocs.push({ ...d, application_ref: app.ref, view_token: tok && !expired ? tok.token : null, token_expires: tok?.expires_at || null });
+    const tokens = await dbQuery('GET', 'document_tokens', null,
+      { client_email: `eq.${email}`, order: 'created_at.desc', limit: 200 });
+    if (!tokens.length) return res.json([]);
+    const byDocId = new Map();
+    for (const t of tokens) if (!byDocId.has(t.document_id)) byDocId.set(t.document_id, t);
+
+    const out = [];
+    for (const tok of byDocId.values()) {
+      const rows = await dbQuery('GET', 'documents', null, { id: `eq.${tok.document_id}`, limit: 1 }).catch(() => []);
+      const doc = rows[0];
+      if (!doc) continue;
+      let activeTok = tok;
+      if (new Date(tok.expires_at) < new Date()) {
+        const newToken = await createDocToken(doc.id, doc.path, doc.filename, email, tok.application_ref);
+        activeTok = { ...tok, token: newToken, expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString() };
       }
+      out.push({
+        id: doc.id, ref: doc.ref, filename: doc.filename, created_at: doc.created_at,
+        kind: DOC_KIND_LABELS[doc.uploaded_by] || 'Delivered File',
+        application_ref: tok.application_ref || null,
+        view_token: activeTok.token, token_expires: activeTok.expires_at,
+      });
     }
-    allDocs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    res.json(allDocs);
+    out.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    res.json(out);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -6207,6 +6223,9 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
       <div class="kv">
         ${data.nationality ? `<div class="k">Nationality</div><div class="v">${data.nationality}</div>` : ''}
         ${data.dob ? `<div class="k">Date of Birth</div><div class="v">${data.dob}</div>` : ''}
+        ${data.height ? `<div class="k">Height</div><div class="v">${data.height}</div>` : ''}
+        ${data.weight ? `<div class="k">Weight</div><div class="v">${data.weight}</div>` : ''}
+        ${data.skinColor ? `<div class="k">Complexion</div><div class="v">${data.skinColor}</div>` : ''}
         <div class="k">Issued</div><div class="v">${data.issuedDate}</div>
         <div class="k">Status</div><div class="v">Active · Verified</div>
       </div>
@@ -6282,18 +6301,34 @@ app.post('/api/identity/member/issue', async (req, res) => {
 // identity terms (logged with a timestamp) and pay before issuance.
 app.post('/api/identity/premium/apply', async (req, res) => {
   try {
-    const { unlock, fullName, nationality, address, idNumber, sector, email, photoDataUrl, termsAccepted } = req.body || {};
+    const { unlock, fullName, nationality, dob, height, weight, skinColor, address, idNumber, sector, email, photoDataUrl, termsAccepted } = req.body || {};
     if (!unlock || !verifyUnlock(unlock, 'premium_digital_id'))
       return res.status(402).json({ error: 'Payment required', pay: { product: 'premium_digital_id' } });
     if (!fullName || !email || !sector) return res.status(400).json({ error: 'Full name, email and sector are required.' });
     if (!termsAccepted) return res.status(400).json({ error: 'You must accept the identity terms to proceed.' });
     const result = await issueIdentityCard({
-      tier: 'premium', fullName, nationality, roleLine: sector, email, photoDataUrl, req,
+      tier: 'premium', fullName, nationality, dob, height, weight, skinColor, roleLine: sector, email, photoDataUrl, req,
     });
     await dbQuery('PATCH', 'identity_cards', {
       address: address || null, id_number: idNumber || null,
       terms_accepted_at: new Date().toISOString(),
     }, { ref: `eq.${result.ref}` }).catch(() => {});
+    // Safety-net email — the on-page confirmation is shown only once, so if
+    // the client closes the tab without saving their access code, this is
+    // their only other way back to the card.
+    if (email) {
+      sendEmail(email, `Your SkyGlobe Digital ID is ready — ${result.ref}`,
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
+          <h2 style="color:#a87016;font-family:Georgia,serif">Your Digital ID is ready</h2>
+          <p>Dear ${fullName},</p>
+          <p>Your SkyGlobe Premium Digital ID (Ref: <strong>${result.ref}</strong>) has been issued.</p>
+          <p style="margin:22px 0"><a href="${result.viewUrl}" style="background:#D4A73A;color:#1a1300;text-decoration:none;font-weight:700;padding:13px 26px;border-radius:30px">Open my ID card</a></p>
+          <p><strong>Your private access code:</strong> ${result.code}<br>
+          <span style="font-size:13px;color:#6b7689">Keep this safe — it is the only way to retrieve your full record if you lose this email.</span></p>
+          <p style="font-size:13px;color:#6b7689">Facilitated &amp; Verified by SkyGlobe Group · Global Operations · One World. One Mission.</p>
+        </div>`
+      ).catch(e => console.error('Premium ID confirmation email failed:', e.message));
+    }
     res.json({ success: true, ref: result.ref, viewUrl: result.viewUrl, accessCode: result.code });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

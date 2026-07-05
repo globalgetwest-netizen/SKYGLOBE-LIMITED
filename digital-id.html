@@ -125,6 +125,18 @@
           <option>Surveyor</option><option>Other</option>
         </select>
       </div>
+      <div class="row2">
+        <div class="field"><label>Date of birth <span style="color:var(--muted);font-weight:400">(optional)</span></label><input id="f_dob" type="date"></div>
+        <div class="field"><label>Complexion <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <select id="f_skinColor">
+            <option value="">Select…</option>
+            <option>Fair</option><option>Light</option><option>Medium</option><option>Olive</option><option>Brown</option><option>Dark</option>
+          </select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Height <span style="color:var(--muted);font-weight:400">(optional)</span></label><input id="f_height" placeholder="e.g. 175 cm"></div>
+        <div class="field"><label>Weight <span style="color:var(--muted);font-weight:400">(optional)</span></label><input id="f_weight" placeholder="e.g. 70 kg"></div>
+      </div>
     </div>
     <div class="actions"><span></span><button class="btn" onclick="goStep(2)">Continue →</button></div>
   </div>
@@ -196,10 +208,16 @@ function onPhoto(input){
   reader.readAsDataURL(file);
 }
 
+function formatDobDisplay(iso){
+  if(!iso) return '';
+  const d=new Date(iso+'T00:00:00'); if(isNaN(d)) return '';
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
 function collectFields(){
   return {
     fullName:val('f_fullName'), email:val('f_email'), nationality:val('f_nationality'),
     address:val('f_address'), idNumber:val('f_idNumber'), sector:val('f_sector'),
+    dob:formatDobDisplay(val('f_dob')), height:val('f_height'), weight:val('f_weight'), skinColor:val('f_skinColor'),
   };
 }
 
@@ -208,8 +226,12 @@ function renderSummary(){
   document.getElementById('paySummary').innerHTML=
     '<b>Name:</b> '+(f.fullName||'—')+'<br>'+
     '<b>Sector:</b> '+(f.sector||'—')+'<br>'+
-    '<b>Email:</b> '+(f.email||'—')+'<br>'+
-    '<b>Total:</b> $79 / €73 / £63 (choose currency at payment)';
+    '<b>Email:</b> '+(f.email||'—')+
+    (f.dob?'<br><b>Date of birth:</b> '+f.dob:'')+
+    (f.height?'<br><b>Height:</b> '+f.height:'')+
+    (f.weight?'<br><b>Weight:</b> '+f.weight:'')+
+    (f.skinColor?'<br><b>Complexion:</b> '+f.skinColor:'')+
+    '<br><b>Total:</b> $79 / €73 / £63 (choose currency at payment)';
 }
 
 async function pickProvider(){
@@ -260,7 +282,7 @@ async function resumeIfPaid(){
       '<div class="actions" style="justify-content:center;margin-top:8px">'+
         (d.viewUrl?'<a class="btn" href="'+d.viewUrl+'" target="_blank" rel="noopener">Open my ID card</a>':'')+
       '</div>'+
-      '<p class="note">Your card is encrypted at rest. Only you (with your access code above) or SkyGlobe staff can retrieve your full record.</p>';
+      '<p class="note">We\'ve also emailed this link and access code to '+(pending.fields.email||'your inbox')+' — and it will always be available in your SkyGlobe account under <b>My Documents</b> once you sign in with this email.</p>';
   }catch(e){
     box.innerHTML='<div class="ic">⚠️</div><h2>We hit a snag</h2><p style="color:var(--muted)">'+e.message+
       '</p><p class="note">Your payment is safe. Please contact us and we\'ll issue your ID manually.</p>'+
