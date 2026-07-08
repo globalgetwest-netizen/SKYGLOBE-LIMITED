@@ -249,6 +249,7 @@ async function startPayment(){
   if(!document.getElementById('f_terms').checked){ goStep(3); return; }
   const btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Starting secure payment…';
   try{ localStorage.setItem('sky_id_pending', JSON.stringify({fields:f, photoDataUrl:PHOTO_DATA_URL, termsAccepted:true})); }catch(e){}
+  if(sessionStorage.getItem('sky_unlock_premium_digital_id')){ location.href=location.pathname+'?resume=1'; return; }
   try{
     const r=await fetch('/api/pay/init',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({product:'premium_digital_id',provider:await pickProvider(),email:f.email,currency:'USD',meta:{service:'digital-id'}})});

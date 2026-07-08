@@ -330,6 +330,9 @@ async function startPayment(){
   const btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Starting secure payment…';
   // persist so we can resume generation after the payment redirect
   try{ localStorage.setItem('sky_legal_pending', JSON.stringify({product:state.product,docId:state.docId,docName:state.docName,tierName:state.tierName,fields:f})); }catch(e){}
+  // Complimentary grant (CEO-issued): a valid unlock is already present, so
+  // skip payment entirely and go straight to generation.
+  if(sessionStorage.getItem('sky_unlock_'+state.product)){ location.href=location.pathname+'?resume=1'; return; }
   try{
     const r=await fetch('/api/pay/init',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({product:state.product,provider:pickProvider(),email:f.email,currency:state.currency,

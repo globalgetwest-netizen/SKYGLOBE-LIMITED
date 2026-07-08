@@ -257,6 +257,7 @@ async function startPayment(){
   if(!f.fullName||!f.email){ goStep(3); const e=document.getElementById('formErr'); e.textContent='Please fill in full name and email.'; e.style.display='block'; return; }
   const btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Starting secure payment…';
   try{ localStorage.setItem('sky_course_pending', JSON.stringify({product:state.product,trackId:state.trackId,trackName:state.trackName,tierId:state.tierId,tierName:state.tierName,fields:f})); }catch(e){}
+  if(sessionStorage.getItem('sky_unlock_'+state.product)){ location.href=location.pathname+'?resume=1'; return; }
   try{
     const r=await fetch('/api/pay/init',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({product:state.product,provider:await pickProvider(),email:f.email,currency:state.currency,
