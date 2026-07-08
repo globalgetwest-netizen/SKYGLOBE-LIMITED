@@ -110,9 +110,9 @@
       '<div id="sgdcAll" style="display:none;max-width:820px;margin:12px auto 0;display:none;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px">' +
       Object.keys(DEPTS).map(function (k) {
         var d2 = DEPTS[k];
-        return '<div class="sgdc-chip" data-mail="' + d2.email + '" title="Click to copy" style="cursor:copy;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);text-align:left">' +
-          '<span>' + d2.icon + '</span><div style="min-width:0"><div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#e9c86a">' + d2.label + '</div>' +
-          '<div style="font-size:.78rem;color:#eef2fb;font-weight:600;word-break:break-all">' + d2.email + '</div></div></div>';
+        return '<div class="sgdc-chip" data-mail="' + d2.email + '" title="Click to copy" style="cursor:copy;display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:11px;background:#182342;border:1px solid rgba(212,167,58,.4);text-align:left;box-shadow:0 3px 10px rgba(0,0,0,.3)">' +
+          '<span style="font-size:1.05rem">' + d2.icon + '</span><div style="min-width:0"><div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#f0c75e">' + d2.label + '</div>' +
+          '<div style="font-size:.8rem;color:#ffffff;font-weight:700;word-break:break-all">' + d2.email + '</div></div></div>';
       }).join('') +
       '</div>';
     if (footer && footer.parentNode) footer.parentNode.insertBefore(strip, footer);
@@ -139,6 +139,22 @@
       });
     });
   }
+
+  // Site-wide click-to-copy: any element with class="sg-copy" data-mail="…"
+  // (footer contact lines, contact-page directory) copies the address —
+  // never a mailto, never an app chooser.
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('.sg-copy[data-mail]') : null;
+    if (!el) return;
+    e.preventDefault();
+    var mail = el.getAttribute('data-mail');
+    var done = function () {
+      var old = el.textContent;
+      el.textContent = '✓ Copied: ' + mail;
+      setTimeout(function () { el.textContent = old; }, 1600);
+    };
+    try { navigator.clipboard.writeText(mail).then(done, done); } catch (err) { done(); }
+  });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
   else mount();
