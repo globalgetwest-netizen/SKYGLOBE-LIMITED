@@ -2972,7 +2972,30 @@ Message: ${message || '(no message — form submission)'}`;
           <p style="font-size:13px;color:#6b7689">${dept.icon} ${dept.label} · SkyGlobe Group · One World. One Mission.</p>
         </div>`,
         undefined, deptSender(rec.department)
-      ).catch(err => console.error('[ai-reception] auto-answer email failed:', err.message));
+      ).catch(async (err) => {
+        // ZERO-SILENT-FAILURE RULE: if the auto-answer could not be delivered
+        // (e.g. email quota, outage), the client must not be left hanging —
+        // flip the item back into the human queue so a specialist follows up.
+        console.error('[ai-reception] auto-answer email failed — rerouting to human:', err.message);
+        try { await dbQuery('PATCH', 'ai_reception', { status: 'new', needs_human: true }, { id: `eq.${row?.id}` }); } catch {}
+      });
+    }
+    // Professional acknowledgement: when the request is queued for a human
+    // (no instant AI answer), the client immediately receives a branded
+    // receipt confirming WHAT we received and WHICH department is handling it.
+    // (Skipped for in-app chat — the hand-off message covers it — and for
+    // payment events, which already send their own confirmations.)
+    if (rec.needs_human && rec.client_email && ['contact', 'email'].includes(rec.source)) {
+      sendEmail(rec.client_email, `We've received your message — ${dept.label}`,
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
+          <h2 style="color:#a87016;font-family:Georgia,serif">${dept.icon} Message received</h2>
+          <p>Dear ${rec.client_name || 'Client'},</p>
+          <p>Thank you for contacting SkyGlobe Group. Your message has been received and assigned to our <strong>${dept.label}</strong> team${ref ? ` (reference <strong>${ref}</strong>)` : ''}. A specialist will reply to you shortly.</p>
+          <div style="background:#f7f8fb;border-left:4px solid #c9a84c;padding:12px 14px;margin:16px 0;font-size:14px;color:#444"><strong>Your message:</strong><br>${String(message || '').slice(0, 600).replace(/</g, '&lt;').replace(/\n/g, '<br>')}</div>
+          <p style="font-size:13px;color:#6b7689">You can reply to this email at any time — it reaches the same team. ${dept.icon} ${dept.label} · SkyGlobe Group · One World. One Mission.</p>
+        </div>`,
+        undefined, deptSender(rec.department)
+      ).catch(err => console.error('[ai-reception] acknowledgement email failed:', err.message));
     }
     const flag = rec.urgency === 'critical' ? '🔴 ' : rec.urgency === 'high' ? '🟠 ' : '';
     sendEmail(deptInbox(rec.department),
