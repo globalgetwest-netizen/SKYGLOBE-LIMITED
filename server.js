@@ -2786,6 +2786,11 @@ const DEPARTMENTS = {
   legal:     { key: 'legal',     label: 'Legal & Documents',        email: 'legal@skyglobegroup.com',    icon: '📜', live: false },
   identity:  { key: 'identity',  label: 'Digital Identity',         email: 'id@skyglobegroup.com',       icon: '🪪', live: false },
   finance:   { key: 'finance',   label: 'Finance & Payments',       email: 'finance@skyglobegroup.com',  icon: '💳', live: false },
+  noria:     { key: 'noria',     label: 'NORIA · AI Assistant',     email: 'noria@skyglobegroup.com',    icon: '✦',  live: false, sticky: true },
+  yunex:     { key: 'yunex',     label: 'Yunex',                    email: 'yunex@skyglobegroup.com',    icon: '◆',  live: false, sticky: true },
+  // CEO mail is sacred: never AI-auto-answered, always queued for a human,
+  // and never re-classified away from the CEO's office by the AI.
+  ceo:       { key: 'ceo',       label: 'Office of the CEO',        email: 'ceo@skyglobegroup.com',      icon: '👑', live: false, sticky: true, aiAutoAnswer: false },
   general:   { key: 'general',   label: 'General / Reception',      email: 'support@skyglobegroup.com',  icon: '📨', live: false },
 };
 const VALID_DEPT_KEYS = Object.keys(DEPARTMENTS);
@@ -2885,12 +2890,13 @@ Message: ${message || '(no message — form submission)'}`;
     const out = await generateText(prompt, { maxTokens: 700, temperature: 0.3 });
     const j = parseAiJson(out);
     if (j) {
-      if (VALID_DEPT_KEYS.includes(j.department)) rec.department = j.department;
+      if (VALID_DEPT_KEYS.includes(j.department) && !(deptHint && DEPARTMENTS[deptHint] && DEPARTMENTS[deptHint].sticky)) rec.department = j.department;
       if (['low','normal','high','critical'].includes(j.urgency)) rec.urgency = j.urgency;
       if (['positive','neutral','frustrated'].includes(j.sentiment)) rec.sentiment = j.sentiment;
       if (typeof j.intent === 'string') rec.intent = j.intent.slice(0, 400);
       if (typeof j.suggested_reply === 'string') rec.suggested_reply = j.suggested_reply.slice(0, 2000);
       if (typeof j.needs_human === 'boolean') rec.needs_human = j.needs_human;
+      if (DEPARTMENTS[rec.department] && DEPARTMENTS[rec.department].aiAutoAnswer === false) rec.needs_human = true;
       rec.status = rec.needs_human ? 'new' : 'ai_handled';
     }
   } catch (e) {

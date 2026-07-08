@@ -792,7 +792,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;',
 function badge(s){return `<span class="badge b-${(s||'Received').replace(/\s/g,'')}">${esc(s||'Received')}</span>`;}
 
 /* ══════════════ STAFF: AI RECEPTION ══════════════ */
-const SREC_DEPT={travel:{icon:'✈️',label:'Travel & Mobility'},education:{icon:'🎓',label:'Education & Academy'},legal:{icon:'📜',label:'Legal & Documents'},identity:{icon:'🪪',label:'Digital Identity'},finance:{icon:'💳',label:'Finance & Payments'},general:{icon:'📨',label:'General'}};
+const SREC_DEPT={travel:{icon:'✈️',label:'Travel & Mobility'},education:{icon:'🎓',label:'Education & Academy'},legal:{icon:'📜',label:'Legal & Documents'},identity:{icon:'🪪',label:'Digital Identity'},finance:{icon:'💳',label:'Finance & Payments'},noria:{icon:'✦',label:'NORIA · AI'},yunex:{icon:'◆',label:'Yunex'},ceo:{icon:'👑',label:'Office of the CEO'},general:{icon:'📨',label:'General'}};
 const SREC_URG={critical:'#f0564f',high:'#f5b942',normal:'#4f8ef7',low:'#5f74a0'};
 function srecTime(d){ if(!d)return''; const s=(Date.now()-new Date(d))/1000; if(s<60)return'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
 
