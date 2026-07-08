@@ -234,11 +234,21 @@ function storagePublicUrl(filePath) {
   return `${SUPA_URL}/storage/v1/object/public/documents/${filePath}`;
 }
 
-// ── RESEND EMAIL ──────────────────────────────────────────────────────────────
-async function sendEmail(to, subject, html, replyTo, from) {
+// ── OUTBOUND EMAIL (Resend primary → Brevo automatic fallback) ───────────────
+// If Resend refuses (daily quota exhausted, outage, etc.) the SAME email is
+// automatically retried through Brevo (free tier ~300/day). The caller never
+// notices. Only if BOTH providers fail does sendEmail throw — and callers'
+// existing .catch fail-safes then route the item back to the human queue.
+function parseSender(fromStr) {
+  const m = /^(.*)<\s*([^>]+)\s*>\s*$/.exec(fromStr || '');
+  if (m) return { name: m[1].trim().replace(/^"|"$/g, '') || 'SkyGlobe Group', email: m[2].trim() };
+  return { name: 'SkyGlobe Group', email: (fromStr || 'support@skyglobegroup.com').trim() };
+}
+
+async function sendViaResend(to, subject, html, replyTo, from) {
   const body = {
     from: from || 'SkyGlobe Group <support@skyglobegroup.com>',
-    to: Array.isArray(to) ? to : [to],
+    to,
     subject,
     html,
     // LOOP GUARD #4 — every email we send is tagged so the inbound pipeline
@@ -254,6 +264,43 @@ async function sendEmail(to, subject, html, replyTo, from) {
   const data = await res.json();
   if (!res.ok) throw new Error(JSON.stringify(data));
   return data;
+}
+
+async function sendViaBrevo(to, subject, html, replyTo, from) {
+  const key = process.env.BREVO_API_KEY;
+  if (!key) throw new Error('BREVO_API_KEY not set');
+  const body = {
+    sender: parseSender(from || 'SkyGlobe Group <support@skyglobegroup.com>'),
+    to: to.map(email => ({ email })),
+    subject,
+    htmlContent: html,
+    headers: { 'X-SkyGlobe-Origin': 'platform' }, // LOOP GUARD #4 (same tag)
+  };
+  if (replyTo) body.replyTo = { email: replyTo };
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': key, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
+
+async function sendEmail(to, subject, html, replyTo, from) {
+  const recipients = Array.isArray(to) ? to : [to];
+  try {
+    return await sendViaResend(recipients, subject, html, replyTo, from);
+  } catch (resendErr) {
+    console.warn(`[email] Resend failed (${resendErr.message.slice(0, 200)}) — trying Brevo fallback`);
+    try {
+      const data = await sendViaBrevo(recipients, subject, html, replyTo, from);
+      console.log(`[email] Delivered via Brevo fallback → ${recipients.join(', ')}`);
+      return data;
+    } catch (brevoErr) {
+      throw new Error(`All email providers failed. Resend: ${resendErr.message.slice(0, 300)} | Brevo: ${brevoErr.message.slice(0, 300)}`);
+    }
+  }
 }
 
 function genRef() {
@@ -374,7 +421,7 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
     deptHint: deptForService(service),
   }).catch(() => {});
 
-  if (!process.env.RESEND_API_KEY)
+  if (!process.env.RESEND_API_KEY && !process.env.BREVO_API_KEY)
     return res.status(500).json({ error: 'Email service not configured. Contact us via WhatsApp.' });
 
   const recipientEmail = process.env.RECIPIENT_EMAIL ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim()) : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
@@ -1125,17 +1172,14 @@ app.get('/api/test-gemini', async (req, res) => {
 });
 
 app.get('/api/test', async (req, res) => {
-  const key = process.env.RESEND_API_KEY;
-  const to  = process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com';
-  if (!key) return res.json({ ok: false, error: 'RESEND_API_KEY env var is missing' });
+  const to = (process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com').split(',')[0].trim();
+  const providers = { resend: !!process.env.RESEND_API_KEY, brevo: !!process.env.BREVO_API_KEY };
+  if (!providers.resend && !providers.brevo)
+    return res.json({ ok: false, providers, error: 'No email provider configured (RESEND_API_KEY / BREVO_API_KEY missing)' });
   try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: 'SkyGlobe Test <support@skyglobegroup.com>', to: [to], subject: 'SkyGlobe — Email Test', html: '<p>✅ Email is working!</p>' }),
-    });
-    res.json({ ok: r.ok, status: r.status, resend_response: await r.json() });
-  } catch (err) { res.json({ ok: false, error: err.message }); }
+    const data = await sendEmail(to, 'SkyGlobe — Email Test', '<p>✅ Email is working! (Resend primary, Brevo fallback)</p>');
+    res.json({ ok: true, providers, response: data });
+  } catch (err) { res.json({ ok: false, providers, error: err.message }); }
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1640,6 +1684,10 @@ app.post('/api/admin/reception/:id/reply', async (req, res) => {
     if (rec.source === 'chat') {
       await dbQuery('POST', 'messages', { client_email: rec.client_email, sender: 'admin', body, read: false }).catch(() => {});
       sseNotify(rec.client_email, 'new-message', { sender: 'admin', body, created_at: new Date().toISOString() });
+    } else {
+      // Portal-first: if this client has an account, the reply also lands in
+      // their in-app inbox instantly — zero email quota, never blocked.
+      await portalDeliver(rec.client_email, body, rec.department).catch(() => {});
     }
     await sendEmail(rec.client_email, `SkyGlobe Group — ${dept.label}`,
       `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a2233">
@@ -2913,6 +2961,29 @@ function parseAiJson(text) {
 // The heart of the AI Reception. Fire-and-forget: never blocks or breaks the
 // client-facing request that triggered it. Classifies, drafts a reply, decides
 // escalation, stores the record, and notifies the owning department.
+// ── PORTAL-FIRST DELIVERY ────────────────────────────────────────────────────
+// If the client has a SkyGlobe account, deliver the AI's reply straight into
+// their in-app Messages inbox (database + live SSE push). This channel costs
+// ZERO email quota and can never be blocked by a provider — email becomes a
+// bonus copy rather than the only path. Returns true when delivered.
+async function portalDeliver(clientEmail, body, deptKey) {
+  if (!clientEmail || !body) return false;
+  const emailLc = String(clientEmail).toLowerCase().trim();
+  try {
+    const accounts = await dbQuery('GET', 'clients', null, { email: `eq.${emailLc}`, select: 'email', limit: 1 });
+    if (!Array.isArray(accounts) || !accounts.length) return false;
+    const dept = DEPARTMENTS[deptKey] || DEPARTMENTS.general;
+    const text = `${dept.icon} ${dept.label}\n\n${body}`;
+    await dbQuery('POST', 'messages', { client_email: emailLc, sender: 'ai', body: text, read: false });
+    sseNotify(emailLc, 'new-message', { sender: 'ai', body: text, created_at: new Date().toISOString() });
+    console.log(`[ai-reception] portal delivery → ${emailLc} (${deptKey})`);
+    return true;
+  } catch (e) {
+    console.error('[ai-reception] portal delivery failed:', e.message);
+    return false;
+  }
+}
+
 async function aiReceive({ source, ref, name, email, service, message, deptHint }) {
   let rec = {
     source: source || 'request', ref: ref || null,
@@ -2964,6 +3035,8 @@ Message: ${message || '(no message — form submission)'}`;
     // auto-answered. Fire-and-forget: an email failure just leaves the item
     // in the queue for staff.
     if (!rec.needs_human && rec.client_email && rec.suggested_reply) {
+      // Portal first (free, instant, quota-proof) — email as a bonus copy.
+      const portalPromise = portalDeliver(rec.client_email, rec.suggested_reply, rec.department);
       sendEmail(rec.client_email, `SkyGlobe Group — ${dept.label}`,
         `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a2233">
           <p>Dear ${rec.client_name || 'Client'},</p>
@@ -2973,11 +3046,17 @@ Message: ${message || '(no message — form submission)'}`;
         </div>`,
         undefined, deptSender(rec.department)
       ).catch(async (err) => {
-        // ZERO-SILENT-FAILURE RULE: if the auto-answer could not be delivered
-        // (e.g. email quota, outage), the client must not be left hanging —
-        // flip the item back into the human queue so a specialist follows up.
-        console.error('[ai-reception] auto-answer email failed — rerouting to human:', err.message);
-        try { await dbQuery('PATCH', 'ai_reception', { status: 'new', needs_human: true }, { id: `eq.${row?.id}` }); } catch {}
+        // ZERO-SILENT-FAILURE RULE: if the auto-answer could not be emailed
+        // (quota, outage on BOTH providers) AND it didn't reach the client's
+        // portal inbox either, flip the item back into the human queue so a
+        // specialist follows up. If the portal copy landed, the client HAS the
+        // reply — no need to re-open the item.
+        console.error('[ai-reception] auto-answer email failed:', err.message);
+        const reachedPortal = await portalPromise.catch(() => false);
+        if (!reachedPortal) {
+          console.error('[ai-reception] no portal account either — rerouting to human');
+          try { await dbQuery('PATCH', 'ai_reception', { status: 'new', needs_human: true }, { id: `eq.${row?.id}` }); } catch {}
+        }
       });
     }
     // Professional acknowledgement: when the request is queued for a human
@@ -2986,6 +3065,9 @@ Message: ${message || '(no message — form submission)'}`;
     // (Skipped for in-app chat — the hand-off message covers it — and for
     // payment events, which already send their own confirmations.)
     if (rec.needs_human && rec.client_email && ['contact', 'email'].includes(rec.source)) {
+      portalDeliver(rec.client_email,
+        `Thank you for contacting SkyGlobe Group. Your message has been received and assigned to our ${dept.label} team${ref ? ` (reference ${ref})` : ''}. A specialist will reply to you shortly.`,
+        rec.department).catch(() => {});
       sendEmail(rec.client_email, `We've received your message — ${dept.label}`,
         `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
           <h2 style="color:#a87016;font-family:Georgia,serif">${dept.icon} Message received</h2>
@@ -5951,7 +6033,7 @@ app.post('/api/conference/register', contactLimiter, async (req, res) => {
   // Best-effort save (table may not exist yet — never blocks the user)
   await dbQuery('POST', 'conference_requests', record).catch(() => {});
   // Notify client + admin (best-effort)
-  if (process.env.RESEND_API_KEY) {
+  if (process.env.RESEND_API_KEY || process.env.BREVO_API_KEY) {
     const adminEmail = process.env.ADMIN_EMAIL || process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com';
     const clientHtml = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto">
       <div style="background:#041022;color:#fff;padding:20px;border-radius:12px 12px 0 0"><h2 style="margin:0;color:#D4A73A">SkyGlobe Group</h2><p style="margin:4px 0 0;color:#c3cee0">Conference Registration Received</p></div>
