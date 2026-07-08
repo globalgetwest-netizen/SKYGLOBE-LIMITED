@@ -31,6 +31,20 @@
     return PAGE_DEPT.hasOwnProperty(p) ? PAGE_DEPT[p] : 'general';
   }
 
+  // Services offered by each department — shown as a selector in the form so
+  // the message arrives pre-classified ("according to the system of services
+  // of that particular email").
+  var SERVICES = {
+    travel:    ['Student Visa', 'Work Visa / Permit', 'Tourist / Visit Visa', 'Flight & Hotel Letters', 'Travel Insurance', 'Conference Invitation', 'Other'],
+    education: ['Certificate Programs', 'SkyGlobe Academy Admission', 'University Admission', 'Scholarship Support', 'Other'],
+    legal:     ['AI Legal Document', 'Notarisation / Apostille', 'Document Verification', 'Other'],
+    identity:  ['Premium Digital ID', 'ID Verification', 'Digitalization Services', 'Other'],
+    finance:   ['Payment Issue', 'Refund Request', 'Invoice / Receipt', 'Other'],
+    general:   ['General Enquiry', 'Complaint', 'Partnership', 'Other'],
+  };
+  var EMAIL_DEPT = {};
+  Object.keys(DEPTS).forEach(function (k) { EMAIL_DEPT[DEPTS[k].email] = k; });
+
   var deptKey = null, dept = null;
 
   function copyAddress(el) {
@@ -43,24 +57,31 @@
     catch (e) { done(); }
   }
 
-  function openForm() {
-    if (document.getElementById('sgdcModal')) return;
+  function openForm(forKey) {
+    var k = (forKey && DEPTS[forKey]) ? forKey : deptKey;
+    var d = DEPTS[k] || DEPTS.general;
+    var svcOptions = (SERVICES[k] || SERVICES.general)
+      .map(function (sv) { return '<option>' + sv + '</option>'; }).join('');
+    var existing = document.getElementById('sgdcModal');
+    if (existing) existing.remove();
     var m = document.createElement('div');
     m.id = 'sgdcModal';
     m.style.cssText = 'position:fixed;inset:0;z-index:99995;background:rgba(4,8,18,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px';
     m.innerHTML =
       '<div style="position:relative;width:min(480px,96vw);background:linear-gradient(160deg,#0e1730,#0b1120);border:1px solid rgba(212,167,58,.35);border-radius:18px;padding:26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.6);font-family:\'Segoe UI\',system-ui,sans-serif;color:#eef2fb">' +
       '<button id="sgdcX" aria-label="Close" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#8fa0c0;cursor:pointer;font-size:.85rem;line-height:1">✕</button>' +
-      '<div style="font-size:.64rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#e9c86a;margin-bottom:4px">' + dept.icon + ' ' + dept.label + '</div>' +
+      '<div style="font-size:.64rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#e9c86a;margin-bottom:4px">' + d.icon + ' ' + d.label + '</div>' +
       '<h3 style="margin:0 0 4px;font-size:1.2rem">Message this department</h3>' +
       '<p style="margin:0 0 16px;font-size:.78rem;color:#8fa0c0;line-height:1.5">Delivered instantly to our AI concierge — you\'ll get a reply by email within minutes, and a specialist follows up personally when needed.</p>' +
       '<div id="sgdcBody">' +
       '<input id="sgdcName" placeholder="Your full name" style="width:100%;margin-bottom:10px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#eef2fb;font-size:.9rem;font-family:inherit;box-sizing:border-box">' +
       '<input id="sgdcEmail" type="email" placeholder="Your email address" style="width:100%;margin-bottom:10px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#eef2fb;font-size:.9rem;font-family:inherit;box-sizing:border-box">' +
+      '<select id="sgdcSvc" style="width:100%;margin-bottom:10px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:#141d36;color:#eef2fb;font-size:.9rem;font-family:inherit;box-sizing:border-box">' +
+      '<option value="">— Which service is this about? —</option>' + svcOptions + '</select>' +
       '<textarea id="sgdcMsg" placeholder="How can we help? Include your application reference if you have one." style="width:100%;min-height:110px;margin-bottom:6px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#eef2fb;font-size:.9rem;font-family:inherit;line-height:1.5;box-sizing:border-box;resize:vertical"></textarea>' +
       '<div id="sgdcErr" style="display:none;color:#ff9c9c;font-size:.78rem;margin-bottom:8px"></div>' +
       '<button id="sgdcSend" style="width:100%;padding:13px;border:none;border-radius:11px;background:linear-gradient(135deg,#f7d774,#e4b132);color:#181000;font-weight:800;font-size:.9rem;cursor:pointer;box-shadow:0 8px 22px rgba(228,177,50,.35);font-family:inherit">Send message</button>' +
-      '<div style="text-align:center;margin-top:12px;font-size:.72rem;color:#8fa0c0">or write from your own email: <b style="color:#c9d4ea">' + dept.email + '</b></div>' +
+      '<div style="text-align:center;margin-top:12px;font-size:.72rem;color:#8fa0c0">or write from your own email: <b class="sgdc-copyonly" data-mail="' + d.email + '" title="Click to copy" style="color:#c9d4ea;cursor:copy">' + d.email + '</b></div>' +
       '</div></div>';
     m.addEventListener('click', function (e) { if (e.target === m) m.remove(); });
     document.body.appendChild(m);
@@ -75,7 +96,8 @@
       btn.disabled = true; btn.textContent = 'Sending…';
       fetch('/api/dept-message', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dept: deptKey, name: name, email: email, message: msg }),
+        body: JSON.stringify({ dept: k, name: name, email: email,
+          message: (document.getElementById('sgdcSvc').value ? 'Service: ' + document.getElementById('sgdcSvc').value + '\n\n' : '') + msg }),
       }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
         .then(function (res) {
           if (!res.ok) throw new Error((res.d && res.d.error) || 'Could not send. Please try again.');
@@ -83,7 +105,7 @@
             '<div style="text-align:center;padding:26px 6px">' +
             '<div style="font-size:2.4rem;margin-bottom:10px">✅</div>' +
             '<div style="font-weight:700;font-size:1.02rem;margin-bottom:6px">Message received</div>' +
-            '<div style="font-size:.8rem;color:#8fa0c0;line-height:1.6">Our AI concierge is already reading it — check <b style="color:#c9d4ea">' + email.replace(/</g, '&lt;') + '</b> for a reply within minutes. A ' + dept.label + ' specialist follows up personally if your case needs one.</div>' +
+            '<div style="font-size:.8rem;color:#8fa0c0;line-height:1.6">Our AI concierge is already reading it — check <b style="color:#c9d4ea">' + email.replace(/</g, '&lt;') + '</b> for a reply within minutes. A ' + d.label + ' specialist follows up personally if your case needs one.</div>' +
             '</div>';
         })
         .catch(function (e) { err.textContent = e.message; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Send message'; });
@@ -102,7 +124,7 @@
       '<div style="text-align:left;min-width:0">' +
         '<div style="font-size:.66rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#e9c86a">' + dept.label + ' · Direct line</div>' +
         '<span id="sgdcAddr" title="Click to copy" style="color:#eef2fb;font-weight:700;font-size:1.02rem;cursor:copy;word-break:break-all">' + dept.email + '</span>' +
-        '<div style="font-size:.72rem;color:#8fa0c0;margin-top:2px">AI-assisted inbox — answered 24/7, escalated to our specialists when needed. Click the address to copy it.</div>' +
+        '<div style="font-size:.72rem;color:#8fa0c0;margin-top:2px">AI-assisted inbox — answered 24/7, escalated to our specialists when needed. Click any address to message that department right here.</div>' +
       '</div>' +
       '<button id="sgdcOpen" style="flex-shrink:0;border:none;background:linear-gradient(135deg,#f7d774,#e4b132);color:#181000;font-size:.8rem;font-weight:800;padding:11px 20px;border-radius:999px;cursor:pointer;box-shadow:0 6px 18px rgba(228,177,50,.35);font-family:inherit">💬 Message this department</button>' +
       '</div>' +
@@ -117,9 +139,11 @@
       '</div>';
     if (footer && footer.parentNode) footer.parentNode.insertBefore(strip, footer);
     else document.body.appendChild(strip);
-    document.getElementById('sgdcOpen').addEventListener('click', openForm);
+    document.getElementById('sgdcOpen').addEventListener('click', function () { openForm(); });
     var addr = document.getElementById('sgdcAddr');
-    addr.addEventListener('click', function () { copyAddress(addr); });
+    addr.setAttribute('title', 'Click to message this department');
+    addr.style.cursor = 'pointer';
+    addr.addEventListener('click', function () { openForm(); });
     // Full directory toggle + click-to-copy chips
     var allBtn = document.getElementById('sgdcAllBtn'), all = document.getElementById('sgdcAll');
     allBtn.addEventListener('click', function () {
@@ -127,33 +151,50 @@
       all.style.display = open ? 'none' : 'grid';
       allBtn.textContent = open ? '▾ View all department contacts' : '▴ Hide department contacts';
     });
-    Array.prototype.forEach.call(strip.querySelectorAll('.sgdc-chip'), function (chip) {
-      chip.addEventListener('click', function () {
-        var mail = chip.getAttribute('data-mail');
-        var done = function () {
-          var sub = chip.querySelector('div > div:last-child');
-          var old = sub.textContent; sub.textContent = '✓ Copied';
-          setTimeout(function () { sub.textContent = old; }, 1400);
-        };
-        try { navigator.clipboard.writeText(mail).then(done, done); } catch (e) { done(); }
-      });
-    });
+    // chips are handled by the delegated click handler (opens that dept's form)
   }
 
-  // Site-wide click-to-copy: any element with class="sg-copy" data-mail="…"
-  // (footer contact lines, contact-page directory) copies the address —
-  // never a mailto, never an app chooser.
+  // Site-wide behavior for every listed address & number — all inside the
+  // website, never an app chooser:
+  //  · click a department EMAIL  → that department's message form opens here
+  //  · click the copy-only line inside the form → address copied
+  //  · click the PHONE number    → dials on mobile, copies on desktop
   document.addEventListener('click', function (e) {
-    var el = e.target.closest ? e.target.closest('.sg-copy[data-mail]') : null;
-    if (!el) return;
-    e.preventDefault();
-    var mail = el.getAttribute('data-mail');
-    var done = function () {
-      var old = el.textContent;
-      el.textContent = '✓ Copied: ' + mail;
-      setTimeout(function () { el.textContent = old; }, 1600);
-    };
-    try { navigator.clipboard.writeText(mail).then(done, done); } catch (err) { done(); }
+    if (!e.target.closest) return;
+    var copyEl = e.target.closest('.sgdc-copyonly[data-mail]');
+    if (copyEl) {
+      e.preventDefault();
+      var mail0 = copyEl.getAttribute('data-mail');
+      var done0 = function () {
+        var old0 = copyEl.textContent;
+        copyEl.textContent = '✓ Copied';
+        setTimeout(function () { copyEl.textContent = old0; }, 1400);
+      };
+      try { navigator.clipboard.writeText(mail0).then(done0, done0); } catch (err) { done0(); }
+      return;
+    }
+    var el = e.target.closest('.sg-copy[data-mail], .sgdc-chip[data-mail]');
+    if (el) {
+      e.preventDefault();
+      var mail = el.getAttribute('data-mail');
+      openForm(EMAIL_DEPT[mail] || 'general');
+      return;
+    }
+    var tel = e.target.closest('.sg-tel[data-tel]');
+    if (tel) {
+      var num = tel.getAttribute('data-tel');
+      if (window.matchMedia && window.matchMedia('(pointer:coarse)').matches) {
+        location.href = 'tel:' + num; // phones: place the call
+        return;
+      }
+      e.preventDefault(); // desktops: copy, never an app chooser
+      var done = function () {
+        var old = tel.textContent;
+        tel.textContent = '✓ Copied: ' + num;
+        setTimeout(function () { tel.textContent = old; }, 1600);
+      };
+      try { navigator.clipboard.writeText(num).then(done, done); } catch (err) { done(); }
+    }
   });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
