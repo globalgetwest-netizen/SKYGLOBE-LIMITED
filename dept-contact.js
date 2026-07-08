@@ -105,12 +105,39 @@
         '<div style="font-size:.72rem;color:#8fa0c0;margin-top:2px">AI-assisted inbox — answered 24/7, escalated to our specialists when needed. Click the address to copy it.</div>' +
       '</div>' +
       '<button id="sgdcOpen" style="flex-shrink:0;border:none;background:linear-gradient(135deg,#f7d774,#e4b132);color:#181000;font-size:.8rem;font-weight:800;padding:11px 20px;border-radius:999px;cursor:pointer;box-shadow:0 6px 18px rgba(228,177,50,.35);font-family:inherit">💬 Message this department</button>' +
+      '</div>' +
+      '<button id="sgdcAllBtn" style="margin-top:14px;background:none;border:none;color:#8fa0c0;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:inherit">▾ View all department contacts</button>' +
+      '<div id="sgdcAll" style="display:none;max-width:820px;margin:12px auto 0;display:none;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px">' +
+      Object.keys(DEPTS).map(function (k) {
+        var d2 = DEPTS[k];
+        return '<div class="sgdc-chip" data-mail="' + d2.email + '" title="Click to copy" style="cursor:copy;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);text-align:left">' +
+          '<span>' + d2.icon + '</span><div style="min-width:0"><div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#e9c86a">' + d2.label + '</div>' +
+          '<div style="font-size:.78rem;color:#eef2fb;font-weight:600;word-break:break-all">' + d2.email + '</div></div></div>';
+      }).join('') +
       '</div>';
     if (footer && footer.parentNode) footer.parentNode.insertBefore(strip, footer);
     else document.body.appendChild(strip);
     document.getElementById('sgdcOpen').addEventListener('click', openForm);
     var addr = document.getElementById('sgdcAddr');
     addr.addEventListener('click', function () { copyAddress(addr); });
+    // Full directory toggle + click-to-copy chips
+    var allBtn = document.getElementById('sgdcAllBtn'), all = document.getElementById('sgdcAll');
+    allBtn.addEventListener('click', function () {
+      var open = all.style.display !== 'none';
+      all.style.display = open ? 'none' : 'grid';
+      allBtn.textContent = open ? '▾ View all department contacts' : '▴ Hide department contacts';
+    });
+    Array.prototype.forEach.call(strip.querySelectorAll('.sgdc-chip'), function (chip) {
+      chip.addEventListener('click', function () {
+        var mail = chip.getAttribute('data-mail');
+        var done = function () {
+          var sub = chip.querySelector('div > div:last-child');
+          var old = sub.textContent; sub.textContent = '✓ Copied';
+          setTimeout(function () { sub.textContent = old; }, 1400);
+        };
+        try { navigator.clipboard.writeText(mail).then(done, done); } catch (e) { done(); }
+      });
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);

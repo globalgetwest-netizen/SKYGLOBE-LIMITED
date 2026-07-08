@@ -8,7 +8,7 @@
  * NOTE: we do NOT call skipWaiting() on install — the page asks the user first,
  *       then posts {type:'SKIP_WAITING'} when they tap "Update".
  */
-const CACHE = 'skyglobe-v9';
+const CACHE = 'skyglobe-v10';
 const STATIC_ASSETS = [
   '/', '/index.html', '/offline.html',
   '/icon.svg?v=3', '/icon-192.png?v=3', '/icon-512.png?v=3', '/apple-touch-icon.png?v=3', '/favicon-32.png?v=3',
@@ -70,7 +70,20 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Static assets: cache-first, then network (and cache same-origin responses).
+  // Scripts & styles: NETWORK-FIRST — code updates must reach every installed
+  // app immediately (a stale cached .js once kept users on an old UI). The
+  // cached copy is only a fallback for offline.
+  if (/\.(js|css)$/i.test(url.pathname) && url.origin === self.location.origin) {
+    e.respondWith(
+      fetch(req).then((res) => {
+        if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
+        return res;
+      }).catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Other static assets (images, fonts): cache-first, then network.
   e.respondWith(
     caches.match(req).then((hit) =>
       hit || fetch(req).then((res) => {
