@@ -14,6 +14,12 @@
 //      set Action = "Send to a Worker" → skyglobe-inbound.
 
 export default {
+  // Health check for web requests (the dashboard preview and curl hit this).
+  // The real work happens in the email() handler below.
+  async fetch() {
+    return new Response('SkyGlobe inbound email worker · OK', { status: 200 });
+  },
+
   async email(message, env, ctx) {
     // LOOP GUARD — never hand SkyGlobe's own mail back to SkyGlobe.
     // (Notifications the platform sends to its own addresses would otherwise
