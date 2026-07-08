@@ -15,6 +15,13 @@
 
 export default {
   async email(message, env, ctx) {
+    // LOOP GUARD — never hand SkyGlobe's own mail back to SkyGlobe.
+    // (Notifications the platform sends to its own addresses would otherwise
+    // circle forever: platform → address → worker → platform → …)
+    const headerFrom = (message.headers.get('from') || '').toLowerCase();
+    const origin = message.headers.get('x-skyglobe-origin') || '';
+    const isOwn = origin === 'platform' || headerFrom.includes('@skyglobegroup.com');
+
     // 1) Safety first: always deliver the original to the human inbox.
     //    The AI is additive — if anything below fails, no mail is lost.
     try {
@@ -23,6 +30,7 @@ export default {
       // forward() throws if FORWARD_TO isn't a verified destination — fix in
       // Email Routing → Destination addresses.
     }
+    if (isOwn) return; // keep the copy, never re-inject into the platform
 
     // 2) Hand the message to SkyGlobe's AI Reception.
     try {

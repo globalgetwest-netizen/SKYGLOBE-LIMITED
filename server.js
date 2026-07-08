@@ -241,6 +241,9 @@ async function sendEmail(to, subject, html, replyTo, from) {
     to: Array.isArray(to) ? to : [to],
     subject,
     html,
+    // LOOP GUARD #4 — every email we send is tagged so the inbound pipeline
+    // (worker + server) can recognise and ignore our own mail on sight.
+    headers: { 'X-SkyGlobe-Origin': 'platform' },
   };
   if (replyTo) body.reply_to = replyTo;
   const res = await fetch('https://api.resend.com/emails', {
@@ -1489,9 +1492,28 @@ app.post('/api/email/inbound', async (req, res) => {
     const { from, to, subject, text, raw } = req.body || {};
     const fromEmail = (String(from || '').match(/[\w.+-]+@[\w.-]+/) || [])[0]?.toLowerCase();
     if (!fromEmail) return res.status(400).json({ error: 'No sender address' });
-    // Loop/noise guards: never react to our own domain, bounces, or robots.
-    if (/@skyglobegroup\.com$/i.test(fromEmail) || /mailer-daemon|postmaster|no-?reply|noreply/i.test(fromEmail))
+    // LOOP GUARD #2 — never react to our own mail, bounces, or robots.
+    // Critical detail: Cloudflare hands the worker the ENVELOPE sender, and
+    // for mail we send via Resend that envelope is a resend/ESP bounce
+    // address, NOT @skyglobegroup.com — so we must also block ESP bounce
+    // domains AND check the raw From: header for our own domain.
+    if (/@skyglobegroup\.com$/i.test(fromEmail)
+      || /mailer-daemon|postmaster|no-?reply|noreply|bounce/i.test(fromEmail)
+      || /(^|[@.])(resend\.(com|dev|app)|amazonses\.com|sendgrid\.net|mailgun\.org|sparkpostmail\.com)$/i.test(fromEmail.split('@')[1] || ''))
       return res.json({ skipped: 'own-domain-or-robot' });
+    const rawHead = String(raw || '').slice(0, 4000);
+    if (/^From:[^\r\n]*@skyglobegroup\.com/im.test(rawHead) || /^X-SkyGlobe-Origin:/im.test(rawHead))
+      return res.json({ skipped: 'own-header-from' });
+    // LOOP GUARD #3 — dedup: at most one inbound-email triage per sender per
+    // minute. A runaway source can never amplify faster than 1/min.
+    try {
+      const recent = await dbQuery('GET', 'ai_reception', null, {
+        client_email: `eq.${fromEmail}`, source: 'eq.email',
+        order: 'created_at.desc', limit: 1,
+      });
+      if (recent[0] && (Date.now() - new Date(recent[0].created_at).getTime()) < 60 * 1000)
+        return res.json({ skipped: 'dedup-window' });
+    } catch { /* dedup is best-effort */ }
     const toAddr = String(to || '').toLowerCase();
     const deptKey = VALID_DEPT_KEYS.find(k => toAddr.includes(DEPARTMENTS[k].email.toLowerCase())) || 'general';
     const bodyText = (text && String(text).trim()) || extractEmailText(raw);
@@ -2844,12 +2866,17 @@ function deptForService(service) {
   return 'general';
 }
 // Who to email for a department: its own address once live, else the team inbox.
-function deptInbox(deptKey) {
-  const team = process.env.RECIPIENT_EMAIL
+// LOOP GUARD #1 — team notifications must NEVER be sent to our own
+// @skyglobegroup.com addresses: those now route into the Email Worker, which
+// would hand the notification straight back to this server (this caused a
+// real self-amplifying mail loop). Notifications go only to true external
+// inboxes; anything on our own domain is stripped.
+function deptInbox(_deptKey) {
+  const team = (process.env.RECIPIENT_EMAIL
     ? process.env.RECIPIENT_EMAIL.split(',').map(s => s.trim())
-    : ['support@skyglobegroup.com', 'insights.skyglobe@gmail.com'];
-  const d = DEPARTMENTS[deptKey];
-  return (d && d.live && d.email) ? [d.email, ...team] : team;
+    : ['insights.skyglobe@gmail.com'])
+    .filter(a => a && !/@skyglobegroup\.com$/i.test(a));
+  return team.length ? team : ['insights.skyglobe@gmail.com'];
 }
 
 // Pull the first JSON object out of an AI response (handles ```json fences).
