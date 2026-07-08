@@ -3,7 +3,7 @@
      <script src="/noria-widget.js"></script>
    Replaces the ~470-line inline copy that used to be duplicated on every
    page that carries NORIA (conferences.html, work-permit.html,
-   digitalization.html, packages.html, and now the Kids Academy pages) —
+   digitalization.html, packages.html, and now the SkyGlobe Academy pages) —
    same look, same behaviour, one source of truth, far less page weight. */
 (function () {
   var css =

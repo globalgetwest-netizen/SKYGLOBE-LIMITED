@@ -8,7 +8,7 @@
  * NOTE: we do NOT call skipWaiting() on install — the page asks the user first,
  *       then posts {type:'SKIP_WAITING'} when they tap "Update".
  */
-const CACHE = 'skyglobe-v8';
+const CACHE = 'skyglobe-v9';
 const STATIC_ASSETS = [
   '/', '/index.html', '/offline.html',
   '/icon.svg?v=3', '/icon-192.png?v=3', '/icon-512.png?v=3', '/apple-touch-icon.png?v=3', '/favicon-32.png?v=3',
@@ -22,7 +22,9 @@ self.addEventListener('install', (e) => {
       Promise.allSettled(STATIC_ASSETS.map((u) => c.add(u)))
     )
   );
-  // No skipWaiting() here — the page controls activation via the Update banner.
+  // Auto-update: new versions activate immediately so every installed app
+  // (old or new) picks up each deploy on its next load — no user action needed.
+  self.skipWaiting();
 });
 
 self.addEventListener('message', (e) => {

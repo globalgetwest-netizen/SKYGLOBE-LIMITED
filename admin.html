@@ -352,6 +352,7 @@
         <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
         <button class="sb-link" data-view="idcards" onclick="switchView('idcards')"><span class="ic">🪪</span> Digital ID Issuance</button>
         <button class="sb-link" data-view="reception" onclick="switchView('reception')"><span class="ic">🛎️</span> AI Reception</button>
+        <button class="sb-link" data-view="grants" onclick="switchView('grants')"><span class="ic">🎁</span> Complimentary</button>
         <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
         <button class="sb-link" data-view="videos" onclick="switchView('videos')"><span class="ic">🎥</span> Featured Videos</button>
         <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
@@ -366,7 +367,7 @@
         <button class="sb-link" data-view="analytics" onclick="switchView('analytics')"><span class="ic">📈</span> Analytics</button>
         <button class="sb-link" data-view="errors" onclick="switchView('errors')"><span class="ic">🚨</span> Error Logs</button>
         <button class="sb-link" data-view="ipregistry" onclick="switchView('ipregistry')"><span class="ic">🛡️</span> IP Registry</button>
-        <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> Kids Academy</button>
+        <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> SkyGlobe Academy</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
       </nav>
       <div class="sb-foot">
@@ -622,6 +623,29 @@
               <button onclick="loadWpRates()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
             </div>
             <div id="wpRatesTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading rates…</p></div>
+          </div>
+        </section>
+
+        <!-- COMPLIMENTARY GRANTS (CEO ONLY) -->
+        <section class="view" id="view-grants">
+          <div class="panel" style="margin-bottom:18px">
+            <h3 style="margin:0 0 6px">🎁 Issue a Complimentary Service</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">👑 <b>CEO personal authority.</b> Issue any paid service free of charge — no payment link is involved. Instant services (legal documents, digital IDs, courses) send the client a claim link that skips the pay step; team-fulfilled services enter the queue marked PAID (complimentary).</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">
+              <div style="grid-column:1/-1"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Service *</label>
+                <select id="grProduct" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"><option value="">Loading services…</option></select></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Client email *</label>
+                <input type="email" id="grEmail" placeholder="client@example.com" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Client name</label>
+                <input type="text" id="grName" placeholder="Full name (for the email)" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+              <div style="grid-column:1/-1"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Reason / note (private)</label>
+                <input type="text" id="grNote" placeholder="e.g. partnership goodwill, scholarship, VIP" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <button class="btn" onclick="issueGrant()">👑 Issue Free of Charge</button>
+              <div id="grMsg" style="font-size:0.85rem;color:var(--muted)"></div>
+            </div>
+            <div id="grResult" style="margin-top:14px"></div>
           </div>
         </section>
 
@@ -1270,7 +1294,7 @@
         <!-- KIDS ACADEMY -->
         <section class="view" id="view-academy">
           <div class="panel">
-            <h3>🎓 SkyGlobe Kids Academy — AI Teachers</h3>
+            <h3>🎓 SkyGlobe Academy — AI Teachers</h3>
             <p style="color:var(--muted);font-size:.9rem;margin:6px 0 4px">
               Each subject has its own AI teacher with a unique name. You can rename any teacher below — the new name takes effect instantly for every child. (These teachers are completely separate from SKYGLOBE CORE.)
             </p>
@@ -1348,7 +1372,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'Kids Academy — AI Teachers',tools:'Quick Tools'};
+  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
@@ -1357,6 +1381,7 @@ function switchView(v){
   if(v==='offerings') loadOfferings();
   if(v==='wprates') loadWpRates();
   if(v==='reception') loadReception();
+  if(v==='grants') loadGrants();
   if(v==='announcements') loadAnnouncements();
   if(v==='videos') loadVideos();
   if(v==='legaldocs') loadLegalDocs();
@@ -1655,6 +1680,37 @@ const REC_DEPT_META={
   finance:{icon:'💳',label:'Finance & Payments'}, noria:{icon:'✦',label:'NORIA · AI'}, yunex:{icon:'◆',label:'Yunex'}, ceo:{icon:'👑',label:'Office of the CEO'}, general:{icon:'📨',label:'General / Reception'}
 };
 const REC_URG={critical:{c:'#f0564f',l:'Critical'},high:{c:'#f5b942',l:'High'},normal:{c:'#4f8ef7',l:'Normal'},low:{c:'#5f74a0',l:'Low'}};
+
+/* ══════════════════ COMPLIMENTARY GRANTS (CEO) ══════════════════ */
+let GR_PRODUCTS=[];
+async function loadGrants(){
+  const sel=document.getElementById('grProduct');
+  try{
+    const r=await fetch(API+'/api/admin/products',{headers:{'x-admin-key':KEY}});
+    GR_PRODUCTS=await r.json();
+    if(!r.ok) throw new Error(GR_PRODUCTS.error||'HTTP '+r.status);
+    sel.innerHTML='<option value="">Select a service…</option>'+GR_PRODUCTS.map(p=>`<option value="${esc(p.key)}">${esc(p.label)} — $${p.USD}${p.instant?' · instant':''}</option>`).join('');
+  }catch(e){ sel.innerHTML='<option value="">Could not load ('+esc(e.message)+') — CEO key required</option>'; }
+}
+async function issueGrant(){
+  const msg=document.getElementById('grMsg'), out=document.getElementById('grResult');
+  const product=document.getElementById('grProduct').value, email=document.getElementById('grEmail').value.trim();
+  if(!product||!email){ msg.style.color='#e57373'; msg.textContent='Choose a service and enter the client email.'; return; }
+  if(!confirm('Issue this service FREE of charge to '+email+'?'))return;
+  msg.style.color='var(--muted)'; msg.textContent='Issuing…'; out.innerHTML='';
+  try{
+    const r=await fetch(API+'/api/admin/grant',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({product,email,fullName:document.getElementById('grName').value.trim(),note:document.getElementById('grNote').value.trim()})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not issue grant.');
+    msg.style.color='#4caf50'; msg.textContent='✓ Issued — the client has been emailed.';
+    out.innerHTML=`<div style="background:var(--navy);border:1px solid var(--gold);border-radius:12px;padding:14px 16px;font-size:0.85rem">
+      <div><b>Reference:</b> ${esc(d.reference)}</div>
+      ${d.accessUrl?`<div style="margin-top:6px"><b>Claim link (also emailed):</b><br><a href="${esc(d.accessUrl)}" target="_blank" style="color:var(--gold);word-break:break-all">${esc(d.accessUrl)}</a></div>`:`<div style="margin-top:6px;color:var(--muted)">Team-fulfilled service — it is now in the queue marked PAID (complimentary).</div>`}
+    </div>`;
+    ['grEmail','grName','grNote'].forEach(id=>document.getElementById(id).value='');
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+}
 
 async function loadReception(){
   const feed=document.getElementById('receptionFeed');

@@ -100,7 +100,11 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 const ENR_ID = new URLSearchParams(location.search).get('id');
 let ENR = null, PHOTO_DATA_URL = null;
 
-if (!ENR_ID) document.body.innerHTML = '<div style="padding:60px;text-align:center;color:#6b7689">No enrolment found. <a href="/courses" style="color:#a87016">Go to Certificate Programs</a></div>';
+if (!ENR_ID) {
+  // No enrolment in the URL: show the friendly notice and STOP — the async
+  // loaders below would otherwise run against the replaced (empty) DOM.
+  document.body.innerHTML = '<div style="padding:60px;text-align:center;color:#6b7689">No enrolment found. <a href="/courses" style="color:#a87016">Go to Certificate Programs</a></div>';
+}
 
 async function load(){
   try{
@@ -194,7 +198,8 @@ async function generateCertificate(){
   }
 }
 
-load();
+if (ENR_ID) load();
 </script>
+<script src="/dept-contact.js" defer></script>
 </body>
 </html>

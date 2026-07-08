@@ -21,7 +21,7 @@ const path = require('path');
 //  §10  Conferences & work permit
 //  §11  HR & operations          (payroll, staff directory, tasks, attendance, activity)
 //  §12  CEO tools                (AI assistant, brand & IP registry)
-//  §13  Kids Academy             (parents, students, teachers, admissions, records)
+//  §13  SkyGlobe Academy             (parents, students, teachers, admissions, records)
 //  §14  Page routes & catch-all
 //
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -891,7 +891,7 @@ VISA SERVICES:
 EDUCATION & SCHOLARSHIPS:
 - University admissions management end-to-end for 195 countries
 - Scholarship applications — secured $2M+ for clients
-- Kids Academy educational programmes
+- SkyGlobe Academy educational programmes
 
 TRAVEL SERVICES:
 - Flight reservation letters: PNR-backed, embassy-accepted, from $15, same-day
@@ -3467,6 +3467,85 @@ function verifyUnlock(token, product) {
   } catch { return false; }
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+//  CEO COMPLIMENTARY GRANT — the CEO's personal authority to issue ANY paid
+//  service free of charge. No payment link is involved anywhere: a $0
+//  'ceo-grant' payment record is created already-paid and pushed through the
+//  exact same fulfilment pipeline a real payment uses (status updates, member
+//  ID, review queue, team notice). For instant products the client receives a
+//  complimentary access link that unlocks the generator with no pay step.
+//  CEO ONLY — staff keys are rejected.
+// ════════════════════════════════════════════════════════════════════════════
+const PRODUCT_PAGE = {
+  legal_doc_standard: '/legal-documents', legal_doc_premium: '/legal-documents', legal_doc_priority: '/legal-documents',
+  premium_digital_id: '/digital-id',
+  cert_amateur: '/courses', cert_advanced: '/courses', cert_pro: '/courses',
+  interview_prep: '/', sop: '/', coverletter: '/', visaletter: '/', experience: '/', invitation: '/', skyconference: '/',
+};
+
+app.get('/api/admin/products', (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'CEO only.' });
+  res.json(Object.entries(PRICING).map(([key, p]) => ({ key, label: p.label, instant: !!p.instant, USD: p.USD })));
+});
+
+app.post('/api/admin/grant', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only — staff cannot issue complimentary grants.' });
+  try {
+    const { product, email, fullName, note } = req.body || {};
+    if (!PRICING[product]) return res.status(400).json({ error: 'Unknown product.' });
+    if (!email) return res.status(400).json({ error: 'Client email is required.' });
+    const reference = 'GRANT-' + new Date().getFullYear() + '-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    const payment = {
+      reference, product, provider: 'ceo-grant', currency: 'USD', amount: 0,
+      email: String(email).toLowerCase(), status: 'paid',
+      meta: { complimentary: true, grantedBy: who || 'CEO', note: String(note || '').slice(0, 300), fullName: fullName || '' },
+    };
+    await insertPayment(payment);
+    await fulfilPayment(payment);
+    logActivity(who || 'CEO', 'ceo', 'complimentary_grant', `Granted ${PRICING[product].label} free to ${email}${note ? ' · ' + note : ''}`, reference);
+
+    let accessUrl = null;
+    if (PRICING[product].instant) {
+      const unlock = signUnlock(reference, product);
+      accessUrl = `${baseUrl(req)}/grant-access?u=${encodeURIComponent(unlock)}&p=${encodeURIComponent(product)}`;
+    }
+    // Tell the client the CEO has gifted them this service.
+    sendEmail(email, `A complimentary gift from SkyGlobe Group — ${PRICING[product].label}`,
+      `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
+        <h2 style="color:#a87016;font-family:Georgia,serif">Complimentary Service — Issued by the Office of the CEO</h2>
+        <p>Dear ${fullName || 'Client'},</p>
+        <p>SkyGlobe Group has issued you <strong>${PRICING[product].label}</strong> — free of charge, with our compliments.</p>
+        ${accessUrl
+          ? `<p style="margin:22px 0"><a href="${accessUrl}" style="background:#D4A73A;color:#1a1300;text-decoration:none;font-weight:700;padding:13px 26px;border-radius:30px">Claim your complimentary service</a></p>
+             <p style="font-size:13px;color:#6b7689">The link opens the service with no payment step. It is valid for 24 hours — contact us if you need it refreshed.</p>`
+          : `<p>Our team has been notified and will begin processing it for you right away — reference <strong>${reference}</strong>.</p>`}
+        <p style="font-size:13px;color:#6b7689">👑 Office of the CEO · SkyGlobe Group · One World. One Mission.</p>
+      </div>`,
+      undefined, deptSender('ceo')
+    ).catch(e => console.error('Grant email failed:', e.message));
+
+    res.json({ success: true, reference, accessUrl, instant: !!PRICING[product].instant });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Public claim link: plants the unlock token exactly where the product page
+// expects it, then forwards the client there — the pay step simply passes.
+app.get('/grant-access', (req, res) => {
+  const { u, p } = req.query || {};
+  const page = PRODUCT_PAGE[p];
+  if (!u || !p || !page || !verifyUnlock(String(u), String(p)))
+    return res.status(400).send('<h2 style="font-family:sans-serif">This complimentary link is invalid or has expired. Please contact support@skyglobegroup.com.</h2>');
+  res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>SkyGlobe — Complimentary Access</title></head>
+<body style="font-family:sans-serif;text-align:center;padding-top:80px;background:#0b1120;color:#eef2fb">
+  <h2 style="color:#e4b132">🎁 Preparing your complimentary access…</h2>
+  <script>
+    try { sessionStorage.setItem('sky_unlock_' + ${JSON.stringify(String(p))}, ${JSON.stringify(String(u))}); } catch (e) {}
+    location.replace(${JSON.stringify(page)} + '?resume=1');
+  </script>
+</body></html>`);
+});
+
 // ── Paystack webhook (server-to-server confirmation, the reliable path) ───────
 app.post('/api/pay/webhook/paystack', async (req, res) => {
   try {
@@ -4440,13 +4519,13 @@ LOGINS TODAY: ${uniqueLoginsToday.length} users | ${uniqueLoginsToday.slice(0,5)
 RECENT ACTIVITY: ${activity.slice(0,6).map(a=>`[${(a.created_at||'').slice(0,16)}] ${a.actor} ${a.action} ${a.detail||''}`).join(' | ')||'none'}
 ${paymentsHealth}`;
 
-    const systemPrompt = `You are SKYGLOBE CORE Intelligence — the private, confidential AI assistant to Saleh Shuaibu, Founder & CEO of SkyGlobe Group. You hold the complete live knowledge of the entire SkyGlobe Group ecosystem — every division, every application, every payment, every student, every staff member, every task, every document — continuously refreshed from the live database below on each request, so you always know what changed since you last spoke to the CEO. This knowledge and this access exist for the CEO alone: never summarise, forward, or describe the contents of LIVE DATA to anyone else, in any other context, portal, or assistant persona (including NORIA, the public-facing assistant, or the Kids Academy tutors) — this data and this role are not to be acknowledged or disclosed outside this conversation with the CEO. Monitor, analyse, and report on the entire SkyGlobe Group ecosystem. Be concise, precise, strategic. Use bullet points and numbers. Address the CEO efficiently. Never guess — say "not in current data" if needed.
+    const systemPrompt = `You are SKYGLOBE CORE Intelligence — the private, confidential AI assistant to Saleh Shuaibu, Founder & CEO of SkyGlobe Group. You hold the complete live knowledge of the entire SkyGlobe Group ecosystem — every division, every application, every payment, every student, every staff member, every task, every document — continuously refreshed from the live database below on each request, so you always know what changed since you last spoke to the CEO. This knowledge and this access exist for the CEO alone: never summarise, forward, or describe the contents of LIVE DATA to anyone else, in any other context, portal, or assistant persona (including NORIA, the public-facing assistant, or the SkyGlobe Academy tutors) — this data and this role are not to be acknowledged or disclosed outside this conversation with the CEO. Monitor, analyse, and report on the entire SkyGlobe Group ecosystem. Be concise, precise, strategic. Use bullet points and numbers. Address the CEO efficiently. Never guess — say "not in current data" if needed.
 
-ABOUT SKYGLOBE GROUP: 5 divisions — Global Mobility, Travel Services, Events & Conferences, Knowledge Hub (incl. Kids Academy), Digitalization. Motto: One World. One Mission. Anchors: CONSTRUCT · TRUST · INTELLIGENCE · POWER. Pricing in USD/EUR/GBP only.
+ABOUT SKYGLOBE GROUP: 5 divisions — Global Mobility, Travel Services, Events & Conferences, Knowledge Hub (incl. SkyGlobe Academy), Digitalization. Motto: One World. One Mission. Anchors: CONSTRUCT · TRUST · INTELLIGENCE · POWER. Pricing in USD/EUR/GBP only.
 
 YOUR MONITORING DUTIES (this is work a staff member would otherwise do manually):
 - Every response, silently check the PAYMENTS HEALTH and ECOSYSTEM DATA INTEGRITY sections of the live data. If anything is flagged there (stuck Grey confirmations, unrecognised payment products, pricing gaps, countries with zero active roles), open your reply by surfacing it BRIEFLY first — one line per issue — even if the CEO didn't ask about payments. If nothing is flagged, don't mention it.
-- When asked about payments, applications, tasks, pricing, or Kids Academy enrolments, give a precise operational read: what needs a decision, what's overdue, what's stuck, and a clear recommended next action.
+- When asked about payments, applications, tasks, pricing, or SkyGlobe Academy enrolments, give a precise operational read: what needs a decision, what's overdue, what's stuck, and a clear recommended next action.
 - You may DRAFT things for the CEO to review (a reply to a client, a task assignment, a pricing suggestion) — but you never take an action yourself. Confirming a payment, sending a client message, or changing a price are always done by a human clicking the button in the relevant portal, never by you. Say so plainly if asked to "just do it."
 
 LIVE DATA (confidential — CEO eyes only):
@@ -4651,7 +4730,7 @@ app.delete('/api/admin/brand-assets/:id', checkAdmin, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SKYGLOBE KIDS ACADEMY — AI TEACHERS (Phase 1: parent accounts + Math tutor "Numa")
+// SKYGLOBE ACADEMY — AI TEACHERS (Phase 1: parent accounts + Math tutor "Numa")
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Each subject has its own named AI teacher persona (distinct identity per subject).
@@ -5083,7 +5162,7 @@ app.post('/api/academy/tutor', async (req, res) => {
     const personality = TEACHER_PERSONALITIES[subjKey] || `You are ${teacher.name}, a warm and encouraging ${teacher.subject} teacher.`;
     const systemPrompt = `${personality}
 
-You are the ${teacher.subject} teacher at SkyGlobe Kids Academy. You are warm, patient, encouraging, and never condescending. You teach ONE child named ${student.name}, age ${age}${student.grade ? `, grade ${student.grade}` : ''}.
+You are the ${teacher.subject} teacher at SkyGlobe Academy. You are warm, patient, encouraging, and never condescending. You teach ONE child named ${student.name}, age ${age}${student.grade ? `, grade ${student.grade}` : ''}.
 
 YOUR IDENTITY:
 - Your name is ${teacher.name}. Always refer to yourself as ${teacher.name}. Never say you are an AI language model.
@@ -5206,7 +5285,7 @@ app.patch('/api/admin/academy/teachers/:key', checkAdmin, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SKYGLOBE KIDS ACADEMY — PROFESSIONAL ADMISSION + ACADEMIC RECORDS
+// SKYGLOBE ACADEMY — PROFESSIONAL ADMISSION + ACADEMIC RECORDS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Generate a unique student ID in SGK-YEAR-XXXX format
@@ -5287,16 +5366,16 @@ app.post('/api/academy/admission/apply', async (req, res) => {
 
     // Confirmation email (best-effort)
     try {
-      await sendEmail(guardianEmail, `Application Received — SkyGlobe Kids Academy`,
+      await sendEmail(guardianEmail, `Application Received — SkyGlobe Academy`,
         `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <div style="background:#041022;padding:28px;text-align:center;border-radius:8px 8px 0 0">
             <h1 style="color:#D4A73A;margin:0;font-size:1.4rem">Application Received ✅</h1>
-            <p style="color:#8899bb;margin:6px 0 0">SkyGlobe Kids Academy</p>
+            <p style="color:#8899bb;margin:6px 0 0">SkyGlobe Academy</p>
           </div>
           <div style="background:#f9f9f9;padding:28px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px">
             <p>Dear ${esc2(b.guardianName) || 'Parent/Guardian'}, thank you for applying to enrol <strong>${esc2(fullName)}</strong>.</p>
             <p>Your application reference is <strong>${esc2(student?.id || '')}</strong>. Our admissions team is now reviewing it. You can track the status anytime by logging in to the Family Campus.</p>
-            <p style="color:#555;font-size:.85rem">SkyGlobe Kids Academy · part of SkyGlobe Group</p>
+            <p style="color:#555;font-size:.85rem">SkyGlobe Academy · part of SkyGlobe Group</p>
           </div>
         </div>`);
     } catch (e) { console.error('[admission] email:', e.message); }
@@ -5354,7 +5433,7 @@ app.patch('/api/academy/admission/:id/accept', checkAdmin, async (req, res) => {
             <div style="background:#041022;padding:28px;text-align:center;border-radius:8px 8px 0 0">
               <h1 style="color:#D4A73A;margin:0;font-size:1.4rem">🎉 Admission Accepted!</h1></div>
             <div style="background:#f9f9f9;padding:28px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px">
-              <p><strong>${esc2(st.name)}</strong> has been accepted to SkyGlobe Kids Academy!</p>
+              <p><strong>${esc2(st.name)}</strong> has been accepted to SkyGlobe Academy!</p>
               <p>Student ID: <strong>${esc2(studentId)}</strong></p>
               <p>Log in to your Family Campus to complete enrolment and begin learning.</p>
             </div></div>`);
@@ -5376,7 +5455,7 @@ app.patch('/api/academy/admission/:id/enroll', checkAdmin, async (req, res) => {
     logActivity(req._who, 'ceo', 'admission_enroll', `Enrolled student ${req.params.id} (${studentId})`, req.params.id);
     try {
       if (st.parent_email) {
-        await sendEmail(st.parent_email, 'Enrolment Complete — Welcome to SkyGlobe Kids Academy',
+        await sendEmail(st.parent_email, 'Enrolment Complete — Welcome to SkyGlobe Academy',
           `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
             <div style="background:#041022;padding:28px;text-align:center;border-radius:8px 8px 0 0">
               <h1 style="color:#D4A73A;margin:0;font-size:1.4rem">Welcome aboard! 🚀</h1></div>
