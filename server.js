@@ -331,6 +331,28 @@ async function generateText(prompt, opts = {}) {
 
 // ── §4 PUBLIC ROUTES ─────────────────────────────────────────────────────────
 // ── CONTACT / CONSULTATION FORM ───────────────────────────────────────────────
+// ── DEPARTMENT MESSAGE (on-site form from the dept-contact strip) ────────────
+// Public: visitors write to a department without leaving the website — no
+// mail client involved. Lands in AI Reception exactly like an email would:
+// AI answers by email when confident, otherwise the department's humans do.
+// 'ceo' is deliberately NOT accepted here — the CEO's address is private.
+app.post('/api/dept-message', contactLimiter, async (req, res) => {
+  const raw = req.body || {};
+  const name = sanitize(raw.name, 100);
+  const email = sanitizeEmail(raw.email);
+  const message = sanitize(raw.message, 3000);
+  let dept = String(raw.dept || 'general').toLowerCase();
+  if (!VALID_DEPT_KEYS.includes(dept) || dept === 'ceo') dept = 'general';
+  if (!name || !email || !message)
+    return res.status(400).json({ error: 'Name, email and message are required.' });
+  aiReceive({
+    source: 'contact', name, email,
+    service: `Website message — ${DEPARTMENTS[dept].label}`,
+    message, deptHint: dept,
+  }).catch(() => {});
+  res.json({ success: true, department: DEPARTMENTS[dept].label });
+});
+
 app.post('/api/contact', contactLimiter, async (req, res) => {
   const raw = req.body || {};
   const fname   = sanitize(raw.fname, 100);
