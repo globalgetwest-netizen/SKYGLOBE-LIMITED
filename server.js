@@ -1463,51 +1463,6 @@ app.get('/api/admin/departments', (req, res) => {
   res.json(Object.values(DEPARTMENTS));
 });
 
-// ── PHASE D: INBOUND EMAIL → AI RECEPTION ────────────────────────────────────
-// A Cloudflare Email Worker (cloudflare-email-worker.js in this repo) POSTs
-// every email that arrives at a department address here. The worker ALSO
-// forwards the original to the human inbox first, so the AI is additive —
-// if this endpoint is down, no mail is ever lost. Protected by a shared
-// secret (EMAIL_INBOUND_SECRET on Render = INBOUND_SECRET on the worker).
-function extractEmailText(raw) {
-  if (!raw) return '';
-  let t = String(raw);
-  // Prefer the text/plain MIME part when present.
-  const m = t.match(/Content-Type:\s*text\/plain[^]*?\r?\n\r?\n([^]*?)(\r?\n--|$)/i);
-  if (m) t = m[1];
-  else { const idx = t.search(/\r?\n\r?\n/); if (idx !== -1) t = t.slice(idx); }
-  // Undo common quoted-printable encoding artifacts.
-  t = t.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/gi, (_, h) => { try { return String.fromCharCode(parseInt(h, 16)); } catch { return _; } });
-  return t.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 4000);
-}
-
-app.post('/api/email/inbound', async (req, res) => {
-  const secret = process.env.EMAIL_INBOUND_SECRET;
-  if (!secret || req.headers['x-inbound-secret'] !== secret)
-    return res.status(401).json({ error: 'Unauthorized' });
-  try {
-    const { from, to, subject, text, raw } = req.body || {};
-    const fromEmail = (String(from || '').match(/[\w.+-]+@[\w.-]+/) || [])[0]?.toLowerCase();
-    if (!fromEmail) return res.status(400).json({ error: 'No sender address' });
-    // Loop/noise guards: never react to our own domain, bounces, or robots.
-    if (/@skyglobegroup\.com$/i.test(fromEmail) || /mailer-daemon|postmaster|no-?reply|noreply/i.test(fromEmail))
-      return res.json({ skipped: 'own-domain-or-robot' });
-    const toAddr = String(to || '').toLowerCase();
-    const deptKey = VALID_DEPT_KEYS.find(k => toAddr.includes(DEPARTMENTS[k].email.toLowerCase())) || 'general';
-    const bodyText = (text && String(text).trim()) || extractEmailText(raw);
-    await aiReceive({
-      source: 'email', name: '', email: fromEmail,
-      service: `Email to ${DEPARTMENTS[deptKey].email}`,
-      message: `Subject: ${String(subject || '(no subject)').slice(0, 200)}\n\n${bodyText || '(no readable text body)'}`,
-      deptHint: deptKey,
-    });
-    res.json({ success: true });
-  } catch (e) {
-    console.error('[inbound-email] failed:', e.message);
-    res.status(500).json({ error: e.message });
-  }
-});
-
 app.get('/api/admin/reception', async (req, res) => {
   if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
   try {
@@ -2233,18 +2188,6 @@ app.post('/api/legal-docs/generate', async (req, res) => {
       console.error('Legal doc store warning:', storeErr.message);
     }
 
-    // Human-review queue: every AI-generated document also lands in Reception
-    // for a staff quality pass. The client keeps the instant delivery they
-    // paid for; a human verifies right behind it and follows up if anything
-    // needs correcting. Fire-and-forget — never blocks the client.
-    dbQuery('POST', 'ai_reception', {
-      source: 'document', ref, client_name: f.name || '', client_email: f.email || '',
-      service: `${meta.name} (AI-generated)`, department: 'legal',
-      urgency: 'normal', intent: `AI-generated "${meta.name}" was delivered instantly — review it for quality and accuracy, and follow up with the client if a correction is needed.`,
-      sentiment: 'neutral', suggested_reply: '', needs_human: true, status: 'new',
-      raw: { viewUrl, docId },
-    }).catch(() => {});
-
     res.json({ success: true, ref, title: meta.name, tier: tier.name, html, viewUrl, viewToken });
   } catch (e) {
     console.error('Legal doc generate error:', e.message);
@@ -2789,14 +2732,6 @@ const DEPARTMENTS = {
   general:   { key: 'general',   label: 'General / Reception',      email: 'support@skyglobegroup.com',  icon: '📨', live: false },
 };
 const VALID_DEPT_KEYS = Object.keys(DEPARTMENTS);
-
-// Which department addresses are LIVE (receiving mail via Cloudflare Email
-// Routing). Set on Render:  DEPT_EMAILS_LIVE=all   — or a list like
-// "travel,legal,general". No code edit needed when Phase A completes.
-{
-  const liveSet = new Set(String(process.env.DEPT_EMAILS_LIVE || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean));
-  for (const k of VALID_DEPT_KEYS) DEPARTMENTS[k].live = liveSet.has('all') || liveSet.has(k);
-}
 
 // Sender identity for a department's outgoing mail. Sending from any
 // @skyglobegroup.com address works today (the domain is verified in Resend) —
@@ -6762,15 +6697,6 @@ app.post('/api/identity/premium/apply', async (req, res) => {
         </div>`
       ).catch(e => console.error('Premium ID confirmation email failed:', e.message));
     }
-    // Human-review queue: each issued Premium ID gets a staff verification
-    // pass (details, photo, standards) right behind the instant issuance.
-    dbQuery('POST', 'ai_reception', {
-      source: 'document', ref: result.ref, client_name: fullName, client_email: email,
-      service: 'Premium Digital ID (issued)', department: 'identity',
-      urgency: 'normal', intent: 'Premium Digital ID was issued instantly — verify the holder details and photo meet SkyGlobe identity standards; follow up if anything looks wrong.',
-      sentiment: 'neutral', suggested_reply: '', needs_human: true, status: 'new',
-      raw: { viewUrl: result.viewUrl },
-    }).catch(() => {});
     res.json({ success: true, ref: result.ref, viewUrl: result.viewUrl, accessCode: result.code });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
