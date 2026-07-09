@@ -1312,6 +1312,7 @@ body.wc-active .page-back-bar{padding-top:138px}
 
   <ul class="nav-links">
     <li><a onclick="showPage('home')" data-page="home">Home</a></li>
+    <li><a onclick="showPage('home');setTimeout(function(){var e=document.getElementById('sgEcosystem');if(e)e.scrollIntoView({behavior:'smooth'});},120)">Ecosystem</a></li>
     <li class="nav-more-wrap">
       <a class="nav-more-btn" onclick="toggleNavMore(event,'mobMobilityDrop')" data-page="services destinations recruitment">Global Mobility ▾</a>
       <div class="nav-more-drop" id="mobMobilityDrop">
@@ -1555,16 +1556,18 @@ body.wc-active .page-back-bar{padding-top:138px}
        FUTURISTIC HERO — Clean, premium, always readable
        Dark navy base · Aurora glows · Smaller globe · 85vh
        ═══════════════════════════════════════════════════════════════ -->
-  <section id="cosmicHero" style="position:relative;width:100%;min-height:90vh;display:flex;align-items:center;overflow:hidden;background:radial-gradient(120% 95% at 50% -10%,#eef4ff 0%,#f4f6f9 60%)">
-    <div style="position:absolute;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(10,28,62,0.05) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse 75% 60% at 50% 35%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 75% 60% at 50% 35%,#000 30%,transparent 75%)"></div>
-    <div style="position:absolute;left:-12%;top:-18%;width:50vw;height:50vw;max-width:640px;max-height:640px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.12),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
-    <div style="position:absolute;right:-10%;bottom:-22%;width:46vw;height:46vw;max-width:620px;max-height:620px;border-radius:50%;background:radial-gradient(circle,rgba(10,46,101,0.09),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
+  <section id="cosmicHero" style="position:relative;width:100%;min-height:90vh;display:flex;align-items:center;overflow:hidden;background:radial-gradient(120% 95% at 50% -10%,#0A2E65 0%,#041022 62%)">
+    <div style="position:absolute;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(212,167,58,0.09) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse 75% 60% at 50% 35%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 75% 60% at 50% 35%,#000 30%,transparent 75%)"></div>
+    <div style="position:absolute;left:-12%;top:-18%;width:50vw;height:50vw;max-width:640px;max-height:640px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,0.16),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
+    <div style="position:absolute;right:-10%;bottom:-22%;width:46vw;height:46vw;max-width:620px;max-height:620px;border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,0.12),transparent 70%);filter:blur(48px);z-index:0;pointer-events:none"></div>
 
     <div class="hero-wrap" style="position:relative;z-index:2;width:100%;max-width:none;margin:0;padding:104px clamp(1.1rem,3.5vw,2.6rem) 56px">
       <div class="hero-left">
-        <h1 style="font-weight:780;letter-spacing:-0.04em;line-height:0.96;color:#0b1220;font-size:clamp(2rem,4.6vw,3.7rem);margin:0">
-          Move the<br><span style="background:linear-gradient(115deg,#C8962A 0%,#e7c46a 45%,#0A2E65 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">World.</span>
+        <div style="display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#D4A73A;border:1px solid rgba(212,167,58,.35);padding:7px 16px;border-radius:100px;margin-bottom:1.1rem">SKYGLOBE GROUP &middot; A DIGITAL ECOSYSTEM <span style="color:#ff9f1c">&#10022;</span></div>
+        <h1 style="font-weight:780;letter-spacing:-0.03em;line-height:1.04;color:#ffffff;font-size:clamp(1.9rem,4.4vw,3.4rem);margin:0">
+          Building the<br><span style="background:linear-gradient(115deg,#e7c46a 0%,#D4A73A 45%,#8fb4f0 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Intelligent Foundation</span><br>of Tomorrow.
         </h1>
+        <p style="color:#9fb0d6;font-size:.95rem;line-height:1.65;max-width:520px;margin:1.1rem 0 0">SkyGlobe Group connects people, businesses and opportunities through intelligent platforms built on trust, innovation and global impact.</p>
         <div style="display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;max-width:560px;margin-top:1.9rem">
           <form style="position:relative;display:flex;align-items:center;flex:1;min-width:240px;background:#fff;border:1px solid #e7e9ee;border-radius:980px;padding:6px 6px 6px 18px;box-shadow:0 8px 30px rgba(16,24,40,.08)" onsubmit="heroSearch(event)">
             <span style="margin-right:8px;opacity:.5;font-size:.95rem">&#128269;</span>
@@ -1576,8 +1579,9 @@ body.wc-active .page-back-bar{padding-top:138px}
           </form>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.9rem">
-          <button onclick="showPage('countries')" class="btn-primary">&#127757; Explore the World</button>
-          <button onclick="showPage('apply')" class="btn-outline">Begin Your Journey</button>
+          <button onclick="document.getElementById('sgEcosystem').scrollIntoView({behavior:'smooth'})" class="btn-primary">Explore Ecosystem &rarr;</button>
+          <button onclick="showPage('contact')" class="btn-outline" style="color:#eaf0ff;border-color:rgba(255,255,255,.35)">Partner With Us</button>
+          <button onclick="showPage('countries')" class="btn-outline" style="color:#eaf0ff;border-color:rgba(255,255,255,.35)">&#127757; Explore the World</button>
         </div>
         <!-- Live work permit country availability — pulled straight from the CEO
              portal, so opening/closing a country there shows up here instantly. -->
@@ -1586,8 +1590,13 @@ body.wc-active .page-back-bar{padding-top:138px}
           <div id="wpOpenChips" style="display:flex;flex-wrap:wrap;gap:.4rem"></div>
         </div>
         <div style="margin-top:2rem">
-          <p style="font-size:.9rem;color:#5b6573;line-height:1.5;margin:0">A digital ecosystem &mdash; mobility, education, trust, economy and intelligence. Unified.</p>
-          <div style="margin-top:.4rem;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:#C8962A;font-weight:800">One World. One Mission.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:1.4rem 2.2rem">
+            <div><div style="color:#F4D77A;font-weight:800;font-size:1.15rem">195+</div><div style="color:#8fa0bd;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase">Country Guides</div></div>
+            <div><div style="color:#F4D77A;font-weight:800;font-size:1.15rem">3</div><div style="color:#8fa0bd;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase">Platforms &middot; NORIA &middot; TERRA &middot; YUNEX</div></div>
+            <div><div style="color:#F4D77A;font-weight:800;font-size:1.15rem">24/7</div><div style="color:#8fa0bd;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase">NORIA AI Support</div></div>
+            <div><div style="color:#F4D77A;font-weight:800;font-size:1.15rem">1</div><div style="color:#8fa0bd;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase">Account for Everything</div></div>
+          </div>
+          <div style="margin-top:1rem;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:#D4A73A;font-weight:800">One World. One Mission. <span style="color:#ff9f1c">&#10022;</span></div>
         </div>
       </div>
 
@@ -1671,6 +1680,63 @@ body.wc-active .page-back-bar{padding-top:138px}
       </div>
 
       <div style="text-align:center;margin-top:26px;font-size:.72rem;letter-spacing:.26em;text-transform:uppercase;color:#6b7f9c;font-weight:700">SKYGLOBE GROUP &middot; A Digital Ecosystem &middot; One World. One Mission. <span style="color:#ff9f1c">&#10022;</span></div>
+    </div>
+  </section>
+
+  <!-- ═══ SOLUTIONS FOR EVERY WORLD — audience doors into the ecosystem ═══ -->
+  <section style="background:#f7f8fb;padding:clamp(3rem,6.5vw,5rem) clamp(1.1rem,3.5vw,2.6rem)">
+    <div style="max-width:1240px;margin:0 auto">
+      <div style="text-align:center;margin-bottom:clamp(1.8rem,4vw,2.6rem)">
+        <span style="display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:#a87016;border:1px solid rgba(212,167,58,.4);padding:7px 18px;border-radius:100px;background:#fdf6e3">SOLUTIONS</span>
+        <h2 style="font-family:Georgia,'Times New Roman',serif;color:#041022;font-size:clamp(1.5rem,3.4vw,2.3rem);margin:16px 0 8px">Solutions for Every World</h2>
+        <p style="color:#64748b;max-width:600px;margin:0 auto;font-size:.92rem;line-height:1.6">Whoever you are, the ecosystem has a door for you.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:16px">
+        <div style="background:#fff;border:1px solid rgba(4,16,34,.1);border-radius:16px;padding:24px 22px;box-shadow:0 4px 14px rgba(4,16,34,.05)">
+          <div style="font-size:1.5rem">&#129489;</div>
+          <h3 style="color:#041022;font-size:1rem;margin:10px 0 10px">For Individuals</h3>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:.86rem">
+            <a onclick="showPage('services')" style="color:#0A2E65;cursor:pointer;font-weight:600">&#9992;&#65039; Travel &amp; visas</a>
+            <a href="/academy" style="color:#0A2E65;text-decoration:none;font-weight:600">&#127891; Learning &amp; scholarships</a>
+            <a onclick="showPage('home');setTimeout(function(){window.noriaOpenPanel&&noriaOpenPanel();},150)" style="color:#0A2E65;cursor:pointer;font-weight:600"><span style="color:#e65100">&#10022;</span> AI assistance</a>
+            <a href="/digital-id.html" style="color:#0A2E65;text-decoration:none;font-weight:600">&#129714; Digital identity</a>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(4,16,34,.1);border-radius:16px;padding:24px 22px;box-shadow:0 4px 14px rgba(4,16,34,.05)">
+          <div style="font-size:1.5rem">&#127970;</div>
+          <h3 style="color:#041022;font-size:1rem;margin:10px 0 10px">For Businesses</h3>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:.86rem">
+            <a href="/yunex" style="color:#0A2E65;text-decoration:none;font-weight:600">&#9670; Commerce &amp; trade (YUNEX)</a>
+            <a href="/terra" style="color:#0A2E65;text-decoration:none;font-weight:600">&#127757; Business verification (TERRA)</a>
+            <a href="/legal-documents.html" style="color:#0A2E65;text-decoration:none;font-weight:600">&#128220; Legal documents</a>
+            <a href="/digitalization" style="color:#0A2E65;text-decoration:none;font-weight:600">&#128640; Digitalization services</a>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(4,16,34,.1);border-radius:16px;padding:24px 22px;box-shadow:0 4px 14px rgba(4,16,34,.05)">
+          <div style="font-size:1.5rem">&#127963;&#65039;</div>
+          <h3 style="color:#041022;font-size:1rem;margin:10px 0 10px">For Governments &amp; Institutions</h3>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:.86rem">
+            <a href="/terra" style="color:#0A2E65;text-decoration:none;font-weight:600">&#127757; Trust infrastructure</a>
+            <a href="/digital-id.html" style="color:#0A2E65;text-decoration:none;font-weight:600">&#129714; Identity systems</a>
+            <a onclick="showPage('contact')" style="color:#0A2E65;cursor:pointer;font-weight:600">&#129309; Partnership enquiries</a>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(4,16,34,.1);border-radius:16px;padding:24px 22px;box-shadow:0 4px 14px rgba(4,16,34,.05)">
+          <div style="font-size:1.5rem">&#128104;&#8205;&#128187;</div>
+          <h3 style="color:#041022;font-size:1rem;margin:10px 0 10px">For Developers</h3>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:.86rem">
+            <span style="color:#64748b">TERRA, YUNEX &amp; NORIA APIs &mdash; the developer platform is on the roadmap.</span>
+            <a onclick="showPage('contact')" style="color:#0A2E65;cursor:pointer;font-weight:600">&#128640; Register early interest</a>
+          </div>
+        </div>
+      </div>
+      <!-- Principles strip -->
+      <div style="margin-top:clamp(2rem,4vw,3rem);background:linear-gradient(160deg,#041022,#0A2E65);border-radius:18px;padding:clamp(1.6rem,3.5vw,2.4rem);text-align:center">
+        <div style="font-size:.7rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#D4A73A;margin-bottom:12px">BUILT ON PRINCIPLES OF</div>
+        <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:.8rem 2.4rem;color:#fff;font-family:Georgia,serif;font-size:clamp(1rem,2.2vw,1.3rem)">
+          <span>&#128737;&#65039; Security</span><span>&#128065;&#65039; Transparency</span><span>&#128161; Innovation</span><span>&#127757; Human Progress</span>
+        </div>
+      </div>
     </div>
   </section>
   <script>
@@ -2644,11 +2710,12 @@ body.wc-active .page-back-bar{padding-top:138px}
             <p style="font-size:0.8rem;color:var(--text-body);margin:2px 0 10px">Every inbox is AI-assisted — answered 24/7, escalated to our specialists when your case needs one.</p>
             <div style="display:grid;gap:7px">
               <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">📨 General Support</span><span class="sg-copy" data-mail="support@skyglobegroup.com" title="Click to copy" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:copy;border-bottom:1px dashed rgba(10,28,62,.3)">support@skyglobegroup.com</span></div>
-              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">✈️ Visas &amp; Travel</span><span class="sg-copy" data-mail="visas@skyglobegroup.com" title="Click to copy" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:copy;border-bottom:1px dashed rgba(10,28,62,.3)">visas@skyglobegroup.com</span></div>
+              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">🌐 Global Mobility</span><span class="sg-copy" data-mail="mobility@skyglobegroup.com" title="Click to message" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:pointer;border-bottom:1px dashed rgba(10,28,62,.3)">mobility@skyglobegroup.com</span></div>
               <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">🎓 SkyGlobe Academy</span><span class="sg-copy" data-mail="education@skyglobegroup.com" title="Click to copy" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:copy;border-bottom:1px dashed rgba(10,28,62,.3)">education@skyglobegroup.com</span></div>
-              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">📜 Legal &amp; Documents</span><span class="sg-copy" data-mail="legal@skyglobegroup.com" title="Click to copy" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:copy;border-bottom:1px dashed rgba(10,28,62,.3)">legal@skyglobegroup.com</span></div>
+              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">📜 Legal &amp; Trust Services</span><span class="sg-copy" data-mail="legal@skyglobegroup.com" title="Click to copy" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:copy;border-bottom:1px dashed rgba(10,28,62,.3)">legal@skyglobegroup.com</span></div>
               <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">🪪 Digital Identity</span><span class="sg-copy" data-mail="id@skyglobegroup.com" title="Click to copy" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:copy;border-bottom:1px dashed rgba(10,28,62,.3)">id@skyglobegroup.com</span></div>
               <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">💳 Finance &amp; Payments</span><span class="sg-copy" data-mail="finance@skyglobegroup.com" title="Click to copy" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:copy;border-bottom:1px dashed rgba(10,28,62,.3)">finance@skyglobegroup.com</span></div>
+              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:0.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a87016;min-width:150px">🚀 Innovation &amp; Tech</span><span class="sg-copy" data-mail="innovation@skyglobegroup.com" title="Click to message" style="font-size:0.86rem;color:#0a1c3e;font-weight:600;cursor:pointer;border-bottom:1px dashed rgba(10,28,62,.3)">innovation@skyglobegroup.com</span></div>
             </div>
           </div>
         </div>
@@ -3288,6 +3355,19 @@ body.wc-active .page-back-bar{padding-top:138px}
       </div>
     </div>
     <div class="footer-col">
+      <h5>Ecosystem</h5>
+      <ul>
+        <li><a onclick="window.noriaOpenPanel&&noriaOpenPanel()"><span style="color:#ff9f1c">✦</span> NORIA — Intelligence</a></li>
+        <li><a href="/terra">🌍 TERRA — Trust</a></li>
+        <li><a href="/yunex">◆ YUNEX — Economy</a></li>
+        <li><a onclick="showPage('services')">🌐 Global Mobility</a></li>
+        <li><a href="/academy">🎓 SkyGlobe Academy</a></li>
+        <li><a href="/legal-documents">📜 Legal &amp; Trust Services</a></li>
+        <li><a href="/digital-id">🪪 Digital Identity</a></li>
+        <li><a href="/digitalization">🚀 Innovation &amp; Technology</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
       <h5>Services</h5>
       <ul>
         <li><a onclick="showSvcDetail('Student Visa Processing')">Student Visa</a></li>
@@ -3318,11 +3398,12 @@ body.wc-active .page-back-bar{padding-top:138px}
       <h5>Contact</h5>
       <ul>
         <li><a class="sg-copy" data-mail="support@skyglobegroup.com" title="Click to copy">support@skyglobegroup.com</a></li>
-        <li><a class="sg-copy" data-mail="visas@skyglobegroup.com" title="Click to copy">visas@skyglobegroup.com</a></li>
+        <li><a class="sg-copy" data-mail="mobility@skyglobegroup.com" title="Click to message">mobility@skyglobegroup.com</a></li>
         <li><a class="sg-copy" data-mail="education@skyglobegroup.com" title="Click to copy">education@skyglobegroup.com</a></li>
         <li><a class="sg-copy" data-mail="legal@skyglobegroup.com" title="Click to copy">legal@skyglobegroup.com</a></li>
         <li><a class="sg-copy" data-mail="id@skyglobegroup.com" title="Click to copy">id@skyglobegroup.com</a></li>
         <li><a class="sg-copy" data-mail="finance@skyglobegroup.com" title="Click to copy">finance@skyglobegroup.com</a></li>
+        <li><a class="sg-copy" data-mail="innovation@skyglobegroup.com" title="Click to message">innovation@skyglobegroup.com</a></li>
         <li><a class="sg-tel" data-tel="+17373998522" title="Tap to call · click to copy">+1 737-399-8522</a></li>
         <li><a>123 Fifth Ave, Suite 450</a></li>
         <li><a>New York, NY 10011</a></li>
@@ -10732,6 +10813,6 @@ else document.addEventListener('DOMContentLoaded', initCountUps);
 </script>
 
 <script src="/announcements.js?v=2" defer></script>
-<script src="/dept-contact.js?v=4" defer></script>
+<script src="/dept-contact.js?v=5" defer></script>
 </body>
 </html>

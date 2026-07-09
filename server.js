@@ -878,6 +878,7 @@ app.get('/yunex', (req, res) => res.sendFile(path.join(__dirname, 'yunex.html'))
 app.get('/packages', (req, res) => res.sendFile(path.join(__dirname, 'packages.html')));
 app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));
 app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));
+app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html'))); // the Academy serves every age — proud new address, old one kept forever
 app.get('/legal-documents', (req, res) => res.sendFile(path.join(__dirname, 'legal-documents.html')));
 
 // ── §8 AI FEATURES ───────────────────────────────────────────────────────────
@@ -1596,7 +1597,12 @@ app.post('/api/email/inbound', async (req, res) => {
         return res.json({ skipped: 'dedup-window' });
     } catch { /* dedup is best-effort */ }
     const toAddr = String(to || '').toLowerCase();
-    const deptKey = VALID_DEPT_KEYS.find(k => toAddr.includes(DEPARTMENTS[k].email.toLowerCase())) || 'general';
+    // Legacy address aliases — old addresses keep working forever after the
+    // ecosystem realignment (visas@ was Global Mobility's original address).
+    const EMAIL_ALIASES = { 'visas@skyglobegroup.com': 'travel' };
+    const deptKey = Object.keys(EMAIL_ALIASES).find(a => toAddr.includes(a))
+      ? EMAIL_ALIASES[Object.keys(EMAIL_ALIASES).find(a => toAddr.includes(a))]
+      : (VALID_DEPT_KEYS.find(k => toAddr.includes(DEPARTMENTS[k].email.toLowerCase())) || 'general');
     const bodyText = (text && String(text).trim()) || extractEmailText(raw);
     await aiReceive({
       source: 'email', name: '', email: fromEmail,
@@ -1624,6 +1630,7 @@ function staffDeptKey(department) {
   if (/legal|document|notary/.test(d)) return 'legal';
   if (/identity|id card/.test(d)) return 'identity';
   if (/financ|payment|account/.test(d)) return 'finance';
+  if (/innovat|technolog|developer/.test(d)) return 'innovation';
   return null;
 }
 
@@ -2916,11 +2923,15 @@ const SERVICE_PRODUCT_MAP = {
 // stays false and notifications fall back to RECIPIENT_EMAIL — flip `live` to
 // true per department the moment its address forwards to a real inbox.
 const DEPARTMENTS = {
-  travel:    { key: 'travel',    label: 'Travel & Global Mobility', email: 'visas@skyglobegroup.com',     icon: '✈️', live: false },
-  education: { key: 'education', label: 'Education & Academy',       email: 'education@skyglobegroup.com', icon: '🎓', live: false },
-  legal:     { key: 'legal',     label: 'Legal & Documents',        email: 'legal@skyglobegroup.com',    icon: '📜', live: false },
-  identity:  { key: 'identity',  label: 'Digital Identity',         email: 'id@skyglobegroup.com',       icon: '🪪', live: false },
-  finance:   { key: 'finance',   label: 'Finance & Payments',       email: 'finance@skyglobegroup.com',  icon: '💳', live: false },
+  // Ecosystem divisions (ARCHITECTURE.md Amendment 2): division-level names —
+  // everything travel-related lives under Global Mobility's shadow; the
+  // Academy serves every age; Innovation & Technology is the Group's R&D face.
+  travel:    { key: 'travel',    label: 'Global Mobility',           email: 'mobility@skyglobegroup.com', icon: '🌐', live: false },
+  education: { key: 'education', label: 'SkyGlobe Academy',          email: 'education@skyglobegroup.com', icon: '🎓', live: false },
+  legal:     { key: 'legal',     label: 'Legal & Trust Services',    email: 'legal@skyglobegroup.com',    icon: '📜', live: false },
+  identity:  { key: 'identity',  label: 'Digital Identity',          email: 'id@skyglobegroup.com',       icon: '🪪', live: false },
+  finance:   { key: 'finance',   label: 'Finance & Payments',        email: 'finance@skyglobegroup.com',  icon: '💳', live: false },
+  innovation:{ key: 'innovation',label: 'Innovation & Technology',   email: 'innovation@skyglobegroup.com', icon: '🚀', live: false },
   noria:     { key: 'noria',     label: 'NORIA · AI Assistant',     email: 'noria@skyglobegroup.com',    icon: '✦',  live: false, sticky: true },
   yunex:     { key: 'yunex',     label: 'Yunex',                    email: 'yunex@skyglobegroup.com',    icon: '◆',  live: false, sticky: true },
   terra:     { key: 'terra',     label: 'TERRA',                    email: 'terra@skyglobegroup.com',    icon: '🌍', live: false, sticky: true },
@@ -3039,7 +3050,7 @@ async function aiReceive({ source, ref, name, email, service, message, deptHint 
   };
   try {
     const prompt = `You are the AI Reception for SkyGlobe Group, a global platform for travel & mobility, education, legal documents and digital identity. A new client request just arrived. Read it and reply with ONLY a JSON object (no prose, no markdown), exactly these keys:
-{"department": one of ["travel","education","legal","identity","finance","general"],
+{"department": one of ["travel","education","legal","identity","finance","innovation","general"],
  "urgency": one of ["low","normal","high","critical"],
  "intent": "one concise sentence describing what the client wants",
  "sentiment": one of ["positive","neutral","frustrated"],
@@ -3054,7 +3065,10 @@ Message: ${message || '(no message — form submission)'}`;
     const out = await generateText(prompt, { maxTokens: 700, temperature: 0.3 });
     const j = parseAiJson(out);
     if (j) {
-      if (VALID_DEPT_KEYS.includes(j.department) && !(deptHint && DEPARTMENTS[deptHint] && DEPARTMENTS[deptHint].sticky)) rec.department = j.department;
+      // The department the client explicitly chose (form selector) or wrote to
+      // (email address) is AUTHORITATIVE — AI classification only decides when
+      // the destination was generic ('general' or no hint at all).
+      if (VALID_DEPT_KEYS.includes(j.department) && (!deptHint || deptHint === 'general')) rec.department = j.department;
       if (['low','normal','high','critical'].includes(j.urgency)) rec.urgency = j.urgency;
       if (['positive','neutral','frustrated'].includes(j.sentiment)) rec.sentiment = j.sentiment;
       if (typeof j.intent === 'string') rec.intent = j.intent.slice(0, 400);

@@ -9,11 +9,12 @@
   if (window.__sgDeptContact) return; window.__sgDeptContact = true;
 
   var DEPTS = {
-    travel:    { icon: '✈️', label: 'Travel & Global Mobility', email: 'visas@skyglobegroup.com' },
+    travel:    { icon: '🌐', label: 'Global Mobility',           email: 'mobility@skyglobegroup.com' },
     education: { icon: '🎓', label: 'SkyGlobe Academy',          email: 'education@skyglobegroup.com' },
-    legal:     { icon: '📜', label: 'Legal & Documents',        email: 'legal@skyglobegroup.com' },
+    legal:     { icon: '📜', label: 'Legal & Trust Services',    email: 'legal@skyglobegroup.com' },
     identity:  { icon: '🪪', label: 'Digital Identity',          email: 'id@skyglobegroup.com' },
     finance:   { icon: '💳', label: 'Finance & Payments',        email: 'finance@skyglobegroup.com' },
+    innovation:{ icon: '🚀', label: 'Innovation & Technology',   email: 'innovation@skyglobegroup.com' },
     general:   { icon: '📨', label: 'SkyGlobe Group',            email: 'support@skyglobegroup.com' },
   };
   var PAGE_DEPT = {
@@ -21,7 +22,7 @@
     'courses': 'education', 'course-learn': 'education', 'academy-admission': 'education',
     'academy-portal': 'education', 'skyglobe-kids-academy': 'education',
     'legal-documents': 'legal',
-    'digital-id': 'identity', 'digitalization': 'identity', 'id-verify': 'identity',
+    'digital-id': 'identity', 'digitalization': 'innovation', 'id-verify': 'identity',
     'payments': 'finance', 'pay': 'finance',
     'more-services': 'general', 'index': 'general', '': 'general',
   };
@@ -40,9 +41,10 @@
     legal:     ['AI Legal Document', 'Notarisation / Apostille', 'Document Verification', 'Other'],
     identity:  ['Premium Digital ID', 'ID Verification', 'Digitalization Services', 'Other'],
     finance:   ['Payment Issue', 'Refund Request', 'Invoice / Receipt', 'Other'],
+    innovation:['Digitalization Services', 'Technology Partnership', 'Developer / API Enquiry', 'Product Idea', 'Other'],
     general:   ['General Enquiry', 'Complaint', 'Partnership', 'Other'],
   };
-  var EMAIL_DEPT = {};
+  var EMAIL_DEPT = { 'visas@skyglobegroup.com': 'travel' }; // legacy alias — old address works forever
   Object.keys(DEPTS).forEach(function (k) { EMAIL_DEPT[DEPTS[k].email] = k; });
 
   var deptKey = null, dept = null;
@@ -197,6 +199,30 @@
     }
   });
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
-  else mount();
+  // ── PAGE NAVIGATION — Back / Next on every page ─────────────────────────
+  // Premium floating pair (bottom-left): ‹ returns to the previous page,
+  // › goes forward again. Works with the browser history, so it respects
+  // both real page changes and in-page navigation.
+  function mountNav() {
+    if (document.getElementById('sgNavPair')) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'sgNavPair';
+    wrap.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:99990;display:flex;gap:8px';
+    function mkBtn(label, title, fn) {
+      var b = document.createElement('button');
+      b.textContent = label;
+      b.setAttribute('aria-label', title); b.title = title;
+      b.style.cssText = 'width:42px;height:42px;border-radius:50%;border:1px solid rgba(212,167,58,.45);background:rgba(7,17,35,.88);backdrop-filter:blur(6px);color:#e9c86a;font-size:1.15rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);line-height:1;transition:transform .15s';
+      b.onmouseover = function(){ b.style.transform='scale(1.08)'; };
+      b.onmouseout = function(){ b.style.transform=''; };
+      b.onclick = fn;
+      return b;
+    }
+    wrap.appendChild(mkBtn('‹', 'Back to previous page', function(){ history.back(); }));
+    wrap.appendChild(mkBtn('›', 'Forward', function(){ history.forward(); }));
+    document.body.appendChild(wrap);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ mount(); mountNav(); });
+  else { mount(); mountNav(); }
 })();
