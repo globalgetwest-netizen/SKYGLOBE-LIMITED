@@ -7150,7 +7150,26 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`SkyGlobe server running on port ${PORT}`);
   refreshStaffCache(); // load CEO-portal staff accounts into memory
+  brevoKeepAlive();    // keep the fallback email key active (Brevo expires keys unused for 90 days)
 });
+
+// ── BREVO KEY KEEP-ALIVE ─────────────────────────────────────────────────────
+// Brevo deactivates API keys after 90 days without use. Since Brevo is only
+// our FALLBACK (it sends nothing while Resend is healthy), the key could sit
+// idle and expire exactly when we need it. A lightweight read-only ping on
+// every server start + weekly counts as API activity and keeps it alive.
+async function brevoKeepAlive() {
+  const key = process.env.BREVO_API_KEY;
+  if (!key) return;
+  try {
+    const r = await fetch('https://api.brevo.com/v3/account', {
+      headers: { 'api-key': key, 'Accept': 'application/json' },
+    });
+    console.log(r.ok ? '[brevo] keep-alive ping OK — fallback key active'
+                     : `[brevo] keep-alive ping failed (${r.status}) — CHECK BREVO_API_KEY`);
+  } catch (e) { console.error('[brevo] keep-alive error:', e.message); }
+  setTimeout(brevoKeepAlive, 7 * 24 * 60 * 60 * 1000).unref?.(); // weekly re-ping
+}
 // Keep the staff-account cache fresh (in case of direct DB edits)
 setInterval(refreshStaffCache, 5 * 60 * 1000);
 
