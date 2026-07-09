@@ -127,6 +127,19 @@ app.use(cors());
 //  • HTML  → always revalidate (users always get the newest page)
 //  • CSS/JS → 1 hour (fresh enough to pick up edits, still fast on repeat hits)
 //  • images/fonts/icons → 30 days (these rarely change)
+// ── PLATFORM SUBDOMAINS ──────────────────────────────────────────────────────
+// terra.skyglobegroup.com and yunex.skyglobegroup.com are first-class homes
+// for the two platforms. The root of each subdomain serves its founding page;
+// every other path (assets, /api/*) behaves exactly like the main site.
+app.use((req, res, next) => {
+  const host = String(req.headers.host || '').toLowerCase();
+  if (req.path === '/' || req.path === '/index.html') {
+    if (host.startsWith('terra.')) return res.sendFile(path.join(__dirname, 'terra.html'));
+    if (host.startsWith('yunex.')) return res.sendFile(path.join(__dirname, 'yunex.html'));
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname), {
   etag: true,
   lastModified: true,
