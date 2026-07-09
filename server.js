@@ -2880,6 +2880,7 @@ const DEPARTMENTS = {
   finance:   { key: 'finance',   label: 'Finance & Payments',       email: 'finance@skyglobegroup.com',  icon: '💳', live: false },
   noria:     { key: 'noria',     label: 'NORIA · AI Assistant',     email: 'noria@skyglobegroup.com',    icon: '✦',  live: false, sticky: true },
   yunex:     { key: 'yunex',     label: 'Yunex',                    email: 'yunex@skyglobegroup.com',    icon: '◆',  live: false, sticky: true },
+  terra:     { key: 'terra',     label: 'TERRA',                    email: 'terra@skyglobegroup.com',    icon: '🌍', live: false, sticky: true },
   // CEO mail is sacred: never AI-auto-answered, always queued for a human,
   // and never re-classified away from the CEO's office by the AI.
   ceo:       { key: 'ceo',       label: 'Office of the CEO',        email: 'ceo@skyglobegroup.com',      icon: '👑', live: false, sticky: true, aiAutoAnswer: false },
