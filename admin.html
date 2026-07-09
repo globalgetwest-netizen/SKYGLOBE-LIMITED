@@ -316,6 +316,19 @@
 </head>
 <body>
 
+<style>
+/* ── Ecosystem Command Bridge (ARCHITECTURE.md §2) ─────────────────── */
+.sb-sec{font-size:.6rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#5f74a0;padding:14px 14px 4px;user-select:none}
+.sb-sec .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.sb-sec--noria{color:#c98a3a}.sb-sec--noria .dot{background:#ff9f1c}
+.sb-sec--terra{color:#4a9a6d}.sb-sec--terra .dot{background:#3fae6a}
+.sb-sec--yunex{color:#5d8fd8}.sb-sec--yunex .dot{background:#4f8ef7}
+.sb-sec--group .dot{background:#c9a84c}.sb-sec--vert .dot{background:#9fb0d6}.sb-sec--ops .dot{background:#7a8aa8}
+.bridge-greet{background:linear-gradient(160deg,#0e1d33,#0a1628);border:1px solid rgba(201,168,76,.22);border-radius:14px;padding:20px 22px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.bridge-greet h3{margin:0;color:#fff;font-size:1.25rem;font-weight:700}
+.bridge-greet .sub{color:#8fa0bd;font-size:.82rem;margin-top:4px}
+.bridge-greet .star{color:#ff9f1c}
+</style>
 <!-- ════ LOGIN ════ -->
 <div id="loginScreen">
   <div class="login-box">
@@ -338,36 +351,50 @@
     <aside class="sidebar" id="sidebar">
       <div class="sb-brand">
         <img src="icon-192.png" alt="" onerror="this.src='icon-512.png'">
-        <div class="t">SkyGlobe<small>Group Portal</small></div>
+        <div class="t">SkyGlobe <span style="color:#ff9f1c;font-size:.6em;vertical-align:.4em">✦</span><small>Ecosystem Command</small></div>
       </div>
       <nav class="sb-nav">
+        <!-- The Command Bridge — navigate the ecosystem's architecture
+             (GROUP → NORIA · TERRA · YUNEX → verticals → operations) -->
         <button class="sb-link core" onclick="toggleCEOAssistant()" title="SKYGLOBE CORE Intelligence — your CEO AI assistant"><span class="ic">🧠</span> SKYGLOBE CORE AI</button>
-        <button class="sb-link active" data-view="dashboard" onclick="switchView('dashboard')"><span class="ic">📊</span> Dashboard</button>
-        <button class="sb-link" data-view="applications" onclick="switchView('applications')"><span class="ic">📋</span> Applications <span class="badge-n" id="navAppsBadge"></span></button>
+        <button class="sb-link active" data-view="dashboard" onclick="switchView('dashboard')"><span class="ic">📊</span> Command Bridge</button>
+
+        <div class="sb-sec sb-sec--noria"><span class="dot"></span>NORIA · Intelligence</div>
+        <button class="sb-link" data-view="reception" onclick="switchView('reception')"><span class="ic">🛎️</span> AI Reception</button>
         <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
-        <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
+        <button class="sb-link" data-view="analytics" onclick="switchView('analytics')"><span class="ic">📈</span> Analytics</button>
+
+        <div class="sb-sec sb-sec--terra"><span class="dot"></span>TERRA · Trust</div>
+        <button class="sb-link" data-view="idcards" onclick="switchView('idcards')"><span class="ic">🪪</span> Digital ID Issuance</button>
+        <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
+        <button class="sb-link" data-view="ipregistry" onclick="switchView('ipregistry')"><span class="ic">🛡️</span> IP Registry</button>
+
+        <div class="sb-sec sb-sec--yunex"><span class="dot"></span>YUNEX · Economy</div>
         <button class="sb-link" data-view="payments" onclick="switchView('payments')"><span class="ic">💳</span> Payments</button>
         <button class="sb-link" data-view="pricing" onclick="switchView('pricing')"><span class="ic">🏷️</span> Pricing</button>
-        <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
-        <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
-        <button class="sb-link" data-view="idcards" onclick="switchView('idcards')"><span class="ic">🪪</span> Digital ID Issuance</button>
-        <button class="sb-link" data-view="reception" onclick="switchView('reception')"><span class="ic">🛎️</span> AI Reception</button>
-        <button class="sb-link" data-view="grants" onclick="switchView('grants')"><span class="ic">🎁</span> Complimentary</button>
-        <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
-        <button class="sb-link" data-view="videos" onclick="switchView('videos')"><span class="ic">🎥</span> Featured Videos</button>
-        <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
         <button class="sb-link" data-view="payroll" onclick="switchView('payroll')"><span class="ic">👥</span> Payroll</button>
+        <button class="sb-link" data-view="grants" onclick="switchView('grants')"><span class="ic">🎁</span> Complimentary</button>
+
+        <div class="sb-sec sb-sec--vert"><span class="dot"></span>Service Verticals</div>
+        <button class="sb-link" data-view="applications" onclick="switchView('applications')"><span class="ic">📋</span> Applications <span class="badge-n" id="navAppsBadge"></span></button>
+        <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
+        <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> SkyGlobe Academy</button>
+        <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
+
+        <div class="sb-sec sb-sec--group"><span class="dot"></span>Group &amp; People</div>
+        <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
+        <button class="sb-link" data-view="videos" onclick="switchView('videos')"><span class="ic">🎥</span> Featured Videos</button>
+        <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
         <button class="sb-link" data-view="departments" onclick="switchView('departments')"><span class="ic">🏢</span> Departments</button>
         <button class="sb-link" data-view="directory" onclick="switchView('directory')"><span class="ic">👤</span> Staff Directory</button>
         <button class="sb-link" data-view="channels" onclick="switchView('channels')"><span class="ic">💬</span> Dept Channels</button>
         <button class="sb-link" data-view="tasks" onclick="switchView('tasks')"><span class="ic">📋</span> Task Board</button>
         <button class="sb-link" data-view="attendance" onclick="switchView('attendance')"><span class="ic">🕐</span> Attendance</button>
+
+        <div class="sb-sec sb-sec--ops"><span class="dot"></span>Operations</div>
         <button class="sb-link" data-view="activity" onclick="switchView('activity')"><span class="ic">🛰️</span> Activity Log</button>
-        <button class="sb-link" data-view="analytics" onclick="switchView('analytics')"><span class="ic">📈</span> Analytics</button>
         <button class="sb-link" data-view="errors" onclick="switchView('errors')"><span class="ic">🚨</span> Error Logs</button>
-        <button class="sb-link" data-view="ipregistry" onclick="switchView('ipregistry')"><span class="ic">🛡️</span> IP Registry</button>
-        <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> SkyGlobe Academy</button>
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
       </nav>
       <div class="sb-foot">
@@ -380,7 +407,7 @@
     <div class="main">
       <div class="topbar">
         <button class="hamburger" onclick="toggleSidebar(true)">☰</button>
-        <h2 id="viewTitle">Dashboard</h2>
+        <h2 id="viewTitle">Command Bridge</h2>
         <div class="spacer"></div>
         <button class="btn btn-sm btn-ghost" onclick="loadAll()">⟳ Refresh</button>
       </div>
@@ -388,6 +415,21 @@
       <div class="content">
         <!-- DASHBOARD -->
         <section class="view active" id="view-dashboard">
+          <div class="bridge-greet">
+            <div>
+              <h3 id="bridgeGreet">Welcome, CEO</h3>
+              <div class="sub" id="bridgeDate">SkyGlobe Group · Command Bridge <span class="star">✦</span></div>
+            </div>
+            <div class="sub" style="text-align:right">Terra verifies · YUNEX moves · NORIA thinks <span class="star">✦</span></div>
+          </div>
+          <script>
+          (function(){
+            var h=new Date().getHours();
+            var g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+            document.getElementById('bridgeGreet').textContent=g+', CEO';
+            document.getElementById('bridgeDate').innerHTML=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · SkyGlobe Group Command Bridge <span class="star">✦</span>';
+          })();
+          </script>
           <div class="kpis" id="kpis"></div>
           <div class="grid2">
             <div class="panel">
@@ -1372,7 +1414,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',tools:'Quick Tools'};
+  const titles={dashboard:'Command Bridge',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();

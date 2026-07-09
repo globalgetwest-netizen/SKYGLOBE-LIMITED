@@ -1611,6 +1611,22 @@ app.post('/api/email/inbound', async (req, res) => {
   }
 });
 
+// Map a staff account's free-text department (e.g. "Legal & Documents") to a
+// reception department key. Conservative: no confident match → no scoping.
+function staffDeptKey(department) {
+  const d = String(department || '').toLowerCase();
+  if (!d) return null;
+  for (const k of VALID_DEPT_KEYS) {
+    if (d === k || d.includes(k) || DEPARTMENTS[k].label.toLowerCase().includes(d) || d.includes(DEPARTMENTS[k].label.toLowerCase())) return k;
+  }
+  if (/travel|visa|mobility/.test(d)) return 'travel';
+  if (/educat|academ|admission/.test(d)) return 'education';
+  if (/legal|document|notary/.test(d)) return 'legal';
+  if (/identity|id card/.test(d)) return 'identity';
+  if (/financ|payment|account/.test(d)) return 'finance';
+  return null;
+}
+
 app.get('/api/admin/reception', async (req, res) => {
   if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
   try {
@@ -1618,7 +1634,19 @@ app.get('/api/admin/reception', async (req, res) => {
     if (req.query.dept && VALID_DEPT_KEYS.includes(req.query.dept)) params.department = `eq.${req.query.dept}`;
     if (req.query.status) params.status = `eq.${req.query.status}`;
     const rows = await dbQuery('GET', 'ai_reception', null, params);
-    res.json(Array.isArray(rows) ? rows : []);
+    let list = Array.isArray(rows) ? rows : [];
+    // ROLE SCOPING (ARCHITECTURE.md §7): a staff member with a recognised
+    // department sees their department's queue (+ general + items assigned to
+    // them personally) by default. ?all=1 shows everything; the CEO always
+    // sees everything.
+    const who = getRole(req);
+    if (who && who.role === 'staff' && req.query.all !== '1' && !req.query.dept) {
+      const myDept = staffDeptKey(who.department);
+      if (myDept) {
+        list = list.filter(r => r.department === myDept || r.department === 'general' || r.assigned_to === who.name);
+      }
+    }
+    res.json(list);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

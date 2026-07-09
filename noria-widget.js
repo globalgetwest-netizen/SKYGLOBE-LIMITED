@@ -94,6 +94,7 @@
     o.classList.add('open');
     if (!_nh.length) _addMsg('👋 Hello! I\'m <strong>NORIA</strong> — SkyGlobe Group\'s AI Intelligence Assistant. Ask me about visas, work permits, university admissions, conferences, scholarships, travel documentation and all our services.', 'bot');
   }
+  window.noriaOvOpen = _open; // public hook — ecosystem cards & links can open NORIA
   window.noriaOvClose = function () {
     var o = document.getElementById('noriaOverlay');
     if (o) o.classList.remove('open');

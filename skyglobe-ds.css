@@ -263,3 +263,53 @@ img,svg,video,canvas{max-width:100%;height:auto}
   .sg-row-stack-m{flex-direction:column;align-items:stretch}
 }
 @media(min-width:641px){.sg-only-mobile{display:none!important}}
+
+/* ══════════════════════════════════════════════════════════════════════
+   11. THE ECOSYSTEM CHAPTER  (ARCHITECTURE.md §4 — the palette law)
+
+   · Parent  — deep navy + premium gold (the signature, above)
+   · TERRA   — green accent  (trust · alive · grounded)
+   · YUNEX   — blue→purple   (dynamic · economic · modern)
+   · NORIA   — the orange ✦  (reserved). Orange elsewhere means one thing
+               only: LIVE ACTIVITY — where the intelligence is working.
+   Rules: gold sparingly · color never the sole carrier of meaning
+          (icon + word always accompany it) · gentle motion only.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  /* Platform accents (honoring the real logos) */
+  --terra:#3fae6a;          /* TERRA · trust green            */
+  --terra-deep:#2c7d4c;
+  --yunex:#4f8ef7;          /* YUNEX · economic blue          */
+  --yunex-grad-a:#3d5af1;   /* YUNEX gradient start           */
+  --yunex-grad-b:#b326d9;   /* YUNEX gradient end (purple)    */
+  --noria:#ff9f1c;          /* NORIA · the ✦ (reserved)       */
+  --noria-deep:#e65100;
+  --sg-live:var(--noria);   /* live activity = intelligence at work */
+}
+
+/* Platform-accented cards (compose with .sg-card / .sg-card-dark) */
+.sg-card--terra{border-color:rgba(63,174,106,.4)}
+.sg-card--yunex{border-color:rgba(79,142,247,.4)}
+.sg-card--noria{border-color:rgba(255,159,28,.4)}
+
+/* Platform buttons (compose with .sg-btn) */
+.sg-btn-terra{background:linear-gradient(135deg,var(--terra),var(--terra-deep));color:#fff}
+.sg-btn-terra:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(63,174,106,.32)}
+.sg-btn-yunex{background:linear-gradient(135deg,var(--yunex-grad-a),var(--yunex-grad-b));color:#fff}
+.sg-btn-yunex:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,142,247,.32)}
+
+/* The NORIA star — the honor mark on every SkyGlobe logo.
+   Position law: upper-right of the emblem. Defined once, never moved. */
+.noria-star{color:var(--noria);font-style:normal;display:inline-block;transform:translateY(-.35em);font-size:.55em;margin-left:.12em}
+@keyframes noria-breathe{0%,100%{opacity:.85}50%{opacity:1;text-shadow:0 0 8px rgba(255,159,28,.55)}}
+.noria-star--live{animation:noria-breathe 3.2s ease-in-out infinite}
+
+/* Live-activity badge (orange = intelligence working; icon+word required) */
+.sg-badge-live{background:rgba(255,159,28,.12);color:var(--noria-deep);border-color:rgba(255,159,28,.4)}
+
+/* Gentle entrance — cards rise into place (motion reinforces, never distracts) */
+@keyframes sg-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.sg-rise{animation:sg-rise .32s cubic-bezier(.22,.7,.3,1) both}
+.sg-rise-2{animation:sg-rise .32s cubic-bezier(.22,.7,.3,1) .08s both}
+.sg-rise-3{animation:sg-rise .32s cubic-bezier(.22,.7,.3,1) .16s both}
+
