@@ -205,6 +205,7 @@
   // both real page changes and in-page navigation.
   function mountNav() {
     if (document.getElementById('sgNavPair')) return;
+    if (document.querySelector('.nav-arrows')) return; // page has its own site-wide pair
     var wrap = document.createElement('div');
     wrap.id = 'sgNavPair';
     wrap.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:99990;display:flex;gap:8px';

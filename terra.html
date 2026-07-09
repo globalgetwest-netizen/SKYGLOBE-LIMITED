@@ -138,5 +138,9 @@ document.getElementById('terraForm').addEventListener('submit', async function(e
   }catch(err){ btn.disabled=false; btn.textContent='Join the Foundation of Trust'; alert('Could not send right now — please try again in a moment.'); }
 });
 </script>
+<div style="position:fixed;left:14px;bottom:14px;z-index:99990;display:flex;gap:8px">
+<button onclick="history.back()" aria-label="Back to previous page" title="Back" style="width:42px;height:42px;border-radius:50%;border:1px solid rgba(201,168,76,.45);background:rgba(7,17,35,.88);color:#e9c86a;font-size:1.15rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);line-height:1">‹</button>
+<button onclick="history.forward()" aria-label="Forward" title="Forward" style="width:42px;height:42px;border-radius:50%;border:1px solid rgba(201,168,76,.45);background:rgba(7,17,35,.88);color:#e9c86a;font-size:1.15rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);line-height:1">›</button>
+</div>
 </body>
 </html>

@@ -1267,6 +1267,19 @@ body.wc-active .page-back-bar{padding-top:138px}
 .sg-link{background:linear-gradient(135deg,#0a1c3e,#15418c)!important;color:#fff!important;border:none!important;box-shadow:0 8px 20px rgba(10,28,62,.28)!important}
 .sg-link:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(10,28,62,.4)!important;color:#fff!important}
 </style>
+<style>
+/* ── Mobile-native polish (ecosystem gateway) ─────────────────────── */
+@media(max-width:640px){
+  #cosmicHero{min-height:auto!important}
+  #cosmicHero .hero-wrap{padding:88px 1rem 40px!important}
+  #cosmicHero h1{font-size:1.75rem!important;line-height:1.12!important}
+  #cosmicHero p{font-size:.88rem!important}
+  #cosmicHero .btn-primary,#cosmicHero .btn-outline{width:100%;justify-content:center;min-height:48px}
+  #sgEcosystem{padding:2.4rem 1rem!important}
+  .nav-arrows{bottom:calc(14px + env(safe-area-inset-bottom,0px))!important}
+}
+@media(prefers-reduced-motion:reduce){#cosmicHero *{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
 
@@ -1302,13 +1315,6 @@ body.wc-active .page-back-bar{padding-top:138px}
     </span>
   </div>
 
-  <!-- Global search bar — always visible, like Google -->
-  <form class="nav-search" style="position:relative" onsubmit="navSearch(event)">
-    <span style="font-size:0.85rem;opacity:0.45;margin-left:2px">🔍</span>
-    <input type="text" id="navSearchInput" placeholder="Search countries, visas, scholarships…" autocomplete="off" oninput="acInput('navSearchInput','navAcDrop')" onkeydown="acKey(event,'navSearchInput','navAcDrop')">
-    <button type="submit" aria-label="Search">→</button>
-    <div class="ac-drop" id="navAcDrop"></div>
-  </form>
 
   <ul class="nav-links">
     <li><a onclick="showPage('home')" data-page="home">Home</a></li>
@@ -1322,9 +1328,13 @@ body.wc-active .page-back-bar{padding-top:138px}
         <a onclick="showPage('services');closeNavMore()">Tourist &amp; Schengen Visas</a>
         <a href="/work-permit">Europe Work Permit &amp; Jobs</a>
         <a onclick="showPage('recruitment');closeNavMore()">Recruitment &amp; Overseas Jobs</a>
-        <a style="font-size:0.74rem;color:#9fb0d6;padding:10px 18px 2px;cursor:default;text-transform:uppercase;letter-spacing:.14em">Education</a>
-        <a onclick="showPage('services');closeNavMore()">University Admissions</a>
-        <a onclick="showPage('blog');closeNavMore()">Scholarships</a>
+        <a style="font-size:0.74rem;color:#9fb0d6;padding:10px 18px 2px;cursor:default;text-transform:uppercase;letter-spacing:.14em">Travel Services</a>
+        <a onclick="showPage('services');closeNavMore()">Flight &amp; Hotel Reservation Letters</a>
+        <a onclick="showPage('services');closeNavMore()">Real Flight &amp; Hotel Booking</a>
+        <a onclick="showPage('services');closeNavMore()">Travel Insurance</a>
+        <a href="/packages">Premium Packages</a>
+        <a style="font-size:0.74rem;color:#9fb0d6;padding:10px 18px 2px;cursor:default;text-transform:uppercase;letter-spacing:.14em">Events</a>
+        <a href="/conferences">Events &amp; Conferences</a>
         <a style="font-size:0.74rem;color:#9fb0d6;padding:10px 18px 2px;cursor:default;text-transform:uppercase;letter-spacing:.14em">Destinations</a>
         <a onclick="showPage('countries');closeNavMore()">Explore Countries</a>
         <a onclick="showPage('destinations');closeNavMore()">Visa by Destination</a>
@@ -1332,36 +1342,29 @@ body.wc-active .page-back-bar{padding-top:138px}
       </div>
     </li>
     <li class="nav-more-wrap">
-      <a class="nav-more-btn" onclick="toggleNavMore(event,'mobTravelDrop')" data-page="world">Travel Services ▾</a>
-      <div class="nav-more-drop" id="mobTravelDrop">
-        <a onclick="showPage('services');closeNavMore()">Flight Reservation Letters</a>
-        <a onclick="showPage('services');closeNavMore()">Real Flight Booking</a>
-        <a onclick="showPage('services');closeNavMore()">Hotel Reservation Letters</a>
-        <a onclick="showPage('services');closeNavMore()">Real Hotel Booking</a>
-        <a onclick="showPage('services');closeNavMore()">Travel Insurance</a>
-        <a href="/packages">Premium Packages</a>
-        <a onclick="showPage('world');closeNavMore()">World Explorer</a>
-      </div>
-    </li>
-    <li><a href="/conferences" data-page="conferences">Events &amp; Conferences</a></li>
-    <li class="nav-more-wrap">
-      <a class="nav-more-btn" onclick="toggleNavMore(event,'mobDigiDrop')" data-page="digitalization">Digitalization ▾</a>
-      <div class="nav-more-drop" id="mobDigiDrop">
-        <a href="/digitalization">Digitalization Overview</a>
-        <a href="/legal-documents">Legal Digital Documentation</a>
-      </div>
-    </li>
-    <li class="nav-more-wrap">
-      <a class="nav-more-btn" onclick="toggleNavMore(event,'mobKnowledgeDrop')" data-page="blog world">Knowledge Hub ▾</a>
-      <div class="nav-more-drop" id="mobKnowledgeDrop">
-        <a href="https://app.skyglobegroup.com/kids-academy">SkyGlobe Academy</a>
+      <a class="nav-more-btn" onclick="toggleNavMore(event,'mobAcademyDrop')" data-page="blog">Academy ▾</a>
+      <div class="nav-more-drop" id="mobAcademyDrop">
+        <a href="/academy">SkyGlobe Academy</a>
         <a href="/courses">Certificate Programs</a>
-        <a href="/more-services">More Services</a>
-        <a href="/digital-id">Premium Digital ID</a>
-        <a onclick="showPage('blog');closeNavMore()">Blog &amp; Insights</a>
+        <a onclick="showPage('services');closeNavMore()">University Admissions</a>
+        <a onclick="showPage('blog');closeNavMore()">Scholarships</a>
         <a onclick="showPage('cv-builder');closeNavMore()">Free CV Builder</a>
-        <a onclick="showPage('world');closeNavMore()">World Explorer</a>
+      </div>
+    </li>
+    <li class="nav-more-wrap">
+      <a class="nav-more-btn" onclick="toggleNavMore(event,'mobDigiDrop')" data-page="digitalization">Solutions ▾</a>
+      <div class="nav-more-drop" id="mobDigiDrop">
+        <a href="/legal-documents">Legal &amp; Trust Services</a>
+        <a href="/digital-id">Premium Digital ID</a>
+        <a href="/digitalization">Innovation &amp; Digitalization</a>
+        <a href="/more-services">More Services</a>
+      </div>
+    </li>
+    <li class="nav-more-wrap">
+      <a class="nav-more-btn" onclick="toggleNavMore(event,'mobKnowledgeDrop')" data-page="blog world">Company ▾</a>
+      <div class="nav-more-drop" id="mobKnowledgeDrop">
         <a onclick="showPage('about');closeNavMore()">About SkyGlobe Group</a>
+        <a onclick="showPage('blog');closeNavMore()">Blog &amp; Insights</a>
         <a onclick="showPage('careers');closeNavMore()">Careers at SkyGlobe</a>
         <a onclick="showPage('antiFraud');closeNavMore()">Anti-Fraud Advisory</a>
       </div>
@@ -1412,31 +1415,31 @@ body.wc-active .page-back-bar{padding-top:138px}
   <a onclick="showPage('services');toggleMenu()"><span>✈️</span>Tourist &amp; Schengen Visas</a>
   <a href="/work-permit"><span>🇪🇺</span>Europe Work Permit &amp; Jobs</a>
   <a onclick="showPage('recruitment');toggleMenu()"><span>🤝</span>Recruitment &amp; Overseas Jobs</a>
-  <a onclick="showPage('services');toggleMenu()"><span>🏛️</span>University Admissions</a>
-  <a onclick="showPage('blog');toggleMenu()"><span>🏆</span>Scholarships</a>
-
-  <div class="mob-section-label">Explore</div>
+  <a onclick="showPage('services');toggleMenu()"><span>📄</span>Flight &amp; Hotel Letters</a>
+  <a onclick="showPage('services');toggleMenu()"><span>🛏️</span>Real Flight &amp; Hotel Booking</a>
+  <a onclick="showPage('services');toggleMenu()"><span>🛡️</span>Travel Insurance</a>
+  <a href="/packages"><span>⭐</span>Premium Packages</a>
+  <a href="/conferences"><span>🎤</span>Events &amp; Conferences</a>
   <a onclick="showPage('countries');toggleMenu()"><span>🌍</span>Explore Countries</a>
   <a onclick="showPage('destinations');toggleMenu()"><span>📍</span>Visa by Destination</a>
   <a onclick="showPage('compare');toggleMenu()"><span>⚖️</span>Compare Countries</a>
   <a onclick="showPage('world');toggleMenu()"><span>🗺️</span>World Explorer</a>
 
-  <div class="mob-section-label">Travel Services</div>
-  <a onclick="showPage('services');toggleMenu()"><span>📄</span>Flight &amp; Hotel Letters</a>
-  <a onclick="showPage('services');toggleMenu()"><span>🛏️</span>Real Flight &amp; Hotel Booking</a>
-  <a onclick="showPage('services');toggleMenu()"><span>🛡️</span>Travel Insurance</a>
-  <a href="/packages"><span>⭐</span>Premium Packages</a>
-
-  <div class="mob-section-label">More</div>
-  <a href="/conferences"><span>🎤</span>Conference Sourcing</a>
-  <a href="/digitalization"><span>💡</span>Digitalization Overview</a>
-  <a href="/legal-documents"><span>⚖️</span>Legal Digital Documentation</a>
-  <a href="https://app.skyglobegroup.com/kids-academy"><span>🎓</span>SkyGlobe Academy</a>
+  <div class="mob-section-label">Academy</div>
+  <a href="/academy"><span>🎓</span>SkyGlobe Academy</a>
   <a href="/courses"><span>🏅</span>Certificate Programs</a>
-  <a href="/more-services"><span>✨</span>More Services</a>
-  <a href="/digital-id"><span>🪪</span>Premium Digital ID</a>
-  <a onclick="showPage('blog');toggleMenu()"><span>📰</span>Blog &amp; Insights</a>
+  <a onclick="showPage('services');toggleMenu()"><span>🏛️</span>University Admissions</a>
+  <a onclick="showPage('blog');toggleMenu()"><span>🏆</span>Scholarships</a>
   <a onclick="showPage('cv-builder');toggleMenu()"><span>📝</span>Free CV Builder</a>
+
+  <div class="mob-section-label">Solutions</div>
+  <a href="/legal-documents"><span>⚖️</span>Legal &amp; Trust Services</a>
+  <a href="/digital-id"><span>🪪</span>Premium Digital ID</a>
+  <a href="/digitalization"><span>🚀</span>Innovation &amp; Digitalization</a>
+  <a href="/more-services"><span>✨</span>More Services</a>
+
+  <div class="mob-section-label">Company</div>
+  <a onclick="showPage('blog');toggleMenu()"><span>📰</span>Blog &amp; Insights</a>
   <a onclick="showPage('about');toggleMenu()"><span>ℹ️</span>About SkyGlobe Group</a>
 
   <div class="mob-divider"></div>

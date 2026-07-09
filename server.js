@@ -1020,25 +1020,44 @@ app.post('/api/noria', async (req, res) => {
   const { message, history } = req.body || {};
   if (!message || !String(message).trim())
     return res.status(400).json({ error: 'Message is required.' });
+  const q = String(message).trim();
+  // NORIA must never hang. Three-tier ladder, each with a hard clock:
+  //  1. dedicated NORIA engine — 8s only (free-tier cold starts take ~50s;
+  //     users must not sit through them)
+  //  2. the platform AI (Gemini→Claude) with the NORIA persona — 20s
+  //  3. built-in FAQ responder — instant, always succeeds
   try {
     const r = await fetch('https://noria-engine.onrender.com/v1/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: String(message).trim(),
-        history: Array.isArray(history) ? history.slice(-10) : [],
-      }),
-      signal: AbortSignal.timeout(25000),
+      body: JSON.stringify({ query: q, history: Array.isArray(history) ? history.slice(-10) : [] }),
+      signal: AbortSignal.timeout(8000),
     });
     const data = await r.json();
-    res.json({ reply: data.answer || skyglobeFaqAnswer(String(message).trim()), source: 'noria' });
+    if (data.answer) return res.json({ reply: data.answer, source: 'noria' });
+    throw new Error('empty engine answer');
   } catch (e) {
-    console.error('NORIA proxy error:', e.message);
-    const isTimeout = e.name === 'TimeoutError' || e.name === 'AbortError';
-    const fallback = isTimeout
-      ? '__NORIA_WARMING__'
-      : skyglobeFaqAnswer(String(message).trim());
-    res.json({ reply: fallback, source: isTimeout ? 'warming' : 'faq' });
+    // Warm the engine in the background so the NEXT question hits it hot.
+    fetch('https://noria-engine.onrender.com/v1/ask', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: 'ping', history: [] }), signal: AbortSignal.timeout(60000),
+    }).catch(() => {});
+    try {
+      const hist = (Array.isArray(history) ? history.slice(-6) : [])
+        .map(m => `${m.role === 'model' ? 'NORIA' : 'Client'}: ${(m.parts?.[0]?.text || '').slice(0, 400)}`).join('\n');
+      const out = await Promise.race([
+        generateText(
+          `${hist ? 'Conversation so far:\n' + hist + '\n\n' : ''}Client question: ${q}\n\nAnswer as NORIA in 2-5 warm, professional sentences. If the question is outside SkyGlobe's services, answer helpfully and gently relate it back. Never invent prices; for exact pricing point to the website or support@skyglobegroup.com.`,
+          { maxTokens: 500, temperature: 0.5, system: 'You are NORIA, SkyGlobe Group\'s AI intelligence. SkyGlobe Group is a digital ecosystem: Global Mobility (visas for 47+ countries, EU work permits & jobs in 17 countries, flight/hotel reservation letters, travel insurance, conferences), SkyGlobe Academy (courses, admissions, scholarships), Legal & Trust Services, Digital Identity, Finance, and the TERRA & YUNEX platforms. WhatsApp +1 737-399-8522.' }
+        ),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('ai-timeout')), 20000)),
+      ]);
+      if (out && String(out).trim()) return res.json({ reply: String(out).trim(), source: 'ai' });
+      throw new Error('empty ai answer');
+    } catch (e2) {
+      console.error('NORIA ladder exhausted:', e.message, '|', e2.message);
+      res.json({ reply: skyglobeFaqAnswer(q), source: 'faq' });
+    }
   }
 });
 
