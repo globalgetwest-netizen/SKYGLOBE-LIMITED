@@ -44,15 +44,21 @@ async function run(){
         <p class="note">${d.error || 'We could not verify a certificate with this reference.'} If you believe this is an error, contact <a href="https://wa.me/17373998522">SkyGlobe support</a>.</p>`;
       return;
     }
-    box.innerHTML = `<div class="ic">✅</div><h1>Certificate Verified</h1><div class="status valid">Authentic · SkyGlobe Group</div>
-      <div class="rows">
-        <div class="row"><span class="k">Name</span><span class="v">${esc(d.fullName)}</span></div>
-        <div class="row"><span class="k">Programme</span><span class="v">${esc(d.track)}</span></div>
-        <div class="row"><span class="k">Level</span><span class="v">${esc(d.tier)}</span></div>
-        <div class="row"><span class="k">Graduation Year</span><span class="v">${esc(d.graduationYear)}</span></div>
-        <div class="row"><span class="k">Reference</span><span class="v">${esc(d.certRef)}</span></div>
-      </div>
-      <p class="note">This certificate was issued and is verified by SkyGlobe Group. Personal contact details are kept private and are never shown on this public verification page.</p>`;
+    // Document-aware rendering: one verified authority (TERRA), but each
+    // document type shows ITS OWN record — never another document's fields.
+    const HEADS = { academic:'Academic Credential Verified', business_work:'Work Certificate Verified', recognition:'Ownership Recognition Verified' };
+    const BADGES = { academic:'Authentic · SkyGlobe Group Academy', business_work:'Genuinely Issued · TERRA Verified', recognition:'Verified Owner & Entity · TERRA' };
+    const head = HEADS[d.kind] || 'Certificate Verified';
+    const badge = BADGES[d.kind] || 'Authentic · SkyGlobe Group';
+    const fields = Array.isArray(d.fields) && d.fields.length ? d.fields : [
+      { label:'Name', value:d.fullName }, { label:'Programme', value:d.track },
+      { label:'Level', value:d.tier }, { label:'Graduation Year', value:d.graduationYear } ];
+    const rows = fields.map(f=>`<div class="row"><span class="k">${esc(f.label)}</span><span class="v">${esc(f.value)}</span></div>`).join('')
+      + `<div class="row"><span class="k">Reference</span><span class="v">${esc(d.certRef)}</span></div>`
+      + (d.verifiedBy ? `<div class="row"><span class="k">Verified By</span><span class="v">${esc(d.verifiedBy)}</span></div>` : '');
+    box.innerHTML = `<div class="ic">✅</div><h1>${esc(head)}</h1><div class="status valid">${esc(badge)}</div>
+      <div class="rows">${rows}</div>
+      <p class="note">${esc(d.note || 'This certificate was issued and is verified by SkyGlobe Group.')} Personal contact details are kept private and are never shown on this public verification page.</p>`;
   }catch(e){
     box.innerHTML = '<div class="ic">⚠️</div><h1>Verification unavailable</h1><p class="note">Please try again shortly.</p>';
   }

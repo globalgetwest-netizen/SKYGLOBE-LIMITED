@@ -1404,9 +1404,12 @@
                 <option value="business">Business</option><option value="company">Company</option>
                 <option value="asset">Asset</option><option value="property">Property</option>
               </select>
-              <input id="rcReg" placeholder="Registration Nº (e.g. CAC / RC number)" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
-              <input id="rcSector" placeholder="Sector — e.g. Agriculture, Real Estate" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
-              <input id="rcLocation" placeholder="Location — e.g. Kano, Nigeria" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcReg" placeholder="Official registration Nº — as issued in the country of registration" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcSector" placeholder="Sector / industry" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcLocation" placeholder="Location — City, Country" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcSize" placeholder="Size / scale — e.g. 120 staff · 3 branches, 4,000 m², 12 units" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcGps" placeholder="GPS coordinates (optional) — e.g. 6.5244° N, 3.3792° E" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcEmail" placeholder="Owner's email — certificate is delivered here" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
               <input id="rcEst" placeholder="Established — e.g. 2015" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
             </div>
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
@@ -1433,10 +1436,15 @@
             </div>
             <textarea id="bcDuties" placeholder="Principal duties &amp; responsibilities (optional, printed in the body)" rows="2" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:10px;resize:vertical"></textarea>
             <textarea id="bcConduct" placeholder="Conduct statement (optional) — e.g. Their service and conduct during this period were satisfactory." rows="2" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:10px;resize:vertical"></textarea>
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-              <label style="color:var(--muted);font-size:.85rem">Business logo (optional, printed on the letterhead):</label>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+              <label style="color:var(--muted);font-size:.85rem">Business logo (optional — used in the generated letterhead):</label>
               <input type="file" id="bcLogo" accept="image/png,image/jpeg" onchange="bcLogoPick(this)" style="color:var(--muted);font-size:.82rem">
             </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+              <label style="color:var(--muted);font-size:.85rem">OR upload the business's own letterhead (full-width header image — replaces the generated one):</label>
+              <input type="file" id="bcLetterhead" accept="image/png,image/jpeg" onchange="bcLetterheadPick(this)" style="color:var(--muted);font-size:.82rem">
+            </div>
+            <input id="bcEmail" placeholder="Recipient's email — the certificate is delivered directly to them" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:12px">
             <button class="btn" onclick="issueBusinessCert()">🏢 Issue Work Certificate</button>
             <div id="bcResult" style="margin-top:10px;font-size:.85rem"></div>
           </div>
@@ -1550,7 +1558,33 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  
+  const titles={dashboard:'Command Bridge',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',tools:'Quick Tools'};
+  document.getElementById('viewTitle').textContent=titles[v]||v;
+  if(v==='messages') loadMessages();
+  if(v==='team') loadTeam();
+  if(v==='payments') loadPayments();
+  if(v==='pricing') loadPricing();
+  if(v==='offerings') loadOfferings();
+  if(v==='wprates') loadWpRates();
+  if(v==='reception') loadReception();
+  if(v==='grants') loadGrants();
+  if(v==='announcements') loadAnnouncements();
+  if(v==='videos') loadVideos();
+  if(v==='legaldocs') loadLegalDocs();
+  if(v==='finance') loadFinance();
+  if(v==='payroll') loadPayroll();
+  if(v==='directory') loadDirectory();
+  if(v==='channels'){ loadChanMsgs(ACTIVE_CHAN); startChanPoll(); }
+  if(v==='tasks') loadTasks();
+  if(v==='attendance') loadAttendanceAdmin();
+  if(v==='activity') loadActivity();
+  if(v==='analytics') loadAnalytics();
+  if(v==='errors') loadErrors();
+  if(v==='ipregistry') loadIPRegistry();
+  if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); loadStudentRecords(); }
+  toggleSidebar(false);
+}
+
 /* ══ Course Catalog manager (CEO adds courses — no code) ══ */
 /* ══ Student Records — the registrar's ledger ══ */
 let SR_ALL=[];
@@ -1614,32 +1648,7 @@ async function removeCourse(id,name){
     loadCourseCatalog();
   }catch(e){ alert(e.message); }
 }
-const titles={dashboard:'Command Bridge',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',tools:'Quick Tools'};
-  document.getElementById('viewTitle').textContent=titles[v]||v;
-  if(v==='messages') loadMessages();
-  if(v==='team') loadTeam();
-  if(v==='payments') loadPayments();
-  if(v==='pricing') loadPricing();
-  if(v==='offerings') loadOfferings();
-  if(v==='wprates') loadWpRates();
-  if(v==='reception') loadReception();
-  if(v==='grants') loadGrants();
-  if(v==='announcements') loadAnnouncements();
-  if(v==='videos') loadVideos();
-  if(v==='legaldocs') loadLegalDocs();
-  if(v==='finance') loadFinance();
-  if(v==='payroll') loadPayroll();
-  if(v==='directory') loadDirectory();
-  if(v==='channels'){ loadChanMsgs(ACTIVE_CHAN); startChanPoll(); }
-  if(v==='tasks') loadTasks();
-  if(v==='attendance') loadAttendanceAdmin();
-  if(v==='activity') loadActivity();
-  if(v==='analytics') loadAnalytics();
-  if(v==='errors') loadErrors();
-  if(v==='ipregistry') loadIPRegistry();
-  if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); loadStudentRecords(); }
-  toggleSidebar(false);
-}
+
 
 /* ══════════════════════════════════════════════════════
    KIDS ACADEMY — AI TEACHER NAME MANAGEMENT (CEO)
@@ -1735,7 +1744,8 @@ async function issueRecognitionCert(){
   const v=id=>document.getElementById(id).value.trim();
   const payload={ownerName:v('rcOwner'),ownerQualification:v('rcQual'),nationality:v('rcNationality'),
     entityName:v('rcEntity'),entityType:document.getElementById('rcType').value,regNumber:v('rcReg'),
-    sector:v('rcSector'),location:v('rcLocation'),established:v('rcEst'),photoDataUrl:RC_PHOTO};
+    sector:v('rcSector'),location:v('rcLocation'),established:v('rcEst'),
+    sizeInfo:v('rcSize'),gps:v('rcGps'),recipientEmail:v('rcEmail'),photoDataUrl:RC_PHOTO};
   if(!payload.ownerName||!payload.entityName){box.style.color='#ffb4b4';box.textContent='Owner name and entity name are required.';return;}
   box.style.color='var(--muted)';box.textContent='Issuing…';
   try{
@@ -1746,7 +1756,18 @@ async function issueRecognitionCert(){
     box.innerHTML='✅ Issued <b>'+d.certRef+'</b> — <a href="'+d.viewUrl+'" target="_blank" style="color:var(--gold)">Open &amp; Print</a> · <a href="'+d.verifyUrl+'" target="_blank" style="color:var(--gold)">Verify</a>';
   }catch(e){box.style.color='#ffb4b4';box.textContent='Network error: '+e.message;}
 }
-let BC_LOGO=null;
+let BC_LOGO=null,BC_LETTERHEAD=null;
+function bcLetterheadPick(input){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{const img=new Image();img.onload=()=>{
+    const max=1400,sc=Math.min(1,max/img.width);
+    const cv=document.createElement('canvas');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    BC_LETTERHEAD=cv.toDataURL('image/jpeg',0.9);
+  };img.src=r.result;};
+  r.readAsDataURL(f);
+}
 function bcLogoPick(input){
   const f=input.files[0]; if(!f) return;
   const r=new FileReader();
@@ -1764,7 +1785,7 @@ async function issueBusinessCert(){
   const payload={businessName:v('bcBizName'),businessAddress:v('bcBizAddress'),businessContact:v('bcBizContact'),
     employeeName:v('bcEmployee'),employeeId:v('bcEmployeeId'),roleTitle:v('bcRole'),employmentPeriod:v('bcPeriod'),
     signatoryName:v('bcSigName'),signatoryTitle:v('bcSigTitle'),dutiesText:v('bcDuties'),conductText:v('bcConduct'),
-    businessLogoDataUrl:BC_LOGO};
+    businessLogoDataUrl:BC_LOGO,letterheadDataUrl:BC_LETTERHEAD,recipientEmail:v('bcEmail')};
   if(!payload.businessName||!payload.employeeName||!payload.roleTitle||!payload.employmentPeriod||!payload.signatoryName||!payload.signatoryTitle){
     box.style.color='#ffb4b4';box.textContent='Fill every field marked * before issuing.';return;}
   box.style.color='var(--muted)';box.textContent='Issuing…';

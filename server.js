@@ -1251,7 +1251,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'TERRA-RECOGNITION-2026-07-10I',
+  build: 'TERRA-GLOBAL-VERIFY-2026-07-10J',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -2910,6 +2910,10 @@ const PRICING = {
   cert_pro:              { label: '3-Month Pro Certificate Program', instant: true, kind: 'certificate', USD: 149, EUR: 138, GBP: 119 },
   cert_executive:        { label: '6-Month Executive Certificate Program', instant: true, kind: 'certificate', USD: 249, EUR: 229, GBP: 199 },
   premium_digital_id:    { label: 'SkyGlobe Premium Digital ID', instant: true, kind: 'identity', USD: 79, EUR: 73, GBP: 63 },
+  // ── TERRA credential products (issued by the CEO after payment is confirmed;
+  //    prices are editable anytime from the admin Pricing panel) ──
+  terra_work_certificate: { label: 'TERRA Business Work Certificate', instant: false, USD: 29, EUR: 27, GBP: 23 },
+  terra_recognition:      { label: 'TERRA Certificate of Recognition — Ownership & Enterprise', instant: false, USD: 149, EUR: 138, GBP: 119 },
   // ── AI Document Generator (public self-service — was previously locked behind
   // a staff/CEO password with no way for a client to ever reach or pay for it).
   // Same instant-unlock pattern as legal docs: pay → signed token → generate.
@@ -7177,10 +7181,12 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
 </style></head><body>
 <div class="doc">
   <div class="inner">
-    <div class="lh">
+    ${d.letterheadDataUrl
+      ? `<div style="margin:-44px -52px 0;border-bottom:3px double #1a2233"><img src="${d.letterheadDataUrl}" alt="${d.businessName}" style="display:block;width:100%;height:auto"></div>`
+      : `<div class="lh">
       <div><div class="bn">${d.businessName}</div><div class="bd">${d.businessAddress || ''}${d.businessContact ? '<br>' + d.businessContact : ''}</div></div>
       ${bizLogo}
-    </div>
+    </div>`}
     <div class="refline"><span>Certificate Nº <b>${d.certRef}</b></span><span>Date of Issue: <b>${issueDate}</b></span></div>
     <div class="title">Certificate of Work</div>
     <div class="rule"></div>
@@ -7219,6 +7225,7 @@ app.post('/api/admin/terra/business-certificate', async (req, res) => {
       businessAddress: String(b.businessAddress || '').trim().slice(0, 200),
       businessContact: String(b.businessContact || '').trim().slice(0, 160),
       businessLogoDataUrl: /^data:image\/(png|jpe?g);base64,/.test(b.businessLogoDataUrl || '') ? b.businessLogoDataUrl : null,
+      letterheadDataUrl: /^data:image\/(png|jpe?g);base64,/.test(b.letterheadDataUrl || '') ? b.letterheadDataUrl : null,
       employeeName: String(b.employeeName || '').trim().slice(0, 120),
       employeeId: String(b.employeeId || '').trim().slice(0, 40),
       roleTitle: String(b.roleTitle || '').trim().slice(0, 120),
@@ -7251,15 +7258,34 @@ app.post('/api/admin/terra/business-certificate', async (req, res) => {
       cert_ref: certRef, full_name: d.employeeName, track_id: 'business_work', tier_id: 'terra_business',
       graduation_year: new Date().getFullYear(), status: 'valid', issued_by: who,
     };
+    const details = { businessName: d.businessName, roleTitle: d.roleTitle, employmentPeriod: d.employmentPeriod,
+      employeeId: d.employeeId, signatoryName: d.signatoryName, signatoryTitle: d.signatoryTitle };
     let saved = false;
-    try { await dbQuery('POST', 'certificates', { ...record, region: d.businessName, address: `${d.roleTitle} · ${d.employmentPeriod}` }); saved = true; }
+    try { await dbQuery('POST', 'certificates', { ...record, details, region: d.businessName, address: `${d.roleTitle} · ${d.employmentPeriod}` }); saved = true; }
     catch (e1) {
-      try { await dbQuery('POST', 'certificates', record); saved = true; }
-      catch (e2) { logError({ source: 'certificates', message: 'Business certificate record failed: ' + e2.message, url: req.originalUrl }); }
+      try { await dbQuery('POST', 'certificates', { ...record, region: d.businessName }); saved = true; } // older table without details column
+      catch (eA) {
+        try { await dbQuery('POST', 'certificates', record); saved = true; }
+        catch (e2) { logError({ source: 'certificates', message: 'Business certificate record failed: ' + e2.message, url: req.originalUrl }); }
+      }
     }
     if (!saved) return res.status(500).json({ error: 'The certificate could not be registered for verification — check Error Logs.' });
     logActivity(who, 'ceo', 'business_certificate', `Issued TERRA work certificate for ${d.employeeName} (${d.businessName})`, certRef);
-    res.json({ success: true, certRef, viewUrl, verifyUrl });
+
+    // Deliver straight to the recipient — email + portal inbox.
+    const bcEmail = String(b.recipientEmail || '').trim().toLowerCase().slice(0, 120);
+    if (bcEmail) {
+      portalDeliver(bcEmail, `Your TERRA-verified Work Certificate from ${d.businessName} is ready.${viewUrl ? ' Open & print it here: ' + viewUrl : ''} Anyone can verify it at ${verifyUrl}`, 'legal').catch(() => {});
+      sendEmail(bcEmail, '🏢 Your Work Certificate — ' + d.businessName,
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
+          <h2 style="color:#062015;font-family:Georgia,serif">🏢 Work Certificate</h2>
+          <p>Dear ${d.employeeName},</p>
+          <p>Your work certificate from <strong>${d.businessName}</strong>, verified through the <strong>TERRA Credential Network</strong>, is ready.</p>
+          ${viewUrl ? `<p><a href="${viewUrl}" style="display:inline-block;background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;font-weight:700;padding:12px 26px;border-radius:10px;text-decoration:none">Open &amp; Print Your Certificate</a></p>` : ''}
+          <p style="font-size:13px;color:#6b7689">Reference: <strong>${certRef}</strong> · Verify anytime at ${verifyUrl}</p>
+        </div>`, undefined, deptSender('legal')).catch(err => console.error('Work certificate email failed:', err.message));
+    }
+    res.json({ success: true, certRef, viewUrl, verifyUrl, emailed: !!bcEmail });
   } catch (e) {
     console.error('Business certificate error:', e.message);
     res.status(500).json({ error: e.message });
@@ -7386,6 +7412,8 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
       ${d.regNumber ? `<div class="f"><div class="l">Registration Nº</div><div class="v">${d.regNumber}</div></div>` : ''}
       ${d.sector ? `<div class="f"><div class="l">Sector</div><div class="v">${d.sector}</div></div>` : ''}
       ${d.location ? `<div class="f"><div class="l">Location</div><div class="v">${d.location}</div></div>` : ''}
+      ${d.sizeInfo ? `<div class="f"><div class="l">Size / Scale of Operation</div><div class="v">${d.sizeInfo}</div></div>` : ''}
+      ${d.gps ? `<div class="f"><div class="l">GPS Coordinates</div><div class="v">${d.gps}</div></div>` : ''}
       ${d.established ? `<div class="f"><div class="l">Established</div><div class="v">${d.established}</div></div>` : ''}
       <div class="f"><div class="l">Date of Issue</div><div class="v">${issueDate}</div></div>
       <div class="f"><div class="l">Status</div><div class="v">Valid · Verified</div></div>
@@ -7429,8 +7457,11 @@ app.post('/api/admin/terra/recognition-certificate', async (req, res) => {
       sector: String(b.sector || '').trim().slice(0, 80),
       location: String(b.location || '').trim().slice(0, 120),
       established: String(b.established || '').trim().slice(0, 40),
+      sizeInfo: String(b.sizeInfo || '').trim().slice(0, 140),
+      gps: String(b.gps || '').trim().slice(0, 60),
       photoDataUrl: /^data:image\/(png|jpe?g);base64,/.test(b.photoDataUrl || '') ? b.photoDataUrl : null,
     };
+    const recipientEmail = String(b.recipientEmail || '').trim().toLowerCase().slice(0, 120);
     if (!d.ownerName) return res.status(400).json({ error: 'Owner full name is required.' });
     if (!d.entityName) return res.status(400).json({ error: 'Business / asset / property name is required.' });
 
@@ -7446,22 +7477,41 @@ app.post('/api/admin/terra/recognition-certificate', async (req, res) => {
       ref: certRef, filename: `recognition_${certRef}.html`, path: filePath, uploaded_by: 'terra:recognition-certificates',
     }).catch(() => null);
     const docRow = Array.isArray(docRows) ? docRows[0] : docRows;
-    const viewToken = docRow ? await createDocToken(docRow.id, filePath, `recognition_${certRef}.html`, String(b.recipientEmail || '').trim() || 'ceo@skyglobegroup.com', certRef).catch(() => null) : null;
+    const viewToken = docRow ? await createDocToken(docRow.id, filePath, `recognition_${certRef}.html`, recipientEmail || 'ceo@skyglobegroup.com', certRef).catch(() => null) : null;
     const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
 
     const record = {
       cert_ref: certRef, full_name: d.ownerName, track_id: 'ownership_recognition', tier_id: 'terra_recognition',
       graduation_year: new Date().getFullYear(), nationality: d.nationality || null, status: 'valid', issued_by: who,
     };
+    const details = { ownerQualification: d.ownerQualification, entityName: d.entityName, entityType: d.entityType,
+      regNumber: d.regNumber, sector: d.sector, sizeInfo: d.sizeInfo, location: d.location, gps: d.gps, established: d.established };
     let saved = false;
-    try { await dbQuery('POST', 'certificates', { ...record, region: d.entityName, address: `${d.entityType}${d.regNumber ? ' · Reg ' + d.regNumber : ''}${d.location ? ' · ' + d.location : ''}` }); saved = true; }
+    try { await dbQuery('POST', 'certificates', { ...record, details, region: d.entityName, address: `${d.entityType}${d.regNumber ? ' · Reg ' + d.regNumber : ''}${d.location ? ' · ' + d.location : ''}` }); saved = true; }
     catch (e1) {
-      try { await dbQuery('POST', 'certificates', record); saved = true; }
-      catch (e2) { logError({ source: 'certificates', message: 'Recognition record failed: ' + e2.message, url: req.originalUrl }); }
+      try { await dbQuery('POST', 'certificates', { ...record, region: d.entityName }); saved = true; } // older table without details column
+      catch (eA) {
+        try { await dbQuery('POST', 'certificates', record); saved = true; }
+        catch (e2) { logError({ source: 'certificates', message: 'Recognition record failed: ' + e2.message, url: req.originalUrl }); }
+      }
     }
     if (!saved) return res.status(500).json({ error: 'The certificate could not be registered for verification — check Error Logs.' });
     logActivity(who, 'ceo', 'recognition_certificate', `Issued TERRA ${d.entityType} recognition for ${d.ownerName} (${d.entityName})`, certRef);
-    res.json({ success: true, certRef, viewUrl, verifyUrl });
+
+    // Deliver straight to the owner — email + portal inbox.
+    if (recipientEmail) {
+      portalDeliver(recipientEmail, `Congratulations! SkyGlobe Group has issued a TERRA-verified Certificate of Recognition for ${d.entityName}.${viewUrl ? ' Open & print it here: ' + viewUrl : ''} Anyone can verify it at ${verifyUrl}`, 'legal').catch(() => {});
+      sendEmail(recipientEmail, '🏛️ Your TERRA Certificate of Recognition — ' + d.entityName,
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
+          <h2 style="color:#0d3b23;font-family:Georgia,serif">🏛️ Certificate of Recognition</h2>
+          <p>Dear ${d.ownerName},</p>
+          <p><strong>SkyGlobe Group</strong> has issued a TERRA-verified Certificate of Recognition for <strong>${d.entityName}</strong>.</p>
+          ${viewUrl ? `<p><a href="${viewUrl}" style="display:inline-block;background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;font-weight:700;padding:12px 26px;border-radius:10px;text-decoration:none">Open &amp; Print Your Certificate</a></p>` : ''}
+          <p style="font-size:13px;color:#6b7689">Reference: <strong>${certRef}</strong> · Anyone, anywhere can verify it at ${verifyUrl}</p>
+          <p style="font-size:13px;color:#6b7689">TERRA Credential Network · One World. One Mission.</p>
+        </div>`, undefined, deptSender('legal')).catch(err => console.error('Recognition email failed:', err.message));
+    }
+    res.json({ success: true, certRef, viewUrl, verifyUrl, emailed: !!recipientEmail });
   } catch (e) {
     console.error('Recognition certificate error:', e.message);
     res.status(500).json({ error: e.message });
@@ -7730,23 +7780,47 @@ app.get('/api/certificates/verify/:certRef', async (req, res) => {
     const c = rows[0];
     if (!c) return res.status(404).json({ valid: false, error: 'No certificate found with this reference.' });
     if (c.track_id === 'ownership_recognition') {
-      // TERRA recognition of a verified owner & entity — honestly framed.
+      // TERRA recognition of a verified owner & entity — the verification shows
+      // the OWNERSHIP record, never school-style fields.
+      const dt = c.details || {};
+      const cap = v => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : v;
+      const fields = [
+        { label: 'Owner', value: c.full_name },
+        dt.ownerQualification ? { label: 'Qualification / Title', value: dt.ownerQualification } : null,
+        c.nationality ? { label: 'Nationality', value: c.nationality } : null,
+        dt.entityName || c.region ? { label: 'Entity', value: dt.entityName || c.region } : null,
+        dt.entityType ? { label: 'Category', value: cap(dt.entityType) } : null,
+        dt.regNumber ? { label: 'Registration Nº', value: dt.regNumber } : null,
+        dt.sector ? { label: 'Sector', value: dt.sector } : null,
+        dt.sizeInfo ? { label: 'Size / Scale of Operation', value: dt.sizeInfo } : null,
+        dt.location ? { label: 'Location', value: dt.location } : null,
+        dt.gps ? { label: 'GPS Coordinates', value: dt.gps } : null,
+        dt.established ? { label: 'Established', value: dt.established } : null,
+        { label: 'Year of Issue', value: c.graduation_year },
+      ].filter(Boolean);
       return res.json({
         valid: c.status === 'valid', certRef: c.cert_ref, fullName: c.full_name,
-        track: 'Certificate of Recognition', tier: c.region ? `${c.region}` : 'TERRA Verified Recognition',
-        graduationYear: c.graduation_year, issuedBy: 'SkyGlobe Group · TERRA Credential Network',
-        verifiedBy: 'TERRA Credential Network',
-        detail: c.address || null,
+        kind: 'recognition', title: 'TERRA Ownership & Business Recognition', fields,
+        issuedBy: 'SkyGlobe Group · TERRA Credential Network', verifiedBy: 'TERRA Credential Network',
         note: 'TERRA recognises the verified identity, ownership and registration of the holder as presented at issuance — not a valuation, licence or endorsement of financial standing.',
       });
     }
     if (c.track_id === 'business_work') {
-      // TERRA-verified business work certificate — issuer & role, honestly framed.
+      // TERRA-verified business work certificate — an EMPLOYMENT record.
+      const dt = c.details || {};
+      const fields = [
+        { label: 'Employee', value: c.full_name },
+        dt.employeeId ? { label: 'Employee ID', value: dt.employeeId } : null,
+        dt.businessName || c.region ? { label: 'Issued By (Employer)', value: dt.businessName || c.region } : null,
+        dt.roleTitle ? { label: 'Position', value: dt.roleTitle } : null,
+        dt.employmentPeriod ? { label: 'Period of Engagement', value: dt.employmentPeriod } : null,
+        dt.signatoryName ? { label: 'Authorised Signatory', value: `${dt.signatoryName}${dt.signatoryTitle ? ' — ' + dt.signatoryTitle : ''}` } : null,
+        { label: 'Year of Issue', value: c.graduation_year },
+      ].filter(Boolean);
       return res.json({
         valid: c.status === 'valid', certRef: c.cert_ref, fullName: c.full_name,
-        track: 'Business Work Certificate', tier: c.region ? `Issued by ${c.region}` : 'TERRA Verified Business Document',
-        graduationYear: c.graduation_year, issuedBy: c.region || 'Registered business',
-        verifiedBy: 'TERRA Credential Network',
+        kind: 'business_work', title: 'Business Work Certificate', fields,
+        issuedBy: dt.businessName || c.region || 'Registered business', verifiedBy: 'TERRA Credential Network',
         note: 'TERRA verifies that this document was genuinely issued and is unaltered — not the statements made within it.',
       });
     }
@@ -7754,8 +7828,17 @@ app.get('/api/certificates/verify/:certRef', async (req, res) => {
     const tier = COURSE_TIERS.find(t => t.id === c.tier_id);
     res.json({
       valid: c.status === 'valid', certRef: c.cert_ref, fullName: c.full_name,
+      kind: 'academic', title: 'SkyGlobe Academy Credential',
+      fields: [
+        { label: 'Name', value: c.full_name },
+        { label: 'Programme', value: track?.name || c.track_id },
+        { label: 'Certificate', value: tier?.name || c.tier_id },
+        c.nationality ? { label: 'Nationality', value: c.nationality } : null,
+        { label: 'Class Of', value: c.graduation_year },
+      ].filter(Boolean),
       track: track?.name || c.track_id, tier: tier?.name || c.tier_id,
       graduationYear: c.graduation_year, issuedBy: 'SkyGlobe Group',
+      verifiedBy: 'TERRA Credential Network',
     });
   } catch (e) { res.status(500).json({ valid: false, error: e.message }); }
 });

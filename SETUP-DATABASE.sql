@@ -297,6 +297,7 @@ alter table certificates add column if not exists track_id        text;
 alter table certificates add column if not exists tier_id         text;
 alter table certificates add column if not exists graduation_year integer;
 alter table certificates add column if not exists photo_url       text;
+alter table certificates add column if not exists details jsonb;
 alter table certificates add column if not exists nationality     text;
 alter table certificates add column if not exists status          text default 'valid';
 alter table certificates add column if not exists issued_by       text;
