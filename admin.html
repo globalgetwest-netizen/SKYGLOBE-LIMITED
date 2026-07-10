@@ -1335,6 +1335,17 @@
 
         <!-- KIDS ACADEMY -->
         <section class="view" id="view-academy">
+          <div class="panel" style="margin-bottom:18px">
+            <h3>📚 Course Catalog — add courses with zero code</h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Add a course here and it appears on the public Certificate Programs page instantly — lessons, tests, final exam and QR certificate are generated automatically by NORIA. <span style="color:var(--gold)">One-time setup:</span> run <code style="color:var(--txt)">create table academy_tracks (id text primary key, name text, emoji text, description text, active boolean default true, created_at timestamptz default now());</code> in Supabase.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+              <input id="newCourseEmoji" placeholder="📘" maxlength="4" style="width:64px;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;text-align:center;font-size:1.05rem">
+              <input id="newCourseName" placeholder="Course name — e.g. Renewable Energy Fundamentals" style="flex:1;min-width:220px;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;font-size:.9rem">
+              <button class="btn" onclick="addCourse()">➕ Add course</button>
+            </div>
+            <input id="newCourseDesc" placeholder="One-line description shown to students (optional)" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;font-size:.9rem;margin-bottom:14px">
+            <div id="courseCatalog"><div class="skeleton">Loading catalog…</div></div>
+          </div>
           <div class="panel">
             <h3>🎓 SkyGlobe Academy — AI Teachers</h3>
             <p style="color:var(--muted);font-size:.9rem;margin:6px 0 4px">
@@ -1414,8 +1425,44 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Command Bridge',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',tools:'Quick Tools'};
+  
+/* ══ Course Catalog manager (CEO adds courses — no code) ══ */
+async function loadCourseCatalog(){
+  const box=document.getElementById('courseCatalog'); if(!box) return;
+  try{
+    const r=await fetch(API+'/api/admin/academy/tracks',{headers:{'x-admin-key':KEY}});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'load failed');
+    const row=(t,custom)=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--navy3)">
+      <span style="font-size:1.1rem">${t.emoji||'📘'}</span>
+      <div style="flex:1;min-width:0"><div style="color:var(--txt);font-weight:600;font-size:.9rem">${t.name}</div>${t.description?`<div style="color:var(--muted);font-size:.76rem">${t.description}</div>`:''}</div>
+      ${custom?`<button class="btn btn-sm btn-ghost" onclick="removeCourse('${t.id}','${t.name.replace(/'/g,"\\'")}')">Remove</button>`:'<span style="font-size:.68rem;color:var(--muted);letter-spacing:.08em">BUILT-IN</span>'}
+    </div>`;
+    box.innerHTML = (d.custom||[]).map(t=>row(t,true)).join('') + (d.builtIn||[]).map(t=>row(t,false)).join('');
+  }catch(e){ box.innerHTML='<p style="color:#e05c5c;font-size:.85rem">'+e.message+'</p>'; }
+}
+async function addCourse(){
+  const name=document.getElementById('newCourseName').value.trim();
+  const emoji=document.getElementById('newCourseEmoji').value.trim();
+  const description=document.getElementById('newCourseDesc').value.trim();
+  if(!name){ alert('Enter the course name.'); return; }
+  try{
+    const r=await fetch(API+'/api/admin/academy/tracks',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({name,emoji,description})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'Could not add');
+    document.getElementById('newCourseName').value='';document.getElementById('newCourseEmoji').value='';document.getElementById('newCourseDesc').value='';
+    loadCourseCatalog();
+  }catch(e){ alert(e.message); }
+}
+async function removeCourse(id,name){
+  if(!confirm('Remove "'+name+'" from the public catalog? Existing enrolments continue unaffected.')) return;
+  try{
+    const r=await fetch(API+'/api/admin/academy/tracks/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'Could not remove');
+    loadCourseCatalog();
+  }catch(e){ alert(e.message); }
+}
+const titles={dashboard:'Command Bridge',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
+  if(v==='academy') loadCourseCatalog();
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
   if(v==='payments') loadPayments();

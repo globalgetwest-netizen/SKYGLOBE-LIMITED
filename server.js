@@ -119,7 +119,7 @@ if (compression) {
   console.log('• compression package not installed — run `npm install` to enable gzip');
 }
 
-app.use(express.json({ limit: '2mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
+app.use(express.json({ limit: '12mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(cors());
 
 // ── #20 STATIC CACHING HEADERS ────────────────────────────────────────────────
@@ -6228,6 +6228,56 @@ const COURSE_TRACKS = [
 ];
 const COURSE_TRACK_INDEX = COURSE_TRACKS.reduce((a, t) => (a[t.id] = t, a), {});
 
+// ── DYNAMIC COURSE CATALOG ───────────────────────────────────────────────────
+// The CEO adds new courses from the admin portal — no code required. Custom
+// tracks live in the `academy_tracks` table and merge with the built-ins.
+//   create table academy_tracks (id text primary key, name text, emoji text,
+//     description text, active boolean default true, created_at timestamptz default now());
+let CUSTOM_TRACKS = [];
+async function refreshCourseTracks() {
+  try {
+    const rows = await dbQuery('GET', 'academy_tracks', null, { active: 'eq.true', order: 'created_at.asc', limit: 200 });
+    CUSTOM_TRACKS = (Array.isArray(rows) ? rows : []).map(r => ({ id: r.id, name: r.name, emoji: r.emoji || '📘', description: r.description || '' }));
+  } catch (e) { /* table may not exist yet — built-ins still work */ }
+}
+function allCourseTracks() { return [...COURSE_TRACKS, ...CUSTOM_TRACKS]; }
+function trackById(id) { return COURSE_TRACK_INDEX[id] || CUSTOM_TRACKS.find(t => t.id === id) || null; }
+
+// CEO course manager — add a course and it appears on the public catalog instantly.
+app.get('/api/admin/academy/tracks', (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  res.json({ builtIn: COURSE_TRACKS, custom: CUSTOM_TRACKS });
+});
+app.post('/api/admin/academy/tracks', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const name = String((req.body || {}).name || '').trim().slice(0, 120);
+    const emoji = String((req.body || {}).emoji || '📘').trim().slice(0, 8);
+    const description = String((req.body || {}).description || '').trim().slice(0, 400);
+    if (!name) return res.status(400).json({ error: 'Course name is required.' });
+    const id = 'c_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+    if (trackById(id)) return res.status(400).json({ error: 'A course with this name already exists.' });
+    await dbQuery('POST', 'academy_tracks', { id, name, emoji, description, active: true });
+    await refreshCourseTracks();
+    logActivity(who, 'ceo', 'course_added', `Added course "${name}" to the Academy catalog`, id);
+    res.json({ success: true, track: { id, name, emoji, description } });
+  } catch (e) {
+    const missing = /relation|does not exist/i.test(e.message);
+    res.status(500).json({ error: missing ? 'Run the academy_tracks setup SQL in Supabase first (see admin panel note).' : e.message });
+  }
+});
+app.delete('/api/admin/academy/tracks/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    await dbQuery('PATCH', 'academy_tracks', { active: false }, { id: `eq.${req.params.id}` });
+    await refreshCourseTracks();
+    logActivity(who, 'ceo', 'course_removed', `Removed course "${req.params.id}" from the catalog`, req.params.id);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Generic 14-phase outline, trimmed to the tier's step count. Deterministic
 // (no AI JSON parsing risk) — the AI is used per-step, on demand, to write the
 // actual lesson content in that track's specific context.
@@ -6244,7 +6294,7 @@ app.get('/api/courses/catalog', (_req, res) => {
     id: t.id, name: t.name, product: t.product, months: t.months, steps: t.steps, blurb: t.blurb, perks: t.perks,
     price: { USD: PRICING[t.product].USD, EUR: PRICING[t.product].EUR, GBP: PRICING[t.product].GBP },
   }));
-  res.json({ tracks: COURSE_TRACKS, tiers });
+  res.json({ tracks: allCourseTracks(), tiers });
 });
 
 // Enrol — requires a valid instant-unlock token proving the tier was paid for.
@@ -6252,7 +6302,7 @@ app.post('/api/courses/enroll', async (req, res) => {
   try {
     const { unlock, trackId, tierId, fullName, email, dob, nationality, address, graduationYear } = req.body || {};
     const tier = COURSE_TIERS.find(t => t.id === tierId);
-    const track = COURSE_TRACK_INDEX[trackId];
+    const track = trackById(trackId);
     if (!tier || !track) return res.status(400).json({ error: 'Invalid track or tier.' });
     if (!unlock || !verifyUnlock(unlock, tier.product))
       return res.status(402).json({ error: 'Payment required', pay: { product: tier.product } });
@@ -6278,7 +6328,7 @@ app.get('/api/courses/enrollment/:id', async (req, res) => {
     const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
     const e = rows[0];
     if (!e) return res.status(404).json({ error: 'Enrolment not found.' });
-    const track = COURSE_TRACK_INDEX[e.track_id];
+    const track = trackById(e.track_id);
     const tier = COURSE_TIERS.find(t => t.id === e.tier_id);
     res.json({ ...e, trackName: track?.name, tierName: tier?.name });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -6294,7 +6344,7 @@ app.post('/api/courses/enrollment/:id/step/:idx/content', async (req, res) => {
     const steps = enr.steps || [];
     const step = steps[idx];
     if (!step) return res.status(400).json({ error: 'Invalid step.' });
-    const track = COURSE_TRACK_INDEX[enr.track_id];
+    const track = trackById(enr.track_id);
     if (step.content) return res.json({ content: step.content });
     if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY && !USE_GROQ && !USE_OLLAMA)
       return res.status(500).json({ error: 'AI not configured. Please contact support.' });
@@ -6306,6 +6356,140 @@ app.post('/api/courses/enrollment/:id/step/:idx/content', async (req, res) => {
   } catch (e) {
     console.error('Course step content error:', e.message);
     res.status(500).json({ error: 'Could not generate this lesson right now. Please try again.' });
+  }
+});
+
+// ── TESTS, EXAMS & RECORDS ───────────────────────────────────────────────────
+// Every lesson carries a 5-question test (pass 3/5 to complete the step) and
+// the programme ends with a 10-question final exam (pass 70%) — required
+// before the certificate. All scores are recorded on the enrolment.
+function parseQuizJson(raw) {
+  try {
+    const m = String(raw).match(/\[[\s\S]*\]/);
+    const arr = JSON.parse(m ? m[0] : raw);
+    if (!Array.isArray(arr)) return null;
+    const qs = arr.filter(q => q && q.q && Array.isArray(q.options) && q.options.length >= 3 && Number.isInteger(q.answer))
+      .map(q => ({ q: String(q.q).slice(0, 300), options: q.options.slice(0, 4).map(o => String(o).slice(0, 160)), answer: Math.max(0, Math.min(3, q.answer)) }));
+    return qs.length ? qs : null;
+  } catch { return null; }
+}
+
+// Generate (once, then cache) the test for one lesson.
+app.post('/api/courses/enrollment/:id/step/:idx/quiz', async (req, res) => {
+  try {
+    const idx = parseInt(req.params.idx, 10);
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr) return res.status(404).json({ error: 'Enrolment not found.' });
+    const steps = enr.steps || [];
+    const step = steps[idx];
+    if (!step) return res.status(400).json({ error: 'Invalid step.' });
+    if (step.quiz) return res.json({ quiz: step.quiz.map(q => ({ q: q.q, options: q.options })), passed: !!step.quiz_passed, score: step.quiz_score ?? null });
+    const track = trackById(enr.track_id);
+    const out = await generateText(
+      `Create exactly 5 multiple-choice questions testing lesson "${step.title}" of a "${track?.name}" certificate programme.${step.content ? ' Base them on this lesson content:\n' + String(step.content).slice(0, 2500) : ''}\nReply with ONLY a JSON array, no prose: [{"q":"question","options":["A","B","C","D"],"answer":0}] where answer is the index of the correct option.`,
+      { maxTokens: 900, temperature: 0.4 });
+    const quiz = parseQuizJson(out);
+    if (!quiz) return res.status(500).json({ error: 'Could not prepare the test right now — please try again.' });
+    steps[idx] = { ...step, quiz };
+    await dbQuery('PATCH', 'course_enrollments', { steps }, { id: `eq.${req.params.id}` }).catch(() => {});
+    res.json({ quiz: quiz.map(q => ({ q: q.q, options: q.options })), passed: false, score: null });
+  } catch (e) {
+    console.error('Quiz generate error:', e.message);
+    res.status(500).json({ error: 'Could not prepare the test right now — please try again.' });
+  }
+});
+
+// Grade a lesson test. Pass = 3/5. A pass marks the step DONE (test = record).
+app.post('/api/courses/enrollment/:id/step/:idx/quiz/submit', async (req, res) => {
+  try {
+    const idx = parseInt(req.params.idx, 10);
+    const answers = (req.body || {}).answers;
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr) return res.status(404).json({ error: 'Enrolment not found.' });
+    const steps = enr.steps || [];
+    const step = steps[idx];
+    if (!step || !step.quiz) return res.status(400).json({ error: 'No test found for this lesson.' });
+    if (!Array.isArray(answers) || answers.length !== step.quiz.length)
+      return res.status(400).json({ error: 'Answer every question before submitting.' });
+    let score = 0;
+    step.quiz.forEach((q, i) => { if (Number(answers[i]) === q.answer) score++; });
+    const passed = score >= 3;
+    // A fail clears the test so the retry gets FRESH questions (no memorising answers).
+    steps[idx] = { ...step, quiz_score: score, quiz_passed: passed, done: passed ? true : step.done, quiz: passed ? step.quiz : null };
+    const allDone = steps.every(st => st.done);
+    await dbQuery('PATCH', 'course_enrollments',
+      { steps, status: allDone ? 'completed' : 'in_progress' }, { id: `eq.${req.params.id}` });
+    res.json({ score, total: step.quiz.length, passed, correct: step.quiz.map(q => q.answer), allDone });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Final exam — generated across the whole curriculum. Pass 70% to unlock the certificate.
+app.post('/api/courses/enrollment/:id/final-exam', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr) return res.status(404).json({ error: 'Enrolment not found.' });
+    const steps = enr.steps || [];
+    if (!steps.length || !steps.every(st => st.done))
+      return res.status(400).json({ error: 'Complete every lesson (and its test) before the final exam.' });
+    if (enr.final_exam) return res.json({ exam: enr.final_exam.map(q => ({ q: q.q, options: q.options })), score: enr.final_score ?? null, passed: (enr.final_score ?? 0) >= 70 });
+    const track = trackById(enr.track_id);
+    const out = await generateText(
+      `Create exactly 10 multiple-choice FINAL EXAM questions for a certificate programme in "${track?.name}", covering these modules: ${steps.map(st => st.title).join('; ')}. Mix difficulty. Reply with ONLY a JSON array: [{"q":"question","options":["A","B","C","D"],"answer":0}].`,
+      { maxTokens: 1600, temperature: 0.4 });
+    const exam = parseQuizJson(out);
+    if (!exam || exam.length < 6) return res.status(500).json({ error: 'Could not prepare the final exam right now — please try again.' });
+    await dbQuery('PATCH', 'course_enrollments', { final_exam: exam }, { id: `eq.${req.params.id}` }).catch(() => {});
+    res.json({ exam: exam.map(q => ({ q: q.q, options: q.options })), score: null, passed: false });
+  } catch (e) {
+    console.error('Final exam error:', e.message);
+    res.status(500).json({ error: 'Could not prepare the final exam right now — please try again.' });
+  }
+});
+
+app.post('/api/courses/enrollment/:id/final-exam/submit', async (req, res) => {
+  try {
+    const answers = (req.body || {}).answers;
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr || !enr.final_exam) return res.status(400).json({ error: 'No final exam found — generate it first.' });
+    if (!Array.isArray(answers) || answers.length !== enr.final_exam.length)
+      return res.status(400).json({ error: 'Answer every question before submitting.' });
+    let correct = 0;
+    enr.final_exam.forEach((q, i) => { if (Number(answers[i]) === q.answer) correct++; });
+    const score = Math.round((correct / enr.final_exam.length) * 100);
+    const passed = score >= 70;
+    const best = Math.max(score, enr.final_score || 0);
+    await dbQuery('PATCH', 'course_enrollments',
+      { final_score: best, status: passed ? 'passed' : enr.status,
+        ...(passed ? {} : { final_exam: null }) }, // a fail issues a FRESH exam next attempt
+      { id: `eq.${req.params.id}` });
+    res.json({ score, passed, correct: passed ? enr.final_exam.map(q => q.answer) : null,
+      message: passed ? 'Congratulations — you passed the final exam!' : 'Below 70% — review your lessons and retake a fresh exam.' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── ASK THE AI TEACHER ───────────────────────────────────────────────────────
+// A student can ask any question about the lesson — typed or spoken — and the
+// teacher answers in the context of that exact lesson.
+app.post('/api/courses/enrollment/:id/ask', async (req, res) => {
+  try {
+    const { question, stepIdx } = req.body || {};
+    if (!question || !String(question).trim()) return res.status(400).json({ error: 'Ask a question first.' });
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr) return res.status(404).json({ error: 'Enrolment not found.' });
+    const track = trackById(enr.track_id);
+    const step = (enr.steps || [])[Number(stepIdx)] || null;
+    const answer = await generateText(
+      `${step?.content ? 'LESSON CONTEXT:\n' + String(step.content).slice(0, 2600) + '\n\n' : ''}A student in the "${track?.name}" certificate programme${step ? ` (lesson: "${step.title}")` : ''} asks: ${String(question).slice(0, 600)}\n\nAnswer as their patient, encouraging teacher in 3-8 clear sentences. Plain text only.`,
+      { maxTokens: 700, temperature: 0.5 });
+    res.json({ answer: String(answer).trim() });
+  } catch (e) {
+    console.error('Ask-teacher error:', e.message);
+    res.status(500).json({ error: 'Your teacher is busy for a moment — please ask again.' });
   }
 });
 
@@ -6393,7 +6577,9 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
     const steps = enr.steps || [];
     if (!steps.length || !steps.every(s => s.done))
       return res.status(400).json({ error: 'Complete every lesson before generating your certificate.' });
-    const track = COURSE_TRACK_INDEX[enr.track_id];
+    if ((enr.final_score || 0) < 70)
+      return res.status(400).json({ error: 'Pass the final exam (70%+) to earn your certificate.' });
+    const track = trackById(enr.track_id);
     const tier = COURSE_TIERS.find(t => t.id === enr.tier_id);
 
     const certRef = 'SGC-' + crypto.randomBytes(5).toString('hex').toUpperCase();
@@ -6442,7 +6628,7 @@ app.get('/api/certificates/verify/:certRef', async (req, res) => {
     const rows = await dbQuery('GET', 'certificates', null, { cert_ref: `eq.${req.params.certRef}`, limit: 1 });
     const c = rows[0];
     if (!c) return res.status(404).json({ valid: false, error: 'No certificate found with this reference.' });
-    const track = COURSE_TRACK_INDEX[c.track_id];
+    const track = trackById(c.track_id);
     const tier = COURSE_TIERS.find(t => t.id === c.tier_id);
     res.json({
       valid: c.status === 'valid', certRef: c.cert_ref, fullName: c.full_name,
@@ -7221,7 +7407,10 @@ app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 // Must be 4-argument to be recognised by Express as error middleware.
 app.use((err, req, res, next) => {
   logError({ source: 'server', message: err.message, stack: err.stack, url: req.originalUrl });
-  if (!res.headersSent) res.status(500).json({ error: 'Internal server error' });
+  if (res.headersSent) return;
+  if (err.type === 'entity.too.large' || /request entity too large/i.test(err.message || ''))
+    return res.status(413).json({ error: 'That photo is too large. Please choose a smaller image (under ~8MB) and try again.' });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 const PORT = process.env.PORT || 3000;
@@ -7229,6 +7418,7 @@ app.listen(PORT, () => {
   console.log(`SkyGlobe server running on port ${PORT}`);
   refreshStaffCache(); // load CEO-portal staff accounts into memory
   brevoKeepAlive();    // keep the fallback email key active (Brevo expires keys unused for 90 days)
+  refreshCourseTracks(); // load CEO-added courses into the catalog
 });
 
 // ── BREVO KEY KEEP-ALIVE ─────────────────────────────────────────────────────
