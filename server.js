@@ -1220,6 +1220,15 @@ app.get('/api/test-gemini', async (req, res) => {
   res.json({ key_set: true, key_preview: key.slice(0, 8) + '...', results });
 });
 
+// Deployment heartbeat — open /api/version in a browser to see EXACTLY which
+// build is live. If "academy" doesn't say v2-transcripts, the upload didn't land.
+app.get('/api/version', (_req, res) => res.json({
+  platform: 'SkyGlobe Group Ecosystem',
+  academy: 'v2-transcripts',
+  certificate: 'CERTIFICATE v2 — SkyGlobe Group Academy · Terra Verified',
+  build: 'ACADEMY-FINAL-2026-07-10',
+}));
+
 app.get('/api/test', async (req, res) => {
   const to = (process.env.RECIPIENT_EMAIL || 'support@skyglobegroup.com').split(',')[0].trim();
   const providers = { resend: !!process.env.RESEND_API_KEY, brevo: !!process.env.BREVO_API_KEY };
@@ -6684,60 +6693,107 @@ app.patch('/api/courses/enrollment/:id/step/:idx/done', async (req, res) => {
 
 // Premium certificate HTML — badge, gold seal, QR verification, real
 // stamp/signature images (same trust marks as legal documents).
-function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req) {
-  const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
+function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req, extra = {}) {
+  const origin = process.env.PUBLIC_ORIGIN || (req ? baseUrl(req) : 'https://skyglobegroup.com');
   const sigUrl = origin + '/signature.png';
   const stampUrl = origin + '/stamp.png';
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&margin=6&data=${encodeURIComponent(verifyUrl)}`;
   const issueDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const LEVELS = { cert_amateur: 'Level 1 · Foundation Certificate', cert_advanced: 'Level 2 · Advanced Certificate', cert_pro: 'Level 3 · Professional Certificate' };
+  const level = LEVELS[tier.id] || 'Professional Certificate';
+  const grade = extra.grade || '';
+  const credentialId = extra.credentialId || '';
+  const completionDate = extra.completionDate || issueDate;
+  const competencies = Array.isArray(extra.competencies) ? extra.competencies.slice(0, 6) : [];
+  const duration = `${tier.months} month${tier.months > 1 ? 's' : ''} · ${tier.steps} modules`;
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Certificate — ${enr.full_name} — SkyGlobe Group</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Certificate — ${enr.full_name} — SkyGlobe Group Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#e9edf3;font-family:Inter,sans-serif;padding:28px;display:flex;justify-content:center}
-  .cert{width:100%;max-width:980px;background:linear-gradient(155deg,#fffdf6,#fbf5e3);border:10px double #D4A73A;border-radius:6px;padding:56px 60px;position:relative;box-shadow:0 30px 70px rgba(4,16,34,.18)}
-  .cert:before{content:"";position:absolute;inset:14px;border:1px solid rgba(212,167,58,.5);border-radius:4px;pointer-events:none}
-  .hd{text-align:center;margin-bottom:10px}
-  .hd .brand{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.15rem;letter-spacing:.14em;color:#041022;text-transform:uppercase}
+  body{background:#e9edf3;font-family:Inter,sans-serif;padding:24px;display:flex;justify-content:center}
+  .cert{width:100%;max-width:1000px;background:linear-gradient(155deg,#fffdf6,#fbf5e3);border:3px solid #0A2E65;border-radius:8px;padding:8px;position:relative;box-shadow:0 30px 70px rgba(4,16,34,.18)}
+  .mid{border:8px double #D4A73A;border-radius:5px;padding:6px;position:relative}
+  .inner{border:1px solid rgba(212,167,58,.55);border-radius:3px;padding:40px 48px 30px;position:relative;overflow:hidden;
+    background-image:repeating-linear-gradient(45deg,rgba(10,46,101,.016) 0 1px,transparent 1px 7px),repeating-linear-gradient(-45deg,rgba(212,167,58,.02) 0 1px,transparent 1px 7px)}
+  /* corner ornaments */
+  .corner{position:absolute;width:34px;height:34px;border-color:#a87016;border-style:solid;opacity:.85}
+  .c1{top:8px;left:8px;border-width:3px 0 0 3px}.c2{top:8px;right:8px;border-width:3px 3px 0 0}
+  .c3{bottom:8px;left:8px;border-width:0 0 3px 3px}.c4{bottom:8px;right:8px;border-width:0 3px 3px 0}
+  /* faint SG watermark */
+  .wmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0}
+  .wmark svg{opacity:.045;width:520px;height:520px}
+  .z{position:relative;z-index:2}
+  .hd{text-align:center}
+  .hd .brand{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.25rem;letter-spacing:.16em;color:#041022;text-transform:uppercase}
   .hd .brand span{color:#a87016}
-  .hd .div{font-size:.66rem;letter-spacing:.24em;color:#8a7638;text-transform:uppercase;margin-top:4px}
-  .title{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:2.4rem;color:#041022;margin:26px 0 4px}
-  .sub{text-align:center;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:#a87016;margin-bottom:26px}
-  .presented{text-align:center;font-size:.86rem;color:#6b7689}
-  .name{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:2.1rem;color:#041022;margin:10px 0;border-bottom:2px solid #D4A73A;display:inline-block;padding:0 20px 8px;position:relative;left:50%;transform:translateX(-50%)}
-  .desc{text-align:center;max-width:640px;margin:16px auto 0;color:#3c465a;font-size:.94rem;line-height:1.7}
+  .hd .acad{font-size:.68rem;letter-spacing:.34em;color:#0A2E65;text-transform:uppercase;margin-top:5px;font-weight:700}
+  .title{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:2.5rem;margin:20px 0 2px;
+    background:linear-gradient(92deg,#8a6a14 0%,#D4A73A 30%,#f4e3a1 50%,#D4A73A 70%,#8a6a14 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{text-align:center;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:#a87016;font-weight:700}
+  .lvl{text-align:center;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:#0A2E65;margin-top:3px;font-weight:600}
+  .presented{text-align:center;font-size:.85rem;color:#6b7689;margin-top:18px}
+  .name{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:2.15rem;color:#041022;margin:8px 0;border-bottom:2px solid #D4A73A;display:inline-block;padding:0 24px 8px;position:relative;left:50%;transform:translateX(-50%)}
+  .desc{text-align:center;max-width:660px;margin:12px auto 0;color:#3c465a;font-size:.92rem;line-height:1.65}
   .desc strong{color:#041022}
-  .row{display:flex;align-items:center;justify-content:space-between;margin-top:48px;gap:20px}
-  .photo{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #D4A73A;box-shadow:0 6px 16px rgba(0,0,0,.15)}
+  .gradebox{text-align:center;margin-top:10px}
+  .grade{display:inline-block;border:1.5px solid #a87016;color:#a87016;font-weight:800;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;padding:5px 22px;border-radius:100px;background:rgba(212,167,58,.07)}
+  .grid{display:flex;justify-content:center;gap:26px;flex-wrap:wrap;margin-top:18px;text-align:center}
+  .grid .f .l{font-size:.58rem;letter-spacing:.16em;color:#8a93a3;text-transform:uppercase}
+  .grid .f .v{font-size:.76rem;color:#041022;font-weight:700;margin-top:2px}
+  .comp{max-width:620px;margin:16px auto 0;border:1px solid rgba(212,167,58,.45);border-radius:10px;padding:10px 16px;background:rgba(255,255,255,.5)}
+  .comp .cl{font-size:.6rem;letter-spacing:.2em;color:#a87016;text-transform:uppercase;font-weight:800;text-align:center;margin-bottom:6px}
+  .comp .items{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center}
+  .comp .items span{font-size:.72rem;color:#3c465a}
+  .comp .items span:before{content:"✓ ";color:#1f9d57;font-weight:700}
+  .row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:26px;gap:18px}
+  .photo{width:86px;height:86px;border-radius:50%;object-fit:cover;border:3px solid #D4A73A;box-shadow:0 6px 16px rgba(0,0,0,.15)}
   .sig-block{text-align:center}
-  .sig-block img{height:52px}
-  .sig-block .ln{border-top:1px solid #8a93a3;margin-top:4px;padding-top:4px;font-size:.72rem;color:#6b7689}
+  .sig-block img{height:48px}
+  .sig-block .ln{border-top:1px solid #8a93a3;margin-top:4px;padding-top:4px;font-size:.68rem;color:#6b7689}
+  .seal{text-align:center}
   .qr-block{text-align:center}
-  .qr-block img{width:82px;height:82px}
-  .qr-block .lbl{font-size:.6rem;color:#8a93a3;margin-top:4px;letter-spacing:.06em;text-transform:uppercase}
-  .stamp-img{position:absolute;bottom:56px;right:70px;height:100px;width:100px;opacity:.9;transform:rotate(-8deg)}
-  .ref{position:absolute;top:26px;right:36px;font-size:.68rem;color:#a87016;letter-spacing:.06em}
-  .foot{text-align:center;margin-top:34px;font-size:.68rem;color:#9aa3b2}
-  @media print{body{background:#fff;padding:0}.cert{box-shadow:none;border-width:6px}}
+  .qr-block img{width:84px;height:84px}
+  .qr-block .lbl{font-size:.56rem;color:#0A2E65;margin-top:4px;letter-spacing:.1em;text-transform:uppercase;font-weight:800}
+  .qr-block .lbl b{color:#a87016}
+  .stamp-img{position:absolute;bottom:88px;right:62px;height:92px;width:92px;opacity:.85;transform:rotate(-8deg);z-index:1}
+  .ref{position:absolute;top:14px;right:22px;font-size:.64rem;color:#a87016;letter-spacing:.06em;font-weight:700;z-index:2}
+  .foot{text-align:center;margin-top:22px;font-size:.66rem;color:#77839a;line-height:1.7}
+  .foot b{color:#0A2E65}
+  @media print{body{background:#fff;padding:0}.cert{box-shadow:none}}
 </style></head><body>
-  <div class="cert">
-    <div class="ref">REF: ${enr.ref}</div>
-    <div class="hd"><div class="brand">SKY<span>GLOBE</span> GROUP</div><div class="div">Knowledge Hub · Professional Certification</div></div>
-    <div class="title">Certificate of Completion</div>
-    <div class="sub">${tier.name}</div>
-    <p class="presented">This is to certify that</p>
-    <div class="name">${enr.full_name}</div>
-    <p class="desc">has successfully completed the <strong>${track.name}</strong> programme, demonstrating diligence and competence across all required modules, and is hereby awarded this certificate — <strong>Class of ${enr.graduation_year}</strong>.</p>
-    ${enr.nationality ? `<p style="text-align:center;font-size:.78rem;color:#8a93a3;margin-top:-8px">Nationality: ${enr.nationality}</p>` : ''}
-    <div class="row">
-      ${photoDataUrl ? `<img class="photo" src="${photoDataUrl}" alt="">` : '<div style="width:88px"></div>'}
-      <div class="sig-block"><img src="${sigUrl}" alt=""><div class="ln">Authorised Signatory<br>SkyGlobe Group</div></div>
-      <div class="qr-block"><img src="${qrUrl}" alt="Verification QR"><div class="lbl">Scan to verify</div></div>
+  <div class="cert"><div class="mid"><div class="inner">
+    <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
+    <div class="wmark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="none" stroke="#0A2E65" stroke-width="2.5"/><ellipse cx="50" cy="50" rx="44" ry="17" fill="none" stroke="#0A2E65" stroke-width="1.6"/><text x="50" y="60" font-family="Georgia,serif" font-weight="bold" font-size="30" text-anchor="middle" fill="#0A2E65">SG</text><path d="M83 21l2.2 6 6 2.2-6 2.2-2.2 6-2.2-6-6-2.2 6-2.2z" fill="#e65100"/></svg></div>
+    <div class="ref">CERTIFICATE Nº ${enr.ref}</div>
+    <div class="z">
+      <div class="hd"><div class="brand">SKY<span>GLOBE</span> GROUP</div><div class="acad">Skyglobe Group Academy</div></div>
+      <div class="title">Certificate of Completion</div>
+      <div class="sub">${tier.name}</div>
+      <div class="lvl">${level}</div>
+      <p class="presented">This is to certify that</p>
+      <div class="name">${enr.full_name}</div>
+      <p class="desc">has successfully completed the prescribed learning programme in <strong>${track.name}</strong> and demonstrated the required competencies in accordance with the standards of SKYGLOBE GROUP ACADEMY — <strong>Class of ${enr.graduation_year}</strong>.</p>
+      ${grade ? `<div class="gradebox"><span class="grade">${grade}</span></div>` : ''}
+      <div class="grid">
+        ${credentialId ? `<div class="f"><div class="l">Credential ID</div><div class="v">${credentialId}</div></div>` : ''}
+        <div class="f"><div class="l">Completion Date</div><div class="v">${completionDate}</div></div>
+        <div class="f"><div class="l">Issue Date</div><div class="v">${issueDate}</div></div>
+        <div class="f"><div class="l">Programme</div><div class="v">${duration}</div></div>
+        ${enr.nationality ? `<div class="f"><div class="l">Nationality</div><div class="v">${enr.nationality}</div></div>` : ''}
+        ${enr.region ? `<div class="f"><div class="l">State / Region</div><div class="v">${enr.region}</div></div>` : ''}
+      </div>
+      ${competencies.length ? `<div class="comp"><div class="cl">Core Competencies</div><div class="items">${competencies.map(c => `<span>${c}</span>`).join('')}</div></div>` : ''}
+      <div class="row">
+        ${photoDataUrl ? `<img class="photo" src="${photoDataUrl}" alt="">` : '<div style="width:86px"></div>'}
+        <div class="sig-block"><img src="${sigUrl}" alt=""><div class="ln">Authorised Signatory<br>Program Director · SkyGlobe Group Academy</div></div>
+        <div class="seal"><svg viewBox="0 0 120 120" width="92" height="92" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="56" fill="none" stroke="#a87016" stroke-width="3"/><circle cx="60" cy="60" r="47" fill="none" stroke="#a87016" stroke-width="1"/><path id="arcT" d="M60 17 a43 43 0 0 1 0 86 a43 43 0 0 1 0-86" fill="none"/><text font-size="9.5" font-family="Inter,sans-serif" font-weight="700" letter-spacing="2" fill="#8a6a14"><textPath href="#arcT" startOffset="2%">SKYGLOBE GROUP ACADEMY · TERRA TRUST ·</textPath></text><circle cx="60" cy="60" r="30" fill="none" stroke="#0A2E65" stroke-width="1.6"/><ellipse cx="60" cy="60" rx="30" ry="11" fill="none" stroke="#0A2E65" stroke-width="1"/><text x="60" y="67" font-family="Georgia,serif" font-weight="bold" font-size="19" text-anchor="middle" fill="#0A2E65">SG</text><path d="M83 32l1.8 5 5 1.8-5 1.8-1.8 5-1.8-5-5-1.8 5-1.8z" fill="#e65100"/></svg></div>
+        <div class="qr-block"><img src="${qrUrl}" alt="Verification QR"><div class="lbl"><b>Terra</b> Verified Credential</div></div>
+      </div>
     </div>
     <img class="stamp-img" src="${stampUrl}" alt="">
-    <div class="foot">Issued ${issueDate} · Facilitated &amp; Verified by SkyGlobe Group · Verify at ${verifyUrl}</div>
-  </div>
+    <div class="foot z">This credential has been digitally issued by <b>SKYGLOBE GROUP ACADEMY</b> and can be verified through <b>TERRA Credential Verification</b>.<br>Verify at ${verifyUrl} · Issued ${issueDate} · One World. One Mission. <span style="color:#e65100">✦</span></div>
+  </div></div></div>
 </body></html>`;
 }
 
@@ -6756,8 +6812,15 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
     const tier = COURSE_TIERS.find(t => t.id === enr.tier_id);
 
     const certRef = 'SGC-' + crypto.randomBytes(5).toString('hex').toUpperCase();
-    const verifyUrl = `${baseUrl(req)}/verify/${certRef}`;
-    const html = wrapCertificate({ ...enr, ref: certRef }, track, tier, photoDataUrl || null, verifyUrl, req);
+    const canon = process.env.PUBLIC_ORIGIN || baseUrl(req);
+    const verifyUrl = `${canon}/verify/${certRef}`;
+    const score = enr.final_score || 0;
+    const grade = score >= 90 ? 'Distinction' : score >= 80 ? 'Merit' : 'Pass';
+    const trackCode = String(enr.track_id).replace(/^voc_/, '').split('_').map(w => w[0]).join('').toUpperCase().slice(0, 4);
+    const credentialId = `SGA-${trackCode}-${enr.graduation_year}-${certRef.slice(4, 10)}`;
+    const competencies = steps.slice(0, 6).map(st => st.title);
+    const html = wrapCertificate({ ...enr, ref: certRef }, track, tier, photoDataUrl || null, verifyUrl, req,
+      { grade: `${grade} · ${score}%`, credentialId, competencies });
 
     let photoUrl = null;
     if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
@@ -6812,21 +6875,40 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
   const who = checkAdmin(req);
   if (!who) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    let { fullName, email, trackId, tierId, graduationYear, nationality } = req.body || {};
+    let { fullName, email, trackId, tierId, graduationYear, nationality, region, address, photoDataUrl } = req.body || {};
     fullName = String(fullName || '').trim().slice(0, 120);
     email = String(email || '').trim().toLowerCase();
+    region = String(region || '').trim().slice(0, 80);
+    address = String(address || '').trim().slice(0, 200);
     const track = trackById(trackId);
     const tier = COURSE_TIERS.find(t => t.id === tierId) || COURSE_TIERS[2];
     if (!fullName) return res.status(400).json({ error: 'Recipient full name is required.' });
     if (!track) return res.status(400).json({ error: 'Choose the course for this certificate.' });
 
     const certRef = 'SGC-' + crypto.randomBytes(5).toString('hex').toUpperCase();
-    const verifyUrl = `${baseUrl(req)}/verify/${certRef}`;
+    const canon = process.env.PUBLIC_ORIGIN || baseUrl(req);
+    const verifyUrl = `${canon}/verify/${certRef}`;
     const enr = {
       ref: certRef, full_name: fullName, graduation_year: graduationYear || new Date().getFullYear(),
-      nationality: (nationality || '').trim() || null,
+      nationality: (nationality || '').trim() || null, region: region || null,
     };
-    const html = wrapCertificate(enr, track, tier, null, verifyUrl, req);
+    const trackCode2 = String(track.id).replace(/^voc_/, '').split('_').map(w => w[0]).join('').toUpperCase().slice(0, 4);
+    const html = wrapCertificate(enr, track, tier, photoDataUrl || null, verifyUrl, req,
+      { grade: 'Honorary Award', credentialId: `SGA-${trackCode2}-${enr.graduation_year}-${certRef.slice(4, 10)}`,
+        competencies: CURRICULUM_OUTLINE.slice(0, 6) });
+
+    // recipient's photo, preserved alongside the certificate
+    let grantPhotoUrl = null;
+    if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
+      const b64 = photoDataUrl.split(',')[1];
+      const buf = Buffer.from(b64, 'base64');
+      if (buf.length <= 5 * 1024 * 1024) {
+        const ext = photoDataUrl.includes('image/png') ? 'png' : 'jpg';
+        const p_ = `certificates/${certRef}/photo.${ext}`;
+        await storageUpload(p_, buf, `image/${ext === 'jpg' ? 'jpeg' : 'png'}`).catch(() => {});
+        grantPhotoUrl = storagePublicUrl(p_);
+      }
+    }
 
     const filePath = `certificates/${certRef}/certificate.html`;
     await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8').catch(() => {});
@@ -6837,11 +6919,19 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
     const viewToken = docRow ? await createDocToken(docRow.id, filePath, `certificate_${certRef}.html`, email || 'ceo@skyglobegroup.com', certRef).catch(() => null) : null;
     const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
 
-    await dbQuery('POST', 'certificates', {
+    const grantRecord = {
       cert_ref: certRef, full_name: fullName, track_id: track.id, tier_id: tier.id,
       graduation_year: enr.graduation_year, nationality: enr.nationality,
       status: 'valid', issued_by: who,
-    }).catch(e => console.error('CEO certificate record warning:', e.message));
+    };
+    let grantSaved = false;
+    try { await dbQuery('POST', 'certificates', { ...grantRecord, region: region || null, address: address || null, photo_url: grantPhotoUrl }); grantSaved = true; }
+    catch (e1) {
+      try { await dbQuery('POST', 'certificates', grantRecord); grantSaved = true; } // older table without the new columns
+      catch (e2) { logError({ source: 'certificates', message: 'CEO grant record failed: ' + e2.message, url: req.originalUrl }); }
+    }
+    if (!grantSaved)
+      return res.status(500).json({ error: 'The certificate could not be registered for verification — check Error Logs.' });
     logActivity(who, 'ceo', 'certificate_granted', `Issued ${track.name} certificate to ${fullName}`, certRef);
 
     // Deliver to the recipient — email + portal inbox when we know who they are.
@@ -6961,6 +7051,135 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:clamp(1.9rem
     logActivity(who, 'ceo', 'flyer_generated', `Generated ${kind} flyer: ${title}`);
     res.json({ success: true, html });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── OFFICIAL ACADEMIC TRANSCRIPT ─────────────────────────────────────────────
+// A registrar-grade record of study for every enrolled student — module by
+// module with real test scores, the final examination result, and the overall
+// grade. Designed for university admissions and institutions in any country:
+// verifiable online, sealed, signed, and privacy-conscious.
+app.get('/api/courses/enrollment/:id/transcript', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'course_enrollments', null, { id: `eq.${req.params.id}`, limit: 1 });
+    const enr = rows[0];
+    if (!enr) return res.status(404).json({ error: 'Enrolment not found.' });
+    const track = trackById(enr.track_id);
+    const tier = COURSE_TIERS.find(t => t.id === enr.tier_id) || COURSE_TIERS[2];
+    const steps = enr.steps || [];
+    const canon = process.env.PUBLIC_ORIGIN || baseUrl(req);
+    const done = steps.filter(st => st.done).length;
+    const scored = steps.filter(st => st.quiz_score != null);
+    const avgTest = scored.length ? Math.round(scored.reduce((a, st) => a + (st.quiz_score / 5) * 100, 0) / scored.length) : null;
+    const finalScore = enr.final_score ?? null;
+    const overall = (finalScore != null && avgTest != null) ? Math.round(0.6 * finalScore + 0.4 * avgTest) : finalScore;
+    const gradeOf = p => p == null ? '—' : p >= 90 ? 'Distinction' : p >= 80 ? 'Merit' : p >= 70 ? 'Pass' : 'In Progress';
+    const complete = steps.length > 0 && done === steps.length && (finalScore || 0) >= 70;
+    const trRef = 'SGT-' + String(enr.ref || '').replace(/^CERT-/, '');
+    const verifyUrl = enr.cert_ref ? `${canon}/verify/${enr.cert_ref}` : `${canon}/courses`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=5&data=${encodeURIComponent(verifyUrl)}`;
+    const enrolDate = enr.created_at ? new Date(enr.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+    const issueDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const LEVELS = { cert_amateur: 'Level 1 · Foundation', cert_advanced: 'Level 2 · Advanced', cert_pro: 'Level 3 · Professional' };
+    const rowsHtml = steps.map((st, i) => `
+      <tr><td>${String(i + 1).padStart(2, '0')}</td><td>${st.title}</td>
+      <td>${st.done ? 'Completed' : 'In progress'}</td>
+      <td>${st.quiz_score != null ? st.quiz_score + ' / 5' : '—'}</td>
+      <td>${st.quiz_score != null ? Math.round((st.quiz_score / 5) * 100) + '%' : '—'}</td></tr>`).join('');
+    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Academic Transcript — ${enr.full_name} — SkyGlobe Group Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9edf3;font-family:Inter,sans-serif;padding:24px;display:flex;justify-content:center;color:#1a2233}
+.doc{width:100%;max-width:860px;background:#fff;border:2px solid #0A2E65;border-radius:6px;padding:6px;box-shadow:0 24px 60px rgba(4,16,34,.16)}
+.in{border:1px solid rgba(212,167,58,.6);border-radius:3px;padding:38px 44px;position:relative;overflow:hidden;
+  background-image:repeating-linear-gradient(45deg,rgba(10,46,101,.015) 0 1px,transparent 1px 8px)}
+.wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.wm svg{opacity:.04;width:440px;height:440px}
+.z{position:relative;z-index:2}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #D4A73A;padding-bottom:14px}
+.hd .brand{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.2rem;letter-spacing:.14em;color:#041022}
+.hd .brand span{color:#a87016}
+.hd .acad{font-size:.62rem;letter-spacing:.3em;color:#0A2E65;text-transform:uppercase;margin-top:4px;font-weight:700}
+.hd .refbox{text-align:right;font-size:.66rem;color:#a87016;font-weight:700;letter-spacing:.05em;line-height:1.8}
+h1{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.8rem;color:#041022;text-align:center;margin:20px 0 2px}
+.subt{text-align:center;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:#a87016;font-weight:700;margin-bottom:20px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px 22px;font-size:.8rem;margin-bottom:20px}
+.meta .l{font-size:.58rem;letter-spacing:.14em;color:#8a93a3;text-transform:uppercase}
+.meta .v{font-weight:700;color:#041022}
+table{width:100%;border-collapse:collapse;font-size:.8rem;margin:6px 0 16px}
+th{background:#0A2E65;color:#fff;text-align:left;padding:8px 10px;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase}
+td{padding:7px 10px;border-bottom:1px solid #eef1f6;color:#3c465a}
+tr:nth-child(even) td{background:#f8fafd}
+.sumline{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+.sum{border:1.5px solid rgba(212,167,58,.55);border-radius:10px;padding:10px 20px;text-align:center;background:rgba(212,167,58,.05)}
+.sum .l{font-size:.56rem;letter-spacing:.16em;color:#8a93a3;text-transform:uppercase}
+.sum .v{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.3rem;color:#041022}
+.gr{color:#a87016!important}
+.frow{display:flex;align-items:flex-end;justify-content:space-between;margin-top:20px;gap:16px}
+.sig{text-align:center}.sig img{height:44px}
+.sig .ln{border-top:1px solid #8a93a3;margin-top:4px;padding-top:4px;font-size:.64rem;color:#6b7689}
+.qr{text-align:center}.qr img{width:74px;height:74px}
+.qr .lbl{font-size:.52rem;color:#0A2E65;margin-top:3px;letter-spacing:.1em;text-transform:uppercase;font-weight:800}
+.qr .lbl b{color:#a87016}
+.foot{text-align:center;margin-top:18px;font-size:.62rem;color:#77839a;line-height:1.7;border-top:1px solid #eef1f6;padding-top:10px}
+.foot b{color:#0A2E65}
+.status{display:inline-block;border:1.5px solid ${complete ? '#1f9d57' : '#a87016'};color:${complete ? '#1f9d57' : '#a87016'};font-weight:800;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;padding:4px 16px;border-radius:100px}
+.printbar{max-width:860px;margin:0 auto 12px;text-align:center}
+.printbar button{background:#0A2E65;color:#fff;border:none;border-radius:100px;padding:10px 26px;font-weight:700;cursor:pointer;font-family:inherit}
+@media print{body{background:#fff;padding:0}.printbar{display:none}.doc{box-shadow:none}}
+</style></head><body><div>
+<div class="printbar"><button onclick="window.print()">🖨️ Print / Save as PDF</button></div>
+<div class="doc"><div class="in">
+  <div class="wm"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="none" stroke="#0A2E65" stroke-width="2.5"/><ellipse cx="50" cy="50" rx="44" ry="17" fill="none" stroke="#0A2E65" stroke-width="1.6"/><text x="50" y="60" font-family="Georgia,serif" font-weight="bold" font-size="30" text-anchor="middle" fill="#0A2E65">SG</text><path d="M83 21l2.2 6 6 2.2-6 2.2-2.2 6-2.2-6-6-2.2 6-2.2z" fill="#e65100"/></svg></div>
+  <div class="z">
+    <div class="hd">
+      <div><div class="brand">SKY<span>GLOBE</span> GROUP</div><div class="acad">Skyglobe Group Academy · Office of the Registrar</div></div>
+      <div class="refbox">TRANSCRIPT Nº ${trRef}<br>${enr.cert_ref ? 'CERTIFICATE Nº ' + enr.cert_ref : 'CERTIFICATE PENDING'}</div>
+    </div>
+    <h1>Official Academic Transcript</h1>
+    <div class="subt">Record of Study &amp; Assessment</div>
+    <div class="meta">
+      <div><div class="l">Student</div><div class="v">${enr.full_name}</div></div>
+      <div><div class="l">Programme</div><div class="v">${track?.name || enr.track_id}</div></div>
+      <div><div class="l">Award</div><div class="v">${tier.name}</div></div>
+      <div><div class="l">Level</div><div class="v">${LEVELS[tier.id] || 'Professional'}</div></div>
+      <div><div class="l">Duration</div><div class="v">${tier.months} month${tier.months > 1 ? 's' : ''} · ${steps.length} modules</div></div>
+      <div><div class="l">Enrolment Date</div><div class="v">${enrolDate}</div></div>
+      ${enr.nationality ? `<div><div class="l">Nationality</div><div class="v">${enr.nationality}</div></div>` : ''}
+      <div><div class="l">Transcript Issued</div><div class="v">${issueDate}</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Nº</th><th>Module</th><th>Status</th><th>Assessment</th><th>Score</th></tr></thead>
+      <tbody>${rowsHtml}
+      <tr><td></td><td style="font-weight:700;color:#041022">Final Examination (comprehensive)</td>
+        <td>${finalScore != null ? 'Completed' : 'Pending'}</td><td>${finalScore != null ? '10 questions' : '—'}</td>
+        <td style="font-weight:700;color:#041022">${finalScore != null ? finalScore + '%' : '—'}</td></tr>
+      </tbody>
+    </table>
+    <div class="sumline">
+      <div class="sum"><div class="l">Modules Completed</div><div class="v">${done} / ${steps.length}</div></div>
+      ${avgTest != null ? `<div class="sum"><div class="l">Module Test Average</div><div class="v">${avgTest}%</div></div>` : ''}
+      ${finalScore != null ? `<div class="sum"><div class="l">Final Examination</div><div class="v">${finalScore}%</div></div>` : ''}
+      ${overall != null ? `<div class="sum"><div class="l">Overall Result</div><div class="v gr">${overall}% · ${gradeOf(overall)}</div></div>` : ''}
+    </div>
+    <div style="text-align:center"><span class="status">${complete ? '✔ PROGRAMME COMPLETED — AWARD CONFERRED' : 'PROGRAMME IN PROGRESS'}</span></div>
+    <div class="frow">
+      <div class="sig"><img src="${canon}/signature.png" alt=""><div class="ln">Registrar<br>SkyGlobe Group Academy</div></div>
+      <div class="sig"><svg viewBox="0 0 120 120" width="80" height="80" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="56" fill="none" stroke="#a87016" stroke-width="3"/><circle cx="60" cy="60" r="47" fill="none" stroke="#a87016" stroke-width="1"/><circle cx="60" cy="60" r="30" fill="none" stroke="#0A2E65" stroke-width="1.6"/><ellipse cx="60" cy="60" rx="30" ry="11" fill="none" stroke="#0A2E65" stroke-width="1"/><text x="60" y="67" font-family="Georgia,serif" font-weight="bold" font-size="19" text-anchor="middle" fill="#0A2E65">SG</text><path d="M83 32l1.8 5 5 1.8-5 1.8-1.8 5-1.8-5-5-1.8 5-1.8z" fill="#e65100"/></svg></div>
+      <div class="qr"><img src="${qrUrl}" alt="QR"><div class="lbl"><b>Terra</b> Verified</div></div>
+    </div>
+    <div class="foot">Grading scale: Distinction 90–100% · Merit 80–89% · Pass 70–79%. Overall result = 60% final examination + 40% module test average.<br>
+    This transcript has been digitally issued by <b>SKYGLOBE GROUP ACADEMY</b>${enr.cert_ref ? ` and can be verified with the linked credential through <b>TERRA Credential Verification</b> at ${verifyUrl}` : ''}.<br>
+    One World. One Mission. <span style="color:#e65100">✦</span></div>
+  </div>
+</div></div></div></body></html>`;
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (e) {
+    console.error('Transcript error:', e.message);
+    res.status(500).json({ error: 'Could not prepare the transcript right now.' });
+  }
 });
 
 // Public verification — deliberately minimal: confirms authenticity without

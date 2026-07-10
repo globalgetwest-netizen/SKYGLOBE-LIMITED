@@ -1359,6 +1359,14 @@
                 <option value="cert_amateur">1-Month Amateur Certificate</option>
               </select>
               <input id="hcYear" placeholder="Class of (year)" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="hcNationality" placeholder="Nationality — e.g. Ghana" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="hcRegion" placeholder="State / Region — e.g. Greater Accra" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+            </div>
+            <input id="hcAddress" placeholder="Address (kept on record only — never printed on the certificate)" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+              <label style="color:var(--muted);font-size:.85rem">Recipient photo (appears in the gold ring):</label>
+              <input type="file" id="hcPhoto" accept="image/png,image/jpeg" onchange="hcPhotoPick(this)" style="color:var(--muted);font-size:.82rem">
+              <img id="hcPhotoPrev" style="display:none;width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)">
             </div>
             <button class="btn" onclick="issueHonoraryCert()">🏅 Issue Certificate</button>
             <div id="hcResult" style="margin-top:12px;font-size:.86rem"></div>
@@ -1599,6 +1607,19 @@ async function loadFlyerTracks(){
     if(a)a.innerHTML=opts; if(b)b.innerHTML=opts;
   }catch(e){}
 }
+let HC_PHOTO=null;
+function hcPhotoPick(input){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{const img=new Image();img.onload=()=>{
+    const max=640,sc=Math.min(1,max/Math.max(img.width,img.height));
+    const cv=document.createElement('canvas');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    HC_PHOTO=cv.toDataURL('image/jpeg',0.86);
+    const pv=document.getElementById('hcPhotoPrev');pv.src=HC_PHOTO;pv.style.display='inline-block';
+  };img.src=r.result;};
+  r.readAsDataURL(f);
+}
 async function issueHonoraryCert(){
   const box=document.getElementById('hcResult');
   const fullName=document.getElementById('hcName').value.trim();
@@ -1607,7 +1628,7 @@ async function issueHonoraryCert(){
   box.style.color='var(--muted)';box.textContent='Issuing certificate…';
   try{
     const r=await fetch(API+'/api/admin/academy/grant-certificate',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
-      body:JSON.stringify({fullName,email:document.getElementById('hcEmail').value.trim(),trackId,tierId:document.getElementById('hcTier').value,graduationYear:parseInt(document.getElementById('hcYear').value)||undefined})});
+      body:JSON.stringify({fullName,email:document.getElementById('hcEmail').value.trim(),trackId,tierId:document.getElementById('hcTier').value,graduationYear:parseInt(document.getElementById('hcYear').value)||undefined,nationality:document.getElementById('hcNationality').value.trim(),region:document.getElementById('hcRegion').value.trim(),address:document.getElementById('hcAddress').value.trim(),photoDataUrl:HC_PHOTO})});
     const d=await r.json(); if(!r.ok)throw new Error(d.error||'Could not issue');
     box.style.color='#7ee2a8';
     box.innerHTML='🏅 Issued <b style="color:var(--gold)">'+d.certRef+'</b>'

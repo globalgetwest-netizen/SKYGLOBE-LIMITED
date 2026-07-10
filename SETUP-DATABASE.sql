@@ -288,5 +288,17 @@ alter table academy_teachers add column if not exists color text;
 alter table certificates add column if not exists issued_by text;
 
 -- Certificate verification repair (root-cause fix):
--- enrolment ids are UUIDs; make the link column text so records always save.
+-- 1. unlock the FK (the cert stores its own copy of all data), then retype;
+-- 2. guarantee every column the certificate writes exists.
+alter table certificates drop constraint if exists certificates_enrollment_id_fkey;
 alter table certificates alter column enrollment_id type text using enrollment_id::text;
+alter table certificates add column if not exists full_name       text;
+alter table certificates add column if not exists track_id        text;
+alter table certificates add column if not exists tier_id         text;
+alter table certificates add column if not exists graduation_year integer;
+alter table certificates add column if not exists photo_url       text;
+alter table certificates add column if not exists nationality     text;
+alter table certificates add column if not exists status          text default 'valid';
+alter table certificates add column if not exists issued_by       text;
+alter table certificates add column if not exists region  text;
+alter table certificates add column if not exists address text;

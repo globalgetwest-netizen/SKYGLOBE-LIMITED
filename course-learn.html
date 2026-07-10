@@ -115,6 +115,7 @@
       <input type="file" id="photoInput" accept="image/png,image/jpeg" onchange="onPhoto(this)">
     </div>
     <button class="btn" id="genBtn" onclick="generateCertificate()">Generate My Certificate →</button>
+    <a class="btn ghost" id="trBtn" href="#" target="_blank" style="margin-left:8px">📜 Official Transcript</a>
     <div id="certResult"></div>
   </div>
 </div></section>
@@ -182,6 +183,7 @@ function renderSteps(){
   if (allDone && passed) {
     document.getElementById('certBox').classList.add('ready');
     document.getElementById('finalScoreLine').textContent = 'Final exam score: ' + ENR.final_score + '%.';
+    document.getElementById('trBtn').href = '/api/courses/enrollment/' + ENR_ID + '/transcript';
   }
 }
 
