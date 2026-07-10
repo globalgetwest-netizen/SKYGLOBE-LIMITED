@@ -1354,10 +1354,22 @@
               <input id="hcEmail" placeholder="Recipient email (for delivery)" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
               <select id="hcTrack" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px"><option value="">Course… *</option></select>
               <select id="hcTier" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
-                <option value="cert_pro">3-Month Pro Certificate</option>
+                <option value="cert_executive">6-Month Executive Certificate</option>
+                <option value="cert_pro" selected>3-Month Pro Certificate</option>
                 <option value="cert_advanced">2-Month Advanced Certificate</option>
                 <option value="cert_amateur">1-Month Amateur Certificate</option>
               </select>
+              <select id="hcAward" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+                <option value="Honorary Award">Award: Honorary Award</option>
+                <option value="Distinction">Award: Academic — Distinction</option>
+                <option value="Merit">Award: Academic — Merit</option>
+                <option value="Pass">Award: Academic — Pass</option>
+                <option value="Award of Excellence">Award: Excellence</option>
+                <option value="Achievement Award">Award: Achievement</option>
+                <option value="Certificate of Completion">Award: Completion</option>
+              </select>
+              <label style="color:var(--muted);font-size:.72rem;display:flex;flex-direction:column;gap:2px">Enrolled (month/year)<input type="month" id="hcEnrolled" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:8px 12px"></label>
+              <label style="color:var(--muted);font-size:.72rem;display:flex;flex-direction:column;gap:2px">Completed (month/year)<input type="month" id="hcCompleted" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:8px 12px"></label>
               <input id="hcYear" placeholder="Class of (year)" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
               <input id="hcNationality" placeholder="Nationality — e.g. Ghana" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
               <input id="hcRegion" placeholder="State / Region — e.g. Greater Accra" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
@@ -1370,6 +1382,13 @@
             </div>
             <button class="btn" onclick="issueHonoraryCert()">🏅 Issue Certificate</button>
             <div id="hcResult" style="margin-top:12px;font-size:.86rem"></div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3>🗂️ Student Records — the Registrar's Ledger</h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 12px">Every enrolled student: live progress, examination results and credentials. Open any student's <b style="color:var(--gold)">Official Transcript</b> or verified certificate. Staff can view records to assist; issuing awards remains the CEO's authority alone. Test questions and answers never leave the server.</p>
+            <input id="srSearch" placeholder="Search by name or email…" oninput="renderStudentRecords()" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:12px">
+            <div id="studentRecords"><div class="skeleton">Loading records…</div></div>
           </div>
 
           <div class="panel" style="margin-bottom:18px">
@@ -1483,6 +1502,35 @@ function switchView(v){
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
   
 /* ══ Course Catalog manager (CEO adds courses — no code) ══ */
+/* ══ Student Records — the registrar's ledger ══ */
+let SR_ALL=[];
+async function loadStudentRecords(){
+  const box=document.getElementById('studentRecords'); if(!box) return;
+  try{
+    const r=await fetch(API+'/api/admin/academy/enrollments',{headers:{'x-admin-key':KEY}});
+    SR_ALL=await r.json(); if(!r.ok) throw new Error(SR_ALL.error||'load failed');
+    renderStudentRecords();
+  }catch(e){ box.innerHTML='<p style="color:#e05c5c;font-size:.85rem">'+esc(e.message)+'</p>'; }
+}
+function renderStudentRecords(){
+  const box=document.getElementById('studentRecords'); if(!box) return;
+  const q=(document.getElementById('srSearch')?.value||'').toLowerCase();
+  const list=(SR_ALL||[]).filter(s=>!q||String(s.full_name||'').toLowerCase().includes(q)||String(s.email||'').toLowerCase().includes(q));
+  if(!list.length){ box.innerHTML='<p style="color:var(--muted);font-size:.85rem">No enrolments'+(q?' match your search':' yet')+'.</p>'; return; }
+  box.innerHTML=list.map(st=>{
+    const pct=st.modules_total?Math.round(st.modules_done/st.modules_total*100):0;
+    const badge=st.status==='certified'?'<span style="color:#7ee2a8;font-weight:700">🎓 Certified</span>':st.status==='passed'?'<span style="color:#7ee2a8">✔ Exam passed</span>':st.status==='completed'?'<span style="color:var(--gold)">Modules complete</span>':'<span style="color:var(--muted)">In progress</span>';
+    return `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--navy3);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px">
+      <div style="min-width:180px;flex:1"><div style="font-weight:700;color:var(--txt)">${esc(st.full_name||'—')}</div><div style="font-size:.74rem;color:var(--muted)">${esc(st.email||'')}</div></div>
+      <div style="min-width:170px;flex:1"><div style="font-size:.8rem;color:var(--txt)">${esc(st.track)}</div><div style="font-size:.72rem;color:var(--muted)">${esc(st.tier)}</div></div>
+      <div style="min-width:120px"><div style="font-size:.78rem;color:var(--txt)">${st.modules_done}/${st.modules_total} modules · ${pct}%</div><div style="font-size:.72rem">${st.final_score!=null?('Final: <b style=\"color:var(--gold)\">'+st.final_score+'%</b>'):''} ${badge}</div></div>
+      <div style="display:flex;gap:6px">
+        <a class="btn btn-sm" href="/api/courses/enrollment/${st.id}/transcript" target="_blank">📜 Transcript</a>
+        ${st.cert_ref?`<a class="btn btn-sm btn-ghost" href="/verify/${st.cert_ref}" target="_blank">🎓 Verify</a>`:''}
+      </div></div>`;
+  }).join('');
+}
+
 async function loadCourseCatalog(){
   const box=document.getElementById('courseCatalog'); if(!box) return;
   try{
@@ -1539,7 +1587,7 @@ const titles={dashboard:'Command Bridge',applications:'Applications',messages:'C
   if(v==='analytics') loadAnalytics();
   if(v==='errors') loadErrors();
   if(v==='ipregistry') loadIPRegistry();
-  if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); }
+  if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); loadStudentRecords(); }
   toggleSidebar(false);
 }
 
@@ -1628,7 +1676,7 @@ async function issueHonoraryCert(){
   box.style.color='var(--muted)';box.textContent='Issuing certificate…';
   try{
     const r=await fetch(API+'/api/admin/academy/grant-certificate',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
-      body:JSON.stringify({fullName,email:document.getElementById('hcEmail').value.trim(),trackId,tierId:document.getElementById('hcTier').value,graduationYear:parseInt(document.getElementById('hcYear').value)||undefined,nationality:document.getElementById('hcNationality').value.trim(),region:document.getElementById('hcRegion').value.trim(),address:document.getElementById('hcAddress').value.trim(),photoDataUrl:HC_PHOTO})});
+      body:JSON.stringify({fullName,email:document.getElementById('hcEmail').value.trim(),trackId,tierId:document.getElementById('hcTier').value,graduationYear:parseInt(document.getElementById('hcYear').value)||undefined,nationality:document.getElementById('hcNationality').value.trim(),region:document.getElementById('hcRegion').value.trim(),address:document.getElementById('hcAddress').value.trim(),photoDataUrl:HC_PHOTO,award:document.getElementById('hcAward').value,enrolledPeriod:document.getElementById('hcEnrolled').value,completedPeriod:document.getElementById('hcCompleted').value})});
     const d=await r.json(); if(!r.ok)throw new Error(d.error||'Could not issue');
     box.style.color='#7ee2a8';
     box.innerHTML='🏅 Issued <b style="color:var(--gold)">'+d.certRef+'</b>'

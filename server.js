@@ -247,6 +247,23 @@ function storagePublicUrl(filePath) {
   return `${SUPA_URL}/storage/v1/object/public/documents/${filePath}`;
 }
 
+// ── INLINE QR CODES ──────────────────────────────────────────────────────────
+// QR codes are generated ON the server and embedded into the document itself
+// as SVG — always visible, printable, scannable, even offline. No external
+// image service can ever make a certificate lose its QR again.
+const qrcodeGen = require('qrcode-generator');
+function qrDataUrl(text) {
+  try {
+    const qr = qrcodeGen(0, 'M');
+    qr.addData(String(text));
+    qr.make();
+    const svg = qr.createSvgTag({ cellSize: 4, margin: 2 });
+    return 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+  } catch (e) {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=170x170&margin=6&data=${encodeURIComponent(text)}`;
+  }
+}
+
 // ── OUTBOUND EMAIL (Resend primary → Brevo automatic fallback) ───────────────
 // If Resend refuses (daily quota exhausted, outage, etc.) the SAME email is
 // automatically retried through Brevo (free tier ~300/day). The caller never
@@ -1226,7 +1243,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v2-transcripts',
   certificate: 'CERTIFICATE v2 — SkyGlobe Group Academy · Terra Verified',
-  build: 'ACADEMY-FINAL-2026-07-10',
+  build: 'ACADEMY-COMPLETE-2026-07-10B',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -2883,6 +2900,7 @@ const PRICING = {
   cert_amateur:          { label: '1-Month Amateur Certificate Program', instant: true, kind: 'certificate', USD: 49,  EUR: 45,  GBP: 39  },
   cert_advanced:         { label: '2-Month Advanced Certificate Program', instant: true, kind: 'certificate', USD: 89,  EUR: 82,  GBP: 71  },
   cert_pro:              { label: '3-Month Pro Certificate Program', instant: true, kind: 'certificate', USD: 149, EUR: 138, GBP: 119 },
+  cert_executive:        { label: '6-Month Executive Certificate Program', instant: true, kind: 'certificate', USD: 249, EUR: 229, GBP: 199 },
   premium_digital_id:    { label: 'SkyGlobe Premium Digital ID', instant: true, kind: 'identity', USD: 79, EUR: 73, GBP: 63 },
   // ── AI Document Generator (public self-service — was previously locked behind
   // a staff/CEO password with no way for a client to ever reach or pay for it).
@@ -3706,7 +3724,7 @@ function verifyUnlock(token, product) {
 const PRODUCT_PAGE = {
   legal_doc_standard: '/legal-documents', legal_doc_premium: '/legal-documents', legal_doc_priority: '/legal-documents',
   premium_digital_id: '/digital-id',
-  cert_amateur: '/courses', cert_advanced: '/courses', cert_pro: '/courses',
+  cert_amateur: '/courses', cert_advanced: '/courses', cert_pro: '/courses', cert_executive: '/courses',
   interview_prep: '/', sop: '/', coverletter: '/', visaletter: '/', experience: '/', invitation: '/', skyconference: '/',
 };
 
@@ -6281,6 +6299,9 @@ const COURSE_TIERS = [
   { id: 'cert_pro', name: '3-Month Pro Certificate', product: 'cert_pro', months: 3, steps: 14,
     blurb: 'Our most complete track — strategy, portfolio and career readiness.',
     perks: ['Everything in Advanced', 'Advanced techniques', 'Capstone project', 'Career-readiness module', 'Priority QR-verifiable certificate'] },
+  { id: 'cert_executive', name: '6-Month Executive Certificate', product: 'cert_executive', months: 6, steps: 20,
+    blurb: 'The flagship — leadership, management and mastery for serious professionals.',
+    perks: ['Everything in Pro', 'Leadership & team management', 'Project management & budgeting', 'Executive capstone project', 'Official Academic Transcript', 'Priority QR-verifiable certificate'] },
 ];
 
 const COURSE_TRACKS = [
@@ -6374,6 +6395,10 @@ const CURRICULUM_OUTLINE = [
   'Case Study Analysis', 'Content / Deliverable Creation', 'Measurement & Analytics',
   'Client / Audience Management', 'Advanced Techniques', 'Portfolio / Project Work',
   'Professional Standards & Ethics', 'Capstone & Career Readiness',
+  // Executive extension (months 4–6)
+  'Leadership & Team Management', 'Project Management Essentials',
+  'Finance & Budgeting for Professionals', 'Communication & Negotiation',
+  'Innovation & Digital Transformation', 'Executive Capstone Project',
 ];
 
 app.get('/api/courses/catalog', (_req, res) => {
@@ -6697,9 +6722,9 @@ function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req, extra =
   const origin = process.env.PUBLIC_ORIGIN || (req ? baseUrl(req) : 'https://skyglobegroup.com');
   const sigUrl = origin + '/signature.png';
   const stampUrl = origin + '/stamp.png';
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&margin=6&data=${encodeURIComponent(verifyUrl)}`;
+  const qrUrl = qrDataUrl(verifyUrl);
   const issueDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  const LEVELS = { cert_amateur: 'Level 1 · Foundation Certificate', cert_advanced: 'Level 2 · Advanced Certificate', cert_pro: 'Level 3 · Professional Certificate' };
+  const LEVELS = { cert_amateur: 'Level 1 · Foundation Certificate', cert_advanced: 'Level 2 · Advanced Certificate', cert_pro: 'Level 3 · Professional Certificate', cert_executive: 'Level 4 · Executive Certificate' };
   const level = LEVELS[tier.id] || 'Professional Certificate';
   const grade = extra.grade || '';
   const credentialId = extra.credentialId || '';
@@ -6777,7 +6802,8 @@ function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req, extra =
       ${grade ? `<div class="gradebox"><span class="grade">${grade}</span></div>` : ''}
       <div class="grid">
         ${credentialId ? `<div class="f"><div class="l">Credential ID</div><div class="v">${credentialId}</div></div>` : ''}
-        <div class="f"><div class="l">Completion Date</div><div class="v">${completionDate}</div></div>
+        ${extra.enrolled ? `<div class="f"><div class="l">Enrolled</div><div class="v">${extra.enrolled}</div></div>` : ''}
+        <div class="f"><div class="l">Completed</div><div class="v">${completionDate}</div></div>
         <div class="f"><div class="l">Issue Date</div><div class="v">${issueDate}</div></div>
         <div class="f"><div class="l">Programme</div><div class="v">${duration}</div></div>
         ${enr.nationality ? `<div class="f"><div class="l">Nationality</div><div class="v">${enr.nationality}</div></div>` : ''}
@@ -6819,8 +6845,10 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
     const trackCode = String(enr.track_id).replace(/^voc_/, '').split('_').map(w => w[0]).join('').toUpperCase().slice(0, 4);
     const credentialId = `SGA-${trackCode}-${enr.graduation_year}-${certRef.slice(4, 10)}`;
     const competencies = steps.slice(0, 6).map(st => st.title);
+    const monthYear = d => new Date(d).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
     const html = wrapCertificate({ ...enr, ref: certRef }, track, tier, photoDataUrl || null, verifyUrl, req,
-      { grade: `${grade} · ${score}%`, credentialId, competencies });
+      { grade: `${grade} · ${score}%`, credentialId, competencies,
+        enrolled: enr.created_at ? monthYear(enr.created_at) : null, completionDate: monthYear(new Date()) });
 
     let photoUrl = null;
     if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
@@ -6875,15 +6903,32 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
   const who = checkAdmin(req);
   if (!who) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    let { fullName, email, trackId, tierId, graduationYear, nationality, region, address, photoDataUrl } = req.body || {};
+    let { fullName, email, trackId, tierId, graduationYear, nationality, region, address, photoDataUrl,
+      award, enrolledPeriod, completedPeriod } = req.body || {};
     fullName = String(fullName || '').trim().slice(0, 120);
     email = String(email || '').trim().toLowerCase();
     region = String(region || '').trim().slice(0, 80);
     address = String(address || '').trim().slice(0, 200);
+    // The CEO's award authority — academic grades included. Whitelisted.
+    const AWARDS = ['Honorary Award', 'Distinction', 'Merit', 'Pass', 'Award of Excellence', 'Achievement Award', 'Certificate of Completion'];
+    const awardLabel = AWARDS.includes(award) ? award : 'Honorary Award';
     const track = trackById(trackId);
     const tier = COURSE_TIERS.find(t => t.id === tierId) || COURSE_TIERS[2];
     if (!fullName) return res.status(400).json({ error: 'Recipient full name is required.' });
     if (!track) return res.status(400).json({ error: 'Choose the course for this certificate.' });
+    // Study period must MATCH the programme duration — the certificate must
+    // never claim a 3-month award over a 1-month period.
+    const parseMY = v => { const m = /^(\d{4})-(\d{2})$/.exec(String(v || '')); return m ? new Date(Number(m[1]), Number(m[2]) - 1, 1) : null; };
+    const dEnrol = parseMY(enrolledPeriod), dDone = parseMY(completedPeriod);
+    let enrolledTxt = null, completedTxt = null;
+    if (dEnrol && dDone) {
+      const monthsDiff = (dDone.getFullYear() - dEnrol.getFullYear()) * 12 + (dDone.getMonth() - dEnrol.getMonth());
+      if (monthsDiff < tier.months)
+        return res.status(400).json({ error: `The study period is shorter than the programme: ${tier.name} requires at least ${tier.months} month(s) between enrolment and completion.` });
+      const fmt = d => d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      enrolledTxt = fmt(dEnrol); completedTxt = fmt(dDone);
+      graduationYear = graduationYear || dDone.getFullYear();
+    }
 
     const certRef = 'SGC-' + crypto.randomBytes(5).toString('hex').toUpperCase();
     const canon = process.env.PUBLIC_ORIGIN || baseUrl(req);
@@ -6894,8 +6939,9 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
     };
     const trackCode2 = String(track.id).replace(/^voc_/, '').split('_').map(w => w[0]).join('').toUpperCase().slice(0, 4);
     const html = wrapCertificate(enr, track, tier, photoDataUrl || null, verifyUrl, req,
-      { grade: 'Honorary Award', credentialId: `SGA-${trackCode2}-${enr.graduation_year}-${certRef.slice(4, 10)}`,
-        competencies: CURRICULUM_OUTLINE.slice(0, 6) });
+      { grade: awardLabel, credentialId: `SGA-${trackCode2}-${enr.graduation_year}-${certRef.slice(4, 10)}`,
+        competencies: CURRICULUM_OUTLINE.slice(0, 6),
+        enrolled: enrolledTxt, completionDate: completedTxt || undefined });
 
     // recipient's photo, preserved alongside the certificate
     let grantPhotoUrl = null;
@@ -6932,7 +6978,7 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
     }
     if (!grantSaved)
       return res.status(500).json({ error: 'The certificate could not be registered for verification — check Error Logs.' });
-    logActivity(who, 'ceo', 'certificate_granted', `Issued ${track.name} certificate to ${fullName}`, certRef);
+    logActivity(who, 'ceo', 'certificate_granted', `Issued ${track.name} certificate (${awardLabel}) to ${fullName}`, certRef);
 
     // Deliver to the recipient — email + portal inbox when we know who they are.
     if (email) {
@@ -7053,6 +7099,31 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:clamp(1.9rem
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── ACADEMY STUDENT RECORDS (portal) ─────────────────────────────────────────
+// The registrar's ledger: every enrolment with live progress and results.
+// Staff may VIEW to assist students; issuing awards remains CEO-only.
+// Sanitized: test questions and answers never leave the server.
+app.get('/api/admin/academy/enrollments', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'course_enrollments', null, { order: 'created_at.desc', limit: 500 });
+    const list = (Array.isArray(rows) ? rows : []).map(e => {
+      const steps = e.steps || [];
+      const track = trackById(e.track_id);
+      const tier = COURSE_TIERS.find(t => t.id === e.tier_id);
+      return {
+        id: e.id, ref: e.ref, cert_ref: e.cert_ref || null,
+        full_name: e.full_name, email: e.email, nationality: e.nationality || null,
+        track: track?.name || e.track_id, tier: tier?.name || e.tier_id,
+        modules_done: steps.filter(st => st.done).length, modules_total: steps.length,
+        final_score: e.final_score ?? null, status: e.status,
+        enrolled_at: e.created_at || null,
+      };
+    });
+    res.json(list);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── OFFICIAL ACADEMIC TRANSCRIPT ─────────────────────────────────────────────
 // A registrar-grade record of study for every enrolled student — module by
 // module with real test scores, the final examination result, and the overall
@@ -7076,10 +7147,10 @@ app.get('/api/courses/enrollment/:id/transcript', async (req, res) => {
     const complete = steps.length > 0 && done === steps.length && (finalScore || 0) >= 70;
     const trRef = 'SGT-' + String(enr.ref || '').replace(/^CERT-/, '');
     const verifyUrl = enr.cert_ref ? `${canon}/verify/${enr.cert_ref}` : `${canon}/courses`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=5&data=${encodeURIComponent(verifyUrl)}`;
+    const qrUrl = qrDataUrl(verifyUrl);
     const enrolDate = enr.created_at ? new Date(enr.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
     const issueDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    const LEVELS = { cert_amateur: 'Level 1 · Foundation', cert_advanced: 'Level 2 · Advanced', cert_pro: 'Level 3 · Professional' };
+    const LEVELS = { cert_amateur: 'Level 1 · Foundation', cert_advanced: 'Level 2 · Advanced', cert_pro: 'Level 3 · Professional', cert_executive: 'Level 4 · Executive' };
     const rowsHtml = steps.map((st, i) => `
       <tr><td>${String(i + 1).padStart(2, '0')}</td><td>${st.title}</td>
       <td>${st.done ? 'Completed' : 'In progress'}</td>
