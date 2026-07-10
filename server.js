@@ -874,6 +874,7 @@ app.get('/digitalization', (req, res) => res.sendFile(path.join(__dirname, 'digi
 app.get('/conferences', (req, res) => res.sendFile(path.join(__dirname, 'conferences.html')));
 app.get('/showreel', (req, res) => res.sendFile(path.join(__dirname, 'showreel.html')));
 app.get('/terra', (req, res) => res.sendFile(path.join(__dirname, 'terra.html')));
+app.get('/noria', (req, res) => res.sendFile(path.join(__dirname, 'noria.html')));
 app.get('/yunex', (req, res) => res.sendFile(path.join(__dirname, 'yunex.html')));
 app.get('/packages', (req, res) => res.sendFile(path.join(__dirname, 'packages.html')));
 app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));

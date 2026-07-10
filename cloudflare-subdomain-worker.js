@@ -30,7 +30,7 @@ const ORIGIN = 'https://skyglobegroup.com';
 const PAGE_MAP = {
   terra: '/terra',
   yunex: '/yunex',
-  noria: '/', // change to NORIA's page when it gets a dedicated one
+  noria: '/noria',
 };
 
 export default {

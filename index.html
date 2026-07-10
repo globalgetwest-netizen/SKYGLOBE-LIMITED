@@ -1280,6 +1280,17 @@ body.wc-active .page-back-bar{padding-top:138px}
 }
 @media(prefers-reduced-motion:reduce){#cosmicHero *{animation:none!important;transition:none!important}}
 </style>
+<style>
+/* NORIA bar — native balance on narrow phones */
+@media(max-width:480px){
+  #noriaBar .noria-compact{gap:8px;padding:8px 10px}
+  #noriaBar input{font-size:.82rem!important;min-width:0}
+  #noriaBar .noria-chips,#noriaBar .noria-chip{display:none!important}
+}
+@media(max-width:380px){
+  #noriaBar .noria-logo-svg{width:30px!important;height:30px!important}
+}
+</style>
 </head>
 <body>
 
@@ -1321,9 +1332,9 @@ body.wc-active .page-back-bar{padding-top:138px}
     <li class="nav-more-wrap">
       <a class="nav-more-btn" onclick="toggleNavMore(event,'platformsDrop')" style="font-weight:700">Platforms <span style="color:#e65100;font-size:.7em;vertical-align:.2em">✦</span> ▾</a>
       <div class="nav-more-drop" id="platformsDrop" style="min-width:290px;padding:8px">
-        <a onclick="closeNavMore();window.noriaOpenPanel&&noriaOpenPanel()" style="display:flex;gap:12px;align-items:center;border-radius:12px;padding:12px 14px">
+        <a href="/noria" style="display:flex;gap:12px;align-items:center;border-radius:12px;padding:12px 14px">
           <span style="font-size:1.35rem;color:#e65100">✦</span>
-          <span style="display:flex;flex-direction:column;line-height:1.25"><b style="letter-spacing:.1em;color:#041022">NORIA</b><small style="color:#64748b;font-size:.74rem">The Intelligence — ask anything, 24/7</small></span>
+          <span style="display:flex;flex-direction:column;line-height:1.25"><b style="letter-spacing:.1em;color:#041022">NORIA</b><small style="color:#64748b;font-size:.74rem">The Intelligence Layer — the platform</small></span>
         </a>
         <a href="/terra" style="display:flex;gap:12px;align-items:center;border-radius:12px;padding:12px 14px">
           <span style="font-size:1.35rem">🌍</span>
@@ -1427,7 +1438,7 @@ body.wc-active .page-back-bar{padding-top:138px}
   <div class="mob-divider"></div>
 
   <div class="mob-section-label">Platforms <span style="color:#e65100">✦</span></div>
-  <a onclick="toggleMenu();setTimeout(function(){window.noriaOpenPanel&&noriaOpenPanel();},200)"><span style="color:#e65100">✦</span>NORIA — The Intelligence</a>
+  <a href="/noria"><span style="color:#e65100">✦</span>NORIA — The Intelligence Platform</a>
   <a href="/terra"><span>🌍</span>TERRA — Trust Infrastructure</a>
   <a href="/yunex"><span style="background:linear-gradient(135deg,#3d5af1,#b326d9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">◆</span>YUNEX — Economic Engine</a>
 
@@ -1686,12 +1697,12 @@ body.wc-active .page-back-bar{padding-top:138px}
 
       <!-- The three platforms -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:16px;margin-bottom:16px">
-        <a href="javascript:void(0)" onclick="try{window.scrollTo({top:0,behavior:'smooth'});(window.noriaOpenPanel||window.noriaOvOpen||function(){})();}catch(e){}" style="text-decoration:none;display:block;background:#ffffff;border:1px solid rgba(230,81,0,.35);border-top:3px solid #e65100;border-radius:16px;padding:26px 22px;box-shadow:0 6px 22px rgba(4,16,34,.07);transition:transform .3s cubic-bezier(.22,.7,.3,1),box-shadow .3s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <a href="/noria" style="text-decoration:none;display:block;background:#ffffff;border:1px solid rgba(230,81,0,.35);border-top:3px solid #e65100;border-radius:16px;padding:26px 22px;box-shadow:0 6px 22px rgba(4,16,34,.07);transition:transform .3s cubic-bezier(.22,.7,.3,1),box-shadow .3s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <div style="font-size:1.7rem;margin-bottom:10px"><span style="color:#ff9f1c">&#10022;</span></div>
           <div style="font-weight:800;letter-spacing:.12em;color:#041022;font-size:1.05rem">NORIA</div>
           <div style="font-size:.7rem;letter-spacing:.22em;color:#e65100;font-weight:700;margin:4px 0 10px">THE INTELLIGENCE LAYER</div>
           <p style="color:#9fb0d6;font-size:.86rem;line-height:1.6;margin:0 0 14px">Not a chatbot &mdash; the intelligence inside every SkyGlobe service. It triages, verifies, answers, drafts and advises, 24/7.</p>
-          <span style="color:#a87016;font-weight:700;font-size:.85rem">Ask NORIA &rarr;</span>
+          <span style="color:#a87016;font-weight:700;font-size:.85rem">Enter NORIA &rarr;</span>
         </a>
         <a href="/terra" style="text-decoration:none;display:block;background:#ffffff;border:1px solid rgba(63,174,106,.4);border-top:3px solid #2c7d4c;border-radius:16px;padding:26px 22px;box-shadow:0 6px 22px rgba(4,16,34,.07);transition:transform .3s cubic-bezier(.22,.7,.3,1)" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <div style="font-size:1.7rem;margin-bottom:10px">&#127757;</div>
@@ -2363,17 +2374,19 @@ body.wc-active .page-back-bar{padding-top:138px}
 
   <div class="section-divider"></div>
 
-  <!-- CTA STRIP -->
+  <!-- CTA STRIP — the ecosystem invitation (royal blue, white text, always readable) -->
   <section style="padding-top:0">
-    <div style="background:linear-gradient(135deg,#041022,#132952);border:1px solid rgba(212,167,58,0.2);border-radius:var(--radius-xl);padding:4rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-50px;right:-50px;width:300px;height:300px;background:rgba(212,167,58,0.05);border-radius:50%;filter:blur(40px)"></div>
-      <div class="section-tag">Ready to Begin?</div>
-      <h2 class="section-title" style="margin-bottom:1rem">Start Your Global Journey <strong>Today</strong></h2>
-      <p style="color:var(--text-body);max-width:480px;margin:0 auto 2rem">Book a free 30-minute consultation with our experts and get a clear roadmap to your international goals.</p>
+    <div style="background:linear-gradient(135deg,#0A2E65 0%,#1a55b0 100%);border-radius:var(--radius-xl);padding:clamp(2.6rem,6vw,4rem) 2rem;text-align:center;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-60px;right:-60px;width:320px;height:320px;background:rgba(255,255,255,0.06);border-radius:50%;filter:blur(30px)"></div>
+      <div style="font-size:.72rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#F4D77A;margin-bottom:14px">BEGIN YOUR JOURNEY</div>
+      <h2 style="font-family:Georgia,'Times New Roman',serif;color:#ffffff;font-size:clamp(1.6rem,3.8vw,2.5rem);line-height:1.2;margin:0 0 12px">One account. Every service.<br>The entire ecosystem.</h2>
+      <p style="color:#e6edf9;max-width:520px;margin:0 auto 1.8rem;font-size:.95rem;line-height:1.6">Travel, learn, verify, trade, and access AI intelligence &mdash; all from a single SkyGlobe account. Or book a free 30-minute consultation with our experts.</p>
       <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-        <button class="btn-primary" onclick="showPage('contact')">✦ Book Free Consultation</button>
-        <a href="https://wa.me/17373998522" class="wa-btn" target="_blank">💬 Chat on WhatsApp</a>
+        <button class="btn-primary" style="background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;font-weight:800" onclick="goAccount()">Create Your Account &rarr;</button>
+        <button onclick="showPage('contact')" style="background:rgba(255,255,255,.1);color:#ffffff;border:1.5px solid rgba(255,255,255,.5);padding:14px 32px;border-radius:10px;font-weight:600;font-size:.95rem;cursor:pointer;font-family:inherit">Partner With Us</button>
+        <button onclick="showPage('contact')" style="background:transparent;color:#F4D77A;border:none;padding:14px 10px;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit">✦ Free Consultation</button>
       </div>
+      <div style="margin-top:1.6rem;font-size:.72rem;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:700">ONE WORLD. ONE MISSION. <span style="color:#F4D77A">✦</span></div>
     </div>
   </section>
 
@@ -3406,7 +3419,7 @@ body.wc-active .page-back-bar{padding-top:138px}
     <div class="footer-col">
       <h5>Ecosystem</h5>
       <ul>
-        <li><a onclick="window.noriaOpenPanel&&noriaOpenPanel()"><span style="color:#ff9f1c">✦</span> NORIA — Intelligence</a></li>
+        <li><a href="/noria"><span style="color:#ff9f1c">✦</span> NORIA — Intelligence</a></li>
         <li><a href="/terra">🌍 TERRA — Trust</a></li>
         <li><a href="/yunex">◆ YUNEX — Economy</a></li>
         <li><a onclick="showPage('services')">🌐 Global Mobility</a></li>
@@ -3655,7 +3668,6 @@ body.wc-active .page-back-bar{padding-top:138px}
 </div>
 
 <!-- WhatsApp Float -->
-<a href="https://wa.me/17373998522" class="wa-float" target="_blank" title="Chat on WhatsApp">💬</a>
 
 <!-- Install App chip (PWA) -->
 <button id="installAppBtn" onclick="triggerInstall()" title="Install SkyGlobe app">
@@ -6526,9 +6538,9 @@ let chatOpen=false,aiGreeted=false,currentChatTab='ai';
 
 function toggleChat(){
   chatOpen=!chatOpen;
-  document.getElementById('chatPanel').classList.toggle('open',chatOpen);
-  document.getElementById('chatFabIcon').textContent=chatOpen?'✕':'💬';
-  document.getElementById('chatBadge').style.display='none';
+  const panel=document.getElementById('chatPanel'); if(panel) panel.classList.toggle('open',chatOpen);
+  const ic=document.getElementById('chatFabIcon'); if(ic) ic.textContent=chatOpen?'✕':'💬';
+  const bd=document.getElementById('chatBadge'); if(bd) bd.style.display='none';
   const lbl=document.getElementById('chatFabLabel');
   if(lbl) lbl.style.display=chatOpen?'none':'';
   if(chatOpen&&!aiGreeted){
@@ -6918,11 +6930,6 @@ else{
 </div>
 
 <!-- ===== CHAT WIDGET ===== -->
-<div class="chat-fab-label" id="chatFabLabel">✨ AI Assistant</div>
-<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Chat with us · AI Assistant">
-  <span id="chatFabIcon">💬</span>
-  <div class="chat-badge" id="chatBadge">1</div>
-</button>
 
 <div class="chat-panel" id="chatPanel">
   <!-- Header -->
