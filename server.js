@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  SKYGLOBE GROUP — server.js  (Express 4 · Node.js · Supabase · Vanilla JS)
@@ -139,6 +140,13 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Platform founding pages are registered BEFORE the static server so a
+// leftover same-named folder in the deploy (GitHub web uploads add files but
+// never delete removed ones — e.g. an old noria/ engine folder) can never
+// shadow the real page.
+app.get(['/terra', '/yunex', '/noria'], (req, res) =>
+  res.sendFile(path.join(__dirname, req.path.replace(/[^a-z]/g, '') + '.html')));
 
 app.use(express.static(path.join(__dirname), {
   etag: true,
@@ -1243,7 +1251,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'CERTIFICATE-V3-FINAL-2026-07-10D',
+  build: 'CERT-EMBEDDED-ASSETS-2026-07-10E',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -6718,6 +6726,22 @@ app.patch('/api/courses/enrollment/:id/step/:idx/done', async (req, res) => {
 
 // Premium certificate HTML — badge, gold seal, QR verification, real
 // stamp/signature images (same trust marks as legal documents).
+// ── SELF-CONTAINED DOCUMENT ASSETS ───────────────────────────────────────────
+// Certificates and transcripts must render their logos, signature and stamp
+// FOREVER — offline, in email clients that block remote images, in PDFs, and
+// regardless of which build is live. So every image is embedded as a data URI
+// at generation time. The remote URL is only a fallback if a file is missing.
+const ASSET_DATA_URIS = {};
+function assetDataUri(name) {
+  if (name in ASSET_DATA_URIS) return ASSET_DATA_URIS[name];
+  try {
+    const buf = fs.readFileSync(path.join(__dirname, name));
+    const mime = name.endsWith('.png') ? 'image/png' : name.endsWith('.svg') ? 'image/svg+xml' : 'image/jpeg';
+    ASSET_DATA_URIS[name] = `data:${mime};base64,${buf.toString('base64')}`;
+  } catch (e) { try { logError({ source: 'asset-embed', message: `${name}: ${e.message}` }); } catch (_) {} ASSET_DATA_URIS[name] = null; }
+  return ASSET_DATA_URIS[name];
+}
+
 function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req, extra = {}) {
   // ═══ CERTIFICATE v3 — The SkyGlobe Global Credential Standard ═══
   // ISO A4 portrait · real ecosystem logos, each with its TRUE role:
@@ -6727,6 +6751,7 @@ function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req, extra =
   //   TERRA — lifetime credential verification
   // One real signature. No invented officials, hours or chains.
   const origin = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+  const img = n => assetDataUri(n) || `${origin}/${n}`; // embedded, never network-dependent
   const qrUrl = qrDataUrl(verifyUrl);
   const issueDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   // No "Level N" prefixes — the credential names itself with dignity.
@@ -6821,13 +6846,13 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
 </style></head><body>
 <div class="cert"><div class="mid"><div class="inner">
   <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
-  <div class="wmark"><img src="${origin}/skyglobe-logo.jpg" alt=""></div>
+  <div class="wmark"><img src="${img('skyglobe-logo.jpg')}" alt=""></div>
   <div class="certno"><div class="l">CERTIFICATE Nº</div><div class="v">${enr.ref}</div></div>
   ${photoDataUrl ? `<div class="idphoto"><img src="${photoDataUrl}" alt=""><div class="pl">Credential Holder</div></div>` : ''}
   <div class="z">
     <div class="micro">${micro}</div>
     <div class="hd">
-      <img src="${origin}/skyglobe-logo.jpg" alt="SkyGlobe Group">
+      <img src="${img('skyglobe-logo.jpg')}" alt="SkyGlobe Group">
       <div class="brandwrap"><span class="rule l"></span><div class="brand">SKYGLOBE GROUP</div><span class="rule r"></span></div>
       <div class="acad">Skyglobe Group Academy</div>
       <div class="tag">Global Professional Education · Innovation · Excellence</div>
@@ -6856,16 +6881,16 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
     </div>
     ${competencies.length ? `<div class="comp"><div class="cl">Core Competencies</div><div class="items">${competencies.map(c => `<span>${c}</span>`).join('')}</div></div>` : ''}
     <div class="eco">
-      <div class="cell"><img class="blogo" src="${origin}/noria-logo.jpg" alt="NORIA"><div class="bn">NORIA</div><div class="br">Assessed &amp; verified by<br><b>NORIA Intelligence</b><br>AI-powered assessment</div></div>
-      <div class="cell"><img class="blogo" src="${origin}/yunex-logo.jpg" alt="YUNEX"><div class="bn">YUNEX</div><div class="br">Enrolment &amp; payments<br>powered by <b>YUNEX</b><br>Secure payment infrastructure</div></div>
-      <div class="cell sealwrap"><div class="seal"><div class="inner-ring"><img src="${origin}/skyglobe-logo.jpg" alt=""></div></div></div>
-      <div class="cell"><img class="blogo" src="${origin}/terra-logo.png" alt="TERRA"><div class="bn">TERRA</div><div class="br">Verified through the<br><b>TERRA Credential Network</b><br>Lifetime verification</div></div>
+      <div class="cell"><img class="blogo" src="${img('noria-logo.jpg')}" alt="NORIA"><div class="bn">NORIA</div><div class="br">Assessed &amp; verified by<br><b>NORIA Intelligence</b><br>AI-powered assessment</div></div>
+      <div class="cell"><img class="blogo" src="${img('yunex-logo.jpg')}" alt="YUNEX"><div class="bn">YUNEX</div><div class="br">Enrolment &amp; payments<br>powered by <b>YUNEX</b><br>Secure payment infrastructure</div></div>
+      <div class="cell sealwrap"><div class="seal"><div class="inner-ring"><img src="${img('skyglobe-logo.jpg')}" alt=""></div></div></div>
+      <div class="cell"><img class="blogo" src="${img('terra-logo.png')}" alt="TERRA"><div class="bn">TERRA</div><div class="br">Verified through the<br><b>TERRA Credential Network</b><br>Lifetime verification</div></div>
       <div class="cell qr"><img src="${qrUrl}" alt="Verification QR"><div class="br"><b>SCAN TO VERIFY</b><br>${origin.replace('https://','')}/verify</div></div>
     </div>
     <div class="band">This credential is permanently verifiable through the TERRA Credential Network</div>
     <div class="sigrow">
       <div style="width:78px"></div>
-      <div class="sig"><img class="s" src="${origin}/signature.png" alt=""><img class="stamp" src="${origin}/stamp.png" alt="" style="position:absolute;left:-96px;bottom:-6px"><div class="ln"><b>President &amp; Chief Executive Officer</b><br>SkyGlobe Group</div></div>
+      <div class="sig"><img class="s" src="${img('signature.png')}" alt=""><img class="stamp" src="${img('stamp.png')}" alt="" style="position:absolute;left:-96px;bottom:-6px"><div class="ln"><b>President &amp; Chief Executive Officer</b><br>SkyGlobe Group</div></div>
       <div style="width:78px"></div>
     </div>
     <div class="micro">${micro}</div>
@@ -7296,7 +7321,7 @@ tr:nth-child(even) td{background:#f8fafd}
     </div>
     <div style="text-align:center"><span class="status">${complete ? '✔ PROGRAMME COMPLETED — AWARD CONFERRED' : 'PROGRAMME IN PROGRESS'}</span></div>
     <div class="frow">
-      <div class="sig"><img src="${canon}/signature.png" alt=""><div class="ln">Registrar<br>SkyGlobe Group Academy</div></div>
+      <div class="sig"><img src="${assetDataUri('signature.png') || (canon+'/signature.png')}" alt=""><div class="ln">Registrar<br>SkyGlobe Group Academy</div></div>
       <div class="sig"><svg viewBox="0 0 120 120" width="80" height="80" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="56" fill="none" stroke="#a87016" stroke-width="3"/><circle cx="60" cy="60" r="47" fill="none" stroke="#a87016" stroke-width="1"/><circle cx="60" cy="60" r="30" fill="none" stroke="#0A2E65" stroke-width="1.6"/><ellipse cx="60" cy="60" rx="30" ry="11" fill="none" stroke="#0A2E65" stroke-width="1"/><text x="60" y="67" font-family="Georgia,serif" font-weight="bold" font-size="19" text-anchor="middle" fill="#0A2E65">SG</text><path d="M83 32l1.8 5 5 1.8-5 1.8-1.8 5-1.8-5-5-1.8 5-1.8z" fill="#e65100"/></svg></div>
       <div class="qr"><img src="${qrUrl}" alt="QR"><div class="lbl"><b>Terra</b> Verified</div></div>
     </div>
