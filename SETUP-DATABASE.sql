@@ -286,3 +286,7 @@ create table if not exists academy_academic_records (
 alter table academy_teachers add column if not exists subject text;
 alter table academy_teachers add column if not exists color text;
 alter table certificates add column if not exists issued_by text;
+
+-- Certificate verification repair (root-cause fix):
+-- enrolment ids are UUIDs; make the link column text so records always save.
+alter table certificates alter column enrollment_id type text using enrollment_id::text;

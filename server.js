@@ -1146,7 +1146,12 @@ app.get('/api/view/:token/content', async (req, res) => {
     const fileUrl = storagePublicUrl(tok.document_path);
     const upstream = await fetch(fileUrl);
     if (!upstream.ok) return res.status(404).send('Document not found.');
-    const contentType = upstream.headers.get('content-type') || 'application/octet-stream';
+    const extType = {
+      '.html': 'text/html; charset=utf-8', '.htm': 'text/html; charset=utf-8',
+      '.pdf': 'application/pdf', '.png': 'image/png', '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.txt': 'text/plain; charset=utf-8',
+    }[(String(tok.filename || tok.document_path || '').match(/\.[a-z0-9]+$/i) || [''])[0].toLowerCase()];
+    const contentType = extType || upstream.headers.get('content-type') || 'application/octet-stream';
     res.set('Content-Type', contentType);
     res.set('Content-Disposition', 'inline'); // inline = display, not download
     res.set('Cache-Control', 'no-store');
@@ -6478,7 +6483,10 @@ async function bankPut(kind, trackId, stepTitle, content, existingId) {
   try {
     if (existingId) await dbQuery('PATCH', 'academy_bank', { content }, { id: `eq.${existingId}` });
     else await dbQuery('POST', 'academy_bank', { kind, track_id: trackId, step_title: stepTitle || null, content });
-  } catch (e) { console.warn('[bank] save skipped:', e.message); }
+  } catch (e) {
+    console.warn('[bank] save skipped:', e.message);
+    logError({ source: 'academy-bank', message: 'bank save failed (pools cannot grow — check academy_bank table): ' + e.message });
+  }
 }
 function sampleAndShuffle(pool, n) {
   const picked = [...pool].sort(() => Math.random() - 0.5).slice(0, n);
@@ -6749,7 +6757,7 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
 
     const certRef = 'SGC-' + crypto.randomBytes(5).toString('hex').toUpperCase();
     const verifyUrl = `${baseUrl(req)}/verify/${certRef}`;
-    const html = wrapCertificate(enr, track, tier, photoDataUrl || null, verifyUrl, req);
+    const html = wrapCertificate({ ...enr, ref: certRef }, track, tier, photoDataUrl || null, verifyUrl, req);
 
     let photoUrl = null;
     if (photoDataUrl && /^data:image\/(png|jpe?g);base64,/.test(photoDataUrl)) {
@@ -6772,11 +6780,19 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
     const viewToken = docRow ? await createDocToken(docRow.id, filePath, `certificate_${certRef}.html`, enr.email, certRef).catch(() => null) : null;
     const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
 
-    await dbQuery('POST', 'certificates', {
-      cert_ref: certRef, enrollment_id: enr.id, full_name: enr.full_name, track_id: enr.track_id,
+    const certRecord = {
+      cert_ref: certRef, full_name: enr.full_name, track_id: enr.track_id,
       tier_id: enr.tier_id, graduation_year: enr.graduation_year, photo_url: photoUrl, status: 'valid',
       nationality: enr.nationality || null,
-    }).catch(e => console.error('Certificate record save warning:', e.message));
+    };
+    let recordSaved = false;
+    try { await dbQuery('POST', 'certificates', { ...certRecord, enrollment_id: String(enr.id) }); recordSaved = true; }
+    catch (e1) {
+      try { await dbQuery('POST', 'certificates', certRecord); recordSaved = true; } // drop incompatible column
+      catch (e2) { logError({ source: 'certificates', message: 'record save failed: ' + e2.message, url: req.originalUrl }); }
+    }
+    if (!recordSaved)
+      return res.status(500).json({ error: 'Your certificate could not be registered for verification — please try again or contact support@skyglobegroup.com.' });
     await dbQuery('PATCH', 'course_enrollments', { status: 'certified', cert_ref: certRef }, { id: `eq.${req.params.id}` }).catch(() => {});
 
     res.json({ success: true, certRef, viewUrl, verifyUrl, html });
@@ -6807,7 +6823,7 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
     const certRef = 'SGC-' + crypto.randomBytes(5).toString('hex').toUpperCase();
     const verifyUrl = `${baseUrl(req)}/verify/${certRef}`;
     const enr = {
-      ref: 'CEO-GRANT', full_name: fullName, graduation_year: graduationYear || new Date().getFullYear(),
+      ref: certRef, full_name: fullName, graduation_year: graduationYear || new Date().getFullYear(),
       nationality: (nationality || '').trim() || null,
     };
     const html = wrapCertificate(enr, track, tier, null, verifyUrl, req);
