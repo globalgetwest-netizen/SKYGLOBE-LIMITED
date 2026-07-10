@@ -202,6 +202,7 @@ create table if not exists course_enrollments (
 alter table course_enrollments add column if not exists final_exam  jsonb;
 alter table course_enrollments add column if not exists final_score integer;
 alter table course_enrollments add column if not exists cert_ref    text;
+alter table course_enrollments add column if not exists exam_next_at timestamptz;
 
 create table if not exists certificates (
   id bigint generated always as identity primary key,
@@ -210,6 +211,13 @@ create table if not exists certificates (
   photo_url text, nationality text, status text default 'valid',
   created_at timestamptz default now()
 );
+
+create table if not exists academy_bank (
+  id bigint generated always as identity primary key,
+  kind text, track_id text, step_title text, content jsonb,
+  created_at timestamptz default now()
+);
+create index if not exists idx_bank_lookup on academy_bank (kind, track_id, step_title);
 
 create table if not exists academy_tracks (
   id text primary key, name text, emoji text, description text,

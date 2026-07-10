@@ -76,6 +76,10 @@
   .askbox .ans{margin-top:10px;background:#f4f6fa;border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px;font-size:.88rem;color:#3c465a;white-space:pre-wrap;display:none}
   .exam-box{background:#fff;border:1.5px solid var(--gold);border-radius:18px;padding:28px;margin-top:26px;box-shadow:0 0 0 3px rgba(212,167,58,.12)}
   .exam-box h2{font-family:'Cormorant Garamond',serif;color:var(--navy);font-size:1.5rem;margin-bottom:8px}
+  /* ── EXAM ROOM: no select/copy, and a traceable watermark on every screen ── */
+  .quiz,.exam-box{-webkit-user-select:none;-moz-user-select:none;user-select:none;position:relative}
+  .quiz::after,.exam-box::after{content:var(--wm,'SKYGLOBE ACADEMY');position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:rgba(4,16,34,.055);transform:rotate(-24deg);letter-spacing:.14em;white-space:pre-wrap;text-align:center;z-index:5}
+  @media print{.quiz,.exam-box,#examArea{display:none!important}}
   footer{background:var(--navy);color:#9fb0c9;text-align:center;padding:28px 20px;font-size:.84rem;margin-top:40px}
   footer .m{color:var(--gold);letter-spacing:.14em;font-size:.72rem;text-transform:uppercase;margin-top:8px}
 </style>
@@ -135,6 +139,7 @@ async function load(){
     if (!r.ok) throw new Error(ENR.error || 'Could not load your programme.');
     document.getElementById('hTrack').textContent = ENR.trackName || 'Your Programme';
     document.getElementById('hSub').textContent = (ENR.tierName || '') + ' · ' + ENR.full_name;
+    setWatermark();
     renderSteps();
   }catch(e){
     document.getElementById('steplist').innerHTML = '<p style="color:#a93226">' + e.message + '</p>';
@@ -349,6 +354,33 @@ async function generateCertificate(){
     box.innerHTML = '<p style="color:#a93226">' + e.message + '</p>';
     btn.disabled = false; btn.textContent = 'Generate My Certificate →';
   }
+}
+
+/* ── EXAM ROOM PROTECTIONS ──────────────────────────────────────────────
+   No copy, no cut, no paste, no right-click, no drag inside tests & exams.
+   Screens are watermarked with the student's own name and reference so any
+   photograph identifies its source. PrintScreen empties the clipboard and
+   briefly veils the questions (a deterrent — no website can fully stop a
+   phone camera, which is why the watermark is the real protection). */
+(function(){
+  const inExam = el => el && el.closest && el.closest('.quiz, .exam-box, #examArea');
+  ['copy','cut','paste','contextmenu','dragstart','selectstart'].forEach(ev =>
+    document.addEventListener(ev, e => { if (inExam(e.target)) e.preventDefault(); }, true));
+  document.addEventListener('keyup', e => {
+    if (e.key === 'PrintScreen') {
+      try { navigator.clipboard.writeText('SkyGlobe Academy — examination content is protected.'); } catch(_){}
+      document.querySelectorAll('.quiz, #examArea').forEach(el => { el.style.filter = 'blur(14px)'; });
+      setTimeout(() => document.querySelectorAll('.quiz, #examArea').forEach(el => { el.style.filter = ''; }), 2000);
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && ['c','x','p','s'].includes((e.key||'').toLowerCase()) && inExam(document.activeElement)) e.preventDefault();
+  });
+})();
+function setWatermark(){
+  if (!ENR) return;
+  const wm = (ENR.full_name || 'SKYGLOBE') + '  ·  ' + (ENR.ref || '') + '\nSKYGLOBE ACADEMY — PROTECTED';
+  document.documentElement.style.setProperty('--wm', JSON.stringify(wm));
 }
 
 if (ENR_ID) load();

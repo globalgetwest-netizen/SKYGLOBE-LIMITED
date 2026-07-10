@@ -6338,7 +6338,14 @@ app.get('/api/courses/enrollment/:id', async (req, res) => {
     if (!e) return res.status(404).json({ error: 'Enrolment not found.' });
     const track = trackById(e.track_id);
     const tier = COURSE_TIERS.find(t => t.id === e.tier_id);
-    res.json({ ...e, trackName: track?.name, tierName: tier?.name });
+    // ANTI-MALPRACTICE: test questions and correct answers NEVER leave the
+    // server through this endpoint — only progress, scores and lesson content.
+    const steps = (e.steps || []).map(st => ({
+      index: st.index, title: st.title, done: st.done, content: st.content,
+      quiz_score: st.quiz_score ?? null, quiz_passed: !!st.quiz_passed,
+    }));
+    const { final_exam, ...safe } = e;
+    res.json({ ...safe, steps, trackName: track?.name, tierName: tier?.name });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -6354,6 +6361,13 @@ app.post('/api/courses/enrollment/:id/step/:idx/content', async (req, res) => {
     if (!step) return res.status(400).json({ error: 'Invalid step.' });
     const track = trackById(enr.track_id);
     if (step.content) return res.json({ content: step.content });
+    // BANK FIRST — if any student ever received this lesson, serve it free.
+    const banked = await bankGet('lesson', enr.track_id, step.title);
+    if (banked?.content?.text) {
+      steps[idx] = { ...step, content: banked.content.text };
+      await dbQuery('PATCH', 'course_enrollments', { steps }, { id: `eq.${req.params.id}` }).catch(() => {});
+      return res.json({ content: banked.content.text });
+    }
     if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY && !USE_GROQ && !USE_OLLAMA)
       return res.status(500).json({ error: 'AI not configured. Please contact support.' });
     const prompt = `You are an expert instructor writing lesson ${idx + 1} of a professional certificate programme in "${track?.name}", titled "${step.title}". Write a COMPLETE lesson (1000-1500 words) a self-study learner can master on their own, structured exactly as:
@@ -6368,6 +6382,7 @@ PRACTICE ACTIONS — 3 short tasks to complete before taking this lesson's test.
 
 Plain text only: use the four section labels above in capitals, blank lines between paragraphs, numbered lists as "1." — no markdown symbols like # or *.`;
     const content = await generateText(prompt, { maxTokens: 2600, temperature: 0.6 });
+    bankPut('lesson', enr.track_id, step.title, { text: content }); // free for every future student
     steps[idx] = { ...step, content };
     await dbQuery('PATCH', 'course_enrollments', { steps }, { id: `eq.${req.params.id}` }).catch(() => {});
     res.json({ content });
@@ -6376,6 +6391,37 @@ Plain text only: use the four section labels above in capitals, blank lines betw
     res.status(500).json({ error: 'Could not generate this lesson right now. Please try again.' });
   }
 });
+
+// ── THE ACADEMY BANK — token economy ─────────────────────────────────────────
+// AI output is expensive; knowledge is reusable. Lessons and question pools
+// are generated ONCE per course and stored in `academy_bank`, then served to
+// every student from the bank — near-zero API usage at steady state. Tests
+// stay unpredictable by SAMPLING randomly from a growing pool and SHUFFLING
+// option order on every serve.
+//   create table academy_bank (id bigint generated always as identity primary key,
+//     kind text, track_id text, step_title text, content jsonb,
+//     created_at timestamptz default now());
+async function bankGet(kind, trackId, stepTitle) {
+  try {
+    const q = { kind: `eq.${kind}`, track_id: `eq.${trackId}`, limit: 1 };
+    if (stepTitle) q.step_title = `eq.${stepTitle}`;
+    const rows = await dbQuery('GET', 'academy_bank', null, q);
+    return rows[0] || null;
+  } catch { return null; }
+}
+async function bankPut(kind, trackId, stepTitle, content, existingId) {
+  try {
+    if (existingId) await dbQuery('PATCH', 'academy_bank', { content }, { id: `eq.${existingId}` });
+    else await dbQuery('POST', 'academy_bank', { kind, track_id: trackId, step_title: stepTitle || null, content });
+  } catch (e) { console.warn('[bank] save skipped:', e.message); }
+}
+function sampleAndShuffle(pool, n) {
+  const picked = [...pool].sort(() => Math.random() - 0.5).slice(0, n);
+  return picked.map(q => {
+    const order = [0, 1, 2, 3].slice(0, q.options.length).sort(() => Math.random() - 0.5);
+    return { q: q.q, options: order.map(i => q.options[i]), answer: order.indexOf(q.answer) };
+  });
+}
 
 // ── TESTS, EXAMS & RECORDS ───────────────────────────────────────────────────
 // Every lesson carries a 5-question test (pass 3/5 to complete the step) and
@@ -6407,19 +6453,28 @@ app.post('/api/courses/enrollment/:id/step/:idx/quiz', async (req, res) => {
     const steps = enr.steps || [];
     const step = steps[idx];
     if (!step) return res.status(400).json({ error: 'Invalid step.' });
+    if (step.quiz_next_at && Date.now() < step.quiz_next_at)
+      return res.status(429).json({ error: `Take a moment to review the lesson — your next attempt opens in ${Math.ceil((step.quiz_next_at - Date.now())/1000)}s.` });
     if (step.quiz) return res.json({ quiz: step.quiz.map(q => ({ q: q.q, options: q.options })), passed: !!step.quiz_passed, score: step.quiz_score ?? null });
     const track = trackById(enr.track_id);
-    const out = await generateText(
-      `Create exactly 5 multiple-choice questions testing lesson "${step.title}" of a "${track?.name}" certificate programme.${step.content ? ' Base them on this lesson content:\n' + String(step.content).slice(0, 2500) : ''}\nReply with ONLY a JSON array, no prose: [{"q":"question","options":["A","B","C","D"],"answer":0}] where answer is the index of the correct option.`,
-      { maxTokens: 1600, temperature: 0.35 });
-    let quiz = parseQuizJson(out);
-    if (!quiz) {
-      const retry = await generateText(
-        `Write 5 multiple-choice questions on "${step.title}" (${track?.name}). STRICT: reply with ONLY valid JSON, nothing else: [{"q":"...","options":["A","B","C","D"],"answer":0}]`,
-        { maxTokens: 1600, temperature: 0.2 });
-      quiz = parseQuizJson(retry);
+    // POOL-BASED: sample 5 from the shared bank (shuffled options every serve).
+    // The AI is only called while the pool is still growing (< 12 questions) —
+    // once mature, tests cost ZERO tokens while staying unpredictable.
+    const bankRow = await bankGet('quiz', enr.track_id, step.title);
+    let pool = Array.isArray(bankRow?.content?.pool) ? bankRow.content.pool : [];
+    if (pool.length < 12) {
+      const out = await generateText(
+        `Create exactly 6 NEW multiple-choice questions testing lesson "${step.title}" of a "${track?.name}" certificate programme.${step.content ? ' Base them on this lesson content:\n' + String(step.content).slice(0, 2500) : ''}${pool.length ? ' Do NOT repeat these existing questions: ' + pool.map(p => p.q).join(' | ').slice(0, 1200) : ''}\nReply with ONLY a JSON array, no prose: [{"q":"question","options":["A","B","C","D"],"answer":0}] where answer is the index of the correct option.`,
+        { maxTokens: 1900, temperature: 0.5 }).catch(() => null);
+      const fresh = out ? parseQuizJson(out) : null;
+      if (fresh) {
+        const seen = new Set(pool.map(p => p.q.toLowerCase()));
+        for (const q of fresh) if (!seen.has(q.q.toLowerCase())) { pool.push(q); seen.add(q.q.toLowerCase()); }
+        bankPut('quiz', enr.track_id, step.title, { pool }, bankRow?.id);
+      }
     }
-    if (!quiz) { logError({ source: 'academy-quiz', message: 'quiz parse failed twice', url: req.originalUrl }); return res.status(500).json({ error: 'Could not prepare the test right now — please try again.' }); }
+    if (pool.length < 5) { logError({ source: 'academy-quiz', message: 'pool too small and AI unavailable', url: req.originalUrl }); return res.status(503).json({ error: 'The AI engines are cooling down after heavy use — please try again in about a minute.' }); }
+    const quiz = sampleAndShuffle(pool, 5);
     steps[idx] = { ...step, quiz };
     await dbQuery('PATCH', 'course_enrollments', { steps }, { id: `eq.${req.params.id}` }).catch(() => {});
     res.json({ quiz: quiz.map(q => ({ q: q.q, options: q.options })), passed: false, score: null });
@@ -6445,8 +6500,10 @@ app.post('/api/courses/enrollment/:id/step/:idx/quiz/submit', async (req, res) =
     let score = 0;
     step.quiz.forEach((q, i) => { if (Number(answers[i]) === q.answer) score++; });
     const passed = score >= 3;
-    // A fail clears the test so the retry gets FRESH questions (no memorising answers).
-    steps[idx] = { ...step, quiz_score: score, quiz_passed: passed, done: passed ? true : step.done, quiz: passed ? step.quiz : null };
+    // A fail clears the test so the retry gets FRESH questions (no memorising
+    // answers) and opens a 60s review window before the next attempt.
+    steps[idx] = { ...step, quiz_score: score, quiz_passed: passed, done: passed ? true : step.done,
+      quiz: passed ? step.quiz : null, quiz_next_at: passed ? null : Date.now() + 60 * 1000 };
     const allDone = steps.every(st => st.done);
     await dbQuery('PATCH', 'course_enrollments',
       { steps, status: allDone ? 'completed' : 'in_progress' }, { id: `eq.${req.params.id}` });
@@ -6463,19 +6520,27 @@ app.post('/api/courses/enrollment/:id/final-exam', async (req, res) => {
     const steps = enr.steps || [];
     if (!steps.length || !steps.every(st => st.done))
       return res.status(400).json({ error: 'Complete every lesson (and its test) before the final exam.' });
+    if (enr.exam_next_at && Date.now() < new Date(enr.exam_next_at).getTime())
+      return res.status(429).json({ error: `Review your lessons — your next exam attempt opens in ${Math.ceil((new Date(enr.exam_next_at).getTime() - Date.now())/60000)} minute(s).` });
     if (enr.final_exam) return res.json({ exam: enr.final_exam.map(q => ({ q: q.q, options: q.options })), score: enr.final_score ?? null, passed: (enr.final_score ?? 0) >= 70 });
     const track = trackById(enr.track_id);
-    const out = await generateText(
-      `Create exactly 10 multiple-choice FINAL EXAM questions for a certificate programme in "${track?.name}", covering these modules: ${steps.map(st => st.title).join('; ')}. Mix difficulty. Reply with ONLY a JSON array: [{"q":"question","options":["A","B","C","D"],"answer":0}].`,
-      { maxTokens: 3000, temperature: 0.35 });
-    let exam = parseQuizJson(out);
-    if (!exam || exam.length < 6) {
-      const retry = await generateText(
-        `Write 10 multiple-choice final-exam questions for a "${track?.name}" certificate covering: ${steps.map(st => st.title).join('; ')}. STRICT: reply with ONLY valid JSON, nothing else: [{"q":"...","options":["A","B","C","D"],"answer":0}]`,
-        { maxTokens: 3000, temperature: 0.2 });
-      exam = parseQuizJson(retry);
+    // POOL-BASED final exam: a 30-question bank per course, each sitting samples
+    // 10 with shuffled options — every exam different, near-zero token cost.
+    const bankRow = await bankGet('exam', enr.track_id, null);
+    let pool = Array.isArray(bankRow?.content?.pool) ? bankRow.content.pool : [];
+    if (pool.length < 24) {
+      const out = await generateText(
+        `Create exactly 12 NEW multiple-choice FINAL EXAM questions for a certificate programme in "${track?.name}", covering these modules: ${steps.map(st => st.title).join('; ')}. Mix difficulty.${pool.length ? ' Do NOT repeat: ' + pool.map(p => p.q).join(' | ').slice(0, 1400) : ''} Reply with ONLY a JSON array: [{"q":"question","options":["A","B","C","D"],"answer":0}].`,
+        { maxTokens: 3400, temperature: 0.5 }).catch(() => null);
+      const fresh = out ? parseQuizJson(out) : null;
+      if (fresh) {
+        const seen = new Set(pool.map(p => p.q.toLowerCase()));
+        for (const q of fresh) if (!seen.has(q.q.toLowerCase())) { pool.push(q); seen.add(q.q.toLowerCase()); }
+        bankPut('exam', enr.track_id, null, { pool }, bankRow?.id);
+      }
     }
-    if (!exam || exam.length < 6) { logError({ source: 'academy-exam', message: 'exam parse failed twice', url: req.originalUrl }); return res.status(500).json({ error: 'Could not prepare the final exam right now — please try again.' }); }
+    if (pool.length < 10) { logError({ source: 'academy-exam', message: 'exam pool too small and AI unavailable', url: req.originalUrl }); return res.status(503).json({ error: 'The AI engines are cooling down after heavy use — please try again in about a minute.' }); }
+    const exam = sampleAndShuffle(pool, 10);
     await dbQuery('PATCH', 'course_enrollments', { final_exam: exam }, { id: `eq.${req.params.id}` }).catch(() => {});
     res.json({ exam: exam.map(q => ({ q: q.q, options: q.options })), score: null, passed: false });
   } catch (e) {
@@ -6499,7 +6564,7 @@ app.post('/api/courses/enrollment/:id/final-exam/submit', async (req, res) => {
     const best = Math.max(score, enr.final_score || 0);
     await dbQuery('PATCH', 'course_enrollments',
       { final_score: best, status: passed ? 'passed' : enr.status,
-        ...(passed ? {} : { final_exam: null }) }, // a fail issues a FRESH exam next attempt
+        ...(passed ? {} : { final_exam: null, exam_next_at: new Date(Date.now() + 3 * 60 * 1000).toISOString() }) }, // fail → fresh exam after a 3-minute review window
       { id: `eq.${req.params.id}` });
     res.json({ score, passed, correct: passed ? enr.final_exam.map(q => q.answer) : null,
       message: passed ? 'Congratulations — you passed the final exam!' : 'Below 70% — review your lessons and retake a fresh exam.' });
