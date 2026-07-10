@@ -5002,18 +5002,22 @@ You use fun challenges, simple body facts, and positive affirmations.`,
 // Returns the teacher for a subject, applying any CEO rename saved in the DB.
 async function getAcademyTeacher(subjKey) {
   const base = ACADEMY_TEACHERS[subjKey];
-  if (!base) return null;
   try {
     const rows = await dbQuery('GET', 'academy_teachers', null, { subject_key: `eq.${subjKey}`, limit: 1 });
     if (rows && rows[0]) {
-      return {
-        ...base,
-        name: (rows[0].name || '').trim() || base.name,
-        emoji: (rows[0].emoji || '').trim() || base.emoji,
+      if (base) return { ...base, name: (rows[0].name || '').trim() || base.name, emoji: (rows[0].emoji || '').trim() || base.emoji };
+      // CEO-added teacher — fully defined by its database row
+      if ((rows[0].subject || '').trim()) return {
+        name: rows[0].name, subject: rows[0].subject,
+        emoji: rows[0].emoji || '🎓', color: rows[0].color || '#D4A73A', custom: true,
       };
     }
   } catch { /* table may not exist yet — fall back to defaults */ }
-  return base;
+  return base || null;
+}
+// Custom teachers are live the moment the CEO creates them.
+function academySubjectLive(subjKey, teacher) {
+  return ACADEMY_LIVE_SUBJECTS.includes(subjKey) || !!teacher?.custom;
 }
 
 // Full roster with overrides applied (for admin UI + learn page)
@@ -5023,7 +5027,7 @@ async function getAcademyRoster() {
     const rows = await dbQuery('GET', 'academy_teachers', null, { limit: 100 });
     for (const r of (rows || [])) overrides[r.subject_key] = r;
   } catch { /* defaults only */ }
-  return Object.entries(ACADEMY_TEACHERS).map(([key, t]) => ({
+  const builtIn = Object.entries(ACADEMY_TEACHERS).map(([key, t]) => ({
     key,
     name: (overrides[key]?.name || '').trim() || t.name,
     emoji: (overrides[key]?.emoji || '').trim() || t.emoji,
@@ -5031,7 +5035,18 @@ async function getAcademyRoster() {
     color: t.color,
     defaultName: t.name,
     live: ACADEMY_LIVE_SUBJECTS.includes(key),
+    custom: false,
   }));
+  // CEO-added teachers: any row whose key is NOT a built-in and carries its
+  // own subject — added from the admin portal with zero code.
+  const custom = Object.values(overrides)
+    .filter(r => !ACADEMY_TEACHERS[r.subject_key] && (r.subject || '').trim())
+    .map(r => ({
+      key: r.subject_key, name: r.name, emoji: r.emoji || '🎓',
+      subject: r.subject, color: r.color || '#D4A73A',
+      defaultName: r.name, live: true, custom: true,
+    }));
+  return [...builtIn, ...custom];
 }
 
 // ── OLLAMA ENGINE (free, runs on your own machine — local OR exposed publicly) ─
@@ -5351,7 +5366,7 @@ app.post('/api/academy/tutor', async (req, res) => {
   const langName = LANG_NAMES[lang] || lang;
   const teacher = await getAcademyTeacher(subjKey);
   if (!teacher) return res.status(400).json({ error: 'Unknown subject.' });
-  if (!ACADEMY_LIVE_SUBJECTS.includes(subjKey))
+  if (!academySubjectLive(subjKey, teacher))
     return res.status(403).json({ error: `${teacher.name} (${teacher.subject}) is coming soon. Mathematics with Numa is available now.` });
   if (!message || !String(message).trim()) return res.status(400).json({ error: 'Message is required.' });
 
@@ -5476,6 +5491,36 @@ app.get('/api/admin/academy/teachers', checkAdmin, async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── CEO: ADD A NEW TEACHER + THE SUBJECT THEY TEACH (zero code) ──────────────
+app.post('/api/admin/academy/teachers', checkAdmin, async (req, res) => {
+  let { name, subject, emoji } = req.body || {};
+  name = String(name || '').trim().slice(0, 40);
+  subject = String(subject || '').trim().slice(0, 60);
+  emoji = String(emoji || '🎓').trim().slice(0, 4);
+  if (!name || !subject) return res.status(400).json({ error: 'Teacher name and the subject they teach are both required.' });
+  const key = 't_' + subject.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+  if (ACADEMY_TEACHERS[key]) return res.status(400).json({ error: 'That subject already has a built-in teacher — rename them below instead.' });
+  try {
+    const existing = await dbQuery('GET', 'academy_teachers', null, { subject_key: `eq.${key}`, limit: 1 }).catch(() => []);
+    if (existing && existing[0]) return res.status(400).json({ error: 'A teacher for this subject already exists.' });
+    await dbQuery('POST', 'academy_teachers', { subject_key: key, name, emoji, subject });
+    logActivity(req._who, 'ceo', 'academy_teacher_added', `Added teacher "${name}" for ${subject}`, key);
+    res.json({ success: true, key, name, subject, emoji });
+  } catch (e) {
+    const missing = /column|relation|does not exist/i.test(e.message);
+    res.status(500).json({ error: missing ? 'Run the academy_teachers upgrade SQL first (see the note in this panel).' : e.message });
+  }
+});
+app.delete('/api/admin/academy/teachers/:key', checkAdmin, async (req, res) => {
+  const key = String(req.params.key || '').toLowerCase();
+  if (ACADEMY_TEACHERS[key]) return res.status(400).json({ error: 'Built-in teachers cannot be removed — rename them instead.' });
+  try {
+    await dbQuery('DELETE', 'academy_teachers', null, { subject_key: `eq.${key}` });
+    logActivity(req._who, 'ceo', 'academy_teacher_removed', `Removed teacher "${key}"`, key);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── CEO: RENAME A TEACHER ─────────────────────────────────────────────────────
 app.patch('/api/admin/academy/teachers/:key', checkAdmin, async (req, res) => {
   const key = String(req.params.key || '').toLowerCase();
@@ -5491,6 +5536,7 @@ app.patch('/api/admin/academy/teachers/:key', checkAdmin, async (req, res) => {
     await dbQuery('POST', 'academy_teachers', {
       subject_key: key, name, emoji: emoji || ACADEMY_TEACHERS[key].emoji,
     });
+    // (built-in rename only reaches here; custom teachers use their own routes)
     if (typeof logActivity === 'function')
       logActivity(req._who, 'ceo', 'academy_rename', `Renamed ${ACADEMY_TEACHERS[key].subject} teacher to "${name}"`);
     res.json({ success: true, key, name, emoji: emoji || ACADEMY_TEACHERS[key].emoji });
@@ -6224,15 +6270,34 @@ const COURSE_TIERS = [
 ];
 
 const COURSE_TRACKS = [
-  { id: 'digital_marketing',     name: 'Digital Marketing',                     emoji: '📈' },
-  { id: 'content_creation',      name: 'Content Creation & Social Media',       emoji: '🎬' },
-  { id: 'entertainment_media',   name: 'Entertainment, Film & Media Production', emoji: '🎥' },
-  { id: 'business_entrepreneurship', name: 'Business & Entrepreneurship',       emoji: '💼' },
-  { id: 'tourism_hospitality',   name: 'Tourism & Hospitality Management',      emoji: '🌴' },
-  { id: 'surveying_built_env',   name: 'Surveying & the Built Environment',     emoji: '📐' },
-  { id: 'fashion_design',        name: 'Fashion & Design',                     emoji: '👗' },
-  { id: 'health_wellness',       name: 'Health & Wellness Coaching',            emoji: '🌿' },
-  { id: 'technology_coding',     name: 'Technology & Coding Fundamentals',      emoji: '💻' },
+  // ── Professional certificates ──
+  { id: 'digital_marketing',     name: 'Digital Marketing',                     emoji: '📈', category: 'professional' },
+  { id: 'content_creation',      name: 'Content Creation & Social Media',       emoji: '🎬', category: 'professional' },
+  { id: 'entertainment_media',   name: 'Entertainment, Film & Media Production', emoji: '🎥', category: 'professional' },
+  { id: 'business_entrepreneurship', name: 'Business & Entrepreneurship',       emoji: '💼', category: 'professional' },
+  { id: 'tourism_hospitality',   name: 'Tourism & Hospitality Management',      emoji: '🌴', category: 'professional' },
+  { id: 'surveying_built_env',   name: 'Surveying & the Built Environment',     emoji: '📐', category: 'professional' },
+  { id: 'fashion_design',        name: 'Fashion & Design',                     emoji: '👗', category: 'professional' },
+  { id: 'health_wellness',       name: 'Health & Wellness Coaching',            emoji: '🌿', category: 'professional' },
+  { id: 'technology_coding',     name: 'Technology & Coding Fundamentals',      emoji: '💻', category: 'professional' },
+  // ── Vocational & trade certificates — work certificates for every profession ──
+  { id: 'voc_auto_mechanic',     name: 'Auto Mechanic & Vehicle Maintenance',   emoji: '🔧', category: 'vocational' },
+  { id: 'voc_tailoring',         name: 'Tailoring & Garment Making',            emoji: '🧵', category: 'vocational' },
+  { id: 'voc_professional_driving', name: 'Professional Driving & Road Safety', emoji: '🚗', category: 'vocational' },
+  { id: 'voc_carpentry',         name: 'Carpentry & Woodwork',                  emoji: '🪚', category: 'vocational' },
+  { id: 'voc_storekeeping',      name: 'Storekeeping & Inventory Management',   emoji: '📦', category: 'vocational' },
+  { id: 'voc_sales_rep',         name: 'Sales Representative & Customer Care',  emoji: '🤝', category: 'vocational' },
+  { id: 'voc_housekeeping',      name: 'Housekeeping & Domestic Management',    emoji: '🏠', category: 'vocational' },
+  { id: 'voc_security',          name: 'Security & Watchman Services',          emoji: '🛡️', category: 'vocational' },
+  { id: 'voc_cashier',           name: 'Cashier & Point-of-Sale Operations',    emoji: '💵', category: 'vocational' },
+  { id: 'voc_receptionist',      name: 'Receptionist & Front Desk',             emoji: '☎️', category: 'vocational' },
+  { id: 'voc_electrical',        name: 'Electrical Installation & Repairs',     emoji: '⚡', category: 'vocational' },
+  { id: 'voc_welding',           name: 'Welding & Metal Fabrication',           emoji: '🔥', category: 'vocational' },
+  { id: 'voc_laundry',           name: 'Laundry & Fabric Care Services',        emoji: '🧺', category: 'vocational' },
+  { id: 'voc_farming',           name: 'Farming & Agribusiness',                emoji: '🌾', category: 'vocational' },
+  { id: 'voc_fishing',           name: 'Fishing & Aquaculture',                 emoji: '🎣', category: 'vocational' },
+  { id: 'voc_construction',      name: 'Construction & Masonry',                emoji: '🏗️', category: 'vocational' },
+  { id: 'voc_plumbing',          name: 'Plumbing & Pipefitting',                emoji: '🚰', category: 'vocational' },
 ];
 const COURSE_TRACK_INDEX = COURSE_TRACKS.reduce((a, t) => (a[t.id] = t, a), {});
 
@@ -6245,7 +6310,7 @@ let CUSTOM_TRACKS = [];
 async function refreshCourseTracks() {
   try {
     const rows = await dbQuery('GET', 'academy_tracks', null, { active: 'eq.true', order: 'created_at.asc', limit: 200 });
-    CUSTOM_TRACKS = (Array.isArray(rows) ? rows : []).map(r => ({ id: r.id, name: r.name, emoji: r.emoji || '📘', description: r.description || '' }));
+    CUSTOM_TRACKS = (Array.isArray(rows) ? rows : []).map(r => ({ id: r.id, name: r.name, emoji: r.emoji || '📘', description: r.description || '', category: 'specialty' }));
   } catch (e) { /* table may not exist yet — built-ins still work */ }
 }
 function allCourseTracks() { return [...COURSE_TRACKS, ...CUSTOM_TRACKS]; }
@@ -6719,6 +6784,167 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
     console.error('Certificate generate error:', e.message);
     res.status(500).json({ error: 'Certificate generation is temporarily unavailable. Please try again in a moment.' });
   }
+});
+
+// ── CEO: HONORARY / DIRECT CERTIFICATE (no exam required) ────────────────────
+// The CEO's personal authority: issue an official, QR-verifiable certificate
+// to any recipient directly — honorary awards, prior-learning recognition,
+// staff development. Recorded with issued_by = the CEO's name for the audit
+// trail, and delivered to the recipient by email + portal when an address is
+// given. Regular students still pass every gate — this route is CEO-only.
+app.post('/api/admin/academy/grant-certificate', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    let { fullName, email, trackId, tierId, graduationYear, nationality } = req.body || {};
+    fullName = String(fullName || '').trim().slice(0, 120);
+    email = String(email || '').trim().toLowerCase();
+    const track = trackById(trackId);
+    const tier = COURSE_TIERS.find(t => t.id === tierId) || COURSE_TIERS[2];
+    if (!fullName) return res.status(400).json({ error: 'Recipient full name is required.' });
+    if (!track) return res.status(400).json({ error: 'Choose the course for this certificate.' });
+
+    const certRef = 'SGC-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    const verifyUrl = `${baseUrl(req)}/verify/${certRef}`;
+    const enr = {
+      ref: 'CEO-GRANT', full_name: fullName, graduation_year: graduationYear || new Date().getFullYear(),
+      nationality: (nationality || '').trim() || null,
+    };
+    const html = wrapCertificate(enr, track, tier, null, verifyUrl, req);
+
+    const filePath = `certificates/${certRef}/certificate.html`;
+    await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8').catch(() => {});
+    const docRows = await dbQuery('POST', 'documents', {
+      ref: certRef, filename: `certificate_${certRef}.html`, path: filePath, uploaded_by: 'ceo:certificates',
+    }).catch(() => null);
+    const docRow = Array.isArray(docRows) ? docRows[0] : docRows;
+    const viewToken = docRow ? await createDocToken(docRow.id, filePath, `certificate_${certRef}.html`, email || 'ceo@skyglobegroup.com', certRef).catch(() => null) : null;
+    const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
+
+    await dbQuery('POST', 'certificates', {
+      cert_ref: certRef, full_name: fullName, track_id: track.id, tier_id: tier.id,
+      graduation_year: enr.graduation_year, nationality: enr.nationality,
+      status: 'valid', issued_by: who,
+    }).catch(e => console.error('CEO certificate record warning:', e.message));
+    logActivity(who, 'ceo', 'certificate_granted', `Issued ${track.name} certificate to ${fullName}`, certRef);
+
+    // Deliver to the recipient — email + portal inbox when we know who they are.
+    if (email) {
+      portalDeliver(email, `Congratulations! The Office of the CEO has awarded you an official SkyGlobe Academy certificate in ${track.name}.${viewUrl ? ' Open it here: ' + viewUrl : ''} Verify anytime: ${verifyUrl}`, 'education').catch(() => {});
+      sendEmail(email, '🏅 You have been awarded a SkyGlobe Academy Certificate',
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
+          <h2 style="color:#a87016;font-family:Georgia,serif">🏅 Congratulations, ${fullName}!</h2>
+          <p>The Office of the CEO of <strong>SkyGlobe Group</strong> has awarded you an official certificate in <strong>${track.name}</strong> (${tier.name}).</p>
+          ${viewUrl ? `<p><a href="${viewUrl}" style="display:inline-block;background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;font-weight:700;padding:12px 26px;border-radius:10px;text-decoration:none">Open &amp; Print Your Certificate</a></p>` : ''}
+          <p style="font-size:13px;color:#6b7689">Reference: <strong>${certRef}</strong> · Anyone can verify it at ${verifyUrl}</p>
+          <p style="font-size:13px;color:#6b7689">🎓 SkyGlobe Academy · One World. One Mission.</p>
+        </div>`, undefined, deptSender('education')).catch(err => console.error('CEO certificate email failed:', err.message));
+    }
+    res.json({ success: true, certRef, viewUrl, verifyUrl });
+  } catch (e) {
+    console.error('CEO certificate error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── CEO: ADMISSION INTAKES & FLYERS STUDIO ───────────────────────────────────
+// Generates a premium, print-ready branded flyer for an Academy admission
+// intake or any course enrollment — deterministic HTML (zero AI tokens),
+// share-ready in seconds. Opens in a new tab for print / save as PDF /
+// screenshot for social media.
+app.post('/api/admin/academy/flyer', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    let { kind, trackId, headline, intake, startDate, note, contact } = req.body || {};
+    kind = kind === 'admission' ? 'admission' : 'course';
+    const track = kind === 'course' ? trackById(trackId) : null;
+    if (kind === 'course' && !track) return res.status(400).json({ error: 'Choose the course for this flyer.' });
+    const origin = baseUrl(req);
+    const title = String(headline || '').trim() ||
+      (kind === 'admission' ? 'Admissions Now Open' : `Enroll Now: ${track.name}`);
+    const target = kind === 'admission' ? `${origin}/academy` : `${origin}/courses`;
+    const qr = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&margin=6&data=${encodeURIComponent(target)}`;
+    const tiersRow = COURSE_TIERS.map(t =>
+      `<div class="tier"><div class="tn">${t.name.replace(' Certificate','')}</div><div class="tp">$${PRICING[t.product].USD}</div><div class="tm">${t.months} month${t.months>1?'s':''} · ${t.steps} lessons</div></div>`).join('');
+    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title} — SkyGlobe ${kind === 'admission' ? 'Academy' : 'Certificate Programs'}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,sans-serif;background:#e9edf3;display:flex;justify-content:center;padding:26px}
+.flyer{width:100%;max-width:760px;background:linear-gradient(165deg,#041022 0%,#0A2E65 70%,#12408a 100%);border-radius:18px;overflow:hidden;color:#fff;box-shadow:0 30px 70px rgba(4,16,34,.35);position:relative}
+.flyer:before{content:"";position:absolute;inset:12px;border:1px solid rgba(212,167,58,.4);border-radius:12px;pointer-events:none}
+.inner{padding:46px 48px;position:relative}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand .n{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.2rem;letter-spacing:.14em}
+.brand .n span{color:#F4D77A}.brand .n .star{color:#ff9f1c;font-size:.7em;vertical-align:.5em}
+.brand .tag{font-size:.6rem;letter-spacing:.28em;color:#9fb0d6;text-transform:uppercase}
+.kick{display:inline-block;margin-top:30px;font-size:.66rem;font-weight:800;letter-spacing:.3em;color:#F4D77A;border:1px solid rgba(212,167,58,.5);padding:7px 16px;border-radius:100px;text-transform:uppercase}
+h1{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:clamp(1.9rem,5vw,2.9rem);margin:18px 0 10px;line-height:1.15}
+.em{font-size:2.6rem;margin-top:8px}
+.sub{color:#c9d6ec;font-size:.95rem;line-height:1.7;max-width:520px}
+.facts{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}
+.fact{background:rgba(255,255,255,.07);border:1px solid rgba(212,167,58,.35);border-radius:12px;padding:12px 18px}
+.fact .l{font-size:.6rem;letter-spacing:.18em;color:#9fb0d6;text-transform:uppercase}
+.fact .v{font-weight:800;font-size:.95rem;color:#F4D77A;margin-top:3px}
+.tiers{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 22px}
+.tier{flex:1;min-width:140px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 14px;text-align:center}
+.tier .tn{font-size:.72rem;font-weight:700;color:#c9d6ec}
+.tier .tp{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.5rem;color:#F4D77A}
+.tier .tm{font-size:.64rem;color:#9fb0d6}
+.perks{color:#c9d6ec;font-size:.84rem;line-height:2}
+.perks b{color:#fff}
+.cta-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:26px;flex-wrap:wrap}
+.cta{background:linear-gradient(135deg,#D4A73A,#F4D77A);color:#041022;font-weight:800;padding:15px 30px;border-radius:100px;font-size:.95rem;text-decoration:none;display:inline-block}
+.qr{background:#fff;border-radius:12px;padding:8px;text-align:center}
+.qr img{width:120px;height:120px;display:block}
+.qr .q{font-size:.56rem;color:#041022;font-weight:700;letter-spacing:.08em;margin-top:4px;text-transform:uppercase}
+.foot{background:#041022;padding:16px 48px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.72rem;color:#9fb0d6}
+.foot b{color:#F4D77A}
+.motto{font-size:.62rem;letter-spacing:.26em;color:#D4A73A;text-transform:uppercase;font-weight:800}
+.printbar{max-width:760px;margin:0 auto 14px;display:flex;gap:10px;justify-content:center}
+.printbar button{background:#0A2E65;color:#fff;border:none;border-radius:100px;padding:10px 24px;font-weight:700;cursor:pointer;font-family:inherit}
+@media print{body{background:#fff;padding:0}.printbar{display:none}.flyer{box-shadow:none;border-radius:0}}
+</style></head><body>
+<div>
+<div class="printbar"><button onclick="window.print()">🖨️ Print / Save as PDF</button></div>
+<div class="flyer">
+  <div class="inner">
+    <div class="brand"><div class="n">SKY<span>GLOBE</span> GROUP<span class="star">✦</span></div><div class="tag">${kind === 'admission' ? 'SkyGlobe Academy' : 'Certificate Programs'}</div></div>
+    <span class="kick">${kind === 'admission' ? '🎓 Admission Intake' : '📜 Now Enrolling'}${intake ? ' · ' + String(intake).slice(0, 60) : ''}</span>
+    ${track ? `<div class="em">${track.emoji}</div>` : '<div class="em">🎓</div>'}
+    <h1>${title}</h1>
+    <p class="sub">${String(note || '').trim() || (kind === 'admission'
+      ? 'SkyGlobe Academy welcomes learners of every age — AI-guided teachers, real curriculum, real records, and a family campus that keeps parents in the picture. Education for all. No matter the age. No matter the distance.'
+      : `Master ${track.name} with AI-guided lessons, hands-on practicals, real tests and a final examination — earn an official QR-verifiable SkyGlobe certificate recognised anywhere.`)}</p>
+    <div class="facts">
+      ${startDate ? `<div class="fact"><div class="l">Starts</div><div class="v">${String(startDate).slice(0, 40)}</div></div>` : ''}
+      <div class="fact"><div class="l">Format</div><div class="v">100% Online · Self-paced</div></div>
+      <div class="fact"><div class="l">Certificate</div><div class="v">QR-Verifiable Worldwide</div></div>
+      <div class="fact"><div class="l">Teacher</div><div class="v">AI-Guided · 24/7</div></div>
+    </div>
+    ${kind === 'course' ? `<div class="tiers">${tiersRow}</div>` : ''}
+    <div class="perks">
+      ✦ <b>Complete lessons</b> — full theory, worked examples &amp; practicals&nbsp;&nbsp;
+      ✦ <b>Real assessment</b> — a test on every lesson + final examination&nbsp;&nbsp;
+      ✦ <b>Listen &amp; ask</b> — lessons read aloud, your AI teacher answers any question
+    </div>
+    <div class="cta-row">
+      <a class="cta" href="${target}">${kind === 'admission' ? 'Apply for Admission →' : 'Enroll Today →'}</a>
+      <div class="qr"><img src="${qr}" alt="Scan to enroll"><div class="q">Scan to ${kind === 'admission' ? 'apply' : 'enroll'}</div></div>
+    </div>
+  </div>
+  <div class="foot">
+    <div><b>${target.replace('https://','')}</b> · ${String(contact || 'education@skyglobegroup.com · WhatsApp +1 737-399-8522').slice(0, 90)}</div>
+    <div class="motto">One World. One Mission. <span style="color:#ff9f1c">✦</span></div>
+  </div>
+</div>
+</div>
+</body></html>`;
+    logActivity(who, 'ceo', 'flyer_generated', `Generated ${kind} flyer: ${title}`);
+    res.json({ success: true, html });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // Public verification — deliberately minimal: confirms authenticity without

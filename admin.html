@@ -1346,6 +1346,54 @@
             <input id="newCourseDesc" placeholder="One-line description shown to students (optional)" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;font-size:.9rem;margin-bottom:14px">
             <div id="courseCatalog"><div class="skeleton">Loading catalog…</div></div>
           </div>
+          <div class="panel" style="margin-bottom:18px">
+            <h3>🏅 CEO Honorary Certificate — issue directly, no exam</h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Your personal authority: award an official, QR-verifiable SkyGlobe certificate to anyone — honorary recognition, prior experience, staff development. Recorded under your name; delivered to the recipient by email and portal inbox. <span style="color:var(--gold)">One-time SQL:</span> <code style="color:var(--txt)">alter table certificates add column if not exists issued_by text;</code></p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px">
+              <input id="hcName" placeholder="Recipient full name *" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="hcEmail" placeholder="Recipient email (for delivery)" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <select id="hcTrack" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px"><option value="">Course… *</option></select>
+              <select id="hcTier" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+                <option value="cert_pro">3-Month Pro Certificate</option>
+                <option value="cert_advanced">2-Month Advanced Certificate</option>
+                <option value="cert_amateur">1-Month Amateur Certificate</option>
+              </select>
+              <input id="hcYear" placeholder="Class of (year)" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+            </div>
+            <button class="btn" onclick="issueHonoraryCert()">🏅 Issue Certificate</button>
+            <div id="hcResult" style="margin-top:12px;font-size:.86rem"></div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3>📣 Intakes &amp; Flyers Studio</h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Generate a premium, print-ready flyer for an Academy admission intake or any course enrollment — branded, QR-coded, share-ready in seconds. Print it, save as PDF, or screenshot for WhatsApp &amp; social media.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px">
+              <select id="flKind" onchange="document.getElementById('flTrack').style.display=this.value==='course'?'':'none'" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+                <option value="course">Course Enrollment Flyer</option>
+                <option value="admission">Academy Admission Flyer</option>
+              </select>
+              <select id="flTrack" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px"><option value="">Course… *</option></select>
+              <input id="flIntake" placeholder="Intake label — e.g. September 2026" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="flStart" placeholder="Start date — e.g. 1 September 2026" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+            </div>
+            <input id="flHeadline" placeholder="Custom headline (optional — a strong default is used)" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:10px">
+            <input id="flNote" placeholder="Custom message (optional)" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:12px">
+            <button class="btn" onclick="generateFlyer()">🎨 Generate Flyer</button>
+            <span id="flStatus" style="margin-left:10px;font-size:.85rem;color:var(--muted)"></span>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3>👩‍🏫 Add a Teacher — and the subject they teach</h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Create a brand-new AI teacher for any subject — they go live for students instantly. <span style="color:var(--gold)">One-time SQL:</span> <code style="color:var(--txt)">alter table academy_teachers add column if not exists subject text; alter table academy_teachers add column if not exists color text;</code></p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <input id="ntEmoji" placeholder="🎓" maxlength="4" style="width:64px;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;text-align:center;font-size:1.05rem">
+              <input id="ntName" placeholder="Teacher name — e.g. Kofi" maxlength="40" style="flex:1;min-width:160px;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="ntSubject" placeholder="Subject they teach — e.g. French Language" maxlength="60" style="flex:2;min-width:200px;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <button class="btn" onclick="addTeacher()">➕ Add teacher</button>
+            </div>
+            <div id="ntStatus" style="margin-top:10px;font-size:.85rem"></div>
+          </div>
+
           <div class="panel">
             <h3>🎓 SkyGlobe Academy — AI Teachers</h3>
             <p style="color:var(--muted);font-size:.9rem;margin:6px 0 4px">
@@ -1462,7 +1510,6 @@ async function removeCourse(id,name){
 }
 const titles={dashboard:'Command Bridge',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
-  if(v==='academy') loadCourseCatalog();
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
   if(v==='payments') loadPayments();
@@ -1484,7 +1531,7 @@ const titles={dashboard:'Command Bridge',applications:'Applications',messages:'C
   if(v==='analytics') loadAnalytics();
   if(v==='errors') loadErrors();
   if(v==='ipregistry') loadIPRegistry();
-  if(v==='academy') loadAcademyTeachers();
+  if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); }
   toggleSidebar(false);
 }
 
@@ -1511,11 +1558,80 @@ async function loadAcademyTeachers(){
         <input id="tn-${t.key}" value="${esc(t.name)}" maxlength="40" style="flex:1;min-width:140px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--navy,#08152e);color:var(--txt)">
         <input id="te-${t.key}" value="${esc(t.emoji)}" maxlength="4" style="width:56px;text-align:center;padding:9px;border-radius:8px;border:1px solid var(--line);background:var(--navy,#08152e);color:var(--txt)">
         <button class="btn btn-sm" onclick="saveTeacherName('${t.key}')">Save</button>
+        ${t.custom?`<button class="btn btn-sm btn-ghost" onclick="removeTeacher('${t.key}','${esc(t.name)}')">Remove</button>`:''}
         <span id="ts-${t.key}" style="font-size:.8rem;min-width:60px"></span>`;
       box.appendChild(card);
     });
   }catch(e){box.innerHTML='<div style="color:#ffb4b4">'+esc(e.message)+'</div>';}
 }
+/* ══ Add / remove teachers (with the subject they teach) ══ */
+async function addTeacher(){
+  const name=document.getElementById('ntName').value.trim();
+  const subject=document.getElementById('ntSubject').value.trim();
+  const emoji=document.getElementById('ntEmoji').value.trim();
+  const st=document.getElementById('ntStatus');
+  if(!name||!subject){st.style.color='#ffb4b4';st.textContent='Teacher name and subject are both required.';return;}
+  st.style.color='var(--muted)';st.textContent='Adding…';
+  try{
+    const r=await fetch(API+'/api/admin/academy/teachers',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({name,subject,emoji})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Could not add');
+    st.style.color='#7ee2a8';st.textContent='✓ '+name+' now teaches '+subject+' — live for students.';
+    document.getElementById('ntName').value='';document.getElementById('ntSubject').value='';document.getElementById('ntEmoji').value='';
+    loadAcademyTeachers();
+  }catch(e){st.style.color='#ffb4b4';st.textContent=e.message;}
+}
+async function removeTeacher(key,name){
+  if(!confirm('Remove teacher "'+name+'" and their subject?'))return;
+  try{
+    const r=await fetch(API+'/api/admin/academy/teachers/'+key,{method:'DELETE',headers:{'x-admin-key':KEY}});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Could not remove');
+    loadAcademyTeachers();
+  }catch(e){alert(e.message);}
+}
+
+/* ══ CEO Honorary Certificate + Flyer Studio ══ */
+async function loadFlyerTracks(){
+  try{
+    const r=await fetch(API+'/api/courses/catalog');
+    const d=await r.json();
+    const opts='<option value="">Course… *</option>'+(d.tracks||[]).map(t=>`<option value="${t.id}">${t.emoji} ${t.name}</option>`).join('');
+    const a=document.getElementById('hcTrack'),b=document.getElementById('flTrack');
+    if(a)a.innerHTML=opts; if(b)b.innerHTML=opts;
+  }catch(e){}
+}
+async function issueHonoraryCert(){
+  const box=document.getElementById('hcResult');
+  const fullName=document.getElementById('hcName').value.trim();
+  const trackId=document.getElementById('hcTrack').value;
+  if(!fullName||!trackId){box.style.color='#ffb4b4';box.textContent='Recipient name and course are required.';return;}
+  box.style.color='var(--muted)';box.textContent='Issuing certificate…';
+  try{
+    const r=await fetch(API+'/api/admin/academy/grant-certificate',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({fullName,email:document.getElementById('hcEmail').value.trim(),trackId,tierId:document.getElementById('hcTier').value,graduationYear:parseInt(document.getElementById('hcYear').value)||undefined})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Could not issue');
+    box.style.color='#7ee2a8';
+    box.innerHTML='🏅 Issued <b style="color:var(--gold)">'+d.certRef+'</b>'
+      +(d.viewUrl?' · <a href="'+d.viewUrl+'" target="_blank" style="color:var(--gold)">Open certificate</a>':'')
+      +' · <a href="'+d.verifyUrl+'" target="_blank" style="color:var(--gold)">Verification page</a>'
+      +(document.getElementById('hcEmail').value.trim()?' · sent to the recipient':'');
+    document.getElementById('hcName').value='';document.getElementById('hcEmail').value='';document.getElementById('hcYear').value='';
+  }catch(e){box.style.color='#ffb4b4';box.textContent=e.message;}
+}
+async function generateFlyer(){
+  const st=document.getElementById('flStatus');
+  const kind=document.getElementById('flKind').value;
+  const trackId=document.getElementById('flTrack').value;
+  if(kind==='course'&&!trackId){st.style.color='#ffb4b4';st.textContent='Choose the course.';return;}
+  st.style.color='var(--muted)';st.textContent='Designing…';
+  try{
+    const r=await fetch(API+'/api/admin/academy/flyer',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},
+      body:JSON.stringify({kind,trackId,headline:document.getElementById('flHeadline').value.trim(),intake:document.getElementById('flIntake').value.trim(),startDate:document.getElementById('flStart').value.trim(),note:document.getElementById('flNote').value.trim()})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Could not generate');
+    const w=window.open('','_blank'); w.document.write(d.html); w.document.close();
+    st.style.color='#7ee2a8';st.textContent='✓ Flyer opened — print, save as PDF, or screenshot to share.';
+  }catch(e){st.style.color='#ffb4b4';st.textContent=e.message;}
+}
+
 async function saveTeacherName(key){
   const name=document.getElementById('tn-'+key).value.trim();
   const emoji=document.getElementById('te-'+key).value.trim();

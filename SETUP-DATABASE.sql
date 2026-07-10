@@ -246,9 +246,14 @@ create table if not exists academy_guardians (
 
 create table if not exists academy_teachers (
   id bigint generated always as identity primary key,
-  subject text unique, teacher_name text, live boolean default true,
-  meta jsonb, created_at timestamptz default now()
+  subject_key text unique, name text, emoji text,
+  subject text, color text,
+  created_at timestamptz default now()
 );
+-- If the table already existed with an older shape, add the columns the code uses:
+alter table academy_teachers add column if not exists subject_key text;
+alter table academy_teachers add column if not exists name text;
+alter table academy_teachers add column if not exists emoji text;
 
 create table if not exists academy_sessions (
   id bigint generated always as identity primary key,
@@ -276,3 +281,8 @@ create table if not exists academy_academic_records (
 -- ═══════════════════════════════════════════════════════════════════════════
 --  Done. "Success. No rows returned." means everything is in place.
 -- ═══════════════════════════════════════════════════════════════════════════
+
+-- Academy completion layer (teachers with subjects, honorary certificates)
+alter table academy_teachers add column if not exists subject text;
+alter table academy_teachers add column if not exists color text;
+alter table certificates add column if not exists issued_by text;

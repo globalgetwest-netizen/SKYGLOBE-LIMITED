@@ -199,13 +199,29 @@ async function loadCatalog(){
 
 function renderTracks(){
   const wrap=document.getElementById('trackGrid'); wrap.innerHTML='';
-  state.catalog.tracks.forEach(t=>{
-    const c=document.createElement('div'); c.className='trk-card';
-    c.innerHTML=`<span class="em">${t.emoji}</span><h3>${t.name}</h3>`;
-    c.onclick=()=>{ state.trackId=t.id; state.trackName=t.name;
-      document.querySelectorAll('.trk-card').forEach(x=>x.classList.remove('sel'));
-      c.classList.add('sel'); setTimeout(()=>goStep(2),180); };
-    wrap.appendChild(c);
+  // The catalog is organised into families — professional, vocational trades,
+  // and the CEO's specialty additions — each under its own premium heading.
+  const GROUPS=[
+    {key:'professional', label:'💼 Professional Certificates', sub:'Career and business programmes'},
+    {key:'vocational',   label:'🛠️ Vocational & Trade Certificates', sub:'Work certificates for every profession — learn a trade, earn proof'},
+    {key:'specialty',    label:'✨ Specialty Programmes', sub:'Newly added by SkyGlobe Academy'},
+  ];
+  const grouped={};
+  state.catalog.tracks.forEach(t=>{ const k=t.category||'professional'; (grouped[k]=grouped[k]||[]).push(t); });
+  GROUPS.forEach(g=>{
+    const list=grouped[g.key]||[]; if(!list.length) return;
+    const head=document.createElement('div');
+    head.style.cssText='grid-column:1/-1;margin:14px 0 2px;text-align:left';
+    head.innerHTML=`<div style="font-weight:800;color:#041022;font-size:1.02rem;letter-spacing:.02em">${g.label}</div><div style="font-size:.78rem;color:#6b7689">${g.sub}</div>`;
+    wrap.appendChild(head);
+    list.forEach(t=>{
+      const c=document.createElement('div'); c.className='trk-card';
+      c.innerHTML=`<span class="em">${t.emoji}</span><h3>${t.name}</h3>`;
+      c.onclick=()=>{ state.trackId=t.id; state.trackName=t.name;
+        document.querySelectorAll('.trk-card').forEach(x=>x.classList.remove('sel'));
+        c.classList.add('sel'); setTimeout(()=>goStep(2),180); };
+      wrap.appendChild(c);
+    });
   });
 }
 
