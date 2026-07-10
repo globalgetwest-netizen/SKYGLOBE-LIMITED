@@ -1393,6 +1393,55 @@
           </div>
 
           <div class="panel" style="margin-bottom:18px">
+            <h3>🏛️ Ownership &amp; Business Recognition <span style="font-size:.68rem;color:#7fd6a3;letter-spacing:.12em">TERRA VERIFIED · CEO AUTHORITY</span></h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Award a premium, frameable <b style="color:var(--txt)">Certificate of Recognition</b> to business, company, asset or property owners — carrying the SkyGlobe logos, gold seal, stamp, your signature and lifetime QR verification. It recognises the <b style="color:var(--txt)">verified identity, ownership and registration</b> as presented — proof that partners and investors can check from anywhere in the world.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px">
+              <input id="rcOwner" placeholder="Owner full name *" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcQual" placeholder="Qualification / title — e.g. B.Sc. Economics" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcNationality" placeholder="Nationality" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcEntity" placeholder="Business / asset / property name *" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <select id="rcType" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+                <option value="business">Business</option><option value="company">Company</option>
+                <option value="asset">Asset</option><option value="property">Property</option>
+              </select>
+              <input id="rcReg" placeholder="Registration Nº (e.g. CAC / RC number)" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcSector" placeholder="Sector — e.g. Agriculture, Real Estate" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcLocation" placeholder="Location — e.g. Kano, Nigeria" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="rcEst" placeholder="Established — e.g. 2015" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+              <label style="color:var(--muted);font-size:.85rem">Owner photo (identity portrait, top-left):</label>
+              <input type="file" id="rcPhoto" accept="image/png,image/jpeg" onchange="rcPhotoPick(this)" style="color:var(--muted);font-size:.82rem">
+            </div>
+            <button class="btn" onclick="issueRecognitionCert()">🏛️ Issue Recognition Certificate</button>
+            <div id="rcResult" style="margin-top:10px;font-size:.85rem"></div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3>🏢 Business Work Certificate <span style="font-size:.68rem;color:#7fd6a3;letter-spacing:.12em">TERRA VERIFIED</span></h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Issue a work certificate on a <b style="color:var(--txt)">business's own letterhead</b> — their name, details and signatory carry the document. SkyGlobe appears only in the TERRA verification footer with the QR code. TERRA verifies the document was genuinely issued and unaltered; the business remains responsible for its contents.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px">
+              <input id="bcBizName" placeholder="Business name *" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="bcBizAddress" placeholder="Business address" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="bcBizContact" placeholder="Business phone / email" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="bcEmployee" placeholder="Employee full name *" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="bcEmployeeId" placeholder="Employee ID (optional)" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="bcRole" placeholder="Position / role * — e.g. Store Manager" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="bcPeriod" placeholder="Period * — e.g. March 2023 – June 2026" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="bcSigName" placeholder="Signatory name *" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+              <input id="bcSigTitle" placeholder="Signatory title * — e.g. Managing Director" style="background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
+            </div>
+            <textarea id="bcDuties" placeholder="Principal duties &amp; responsibilities (optional, printed in the body)" rows="2" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:10px;resize:vertical"></textarea>
+            <textarea id="bcConduct" placeholder="Conduct statement (optional) — e.g. Their service and conduct during this period were satisfactory." rows="2" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:10px;resize:vertical"></textarea>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+              <label style="color:var(--muted);font-size:.85rem">Business logo (optional, printed on the letterhead):</label>
+              <input type="file" id="bcLogo" accept="image/png,image/jpeg" onchange="bcLogoPick(this)" style="color:var(--muted);font-size:.82rem">
+            </div>
+            <button class="btn" onclick="issueBusinessCert()">🏢 Issue Work Certificate</button>
+            <div id="bcResult" style="margin-top:10px;font-size:.85rem"></div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
             <h3>📣 Intakes &amp; Flyers Studio</h3>
             <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Generate a premium, print-ready flyer for an Academy admission intake or any course enrollment — branded, QR-coded, share-ready in seconds. Print it, save as PDF, or screenshot for WhatsApp &amp; social media.</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px">
@@ -1668,6 +1717,64 @@ function hcPhotoPick(input){
     const pv=document.getElementById('hcPhotoPrev');pv.src=HC_PHOTO;pv.style.display='inline-block';
   };img.src=r.result;};
   r.readAsDataURL(f);
+}
+let RC_PHOTO=null;
+function rcPhotoPick(input){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{const img=new Image();img.onload=()=>{
+    const max=640,sc=Math.min(1,max/Math.max(img.width,img.height));
+    const cv=document.createElement('canvas');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    RC_PHOTO=cv.toDataURL('image/jpeg',0.86);
+  };img.src=r.result;};
+  r.readAsDataURL(f);
+}
+async function issueRecognitionCert(){
+  const box=document.getElementById('rcResult');
+  const v=id=>document.getElementById(id).value.trim();
+  const payload={ownerName:v('rcOwner'),ownerQualification:v('rcQual'),nationality:v('rcNationality'),
+    entityName:v('rcEntity'),entityType:document.getElementById('rcType').value,regNumber:v('rcReg'),
+    sector:v('rcSector'),location:v('rcLocation'),established:v('rcEst'),photoDataUrl:RC_PHOTO};
+  if(!payload.ownerName||!payload.entityName){box.style.color='#ffb4b4';box.textContent='Owner name and entity name are required.';return;}
+  box.style.color='var(--muted)';box.textContent='Issuing…';
+  try{
+    const r=await fetch(API+'/api/admin/terra/recognition-certificate',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(!r.ok||!d.success){box.style.color='#ffb4b4';box.textContent=d.error||'Could not issue the certificate.';return;}
+    box.style.color='#7fd6a3';
+    box.innerHTML='✅ Issued <b>'+d.certRef+'</b> — <a href="'+d.viewUrl+'" target="_blank" style="color:var(--gold)">Open &amp; Print</a> · <a href="'+d.verifyUrl+'" target="_blank" style="color:var(--gold)">Verify</a>';
+  }catch(e){box.style.color='#ffb4b4';box.textContent='Network error: '+e.message;}
+}
+let BC_LOGO=null;
+function bcLogoPick(input){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{const img=new Image();img.onload=()=>{
+    const max=480,sc=Math.min(1,max/Math.max(img.width,img.height));
+    const cv=document.createElement('canvas');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    BC_LOGO=cv.toDataURL('image/png');
+  };img.src=r.result;};
+  r.readAsDataURL(f);
+}
+async function issueBusinessCert(){
+  const box=document.getElementById('bcResult');
+  const v=id=>document.getElementById(id).value.trim();
+  const payload={businessName:v('bcBizName'),businessAddress:v('bcBizAddress'),businessContact:v('bcBizContact'),
+    employeeName:v('bcEmployee'),employeeId:v('bcEmployeeId'),roleTitle:v('bcRole'),employmentPeriod:v('bcPeriod'),
+    signatoryName:v('bcSigName'),signatoryTitle:v('bcSigTitle'),dutiesText:v('bcDuties'),conductText:v('bcConduct'),
+    businessLogoDataUrl:BC_LOGO};
+  if(!payload.businessName||!payload.employeeName||!payload.roleTitle||!payload.employmentPeriod||!payload.signatoryName||!payload.signatoryTitle){
+    box.style.color='#ffb4b4';box.textContent='Fill every field marked * before issuing.';return;}
+  box.style.color='var(--muted)';box.textContent='Issuing…';
+  try{
+    const r=await fetch(API+'/api/admin/terra/business-certificate',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(!r.ok||!d.success){box.style.color='#ffb4b4';box.textContent=d.error||'Could not issue the certificate.';return;}
+    box.style.color='#7fd6a3';
+    box.innerHTML='✅ Issued <b>'+d.certRef+'</b> — <a href="'+d.viewUrl+'" target="_blank" style="color:var(--gold)">Open &amp; Print</a> · <a href="'+d.verifyUrl+'" target="_blank" style="color:var(--gold)">Verify</a>';
+  }catch(e){box.style.color='#ffb4b4';box.textContent='Network error: '+e.message;}
 }
 async function issueHonoraryCert(){
   const box=document.getElementById('hcResult');

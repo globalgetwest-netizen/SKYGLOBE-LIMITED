@@ -1251,7 +1251,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'CERT-EMBEDDED-ASSETS-2026-07-10E',
+  build: 'TERRA-RECOGNITION-2026-07-10I',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -2352,10 +2352,10 @@ function wrapLegalDoc(title, bodyText, ref, req) {
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const paras = String(bodyText).trim().split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</p>`).join('\n');
   const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
-  const sigUrl = origin + '/signature.png';
-  const stampUrl = origin + '/stamp.png';
+  const sigUrl = assetDataUri('signature.png') || (origin + '/signature.png');
+  const stampUrl = assetDataUri('stamp.png') || (origin + '/stamp.png');
   const verifyUrl = origin + '/verify-document/' + ref;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=4&data=${encodeURIComponent(verifyUrl)}`;
+  const qrUrl = qrDataUrl(verifyUrl);
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title} — SkyGlobe Group</title>
 <style>
@@ -6409,6 +6409,49 @@ const CURRICULUM_OUTLINE = [
   'Innovation & Digital Transformation', 'Executive Capstone Project',
 ];
 
+// ── TRACK-SPECIFIC CORE COMPETENCIES ─────────────────────────────────────────
+// Printed on every certificate. Each programme has its own curated profile;
+// courses added later from the CEO panel get a deterministic profile built
+// from the course name — no certificate ever shows another course's skills.
+const TRACK_COMPETENCIES = {
+  digital_marketing: ['Digital Marketing Strategy', 'Search & Social Media Marketing', 'Content Marketing & Copywriting', 'Campaign Planning & Execution', 'Marketing Analytics & Reporting', 'Brand Building & Positioning', 'Email & Funnel Marketing', 'Paid Advertising Management'],
+  content_creation: ['Content Strategy & Planning', 'Video Production & Editing', 'Social Media Management', 'Audience Growth & Engagement', 'Storytelling & Scriptwriting', 'Platform Analytics', 'Personal & Brand Monetisation', 'Community Management'],
+  entertainment_media: ['Film & Video Production', 'Directing & Storyboarding', 'Camera, Lighting & Sound', 'Post-Production & Editing', 'Media Distribution & Licensing', 'Talent & Production Management', 'Entertainment Business Practice', 'Audience Development'],
+  business_entrepreneurship: ['Business Model Design', 'Market Research & Validation', 'Financial Planning & Budgeting', 'Sales & Revenue Strategy', 'Operations & Team Management', 'Marketing & Brand Strategy', 'Business Law & Compliance Basics', 'Pitching & Investor Readiness'],
+  tourism_hospitality: ['Hospitality Operations Management', 'Guest Experience & Service Excellence', 'Tour Planning & Destination Management', 'Travel Industry Systems & Booking', 'Food & Beverage Service Standards', 'Revenue & Occupancy Management', 'Cultural Awareness & Communication', 'Health, Safety & Compliance'],
+  surveying_built_env: ['Land Surveying Principles', 'Measurement Instruments & Techniques', 'Mapping & Site Analysis', 'Construction Setting-Out', 'Building Regulations & Standards', 'CAD & Digital Survey Tools', 'Project Documentation', 'Professional Ethics in the Built Environment'],
+  fashion_design: ['Fashion Illustration & Design', 'Pattern Making & Garment Construction', 'Textile Selection & Fabric Science', 'Trend Analysis & Forecasting', 'Fashion Branding & Merchandising', 'Collection Development', 'Production & Quality Control', 'Fashion Business & Retail'],
+  health_wellness: ['Health Coaching Fundamentals', 'Nutrition & Lifestyle Planning', 'Fitness & Physical Wellbeing', 'Behaviour Change Techniques', 'Client Assessment & Goal Setting', 'Stress Management & Mental Wellbeing', 'Wellness Programme Design', 'Professional Ethics & Client Care'],
+  technology_coding: ['Programming Fundamentals', 'Web Development Essentials', 'Databases & Data Handling', 'Problem Solving & Algorithms', 'Version Control & Collaboration', 'Software Testing & Debugging', 'Cybersecurity Awareness', 'Building & Deploying Applications'],
+  voc_auto_mechanic: ['Engine Systems & Diagnostics', 'Electrical & Battery Systems', 'Brake & Suspension Service', 'Transmission & Drivetrain Maintenance', 'Preventive Maintenance Scheduling', 'Workshop Safety & Tools', 'Vehicle Inspection Standards', 'Customer Service & Job Estimation'],
+  voc_tailoring: ['Body Measurement & Fitting', 'Pattern Drafting & Cutting', 'Machine & Hand Sewing Techniques', 'Garment Finishing & Alterations', 'Fabric Selection & Care', 'Traditional & Modern Styles', 'Quality Control', 'Costing & Customer Relations'],
+  voc_professional_driving: ['Defensive Driving Techniques', 'Road Signs & Traffic Regulations', 'Vehicle Inspection & Maintenance Checks', 'Passenger & Cargo Safety', 'Route Planning & Navigation', 'Emergency Response Procedures', 'Fuel-Efficient Driving', 'Professional Conduct & Documentation'],
+  voc_carpentry: ['Wood Selection & Preparation', 'Measuring, Marking & Cutting', 'Joinery Techniques', 'Furniture Construction & Assembly', 'Finishing & Polishing', 'Tool Care & Workshop Safety', 'Reading Drawings & Specifications', 'Costing & Client Management'],
+  voc_storekeeping: ['Inventory Recording & Control', 'Stock Receiving & Inspection', 'Warehouse Organisation & Storage', 'Stock Counting & Reconciliation', 'Issue & Dispatch Procedures', 'Loss Prevention & Security', 'Store Documentation & Reporting', 'Health & Safety in the Store'],
+  voc_sales_rep: ['Customer Needs Assessment', 'Product Knowledge & Presentation', 'Sales Techniques & Closing', 'Customer Care & After-Sales Service', 'Complaint Handling & Resolution', 'Sales Records & Reporting', 'Merchandising Basics', 'Professional Communication'],
+  voc_housekeeping: ['Cleaning Standards & Techniques', 'Laundry & Linen Care', 'Kitchen & Food Hygiene Support', 'Household Safety & Security', 'Inventory of Household Supplies', 'Time & Task Management', 'Care of Furnishings & Equipment', 'Professional Conduct & Discretion'],
+  voc_security: ['Access Control & Patrolling', 'Observation & Incident Reporting', 'Emergency & Fire Response', 'Crowd & Visitor Management', 'Basic First Aid Awareness', 'Security Equipment Operation', 'Law & Use-of-Force Basics', 'Professional Conduct & Vigilance'],
+  voc_cashier: ['Point-of-Sale Operation', 'Cash Handling & Reconciliation', 'Receipts, Refunds & Exchanges', 'Fraud & Counterfeit Detection', 'Customer Service at Checkout', 'Daily Sales Reporting', 'Digital & Mobile Payments', 'Accuracy & Accountability'],
+  voc_receptionist: ['Front Desk & Visitor Management', 'Telephone & Message Handling', 'Appointment Scheduling', 'Office Correspondence Basics', 'Customer Service Excellence', 'Records & Filing', 'Office Equipment Operation', 'Professional Image & Etiquette'],
+  voc_electrical: ['Electrical Circuit Fundamentals', 'Wiring & Installation Practice', 'Fault Finding & Repairs', 'Electrical Safety Standards', 'Meter Reading & Testing Instruments', 'Domestic & Commercial Installations', 'Earthing & Protection Systems', 'Job Planning & Costing'],
+  voc_welding: ['Arc & Gas Welding Techniques', 'Metal Preparation & Cutting', 'Joint Design & Fabrication', 'Welding Safety & Protective Equipment', 'Blueprint Reading', 'Quality Inspection of Welds', 'Metal Finishing', 'Workshop Management'],
+  voc_laundry: ['Fabric Identification & Care Labels', 'Washing & Stain Removal Techniques', 'Ironing, Pressing & Finishing', 'Dry-Cleaning Basics', 'Garment Handling & Packaging', 'Machine Operation & Maintenance', 'Customer Orders & Records', 'Hygiene & Quality Standards'],
+  voc_farming: ['Crop Production & Soil Management', 'Livestock Care Basics', 'Farm Planning & Record Keeping', 'Pest & Disease Control', 'Harvesting & Post-Harvest Handling', 'Agribusiness & Market Access', 'Farm Tools & Equipment', 'Sustainable Farming Practices'],
+  voc_fishing: ['Fishing Methods & Gear Handling', 'Fish Pond Construction & Management', 'Water Quality & Feeding', 'Fish Health & Disease Control', 'Harvesting & Preservation', 'Processing & Packaging', 'Aquaculture Business & Marketing', 'Safety on Water'],
+  voc_construction: ['Site Preparation & Setting Out', 'Blockwork & Bricklaying', 'Concrete Mixing & Casting', 'Plastering & Finishing', 'Reading Building Plans', 'Construction Safety Practice', 'Material Estimation', 'Teamwork on Site'],
+  voc_plumbing: ['Pipe Installation & Fitting', 'Water Supply Systems', 'Drainage & Waste Systems', 'Leak Detection & Repairs', 'Sanitary Fixture Installation', 'Pipe Materials & Joining Methods', 'Plumbing Safety Standards', 'Job Estimation & Client Care'],
+};
+function trackCompetencies(track) {
+  if (!track) return [];
+  if (TRACK_COMPETENCIES[track.id]) return TRACK_COMPETENCIES[track.id];
+  const n = track.name;
+  return [
+    `Foundations of ${n}`, `Core Tools & Techniques of ${n}`, `Industry Standards & Best Practice`,
+    `Practical ${n} Skills`, `Case Study & Applied Work`, `Quality & Professional Ethics`,
+    `Client & Stakeholder Management`, `Capstone Project in ${n}`,
+  ];
+}
+
 app.get('/api/courses/catalog', (_req, res) => {
   const tiers = COURSE_TIERS.map(t => ({
     id: t.id, name: t.name, product: t.product, months: t.months, steps: t.steps, blurb: t.blurb, perks: t.perks,
@@ -6925,7 +6968,7 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
     const grade = score >= 90 ? 'Distinction' : score >= 80 ? 'Merit' : 'Pass';
     const trackCode = String(enr.track_id).replace(/^voc_/, '').split('_').map(w => w[0]).join('').toUpperCase().slice(0, 4);
     const credentialId = `SGA-${trackCode}-${enr.graduation_year}-${certRef.slice(4, 10)}`;
-    const competencies = steps.slice(0, 8).map(st => st.title);
+    const competencies = trackCompetencies(track);
     const monthYear = d => new Date(d).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
     const html = wrapCertificate({ ...enr, ref: certRef }, track, tier, photoDataUrl || null, verifyUrl, req,
       { grade: `${grade} · ${score}%`, credentialId, competencies,
@@ -7024,7 +7067,7 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
     const trackCode2 = String(track.id).replace(/^voc_/, '').split('_').map(w => w[0]).join('').toUpperCase().slice(0, 4);
     const html = wrapCertificate(enr, track, tier, photoDataUrl || null, verifyUrl, req,
       { grade: awardLabel, credentialId: `SGA-${trackCode2}-${enr.graduation_year}-${certRef.slice(4, 10)}`,
-        competencies: CURRICULUM_OUTLINE.slice(0, 8),
+        competencies: trackCompetencies(track),
         studentId: 'SGA-ST-' + certRef.slice(4, 10), language,
         enrolled: enrolledTxt, completionDate: completedTxt || undefined });
 
@@ -7084,6 +7127,347 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
   }
 });
 
+// ── TERRA: BUSINESS WORK CERTIFICATE ─────────────────────────────────────────
+// A business issues a work certificate on ITS OWN letterhead — the business's
+// name, details and signatory carry the document. SkyGlobe appears ONLY in the
+// TERRA verification footer (logo + QR + reference). TERRA verifies that the
+// certificate was genuinely issued by that business — it does not certify the
+// claims themselves; the footer says so honestly.
+function wrapBusinessCertificate(d, verifyUrl) {
+  const qrUrl = qrDataUrl(verifyUrl);
+  const issueDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const terraLogo = assetDataUri('terra-logo-t.png') || assetDataUri('terra-logo.png') || '';
+  const bizLogo = d.businessLogoDataUrl ? `<img src="${d.businessLogoDataUrl}" alt="" style="height:64px;width:auto;max-width:200px;object-fit:contain">` : '';
+  const micro = ('TERRA CREDENTIAL NETWORK · VERIFIED BUSINESS DOCUMENT · ').repeat(10);
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Work Certificate — ${d.employeeName} — ${d.businessName}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;justify-content:center}
+.doc{width:100%;max-width:820px;background:#fff;border:1px solid #d5dbe6;border-radius:6px;box-shadow:0 24px 60px rgba(4,16,34,.16);overflow:hidden}
+.inner{padding:44px 52px 0}
+.lh{display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:3px double #1a2233;padding-bottom:18px}
+.lh .bn{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.9rem;color:#101828;letter-spacing:.04em}
+.lh .bd{font-size:.72rem;color:#5b6577;margin-top:4px;line-height:1.6}
+.refline{display:flex;justify-content:space-between;font-size:.68rem;color:#5b6577;margin:14px 0 8px}
+.refline b{color:#101828}
+.title{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.9rem;color:#101828;letter-spacing:.14em;text-transform:uppercase;margin:22px 0 4px}
+.rule{width:120px;height:2px;background:#1a2233;margin:0 auto 22px}
+.body{font-size:.92rem;color:#2a3345;line-height:1.9;text-align:justify}
+.body b{color:#101828}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px 26px;margin:22px 0;border:1px solid #e3e7ef;border-radius:10px;padding:16px 20px;background:#f8fafc}
+.facts .f .l{font-size:.56rem;letter-spacing:.14em;color:#8a93a3;text-transform:uppercase}
+.facts .f .v{font-size:.8rem;color:#101828;font-weight:700;margin-top:2px}
+.sigzone{display:flex;justify-content:space-between;align-items:flex-end;margin:34px 0 26px;gap:30px}
+.sigzone .sig{min-width:230px}
+.sigzone .line{border-top:1.5px solid #1a2233;padding-top:6px;font-size:.72rem;color:#5b6577;margin-top:52px}
+.sigzone .line b{color:#101828;font-size:.8rem}
+.sigzone .note{font-size:.6rem;color:#8a93a3;max-width:250px;line-height:1.6;text-align:right}
+.micro{font-size:5px;letter-spacing:1px;color:rgba(26,34,51,.28);white-space:nowrap;overflow:hidden;text-align:center;user-select:none;margin-top:8px}
+.terra{background:#062015;color:#cfe8d8;display:flex;align-items:center;gap:18px;padding:16px 52px;margin-top:6px}
+.terra img.tl{height:44px;width:44px;object-fit:contain}
+.terra .tt{flex:1}
+.terra .tt .t1{font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#7fd6a3}
+.terra .tt .t2{font-size:.62rem;color:#a9c9b6;margin-top:3px;line-height:1.6}
+.terra .qr{background:#fff;border-radius:8px;padding:5px;display:flex;flex-direction:column;align-items:center}
+.terra .qr img{width:72px;height:72px}
+.terra .qr .ql{font-size:.5rem;color:#062015;font-weight:800;letter-spacing:.08em;margin-top:2px}
+@media print{body{background:#fff;padding:0}.doc{box-shadow:none;border:none}}
+</style></head><body>
+<div class="doc">
+  <div class="inner">
+    <div class="lh">
+      <div><div class="bn">${d.businessName}</div><div class="bd">${d.businessAddress || ''}${d.businessContact ? '<br>' + d.businessContact : ''}</div></div>
+      ${bizLogo}
+    </div>
+    <div class="refline"><span>Certificate Nº <b>${d.certRef}</b></span><span>Date of Issue: <b>${issueDate}</b></span></div>
+    <div class="title">Certificate of Work</div>
+    <div class="rule"></div>
+    <p class="body">This is to certify that <b>${d.employeeName}</b> ${d.employeeId ? `(Employee ID: <b>${d.employeeId}</b>) ` : ''}has been engaged by <b>${d.businessName}</b> in the capacity of <b>${d.roleTitle}</b> for the period of <b>${d.employmentPeriod}</b>.${d.dutiesText ? ` During this engagement, principal duties and responsibilities included: ${d.dutiesText}` : ''}${d.conductText ? ` ${d.conductText}` : ''}</p>
+    <div class="facts">
+      <div class="f"><div class="l">Employee</div><div class="v">${d.employeeName}</div></div>
+      <div class="f"><div class="l">Position</div><div class="v">${d.roleTitle}</div></div>
+      <div class="f"><div class="l">Period of Engagement</div><div class="v">${d.employmentPeriod}</div></div>
+      <div class="f"><div class="l">Issued By</div><div class="v">${d.businessName}</div></div>
+    </div>
+    <div class="sigzone">
+      <div class="sig"><div class="line"><b>${d.signatoryName}</b><br>${d.signatoryTitle}, ${d.businessName}</div></div>
+      <div class="note">This certificate is issued under the authority of the business named above, which is solely responsible for its contents. Signed by the authorised signatory.</div>
+    </div>
+    <div class="micro">${micro}</div>
+  </div>
+  <div class="terra">
+    ${terraLogo ? `<img class="tl" src="${terraLogo}" alt="TERRA">` : ''}
+    <div class="tt">
+      <div class="t1">Verified through the TERRA Credential Network</div>
+      <div class="t2">TERRA confirms this document was genuinely issued by ${d.businessName} on ${issueDate} and has not been altered. Verification of issuance, not of the statements made. Verify anytime: ${verifyUrl}</div>
+    </div>
+    <div class="qr"><img src="${qrUrl}" alt="QR"><div class="ql">SCAN TO VERIFY</div></div>
+  </div>
+</div>
+</body></html>`;
+}
+
+app.post('/api/admin/terra/business-certificate', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const b = req.body || {};
+    const d = {
+      businessName: String(b.businessName || '').trim().slice(0, 120),
+      businessAddress: String(b.businessAddress || '').trim().slice(0, 200),
+      businessContact: String(b.businessContact || '').trim().slice(0, 160),
+      businessLogoDataUrl: /^data:image\/(png|jpe?g);base64,/.test(b.businessLogoDataUrl || '') ? b.businessLogoDataUrl : null,
+      employeeName: String(b.employeeName || '').trim().slice(0, 120),
+      employeeId: String(b.employeeId || '').trim().slice(0, 40),
+      roleTitle: String(b.roleTitle || '').trim().slice(0, 120),
+      employmentPeriod: String(b.employmentPeriod || '').trim().slice(0, 120),
+      dutiesText: String(b.dutiesText || '').trim().slice(0, 600),
+      conductText: String(b.conductText || '').trim().slice(0, 400),
+      signatoryName: String(b.signatoryName || '').trim().slice(0, 120),
+      signatoryTitle: String(b.signatoryTitle || '').trim().slice(0, 120),
+    };
+    for (const [k, label] of [['businessName', 'Business name'], ['employeeName', 'Employee name'], ['roleTitle', 'Position / role'], ['employmentPeriod', 'Employment period'], ['signatoryName', 'Signatory name'], ['signatoryTitle', 'Signatory title']])
+      if (!d[k]) return res.status(400).json({ error: `${label} is required.` });
+
+    const certRef = 'SGB-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    d.certRef = certRef;
+    const canon = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+    const verifyUrl = `${canon}/verify/${certRef}`;
+    const html = wrapBusinessCertificate(d, verifyUrl);
+
+    const filePath = `certificates/${certRef}/certificate.html`;
+    await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8').catch(() => {});
+    const docRows = await dbQuery('POST', 'documents', {
+      ref: certRef, filename: `work_certificate_${certRef}.html`, path: filePath, uploaded_by: 'terra:business-certificates',
+    }).catch(() => null);
+    const docRow = Array.isArray(docRows) ? docRows[0] : docRows;
+    const viewToken = docRow ? await createDocToken(docRow.id, filePath, `work_certificate_${certRef}.html`, String(b.recipientEmail || '').trim() || 'ceo@skyglobegroup.com', certRef).catch(() => null) : null;
+    const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
+
+    // Registry — zero-silent-failure, same doctrine as academic certificates.
+    const record = {
+      cert_ref: certRef, full_name: d.employeeName, track_id: 'business_work', tier_id: 'terra_business',
+      graduation_year: new Date().getFullYear(), status: 'valid', issued_by: who,
+    };
+    let saved = false;
+    try { await dbQuery('POST', 'certificates', { ...record, region: d.businessName, address: `${d.roleTitle} · ${d.employmentPeriod}` }); saved = true; }
+    catch (e1) {
+      try { await dbQuery('POST', 'certificates', record); saved = true; }
+      catch (e2) { logError({ source: 'certificates', message: 'Business certificate record failed: ' + e2.message, url: req.originalUrl }); }
+    }
+    if (!saved) return res.status(500).json({ error: 'The certificate could not be registered for verification — check Error Logs.' });
+    logActivity(who, 'ceo', 'business_certificate', `Issued TERRA work certificate for ${d.employeeName} (${d.businessName})`, certRef);
+    res.json({ success: true, certRef, viewUrl, verifyUrl });
+  } catch (e) {
+    console.error('Business certificate error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── TERRA: CERTIFICATE OF RECOGNITION (OWNERSHIP & ENTERPRISE) ──────────────
+// Issued BY SkyGlobe Group under the CEO's authority to business, company,
+// asset and property owners. Carries the full SkyGlobe/TERRA verification
+// suite — logos, gold seal, stamp, real signature, QR — designed to be framed
+// and displayed. Honest by doctrine: TERRA recognises the VERIFIED IDENTITY
+// and REGISTRATION of the owner and entity as presented at issuance — it is
+// recognition of verification, not an endorsement of financial standing.
+function wrapRecognitionCertificate(d, verifyUrl) {
+  const origin = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+  const img = n => assetDataUri(n) || `${origin}/${n}`;
+  const qrUrl = qrDataUrl(verifyUrl);
+  const issueDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const TITLES = { business: 'Certificate of Business Recognition', company: 'Certificate of Corporate Recognition', asset: 'Certificate of Asset Recognition', property: 'Certificate of Property Recognition' };
+  const title = TITLES[d.entityType] || 'Certificate of Recognition';
+  const micro = 'SKYGLOBE GROUP · TERRA VERIFIED RECOGNITION · '.repeat(12);
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title} — ${d.entityName} — SkyGlobe Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;justify-content:center}
+.cert{width:100%;max-width:820px;background:linear-gradient(160deg,#fffdf6,#f7fbf6);border:3px solid #0d3b23;border-radius:8px;padding:7px;position:relative;box-shadow:0 30px 70px rgba(4,26,14,.22)}
+.mid{border:7px double #D4A73A;border-radius:5px;padding:5px}
+.inner{border:1px solid rgba(212,167,58,.55);border-radius:3px;padding:30px 40px 0;position:relative;overflow:hidden;
+ background-image:repeating-linear-gradient(45deg,rgba(13,59,35,.014) 0 1px,transparent 1px 7px),repeating-linear-gradient(-45deg,rgba(212,167,58,.018) 0 1px,transparent 1px 7px),radial-gradient(ellipse 70% 40% at 50% 0%,rgba(212,167,58,.05),transparent)}
+.corner{position:absolute;width:30px;height:30px;border-color:#a87016;border-style:solid;opacity:.9;z-index:4}
+.c1{top:7px;left:7px;border-width:3px 0 0 3px}.c2{top:7px;right:7px;border-width:3px 3px 0 0}
+.c3{bottom:7px;left:7px;border-width:0 0 3px 3px}.c4{bottom:7px;right:7px;border-width:0 3px 3px 0}
+.micro{font-size:5px;letter-spacing:1px;color:rgba(13,59,35,.35);white-space:nowrap;overflow:hidden;text-align:center;user-select:none}
+.wmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0}
+.wmark img{width:430px;height:auto;opacity:.05;filter:grayscale(30%)}
+.z{position:relative;z-index:2}
+.certno{position:absolute;top:16px;right:20px;text-align:right;z-index:4}
+.certno .l{font-size:.5rem;letter-spacing:.2em;color:#8a93a3}
+.certno .v{font-size:.68rem;font-weight:800;color:#a87016;letter-spacing:.04em}
+.idphoto{position:absolute;top:16px;left:20px;z-index:4;text-align:center}
+.idphoto img{width:66px;height:78px;border-radius:8px;object-fit:cover;border:2px solid #D4A73A;box-shadow:0 4px 12px rgba(0,0,0,.16);background:#fff}
+.idphoto .pl{font-size:.44rem;letter-spacing:.16em;color:#8a93a3;text-transform:uppercase;margin-top:3px}
+.hd{text-align:center;padding-top:4px}
+.hd img{height:74px;width:74px;object-fit:contain;background:#fff;border-radius:16px;padding:4px;border:1px solid rgba(212,167,58,.35);box-shadow:0 4px 12px rgba(4,16,34,.1)}
+.brandwrap{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:8px}
+.brandwrap .rule{flex:0 0 72px;height:1px;background:linear-gradient(90deg,transparent,#a87016);position:relative}
+.brandwrap .rule.r{background:linear-gradient(90deg,#a87016,transparent)}
+.brandwrap .rule:after{content:"◆";position:absolute;top:-7px;font-size:.5rem;color:#a87016}
+.brandwrap .rule.l:after{right:-3px}.brandwrap .rule.r:after{left:-3px}
+.hd .brand{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.82rem;letter-spacing:.3em;color:#041022;text-shadow:0 1px 0 rgba(212,167,58,.45),0 2px 3px rgba(4,16,34,.08);text-indent:.3em}
+.hd .acad{font-size:.66rem;letter-spacing:.34em;color:#0d3b23;text-transform:uppercase;font-weight:700;margin-top:2px}
+.hd .tag{font-size:.54rem;letter-spacing:.22em;color:#8a7638;text-transform:uppercase;margin-top:4px}
+.title{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:2.15rem;margin:16px 0 8px;letter-spacing:.04em;
+ background:linear-gradient(92deg,#6b4e0b 0%,#a87016 30%,#c99a2e 50%,#a87016 70%,#6b4e0b 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pill{text-align:center}
+.pill span{display:inline-block;background:#0d3b23;color:#fff;font-size:.66rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;padding:7px 26px;border-radius:100px}
+.presented{text-align:center;font-size:.82rem;color:#6b7689;margin-top:14px}
+.name{text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;font-size:2.5rem;color:#041022;margin:2px 0 0;line-height:1.15}
+.qual{text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#a87016;margin-top:5px}
+.entity{text-align:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.5rem;color:#0d3b23;margin-top:7px}
+.underline{width:280px;height:2px;background:linear-gradient(90deg,transparent,#D4A73A,transparent);margin:6px auto 2px}
+.diamond{text-align:center;color:#D4A73A;font-size:.8rem}
+.desc{text-align:center;max-width:620px;margin:10px auto 0;color:#3c465a;font-size:.85rem;line-height:1.65}
+.desc strong{color:#041022}
+.desc .intl{display:block;margin-top:6px;font-size:.74rem;color:#6b7689}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 14px;margin:18px auto 0;max-width:680px;border-top:1px solid rgba(212,167,58,.4);border-bottom:1px solid rgba(212,167,58,.4);padding:12px 4px}
+.grid .f .l{font-size:.5rem;letter-spacing:.14em;color:#8a93a3;text-transform:uppercase}
+.grid .f .v{font-size:.7rem;color:#041022;font-weight:700;margin-top:1px}
+.eco{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px auto 0;max-width:700px;border:1px solid rgba(212,167,58,.45);border-radius:12px;padding:12px 16px;background:rgba(255,255,255,.55)}
+.eco .cell{flex:1;text-align:center}
+.eco img.blogo{height:44px;width:44px;object-fit:contain;background:#fff;border-radius:10px;padding:3px;border:1px solid rgba(4,16,34,.1);box-shadow:0 2px 6px rgba(4,16,34,.08)}
+.eco .bn{font-size:.6rem;font-weight:800;letter-spacing:.1em;color:#041022;margin-top:3px}
+.eco .br{font-size:.54rem;color:#6b7689;line-height:1.5}
+.eco .br b{color:#0d3b23}
+.eco .qr img{width:76px;height:76px}
+.seal{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f6e7ae,#D4A73A 55%,#8a6a14);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(138,106,20,.45),inset 0 0 0 3px rgba(255,255,255,.35);border:2px solid #8a6a14;margin:0 auto}
+.seal .inner-ring{width:74px;height:74px;border-radius:50%;border:1.5px dashed rgba(4,16,34,.5);display:flex;align-items:center;justify-content:center}
+.seal img{height:46px;width:auto;border-radius:50%}
+.band{background:#0d3b23;color:#dff0e6;text-align:center;font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;padding:7px 10px;border-radius:100px;max-width:660px;margin:14px auto 0}
+.sigrow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:18px auto 6px;max-width:680px}
+.sig{text-align:center;position:relative}
+.sig img.s{height:46px}
+.sig .ln{border-top:1px solid #8a93a3;margin-top:3px;padding-top:3px;font-size:.62rem;color:#6b7689}
+.sig .ln b{color:#041022}
+.stamp{height:86px;width:86px;opacity:.85;transform:rotate(-9deg)}
+.foot{background:#041c10;margin:14px -40px 0;padding:12px 40px 14px;text-align:center}
+.foot .m1{font-size:.6rem;letter-spacing:.3em;color:#F4D77A;font-weight:800;text-transform:uppercase}
+.foot .m1 .st{color:#ff9f1c}
+.foot .m2{font-size:.52rem;letter-spacing:.18em;color:#a9c9b6;text-transform:uppercase;margin-top:4px}
+.foot .m3{font-size:.5rem;color:#7d9a8a;margin-top:5px}
+@media print{body{background:#fff;padding:0}.cert{box-shadow:none}}
+</style></head><body>
+<div class="cert"><div class="mid"><div class="inner">
+  <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
+  <div class="wmark"><img src="${img('skyglobe-logo.jpg')}" alt=""></div>
+  <div class="certno"><div class="l">CERTIFICATE Nº</div><div class="v">${d.certRef}</div></div>
+  ${d.photoDataUrl ? `<div class="idphoto"><img src="${d.photoDataUrl}" alt=""><div class="pl">Certificate Holder</div></div>` : ''}
+  <div class="z">
+    <div class="micro">${micro}</div>
+    <div class="hd">
+      <img src="${img('skyglobe-logo.jpg')}" alt="SkyGlobe Group">
+      <div class="brandwrap"><span class="rule l"></span><div class="brand">SKYGLOBE GROUP</div><span class="rule r"></span></div>
+      <div class="acad">Terra Credential Network</div>
+      <div class="tag">Global Verification · Trust · Recognition</div>
+    </div>
+    <div class="title">${title}</div>
+    <div class="pill"><span>Terra Verified · Globally Recognised</span></div>
+    <p class="presented">This is to recognise</p>
+    <div class="name">${d.ownerName}</div>
+    ${d.ownerQualification ? `<div class="qual">${d.ownerQualification}</div>` : ''}
+    <div class="entity">${d.entityName}</div>
+    <div class="underline"></div>
+    <div class="diamond">◆</div>
+    <p class="desc">whose identity, ownership and registration details have been <strong>presented, reviewed and verified</strong> through the <strong>TERRA Credential Network</strong> of SkyGlobe Group. This recognition affirms the verified standing of the ${d.entityType} named above and its owner as at the date of issue, for the confidence of partners, investors and institutions worldwide.<span class="intl">Recognition of verification — permanently checkable by anyone, anywhere, via the QR code below.</span></p>
+    <div class="grid">
+      <div class="f"><div class="l">Owner</div><div class="v">${d.ownerName}</div></div>
+      ${d.ownerQualification ? `<div class="f"><div class="l">Qualification / Title</div><div class="v">${d.ownerQualification}</div></div>` : ''}
+      ${d.nationality ? `<div class="f"><div class="l">Nationality</div><div class="v">${d.nationality}</div></div>` : ''}
+      <div class="f"><div class="l">${d.entityType === 'property' || d.entityType === 'asset' ? 'Asset / Property' : 'Entity'}</div><div class="v">${d.entityName}</div></div>
+      <div class="f"><div class="l">Category</div><div class="v">${d.entityType.charAt(0).toUpperCase() + d.entityType.slice(1)}</div></div>
+      ${d.regNumber ? `<div class="f"><div class="l">Registration Nº</div><div class="v">${d.regNumber}</div></div>` : ''}
+      ${d.sector ? `<div class="f"><div class="l">Sector</div><div class="v">${d.sector}</div></div>` : ''}
+      ${d.location ? `<div class="f"><div class="l">Location</div><div class="v">${d.location}</div></div>` : ''}
+      ${d.established ? `<div class="f"><div class="l">Established</div><div class="v">${d.established}</div></div>` : ''}
+      <div class="f"><div class="l">Date of Issue</div><div class="v">${issueDate}</div></div>
+      <div class="f"><div class="l">Status</div><div class="v">Valid · Verified</div></div>
+      <div class="f"><div class="l">Recognition ID</div><div class="v">${d.certRef}</div></div>
+    </div>
+    <div class="eco">
+      <div class="cell"><img class="blogo" src="${img('terra-logo.png')}" alt="TERRA"><div class="bn">TERRA</div><div class="br">Verified through the<br><b>TERRA Credential Network</b><br>Lifetime verification</div></div>
+      <div class="cell"><div class="seal"><div class="inner-ring"><img src="${img('skyglobe-logo.jpg')}" alt=""></div></div></div>
+      <div class="cell qr"><img src="${qrUrl}" alt="Verification QR"><div class="br"><b>SCAN TO VERIFY</b><br>${(process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com').replace('https://','')}/verify</div></div>
+    </div>
+    <div class="band">This recognition is permanently verifiable through the TERRA Credential Network</div>
+    <div class="sigrow">
+      <div style="width:78px"></div>
+      <div class="sig"><img class="s" src="${img('signature.png')}" alt=""><img class="stamp" src="${img('stamp.png')}" alt="" style="position:absolute;left:-96px;bottom:-6px"><div class="ln"><b>President &amp; Chief Executive Officer</b><br>SkyGlobe Group</div></div>
+      <div style="width:78px"></div>
+    </div>
+    <div class="micro">${micro}</div>
+    <div class="foot">
+      <div class="m1">One World. One Mission. <span class="st">✦</span></div>
+      <div class="m2">Terra Credential Network — Trust · Verification · Recognition</div>
+      <div class="m3">Issued ${issueDate} · Verify at ${verifyUrl} · TERRA recognises the verified identity, ownership and registration of the holder as presented at issuance. Recognition of verification — not a valuation, licence or endorsement of financial standing.</div>
+    </div>
+  </div>
+</div></div></div>
+</body></html>`;
+}
+
+app.post('/api/admin/terra/recognition-certificate', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const b = req.body || {};
+    const TYPES = ['business', 'company', 'asset', 'property'];
+    const d = {
+      ownerName: String(b.ownerName || '').trim().slice(0, 120),
+      ownerQualification: String(b.ownerQualification || '').trim().slice(0, 120),
+      nationality: String(b.nationality || '').trim().slice(0, 60),
+      entityName: String(b.entityName || '').trim().slice(0, 140),
+      entityType: TYPES.includes(b.entityType) ? b.entityType : 'business',
+      regNumber: String(b.regNumber || '').trim().slice(0, 60),
+      sector: String(b.sector || '').trim().slice(0, 80),
+      location: String(b.location || '').trim().slice(0, 120),
+      established: String(b.established || '').trim().slice(0, 40),
+      photoDataUrl: /^data:image\/(png|jpe?g);base64,/.test(b.photoDataUrl || '') ? b.photoDataUrl : null,
+    };
+    if (!d.ownerName) return res.status(400).json({ error: 'Owner full name is required.' });
+    if (!d.entityName) return res.status(400).json({ error: 'Business / asset / property name is required.' });
+
+    const certRef = 'SGR-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    d.certRef = certRef;
+    const canon = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+    const verifyUrl = `${canon}/verify/${certRef}`;
+    const html = wrapRecognitionCertificate(d, verifyUrl);
+
+    const filePath = `certificates/${certRef}/certificate.html`;
+    await storageUpload(filePath, Buffer.from(html, 'utf8'), 'text/html; charset=utf-8').catch(() => {});
+    const docRows = await dbQuery('POST', 'documents', {
+      ref: certRef, filename: `recognition_${certRef}.html`, path: filePath, uploaded_by: 'terra:recognition-certificates',
+    }).catch(() => null);
+    const docRow = Array.isArray(docRows) ? docRows[0] : docRows;
+    const viewToken = docRow ? await createDocToken(docRow.id, filePath, `recognition_${certRef}.html`, String(b.recipientEmail || '').trim() || 'ceo@skyglobegroup.com', certRef).catch(() => null) : null;
+    const viewUrl = viewToken ? `${baseUrl(req)}/view/${viewToken}` : null;
+
+    const record = {
+      cert_ref: certRef, full_name: d.ownerName, track_id: 'ownership_recognition', tier_id: 'terra_recognition',
+      graduation_year: new Date().getFullYear(), nationality: d.nationality || null, status: 'valid', issued_by: who,
+    };
+    let saved = false;
+    try { await dbQuery('POST', 'certificates', { ...record, region: d.entityName, address: `${d.entityType}${d.regNumber ? ' · Reg ' + d.regNumber : ''}${d.location ? ' · ' + d.location : ''}` }); saved = true; }
+    catch (e1) {
+      try { await dbQuery('POST', 'certificates', record); saved = true; }
+      catch (e2) { logError({ source: 'certificates', message: 'Recognition record failed: ' + e2.message, url: req.originalUrl }); }
+    }
+    if (!saved) return res.status(500).json({ error: 'The certificate could not be registered for verification — check Error Logs.' });
+    logActivity(who, 'ceo', 'recognition_certificate', `Issued TERRA ${d.entityType} recognition for ${d.ownerName} (${d.entityName})`, certRef);
+    res.json({ success: true, certRef, viewUrl, verifyUrl });
+  } catch (e) {
+    console.error('Recognition certificate error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── CEO: ADMISSION INTAKES & FLYERS STUDIO ───────────────────────────────────
 // Generates a premium, print-ready branded flyer for an Academy admission
 // intake or any course enrollment — deterministic HTML (zero AI tokens),
@@ -7101,7 +7485,7 @@ app.post('/api/admin/academy/flyer', async (req, res) => {
     const title = String(headline || '').trim() ||
       (kind === 'admission' ? 'Admissions Now Open' : `Enroll Now: ${track.name}`);
     const target = kind === 'admission' ? `${origin}/academy` : `${origin}/courses`;
-    const qr = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&margin=6&data=${encodeURIComponent(target)}`;
+    const qr = qrDataUrl(target);
     const tiersRow = COURSE_TIERS.map(t =>
       `<div class="tier"><div class="tn">${t.name.replace(' Certificate','')}</div><div class="tp">$${PRICING[t.product].USD}</div><div class="tm">${t.months} month${t.months>1?'s':''} · ${t.steps} lessons</div></div>`).join('');
     const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7345,6 +7729,27 @@ app.get('/api/certificates/verify/:certRef', async (req, res) => {
     const rows = await dbQuery('GET', 'certificates', null, { cert_ref: `eq.${req.params.certRef}`, limit: 1 });
     const c = rows[0];
     if (!c) return res.status(404).json({ valid: false, error: 'No certificate found with this reference.' });
+    if (c.track_id === 'ownership_recognition') {
+      // TERRA recognition of a verified owner & entity — honestly framed.
+      return res.json({
+        valid: c.status === 'valid', certRef: c.cert_ref, fullName: c.full_name,
+        track: 'Certificate of Recognition', tier: c.region ? `${c.region}` : 'TERRA Verified Recognition',
+        graduationYear: c.graduation_year, issuedBy: 'SkyGlobe Group · TERRA Credential Network',
+        verifiedBy: 'TERRA Credential Network',
+        detail: c.address || null,
+        note: 'TERRA recognises the verified identity, ownership and registration of the holder as presented at issuance — not a valuation, licence or endorsement of financial standing.',
+      });
+    }
+    if (c.track_id === 'business_work') {
+      // TERRA-verified business work certificate — issuer & role, honestly framed.
+      return res.json({
+        valid: c.status === 'valid', certRef: c.cert_ref, fullName: c.full_name,
+        track: 'Business Work Certificate', tier: c.region ? `Issued by ${c.region}` : 'TERRA Verified Business Document',
+        graduationYear: c.graduation_year, issuedBy: c.region || 'Registered business',
+        verifiedBy: 'TERRA Credential Network',
+        note: 'TERRA verifies that this document was genuinely issued and is unaltered — not the statements made within it.',
+      });
+    }
     const track = trackById(c.track_id);
     const tier = COURSE_TIERS.find(t => t.id === c.tier_id);
     res.json({
@@ -7512,9 +7917,9 @@ function formatCardNumber(ref) {
 
 function wrapCeoIdentityCard(data, verifyUrl, req) {
   const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
-  const sigUrl = origin + '/signature.png';
-  const stampUrl = origin + '/stamp.png';
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=1&ecc=H&data=${encodeURIComponent(verifyUrl)}`;
+  const sigUrl = assetDataUri('signature.png') || (origin + '/signature.png');
+  const stampUrl = assetDataUri('stamp.png') || (origin + '/stamp.png');
+  const qrUrl = qrDataUrl(verifyUrl);
   // The Founder ID defaults to the CEO's own uploaded photo (ceo.png in the
   // repo root) unless a specific photo was passed at issuance time.
   const photoSrc = data.photoDataUrl || (origin + '/ceo.png');
@@ -7805,9 +8210,9 @@ function wrapIdentityCard(tier, data, verifyUrl, req) {
   const p = t.palette;
   const isCeo = false;
   const origin = req ? baseUrl(req) : 'https://skyglobegroup.com';
-  const sigUrl = origin + '/signature.png';
-  const stampUrl = origin + '/stamp.png';
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=1&ecc=H&data=${encodeURIComponent(verifyUrl)}`;
+  const sigUrl = assetDataUri('signature.png') || (origin + '/signature.png');
+  const stampUrl = assetDataUri('stamp.png') || (origin + '/stamp.png');
+  const qrUrl = qrDataUrl(verifyUrl);
   const photoTag = data.photoDataUrl ? `<img class="photo" src="${data.photoDataUrl}" alt="">` : `<div class="photo"></div>`;
   const photoBlock = `<div class="photo-wrap"><div class="chip"></div>${photoTag}</div>`;
   const ceoRibbon = '';
