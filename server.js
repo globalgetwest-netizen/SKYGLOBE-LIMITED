@@ -376,16 +376,24 @@ async function claudeGenerate(prompt, { maxTokens = 2048, system } = {}) {
 
 // Gemini-primary (free) → Claude fallback (premium). Always returns text or throws.
 async function generateText(prompt, opts = {}) {
+  // FULL 24/7 CASCADE — the same resilience the CEO assistant enjoys:
+  //   1. fast single Gemini call (honours opts exactly)
+  //   2. the hardened chain: Ollama → Groq → 3 Gemini models with retries
+  //   3. Claude (if configured)
+  // One engine having a bad minute must never surface as "can't load".
+  let gemErr;
   try {
     return await geminiGenerate(prompt, opts);
-  } catch (gemErr) {
-    console.warn('[AI] Gemini failed, falling back to Claude:', gemErr.message);
-    try {
-      return await claudeGenerate(prompt, opts);
-    } catch (claudeErr) {
-      console.error('[AI] Both engines failed. Gemini:', gemErr.message, '| Claude:', claudeErr.message);
-      throw new Error('Both AI engines unavailable: ' + claudeErr.message);
-    }
+  } catch (e) { gemErr = e; console.warn('[AI] fast Gemini failed, engaging cascade:', e.message); }
+  try {
+    const t = await callGeminiWithRetry(prompt, opts.system || 'You are a helpful, precise expert. Follow the user instructions exactly.');
+    if (t && String(t).trim()) return t;
+  } catch (e) { console.warn('[AI] cascade failed:', e.message); }
+  try {
+    return await claudeGenerate(prompt, opts);
+  } catch (claudeErr) {
+    console.error('[AI] All engines failed. Gemini:', gemErr?.message, '| Claude:', claudeErr.message);
+    throw new Error('All AI engines unavailable: ' + claudeErr.message);
   }
 }
 
@@ -6348,8 +6356,18 @@ app.post('/api/courses/enrollment/:id/step/:idx/content', async (req, res) => {
     if (step.content) return res.json({ content: step.content });
     if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY && !USE_GROQ && !USE_OLLAMA)
       return res.status(500).json({ error: 'AI not configured. Please contact support.' });
-    const prompt = `You are an expert instructor writing lesson ${idx + 1} of a certificate programme in "${track?.name}", titled "${step.title}". Write a clear, practical, well-structured lesson (400-600 words) a self-study learner can follow step by step: explain the concept, give concrete real-world examples relevant to ${track?.name}, and end with 2-3 short practice actions the learner should do before ticking this step complete. Plain text only, no markdown headings or asterisks — use blank lines between paragraphs.`;
-    const content = await generateText(prompt, { maxTokens: 900, temperature: 0.6 });
+    const prompt = `You are an expert instructor writing lesson ${idx + 1} of a professional certificate programme in "${track?.name}", titled "${step.title}". Write a COMPLETE lesson (1000-1500 words) a self-study learner can master on their own, structured exactly as:
+
+THEORY — teach the full concept from first principles: definitions, why it matters in ${track?.name}, the key frameworks or rules, and common mistakes to avoid.
+
+WORKED EXAMPLE — one concrete, realistic ${track?.name} scenario walked through step by step, showing how the theory is applied.
+
+PRACTICAL — hands-on instructions the learner performs themselves: numbered steps, what tools or materials to use, and what a good result looks like.
+
+PRACTICE ACTIONS — 3 short tasks to complete before taking this lesson's test.
+
+Plain text only: use the four section labels above in capitals, blank lines between paragraphs, numbered lists as "1." — no markdown symbols like # or *.`;
+    const content = await generateText(prompt, { maxTokens: 2600, temperature: 0.6 });
     steps[idx] = { ...step, content };
     await dbQuery('PATCH', 'course_enrollments', { steps }, { id: `eq.${req.params.id}` }).catch(() => {});
     res.json({ content });
@@ -6365,8 +6383,13 @@ app.post('/api/courses/enrollment/:id/step/:idx/content', async (req, res) => {
 // before the certificate. All scores are recorded on the enrolment.
 function parseQuizJson(raw) {
   try {
-    const m = String(raw).match(/\[[\s\S]*\]/);
-    const arr = JSON.parse(m ? m[0] : raw);
+    let txt = String(raw).replace(/```json|```/gi, '');
+    const m = txt.match(/\[[\s\S]*/);
+    let body = m ? m[0] : txt;
+    const attempt = (t) => { try { const a = JSON.parse(t); return Array.isArray(a) ? a : null; } catch { return null; } };
+    let arr = attempt(body);
+    if (!arr) { const end = body.lastIndexOf(']'); if (end > 0) arr = attempt(body.slice(0, end + 1)); }
+    if (!arr) { const lastObj = body.lastIndexOf('}'); if (lastObj > 0) arr = attempt(body.slice(0, lastObj + 1) + ']'); } // repair truncated output
     if (!Array.isArray(arr)) return null;
     const qs = arr.filter(q => q && q.q && Array.isArray(q.options) && q.options.length >= 3 && Number.isInteger(q.answer))
       .map(q => ({ q: String(q.q).slice(0, 300), options: q.options.slice(0, 4).map(o => String(o).slice(0, 160)), answer: Math.max(0, Math.min(3, q.answer)) }));
@@ -6388,9 +6411,15 @@ app.post('/api/courses/enrollment/:id/step/:idx/quiz', async (req, res) => {
     const track = trackById(enr.track_id);
     const out = await generateText(
       `Create exactly 5 multiple-choice questions testing lesson "${step.title}" of a "${track?.name}" certificate programme.${step.content ? ' Base them on this lesson content:\n' + String(step.content).slice(0, 2500) : ''}\nReply with ONLY a JSON array, no prose: [{"q":"question","options":["A","B","C","D"],"answer":0}] where answer is the index of the correct option.`,
-      { maxTokens: 900, temperature: 0.4 });
-    const quiz = parseQuizJson(out);
-    if (!quiz) return res.status(500).json({ error: 'Could not prepare the test right now — please try again.' });
+      { maxTokens: 1600, temperature: 0.35 });
+    let quiz = parseQuizJson(out);
+    if (!quiz) {
+      const retry = await generateText(
+        `Write 5 multiple-choice questions on "${step.title}" (${track?.name}). STRICT: reply with ONLY valid JSON, nothing else: [{"q":"...","options":["A","B","C","D"],"answer":0}]`,
+        { maxTokens: 1600, temperature: 0.2 });
+      quiz = parseQuizJson(retry);
+    }
+    if (!quiz) { logError({ source: 'academy-quiz', message: 'quiz parse failed twice', url: req.originalUrl }); return res.status(500).json({ error: 'Could not prepare the test right now — please try again.' }); }
     steps[idx] = { ...step, quiz };
     await dbQuery('PATCH', 'course_enrollments', { steps }, { id: `eq.${req.params.id}` }).catch(() => {});
     res.json({ quiz: quiz.map(q => ({ q: q.q, options: q.options })), passed: false, score: null });
@@ -6438,9 +6467,15 @@ app.post('/api/courses/enrollment/:id/final-exam', async (req, res) => {
     const track = trackById(enr.track_id);
     const out = await generateText(
       `Create exactly 10 multiple-choice FINAL EXAM questions for a certificate programme in "${track?.name}", covering these modules: ${steps.map(st => st.title).join('; ')}. Mix difficulty. Reply with ONLY a JSON array: [{"q":"question","options":["A","B","C","D"],"answer":0}].`,
-      { maxTokens: 1600, temperature: 0.4 });
-    const exam = parseQuizJson(out);
-    if (!exam || exam.length < 6) return res.status(500).json({ error: 'Could not prepare the final exam right now — please try again.' });
+      { maxTokens: 3000, temperature: 0.35 });
+    let exam = parseQuizJson(out);
+    if (!exam || exam.length < 6) {
+      const retry = await generateText(
+        `Write 10 multiple-choice final-exam questions for a "${track?.name}" certificate covering: ${steps.map(st => st.title).join('; ')}. STRICT: reply with ONLY valid JSON, nothing else: [{"q":"...","options":["A","B","C","D"],"answer":0}]`,
+        { maxTokens: 3000, temperature: 0.2 });
+      exam = parseQuizJson(retry);
+    }
+    if (!exam || exam.length < 6) { logError({ source: 'academy-exam', message: 'exam parse failed twice', url: req.originalUrl }); return res.status(500).json({ error: 'Could not prepare the final exam right now — please try again.' }); }
     await dbQuery('PATCH', 'course_enrollments', { final_exam: exam }, { id: `eq.${req.params.id}` }).catch(() => {});
     res.json({ exam: exam.map(q => ({ q: q.q, options: q.options })), score: null, passed: false });
   } catch (e) {
