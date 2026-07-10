@@ -1251,7 +1251,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'TERRA-GLOBAL-VERIFY-2026-07-10J',
+  build: 'GLOBAL-LAYER-2026-07-10K',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -6875,6 +6875,10 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
 .seal .inner-ring{width:74px;height:74px;border-radius:50%;border:1.5px dashed rgba(4,16,34,.5);display:flex;align-items:center;justify-content:center}
 .seal img{height:46px;width:auto;border-radius:50%}
 .band{background:#0A2E65;color:#dfe8f6;text-align:center;font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;padding:7px 10px;border-radius:100px;max-width:640px;margin:14px auto 0}
+.globeband{max-width:640px;margin:10px auto 0;text-align:center}
+.globeband .gl{font-size:.48rem;letter-spacing:.26em;color:#8a93a3;text-transform:uppercase;font-weight:700}
+.globeband .gc{font-size:.54rem;letter-spacing:.24em;color:#a87016;text-transform:uppercase;font-weight:800;margin-top:3px}
+.globeband .gc span{color:#D4A73A;padding:0 2px}
 .sigrow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:18px auto 6px;max-width:680px}
 .idphoto{position:absolute;top:16px;left:20px;z-index:4;text-align:center}
 .idphoto img{width:66px;height:78px;border-radius:8px;object-fit:cover;border:2px solid #D4A73A;box-shadow:0 4px 12px rgba(0,0,0,.16);background:#fff}
@@ -6935,6 +6939,8 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
       <div class="cell qr"><img src="${qrUrl}" alt="Verification QR"><div class="br"><b>SCAN TO VERIFY</b><br>${origin.replace('https://','')}/verify</div></div>
     </div>
     <div class="band">This credential is permanently verifiable through the TERRA Credential Network</div>
+    <div class="globeband"><div class="gl">Global Verification Layer — one registry, every continent, 24/7</div><div class="gc">AFRICA <span>◆</span> ASIA <span>◆</span> EUROPE <span>◆</span> NORTH AMERICA <span>◆</span> SOUTH AMERICA <span>◆</span> OCEANIA</div></div>
+
     <div class="sigrow">
       <div style="width:78px"></div>
       <div class="sig"><img class="s" src="${img('signature.png')}" alt=""><img class="stamp" src="${img('stamp.png')}" alt="" style="position:absolute;left:-96px;bottom:-6px"><div class="ln"><b>President &amp; Chief Executive Officer</b><br>SkyGlobe Group</div></div>
@@ -7208,6 +7214,7 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
     <div class="tt">
       <div class="t1">Verified through the TERRA Credential Network</div>
       <div class="t2">TERRA confirms this document was genuinely issued by ${d.businessName} on ${issueDate} and has not been altered. Verification of issuance, not of the statements made. Verify anytime: ${verifyUrl}</div>
+      <div style="font-size:.5rem;letter-spacing:.22em;color:#7fd6a3;font-weight:800;margin-top:5px">AFRICA · ASIA · EUROPE · NORTH AMERICA · SOUTH AMERICA · OCEANIA — ONE REGISTRY, EVERY CONTINENT, 24/7</div>
     </div>
     <div class="qr"><img src="${qrUrl}" alt="QR"><div class="ql">SCAN TO VERIFY</div></div>
   </div>
@@ -7368,6 +7375,10 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
 .seal .inner-ring{width:74px;height:74px;border-radius:50%;border:1.5px dashed rgba(4,16,34,.5);display:flex;align-items:center;justify-content:center}
 .seal img{height:46px;width:auto;border-radius:50%}
 .band{background:#0d3b23;color:#dff0e6;text-align:center;font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;padding:7px 10px;border-radius:100px;max-width:660px;margin:14px auto 0}
+.globeband{max-width:640px;margin:10px auto 0;text-align:center}
+.globeband .gl{font-size:.48rem;letter-spacing:.26em;color:#8a93a3;text-transform:uppercase;font-weight:700}
+.globeband .gc{font-size:.54rem;letter-spacing:.24em;color:#a87016;text-transform:uppercase;font-weight:800;margin-top:3px}
+.globeband .gc span{color:#D4A73A;padding:0 2px}
 .sigrow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:18px auto 6px;max-width:680px}
 .sig{text-align:center;position:relative}
 .sig img.s{height:46px}
@@ -7425,6 +7436,8 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
       <div class="cell qr"><img src="${qrUrl}" alt="Verification QR"><div class="br"><b>SCAN TO VERIFY</b><br>${(process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com').replace('https://','')}/verify</div></div>
     </div>
     <div class="band">This recognition is permanently verifiable through the TERRA Credential Network</div>
+    <div class="globeband"><div class="gl">Global Verification Layer — one registry, every continent, 24/7</div><div class="gc">AFRICA <span>◆</span> ASIA <span>◆</span> EUROPE <span>◆</span> NORTH AMERICA <span>◆</span> SOUTH AMERICA <span>◆</span> OCEANIA</div></div>
+
     <div class="sigrow">
       <div style="width:78px"></div>
       <div class="sig"><img class="s" src="${img('signature.png')}" alt=""><img class="stamp" src="${img('stamp.png')}" alt="" style="position:absolute;left:-96px;bottom:-6px"><div class="ln"><b>President &amp; Chief Executive Officer</b><br>SkyGlobe Group</div></div>
