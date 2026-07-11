@@ -1342,6 +1342,17 @@
               <div style="color:var(--muted);font-size:.85rem;margin-top:4px">Premium, globally-verifiable documents issued under your authority: work certificates for employees, and recognition certificates for business, company, asset and property owners. Every one appears in the Records Vault and delivers to the recipient. This is separate from the Academy (education).</div>
             </div>
           </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3>🛡️ YUNEX Trust Desk — Verification Queue <span style="font-size:.68rem;color:#7fd6a3;letter-spacing:.12em">NO VERIFICATION, NO TRADE</span></h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 12px">Every person and business must be verified by TERRA before they can trade on YUNEX. Review each submission and approve or reject — approval stamps their SKYGLOBE ID with the verified trust mark and unlocks trading.</p>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <button class="btn btn-sm" id="vqTabPending" onclick="loadVerifyQueue('pending')">Pending</button>
+              <button class="btn btn-sm btn-ghost" id="vqTabAll" onclick="loadVerifyQueue('all')">All</button>
+            </div>
+            <div id="verifyQueue"><div class="skeleton">Loading…</div></div>
+          </div>
+
           <div class="panel" style="margin-bottom:18px">
             <h3>🏛️ Ownership &amp; Business Recognition <span style="font-size:.68rem;color:#7fd6a3;letter-spacing:.12em">TERRA VERIFIED · CEO AUTHORITY</span></h3>
             <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Award a premium, frameable <b style="color:var(--txt)">Certificate of Recognition</b> to business, company, asset or property owners — carrying the SkyGlobe logos, gold seal, stamp, your signature and lifetime QR verification. It recognises the <b style="color:var(--txt)">verified identity, ownership and registration</b> as presented — proof that partners and investors can check from anywhere in the world.</p>
@@ -1598,12 +1609,50 @@ function switchView(v){
   if(v==='errors') loadErrors();
   if(v==='ipregistry') loadIPRegistry();
   if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); loadStudentRecords(); loadRecordsVault(); }
+  if(v==='credentials'){ loadVerifyQueue('pending'); }
   toggleSidebar(false);
 }
 
 /* ══ Course Catalog manager (CEO adds courses — no code) ══ */
 /* ══ Student Records — the registrar's ledger ══ */
 let SR_ALL=[];
+async function loadVerifyQueue(status){
+  const box=document.getElementById('verifyQueue'); if(!box) return;
+  document.getElementById('vqTabPending').className='btn btn-sm'+(status==='pending'?'':' btn-ghost');
+  document.getElementById('vqTabAll').className='btn btn-sm'+(status==='all'?'':' btn-ghost');
+  box.innerHTML='<div class="skeleton">Loading…</div>';
+  try{
+    const r=await fetch(API+'/api/admin/yunex/verifications?status='+status,{headers:{'x-admin-key':KEY}});
+    const list=await r.json(); if(!r.ok) throw new Error(list.error||'load failed');
+    if(!list.length){ box.innerHTML='<p style="color:var(--muted);font-size:.85rem">No '+(status==='pending'?'pending':'')+' verification requests.</p>'; return; }
+    box.innerHTML=list.map(v=>{
+      const stColor=v.status==='verified'?'#7ee2a8':v.status==='rejected'?'#e0736c':'#e0a34c';
+      const when=v.created_at?new Date(v.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'';
+      const detail=v.kind==='business'?('Business: '+esc(v.business_name||'—')+(v.business_reg_no?' · Reg '+esc(v.business_reg_no):'')):('Doc: '+esc(v.document_type||'—')+(v.document_ref?' · '+esc(v.document_ref):''));
+      return `<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:var(--navy3)">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div style="font-size:1.2rem">${v.kind==='business'?'🏢':'🪪'}</div>
+          <div style="flex:1;min-width:160px"><div style="font-weight:700;color:var(--txt)">${esc(v.full_name||v.client_email)}</div><div style="font-size:.74rem;color:var(--muted)">${esc(v.client_email)} · ${esc(v.country||'')} · ${when}</div></div>
+          <div style="flex:1;min-width:150px;font-size:.78rem;color:var(--txt)"><span style="text-transform:capitalize;font-weight:700">${esc(v.kind)}</span> · ${detail}<div style="font-size:.72rem;color:var(--muted)">${esc(v.ref)}</div></div>
+          <div><span style="color:${stColor};font-weight:700;font-size:.78rem;text-transform:capitalize">${esc(v.status)}</span></div>
+          ${v.status==='pending'?`<div style="display:flex;gap:6px">
+            <button class="btn btn-sm" onclick="decideVerify('${v.ref}','verified',this)">✔ Approve</button>
+            <button class="btn btn-sm btn-ghost" onclick="decideVerify('${v.ref}','rejected',this)">✖ Reject</button>
+          </div>`:(v.review_note?`<div style="font-size:.72rem;color:var(--muted);max-width:160px">${esc(v.review_note)}</div>`:'')}
+        </div></div>`;
+    }).join('');
+  }catch(e){ box.innerHTML='<p style="color:#e05c5c;font-size:.85rem">'+esc(e.message)+'</p>'; }
+}
+async function decideVerify(ref,decision,btn){
+  let note='';
+  if(decision==='rejected'){ note=prompt('Reason for rejection (shown to the applicant):','')||''; }
+  btn.disabled=true; btn.textContent='…';
+  try{
+    const r=await fetch(API+'/api/admin/yunex/verifications/'+ref+'/decide',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({decision,note})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'failed');
+    loadVerifyQueue('pending');
+  }catch(e){ alert(e.message); btn.disabled=false; }
+}
 let RV_ALL=[];
 async function loadRecordsVault(){
   const box=document.getElementById('recordsVault'); if(!box) return;

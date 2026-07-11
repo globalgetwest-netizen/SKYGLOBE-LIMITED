@@ -303,3 +303,58 @@ alter table certificates add column if not exists status          text default '
 alter table certificates add column if not exists issued_by       text;
 alter table certificates add column if not exists region  text;
 alter table certificates add column if not exists address text;
+
+-- ══════════════════════════════════════════════════════════════════════════
+-- YUNEX LAYER 1 — SKYGLOBE ID (layered identity) + TERRA verification gate
+-- One account for the whole ecosystem; capabilities unlock through layers.
+-- ══════════════════════════════════════════════════════════════════════════
+-- SKYGLOBE ID profile fields on the existing clients table (one account, evolves)
+alter table clients add column if not exists phone       text;
+alter table clients add column if not exists country     text;
+alter table clients add column if not exists roles       jsonb default '[]'::jsonb;  -- e.g. ["buyer","seller","business"]
+alter table clients add column if not exists id_verified boolean default false;      -- identity verified via TERRA
+alter table clients add column if not exists biz_verified boolean default false;     -- business verified via TERRA
+alter table clients add column if not exists profile     jsonb default '{}'::jsonb;   -- extended identity (dob, residence, language...)
+
+-- TERRA verification submissions — the trust gate. No verification, no trade.
+create table if not exists terra_verifications (
+  id bigint generated always as identity primary key,
+  ref text unique,
+  client_email text,
+  kind text,                     -- 'identity' | 'business' | 'address'
+  status text default 'pending', -- 'pending' | 'verified' | 'rejected'
+  full_name text,
+  country text,
+  document_type text,            -- passport | national_id | drivers_license | business_registration | tax | utility
+  document_ref text,             -- reference / number provided
+  business_name text,
+  business_reg_no text,
+  details jsonb default '{}'::jsonb,
+  reviewed_by text,
+  review_note text,
+  created_at timestamptz default now(),
+  reviewed_at timestamptz
+);
+create index if not exists idx_terra_ver_email on terra_verifications (client_email, kind);
+create index if not exists idx_terra_ver_status on terra_verifications (status);
+
+-- YUNEX marketplace listings (created here for Layer 2; harmless if unused now)
+create table if not exists yunex_listings (
+  id bigint generated always as identity primary key,
+  ref text unique,
+  seller_email text,
+  pillar text,                   -- trade | investment | assets | business | finance | consumer | services | digital
+  category text,
+  title text,
+  description text,
+  price numeric,
+  currency text default 'USD',
+  quantity text,
+  location text,
+  images jsonb default '[]'::jsonb,
+  status text default 'active',  -- active | paused | removed
+  created_at timestamptz default now()
+);
+create index if not exists idx_yunex_listings_seller on yunex_listings (seller_email);
+create index if not exists idx_yunex_listings_pillar on yunex_listings (pillar, status);
+

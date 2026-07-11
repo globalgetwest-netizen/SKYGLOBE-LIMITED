@@ -909,6 +909,8 @@ app.get('/showreel', (req, res) => res.sendFile(path.join(__dirname, 'showreel.h
 app.get('/terra', (req, res) => res.sendFile(path.join(__dirname, 'terra.html')));
 app.get('/noria', (req, res) => res.sendFile(path.join(__dirname, 'noria.html')));
 app.get('/yunex', (req, res) => res.sendFile(path.join(__dirname, 'yunex.html')));
+app.get('/yunex/app', (req, res) => res.sendFile(path.join(__dirname, 'yunex-app.html')));
+app.get('/yunex-app', (req, res) => res.sendFile(path.join(__dirname, 'yunex-app.html')));
 app.get('/packages', (req, res) => res.sendFile(path.join(__dirname, 'packages.html')));
 app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));
 app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));
@@ -1251,7 +1253,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'ORGANIZED-2026-07-11D',
+  build: 'YUNEX-LAYER1-2026-07-11E',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1356,6 +1358,175 @@ app.get('/api/auth/me', async (req, res) => {
     const client = await getClientByEmail(email);
     if (!client) return res.status(401).json({ error: 'Account not found.' });
     res.json({ email: client.email, name: client.name || '' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// §7b · SKYGLOBE ID + YUNEX LAYER 1 — Foundation & Trust Gate
+// One account for the whole ecosystem. Capabilities unlock through layers:
+//   Identity → TERRA Verification → Roles → (Service enrolment: Layer 2+)
+// Doctrine: "No verification, no trade." A seller cannot list until TERRA
+// has verified their identity (and business, where they trade as a business).
+// ══════════════════════════════════════════════════════════════════════════
+const YUNEX_ROLES = ['buyer', 'seller', 'business', 'investor', 'partner'];
+
+// Full SKYGLOBE ID for the logged-in user: identity + roles + verification.
+app.get('/api/skyglobe-id/me', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const c = await getClientByEmail(email);
+    if (!c) return res.status(401).json({ error: 'Account not found.' });
+    const roles = Array.isArray(c.roles) ? c.roles : [];
+    // A verified seller = identity verified (and business-verified if trading as a business).
+    const isBusiness = roles.includes('business');
+    const canSell = !!c.id_verified && (!isBusiness || !!c.biz_verified);
+    res.json({
+      email: c.email, name: c.name || '', phone: c.phone || '', country: c.country || '',
+      profile: c.profile || {}, roles,
+      verification: {
+        identity: c.id_verified ? 'verified' : 'not_verified',
+        business: c.biz_verified ? 'verified' : (isBusiness ? 'not_verified' : 'not_applicable'),
+      },
+      can_sell: canSell,
+      trust_marks: [
+        ...(c.id_verified ? [{ key: 'identity', label: 'Identity Verified', color: '#1e57c9' }] : []),
+        ...(c.biz_verified ? [{ key: 'business', label: 'Business Verified', color: '#a87016' }] : []),
+      ],
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Update core identity profile fields.
+app.post('/api/skyglobe-id/profile', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const b = req.body || {};
+    const patch = {};
+    if (b.name != null) patch.name = String(b.name).trim().slice(0, 120);
+    if (b.phone != null) patch.phone = String(b.phone).trim().slice(0, 40);
+    if (b.country != null) patch.country = String(b.country).trim().slice(0, 60);
+    if (b.profile && typeof b.profile === 'object') {
+      const p = {};
+      for (const k of ['dob', 'residence', 'language', 'gender', 'city']) if (b.profile[k] != null) p[k] = String(b.profile[k]).slice(0, 120);
+      patch.profile = p;
+    }
+    if (!Object.keys(patch).length) return res.status(400).json({ error: 'Nothing to update.' });
+    await dbQuery('PATCH', 'clients', patch, { email: `eq.${email}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Add a role to the account (multiple roles coexist). Selling still requires
+// verification — a role is an intent, not a permission.
+app.post('/api/skyglobe-id/roles', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const role = String((req.body || {}).role || '').trim().toLowerCase();
+    if (!YUNEX_ROLES.includes(role)) return res.status(400).json({ error: 'Unknown role.' });
+    const c = await getClientByEmail(email);
+    const roles = Array.isArray(c.roles) ? c.roles : [];
+    if (!roles.includes(role)) roles.push(role);
+    await dbQuery('PATCH', 'clients', { roles }, { email: `eq.${email}` });
+    res.json({ success: true, roles });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── TERRA VERIFICATION (the trust gate) ──────────────────────────────────────
+// Submit an identity or business verification. Goes into a review queue; the
+// CEO/TERRA officer approves or rejects. Verification is real: the participant
+// declares legal identity and provides a document reference to be checked.
+app.post('/api/yunex/verify/request', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const b = req.body || {};
+    const kind = ['identity', 'business', 'address'].includes(b.kind) ? b.kind : 'identity';
+    // one open (pending) request per kind
+    const existing = await dbQuery('GET', 'terra_verifications', null, { client_email: `eq.${email}`, kind: `eq.${kind}`, status: 'eq.pending', limit: 1 }).catch(() => []);
+    if (existing.length) return res.status(409).json({ error: 'You already have a pending ' + kind + ' verification under review.' });
+    const ref = 'TV-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    const row = {
+      ref, client_email: email, kind, status: 'pending',
+      full_name: String(b.fullName || '').trim().slice(0, 120),
+      country: String(b.country || '').trim().slice(0, 60),
+      document_type: String(b.documentType || '').trim().slice(0, 40),
+      document_ref: String(b.documentRef || '').trim().slice(0, 80),
+      business_name: String(b.businessName || '').trim().slice(0, 140),
+      business_reg_no: String(b.businessRegNo || '').trim().slice(0, 80),
+      details: (b.details && typeof b.details === 'object') ? b.details : {},
+    };
+    if (!row.full_name) return res.status(400).json({ error: 'Full legal name is required.' });
+    if (kind === 'business' && !row.business_name) return res.status(400).json({ error: 'Business name is required for business verification.' });
+    await dbQuery('POST', 'terra_verifications', row).catch(e => { throw new Error('Could not submit verification: ' + e.message); });
+    logActivity(email, 'client', 'terra_verify_request', `Submitted ${kind} verification (${ref})`, ref);
+    // notify the platform (portal + email to the trust desk)
+    portalDeliver(email, `Your ${kind} verification (${ref}) has been received and is under review by the TERRA Trust desk. We will notify you once a decision is made.`, 'legal').catch(() => {});
+    res.json({ success: true, ref, status: 'pending' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// My verification submissions & their statuses.
+app.get('/api/yunex/verify/status', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'terra_verifications', null, { client_email: `eq.${email}`, order: 'created_at.desc', limit: 50 }).catch(() => []);
+    res.json((Array.isArray(rows) ? rows : []).map(r => ({
+      ref: r.ref, kind: r.kind, status: r.status, note: r.review_note || null,
+      submitted_at: r.created_at, decided_at: r.reviewed_at || null,
+    })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// The gate helper — reused by Layer 2 listing endpoints. "No verification, no trade."
+async function requireVerifiedSeller(email) {
+  const c = await getClientByEmail(email);
+  if (!c) return { ok: false, error: 'Account not found.' };
+  const roles = Array.isArray(c.roles) ? c.roles : [];
+  if (!c.id_verified) return { ok: false, error: 'Your identity must be verified by TERRA before you can trade on YUNEX.' };
+  if (roles.includes('business') && !c.biz_verified) return { ok: false, error: 'Your business must be verified by TERRA before trading as a business.' };
+  return { ok: true, client: c };
+}
+
+// ── ADMIN / TERRA OFFICER: verification review queue ─────────────────────────
+app.get('/api/admin/yunex/verifications', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const status = String(req.query.status || 'pending');
+    const params = { order: 'created_at.desc', limit: 500 };
+    if (status !== 'all') params.status = `eq.${status}`;
+    const rows = await dbQuery('GET', 'terra_verifications', null, params).catch(() => []);
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Approve or reject — CEO authority (final trust decision). On approval the
+// client's SKYGLOBE ID is stamped verified, unlocking trade.
+app.post('/api/admin/yunex/verifications/:ref/decide', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const decision = String((req.body || {}).decision || '').toLowerCase();
+    const note = String((req.body || {}).note || '').trim().slice(0, 300);
+    if (!['verified', 'rejected'].includes(decision)) return res.status(400).json({ error: 'Decision must be verified or rejected.' });
+    const rows = await dbQuery('GET', 'terra_verifications', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const v = rows[0];
+    if (!v) return res.status(404).json({ error: 'Verification not found.' });
+    await dbQuery('PATCH', 'terra_verifications', { status: decision, reviewed_by: who, review_note: note, reviewed_at: new Date().toISOString() }, { ref: `eq.${req.params.ref}` });
+    if (decision === 'verified') {
+      const patch = v.kind === 'business' ? { biz_verified: true } : v.kind === 'identity' ? { id_verified: true } : {};
+      if (Object.keys(patch).length) await dbQuery('PATCH', 'clients', patch, { email: `eq.${v.client_email}` });
+    }
+    logActivity(who, 'ceo', 'terra_verify_decision', `${decision} ${v.kind} verification for ${v.client_email} (${v.ref})`, v.ref);
+    const msg = decision === 'verified'
+      ? `Congratulations! Your ${v.kind} verification (${v.ref}) has been approved by TERRA. Your SKYGLOBE ID now carries the ${v.kind === 'business' ? 'Business' : 'Identity'} Verified trust mark${v.kind !== 'business' ? ', and you can now trade on YUNEX' : ''}.`
+      : `Your ${v.kind} verification (${v.ref}) was not approved.${note ? ' Reason: ' + note : ''} You may correct the details and submit again.`;
+    portalDeliver(v.client_email, msg, 'legal').catch(() => {});
+    res.json({ success: true, ref: v.ref, decision });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

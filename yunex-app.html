@@ -1,0 +1,320 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YUNEX — Your Economic Home | SkyGlobe Group</title>
+<meta name="description" content="YUNEX — trade, invest, and grow across a verified global marketplace. Powered by SkyGlobe Group, verified by TERRA, guided by NORIA.">
+<link rel="icon" href="/yunex-logo-t.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0a1230;--navy2:#111a44;--line:rgba(255,255,255,.1);--blue:#3d5af1;--purple:#b326d9;--ink:#0a1230;--mut:#8b93b8}
+body{font-family:Inter,system-ui,sans-serif;background:#f6f7fb;color:var(--ink);-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+.grad{background:linear-gradient(120deg,var(--blue),var(--purple))}
+/* Top bar */
+.top{position:sticky;top:0;z-index:40;background:rgba(10,18,48,.96);backdrop-filter:blur(10px);color:#fff;border-bottom:1px solid var(--line)}
+.top .row{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:12px 20px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.04em}
+.brand img{width:34px;height:34px;object-fit:contain}
+.brand small{display:block;font-size:.56rem;letter-spacing:.22em;color:#9fb0e8;font-weight:600}
+.search{flex:1;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:12px;padding:9px 14px;color:#cdd6f5;min-width:0}
+.search input{flex:1;background:none;border:none;color:#fff;font-size:.9rem;outline:none;min-width:0}
+.top .acct{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.btn{border:none;cursor:pointer;font-family:inherit;font-weight:700;border-radius:11px;padding:9px 16px;font-size:.86rem}
+.btn.g{color:#fff}.btn.o{background:transparent;border:1px solid var(--line);color:#fff}
+.btn.sm{padding:7px 13px;font-size:.8rem}
+/* Section nav */
+.nav{position:sticky;top:59px;z-index:30;background:#fff;border-bottom:1px solid #e8eaf2}
+.nav .row{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:0 14px;overflow-x:auto}
+.nav button{background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:.9rem;color:#67708f;padding:15px 16px;border-bottom:3px solid transparent;white-space:nowrap}
+.nav button.on{color:var(--blue);border-bottom-color:var(--purple)}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 80px}
+.view{display:none}.view.on{display:block}
+/* Hero */
+.hero{border-radius:22px;padding:40px 34px;color:#fff;position:relative;overflow:hidden}
+.hero h1{font-size:2rem;font-weight:900;letter-spacing:-.01em;line-height:1.15;max-width:620px}
+.hero p{margin-top:12px;color:#dfe4ff;max-width:560px;font-size:1.02rem;line-height:1.6}
+.hero .marks{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:7px 15px;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:7px}
+/* Pillars */
+.grid{display:grid;gap:16px;margin-top:22px}
+.g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:#fff;border:1px solid #e8eaf2;border-radius:16px;padding:22px;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(10,18,48,.1)}
+.card .ic{font-size:1.7rem}
+.card h3{margin-top:12px;font-size:1.05rem}
+.card p{color:#67708f;font-size:.86rem;margin-top:6px;line-height:1.55}
+.sec-h{font-size:1.25rem;font-weight:800;margin:6px 0 2px}
+.sec-s{color:#67708f;font-size:.9rem;margin-bottom:6px}
+/* Panels */
+.panel{background:#fff;border:1px solid #e8eaf2;border-radius:18px;padding:26px;margin-top:18px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-size:.74rem;font-weight:700;color:#67708f;text-transform:uppercase;letter-spacing:.06em;margin:0 0 5px}
+input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;padding:11px 13px;font-family:inherit;font-size:.92rem;background:#fbfcff;color:var(--ink)}
+.st{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.82rem;padding:5px 13px;border-radius:100px}
+.st.ok{background:#e6f7ee;color:#12864e}.st.pend{background:#fff4e0;color:#b5730a}.st.no{background:#f1f3f9;color:#67708f}
+.empty{text-align:center;padding:60px 20px;color:#8b93b8}
+.empty .ic{font-size:2.6rem}
+.muted{color:#8b93b8;font-size:.86rem}
+.notice{background:linear-gradient(120deg,rgba(61,90,241,.08),rgba(179,38,217,.08));border:1px solid rgba(61,90,241,.2);border-radius:14px;padding:16px 18px;font-size:.9rem;color:#334;line-height:1.6}
+@media(max-width:640px){.row2{grid-template-columns:1fr}.hero h1{font-size:1.55rem}.brand small{display:none}}
+/* Auth modal */
+.modal{position:fixed;inset:0;background:rgba(10,18,48,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:20px;padding:30px;max-width:400px;width:100%}
+.modal h2{font-size:1.3rem}.modal .tabs{display:flex;gap:8px;margin:16px 0}
+.modal .tabs button{flex:1;padding:9px;border-radius:10px;border:1px solid #d7dbe8;background:#fbfcff;font-weight:700;cursor:pointer;font-family:inherit;color:#67708f}
+.modal .tabs button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.modal input{margin-bottom:10px}
+.err{color:#c62828;font-size:.84rem;margin-top:4px;min-height:1em}
+</style>
+
+<div class="top"><div class="row">
+  <a class="brand" href="/yunex"><img src="/yunex-logo-t.png" alt="YUNEX"><span>YUNEX<small>A SKYGLOBE GROUP PLATFORM</small></span></a>
+  <div class="search"><span>🔎</span><input id="q" placeholder="Search products, suppliers, services, opportunities…"><button class="btn g grad sm" onclick="doSearch()">Search</button></div>
+  <div class="acct" id="acct"><button class="btn o" onclick="openAuth('login')">Log in</button><button class="btn g grad" onclick="openAuth('signup')">Join YUNEX</button></div>
+</div></div>
+
+<div class="nav"><div class="row" id="nav">
+  <button class="on" data-v="home" onclick="go('home')">🏠 Home</button>
+  <button data-v="market" onclick="go('market')">🛍️ Marketplace</button>
+  <button data-v="wallet" onclick="go('wallet')">💳 Wallet</button>
+  <button data-v="business" onclick="go('business')">🏢 Business Centre</button>
+  <button data-v="community" onclick="go('community')">🌍 Community</button>
+  <button data-v="id" onclick="go('id')">🪪 My SKYGLOBE ID</button>
+</div></div>
+
+<div class="wrap">
+  <!-- HOME -->
+  <section class="view on" id="v-home">
+    <div class="hero grad">
+      <h1>One verified marketplace for the world's real economy.</h1>
+      <p>Trade, invest and grow with people and businesses whose identity is verified before the first handshake. <b>No verification, no trade.</b></p>
+      <div class="marks">
+        <span class="chip">🛡️ Verified by TERRA</span>
+        <span class="chip">💳 Payments by YUNEX</span>
+        <span class="chip">🧠 Guided by NORIA</span>
+      </div>
+    </div>
+    <h2 class="sec-h" style="margin-top:26px">The five pillars of YUNEX</h2>
+    <div class="sec-s">Everything the real economy needs — each participant verified, each deal trusted.</div>
+    <div class="grid g5">
+      <div class="card" onclick="go('market')"><div class="ic">🔁</div><h3>Trade</h3><p>Cross-border B2B commerce — verified suppliers, sourcing and settlement.</p></div>
+      <div class="card" onclick="go('market')"><div class="ic">📈</div><h3>Investment</h3><p>Verified projects and opportunities seeking capital and partners.</p></div>
+      <div class="card" onclick="go('market')"><div class="ic">🏝️</div><h3>Assets</h3><p>Land, farms, property and machinery — clearly listed, verified owners.</p></div>
+      <div class="card" onclick="go('market')"><div class="ic">🏢</div><h3>Business</h3><p>Verified company profiles, sourcing, distribution and expansion.</p></div>
+      <div class="card" onclick="go('market')"><div class="ic">💰</div><h3>Finance</h3><p>Wallet, transfers and merchant services — with licensed partners.</p></div>
+    </div>
+    <div class="notice" style="margin-top:22px">🛡️ <b>Trust first.</b> Every buyer and seller on YUNEX is verified by the TERRA Credential Network before they can transact. YUNEX connects verified people and businesses — it never becomes the bank, the customs authority or the shipping company; it integrates licensed specialists.</div>
+  </section>
+
+  <!-- MARKETPLACE -->
+  <section class="view" id="v-market">
+    <h2 class="sec-h">Marketplace</h2>
+    <div class="sec-s">Browse verified listings across all five pillars.</div>
+    <div class="grid g3" id="listings"><div class="empty" style="grid-column:1/-1"><div class="ic">🛍️</div><p style="margin-top:8px;font-weight:700">The marketplace opens with Layer 2</p><p class="muted">Verified sellers will list products, services, assets and opportunities here. The trust foundation is live now — listings arrive next.</p></div></div>
+  </section>
+
+  <!-- WALLET -->
+  <section class="view" id="v-wallet">
+    <h2 class="sec-h">YUNEX Wallet</h2>
+    <div class="sec-s">Payments, transfers and settlement — powered by YUNEX Pay.</div>
+    <div class="panel"><div class="empty"><div class="ic">💳</div><p style="margin-top:8px;font-weight:700">Your wallet activates with the marketplace</p><p class="muted">YUNEX Pay already powers payments across the ecosystem. The in-app wallet, escrow and transfers arrive with Layer 3 (the Deal Room), always with licensed partners per each country's law.</p></div></div>
+  </section>
+
+  <!-- BUSINESS CENTRE -->
+  <section class="view" id="v-business">
+    <h2 class="sec-h">Business Centre</h2>
+    <div class="sec-s">Manage your presence as a verified seller or business.</div>
+    <div id="bizGate"></div>
+  </section>
+
+  <!-- COMMUNITY -->
+  <section class="view" id="v-community">
+    <h2 class="sec-h">Community</h2>
+    <div class="sec-s">Reviews, knowledge and the verified business network.</div>
+    <div class="panel"><div class="empty"><div class="ic">🌍</div><p style="margin-top:8px;font-weight:700">The network grows with Layer 5</p><p class="muted">Business profiles, supplier↔distributor↔retailer connections, reviews and knowledge sharing — built once there's a verified market to connect.</p></div></div>
+  </section>
+
+  <!-- SKYGLOBE ID -->
+  <section class="view" id="v-id">
+    <div id="idContent"><div class="panel"><div class="empty"><div class="ic">🪪</div><p style="margin-top:8px;font-weight:700">Log in to see your SKYGLOBE ID</p><p class="muted">One account for the whole ecosystem — Academy, Travel, YUNEX and more.</p><button class="btn g grad" style="margin-top:14px" onclick="openAuth('login')">Log in</button></div></div></div>
+  </section>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal" id="authModal"><div class="box">
+  <h2 id="authTitle">Join YUNEX</h2>
+  <p class="muted" style="margin-top:4px">One SKYGLOBE ID for the entire ecosystem.</p>
+  <div class="tabs"><button id="tabLogin" onclick="authTab('login')">Log in</button><button id="tabSignup" class="on" onclick="authTab('signup')">Sign up</button></div>
+  <div id="nameWrap"><input id="au_name" placeholder="Full name"></div>
+  <input id="au_email" type="email" placeholder="Email">
+  <input id="au_pass" type="password" placeholder="Password (min 6 characters)">
+  <div class="err" id="au_err"></div>
+  <button class="btn g grad" style="width:100%;padding:12px" onclick="submitAuth()" id="au_btn">Create my SKYGLOBE ID</button>
+  <button class="btn o" style="width:100%;margin-top:8px;color:#67708f;border-color:#d7dbe8" onclick="closeAuth()">Cancel</button>
+</div></div>
+
+<script>
+const API='';
+let TOKEN=localStorage.getItem('sky_token')||'';
+let ME=null, authMode='signup';
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function H(){return TOKEN?{authorization:'Bearer '+TOKEN}:{};}
+
+function go(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
+  $('v-'+v).classList.add('on');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  if(v==='id') renderID();
+  if(v==='business') renderBiz();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function doSearch(){ go('market'); }
+
+/* auth */
+function openAuth(m){ authTab(m); $('authModal').classList.add('on'); }
+function closeAuth(){ $('authModal').classList.remove('on'); $('au_err').textContent=''; }
+function authTab(m){ authMode=m; $('tabLogin').classList.toggle('on',m==='login'); $('tabSignup').classList.toggle('on',m==='signup');
+  $('nameWrap').style.display=m==='signup'?'block':'none'; $('authTitle').textContent=m==='signup'?'Join YUNEX':'Welcome back';
+  $('au_btn').textContent=m==='signup'?'Create my SKYGLOBE ID':'Log in'; }
+async function submitAuth(){
+  $('au_err').textContent='';
+  const email=$('au_email').value.trim(), password=$('au_pass').value, name=$('au_name').value.trim();
+  if(!email||!password){$('au_err').textContent='Email and password are required.';return;}
+  const url=authMode==='signup'?'/api/auth/signup':'/api/auth/login';
+  const body=authMode==='signup'?{name,email,password}:{email,password};
+  try{
+    const r=await fetch(API+url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!r.ok||!d.success){$('au_err').textContent=d.error||'Could not sign in.';return;}
+    TOKEN=d.token; localStorage.setItem('sky_token',TOKEN); closeAuth(); await loadMe(); go('id');
+  }catch(e){$('au_err').textContent='Network error. Please try again.';}
+}
+function logout(){ TOKEN=''; localStorage.removeItem('sky_token'); ME=null; renderAcct(); go('home'); }
+
+async function loadMe(){
+  if(!TOKEN){ ME=null; renderAcct(); return; }
+  try{
+    const r=await fetch(API+'/api/skyglobe-id/me',{headers:H()});
+    if(!r.ok){ if(r.status===401){logout();} ME=null; renderAcct(); return; }
+    ME=await r.json(); renderAcct();
+  }catch(e){ ME=null; renderAcct(); }
+}
+function renderAcct(){
+  const el=$('acct');
+  if(!ME){ el.innerHTML='<button class="btn o" onclick="openAuth(\'login\')">Log in</button><button class="btn g grad" onclick="openAuth(\'signup\')">Join YUNEX</button>'; return; }
+  const initial=(ME.name||ME.email||'?').trim().charAt(0).toUpperCase();
+  const badge=ME.can_sell?'<span class="chip" style="background:rgba(255,255,255,.16)">✔ Verified</span>':'';
+  el.innerHTML=badge+'<button class="btn o" onclick="go(\'id\')">🪪 '+esc(ME.name||ME.email.split('@')[0])+'</button><button class="btn o sm" onclick="logout()">Log out</button>';
+}
+
+/* SKYGLOBE ID view */
+function stTag(s){ return s==='verified'?'<span class="st ok">✔ Verified</span>':s==='pending'?'<span class="st pend">⏳ Under review</span>':s==='not_applicable'?'<span class="st no">—</span>':'<span class="st no">Not verified</span>'; }
+async function renderID(){
+  if(!ME){ return; }
+  const el=$('idContent');
+  const roles=(ME.roles||[]);
+  el.innerHTML=`
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div class="grad" style="width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.8rem;font-weight:800">${esc((ME.name||ME.email||'?').charAt(0).toUpperCase())}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:1.3rem;font-weight:800">${esc(ME.name||'Your name')}</div>
+          <div class="muted">${esc(ME.email)}${ME.country?' · '+esc(ME.country):''}</div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${(ME.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color}">🛡️ ${esc(m.label)}</span>`).join('')||'<span class="muted" style="font-size:.82rem">No trust marks yet — get verified to earn them.</span>'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="sec-h" style="font-size:1.05rem">🛡️ TERRA Verification</div>
+      <div class="sec-s">Your trust status. This is what unlocks trading on YUNEX.</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:10px">
+        <div><label>Identity</label>${stTag(ME.verification.identity)}</div>
+        <div><label>Business</label>${stTag(ME.verification.business)}</div>
+        <div><label>Can trade on YUNEX?</label>${ME.can_sell?'<span class="st ok">✔ Yes — verified</span>':'<span class="st no">Not yet</span>'}</div>
+      </div>
+      ${ME.verification.identity==='verified'?'':`<div style="margin-top:16px"><button class="btn g grad" onclick="showVerify('identity')">Verify my identity with TERRA</button></div>`}
+      ${roles.includes('business')&&ME.verification.business!=='verified'?`<div style="margin-top:10px"><button class="btn g grad" onclick="showVerify('business')">Verify my business with TERRA</button></div>`:''}
+      <div id="verifyForm"></div>
+      <div id="verifyList" style="margin-top:14px"></div>
+    </div>
+
+    <div class="panel">
+      <div class="sec-h" style="font-size:1.05rem">Roles</div>
+      <div class="sec-s">Your account can hold many roles at once. A role is an intent — trading still requires verification.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">${roles.length?roles.map(r=>`<span class="st no" style="text-transform:capitalize">${esc(r)}</span>`).join(''):'<span class="muted" style="font-size:.85rem">No roles yet.</span>'}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${['buyer','seller','business','investor'].filter(r=>!roles.includes(r)).map(r=>`<button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" onclick="addRole('${r}')">+ ${r[0].toUpperCase()+r.slice(1)}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="sec-h" style="font-size:1.05rem">Profile</div>
+      <div class="row2" style="margin-top:10px">
+        <div><label>Full name</label><input id="p_name" value="${esc(ME.name||'')}"></div>
+        <div><label>Phone</label><input id="p_phone" value="${esc(ME.phone||'')}"></div>
+        <div><label>Country</label><input id="p_country" value="${esc(ME.country||'')}"></div>
+        <div><label>City / Residence</label><input id="p_res" value="${esc((ME.profile||{}).residence||'')}"></div>
+      </div>
+      <button class="btn g grad" style="margin-top:14px" onclick="saveProfile()">Save profile</button>
+      <span class="muted" id="p_msg" style="margin-left:10px"></span>
+    </div>`;
+  loadVerifyList();
+}
+async function addRole(role){ await fetch(API+'/api/skyglobe-id/roles',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({role})}); await loadMe(); renderID(); }
+async function saveProfile(){
+  const body={name:$('p_name').value.trim(),phone:$('p_phone').value.trim(),country:$('p_country').value.trim(),profile:{residence:$('p_res').value.trim()}};
+  const r=await fetch(API+'/api/skyglobe-id/profile',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify(body)});
+  $('p_msg').textContent=r.ok?'✔ Saved':'Could not save'; await loadMe();
+}
+function showVerify(kind){
+  const isBiz=kind==='business';
+  $('verifyForm').innerHTML=`
+    <div class="notice" style="margin-top:16px">
+      <b>${isBiz?'Business':'Identity'} verification by TERRA.</b> Provide your real legal ${isBiz?'business':'identity'} details. The TERRA Trust desk reviews every submission before approval — this is what makes YUNEX trustworthy.
+      <div class="row2" style="margin-top:12px">
+        <div><label>Full legal name</label><input id="v_name" value="${esc(ME.name||'')}"></div>
+        <div><label>Country</label><input id="v_country" value="${esc(ME.country||'')}"></div>
+        ${isBiz?`<div><label>Business name</label><input id="v_biz"></div><div><label>Business registration Nº</label><input id="v_reg"></div>`:
+          `<div><label>Document type</label><select id="v_doctype"><option value="passport">Passport</option><option value="national_id">National ID</option><option value="drivers_license">Driver's licence</option></select></div><div><label>Document number</label><input id="v_docref"></div>`}
+      </div>
+      <button class="btn g grad" style="margin-top:12px" onclick="submitVerify('${kind}')">Submit to TERRA</button>
+      <span class="muted" id="v_msg" style="margin-left:10px"></span>
+    </div>`;
+}
+async function submitVerify(kind){
+  const body={kind,fullName:$('v_name').value.trim(),country:$('v_country').value.trim()};
+  if(kind==='business'){ body.businessName=$('v_biz').value.trim(); body.businessRegNo=$('v_reg').value.trim(); }
+  else { body.documentType=$('v_doctype').value; body.documentRef=$('v_docref').value.trim(); }
+  const r=await fetch(API+'/api/yunex/verify/request',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify(body)});
+  const d=await r.json();
+  $('v_msg').textContent=r.ok?('✔ Submitted ('+d.ref+') — under review'):(d.error||'Could not submit');
+  if(r.ok){ $('verifyForm').innerHTML=''; loadVerifyList(); }
+}
+async function loadVerifyList(){
+  try{
+    const r=await fetch(API+'/api/yunex/verify/status',{headers:H()});
+    const list=await r.json(); if(!Array.isArray(list)||!list.length){ $('verifyList').innerHTML=''; return; }
+    $('verifyList').innerHTML='<label>Your verification requests</label>'+list.map(v=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #e8eaf2;border-radius:10px;padding:9px 12px;margin-bottom:6px"><div><b style="text-transform:capitalize">${esc(v.kind)}</b> <span class="muted">· ${esc(v.ref)}</span>${v.note?'<div class="muted" style="font-size:.78rem">'+esc(v.note)+'</div>':''}</div>${stTag(v.status)}</div>`).join('');
+  }catch(e){}
+}
+
+/* Business Centre gate */
+function renderBiz(){
+  const el=$('bizGate');
+  if(!ME){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🏢</div><p style="margin-top:8px;font-weight:700">Log in to open your Business Centre</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return; }
+  if(!ME.can_sell){
+    el.innerHTML=`<div class="panel"><div class="notice">🛡️ <b>No verification, no trade.</b> To sell, list assets, or offer services on YUNEX, your identity${ (ME.roles||[]).includes('business')?' and business':'' } must be verified by TERRA. This protects every buyer and gives you a verified trust mark that investors and partners can check worldwide.</div>
+      <div style="margin-top:16px"><button class="btn g grad" onclick="go('id')">Go to My SKYGLOBE ID to get verified →</button></div></div>`;
+    return;
+  }
+  el.innerHTML=`<div class="panel"><div style="display:flex;align-items:center;gap:10px"><span class="st ok">✔ Verified seller</span><b>You're cleared to trade on YUNEX.</b></div>
+    <div class="sec-s" style="margin-top:8px">Listing management, analytics and advertising arrive with Layer 2. Your verified status is live now — you'll be able to publish listings the moment the marketplace opens.</div></div>`;
+}
+
+/* boot */
+renderAcct(); loadMe();
+</script>
