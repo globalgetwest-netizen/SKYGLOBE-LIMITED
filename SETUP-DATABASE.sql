@@ -358,3 +358,5 @@ create table if not exists yunex_listings (
 create index if not exists idx_yunex_listings_seller on yunex_listings (seller_email);
 create index if not exists idx_yunex_listings_pillar on yunex_listings (pillar, status);
 
+-- Delegation: responsibilities the CEO assigns to a staff member (Layer: staff/admin shared duties)
+alter table staff_members add column if not exists responsibilities jsonb default '[]'::jsonb;

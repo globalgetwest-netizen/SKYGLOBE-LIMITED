@@ -1059,6 +1059,11 @@
 
         <!-- STAFF DIRECTORY -->
         <section class="view" id="view-directory">
+          <div class="panel" style="margin-bottom:18px">
+            <h3>🎛️ Delegation — assign responsibilities to staff <span style="font-size:.68rem;color:#7fd6a3;letter-spacing:.12em">CEO CONTROL</span></h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 12px">Choose which admin duties each staff member handles. A delegated responsibility appears in that person's Staff Portal and stays visible to you here. Final approval on money and irreversible actions remains yours — staff prepare and handle the day-to-day.</p>
+            <div id="delegationList"><div class="skeleton">Loading staff…</div></div>
+          </div>
           <div class="add-staff-form">
             <h3>➕ Add Staff Member</h3>
             <div class="form-grid">
@@ -1600,7 +1605,7 @@ function switchView(v){
   if(v==='legaldocs') loadLegalDocs();
   if(v==='finance') loadFinance();
   if(v==='payroll') loadPayroll();
-  if(v==='directory') loadDirectory();
+  if(v==='directory'){ loadDirectory(); loadDelegation(); }
   if(v==='channels'){ loadChanMsgs(ACTIVE_CHAN); startChanPoll(); }
   if(v==='tasks') loadTasks();
   if(v==='attendance') loadAttendanceAdmin();
@@ -3325,6 +3330,40 @@ setInterval(()=>{ if(KEY) pollTeamBadge(); }, 25000);
 let STAFF_DIR = [];
 const DEPT_LABELS = {immigration:'🛂 Immigration',operations:'⚙️ Operations',finance:'💰 Finance',client_relations:'🤝 Client Relations',legal:'🔐 Legal',general:'📢 General'};
 
+let RESP_CATALOG=[];
+async function loadDelegation(){
+  const box=document.getElementById('delegationList'); if(!box) return;
+  try{
+    if(!RESP_CATALOG.length){ const cr=await fetch(API+'/api/responsibilities/catalog',{headers:{'x-admin-key':KEY}}); RESP_CATALOG=await cr.json(); }
+    const r=await fetch(API+'/api/admin/staff-delegation',{headers:{'x-admin-key':KEY}});
+    const staff=await r.json(); if(!r.ok) throw new Error(staff.error||'load failed');
+    if(!Array.isArray(staff)||!staff.length){ box.innerHTML='<p style="color:var(--muted);font-size:.85rem">No staff members yet. Add staff below, then delegate responsibilities.</p>'; return; }
+    box.innerHTML=staff.map(s=>{
+      const held=s.responsibilities||[];
+      const chips=RESP_CATALOG.map(rc=>{
+        const on=held.includes(rc.key);
+        return `<button onclick="toggleResp(${s.id},'${rc.key}',this)" data-on="${on}" style="cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:600;border-radius:100px;padding:6px 12px;border:1px solid ${on?'#7ee2a8':'var(--line)'};background:${on?'rgba(126,226,168,.14)':'var(--navy3)'};color:${on?'#7ee2a8':'var(--muted)'}">${on?'✔ ':''}${rc.icon} ${rc.label}</button>`;
+      }).join(' ');
+      return `<div style="border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--navy3)">
+        <div style="font-weight:700;color:var(--txt)">${esc(s.name||'—')} <span style="font-size:.74rem;color:var(--muted);font-weight:500">· ${esc(s.role_title||'')} ${s.department?'· '+esc(s.department):''}</span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${chips}</div>
+      </div>`;
+    }).join('');
+  }catch(e){ box.innerHTML='<p style="color:#e05c5c;font-size:.85rem">'+esc(e.message)+'</p>'; }
+}
+async function toggleResp(staffId,key,btn){
+  const wasOn=btn.dataset.on==='true';
+  // read current chips for this staff row
+  const row=btn.closest('div').parentElement;
+  const current=[...row.querySelectorAll('button[data-on]')].filter(b=>b.dataset.on==='true').map(b=>b.getAttribute('onclick').match(/'([a-z_]+)'/)[1]);
+  const next=wasOn?current.filter(k=>k!==key):[...new Set([...current,key])];
+  btn.disabled=true;
+  try{
+    const r=await fetch(API+'/api/admin/staff-delegation/'+staffId,{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({responsibilities:next})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'failed');
+    loadDelegation();
+  }catch(e){ alert(e.message); btn.disabled=false; }
+}
 async function loadDirectory(){
   const el=document.getElementById('dirGrid');
   try{

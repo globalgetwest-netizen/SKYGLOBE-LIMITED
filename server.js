@@ -677,7 +677,8 @@ async function refreshStaffCache() {
     const rows = await dbQuery('GET', 'staff_members', null, { status: `eq.active`, limit: 500 });
     STAFF_CACHE = (Array.isArray(rows) ? rows : [])
       .filter(s => s.password)
-      .map(s => ({ name: s.name, password: s.password, department: s.department, role: 'staff' }));
+      .map(s => ({ id: s.id, name: s.name, password: s.password, department: s.department, role: 'staff',
+        responsibilities: Array.isArray(s.responsibilities) ? s.responsibilities : [] }));
   } catch (e) { console.error('[staff-cache] refresh failed:', e.message); }
 }
 
@@ -704,7 +705,7 @@ function getRole(req) {
   }
   // Staff accounts created from the CEO portal (Staff Directory)
   for (const s of STAFF_CACHE) {
-    if (supplied === s.password) return { role: 'staff', name: s.name, department: s.department };
+    if (supplied === s.password) return { role: 'staff', name: s.name, department: s.department, staffId: s.id, responsibilities: s.responsibilities || [] };
   }
   const staffRaw = process.env.STAFF_PASSWORDS || '';
   for (const entry of staffRaw.split(',').map(s => s.trim()).filter(Boolean)) {
@@ -729,6 +730,78 @@ function checkStaffOrAdmin(req, res, next) {
   if (res && !res.headersSent) return res.status(401).json({ error: 'Unauthorized' });
   return null;
 }
+
+
+// ── DELEGATION — responsibilities the CEO can assign to staff ────────────────
+// The CEO delegates specific admin duties to a staff member. A delegated
+// responsibility appears in that staff member's portal AND stays visible to the
+// CEO in the admin portal. Final authority on irreversible actions stays with
+// the CEO where noted (approvals, money) — staff can prepare and handle.
+const RESPONSIBILITIES = {
+  verifications:   { key: 'verifications',   label: 'YUNEX Trust Desk',        icon: '🛡️', desc: 'Review and decide identity & business verification requests.' },
+  academy_records: { key: 'academy_records', label: 'Academy Student Records',  icon: '🎓', desc: 'View student records and open transcripts to assist learners.' },
+  applications:    { key: 'applications',    label: 'Client Applications',      icon: '📋', desc: 'Handle the client application work queue.' },
+  legal_docs:      { key: 'legal_docs',      label: 'Legal Documents',          icon: '📜', desc: 'Assist with legal document requests.' },
+  reception:       { key: 'reception',       label: 'AI Reception',             icon: '🛎️', desc: 'Oversee AI reception and client conversations.' },
+  announcements:   { key: 'announcements',   label: 'Announcements',            icon: '📣', desc: 'Draft and post announcements.' },
+};
+const VALID_RESP_KEYS = Object.keys(RESPONSIBILITIES);
+
+// Does the caller hold a responsibility? The CEO holds all; staff hold what was
+// delegated to them. Returns the actor name if allowed, else null.
+function hasResponsibility(req, key) {
+  const r = getRole(req);
+  if (!r) return null;
+  if (r.role === 'ceo') { req._who = r.name; return r.name; }
+  if (r.role === 'staff' && Array.isArray(r.responsibilities) && r.responsibilities.includes(key)) { req._who = r.name; req._role = 'staff'; return r.name; }
+  return null;
+}
+// Express guard factory for delegated endpoints.
+function requireResponsibility(key) {
+  return (req, res, next) => {
+    if (hasResponsibility(req, key)) return next();
+    return res.status(401).json({ error: 'You do not have this responsibility. Ask the CEO to delegate it to you.' });
+  };
+}
+
+// The catalog (for the admin delegation UI and the staff portal).
+app.get('/api/responsibilities/catalog', (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  res.json(Object.values(RESPONSIBILITIES));
+});
+
+// Staff: what has been delegated to me (drives the staff portal menu).
+app.get('/api/staff/responsibilities', (req, res) => {
+  const r = getRole(req);
+  if (!r) return res.status(401).json({ error: 'Unauthorized' });
+  const keys = r.role === 'ceo' ? VALID_RESP_KEYS : (Array.isArray(r.responsibilities) ? r.responsibilities : []);
+  res.json({ role: r.role, responsibilities: keys.map(k => RESPONSIBILITIES[k]).filter(Boolean) });
+});
+
+// CEO: set a staff member's responsibilities (the delegation control).
+app.get('/api/admin/staff-delegation', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const rows = await dbQuery('GET', 'staff_members', null, { order: 'created_at.asc', limit: 500 }).catch(() => []);
+    res.json((Array.isArray(rows) ? rows : []).map(s => ({
+      id: s.id, name: s.name, department: s.department, role_title: s.role_title, status: s.status,
+      responsibilities: Array.isArray(s.responsibilities) ? s.responsibilities : [],
+    })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post('/api/admin/staff-delegation/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    let list = (req.body || {}).responsibilities;
+    if (!Array.isArray(list)) return res.status(400).json({ error: 'responsibilities must be a list.' });
+    list = list.filter(k => VALID_RESP_KEYS.includes(k));
+    await dbQuery('PATCH', 'staff_members', { responsibilities: list }, { id: `eq.${req.params.id}` });
+    await refreshStaffCache();
+    logActivity(who, 'ceo', 'delegation_update', `Updated responsibilities for staff #${req.params.id}: ${list.join(', ') || 'none'}`, String(req.params.id));
+    res.json({ success: true, responsibilities: list });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 // CEO portal login — rejects staff passwords (CEO portal is CEO-only)
 app.post('/api/admin/login', loginLimiter, (req, res) => {
@@ -1253,7 +1326,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-LAYER1-2026-07-11E',
+  build: 'DELEGATION-2026-07-11F',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1494,7 +1567,7 @@ async function requireVerifiedSeller(email) {
 
 // ── ADMIN / TERRA OFFICER: verification review queue ─────────────────────────
 app.get('/api/admin/yunex/verifications', async (req, res) => {
-  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!hasResponsibility(req, 'verifications')) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const status = String(req.query.status || 'pending');
     const params = { order: 'created_at.desc', limit: 500 };
@@ -1507,7 +1580,7 @@ app.get('/api/admin/yunex/verifications', async (req, res) => {
 // Approve or reject — CEO authority (final trust decision). On approval the
 // client's SKYGLOBE ID is stamped verified, unlocking trade.
 app.post('/api/admin/yunex/verifications/:ref/decide', async (req, res) => {
-  const who = checkAdmin(req);
+  const who = hasResponsibility(req, 'verifications');
   if (!who) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const decision = String((req.body || {}).decision || '').toLowerCase();
