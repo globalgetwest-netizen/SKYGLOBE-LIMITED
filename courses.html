@@ -199,20 +199,31 @@ async function loadCatalog(){
 
 function renderTracks(){
   const wrap=document.getElementById('trackGrid'); wrap.innerHTML='';
-  // The catalog is organised into families — professional, vocational trades,
-  // and the CEO's specialty additions — each under its own premium heading.
-  const GROUPS=[
-    {key:'professional', label:'💼 Professional Certificates', sub:'Career and business programmes'},
-    {key:'vocational',   label:'🛠️ Vocational & Trade Certificates', sub:'Work certificates for every profession — learn a trade, earn proof'},
-    {key:'specialty',    label:'✨ Specialty Programmes', sub:'Newly added by SkyGlobe Academy'},
+  // The catalog is organised by the Academy's Schools — exactly as the
+  // certificates are issued. Every programme appears under its faculty.
+  const SCHOOLS=[
+    {name:'School of Technology & Digital Sciences', icon:'💻', sub:'Coding, cloud, cybersecurity, data & AI'},
+    {name:'School of Business & Enterprise', icon:'💼', sub:'Business, management, marketing & commerce'},
+    {name:'School of Finance & Investment', icon:'💰', sub:'Accounting, tax, planning & investment'},
+    {name:'School of Health & Wellbeing', icon:'🩺', sub:'Clinical support, care & wellness professions'},
+    {name:'School of Creative Arts & Media', icon:'🎨', sub:'Design, photography, film & content'},
+    {name:'School of Education', icon:'🎓', sub:'Teaching, instructional design & leadership'},
+    {name:'School of Environment & Sustainability', icon:'🌍', sub:'Sustainability, renewable energy & conservation'},
+    {name:'School of Hospitality & Tourism', icon:'🌴', sub:'Hospitality, tourism & culinary arts'},
+    {name:'School of the Built Environment', icon:'📐', sub:'Surveying, construction & the built world'},
+    {name:'School of Agriculture & Natural Resources', icon:'🌾', sub:'Farming, fishing & agribusiness'},
+    {name:'School of Vocational Trades & Safety', icon:'🛠️', sub:'Hands-on trades — learn a skill, earn proof'},
+    {name:'School of Professional Studies', icon:'✨', sub:'Specialty programmes'},
   ];
   const grouped={};
-  state.catalog.tracks.forEach(t=>{ const k=t.category||'professional'; (grouped[k]=grouped[k]||[]).push(t); });
-  GROUPS.forEach(g=>{
-    const list=grouped[g.key]||[]; if(!list.length) return;
+  state.catalog.tracks.forEach(t=>{ const k=t.school||'School of Professional Studies'; (grouped[k]=grouped[k]||[]).push(t); });
+  const known=new Set(SCHOOLS.map(g=>g.name));
+  Object.keys(grouped).forEach(k=>{ if(!known.has(k)) SCHOOLS.push({name:k,icon:'📘',sub:''}); });
+  SCHOOLS.forEach(g=>{
+    const list=grouped[g.name]||[]; if(!list.length) return;
     const head=document.createElement('div');
-    head.style.cssText='grid-column:1/-1;margin:14px 0 2px;text-align:left';
-    head.innerHTML=`<div style="font-weight:800;color:#041022;font-size:1.02rem;letter-spacing:.02em">${g.label}</div><div style="font-size:.78rem;color:#6b7689">${g.sub}</div>`;
+    head.style.cssText='grid-column:1/-1;margin:16px 0 2px;text-align:left';
+    head.innerHTML=`<div style="font-weight:800;color:#041022;font-size:1.02rem;letter-spacing:.02em">${g.icon} ${g.name}</div>${g.sub?`<div style="font-size:.78rem;color:#6b7689">${g.sub}</div>`:''}`;
     wrap.appendChild(head);
     list.forEach(t=>{
       const c=document.createElement('div'); c.className='trk-card';

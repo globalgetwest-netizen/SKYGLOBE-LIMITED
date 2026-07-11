@@ -1251,7 +1251,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'GLOBAL-LAYER-2026-07-10K',
+  build: 'CATALOG-50-SCHOOLS-2026-07-11B',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -6345,6 +6345,57 @@ const COURSE_TRACKS = [
   { id: 'voc_fishing',           name: 'Fishing & Aquaculture',                 emoji: '🎣', category: 'vocational' },
   { id: 'voc_construction',      name: 'Construction & Masonry',                emoji: '🏗️', category: 'vocational' },
   { id: 'voc_plumbing',          name: 'Plumbing & Pipefitting',                emoji: '🚰', category: 'vocational' },
+  { id: 'voc_hvac',              name: 'HVAC — Heating, Ventilation & Air Conditioning', emoji: '❄️', category: 'vocational' },
+  { id: 'voc_roofing',           name: 'Roofing Installation & Maintenance',    emoji: '🏠', category: 'vocational' },
+  { id: 'voc_forklift',          name: 'Forklift & Heavy Equipment Operation',  emoji: '🚜', category: 'vocational' },
+  { id: 'voc_cosmetology',       name: 'Cosmetology & Beauty Services',         emoji: '💇', category: 'vocational' },
+  // ── Healthcare ──
+  { id: 'medical_assistant',     name: 'Medical Assistant',                     emoji: '🩺', category: 'professional' },
+  { id: 'pharmacy_technician',   name: 'Pharmacy Technician',                   emoji: '💊', category: 'professional' },
+  { id: 'dental_assistant',      name: 'Dental Assistant',                      emoji: '🦷', category: 'professional' },
+  { id: 'nursing_assistant',     name: 'Nursing Assistant',                     emoji: '🏥', category: 'professional' },
+  { id: 'health_information',    name: 'Health Information Technician',         emoji: '📋', category: 'professional' },
+  // ── Technology ──
+  { id: 'cloud_computing',       name: 'Cloud Computing',                       emoji: '☁️', category: 'professional' },
+  { id: 'cybersecurity',         name: 'Cybersecurity',                         emoji: '🔐', category: 'professional' },
+  { id: 'data_science',          name: 'Data Science',                          emoji: '📊', category: 'professional' },
+  { id: 'artificial_intelligence', name: 'Artificial Intelligence',             emoji: '🤖', category: 'professional' },
+  { id: 'software_development',  name: 'Software Development',                  emoji: '💻', category: 'professional' },
+  { id: 'web_development',       name: 'Web Development',                       emoji: '🌐', category: 'professional' },
+  // ── Business & Management ──
+  { id: 'project_management',    name: 'Project Management',                    emoji: '🗂️', category: 'professional' },
+  { id: 'human_resources',       name: 'Human Resources Management',            emoji: '🤝', category: 'professional' },
+  { id: 'supply_chain',          name: 'Supply Chain Management',               emoji: '🔗', category: 'professional' },
+  { id: 'logistics_transport',   name: 'Logistics & Transportation Management', emoji: '🚚', category: 'professional' },
+  { id: 'small_business_mgmt',   name: 'Small Business Management',             emoji: '🏪', category: 'professional' },
+  { id: 'franchise_mgmt',        name: 'Franchise Management',                  emoji: '🏬', category: 'professional' },
+  { id: 'ecommerce',             name: 'E-commerce',                            emoji: '🛒', category: 'professional' },
+  { id: 'social_media_marketing', name: 'Social Media Marketing',               emoji: '📱', category: 'professional' },
+  // ── Finance ──
+  { id: 'financial_planning',    name: 'Financial Planning',                    emoji: '💰', category: 'professional' },
+  { id: 'accounting',            name: 'Accounting',                            emoji: '🧾', category: 'professional' },
+  { id: 'tax_preparation',       name: 'Tax Preparation',                       emoji: '🧮', category: 'professional' },
+  { id: 'investment_analysis',   name: 'Investment Analysis',                   emoji: '📈', category: 'professional' },
+  { id: 'risk_management',       name: 'Risk Management & Insurance',           emoji: '🛡️', category: 'professional' },
+  // ── Creative & Design ──
+  { id: 'graphic_design',        name: 'Graphic Design',                        emoji: '🎨', category: 'professional' },
+  { id: 'digital_photography',   name: 'Digital Photography',                   emoji: '📷', category: 'professional' },
+  { id: 'video_production',      name: 'Video Production',                      emoji: '🎬', category: 'professional' },
+  { id: 'ux_design',             name: 'User Experience (UX) Design',           emoji: '🖌️', category: 'professional' },
+  // ── Hospitality & Culinary ──
+  { id: 'culinary_arts',         name: 'Culinary Arts',                         emoji: '👨‍🍳', category: 'professional' },
+  // ── Education ──
+  { id: 'teaching_skills',       name: 'Teaching & Classroom Instruction',      emoji: '🍎', category: 'professional' },
+  { id: 'online_course_dev',     name: 'Online Course Development',             emoji: '🖥️', category: 'professional' },
+  { id: 'educational_leadership', name: 'Educational Leadership',               emoji: '🎓', category: 'professional' },
+  { id: 'special_education',     name: 'Special Education Support',             emoji: '🧩', category: 'professional' },
+  { id: 'esl_teaching',          name: 'English as a Second Language (ESL) Teaching', emoji: '🗣️', category: 'professional' },
+  // ── Environment & Sustainability ──
+  { id: 'sustainability',        name: 'Sustainability Management',             emoji: '🌱', category: 'professional' },
+  { id: 'renewable_energy',      name: 'Renewable Energy Systems',              emoji: '☀️', category: 'professional' },
+  { id: 'environmental_science', name: 'Environmental Science',                 emoji: '🌍', category: 'professional' },
+  { id: 'waste_management',      name: 'Waste Management & Recycling',          emoji: '♻️', category: 'professional' },
+  { id: 'green_building',        name: 'Green Building & Sustainable Construction', emoji: '🏡', category: 'professional' },
 ];
 const COURSE_TRACK_INDEX = COURSE_TRACKS.reduce((a, t) => (a[t.id] = t, a), {});
 
@@ -6366,7 +6417,10 @@ function trackById(id) { return COURSE_TRACK_INDEX[id] || CUSTOM_TRACKS.find(t =
 // CEO course manager — add a course and it appears on the public catalog instantly.
 app.get('/api/admin/academy/tracks', (req, res) => {
   if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
-  res.json({ builtIn: COURSE_TRACKS, custom: CUSTOM_TRACKS });
+  res.json({
+    builtIn: COURSE_TRACKS.map(t => ({ ...t, school: trackSchool(t) })),
+    custom: CUSTOM_TRACKS.map(t => ({ ...t, school: trackSchool(t) })),
+  });
 });
 app.post('/api/admin/academy/tracks', async (req, res) => {
   const who = checkAdmin(req);
@@ -6444,6 +6498,49 @@ const TRACK_COMPETENCIES = {
   voc_fishing: ['Fishing Methods & Gear Handling', 'Fish Pond Construction & Management', 'Water Quality & Feeding', 'Fish Health & Disease Control', 'Harvesting & Preservation', 'Processing & Packaging', 'Aquaculture Business & Marketing', 'Safety on Water'],
   voc_construction: ['Site Preparation & Setting Out', 'Blockwork & Bricklaying', 'Concrete Mixing & Casting', 'Plastering & Finishing', 'Reading Building Plans', 'Construction Safety Practice', 'Material Estimation', 'Teamwork on Site'],
   voc_plumbing: ['Pipe Installation & Fitting', 'Water Supply Systems', 'Drainage & Waste Systems', 'Leak Detection & Repairs', 'Sanitary Fixture Installation', 'Pipe Materials & Joining Methods', 'Plumbing Safety Standards', 'Job Estimation & Client Care'],
+  voc_hvac: ['Heating System Installation & Service', 'Ventilation Design Basics', 'Air Conditioning & Refrigeration', 'Electrical Controls & Thermostats', 'System Diagnostics & Fault Finding', 'Refrigerant Handling & Safety', 'Preventive Maintenance Programmes', 'Energy Efficiency Optimisation'],
+  voc_roofing: ['Roofing Materials & Selection', 'Roof Installation Techniques', 'Waterproofing & Insulation', 'Leak Detection & Repair', 'Working-at-Height Safety', 'Gutter & Drainage Systems', 'Roof Inspection & Assessment', 'Job Estimation & Client Care'],
+  voc_forklift: ['Forklift Operation & Manoeuvring', 'Load Handling & Weight Limits', 'Pre-Operation Equipment Inspection', 'Warehouse & Site Safety Rules', 'Pallet Stacking & Racking', 'Heavy Equipment Basics', 'Hazard Identification & Reporting', 'Operational Records & Compliance'],
+  voc_cosmetology: ['Hair Cutting & Styling', 'Hair Colouring & Treatments', 'Skincare & Facial Services', 'Makeup Application Techniques', 'Nail Care Services', 'Salon Hygiene & Sanitation', 'Client Consultation & Care', 'Salon Business Basics'],
+  medical_assistant: ['Patient Care & Preparation', 'Vital Signs & Clinical Measurements', 'Medical Terminology', 'Clinical Office Administration', 'Infection Control & Hygiene', 'Medical Records Management', 'Patient Communication & Ethics', 'Basic Laboratory Procedures'],
+  pharmacy_technician: ['Pharmacy Operations & Workflow', 'Medication Classification & Dosage', 'Prescription Processing', 'Inventory & Stock Control', 'Pharmaceutical Calculations', 'Patient Safety & Counselling Support', 'Pharmacy Law & Ethics', 'Dispensing Accuracy & Quality'],
+  dental_assistant: ['Chairside Assisting Techniques', 'Dental Instruments & Materials', 'Oral Health & Anatomy Basics', 'Infection Control in Dentistry', 'Dental Radiography Basics', 'Patient Preparation & Comfort', 'Dental Office Administration', 'Sterilisation Procedures'],
+  nursing_assistant: ['Fundamentals of Patient Care', 'Vital Signs Monitoring', 'Mobility & Patient Transfer', 'Personal Care & Hygiene Support', 'Nutrition & Feeding Assistance', 'Infection Prevention & Control', 'Communication with Patients & Families', 'Care Documentation & Reporting'],
+  health_information: ['Health Data Management', 'Medical Records & Coding Basics', 'Healthcare Billing Fundamentals', 'Data Privacy & Confidentiality', 'Health Information Systems', 'Quality & Accuracy Auditing', 'Medical Terminology', 'Reporting & Analytics'],
+  cloud_computing: ['Cloud Infrastructure Fundamentals', 'Compute, Storage & Networking Services', 'Cloud Migration Strategies', 'Identity & Access Management', 'Cloud Security Essentials', 'Cost Management & Optimisation', 'Monitoring & Reliability', 'Deployment Automation'],
+  cybersecurity: ['Network Security Fundamentals', 'Threat Detection & Analysis', 'Vulnerability Assessment', 'Identity & Access Management', 'Security Operations & Incident Response', 'Encryption & Data Protection', 'Security Policies & Compliance', 'Ethical Security Practice'],
+  data_science: ['Data Analysis & Statistics', 'Data Cleaning & Preparation', 'Machine Learning Fundamentals', 'Data Visualisation & Storytelling', 'Databases & SQL', 'Predictive Modelling', 'Model Evaluation & Validation', 'Reporting Insights to Stakeholders'],
+  artificial_intelligence: ['AI Concepts & Foundations', 'Machine Learning Algorithms', 'Neural Networks Fundamentals', 'Natural Language Processing Basics', 'AI Solution Design', 'Model Training & Evaluation', 'Responsible & Ethical AI', 'AI Deployment & Integration'],
+  software_development: ['Programming Fundamentals', 'Software Design & Architecture', 'Development Best Practices', 'Testing & Quality Assurance', 'Version Control & Collaboration', 'Debugging & Problem Solving', 'APIs & Integration', 'Deployment & Maintenance'],
+  web_development: ['HTML, CSS & JavaScript', 'Responsive Design & Accessibility', 'Front-End Frameworks Basics', 'Back-End & APIs', 'Databases for the Web', 'Web Security Essentials', 'Performance Optimisation', 'Deploying Web Applications'],
+  project_management: ['Project Planning & Scoping', 'Scheduling & Milestones', 'Budgeting & Resource Allocation', 'Risk Identification & Mitigation', 'Team Leadership & Communication', 'Agile & Waterfall Methods', 'Stakeholder Management', 'Project Monitoring & Delivery'],
+  human_resources: ['Recruitment & Selection', 'Onboarding & Talent Development', 'Performance Management', 'Compensation & Benefits Basics', 'Employment Law Fundamentals', 'Employee Relations & Wellbeing', 'HR Records & Systems', 'Organisational Culture'],
+  supply_chain: ['Supply Chain Fundamentals', 'Procurement & Sourcing', 'Inventory Management', 'Demand Planning & Forecasting', 'Warehouse Operations', 'Distribution & Fulfilment', 'Supplier Relationship Management', 'Supply Chain Analytics'],
+  logistics_transport: ['Transportation Modes & Planning', 'Freight & Cargo Management', 'Route Optimisation', 'Customs & Trade Documentation', 'Fleet Management Basics', 'Warehouse & Distribution Coordination', 'Logistics Cost Control', 'Safety & Regulatory Compliance'],
+  small_business_mgmt: ['Business Operations Management', 'Financial Management for Small Business', 'Marketing on a Budget', 'Hiring & Managing Staff', 'Customer Relationship Management', 'Pricing & Profitability', 'Business Compliance Basics', 'Growth & Scaling Strategies'],
+  franchise_mgmt: ['Franchise Business Models', 'Franchise Operations Standards', 'Brand Compliance & Quality Control', 'Multi-Unit Management', 'Franchise Marketing Execution', 'Financial Reporting for Franchises', 'Staff Training & Retention', 'Franchisor Relations'],
+  ecommerce: ['Online Store Setup & Management', 'Product Listing & Merchandising', 'Digital Payments & Checkout', 'E-commerce Marketing & Traffic', 'Order Fulfilment & Delivery', 'Customer Service Online', 'Analytics & Conversion Optimisation', 'Marketplace Selling Strategies'],
+  social_media_marketing: ['Platform Strategy & Selection', 'Content Planning & Calendars', 'Community Building & Engagement', 'Paid Social Campaigns', 'Influencer & Partnership Marketing', 'Analytics & Performance Measurement', 'Brand Voice & Storytelling', 'Social Commerce'],
+  financial_planning: ['Personal Financial Assessment', 'Budgeting & Cash-Flow Planning', 'Investment Planning Fundamentals', 'Retirement Planning', 'Insurance & Protection Planning', 'Tax-Efficient Planning Basics', 'Estate Planning Awareness', 'Client Advisory Ethics'],
+  accounting: ['Accounting Principles & Standards', 'Double-Entry Bookkeeping', 'Financial Statements Preparation', 'Accounts Payable & Receivable', 'Payroll Accounting Basics', 'Reconciliation & Controls', 'Financial Analysis & Ratios', 'Accounting Software Practice'],
+  tax_preparation: ['Tax Law Fundamentals', 'Individual Tax Returns', 'Business Tax Basics', 'Deductions, Credits & Allowances', 'Tax Documentation & Filing', 'Compliance & Deadlines', 'Tax Software Practice', 'Client Records & Confidentiality'],
+  investment_analysis: ['Financial Statement Analysis', 'Equity & Fixed-Income Basics', 'Valuation Methods', 'Market & Industry Analysis', 'Portfolio Construction Principles', 'Risk & Return Measurement', 'Investment Research & Reporting', 'Ethics in Investment Practice'],
+  risk_management: ['Risk Identification & Assessment', 'Insurance Principles & Products', 'Financial Risk Fundamentals', 'Operational Risk Controls', 'Business Continuity Planning', 'Compliance & Regulatory Risk', 'Risk Reporting & Governance', 'Claims & Loss Management'],
+  graphic_design: ['Design Principles & Composition', 'Typography & Layout', 'Colour Theory & Application', 'Brand Identity Design', 'Digital Design Tools', 'Print & Digital Production', 'Visual Communication Strategy', 'Portfolio Development'],
+  digital_photography: ['Camera Operation & Exposure', 'Composition & Lighting', 'Portrait & Product Photography', 'Photo Editing & Retouching', 'Colour Correction & Grading', 'Studio & Location Shooting', 'Visual Storytelling', 'Photography Business Basics'],
+  video_production: ['Pre-Production & Scripting', 'Camera, Lighting & Sound', 'Directing & Shot Composition', 'Video Editing & Post-Production', 'Colour Grading & Audio Mixing', 'Motion Graphics Basics', 'Publishing & Distribution', 'Production Project Management'],
+  ux_design: ['User Research & Personas', 'Information Architecture', 'Wireframing & Prototyping', 'Interaction Design Principles', 'Usability Testing', 'Visual & Interface Design', 'Accessibility & Inclusive Design', 'Design Handoff & Collaboration'],
+  culinary_arts: ['Kitchen Fundamentals & Knife Skills', 'Cooking Methods & Techniques', 'Baking & Pastry Basics', 'Menu Planning & Costing', 'Food Safety & Hygiene (HACCP)', 'Plating & Presentation', 'World Cuisines & Flavour Building', 'Kitchen Management'],
+  teaching_skills: ['Lesson Planning & Delivery', 'Classroom Management', 'Assessment & Feedback Methods', 'Learner Psychology Basics', 'Inclusive Teaching Practice', 'Educational Technology Tools', 'Curriculum Alignment', 'Professional Ethics in Education'],
+  online_course_dev: ['Instructional Design Principles', 'Curriculum Structure & Sequencing', 'Multimedia Content Creation', 'Learning Platforms & Technology', 'Assessment Design for Online Learning', 'Learner Engagement Strategies', 'Accessibility in E-Learning', 'Course Quality & Improvement'],
+  educational_leadership: ['Educational Administration', 'Instructional Leadership', 'Policy & Governance Basics', 'Staff Development & Supervision', 'School Improvement Planning', 'Data-Driven Decision Making', 'Community & Stakeholder Engagement', 'Ethics & Accountability'],
+  special_education: ['Understanding Learning Differences', 'Individualised Education Planning', 'Instructional Accommodations', 'Behaviour Support Strategies', 'Assistive Technologies', 'Inclusive Classroom Practice', 'Family Collaboration', 'Legal & Ethical Foundations'],
+  esl_teaching: ['Language Acquisition Principles', 'Teaching Grammar & Vocabulary', 'Listening & Speaking Instruction', 'Reading & Writing Instruction', 'Lesson Planning for ESL', 'Classroom Communication Techniques', 'Assessment of Language Learners', 'Cultural Awareness in Teaching'],
+  sustainability: ['Sustainability Principles & Frameworks', 'Environmental Management Systems', 'Corporate Social Responsibility', 'Sustainable Resource Use', 'Carbon Footprint & Reporting', 'Circular Economy Concepts', 'Sustainability Auditing Basics', 'Stakeholder Engagement'],
+  renewable_energy: ['Solar Energy Systems', 'Wind Power Fundamentals', 'Energy Storage Basics', 'System Design & Sizing', 'Installation & Safety Practice', 'Grid Connection Principles', 'Maintenance & Performance Monitoring', 'Renewable Project Economics'],
+  environmental_science: ['Ecology & Ecosystems', 'Conservation Biology Basics', 'Pollution & Environmental Impact', 'Environmental Monitoring & Sampling', 'Climate Science Fundamentals', 'Environmental Policy & Regulation', 'Field & Laboratory Methods', 'Environmental Reporting'],
+  waste_management: ['Waste Streams & Classification', 'Collection & Transport Systems', 'Recycling Processes & Sorting', 'Composting & Organic Waste', 'Hazardous Waste Handling', 'Waste Reduction Strategies', 'Regulatory Compliance', 'Community Education & Engagement'],
+  green_building: ['Sustainable Design Principles', 'Energy-Efficient Building Systems', 'Green Materials & Selection', 'Water Efficiency & Management', 'Indoor Environmental Quality', 'Green Certification Standards', 'Retrofit & Renovation Practice', 'Lifecycle Assessment Basics'],
 };
 function trackCompetencies(track) {
   if (!track) return [];
@@ -6461,7 +6558,7 @@ app.get('/api/courses/catalog', (_req, res) => {
     id: t.id, name: t.name, product: t.product, months: t.months, steps: t.steps, blurb: t.blurb, perks: t.perks,
     price: { USD: PRICING[t.product].USD, EUR: PRICING[t.product].EUR, GBP: PRICING[t.product].GBP },
   }));
-  res.json({ tracks: allCourseTracks(), tiers });
+  res.json({ tracks: allCourseTracks().map(t => ({ ...t, school: trackSchool(t) })), tiers });
 });
 
 // Enrol — requires a valid instant-unlock token proving the tier was paid for.
@@ -6789,6 +6886,63 @@ function assetDataUri(name) {
   return ASSET_DATA_URIS[name];
 }
 
+
+// ── ISSUING SCHOOLS OF SKYGLOBE GROUP ACADEMY ────────────────────────────────
+// Real organisational divisions: every certificate names the school that
+// issued it, exactly as universities issue through their faculties.
+const TRACK_SCHOOLS = {
+  digital_marketing: 'School of Business & Enterprise',
+  content_creation: 'School of Creative Arts & Media',
+  entertainment_media: 'School of Creative Arts & Media',
+  business_entrepreneurship: 'School of Business & Enterprise',
+  tourism_hospitality: 'School of Hospitality & Tourism',
+  surveying_built_env: 'School of the Built Environment',
+  fashion_design: 'School of Creative Arts & Media',
+  health_wellness: 'School of Health & Wellbeing',
+  technology_coding: 'School of Technology & Digital Sciences',
+  medical_assistant: 'School of Health & Wellbeing', pharmacy_technician: 'School of Health & Wellbeing',
+  dental_assistant: 'School of Health & Wellbeing', nursing_assistant: 'School of Health & Wellbeing',
+  health_information: 'School of Health & Wellbeing',
+  cloud_computing: 'School of Technology & Digital Sciences', cybersecurity: 'School of Technology & Digital Sciences',
+  data_science: 'School of Technology & Digital Sciences', artificial_intelligence: 'School of Technology & Digital Sciences',
+  software_development: 'School of Technology & Digital Sciences', web_development: 'School of Technology & Digital Sciences',
+  project_management: 'School of Business & Enterprise', human_resources: 'School of Business & Enterprise',
+  supply_chain: 'School of Business & Enterprise', logistics_transport: 'School of Business & Enterprise',
+  small_business_mgmt: 'School of Business & Enterprise', franchise_mgmt: 'School of Business & Enterprise',
+  ecommerce: 'School of Business & Enterprise', social_media_marketing: 'School of Business & Enterprise',
+  financial_planning: 'School of Finance & Investment', accounting: 'School of Finance & Investment',
+  tax_preparation: 'School of Finance & Investment', investment_analysis: 'School of Finance & Investment',
+  risk_management: 'School of Finance & Investment',
+  graphic_design: 'School of Creative Arts & Media', digital_photography: 'School of Creative Arts & Media',
+  video_production: 'School of Creative Arts & Media', ux_design: 'School of Creative Arts & Media',
+  culinary_arts: 'School of Hospitality & Tourism',
+  teaching_skills: 'School of Education', online_course_dev: 'School of Education',
+  educational_leadership: 'School of Education', special_education: 'School of Education',
+  esl_teaching: 'School of Education',
+  sustainability: 'School of Environment & Sustainability', renewable_energy: 'School of Environment & Sustainability',
+  environmental_science: 'School of Environment & Sustainability', waste_management: 'School of Environment & Sustainability',
+  green_building: 'School of Environment & Sustainability',
+  voc_hvac: 'School of Vocational Trades & Safety', voc_roofing: 'School of Vocational Trades & Safety',
+  voc_forklift: 'School of Vocational Trades & Safety', voc_cosmetology: 'School of Vocational Trades & Safety',
+};
+function trackSchool(track) {
+  if (!track) return 'School of Professional Studies';
+  if (TRACK_SCHOOLS[track.id]) return TRACK_SCHOOLS[track.id];
+  if (track.category === 'vocational') return 'School of Vocational Trades & Safety';
+  const n = String(track.name || '').toLowerCase();
+  if (/cyber|data|software|coding|tech|computer|ai |cloud|network/.test(n)) return 'School of Technology & Digital Sciences';
+  if (/health|nurs|care|wellness|medic/.test(n)) return 'School of Health & Wellbeing';
+  if (/teach|educat|classroom|esl|curriculum|school|tutor/.test(n)) return 'School of Education';
+  if (/environment|sustainab|renewable|solar|wind|waste|recycl|green|climate|conservation/.test(n)) return 'School of Environment & Sustainability';
+  if (/finance|account|tax|invest|audit|insurance|banking/.test(n)) return 'School of Finance & Investment';
+  if (/business|market|sales|management|entrepreneur|commerce|logistics|supply/.test(n)) return 'School of Business & Enterprise';
+  if (/media|film|music|design|art|photo|fashion|creative/.test(n)) return 'School of Creative Arts & Media';
+  if (/hotel|hospital|tourism|travel|culinary|catering/.test(n)) return 'School of Hospitality & Tourism';
+  if (/build|construct|survey|architect|engineer|civil/.test(n)) return 'School of the Built Environment';
+  if (/farm|agri|fish|forest/.test(n)) return 'School of Agriculture & Natural Resources';
+  return 'School of Professional Studies';
+}
+
 function wrapCertificate(enr, track, tier, photoDataUrl, verifyUrl, req, extra = {}) {
   // ═══ CERTIFICATE v3 — The SkyGlobe Global Credential Standard ═══
   // ISO A4 portrait · real ecosystem logos, each with its TRUE role:
@@ -6906,6 +7060,7 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
       <img src="${img('skyglobe-logo.jpg')}" alt="SkyGlobe Group">
       <div class="brandwrap"><span class="rule l"></span><div class="brand">SKYGLOBE GROUP</div><span class="rule r"></span></div>
       <div class="acad">Skyglobe Group Academy</div>
+      ${extra.school ? `<div class="tag" style="color:#0A2E65;letter-spacing:.28em;font-weight:700">${extra.school}</div>` : ''}
       <div class="tag">Global Professional Education · Innovation · Excellence</div>
     </div>
     <div class="title">Certificate of Completion</div>
@@ -6924,7 +7079,8 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
       ${extra.enrolled ? `<div class="f"><div class="l">Enrolled</div><div class="v">${extra.enrolled}</div></div>` : ''}
       <div class="f"><div class="l">Completed</div><div class="v">${completionDate}</div></div>
       <div class="f"><div class="l">Issue Date</div><div class="v">${issueDate}</div></div>
-      <div class="f"><div class="l">Mode of Study</div><div class="v">Online</div></div>
+      <div class="f"><div class="l">Mode of Study</div><div class="v">100% Online</div></div>
+      ${extra.school ? `<div class="f"><div class="l">Issuing School</div><div class="v">${extra.school}</div></div>` : ''}
       <div class="f"><div class="l">Language of Study</div><div class="v">${language}</div></div>
       ${enr.nationality ? `<div class="f"><div class="l">Nationality</div><div class="v">${enr.nationality}</div></div>` : ''}
       ${enr.region ? `<div class="f"><div class="l">State / Region</div><div class="v">${enr.region}</div></div>` : ''}
@@ -6932,7 +7088,7 @@ body{background:#e9edf3;font-family:Inter,sans-serif;padding:22px;display:flex;j
     </div>
     ${competencies.length ? `<div class="comp"><div class="cl">Core Competencies</div><div class="items">${competencies.map(c => `<span>${c}</span>`).join('')}</div></div>` : ''}
     <div class="eco">
-      <div class="cell"><img class="blogo" src="${img('noria-logo.jpg')}" alt="NORIA"><div class="bn">NORIA</div><div class="br">Assessed &amp; verified by<br><b>NORIA Intelligence</b><br>AI-powered assessment</div></div>
+      <div class="cell"><img class="blogo" src="${img('noria-logo.jpg')}" alt="NORIA"><div class="bn">NORIA</div><div class="br">Assessed &amp; verified by<br><b>NORIA Intelligence</b><br>Precision assessment &amp; grading</div></div>
       <div class="cell"><img class="blogo" src="${img('yunex-logo.jpg')}" alt="YUNEX"><div class="bn">YUNEX</div><div class="br">Enrolment &amp; payments<br>powered by <b>YUNEX</b><br>Secure payment infrastructure</div></div>
       <div class="cell sealwrap"><div class="seal"><div class="inner-ring"><img src="${img('skyglobe-logo.jpg')}" alt=""></div></div></div>
       <div class="cell"><img class="blogo" src="${img('terra-logo.png')}" alt="TERRA"><div class="bn">TERRA</div><div class="br">Verified through the<br><b>TERRA Credential Network</b><br>Lifetime verification</div></div>
@@ -6981,7 +7137,7 @@ app.post('/api/courses/enrollment/:id/certificate', async (req, res) => {
     const competencies = trackCompetencies(track);
     const monthYear = d => new Date(d).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
     const html = wrapCertificate({ ...enr, ref: certRef }, track, tier, photoDataUrl || null, verifyUrl, req,
-      { grade: `${grade} · ${score}%`, credentialId, competencies,
+      { grade: `${grade} · ${score}%`, credentialId, competencies, school: trackSchool(track),
         studentId: 'SGA-ST-' + String(enr.id).replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase(),
         modules: steps.length + ' modules completed',
         enrolled: enr.created_at ? monthYear(enr.created_at) : null, completionDate: monthYear(new Date()) });
@@ -7077,7 +7233,7 @@ app.post('/api/admin/academy/grant-certificate', async (req, res) => {
     const trackCode2 = String(track.id).replace(/^voc_/, '').split('_').map(w => w[0]).join('').toUpperCase().slice(0, 4);
     const html = wrapCertificate(enr, track, tier, photoDataUrl || null, verifyUrl, req,
       { grade: awardLabel, credentialId: `SGA-${trackCode2}-${enr.graduation_year}-${certRef.slice(4, 10)}`,
-        competencies: trackCompetencies(track),
+        competencies: trackCompetencies(track), school: trackSchool(track),
         studentId: 'SGA-ST-' + certRef.slice(4, 10), language,
         enrolled: enrolledTxt, completionDate: completedTxt || undefined });
 
@@ -7606,13 +7762,13 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:clamp(1.9rem
       ${startDate ? `<div class="fact"><div class="l">Starts</div><div class="v">${String(startDate).slice(0, 40)}</div></div>` : ''}
       <div class="fact"><div class="l">Format</div><div class="v">100% Online · Self-paced</div></div>
       <div class="fact"><div class="l">Certificate</div><div class="v">QR-Verifiable Worldwide</div></div>
-      <div class="fact"><div class="l">Teacher</div><div class="v">AI-Guided · 24/7</div></div>
+      <div class="fact"><div class="l">Support</div><div class="v">Personal Tutoring · 24/7</div></div>
     </div>
     ${kind === 'course' ? `<div class="tiers">${tiersRow}</div>` : ''}
     <div class="perks">
       ✦ <b>Complete lessons</b> — full theory, worked examples &amp; practicals&nbsp;&nbsp;
       ✦ <b>Real assessment</b> — a test on every lesson + final examination&nbsp;&nbsp;
-      ✦ <b>Listen &amp; ask</b> — lessons read aloud, your AI teacher answers any question
+      ✦ <b>Listen &amp; ask</b> — lessons read aloud, and your personal tutor answers any question, day or night
     </div>
     <div class="cta-row">
       <a class="cta" href="${target}">${kind === 'admission' ? 'Apply for Admission →' : 'Enroll Today →'}</a>
