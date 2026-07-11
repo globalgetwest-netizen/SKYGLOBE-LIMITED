@@ -708,11 +708,15 @@ async function loadStaffVerify(status){
   }catch(e){ box.innerHTML='<p style="color:#e05c5c;font-size:.85rem">'+esc(e.message)+'</p>'; }
 }
 async function staffDecideVerify(ref,decision,btn){
-  let note='';
-  if(decision==='rejected'){ note=prompt('Reason for rejection (shown to the applicant):','')||''; }
+  let note='', confirmMatch=false;
+  if(decision==='rejected'){ note=prompt('Reason for rejection (shown to the applicant):','')||''; if(!note.trim())return; }
+  if(decision==='verified'){
+    confirmMatch=confirm('APPROVAL CHECKLIST — confirm ALL before verifying:\n\n✓ The face in the live selfie matches the photo on the ID document\n✓ The name, country and document number are accurate and legible\n✓ The document appears genuine and unaltered\n\nClick OK only if every check passes.');
+    if(!confirmMatch)return;
+  }
   btn.disabled=true; btn.textContent='…';
   try{
-    const r=await fetch(API+'/api/admin/yunex/verifications/'+ref+'/decide',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({decision,note})});
+    const r=await fetch(API+'/api/admin/yunex/verifications/'+ref+'/decide',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({decision,note,confirmMatch})});
     const d=await r.json(); if(!r.ok) throw new Error(d.error||'failed');
     loadStaffVerify('pending');
   }catch(e){ alert(e.message); btn.disabled=false; }

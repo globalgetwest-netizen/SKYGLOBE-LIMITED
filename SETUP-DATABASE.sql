@@ -424,3 +424,9 @@ alter table terra_verifications add column if not exists ip text;
 alter table clients add column if not exists status text default 'active';   -- active | suspended | removed
 alter table clients add column if not exists status_reason text;
 alter table clients add column if not exists preferred_currency text;
+
+-- Rich product details (brand, origin, condition, warranty, specs…) for premium listings
+alter table yunex_listings add column if not exists details jsonb default '{}'::jsonb;
+
+-- Trade corridors (features, not brands): China · Gulf · Europe · America · Oceania · Africa
+alter table yunex_listings add column if not exists corridor text;

@@ -1327,7 +1327,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-TRUST-COMMERCE-2026-07-11J',
+  build: 'YUNEX-VERIFY-CORRIDORS-2026-07-11L',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1673,13 +1673,29 @@ app.post('/api/yunex/verify/request', async (req, res) => {
       details: (b.details && typeof b.details === 'object') ? b.details : {},
       ip: (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || null,
     };
+    // ── EVERY STAGE MUST BE COMPLETE — no partial submissions ────────────────
     if (!row.full_name) return res.status(400).json({ error: 'Full legal name is required.' });
-    if (kind === 'business' && !row.business_name) return res.status(400).json({ error: 'Business name is required for business verification.' });
+    if (!row.country) return res.status(400).json({ error: 'Country is required.' });
+    if (kind === 'identity') {
+      if (!row.document_type || !row.document_ref) return res.status(400).json({ error: 'Select your document type and enter its number.' });
+      if (!b.documentImage) return res.status(400).json({ error: 'A clear photo of your ID document is required.' });
+      if (!b.selfieImage) return res.status(400).json({ error: 'A live selfie is required — it must be captured through the guided live check, not uploaded.' });
+    }
+    if (kind === 'business') {
+      if (!row.business_name || !row.business_reg_no) return res.status(400).json({ error: 'Business name and registration number are required.' });
+      if (!b.documentImage) return res.status(400).json({ error: 'A photo of the business registration document is required.' });
+    }
     // KYC evidence — the identity document and a live selfie — stored PRIVATELY
     // for the reviewer and retained for dispute & compliance. Never public.
     const stamp = ref + '-' + Date.now();
     if (b.documentImage) row.doc_image_path = await kycUpload(b.documentImage, stamp + '-doc').catch(() => null);
     if (b.selfieImage) row.selfie_image_path = await kycUpload(b.selfieImage, stamp + '-selfie').catch(() => null);
+    // Hard stop: if required evidence failed to store, do not create a
+    // reviewable record that could be approved without proof.
+    if (kind === 'identity' && (!row.doc_image_path || !row.selfie_image_path)) return res.status(500).json({ error: 'Your document or selfie could not be securely stored. Please try again.' });
+    if (kind === 'business' && !row.doc_image_path) return res.status(500).json({ error: 'Your registration document could not be securely stored. Please try again.' });
+    // A basic client-reported liveness signal from the guided capture (0–255).
+    if (b.liveness != null) row.details = { ...(row.details || {}), liveness: Number(b.liveness) || 0 };
     await dbQuery('POST', 'terra_verifications', row).catch(e => { throw new Error('Could not submit verification: ' + e.message); });
     logActivity(email, 'client', 'terra_verify_request', `Submitted ${kind} verification (${ref})`, ref);
     // notify the platform (portal + email to the trust desk)
@@ -1740,14 +1756,48 @@ function sellerPublicName(seller) {
   if (!seller) return 'Verified Seller';
   return seller.name || (seller.email ? seller.email.split('@')[0] : 'Verified Seller');
 }
+// ── PRODUCT CATEGORIES — a curated taxonomy per pillar (premium, organised) ───
+const YUNEX_CATEGORIES = {
+  consumer: ['Electronics', 'Fashion & Apparel', 'Home & Furniture', 'Health & Beauty', 'Food & Grocery', 'Sports & Outdoors', 'Baby & Kids', 'Automotive', 'Jewelry & Watches', 'Books & Media', 'Phones & Accessories', 'Computers'],
+  trade: ['Agriculture & Produce', 'Raw Materials', 'Industrial Equipment', 'Construction Materials', 'Machinery', 'Textiles & Fabrics', 'Chemicals', 'Packaging', 'Metals & Minerals', 'Renewable Energy', 'Medical Supplies', 'Food Ingredients'],
+  services: ['Consulting', 'Legal Services', 'Engineering', 'Design & Creative', 'Software & Development', 'Marketing & Media', 'Logistics & Freight', 'Translation', 'Accounting & Finance', 'Architecture', 'Training', 'Repair & Maintenance'],
+  assets: ['Land', 'Residential Property', 'Commercial Property', 'Vehicles', 'Heavy Machinery', 'Equipment', 'Farms', 'Warehouses'],
+  investment: ['Startups', 'Real Estate Projects', 'Agriculture Projects', 'Franchises', 'Manufacturing', 'Energy Projects', 'SME Equity'],
+  business: ['Wholesale', 'Distribution', 'Manufacturing', 'Import / Export', 'Sourcing', 'Private Label', 'Dropshipping'],
+  finance: ['Business Loans', 'Trade Finance', 'Insurance', 'Merchant Services'],
+  digital: ['Software', 'AI Models & APIs', 'Templates', 'Digital Art', 'Music', 'E-Books', 'Domains', 'Cloud Services', 'Online Courses'],
+};
+const CONDITIONS = ['New', 'Used - Like New', 'Used - Good', 'Refurbished', 'For Parts', 'N/A'];
+
+// ── TRADE CORRIDORS — global trade lanes (features inside YUNEX Trade) ────────
+const YUNEX_CORRIDORS = [
+  { key: 'china',   label: 'China Corridor',   flag: '🇨🇳', blurb: 'Verified suppliers, sourcing & settlement with China.' },
+  { key: 'gulf',    label: 'Gulf Corridor',    flag: '🌙', blurb: 'Trade with the Gulf & Middle East markets.' },
+  { key: 'europe',  label: 'Europe Corridor',  flag: '🇪🇺', blurb: 'Sourcing and export with European partners.' },
+  { key: 'america', label: 'America Corridor',  flag: '🌎', blurb: 'North & South American trade lanes.' },
+  { key: 'oceania', label: 'Oceania Corridor', flag: '🌏', blurb: 'Australia, New Zealand & the Pacific.' },
+  { key: 'africa',  label: 'Africa Corridor',  flag: '🌍', blurb: 'The continent trading with itself — AfCFTA, the mission.' },
+];
+const VALID_CORRIDORS = YUNEX_CORRIDORS.map(c => c.key);
+
 function shapeListing(l, seller) {
+  const d = l.details || {};
   return {
     ref: l.ref, pillar: l.pillar, pillar_label: (YUNEX_PILLARS[l.pillar] || {}).label || l.pillar,
     pillar_icon: (YUNEX_PILLARS[l.pillar] || {}).icon || '•',
-    category: l.category || null, title: l.title, description: l.description || '',
+    category: l.category || null, corridor: l.corridor || null,
+    corridor_label: (YUNEX_CORRIDORS.find(c => c.key === l.corridor) || {}).label || null,
+    corridor_flag: (YUNEX_CORRIDORS.find(c => c.key === l.corridor) || {}).flag || null,
+    title: l.title, description: l.description || '',
     price: l.price != null ? Number(l.price) : null, currency: l.currency || 'USD',
     quantity: l.quantity || null, location: l.location || null,
     images: Array.isArray(l.images) ? l.images : [],
+    details: {
+      brand: d.brand || null, manufacturer: d.manufacturer || null, origin: d.origin || null,
+      condition: d.condition || null, warranty: d.warranty || null, unit: d.unit || null,
+      min_order: d.min_order || null, sku: d.sku || null,
+      specs: Array.isArray(d.specs) ? d.specs : [],
+    },
     status: l.status || 'active', created_at: l.created_at || null,
     seller: { name: sellerPublicName(seller), country: seller?.country || null, trust_marks: listingTrustMarks(seller) },
   };
@@ -1764,20 +1814,50 @@ app.post('/api/yunex/listings', async (req, res) => {
     const pillar = VALID_PILLARS.includes(b.pillar) ? b.pillar : 'trade';
     const title = String(b.title || '').trim().slice(0, 140);
     if (!title) return res.status(400).json({ error: 'A title is required.' });
-    const images = Array.isArray(b.images)
-      ? b.images.filter(s => /^data:image\/(png|jpe?g|webp);base64,/.test(s) || /^https?:\/\//.test(s)).slice(0, 6)
-      : [];
     const ref = 'YX-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    // Images: upload data-URLs to storage (public product images), keep any URLs.
+    const images = [];
+    if (Array.isArray(b.images)) {
+      let i = 0;
+      for (const src of b.images.slice(0, 8)) {
+        if (/^https?:\/\//.test(src)) { images.push(src); continue; }
+        const m = /^data:image\/(png|jpe?g|webp);base64,(.+)$/.exec(String(src || ''));
+        if (!m) continue;
+        const buf = Buffer.from(m[2], 'base64');
+        if (buf.length > 5 * 1024 * 1024) continue;
+        const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
+        const path_ = `listings/${ref}/${i++}.${ext}`;
+        await storageUpload(path_, buf, `image/${m[1] === 'jpg' ? 'jpeg' : m[1]}`).catch(() => {});
+        images.push(storagePublicUrl(path_));
+      }
+    }
+    const cats = YUNEX_CATEGORIES[pillar] || [];
+    const d = b.details || {};
+    const details = {
+      brand: String(d.brand || '').trim().slice(0, 80), manufacturer: String(d.manufacturer || '').trim().slice(0, 100),
+      origin: String(d.origin || '').trim().slice(0, 60), condition: CONDITIONS.includes(d.condition) ? d.condition : null,
+      warranty: String(d.warranty || '').trim().slice(0, 80), unit: String(d.unit || '').trim().slice(0, 30),
+      min_order: String(d.min_order || '').trim().slice(0, 40), sku: String(d.sku || '').trim().slice(0, 60),
+      specs: Array.isArray(d.specs) ? d.specs.filter(x => x && x.k).slice(0, 20).map(x => ({ k: String(x.k).slice(0, 50), v: String(x.v || '').slice(0, 120) })) : [],
+    };
     const row = {
-      ref, seller_email: email, pillar, category: String(b.category || '').trim().slice(0, 60),
-      title, description: String(b.description || '').trim().slice(0, 2000),
+      ref, seller_email: email, pillar,
+      category: cats.includes(b.category) ? b.category : String(b.category || '').trim().slice(0, 60),
+      title, description: String(b.description || '').trim().slice(0, 4000),
       price: (b.price != null && b.price !== '') ? Number(b.price) || null : null,
-      currency: ['USD', 'EUR', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'].includes(b.currency) ? b.currency : 'USD',
+      currency: (CURRENCY_RATES[b.currency]) ? b.currency : 'USD',
       quantity: String(b.quantity || '').trim().slice(0, 80),
       location: String(b.location || '').trim().slice(0, 120),
-      images, status: 'active',
+      corridor: VALID_CORRIDORS.includes(b.corridor) ? b.corridor : null,
+      images, details, status: 'active',
     };
-    await dbQuery('POST', 'yunex_listings', row).catch(e => { throw new Error('Could not save listing: ' + e.message); });
+    let saved = false;
+    try { await dbQuery('POST', 'yunex_listings', row); saved = true; }
+    catch (e1) { // older table without details/corridor columns
+      const { details: _o1, corridor: _o2, ...basic } = row;
+      try { await dbQuery('POST', 'yunex_listings', basic); saved = true; }
+      catch (e2) { throw new Error('Could not save listing: ' + e2.message); }
+    }
     logActivity(email, 'client', 'yunex_listing_create', `Listed "${title}" in ${pillar}`, ref);
     res.json({ success: true, ref });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -1788,6 +1868,7 @@ app.get('/api/yunex/listings', async (req, res) => {
   try {
     const params = { status: 'eq.active', order: 'created_at.desc', limit: Math.min(Number(req.query.limit) || 60, 120) };
     if (req.query.pillar && VALID_PILLARS.includes(req.query.pillar)) params.pillar = `eq.${req.query.pillar}`;
+    if (req.query.corridor && VALID_CORRIDORS.includes(req.query.corridor)) params.corridor = `eq.${req.query.corridor}`;
     let rows = await dbQuery('GET', 'yunex_listings', null, params).catch(() => []);
     rows = Array.isArray(rows) ? rows : [];
     const q = String(req.query.q || '').trim().toLowerCase();
@@ -2116,6 +2197,10 @@ const CURRENCY_SYMBOLS = {
   CHF: 'CHF ', INR: '₹', NGN: '₦', GHS: 'GH₵', KES: 'KSh ', ZAR: 'R', BRL: 'R$', MXN: 'MX$',
   SAR: 'SAR ', EGP: 'E£', XOF: 'CFA ', XAF: 'FCFA ', TRY: '₺', KRW: '₩', SGD: 'S$',
 };
+app.get('/api/yunex/corridors', (_req, res) => { res.json({ corridors: YUNEX_CORRIDORS }); });
+app.get('/api/yunex/categories', (_req, res) => {
+  res.json({ categories: YUNEX_CATEGORIES, conditions: CONDITIONS });
+});
 app.get('/api/yunex/currencies', (_req, res) => {
   res.json({ base: 'USD', rates: CURRENCY_RATES, symbols: CURRENCY_SYMBOLS, list: Object.keys(CURRENCY_RATES) });
 });
@@ -2152,6 +2237,19 @@ app.post('/api/admin/yunex/verifications/:ref/decide', async (req, res) => {
     const rows = await dbQuery('GET', 'terra_verifications', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
     const v = rows[0];
     if (!v) return res.status(404).json({ error: 'Verification not found.' });
+    // ── APPROVAL GUARDS — cannot verify without complete, matching evidence ───
+    if (decision === 'verified') {
+      if (v.status !== 'pending') return res.status(400).json({ error: 'This request has already been decided.' });
+      if (v.kind === 'identity' && (!v.doc_image_path || !v.selfie_image_path))
+        return res.status(400).json({ error: 'Cannot verify: the ID document and live selfie are both required.' });
+      if (v.kind === 'business' && !v.doc_image_path)
+        return res.status(400).json({ error: 'Cannot verify: the business registration document is required.' });
+      // The officer must explicitly confirm the checks (face on the document
+      // matches the live selfie; details are accurate). Approval is refused
+      // otherwise — no accidental verification of mismatched identities.
+      if (v.kind === 'identity' && (req.body || {}).confirmMatch !== true)
+        return res.status(400).json({ error: 'Confirm the selfie matches the ID photo and the details are accurate before verifying.' });
+    }
     await dbQuery('PATCH', 'terra_verifications', { status: decision, reviewed_by: who, review_note: note, reviewed_at: new Date().toISOString() }, { ref: `eq.${req.params.ref}` });
     if (decision === 'verified') {
       const patch = v.kind === 'business' ? { biz_verified: true } : v.kind === 'identity' ? { id_verified: true } : {};
