@@ -215,6 +215,12 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
     <div id="communityFeed" class="stack" style="display:grid;gap:14px"></div>
   </section>
 
+  <!-- STOREFRONT -->
+  <section class="view" id="v-storefront">
+    <button class="btn o sm" style="color:#67708f;border-color:#d7dbe8;margin-bottom:12px" onclick="go('market')">← Back to Marketplace</button>
+    <div id="storefrontContent"></div>
+  </section>
+
   <!-- SKYGLOBE ID -->
   <section class="view" id="v-id">
     <div id="idContent"><div class="panel"><div class="empty"><div class="ic">🪪</div><p style="margin-top:8px;font-weight:700">Log in to see your SKYGLOBE ID</p><p class="muted">One account for the whole ecosystem — Academy, Travel, YUNEX and more.</p><button class="btn g grad" style="margin-top:14px" onclick="openAuth('login')">Log in</button></div></div></div>
@@ -363,6 +369,7 @@ async function openListing(ref){
       <div class="panel" style="margin-top:16px;padding:16px">
         <div style="font-weight:700">${esc(l.seller.name)} ${l.seller.country?'· '+esc(l.seller.country):''}</div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
+        ${l.seller.handle?`<button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:10px" onclick="closeListing();openStorefront('${esc(l.seller.handle)}')">🏢 View verified company page →</button>`:''}
         <div class="notice" style="margin-top:12px">🛡️ This seller is verified by the TERRA Credential Network. Negotiate, agree a price, and pay into secure escrow — funds release to the seller only when you confirm delivery.</div>
         <button class="btn g grad" style="width:100%;margin-top:12px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
         <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
@@ -716,6 +723,7 @@ function renderBiz(){
   }
   el.innerHTML=`
     <div id="bizOverview"></div>
+    <div id="bizInsights"></div>
     <div id="bizProfile"></div>
     <div class="panel">
       <div class="sec-h" style="font-size:1.05rem">➕ Create a listing</div>
@@ -752,7 +760,40 @@ function renderBiz(){
       <div class="sec-h" style="font-size:1.05rem">My listings</div>
       <div id="myListings" style="margin-top:8px"><div class="muted">Loading…</div></div>
     </div>`;
-  fillCurrencies(); fillCategories(); loadMyListings(); loadBizOverview(); loadBizProfile();
+  fillCurrencies(); fillCategories(); loadMyListings(); loadBizOverview(); loadBizInsights(); loadBizProfile();
+}
+async function loadBizInsights(){
+  const el=document.getElementById('bizInsights'); if(!el)return;
+  try{
+    const d=await fetch(API+'/api/yunex/business/insights',{headers:H()}).then(r=>r.json());
+    if(d.error){ el.innerHTML=''; return; }
+    const usd=n=>fmtCur(n,'USD')+' USD';
+    const max=Math.max(1,...d.revenue_series.map(s=>s.amount));
+    const bars=d.revenue_series.map(s=>{const h=Math.round((s.amount/max)*90);return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-size:.62rem;color:#67708f;font-weight:700">${s.amount?fmtCur(s.amount,'USD'):''}</div><div style="width:100%;max-width:38px;height:${Math.max(3,h)}px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#3d5af1,#b326d9)"></div><div style="font-size:.66rem;color:#8b93aa">${esc(s.label)}</div></div>`;}).join('');
+    const f=d.funnel;
+    const funnel=[['🗣️ Negotiating',f.negotiating,'#8b5cf6'],['🔒 In escrow',f.escrow,'#a87016'],['✅ Completed',f.completed,'#12864e'],['📉 Conversion',f.conversion+'%','#1e57c9']];
+    const pill=d.pillar_breakdown.length?d.pillar_breakdown.map(p=>`<span class="st ok" style="background:#eef1fb;color:#3d5af1;padding:5px 11px;font-size:.76rem">${p.icon} ${esc(p.label)} · <b>${usd(p.value)}</b></span>`).join(' '):'<span class="muted" style="font-size:.82rem">Complete deals to see which pillars perform.</span>';
+    const corr=d.corridor_breakdown.length?d.corridor_breakdown.map(c=>`<span class="st ok" style="background:#f6f0fb;color:#8b5cf6;padding:5px 11px;font-size:.76rem">${esc(c.label)} · ${c.count}</span>`).join(' '):'<span class="muted" style="font-size:.82rem">Assign corridors to listings to map your trade lanes.</span>';
+    const tops=d.top_listings.length?d.top_listings.map((t,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f7"><div style="min-width:0"><div style="font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i+1}. ${esc(t.title)}</div><div class="muted" style="font-size:.72rem">${t.count} completed deal${t.count>1?'s':''}</div></div><div style="font-weight:800;color:#12864e;white-space:nowrap">${usd(t.value)}</div></div>`).join(''):'<div class="muted" style="font-size:.84rem">Your best-selling listings appear here once deals complete.</div>';
+    el.innerHTML=`<div class="panel">
+      <div class="sec-h" style="font-size:1.05rem">📊 Business Insights</div>
+      <div class="sec-s">Live intelligence from your real deals — nothing invented.</div>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:12px">
+        <div class="card" style="padding:14px"><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">Total revenue</div><div style="font-size:1.35rem;font-weight:900;color:#0a1230;margin-top:3px">${usd(d.revenue_total)}</div></div>
+        <div class="card" style="padding:14px"><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">Avg deal value</div><div style="font-size:1.35rem;font-weight:900;color:#0a1230;margin-top:3px">${usd(d.avg_deal_value)}</div></div>
+        <div class="card" style="padding:14px"><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">Unique buyers</div><div style="font-size:1.35rem;font-weight:900;color:#0a1230;margin-top:3px">${d.unique_buyers}</div></div>
+        <div class="card" style="padding:14px"><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">Repeat buyers</div><div style="font-size:1.35rem;font-weight:900;color:#0a1230;margin-top:3px">${d.repeat_buyers}</div></div>
+      </div>
+      <div style="margin-top:18px"><div style="font-weight:700;font-size:.9rem;margin-bottom:8px">Revenue · last 6 months</div>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:130px;padding:8px 4px 0;background:linear-gradient(180deg,#fbfcff,#f4f6fc);border-radius:12px">${bars}</div></div>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px">
+        ${funnel.map(x=>`<div style="text-align:center"><div style="font-size:1.5rem;font-weight:900;color:${x[2]}">${x[1]}</div><div class="muted" style="font-size:.72rem">${x[0]}</div></div>`).join('')}
+      </div>
+      <div style="margin-top:18px"><div style="font-weight:700;font-size:.9rem;margin-bottom:8px">Top performing listings</div>${tops}</div>
+      <div style="margin-top:16px"><div style="font-weight:700;font-size:.9rem;margin-bottom:8px">Revenue by pillar</div><div style="display:flex;gap:8px;flex-wrap:wrap">${pill}</div></div>
+      <div style="margin-top:14px"><div style="font-weight:700;font-size:.9rem;margin-bottom:8px">Trade corridors</div><div style="display:flex;gap:8px;flex-wrap:wrap">${corr}</div></div>
+    </div>`;
+  }catch(e){ el.innerHTML=''; }
 }
 async function loadBizOverview(){
   const el=document.getElementById('bizOverview'); if(!el)return;
@@ -773,6 +814,40 @@ async function loadBizOverview(){
       ${o.response_needed>0?`<div class="notice" style="margin-top:12px">⚡ You have <b>${o.response_needed}</b> offer${o.response_needed>1?'s':''} awaiting your response. <a href="#" onclick="go('deals');return false" style="color:#3d5af1">Open Deals →</a></div>`:''}`;
   }catch(e){}
 }
+async function openStorefront(handle){
+  go('storefront');
+  const el=$('storefrontContent'); el.innerHTML='<div class="panel"><div class="muted">Loading company page…</div></div>';
+  try{
+    const s=await fetch(API+'/api/yunex/storefront/'+encodeURIComponent(handle)).then(r=>r.json());
+    if(s.error){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🏢</div><p style="margin-top:8px;font-weight:700">Company page not available</p><p class="muted">This business has no public storefront.</p></div></div>'; return; }
+    const marks=(s.trust_marks||[]).map(m=>`<span class="st ok" style="background:#ffffff22;color:#fff;padding:4px 11px;font-size:.74rem">${terraBadge(14)} ${esc(m.label)}</span>`).join(' ');
+    const since=s.member_since?new Date(s.member_since).toLocaleDateString(undefined,{year:'numeric',month:'long'}):null;
+    const logo=s.logo_url?`<div style="width:82px;height:82px;border-radius:18px;background:#fff center/cover url('${esc(s.logo_url)}');flex-shrink:0"></div>`:`<div style="width:82px;height:82px;border-radius:18px;background:linear-gradient(120deg,#3d5af1,#b326d9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;flex-shrink:0">${esc((s.name||'C').charAt(0).toUpperCase())}</div>`;
+    const facts=[s.sector?['Sector',s.sector]:null,s.location?['Location',s.location]:null,s.established?['Established',s.established]:null,since?['On SKYGLOBE since',since]:null].filter(Boolean);
+    const grid=s.listings.length?`<div class="grid g3" style="margin-top:14px">${s.listings.map(l=>{
+      const img=(l.images&&l.images[0])?`<div style="height:140px;border-radius:12px;background:#eef1f8 center/cover url('${esc(l.images[0])}');margin:-4px -4px 12px"></div>`:`<div style="height:100px;border-radius:12px;background:linear-gradient(120deg,#eef1fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:-4px -4px 12px">${l.pillar_icon}</div>`;
+      return `<div class="card" style="cursor:pointer" onclick="openListing('${l.ref}')">${img}<div style="font-size:.68rem;font-weight:700;color:#8b5cf6;text-transform:uppercase">${l.pillar_icon} ${esc(l.pillar_label)}</div><h3 style="margin-top:4px;font-size:.95rem">${esc(l.title)}</h3><div style="margin-top:6px">${money(l)}</div></div>`;}).join('')}</div>`:'<div class="muted" style="margin-top:14px">No active listings right now.</div>';
+    el.innerHTML=`
+      <div class="panel" style="background:linear-gradient(120deg,#0a1230,#111a44);color:#fff;border:none">
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+          ${logo}
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;color:#fff;font-size:1.5rem">${esc(s.name)}</h2><span style="background:${s.tier.color};color:#fff;padding:4px 12px;border-radius:100px;font-weight:700;font-size:.76rem">${s.tier.icon} ${esc(s.tier.label)}</span></div>
+            ${s.tagline?`<div style="color:#c7d2f0;margin-top:4px">${esc(s.tagline)}</div>`:''}
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid #ffffff1a">
+          <div><div style="font-size:1.5rem;font-weight:900">${s.completed_deals}</div><div style="font-size:.68rem;color:#9fb3dd;text-transform:uppercase">Completed deals</div></div>
+          <div><div style="font-size:1.5rem;font-weight:900">${s.active_listings}</div><div style="font-size:.68rem;color:#9fb3dd;text-transform:uppercase">Active listings</div></div>
+          ${s.website?`<div style="grid-column:1/-1"><a href="${esc(s.website)}" target="_blank" rel="noopener" style="color:#9fb3dd;font-size:.85rem">🔗 ${esc(s.website)}</a></div>`:''}
+        </div>
+      </div>
+      ${facts.length?`<div class="panel"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">${facts.map(f=>`<div><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">${esc(f[0])}</div><div style="font-weight:700;margin-top:2px">${esc(f[1])}</div></div>`).join('')}</div></div>`:''}
+      ${s.description?`<div class="panel"><div class="sec-h" style="font-size:1.05rem">About</div><p style="margin-top:6px;line-height:1.7;color:#334;white-space:pre-wrap">${esc(s.description)}</p></div>`:''}
+      <div class="panel"><div class="sec-h" style="font-size:1.05rem">Listings from ${esc(s.name)}</div>${grid}</div>`;
+  }catch(e){ el.innerHTML='<div class="panel"><div class="muted">Could not load company page.</div></div>'; }
+}
 let BIZ_LOGO=null;
 async function loadBizProfile(){
   const el=document.getElementById('bizProfile'); if(!el)return;
@@ -782,6 +857,7 @@ async function loadBizProfile(){
     <div class="panel">
       <div class="sec-h" style="font-size:1.05rem">🏢 Company Profile</div>
       <div class="sec-s">Your public business page — shown to buyers and partners with your verified tier.</div>
+      ${pr.handle?`<div class="notice" style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">🌍 Your public storefront is live. <button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" onclick="openStorefront('${esc(pr.handle)}')">View my company page →</button></div>`:''}
       <div class="row2" style="margin-top:10px">
         <div><label>Company name</label><input id="bp_name" value="${esc(pr.name||ME.name||'')}"></div>
         <div><label>Tagline</label><input id="bp_tag" value="${esc(pr.tagline||'')}" placeholder="One line about your business"></div>

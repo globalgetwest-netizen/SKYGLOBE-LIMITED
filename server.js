@@ -1344,7 +1344,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-COMMUNITY-2026-07-11S',
+  build: 'YUNEX-STOREFRONT-2026-07-11U',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1975,7 +1975,12 @@ app.get('/api/yunex/listings/:ref', async (req, res) => {
     const l = rows[0];
     if (!l || l.status === 'removed') return res.status(404).json({ error: 'Listing not found.' });
     const seller = await getClientByEmail(l.seller_email).catch(() => null);
-    res.json(shapeListing(l, seller));
+    const shaped = shapeListing(l, seller);
+    // Attach the seller's public storefront handle (if they have a public page)
+    // so buyers can open the verified company profile before dealing.
+    const bp = await dbQuery('GET', 'business_profiles', null, { owner_email: `eq.${l.seller_email}`, limit: 1 }).catch(() => []);
+    if (bp[0] && bp[0].is_public !== false && bp[0].handle) shaped.seller.handle = bp[0].handle;
+    res.json(shaped);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -2665,6 +2670,14 @@ app.post('/api/yunex/rfqs/:ref/close', async (req, res) => {
 // ── YUNEX BUSINESS CENTRE — the seller/business operating hub ─────────────────
 // A verified business's command centre: public company profile, catalog,
 // orders and analytics. Trust tier is earned by verification + real activity.
+// A public, URL-safe handle for a business storefront — the company name
+// slugified plus a short stable hash of the owner's email. The hash keeps
+// it unique and means the email itself never appears in the public URL.
+function businessHandle(name, email) {
+  const slug = String(name || 'business').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'business';
+  const h = crypto.createHash('sha1').update(String(email || '')).digest('hex').slice(0, 6);
+  return `${slug}-${h}`;
+}
 function businessTier(c, completed) {
   if (!c.biz_verified) return { key: 'seller', label: 'Verified Seller', color: '#12864e', icon: '🥉' };
   if (completed >= 25) return { key: 'global', label: 'Global Enterprise', color: '#7c3aed', icon: '💎' };
@@ -2698,9 +2711,13 @@ app.post('/api/yunex/business/profile', async (req, res) => {
     }
     if (!patch.name) return res.status(400).json({ error: 'Company name is required.' });
     const existing = await dbQuery('GET', 'business_profiles', null, { owner_email: `eq.${email}`, limit: 1 }).catch(() => []);
+    // Assign a stable public handle once, derived from the email (never changes
+    // even if the company is renamed, so shared storefront links keep working).
+    const handle = (existing[0] && existing[0].handle) || businessHandle(email.split('@')[0], email);
+    patch.handle = handle;
     if (existing.length) await dbQuery('PATCH', 'business_profiles', patch, { owner_email: `eq.${email}` });
     else await dbQuery('POST', 'business_profiles', { owner_email: email, ...patch });
-    res.json({ success: true });
+    res.json({ success: true, handle });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 app.get('/api/yunex/business/overview', async (req, res) => {
@@ -2722,6 +2739,99 @@ app.get('/api/yunex/business/overview', async (req, res) => {
       completed_deals: completed.length,
       total_earned: earned,
       response_needed: D.filter(d => d.status === 'offer').length,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── BUSINESS INSIGHTS — real intelligence from actual deal & listing state ────
+// Every number is derived from the seller's own records — no invented metrics.
+// Revenue counts only completed deals; the funnel and breakdowns reflect the
+// live pipeline so a business can see exactly where it stands.
+app.get('/api/yunex/business/insights', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await requireVerifiedSeller(email);
+    if (!gate.ok) return res.status(403).json({ error: gate.error });
+    const listings = await dbQuery('GET', 'yunex_listings', null, { seller_email: `eq.${email}`, limit: 1000 }).catch(() => []);
+    const deals = await dbQuery('GET', 'yunex_deals', null, { seller_email: `eq.${email}`, limit: 1000 }).catch(() => []);
+    const L = Array.isArray(listings) ? listings : [], D = Array.isArray(deals) ? deals : [];
+    const byRef = {}; for (const l of L) byRef[l.ref] = l;
+    const val = d => Number(d.offer_price) || 0;
+    const completed = D.filter(d => d.status === 'completed');
+    const cancelled = D.filter(d => d.status === 'cancelled');
+    const inEscrow = D.filter(d => ['paid', 'shipped'].includes(d.status));
+    const negotiating = D.filter(d => ['open', 'offer', 'countered', 'accepted'].includes(d.status));
+    const revenue = completed.reduce((a, d) => a + val(d), 0);
+    // Revenue over the last 6 calendar months (oldest → newest).
+    const now = new Date(); const series = [];
+    for (let i = 5; i >= 0; i--) {
+      const d0 = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const d1 = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      const label = d0.toLocaleString('en', { month: 'short' });
+      const amount = completed.filter(d => { const t = new Date(d.updated_at || d.created_at); return t >= d0 && t < d1; }).reduce((a, d) => a + val(d), 0);
+      series.push({ label, amount });
+    }
+    // Top listings by completed value.
+    const perListing = {};
+    for (const d of completed) { const r = d.listing_ref; if (!r) continue; (perListing[r] = perListing[r] || { value: 0, count: 0 }); perListing[r].value += val(d); perListing[r].count++; }
+    const top_listings = Object.entries(perListing).map(([r, s]) => ({ title: byRef[r]?.title || 'Listing', ref: r, value: s.value, count: s.count })).sort((a, b) => b.value - a.value).slice(0, 5);
+    // Pillar & corridor breakdowns (by completed value / active listing count).
+    const pillarMap = {}; for (const d of completed) { const p = byRef[d.listing_ref]?.pillar || 'other'; pillarMap[p] = (pillarMap[p] || 0) + val(d); }
+    const pillar_breakdown = Object.entries(pillarMap).map(([k, v]) => ({ key: k, label: (YUNEX_PILLARS[k]?.label) || k, icon: (YUNEX_PILLARS[k]?.icon) || '•', value: v })).sort((a, b) => b.value - a.value);
+    const corridorMap = {}; for (const l of L) { if (l.corridor) corridorMap[l.corridor] = (corridorMap[l.corridor] || 0) + 1; }
+    const corridor_breakdown = Object.entries(corridorMap).map(([k, v]) => ({ key: k, label: (YUNEX_CORRIDORS.find(c => c.key === k)?.label) || k, count: v })).sort((a, b) => b.count - a.count);
+    // Buyers — unique and repeat (privacy: counts only, never emails).
+    const buyerCounts = {}; for (const d of completed) { if (d.buyer_email) buyerCounts[d.buyer_email] = (buyerCounts[d.buyer_email] || 0) + 1; }
+    const unique_buyers = Object.keys(buyerCounts).length;
+    const repeat_buyers = Object.values(buyerCounts).filter(n => n > 1).length;
+    const totalDecided = completed.length + cancelled.length;
+    res.json({
+      currency: 'USD',
+      revenue_total: revenue,
+      revenue_series: series,
+      avg_deal_value: completed.length ? Math.round(revenue / completed.length) : 0,
+      funnel: {
+        negotiating: negotiating.length, escrow: inEscrow.length,
+        completed: completed.length, cancelled: cancelled.length,
+        conversion: totalDecided ? Math.round((completed.length / totalDecided) * 100) : 0,
+      },
+      top_listings, pillar_breakdown, corridor_breakdown,
+      unique_buyers, repeat_buyers,
+      active_listings: L.filter(l => l.status === 'active').length,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── PUBLIC VERIFIED STOREFRONT — a shareable company page (no email exposed) ──
+// Anyone can view a public business page by its handle: the verified tier,
+// trust marks, company details, live listings, and honest social proof
+// (completed-deal count, member-since). Buyers vet a seller before dealing —
+// verification made visible. Private profiles (is_public=false) return 404.
+app.get('/api/yunex/storefront/:handle', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'business_profiles', null, { handle: `eq.${req.params.handle}`, limit: 1 }).catch(() => []);
+    const bp = rows[0];
+    if (!bp || bp.is_public === false) return res.status(404).json({ error: 'Storefront not found.' });
+    const owner = await getClientByEmail(bp.owner_email).catch(() => null);
+    const listings = await dbQuery('GET', 'yunex_listings', null, { seller_email: `eq.${bp.owner_email}`, status: 'eq.active', order: 'created_at.desc', limit: 60 }).catch(() => []);
+    const deals = await dbQuery('GET', 'yunex_deals', null, { seller_email: `eq.${bp.owner_email}`, limit: 1000 }).catch(() => []);
+    const completed = (Array.isArray(deals) ? deals : []).filter(d => d.status === 'completed').length;
+    const tier = businessTier(owner || {}, completed);
+    const L = Array.isArray(listings) ? listings : [];
+    res.json({
+      handle: bp.handle,
+      name: bp.name || sellerPublicName(owner),
+      tagline: bp.tagline || null, description: bp.description || null,
+      sector: bp.sector || null, location: bp.location || owner?.country || null,
+      established: bp.established || null, website: bp.website || null,
+      logo_url: bp.logo_url || null,
+      country: owner?.country || null,
+      tier, trust_marks: listingTrustMarks(owner),
+      member_since: owner?.created_at || null,
+      completed_deals: completed,
+      active_listings: L.length,
+      listings: L.map(l => shapeListing(l, owner)),
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

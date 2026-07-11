@@ -441,6 +441,8 @@ create table if not exists business_profiles (
   created_at timestamptz default now(), updated_at timestamptz default now()
 );
 create index if not exists idx_biz_profiles_owner on business_profiles (owner_email);
+alter table business_profiles add column if not exists handle text;
+create index if not exists idx_biz_profiles_handle on business_profiles (handle);
 
 -- YUNEX Deal Centre — RFQ (Request for Quotation): buyers post needs, sellers quote
 create table if not exists yunex_rfqs (
