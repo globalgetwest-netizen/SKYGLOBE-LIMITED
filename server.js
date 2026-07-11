@@ -1344,7 +1344,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-STOREFRONT-2026-07-11U',
+  build: 'YUNEX-NORIA-2026-07-11W',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1980,6 +1980,10 @@ app.get('/api/yunex/listings/:ref', async (req, res) => {
     // so buyers can open the verified company profile before dealing.
     const bp = await dbQuery('GET', 'business_profiles', null, { owner_email: `eq.${l.seller_email}`, limit: 1 }).catch(() => []);
     if (bp[0] && bp[0].is_public !== false && bp[0].handle) shaped.seller.handle = bp[0].handle;
+    shaped.seller.rating = await sellerRating(l.seller_email);
+    // Is this listing saved by the caller?
+    const viewer = clientAuth(req);
+    if (viewer) { const sv = await dbQuery('GET', 'yunex_saved', null, { user_email: `eq.${viewer}`, listing_ref: `eq.${l.ref}`, limit: 1 }).catch(() => []); shaped.saved = sv.length > 0; }
     res.json(shaped);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2098,8 +2102,11 @@ app.get('/api/yunex/deals/:ref', async (req, res) => {
     const role = dealRole(d, email);
     if (!role) return res.status(403).json({ error: 'You are not a participant in this deal.' });
     const msgs = await dbQuery('GET', 'yunex_deal_messages', null, { deal_ref: `eq.${req.params.ref}`, order: 'created_at.asc', limit: 500 }).catch(() => []);
+    // Has the buyer already reviewed this completed deal?
+    let reviewed = false;
+    if (d.status === 'completed') { const rv = await dbQuery('GET', 'yunex_reviews', null, { deal_ref: `eq.${d.ref}`, limit: 1 }).catch(() => []); reviewed = rv.length > 0; }
     res.json({
-      deal: { ...shapeDeal(d), my_role: role },
+      deal: { ...shapeDeal(d), my_role: role, reviewed },
       messages: (Array.isArray(msgs) ? msgs : []).map(m => ({
         sender_role: m.sender_role, kind: m.kind, body: m.body, meta: m.meta || {},
         mine: m.sender_email === email, at: m.created_at,
@@ -2214,6 +2221,162 @@ app.post('/api/yunex/deals/:ref/complete', async (req, res) => {
     logActivity(email, 'client', 'yunex_deal_complete', `Completed deal ${d.ref}`, d.ref);
     portalDeliver(d.seller_email, `The buyer confirmed delivery for "${d.listing_title}". Escrow is being released to you. Deal complete.`, 'finance').catch(() => {});
     res.json({ success: true, status: 'completed' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── REVIEWS & RATINGS — honest social proof, earned only through real trade ───
+// A review can ONLY be left by the buyer of a COMPLETED deal, exactly once per
+// deal. No fake reviews are possible: no completed deal, no review. Ratings are
+// aggregated onto the seller, their listings and their storefront.
+async function sellerRating(sellerEmail) {
+  const rows = await dbQuery('GET', 'yunex_reviews', null, { seller_email: `eq.${sellerEmail}`, limit: 500 }).catch(() => []);
+  const r = Array.isArray(rows) ? rows : [];
+  if (!r.length) return { average: null, count: 0 };
+  const sum = r.reduce((a, x) => a + (Number(x.rating) || 0), 0);
+  return { average: Math.round((sum / r.length) * 10) / 10, count: r.length };
+}
+// Leave a review — buyer of a completed deal, once.
+app.post('/api/yunex/deals/:ref/review', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    if (dealRole(d, email) !== 'buyer') return res.status(403).json({ error: 'Only the buyer can review the seller.' });
+    if (d.status !== 'completed') return res.status(400).json({ error: 'You can review only after the deal is completed.' });
+    const existing = await dbQuery('GET', 'yunex_reviews', null, { deal_ref: `eq.${d.ref}`, limit: 1 }).catch(() => []);
+    if (existing.length) return res.status(409).json({ error: 'You have already reviewed this deal.' });
+    const rating = Math.max(1, Math.min(5, parseInt((req.body || {}).rating) || 0));
+    if (!rating) return res.status(400).json({ error: 'Give a rating from 1 to 5 stars.' });
+    const comment = String((req.body || {}).comment || '').trim().slice(0, 1500);
+    await dbQuery('POST', 'yunex_reviews', {
+      ref: 'RV-' + crypto.randomBytes(4).toString('hex').toUpperCase(), deal_ref: d.ref,
+      seller_email: d.seller_email, buyer_email: email, listing_ref: d.listing_ref,
+      listing_title: d.listing_title, rating, comment,
+    }).catch(e => { throw new Error('Could not save review: ' + e.message); });
+    logActivity(email, 'client', 'yunex_review', `Reviewed deal ${d.ref} (${rating}★)`, d.ref);
+    portalDeliver(d.seller_email, `You received a ${rating}★ review on "${d.listing_title}".`, 'finance').catch(() => {});
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Public reviews for a seller (by storefront handle) — reviewer names shown, never emails.
+app.get('/api/yunex/storefront/:handle/reviews', async (req, res) => {
+  try {
+    const bpRows = await dbQuery('GET', 'business_profiles', null, { handle: `eq.${req.params.handle}`, limit: 1 }).catch(() => []);
+    const bp = bpRows[0]; if (!bp) return res.status(404).json({ error: 'Not found.' });
+    const rows = await dbQuery('GET', 'yunex_reviews', null, { seller_email: `eq.${bp.owner_email}`, order: 'created_at.desc', limit: 100 }).catch(() => []);
+    const out = [];
+    for (const rv of (Array.isArray(rows) ? rows : [])) {
+      const buyer = await getClientByEmail(rv.buyer_email).catch(() => null);
+      out.push({ ref: rv.ref, rating: rv.rating, comment: rv.comment || '', listing_title: rv.listing_title || null, at: rv.created_at, reviewer: sellerPublicName(buyer) });
+    }
+    const agg = await sellerRating(bp.owner_email);
+    res.json({ rating: agg, reviews: out });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── SAVED / WATCHLIST — a member's saved listings ────────────────────────────
+app.get('/api/yunex/saved', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_saved', null, { user_email: `eq.${email}`, order: 'created_at.desc', limit: 200 }).catch(() => []);
+    const out = [];
+    for (const s of (Array.isArray(rows) ? rows : [])) {
+      const lr = await dbQuery('GET', 'yunex_listings', null, { ref: `eq.${s.listing_ref}`, limit: 1 }).catch(() => []);
+      const l = lr[0]; if (!l || l.status === 'removed') continue;
+      const seller = await getClientByEmail(l.seller_email).catch(() => null);
+      out.push(shapeListing(l, seller));
+    }
+    res.json({ listings: out });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post('/api/yunex/saved/:ref', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const ref = req.params.ref;
+    const existing = await dbQuery('GET', 'yunex_saved', null, { user_email: `eq.${email}`, listing_ref: `eq.${ref}`, limit: 1 }).catch(() => []);
+    if (existing.length) {
+      await dbQuery('DELETE', 'yunex_saved', null, { user_email: `eq.${email}`, listing_ref: `eq.${ref}` }).catch(() => {});
+      return res.json({ success: true, saved: false });
+    }
+    await dbQuery('POST', 'yunex_saved', { user_email: email, listing_ref: ref });
+    res.json({ success: true, saved: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── NORIA — the intelligent commerce layer (unified search, trending, related) ─
+// One query searches across the whole economy: listings, opportunities (RFQs),
+// events and verified companies — ranked by relevance. Powered by NORIA, the
+// intelligence engine of the SKYGLOBE ecosystem.
+function noriaScore(text, terms) {
+  const t = String(text || '').toLowerCase();
+  let s = 0;
+  for (const w of terms) { if (!w) continue; if (t.includes(w)) s += 2; if (t.startsWith(w)) s += 1; }
+  return s;
+}
+app.get('/api/yunex/search', async (req, res) => {
+  try {
+    const q = String(req.query.q || '').trim().toLowerCase();
+    if (!q) return res.json({ q: '', listings: [], rfqs: [], events: [], companies: [] });
+    const terms = q.split(/\s+/).filter(Boolean);
+    const hit = (...fields) => { const txt = fields.join(' '); return noriaScore(txt, terms); };
+    // Listings
+    let lRows = await dbQuery('GET', 'yunex_listings', null, { status: 'eq.active', limit: 500 }).catch(() => []);
+    const listings = [];
+    for (const l of (Array.isArray(lRows) ? lRows : [])) {
+      const sc = hit(l.title, l.description, l.category, l.pillar);
+      if (sc > 0) { const seller = await getClientByEmail(l.seller_email).catch(() => null); listings.push({ score: sc, item: shapeListing(l, seller) }); }
+    }
+    listings.sort((a, b) => b.score - a.score);
+    // RFQs (open opportunities)
+    let rRows = await dbQuery('GET', 'yunex_rfqs', null, { status: 'eq.open', limit: 300 }).catch(() => []);
+    const rfqs = (Array.isArray(rRows) ? rRows : []).map(r => ({ score: hit(r.title, r.description, r.category), r })).filter(x => x.score > 0).sort((a, b) => b.score - a.score)
+      .map(x => ({ ref: x.r.ref, title: x.r.title, budget: x.r.budget != null ? Number(x.r.budget) : null, currency: x.r.currency || 'USD', quantity: x.r.quantity || null }));
+    // Events
+    let eRows = await dbQuery('GET', 'yunex_events', null, { limit: 300 }).catch(() => []);
+    const events = (Array.isArray(eRows) ? eRows : []).filter(e => e.status !== 'closed').map(e => ({ score: hit(e.title, e.description, e.type), e })).filter(x => x.score > 0).sort((a, b) => b.score - a.score)
+      .map(x => ({ ref: x.e.ref, title: x.e.title, type: x.e.type, starts_at: x.e.starts_at || null, location: x.e.location || null }));
+    // Companies (public storefronts)
+    let cRows = await dbQuery('GET', 'business_profiles', null, { limit: 300 }).catch(() => []);
+    const companies = [];
+    for (const bp of (Array.isArray(cRows) ? cRows : [])) {
+      if (bp.is_public === false) continue;
+      const sc = hit(bp.name, bp.tagline, bp.description, bp.sector);
+      if (sc > 0) { const owner = await getClientByEmail(bp.owner_email).catch(() => null); companies.push({ score: sc, handle: bp.handle, name: bp.name, tagline: bp.tagline || null, tier: businessTier(owner || {}, 0), trust_marks: listingTrustMarks(owner) }); }
+    }
+    companies.sort((a, b) => b.score - a.score);
+    res.json({
+      q, total: listings.length + rfqs.length + events.length + companies.length,
+      listings: listings.slice(0, 24).map(x => x.item), rfqs: rfqs.slice(0, 10), events: events.slice(0, 10), companies: companies.slice(0, 8),
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Trending — most-saved active listings (real signal), newest as tiebreak.
+app.get('/api/yunex/trending', async (req, res) => {
+  try {
+    const saved = await dbQuery('GET', 'yunex_saved', null, { limit: 2000 }).catch(() => []);
+    const counts = {}; for (const s of (Array.isArray(saved) ? saved : [])) counts[s.listing_ref] = (counts[s.listing_ref] || 0) + 1;
+    let rows = await dbQuery('GET', 'yunex_listings', null, { status: 'eq.active', order: 'created_at.desc', limit: 200 }).catch(() => []);
+    rows = (Array.isArray(rows) ? rows : []);
+    rows.sort((a, b) => (counts[b.ref] || 0) - (counts[a.ref] || 0));
+    const out = [];
+    for (const l of rows.slice(0, 12)) { const seller = await getClientByEmail(l.seller_email).catch(() => null); const s = shapeListing(l, seller); s.saves = counts[l.ref] || 0; out.push(s); }
+    res.json({ listings: out });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Related listings — same pillar/category, excluding the given listing.
+app.get('/api/yunex/listings/:ref/related', async (req, res) => {
+  try {
+    const base = (await dbQuery('GET', 'yunex_listings', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []))[0];
+    if (!base) return res.json({ listings: [] });
+    let rows = await dbQuery('GET', 'yunex_listings', null, { pillar: `eq.${base.pillar}`, status: 'eq.active', limit: 60 }).catch(() => []);
+    rows = (Array.isArray(rows) ? rows : []).filter(l => l.ref !== base.ref);
+    rows.sort((a, b) => ((b.category === base.category) - (a.category === base.category)));
+    const out = [];
+    for (const l of rows.slice(0, 6)) { const seller = await getClientByEmail(l.seller_email).catch(() => null); out.push(shapeListing(l, seller)); }
+    res.json({ listings: out });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -2383,6 +2546,114 @@ app.post('/api/yunex/community/posts/:ref/like', async (req, res) => {
     await dbQuery('POST', 'yunex_post_likes', { post_ref: p.ref, user_email: email });
     await dbQuery('PATCH', 'yunex_posts', { likes: (p.likes || 0) + 1 }, { ref: `eq.${p.ref}` });
     res.json({ success: true, liked: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── EVENTS & OPPORTUNITIES — the verified business calendar ───────────────────
+// Verified members post real events (trade fairs, webinars), tenders and
+// opportunities. Anyone can browse; verified members register interest. Host
+// identity is shown with trust marks — never the email.
+const EVENT_TYPES = [
+  { key: 'event', label: 'Event', icon: '📅' },
+  { key: 'webinar', label: 'Webinar', icon: '💻' },
+  { key: 'tender', label: 'Tender', icon: '📑' },
+  { key: 'opportunity', label: 'Opportunity', icon: '🚀' },
+  { key: 'expo', label: 'Expo / Fair', icon: '🎪' },
+];
+async function shapeEvent(e, viewerEmail) {
+  const host = await getClientByEmail(e.host_email).catch(() => null);
+  let going = false;
+  if (viewerEmail) { const r = await dbQuery('GET', 'yunex_event_rsvps', null, { event_ref: `eq.${e.ref}`, user_email: `eq.${viewerEmail}`, limit: 1 }).catch(() => []); going = r.length > 0; }
+  const ty = EVENT_TYPES.find(t => t.key === e.type) || EVENT_TYPES[0];
+  return {
+    ref: e.ref, type: e.type, type_label: ty.label, type_icon: ty.icon,
+    title: e.title || '', description: e.description || '', location: e.location || null,
+    corridor: e.corridor || null, corridor_label: (YUNEX_CORRIDORS.find(c => c.key === e.corridor) || {}).label || null,
+    starts_at: e.starts_at || null, link: e.link || null,
+    rsvps: e.rsvps || 0, going, mine: e.host_email === viewerEmail, status: e.status || 'open', created_at: e.created_at,
+    host: { name: sellerPublicName(host), country: host?.country || null, trust_marks: listingTrustMarks(host) },
+  };
+}
+// Post an event — verified members only.
+app.post('/api/yunex/events', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await dealParticipant(email); // identity-verified
+    if (!gate.ok) return res.status(403).json({ error: 'Verify your identity with TERRA to post an event or opportunity.' });
+    const b = req.body || {};
+    const type = EVENT_TYPES.some(t => t.key === b.type) ? b.type : 'event';
+    const title = String(b.title || '').trim().slice(0, 160);
+    if (!title) return res.status(400).json({ error: 'A title is required.' });
+    const ref = 'EVT-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    const row = {
+      ref, host_email: email, type, title,
+      description: String(b.description || '').trim().slice(0, 4000),
+      location: String(b.location || '').trim().slice(0, 120),
+      corridor: VALID_CORRIDORS.includes(b.corridor) ? b.corridor : null,
+      starts_at: String(b.starts_at || '').trim().slice(0, 30) || null,
+      link: String(b.link || '').trim().slice(0, 300), rsvps: 0, status: 'open',
+    };
+    await dbQuery('POST', 'yunex_events', row).catch(e => { throw new Error('Could not post: ' + e.message); });
+    logActivity(email, 'client', 'event_post', `Posted ${type}: ${title}`, ref);
+    res.json({ success: true, ref });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Browse events — public; filter by type / corridor / q.
+app.get('/api/yunex/events', async (req, res) => {
+  const email = clientAuth(req);
+  try {
+    const params = { order: 'created_at.desc', limit: 80 };
+    if (req.query.type && EVENT_TYPES.some(t => t.key === req.query.type)) params.type = `eq.${req.query.type}`;
+    if (req.query.corridor && VALID_CORRIDORS.includes(req.query.corridor)) params.corridor = `eq.${req.query.corridor}`;
+    let rows = await dbQuery('GET', 'yunex_events', null, params).catch(() => []);
+    rows = (Array.isArray(rows) ? rows : []).filter(e => e.status !== 'closed');
+    const q = String(req.query.q || '').trim().toLowerCase();
+    if (q) rows = rows.filter(e => (e.title || '').toLowerCase().includes(q) || (e.description || '').toLowerCase().includes(q));
+    const out = [];
+    for (const e of rows) out.push(await shapeEvent(e, email));
+    res.json({ types: EVENT_TYPES, events: out });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Event detail.
+app.get('/api/yunex/events/:ref', async (req, res) => {
+  const email = clientAuth(req);
+  try {
+    const rows = await dbQuery('GET', 'yunex_events', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const e = rows[0]; if (!e) return res.status(404).json({ error: 'Event not found.' });
+    res.json(await shapeEvent(e, email));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// RSVP toggle — verified members.
+app.post('/api/yunex/events/:ref/rsvp', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await dealParticipant(email);
+    if (!gate.ok) return res.status(403).json({ error: 'Verify your identity to register.' });
+    const rows = await dbQuery('GET', 'yunex_events', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const e = rows[0]; if (!e) return res.status(404).json({ error: 'Event not found.' });
+    const existing = await dbQuery('GET', 'yunex_event_rsvps', null, { event_ref: `eq.${e.ref}`, user_email: `eq.${email}`, limit: 1 }).catch(() => []);
+    if (existing.length) {
+      await dbQuery('DELETE', 'yunex_event_rsvps', null, { event_ref: `eq.${e.ref}`, user_email: `eq.${email}` }).catch(() => {});
+      await dbQuery('PATCH', 'yunex_events', { rsvps: Math.max(0, (e.rsvps || 0) - 1) }, { ref: `eq.${e.ref}` });
+      return res.json({ success: true, going: false });
+    }
+    await dbQuery('POST', 'yunex_event_rsvps', { event_ref: e.ref, user_email: email });
+    await dbQuery('PATCH', 'yunex_events', { rsvps: (e.rsvps || 0) + 1 }, { ref: `eq.${e.ref}` });
+    res.json({ success: true, going: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Close an event — host only.
+app.post('/api/yunex/events/:ref/close', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_events', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const e = rows[0]; if (!e) return res.status(404).json({ error: 'Event not found.' });
+    if (e.host_email !== email) return res.status(403).json({ error: 'Only the host can close this.' });
+    await dbQuery('PATCH', 'yunex_events', { status: 'closed' }, { ref: `eq.${e.ref}` });
+    res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -2828,6 +3099,7 @@ app.get('/api/yunex/storefront/:handle', async (req, res) => {
       logo_url: bp.logo_url || null,
       country: owner?.country || null,
       tier, trust_marks: listingTrustMarks(owner),
+      rating: await sellerRating(bp.owner_email),
       member_since: owner?.created_at || null,
       completed_deals: completed,
       active_listings: L.length,

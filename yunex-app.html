@@ -166,9 +166,22 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
       <div class="sec-s">Browse verified listings across every pillar. Every seller is verified by TERRA.</div>
       <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:#67708f">💱 Show prices in <select id="curPick" onchange="setCurrency(this.value)" style="width:auto;padding:6px 10px"></select></label>
     </div>
-    <div id="pillarTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px">
+      <button class="btn g grad sm" id="mtabBrowse" onclick="marketTab('browse')">🛍️ Browse</button>
+      <button class="btn o sm" id="mtabTrending" style="color:#67708f;border-color:#d7dbe8" onclick="marketTab('trending')">🔥 Trending</button>
+      <button class="btn o sm" id="mtabSaved" style="color:#67708f;border-color:#d7dbe8" onclick="marketTab('saved')">🤍 Saved</button>
+    </div>
+    <div id="pillarTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px"></div>
     <div id="corridorTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 2px"></div>
     <div class="grid g3" id="listings"><div class="empty" style="grid-column:1/-1"><div class="ic">⏳</div><p class="muted" style="margin-top:8px">Loading listings…</p></div></div>
+  </section>
+
+  <!-- NORIA SEARCH -->
+  <section class="view" id="v-search">
+    <button class="btn o sm" style="color:#67708f;border-color:#d7dbe8;margin-bottom:12px" onclick="go('market')">← Back to Marketplace</button>
+    <h2 class="sec-h" id="searchTitle">Search</h2>
+    <div class="sec-s">NORIA searched the whole economy — products, opportunities, events and verified companies.</div>
+    <div id="searchResults" style="margin-top:12px"></div>
   </section>
 
   <!-- WALLET -->
@@ -210,9 +223,20 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
   <section class="view" id="v-community">
     <h2 class="sec-h">Community</h2>
     <div class="sec-s">The verified business network — knowledge, opportunities and trusted voices.</div>
-    <div id="communityCompose"></div>
-    <div id="communityTopics" class="tabs" style="margin:14px 0"></div>
-    <div id="communityFeed" class="stack" style="display:grid;gap:14px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">
+      <button class="btn g grad sm" id="ctabFeed" onclick="commTab('feed')">🗣️ Feed</button>
+      <button class="btn o sm" id="ctabEvents" style="color:#67708f;border-color:#d7dbe8" onclick="commTab('events')">📅 Events & Opportunities</button>
+    </div>
+    <div id="commFeedPane">
+      <div id="communityCompose"></div>
+      <div id="communityTopics" style="margin:14px 0"></div>
+      <div id="communityFeed" style="display:grid;gap:14px"></div>
+    </div>
+    <div id="commEventsPane" style="display:none">
+      <div id="eventsCompose"></div>
+      <div id="eventsTypes" style="margin:14px 0"></div>
+      <div id="eventsFeed" style="display:grid;gap:14px"></div>
+    </div>
   </section>
 
   <!-- STOREFRONT -->
@@ -284,10 +308,27 @@ function go(v){
   if(v==='community') loadCommunity();
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function doSearch(){ MARKET_Q=$('q').value.trim(); go('market'); loadMarket(); }
+function doSearch(){ const q=$('q').value.trim(); if(!q){ go('market'); return; } openSearch(q); }
+/* NORIA unified search */
+function stars(avg){ const n=Math.round(avg||0); let s=''; for(let i=1;i<=5;i++)s+=`<span style="color:${i<=n?'#f5a623':'#d7dbe8'}">★</span>`; return s; }
+function ratingLine(r){ if(!r||!r.count) return '<span class="muted" style="font-size:.76rem">No ratings yet</span>'; return `<span style="font-size:.82rem">${stars(r.average)} <b>${r.average.toFixed(1)}</b> <span class="muted">(${r.count})</span></span>`; }
+async function openSearch(q){
+  go('search'); $('searchTitle').textContent='Results for “'+q+'”';
+  const el=$('searchResults'); el.innerHTML='<div class="panel"><div class="muted">NORIA is searching…</div></div>';
+  try{
+    const d=await fetch(API+'/api/yunex/search?q='+encodeURIComponent(q)).then(r=>r.json());
+    if(!d.total){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🔍</div><p style="margin-top:8px;font-weight:700">Nothing found for “'+esc(q)+'”</p><p class="muted">Try different words, or browse the marketplace pillars.</p></div></div>'; return; }
+    let html='';
+    if(d.listings.length){ html+=`<div class="sec-h" style="font-size:1.05rem;margin-top:4px">🛍️ Products & listings (${d.listings.length})</div><div class="grid g3" style="margin:10px 0 18px">${d.listings.map(l=>listingCard(l)).join('')}</div>`; }
+    if(d.companies.length){ html+=`<div class="sec-h" style="font-size:1.05rem">🏢 Verified companies (${d.companies.length})</div><div class="grid g3" style="margin:10px 0 18px">${d.companies.map(c=>`<div class="card" style="cursor:pointer" onclick="openStorefront('${esc(c.handle)}')"><div style="display:flex;align-items:center;gap:8px"><span style="background:${c.tier.color};color:#fff;padding:3px 9px;border-radius:100px;font-size:.68rem;font-weight:700">${c.tier.icon} ${esc(c.tier.label)}</span></div><h3 style="margin-top:8px;font-size:1rem">${esc(c.name)}</h3>${c.tagline?`<div class="muted" style="font-size:.82rem">${esc(c.tagline)}</div>`:''}<div style="margin-top:6px">${(c.trust_marks||[]).map(m=>`<span class="st ok" style="font-size:.66rem">${terraBadge(11)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ')}</div></div>`).join('')}</div>`; }
+    if(d.rfqs.length){ html+=`<div class="sec-h" style="font-size:1.05rem">📋 Sourcing opportunities (${d.rfqs.length})</div><div style="margin:10px 0 18px;display:grid;gap:8px">${d.rfqs.map(r=>`<div class="panel" style="cursor:pointer;padding:14px" onclick="go('deals');dealTab('sourcing')"><div style="font-weight:700">${esc(r.title)}</div><div class="muted" style="font-size:.82rem">${r.budget!=null?'Budget '+fmtCur(r.budget,r.currency)+' '+r.currency:''}${r.quantity?' · '+esc(r.quantity):''}</div></div>`).join('')}</div>`; }
+    if(d.events.length){ html+=`<div class="sec-h" style="font-size:1.05rem">📅 Events & opportunities (${d.events.length})</div><div style="margin:10px 0 18px;display:grid;gap:8px">${d.events.map(e=>`<div class="panel" style="cursor:pointer;padding:14px" onclick="go('community');commTab('events')"><div style="font-weight:700">${esc(e.title)}</div><div class="muted" style="font-size:.82rem">${esc(e.type)}${e.starts_at?' · '+esc(e.starts_at):''}${e.location?' · '+esc(e.location):''}</div></div>`).join('')}</div>`; }
+    el.innerHTML=html;
+  }catch(e){ el.innerHTML='<div class="panel"><div class="muted">Search failed. Try again.</div></div>'; }
+}
 
 /* Marketplace */
-let MARKET_PILLAR='', MARKET_Q='', MARKET_PILLARS=null, MARKET_CORRIDOR='', CORRIDORS=null;
+let MARKET_PILLAR='', MARKET_Q='', MARKET_PILLARS=null, MARKET_CORRIDOR='', CORRIDORS=null, MARKET_TAB='browse';
 let FX=null, MYCUR=localStorage.getItem('sky_cur')||'USD';
 async function loadFX(){ try{ FX=await fetch(API+'/api/yunex/currencies').then(r=>r.json()); renderCurrencyPicker(); }catch(e){} }
 function convert(amount,from){ if(!FX||!FX.rates[from]||!FX.rates[MYCUR])return null; return amount/FX.rates[from]*FX.rates[MYCUR]; }
@@ -302,27 +343,47 @@ function money(l){
 }
 function renderCurrencyPicker(){ const el=document.getElementById('curPick'); if(!el||!FX)return; el.innerHTML=FX.list.map(c=>`<option ${c===MYCUR?'selected':''}>${c}</option>`).join(''); }
 function setCurrency(c){ MYCUR=c; localStorage.setItem('sky_cur',c); if($('v-market').classList.contains('on'))loadMarket(); }
+function listingCard(l){
+  const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color};padding:3px 9px;font-size:.7rem">${terraBadge(13)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ');
+  const img=(l.images&&l.images[0])?`<div style="height:150px;border-radius:12px;background:#eef1f8 center/cover url('${esc(l.images[0])}');margin:-4px -4px 12px"></div>`:`<div style="height:110px;border-radius:12px;background:linear-gradient(120deg,#eef1fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:-4px -4px 12px">${l.pillar_icon}</div>`;
+  return `<div class="card" style="cursor:pointer" onclick="openListing('${l.ref}')">
+    ${img}
+    <div style="font-size:.7rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div style="font-size:.68rem;color:#3d5af1;margin-top:2px">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
+    <h3 style="margin-top:5px;font-size:1rem">${esc(l.title)}</h3>
+    <div style="margin-top:8px">${money(l)}</div>
+    ${l.saves?`<div style="font-size:.72rem;color:#c0392b;margin-top:4px">❤️ ${l.saves} saved</div>`:''}
+    ${l.location?`<div class="muted" style="font-size:.8rem;margin-top:4px">📍 ${esc(l.location)}</div>`:''}
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap">
+      <span class="muted" style="font-size:.8rem">${esc(l.seller.name)}</span>${marks}
+    </div>
+  </div>`;
+}
+function marketTab(t){
+  MARKET_TAB=t;
+  const set=(id,on)=>{ const b=$(id); b.className=on?'btn g grad sm':'btn o sm'; b.style.cssText=on?'':'color:#67708f;border-color:#d7dbe8'; };
+  set('mtabBrowse',t==='browse'); set('mtabTrending',t==='trending'); set('mtabSaved',t==='saved');
+  const showFilters=t==='browse'; $('pillarTabs').style.display=showFilters?'':'none'; $('corridorTabs').style.display=showFilters?'':'none';
+  loadMarket();
+}
 async function loadMarket(){
-  const grid=$('listings'); grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">⏳</div><p class="muted" style="margin-top:8px">Loading listings…</p></div>';
+  const grid=$('listings'); grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">⏳</div><p class="muted" style="margin-top:8px">Loading…</p></div>';
   try{
+    if(MARKET_TAB==='trending'){
+      const d=await fetch(API+'/api/yunex/trending').then(r=>r.json());
+      grid.innerHTML=d.listings.length?d.listings.map(l=>listingCard(l)).join(''):'<div class="empty" style="grid-column:1/-1"><div class="ic">🔥</div><p style="margin-top:8px;font-weight:700">Nothing trending yet</p><p class="muted">Popular listings will surface here.</p></div>';
+      return;
+    }
+    if(MARKET_TAB==='saved'){
+      if(!ME){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">🤍</div><p style="margin-top:8px;font-weight:700">Log in to see saved items</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div>'; return; }
+      const d=await fetch(API+'/api/yunex/saved',{headers:H()}).then(r=>r.json());
+      grid.innerHTML=d.listings.length?d.listings.map(l=>listingCard(l)).join(''):'<div class="empty" style="grid-column:1/-1"><div class="ic">🤍</div><p style="margin-top:8px;font-weight:700">No saved items yet</p><p class="muted">Tap the heart on any listing to save it here.</p></div>';
+      return;
+    }
     const qs=new URLSearchParams(); if(MARKET_PILLAR)qs.set('pillar',MARKET_PILLAR); if(MARKET_CORRIDOR)qs.set('corridor',MARKET_CORRIDOR); if(MARKET_Q)qs.set('q',MARKET_Q);
     const r=await fetch(API+'/api/yunex/listings?'+qs.toString()); const d=await r.json();
     MARKET_PILLARS=d.pillars; renderPillarTabs(); renderCorridorTabs();
     if(!d.listings.length){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">🛍️</div><p style="margin-top:8px;font-weight:700">No listings yet'+(MARKET_Q||MARKET_PILLAR?' for this filter':'')+'</p><p class="muted">Verified sellers publish products, services, assets and opportunities here.</p></div>'; return; }
-    grid.innerHTML=d.listings.map(l=>{
-      const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color};padding:3px 9px;font-size:.7rem">${terraBadge(13)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ');
-      const img=(l.images&&l.images[0])?`<div style="height:150px;border-radius:12px;background:#eef1f8 center/cover url('${esc(l.images[0])}');margin:-4px -4px 12px"></div>`:`<div style="height:110px;border-radius:12px;background:linear-gradient(120deg,#eef1fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:-4px -4px 12px">${l.pillar_icon}</div>`;
-      return `<div class="card" style="cursor:pointer" onclick="openListing('${l.ref}')">
-        ${img}
-        <div style="font-size:.7rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div style="font-size:.68rem;color:#3d5af1;margin-top:2px">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
-        <h3 style="margin-top:5px;font-size:1rem">${esc(l.title)}</h3>
-        <div style="margin-top:8px">${money(l)}</div>
-        ${l.location?`<div class="muted" style="font-size:.8rem;margin-top:4px">📍 ${esc(l.location)}</div>`:''}
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap">
-          <span class="muted" style="font-size:.8rem">${esc(l.seller.name)}</span>${marks}
-        </div>
-      </div>`;
-    }).join('');
+    grid.innerHTML=d.listings.map(l=>listingCard(l)).join('');
   }catch(e){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><p class="muted">Could not load listings.</p></div>'; }
 }
 function renderPillarTabs(){
@@ -359,7 +420,10 @@ async function openListing(ref){
     $('listingModalBody').innerHTML=`
       ${gallery}
       <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em;margin-top:14px">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>
-      <h2 style="margin:6px 0 2px">${esc(l.title)}</h2>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <h2 style="margin:6px 0 2px">${esc(l.title)}</h2>
+        <button id="saveBtn_${l.ref}" onclick="toggleSave('${l.ref}')" title="Save" style="background:none;border:none;cursor:pointer;font-size:1.5rem;line-height:1;margin-top:6px">${l.saved?'❤️':'🤍'}</button>
+      </div>
       ${d.brand?`<div class="muted" style="font-size:.84rem">by ${esc(d.brand)}</div>`:''}
       <div style="font-size:1.4rem;margin-top:10px">${money(l)}</div>
       ${d.unit?`<div class="muted" style="font-size:.82rem">per ${esc(d.unit)}${d.min_order?' · min order '+esc(d.min_order):''}</div>`:''}
@@ -368,14 +432,31 @@ async function openListing(ref){
       ${l.description?`<div style="font-weight:700;margin-top:16px">Description</div><p style="margin-top:6px;line-height:1.7;color:#334;white-space:pre-wrap">${esc(l.description)}</p>`:''}
       <div class="panel" style="margin-top:16px;padding:16px">
         <div style="font-weight:700">${esc(l.seller.name)} ${l.seller.country?'· '+esc(l.seller.country):''}</div>
+        <div style="margin-top:4px">${ratingLine(l.seller.rating)}</div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
         ${l.seller.handle?`<button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:10px" onclick="closeListing();openStorefront('${esc(l.seller.handle)}')">🏢 View verified company page →</button>`:''}
         <div class="notice" style="margin-top:12px">🛡️ This seller is verified by the TERRA Credential Network. Negotiate, agree a price, and pay into secure escrow — funds release to the seller only when you confirm delivery.</div>
         <button class="btn g grad" style="width:100%;margin-top:12px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
         <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
-      </div>`;
+      </div>
+      <div id="relatedBox" style="margin-top:16px"></div>`;
     $('listingModal').classList.add('on');
+    loadRelated(l.ref);
   }catch(e){ alert('Could not open listing.'); }
+}
+async function toggleSave(ref){
+  if(!ME){ openAuth('login'); return; }
+  const r=await fetch(API+'/api/yunex/saved/'+ref,{method:'POST',headers:H()});
+  const d=await r.json(); if(!r.ok)return;
+  const b=$('saveBtn_'+ref); if(b)b.textContent=d.saved?'❤️':'🤍';
+}
+async function loadRelated(ref){
+  try{
+    const d=await fetch(API+'/api/yunex/listings/'+ref+'/related').then(r=>r.json());
+    const box=$('relatedBox'); if(!box)return;
+    if(!d.listings.length){ box.innerHTML=''; return; }
+    box.innerHTML=`<div style="font-weight:700;margin-bottom:8px">Related listings</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${d.listings.map(l=>`<div class="card" style="cursor:pointer;padding:10px" onclick="openListing('${l.ref}')"><div style="font-size:.66rem;font-weight:700;color:#8b5cf6;text-transform:uppercase">${l.pillar_icon} ${esc(l.category||l.pillar_label)}</div><div style="font-weight:600;font-size:.86rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.title)}</div><div style="margin-top:4px;font-size:.9rem">${money(l)}</div></div>`).join('')}</div>`;
+  }catch(e){}
 }
 function closeListing(){ $('listingModal').classList.remove('on'); }
 
@@ -834,6 +915,7 @@ async function openStorefront(handle){
           <div style="flex:1;min-width:200px">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;color:#fff;font-size:1.5rem">${esc(s.name)}</h2><span style="background:${s.tier.color};color:#fff;padding:4px 12px;border-radius:100px;font-weight:700;font-size:.76rem">${s.tier.icon} ${esc(s.tier.label)}</span></div>
             ${s.tagline?`<div style="color:#c7d2f0;margin-top:4px">${esc(s.tagline)}</div>`:''}
+            <div style="margin-top:8px">${s.rating&&s.rating.count?`<span style="color:#fff;font-size:.9rem">${stars(s.rating.average)} <b>${s.rating.average.toFixed(1)}</b> <span style="color:#9fb3dd">(${s.rating.count} review${s.rating.count>1?'s':''})</span></span>`:'<span style="color:#9fb3dd;font-size:.82rem">No reviews yet</span>'}</div>
             <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
           </div>
         </div>
@@ -845,8 +927,19 @@ async function openStorefront(handle){
       </div>
       ${facts.length?`<div class="panel"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">${facts.map(f=>`<div><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">${esc(f[0])}</div><div style="font-weight:700;margin-top:2px">${esc(f[1])}</div></div>`).join('')}</div></div>`:''}
       ${s.description?`<div class="panel"><div class="sec-h" style="font-size:1.05rem">About</div><p style="margin-top:6px;line-height:1.7;color:#334;white-space:pre-wrap">${esc(s.description)}</p></div>`:''}
-      <div class="panel"><div class="sec-h" style="font-size:1.05rem">Listings from ${esc(s.name)}</div>${grid}</div>`;
+      <div class="panel"><div class="sec-h" style="font-size:1.05rem">Listings from ${esc(s.name)}</div>${grid}</div>
+      <div class="panel" id="sfReviews"><div class="muted">Loading reviews…</div></div>`;
+    loadStorefrontReviews(s.handle);
   }catch(e){ el.innerHTML='<div class="panel"><div class="muted">Could not load company page.</div></div>'; }
+}
+async function loadStorefrontReviews(handle){
+  const box=$('sfReviews'); if(!box)return;
+  try{
+    const d=await fetch(API+'/api/yunex/storefront/'+encodeURIComponent(handle)+'/reviews').then(r=>r.json());
+    const head=`<div class="sec-h" style="font-size:1.05rem">Reviews ${d.rating&&d.rating.count?`· ${stars(d.rating.average)} ${d.rating.average.toFixed(1)} (${d.rating.count})`:''}</div>`;
+    if(!d.reviews||!d.reviews.length){ box.innerHTML=head+'<div class="muted" style="margin-top:6px;font-size:.85rem">No reviews yet. Reviews are earned only through completed, escrow-protected deals.</div>'; return; }
+    box.innerHTML=head+'<div style="margin-top:8px">'+d.reviews.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f0f2f7"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div style="font-weight:700;font-size:.88rem">${esc(r.reviewer)}</div><div>${stars(r.rating)}</div></div>${r.listing_title?`<div class="muted" style="font-size:.74rem">on ${esc(r.listing_title)}</div>`:''}${r.comment?`<div style="font-size:.88rem;color:#2a3350;margin-top:4px">${esc(r.comment)}</div>`:''}</div>`).join('')+'</div>';
+  }catch(e){ box.innerHTML='<div class="muted">Could not load reviews.</div>'; }
 }
 let BIZ_LOGO=null;
 async function loadBizProfile(){
@@ -1121,7 +1214,19 @@ async function renderDeal(quiet){
       actions=(role==='seller'?`<button class="btn g grad" onclick="dealAction('ship')">📦 Mark as shipped</button>`:`<div class="notice">🔒 Escrow funded and held safely. The seller is preparing to ship.</div>`)+`<button class="btn o sm" style="margin-left:8px;color:#c0392b;border-color:#f0c4bd" onclick="raiseDispute('${deal.ref}')">⚖️ Raise a dispute</button>`;
     } else if(s==='shipped'){
       actions=(role==='buyer'?`<button class="btn g grad" onclick="dealAction('complete')">✔ Confirm delivery & release escrow</button>`:`<div class="muted">Shipped — waiting for the buyer to confirm delivery.</div>`)+`<button class="btn o sm" style="margin-left:8px;color:#c0392b;border-color:#f0c4bd" onclick="raiseDispute('${deal.ref}')">⚖️ Raise a dispute</button>`;
-    } else if(s==='completed'){ actions=`<div class="st ok" style="padding:8px 16px">✔ Deal complete — escrow released</div>`; }
+    } else if(s==='completed'){
+      actions=`<div class="st ok" style="padding:8px 16px">✔ Deal complete — escrow released</div>`;
+      if(role==='buyer'&&!deal.reviewed){ actions+=`
+        <div class="panel" style="padding:14px;margin-top:12px">
+          <div style="font-weight:700">⭐ Rate this seller</div>
+          <div class="sec-s">Your honest review helps the whole verified market.</div>
+          <div id="starPick" style="font-size:1.8rem;margin-top:6px">${[1,2,3,4,5].map(i=>`<span onclick="pickStar(${i})" data-s="${i}" style="cursor:pointer;color:#d7dbe8">★</span>`).join('')}</div>
+          <textarea id="rv_comment" rows="2" placeholder="How was the product, communication and delivery?" style="width:100%;margin-top:8px"></textarea>
+          <button class="btn g grad" style="margin-top:8px" onclick="submitReview()">Submit review</button>
+          <span class="muted" id="rv_msg" style="margin-left:10px;font-size:.8rem"></span>
+        </div>`; }
+      else if(role==='buyer'&&deal.reviewed){ actions+=`<div class="muted" style="margin-top:10px">✔ Thank you — you reviewed this deal.</div>`; }
+    }
     else if(s==='disputed'){ actions=`<div class="notice">⚖️ A dispute is open on this deal. Escrow is frozen until the TERRA resolution team decides. Track it under Deals → Disputes.</div>`; }
     else if(s==='cancelled'){ actions=`<div class="muted">This deal was cancelled.</div>`; }
     el.innerHTML=`
@@ -1138,6 +1243,14 @@ async function renderDeal(quiet){
       </div>`;
     const box=$('dealMsgs'); if(box)box.scrollTop=box.scrollHeight;
   }catch(e){ if(!quiet)el.innerHTML='<div class="muted">Could not load.</div>'; }
+}
+let RV_STARS=0;
+function pickStar(n){ RV_STARS=n; document.querySelectorAll('#starPick span').forEach(s=>{ s.style.color=(+s.dataset.s<=n)?'#f5a623':'#d7dbe8'; }); }
+async function submitReview(){
+  const msg=$('rv_msg'); if(!RV_STARS){ msg.style.color='#c0392b'; msg.textContent='Pick a star rating.'; return; }
+  const r=await fetch(API+'/api/yunex/deals/'+DEAL_REF+'/review',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({rating:RV_STARS,comment:$('rv_comment').value.trim()})});
+  const d=await r.json(); if(!r.ok){ msg.style.color='#c0392b'; msg.textContent=d.error||'Failed'; return; }
+  RV_STARS=0; renderDeal(true);
 }
 async function sendDealMsg(){
   const inp=$('dl_msg'); const body=inp.value.trim(); if(!body)return; inp.value='';
@@ -1290,6 +1403,86 @@ async function sendComment(ref){
   const r=await fetch(API+'/api/yunex/community/posts/'+ref+'/comment',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({body})});
   const d=await r.json(); if(!r.ok){ msg.style.color='#c0392b'; msg.textContent=d.error||'Failed'; return; }
   openPost(ref); loadCommunity();
+}
+/* Community tabs: Feed | Events */
+function commTab(t){
+  const feed=t==='feed';
+  $('commFeedPane').style.display=feed?'':'none'; $('commEventsPane').style.display=feed?'none':'';
+  $('ctabFeed').className=feed?'btn g grad sm':'btn o sm'; $('ctabFeed').style.cssText=feed?'':'color:#67708f;border-color:#d7dbe8';
+  $('ctabEvents').className=feed?'btn o sm':'btn g grad sm'; $('ctabEvents').style.cssText=feed?'color:#67708f;border-color:#d7dbe8':'';
+  feed?loadCommunity():loadEvents();
+}
+/* Events & Opportunities */
+let EVT_TYPE='', EVENT_TYPES_FALLBACK=[{key:'event',label:'Event',icon:'📅'},{key:'webinar',label:'Webinar',icon:'💻'},{key:'tender',label:'Tender',icon:'📑'},{key:'opportunity',label:'Opportunity',icon:'🚀'},{key:'expo',label:'Expo / Fair',icon:'🎪'}];
+function evtChip(label,key,active){return `<button onclick="setEvtType('${key}')" style="padding:7px 15px;border-radius:100px;border:1px solid ${active?'#3d5af1':'#d7dbe8'};background:${active?'linear-gradient(120deg,#3d5af1,#b326d9)':'#fff'};color:${active?'#fff':'#67708f'};font-weight:700;font-size:.8rem;cursor:pointer;font-family:inherit">${esc(label)}</button>`;}
+function setEvtType(k){ EVT_TYPE=k; loadEvents(); }
+async function loadEvents(){
+  const compose=$('eventsCompose'), types=$('eventsTypes'), feed=$('eventsFeed'); if(!compose)return;
+  if(!ME){ compose.innerHTML='<div class="panel"><div class="empty"><div class="ic">📅</div><p style="margin-top:8px;font-weight:700">Discover verified events & opportunities</p><p class="muted">Log in and verify your identity to post and register.</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; }
+  else if(ME.verification&&ME.verification.identity!=='verified'){ compose.innerHTML='<div class="notice">🛡️ Verify your identity with TERRA to post an event or opportunity. You can browse and register freely once verified.</div>'; }
+  else compose.innerHTML=`<div class="panel">
+    <div class="sec-h" style="font-size:1.05rem">➕ Post an event or opportunity</div>
+    <div class="row2" style="margin-top:10px">
+      <div><label>Type</label><select id="ev_type">${EVENT_TYPES_FALLBACK.map(t=>`<option value="${t.key}">${t.icon} ${t.label}</option>`).join('')}</select></div>
+      <div><label>Date / when</label><input id="ev_when" placeholder="e.g. 15 Aug 2026, 10:00 GMT"></div>
+      <div style="grid-column:1/-1"><label>Title</label><input id="ev_title" placeholder="e.g. West Africa Cocoa Expo 2026"></div>
+      <div><label>Location</label><input id="ev_loc" placeholder="City / Online"></div>
+      <div><label>Corridor</label><select id="ev_corr"><option value="">— None —</option><option value="china">🇨🇳 China</option><option value="gulf">🌙 Gulf</option><option value="europe">🇪🇺 Europe</option><option value="america">🌎 America</option><option value="oceania">🌏 Oceania</option><option value="africa">🌍 Africa</option></select></div>
+      <div style="grid-column:1/-1"><label>Link (optional)</label><input id="ev_link" placeholder="https://"></div>
+      <div style="grid-column:1/-1"><label>Details</label><textarea id="ev_desc" rows="2" placeholder="What it's about, who should attend, terms…"></textarea></div>
+    </div>
+    <button class="btn g grad" style="margin-top:12px" onclick="postEvent()">Post</button><span class="muted" id="ev_msg" style="margin-left:10px;font-size:.8rem"></span></div>`;
+  feed.innerHTML='<div class="panel"><div class="muted">Loading events…</div></div>';
+  try{
+    const qs=new URLSearchParams(); if(EVT_TYPE)qs.set('type',EVT_TYPE);
+    const d=await fetch(API+'/api/yunex/events?'+qs.toString(),{headers:H()}).then(r=>r.json());
+    EVENT_TYPES_FALLBACK=d.types||EVENT_TYPES_FALLBACK;
+    types.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap">'+evtChip('All','',!EVT_TYPE)+d.types.map(t=>evtChip(t.icon+' '+t.label,t.key,EVT_TYPE===t.key)).join('')+'</div>';
+    if(!d.events.length){ feed.innerHTML='<div class="panel"><div class="empty"><div class="ic">📅</div><p style="margin-top:8px;font-weight:700">No events yet'+(EVT_TYPE?' in this category':'')+'</p><p class="muted">Verified members post trade fairs, webinars, tenders and opportunities here.</p></div></div>'; return; }
+    feed.innerHTML=d.events.map(e=>eventCard(e)).join('');
+  }catch(e){ feed.innerHTML='<div class="panel"><div class="muted">Could not load events.</div></div>'; }
+}
+function eventCard(e){
+  const marks=(e.host.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color};padding:2px 8px;font-size:.66rem">${terraBadge(11)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ');
+  return `<div class="panel">
+    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(120deg,#0a1230,#111a44);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">${e.type_icon}</div>
+      <div style="flex:1;min-width:180px">
+        <div style="font-size:.68rem;font-weight:700;color:#8b5cf6;text-transform:uppercase">${esc(e.type_label)}${e.corridor_label?' · '+esc(e.corridor_label):''}</div>
+        <h3 style="margin:3px 0;font-size:1.05rem">${esc(e.title)}</h3>
+        <div class="muted" style="font-size:.8rem">${e.starts_at?'🗓️ '+esc(e.starts_at):''}${e.location?(e.starts_at?' · ':'')+'📍 '+esc(e.location):''}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-weight:600;font-size:.82rem">${esc(e.host.name)}</span> ${marks}</div>
+      </div>
+    </div>
+    ${e.description?`<p style="margin:12px 0 0;line-height:1.6;color:#2a3350;white-space:pre-wrap">${esc(e.description)}</p>`:''}
+    ${e.link?`<div style="margin-top:8px"><a href="${esc(e.link)}" target="_blank" rel="noopener" style="color:#3d5af1;font-size:.85rem">🔗 ${esc(e.link)}</a></div>`:''}
+    <div style="display:flex;gap:12px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #f0f2f7;flex-wrap:wrap">
+      <button onclick="rsvpEvent('${e.ref}')" class="btn ${e.going?'o':'g grad'} sm" ${e.going?'style="color:#12864e;border-color:#bfe6cf"':''}><span id="rsvp_${e.ref}">${e.going?'✓ Registered':'Register interest'}</span></button>
+      <span class="muted" style="font-size:.8rem"><b id="rsvpn_${e.ref}">${e.rsvps}</b> registered</span>
+      ${e.mine?`<span style="flex:1"></span><button class="btn o sm" style="color:#c0392b;border-color:#f0c9c9" onclick="closeEvent('${e.ref}')">Close</button>`:''}
+    </div></div>`;
+}
+async function postEvent(){
+  const g=id=>$(id).value.trim(); const msg=$('ev_msg');
+  const body={type:$('ev_type').value,title:g('ev_title'),starts_at:g('ev_when'),location:g('ev_loc'),corridor:$('ev_corr').value,link:g('ev_link'),description:g('ev_desc')};
+  if(!body.title){ msg.style.color='#c0392b'; msg.textContent='A title is required.'; return; }
+  msg.style.color='#67708f'; msg.textContent='Posting…';
+  const r=await fetch(API+'/api/yunex/events',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify(body)});
+  const d=await r.json(); if(!r.ok){ msg.style.color='#c0392b'; msg.textContent=d.error||'Failed'; return; }
+  loadEvents();
+}
+async function rsvpEvent(ref){
+  if(!ME){ openAuth('login'); return; }
+  const r=await fetch(API+'/api/yunex/events/'+ref+'/rsvp',{method:'POST',headers:H()});
+  const d=await r.json(); if(!r.ok){ alert(d.error||'Could not register'); return; }
+  const btn=$('rsvp_'+ref), n=$('rsvpn_'+ref);
+  if(btn){ btn.textContent=d.going?'✓ Registered':'Register interest'; const b=btn.parentElement; b.className='btn '+(d.going?'o':'g grad')+' sm'; b.style.cssText=d.going?'color:#12864e;border-color:#bfe6cf':''; }
+  if(n){ const c=parseInt(n.textContent)||0; n.textContent=d.going?c+1:Math.max(0,c-1); }
+}
+async function closeEvent(ref){
+  if(!confirm('Close this event? It will be removed from the board.'))return;
+  const r=await fetch(API+'/api/yunex/events/'+ref+'/close',{method:'POST',headers:H()});
+  if(r.ok)loadEvents();
 }
 
 /* HOME gateway */

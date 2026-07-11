@@ -509,3 +509,36 @@ create table if not exists yunex_post_likes (
   post_ref text, user_email text, created_at timestamptz default now()
 );
 create index if not exists idx_post_likes on yunex_post_likes (post_ref, user_email);
+
+-- YUNEX Events & Opportunities — the verified business calendar
+create table if not exists yunex_events (
+  id bigint generated always as identity primary key,
+  ref text unique, host_email text, type text,
+  title text, description text, location text, corridor text,
+  starts_at text, link text, rsvps int default 0,
+  status text default 'open',      -- open | closed
+  created_at timestamptz default now()
+);
+create index if not exists idx_events_type on yunex_events (type, created_at);
+create table if not exists yunex_event_rsvps (
+  id bigint generated always as identity primary key,
+  event_ref text, user_email text, created_at timestamptz default now()
+);
+create index if not exists idx_event_rsvps on yunex_event_rsvps (event_ref, user_email);
+
+-- YUNEX Reviews & Ratings — earned only through completed deals
+create table if not exists yunex_reviews (
+  id bigint generated always as identity primary key,
+  ref text unique, deal_ref text unique, seller_email text, buyer_email text,
+  listing_ref text, listing_title text,
+  rating int, comment text,
+  created_at timestamptz default now()
+);
+create index if not exists idx_reviews_seller on yunex_reviews (seller_email);
+
+-- YUNEX Saved / Watchlist
+create table if not exists yunex_saved (
+  id bigint generated always as identity primary key,
+  user_email text, listing_ref text, created_at timestamptz default now()
+);
+create index if not exists idx_saved_user on yunex_saved (user_email, listing_ref);
