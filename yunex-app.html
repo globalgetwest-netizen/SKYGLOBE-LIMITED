@@ -111,8 +111,9 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
   <!-- MARKETPLACE -->
   <section class="view" id="v-market">
     <h2 class="sec-h">Marketplace</h2>
-    <div class="sec-s">Browse verified listings across all five pillars.</div>
-    <div class="grid g3" id="listings"><div class="empty" style="grid-column:1/-1"><div class="ic">🛍️</div><p style="margin-top:8px;font-weight:700">The marketplace opens with Layer 2</p><p class="muted">Verified sellers will list products, services, assets and opportunities here. The trust foundation is live now — listings arrive next.</p></div></div>
+    <div class="sec-s">Browse verified listings across every pillar. Every seller is verified by TERRA.</div>
+    <div id="pillarTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px"></div>
+    <div class="grid g3" id="listings"><div class="empty" style="grid-column:1/-1"><div class="ic">⏳</div><p class="muted" style="margin-top:8px">Loading listings…</p></div></div>
   </section>
 
   <!-- WALLET -->
@@ -142,6 +143,12 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
   </section>
 </div>
 
+<!-- LISTING MODAL -->
+<div class="modal" id="listingModal"><div class="box" style="max-width:560px;max-height:88vh;overflow:auto">
+  <div id="listingModalBody"></div>
+  <button class="btn o" style="width:100%;margin-top:14px;color:#67708f;border-color:#d7dbe8" onclick="closeListing()">Close</button>
+</div></div>
+
 <!-- AUTH MODAL -->
 <div class="modal" id="authModal"><div class="box">
   <h2 id="authTitle">Join YUNEX</h2>
@@ -169,9 +176,66 @@ function go(v){
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   if(v==='id') renderID();
   if(v==='business') renderBiz();
+  if(v==='market') loadMarket();
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function doSearch(){ go('market'); }
+function doSearch(){ MARKET_Q=$('q').value.trim(); go('market'); loadMarket(); }
+
+/* Marketplace */
+let MARKET_PILLAR='', MARKET_Q='', MARKET_PILLARS=null;
+function money(l){ if(l.price==null) return '<span class="muted">Contact for price</span>'; const sym={USD:'$',EUR:'€',GBP:'£',NGN:'₦',GHS:'GH₵',KES:'KSh',ZAR:'R'}[l.currency]||''; return '<b>'+sym+Number(l.price).toLocaleString()+'</b> <span class="muted" style="font-size:.8rem">'+l.currency+'</span>'; }
+async function loadMarket(){
+  const grid=$('listings'); grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">⏳</div><p class="muted" style="margin-top:8px">Loading listings…</p></div>';
+  try{
+    const qs=new URLSearchParams(); if(MARKET_PILLAR)qs.set('pillar',MARKET_PILLAR); if(MARKET_Q)qs.set('q',MARKET_Q);
+    const r=await fetch(API+'/api/yunex/listings?'+qs.toString()); const d=await r.json();
+    MARKET_PILLARS=d.pillars; renderPillarTabs();
+    if(!d.listings.length){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">🛍️</div><p style="margin-top:8px;font-weight:700">No listings yet'+(MARKET_Q||MARKET_PILLAR?' for this filter':'')+'</p><p class="muted">Verified sellers publish products, services, assets and opportunities here.</p></div>'; return; }
+    grid.innerHTML=d.listings.map(l=>{
+      const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color};padding:3px 9px;font-size:.7rem">🛡️ ${esc(m.label.replace(' Verified',''))}</span>`).join(' ');
+      const img=(l.images&&l.images[0])?`<div style="height:150px;border-radius:12px;background:#eef1f8 center/cover url('${esc(l.images[0])}');margin:-4px -4px 12px"></div>`:`<div style="height:110px;border-radius:12px;background:linear-gradient(120deg,#eef1fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:-4px -4px 12px">${l.pillar_icon}</div>`;
+      return `<div class="card" style="cursor:pointer" onclick="openListing('${l.ref}')">
+        ${img}
+        <div style="font-size:.7rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>
+        <h3 style="margin-top:5px;font-size:1rem">${esc(l.title)}</h3>
+        <div style="margin-top:8px">${money(l)}</div>
+        ${l.location?`<div class="muted" style="font-size:.8rem;margin-top:4px">📍 ${esc(l.location)}</div>`:''}
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap">
+          <span class="muted" style="font-size:.8rem">${esc(l.seller.name)}</span>${marks}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><p class="muted">Could not load listings.</p></div>'; }
+}
+function renderPillarTabs(){
+  if(!MARKET_PILLARS) return;
+  const tabs=$('pillarTabs');
+  const all=[{key:'',label:'All',icon:'✦'},...MARKET_PILLARS];
+  tabs.innerHTML=all.map(p=>`<button onclick="MARKET_PILLAR='${p.key}';loadMarket()" style="cursor:pointer;font-family:inherit;font-weight:700;font-size:.82rem;border-radius:100px;padding:7px 14px;border:1px solid ${MARKET_PILLAR===p.key?'#8b5cf6':'#e0e3ee'};background:${MARKET_PILLAR===p.key?'linear-gradient(120deg,#3d5af1,#b326d9)':'#fff'};color:${MARKET_PILLAR===p.key?'#fff':'#67708f'}">${p.icon} ${esc(p.label)}</button>`).join('');
+}
+async function openListing(ref){
+  try{
+    const l=await fetch(API+'/api/yunex/listings/'+ref).then(r=>r.json());
+    if(l.error){ alert(l.error); return; }
+    const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color}">🛡️ ${esc(m.label)}</span>`).join(' ');
+    const imgs=(l.images&&l.images.length)?l.images.map(s=>`<img src="${esc(s)}" style="width:100%;border-radius:12px;margin-bottom:8px">`).join(''):`<div style="height:180px;border-radius:12px;background:linear-gradient(120deg,#eef1fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:3rem">${l.pillar_icon}</div>`;
+    $('listingModalBody').innerHTML=`
+      ${imgs}
+      <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em;margin-top:12px">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>
+      <h2 style="margin:6px 0">${esc(l.title)}</h2>
+      <div style="font-size:1.2rem">${money(l)}</div>
+      ${l.quantity?`<div class="muted" style="margin-top:4px">Quantity: ${esc(l.quantity)}</div>`:''}
+      ${l.location?`<div class="muted" style="margin-top:2px">📍 ${esc(l.location)}</div>`:''}
+      <p style="margin-top:14px;line-height:1.7;color:#334;white-space:pre-wrap">${esc(l.description||'')}</p>
+      <div class="panel" style="margin-top:16px;padding:16px">
+        <div style="font-weight:700">${esc(l.seller.name)} ${l.seller.country?'· '+esc(l.seller.country):''}</div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
+        <div class="notice" style="margin-top:12px">🛡️ This seller is verified by the TERRA Credential Network. Real-time messaging, negotiation and secure payment arrive with the Deal Room (Layer 3).</div>
+      </div>`;
+    $('listingModal').classList.add('on');
+  }catch(e){ alert('Could not open listing.'); }
+}
+function closeListing(){ $('listingModal').classList.remove('on'); }
 
 /* auth */
 function openAuth(m){ authTab(m); $('authModal').classList.add('on'); }
@@ -311,8 +375,63 @@ function renderBiz(){
       <div style="margin-top:16px"><button class="btn g grad" onclick="go('id')">Go to My SKYGLOBE ID to get verified →</button></div></div>`;
     return;
   }
-  el.innerHTML=`<div class="panel"><div style="display:flex;align-items:center;gap:10px"><span class="st ok">✔ Verified seller</span><b>You're cleared to trade on YUNEX.</b></div>
-    <div class="sec-s" style="margin-top:8px">Listing management, analytics and advertising arrive with Layer 2. Your verified status is live now — you'll be able to publish listings the moment the marketplace opens.</div></div>`;
+  el.innerHTML=`
+    <div class="panel"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="st ok">✔ Verified seller</span><b>You're cleared to trade on YUNEX.</b></div></div>
+    <div class="panel">
+      <div class="sec-h" style="font-size:1.05rem">➕ Create a listing</div>
+      <div class="sec-s">Publish across any pillar. Buyers see it instantly with your verified trust mark.</div>
+      <div class="row2" style="margin-top:10px">
+        <div><label>Pillar</label><select id="nl_pillar"><option value="trade">🔁 Trade</option><option value="consumer">🛍️ Marketplace</option><option value="services">🛠️ Services</option><option value="assets">🏝️ Assets</option><option value="investment">📈 Investment</option><option value="business">🏢 Business</option><option value="finance">💰 Finance</option></select></div>
+        <div><label>Category</label><input id="nl_cat" placeholder="e.g. Agriculture, Electronics"></div>
+        <div style="grid-column:1/-1"><label>Title</label><input id="nl_title" placeholder="e.g. Premium Cocoa Beans — 10 tonnes"></div>
+        <div><label>Price</label><input id="nl_price" type="number" placeholder="e.g. 2400"></div>
+        <div><label>Currency</label><select id="nl_cur"><option>USD</option><option>EUR</option><option>GBP</option><option>NGN</option><option>GHS</option><option>KES</option><option>ZAR</option></select></div>
+        <div><label>Quantity / availability</label><input id="nl_qty" placeholder="e.g. 10 tonnes · 50 units"></div>
+        <div><label>Location</label><input id="nl_loc" placeholder="City, Country"></div>
+        <div style="grid-column:1/-1"><label>Description</label><textarea id="nl_desc" rows="3" placeholder="Describe what you're offering, quality, terms…"></textarea></div>
+      </div>
+      <button class="btn g grad" style="margin-top:12px" onclick="createListing()">Publish listing</button>
+      <span class="muted" id="nl_msg" style="margin-left:10px"></span>
+    </div>
+    <div class="panel">
+      <div class="sec-h" style="font-size:1.05rem">My listings</div>
+      <div id="myListings" style="margin-top:8px"><div class="muted">Loading…</div></div>
+    </div>`;
+  loadMyListings();
+}
+async function createListing(){
+  const g=id=>document.getElementById(id).value.trim();
+  const body={pillar:document.getElementById('nl_pillar').value,category:g('nl_cat'),title:g('nl_title'),price:g('nl_price'),currency:document.getElementById('nl_cur').value,quantity:g('nl_qty'),location:g('nl_loc'),description:g('nl_desc')};
+  if(!body.title){ $('nl_msg').textContent='A title is required.'; return; }
+  $('nl_msg').textContent='Publishing…';
+  try{
+    const r=await fetch(API+'/api/yunex/listings',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!r.ok||!d.success){ $('nl_msg').textContent=d.error||'Could not publish'; return; }
+    $('nl_msg').textContent='✔ Published';
+    ['nl_cat','nl_title','nl_price','nl_qty','nl_loc','nl_desc'].forEach(i=>document.getElementById(i).value='');
+    loadMyListings();
+  }catch(e){ $('nl_msg').textContent='Network error'; }
+}
+async function loadMyListings(){
+  const el=$('myListings'); if(!el) return;
+  try{
+    const list=await fetch(API+'/api/yunex/my-listings',{headers:H()}).then(r=>r.json());
+    if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="muted">No listings yet — publish your first above.</div>'; return; }
+    el.innerHTML=list.map(l=>`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #e8eaf2;border-radius:12px;padding:11px 14px;margin-bottom:8px">
+      <div style="font-size:1.2rem">${l.pillar_icon}</div>
+      <div style="flex:1;min-width:150px"><div style="font-weight:700">${esc(l.title)}</div><div class="muted" style="font-size:.8rem">${esc(l.pillar_label)} · ${money(l)} · <span style="text-transform:capitalize">${esc(l.status)}</span></div></div>
+      <div style="display:flex;gap:6px">
+        ${l.status==='active'?`<button class="btn o sm" style="color:#b5730a;border-color:#f0d9b0" onclick="setListing('${l.ref}','paused')">Pause</button>`:l.status==='paused'?`<button class="btn o sm" style="color:#12864e;border-color:#bfe6cf" onclick="setListing('${l.ref}','active')">Activate</button>`:''}
+        ${l.status!=='removed'?`<button class="btn o sm" style="color:#c0392b;border-color:#f0c4bd" onclick="setListing('${l.ref}','removed')">Remove</button>`:'<span class="muted" style="font-size:.8rem">Removed</span>'}
+      </div>
+    </div>`).join('');
+  }catch(e){ el.innerHTML='<div class="muted">Could not load.</div>'; }
+}
+async function setListing(ref,status){
+  if(status==='removed'&&!confirm('Remove this listing?')) return;
+  await fetch(API+'/api/yunex/listings/'+ref+'/status',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({status})});
+  loadMyListings();
 }
 
 /* boot */

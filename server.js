@@ -1326,7 +1326,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'DELEGATION-2026-07-11F',
+  build: 'YUNEX-LAYER2-2026-07-11G',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1564,6 +1564,135 @@ async function requireVerifiedSeller(email) {
   if (roles.includes('business') && !c.biz_verified) return { ok: false, error: 'Your business must be verified by TERRA before trading as a business.' };
   return { ok: true, client: c };
 }
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// §7c · YUNEX LAYER 2 — Listings & Marketplace
+// Verified sellers publish listings across the five pillars; buyers browse and
+// search. Every listing carries the seller's TERRA trust marks. Only verified
+// sellers can publish — the gate from Layer 1 is enforced on every create.
+// ══════════════════════════════════════════════════════════════════════════
+const YUNEX_PILLARS = {
+  trade:      { key: 'trade',      label: 'Trade',      icon: '🔁' },
+  investment: { key: 'investment', label: 'Investment', icon: '📈' },
+  assets:     { key: 'assets',     label: 'Assets',     icon: '🏝️' },
+  business:   { key: 'business',   label: 'Business',   icon: '🏢' },
+  finance:    { key: 'finance',    label: 'Finance',    icon: '💰' },
+  services:   { key: 'services',   label: 'Services',   icon: '🛠️' },
+  consumer:   { key: 'consumer',   label: 'Marketplace',icon: '🛍️' },
+};
+const VALID_PILLARS = Object.keys(YUNEX_PILLARS);
+
+function listingTrustMarks(seller) {
+  const marks = [];
+  if (seller?.id_verified) marks.push({ key: 'identity', label: 'Identity Verified', color: '#1e57c9' });
+  if (seller?.biz_verified) marks.push({ key: 'business', label: 'Business Verified', color: '#a87016' });
+  return marks;
+}
+function sellerPublicName(seller) {
+  if (!seller) return 'Verified Seller';
+  return seller.name || (seller.email ? seller.email.split('@')[0] : 'Verified Seller');
+}
+function shapeListing(l, seller) {
+  return {
+    ref: l.ref, pillar: l.pillar, pillar_label: (YUNEX_PILLARS[l.pillar] || {}).label || l.pillar,
+    pillar_icon: (YUNEX_PILLARS[l.pillar] || {}).icon || '•',
+    category: l.category || null, title: l.title, description: l.description || '',
+    price: l.price != null ? Number(l.price) : null, currency: l.currency || 'USD',
+    quantity: l.quantity || null, location: l.location || null,
+    images: Array.isArray(l.images) ? l.images : [],
+    status: l.status || 'active', created_at: l.created_at || null,
+    seller: { name: sellerPublicName(seller), country: seller?.country || null, trust_marks: listingTrustMarks(seller) },
+  };
+}
+
+// CREATE a listing — verified sellers only (Layer 1 gate).
+app.post('/api/yunex/listings', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await requireVerifiedSeller(email);
+    if (!gate.ok) return res.status(403).json({ error: gate.error });
+    const b = req.body || {};
+    const pillar = VALID_PILLARS.includes(b.pillar) ? b.pillar : 'trade';
+    const title = String(b.title || '').trim().slice(0, 140);
+    if (!title) return res.status(400).json({ error: 'A title is required.' });
+    const images = Array.isArray(b.images)
+      ? b.images.filter(s => /^data:image\/(png|jpe?g|webp);base64,/.test(s) || /^https?:\/\//.test(s)).slice(0, 6)
+      : [];
+    const ref = 'YX-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    const row = {
+      ref, seller_email: email, pillar, category: String(b.category || '').trim().slice(0, 60),
+      title, description: String(b.description || '').trim().slice(0, 2000),
+      price: (b.price != null && b.price !== '') ? Number(b.price) || null : null,
+      currency: ['USD', 'EUR', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'].includes(b.currency) ? b.currency : 'USD',
+      quantity: String(b.quantity || '').trim().slice(0, 80),
+      location: String(b.location || '').trim().slice(0, 120),
+      images, status: 'active',
+    };
+    await dbQuery('POST', 'yunex_listings', row).catch(e => { throw new Error('Could not save listing: ' + e.message); });
+    logActivity(email, 'client', 'yunex_listing_create', `Listed "${title}" in ${pillar}`, ref);
+    res.json({ success: true, ref });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// BROWSE listings — public. Filters: pillar, q (search), limit.
+app.get('/api/yunex/listings', async (req, res) => {
+  try {
+    const params = { status: 'eq.active', order: 'created_at.desc', limit: Math.min(Number(req.query.limit) || 60, 120) };
+    if (req.query.pillar && VALID_PILLARS.includes(req.query.pillar)) params.pillar = `eq.${req.query.pillar}`;
+    let rows = await dbQuery('GET', 'yunex_listings', null, params).catch(() => []);
+    rows = Array.isArray(rows) ? rows : [];
+    const q = String(req.query.q || '').trim().toLowerCase();
+    if (q) rows = rows.filter(l => `${l.title} ${l.description} ${l.category} ${l.location}`.toLowerCase().includes(q));
+    // attach seller trust (batch by unique email)
+    const emails = [...new Set(rows.map(l => l.seller_email))];
+    const sellers = {};
+    for (const em of emails) sellers[em] = await getClientByEmail(em).catch(() => null);
+    res.json({
+      pillars: Object.values(YUNEX_PILLARS),
+      listings: rows.map(l => shapeListing(l, sellers[l.seller_email])),
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// LISTING detail.
+app.get('/api/yunex/listings/:ref', async (req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'yunex_listings', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const l = rows[0];
+    if (!l || l.status === 'removed') return res.status(404).json({ error: 'Listing not found.' });
+    const seller = await getClientByEmail(l.seller_email).catch(() => null);
+    res.json(shapeListing(l, seller));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// MY listings — the seller's own (any status).
+app.get('/api/yunex/my-listings', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_listings', null, { seller_email: `eq.${email}`, order: 'created_at.desc', limit: 200 }).catch(() => []);
+    const seller = await getClientByEmail(email).catch(() => null);
+    res.json((Array.isArray(rows) ? rows : []).map(l => shapeListing(l, seller)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Update own listing status: active | paused | removed.
+app.post('/api/yunex/listings/:ref/status', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const status = ['active', 'paused', 'removed'].includes((req.body || {}).status) ? req.body.status : null;
+    if (!status) return res.status(400).json({ error: 'Invalid status.' });
+    const rows = await dbQuery('GET', 'yunex_listings', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const l = rows[0];
+    if (!l) return res.status(404).json({ error: 'Listing not found.' });
+    if (l.seller_email !== email) return res.status(403).json({ error: 'This is not your listing.' });
+    await dbQuery('PATCH', 'yunex_listings', { status }, { ref: `eq.${req.params.ref}` });
+    res.json({ success: true, status });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 // ── ADMIN / TERRA OFFICER: verification review queue ─────────────────────────
 app.get('/api/admin/yunex/verifications', async (req, res) => {
