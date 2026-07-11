@@ -393,3 +393,29 @@ create table if not exists yunex_deal_messages (
   created_at timestamptz default now()
 );
 create index if not exists idx_yunex_dmsg_deal on yunex_deal_messages (deal_ref, created_at);
+
+-- ══════════════════════════════════════════════════════════════════════════
+-- TRUST & SECURITY FOUNDATION — email verification, password recovery, KYC
+-- ══════════════════════════════════════════════════════════════════════════
+alter table clients add column if not exists email_verified boolean default false;
+
+-- Short-lived one-time codes for email verification & password reset.
+-- Codes are stored HASHED (sha256) — never in plain text. Auto-expire.
+create table if not exists auth_codes (
+  id bigint generated always as identity primary key,
+  email text,
+  kind text,                       -- 'verify_email' | 'reset_password'
+  code_hash text,
+  expires_at timestamptz,
+  used boolean default false,
+  attempts int default 0,
+  created_at timestamptz default now()
+);
+create index if not exists idx_auth_codes on auth_codes (email, kind, used);
+
+-- KYC evidence for TERRA verification — private, retained for dispute/compliance.
+-- Images live in PRIVATE Supabase storage; only the paths are stored here and
+-- served to reviewers through short-lived signed URLs (never public).
+alter table terra_verifications add column if not exists doc_image_path text;
+alter table terra_verifications add column if not exists selfie_image_path text;
+alter table terra_verifications add column if not exists ip text;

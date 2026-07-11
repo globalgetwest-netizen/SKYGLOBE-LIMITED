@@ -696,7 +696,8 @@ async function loadStaffVerify(status){
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <div style="font-size:1.2rem">${v.kind==='business'?'🏢':'🪪'}</div>
           <div style="flex:1;min-width:150px"><div style="font-weight:700;color:var(--txt)">${esc(v.full_name||v.client_email)}</div><div style="font-size:.74rem;color:var(--muted)">${esc(v.client_email)} · ${esc(v.country||'')} · ${when}</div></div>
-          <div style="flex:1;min-width:140px;font-size:.78rem;color:var(--txt)"><span style="text-transform:capitalize;font-weight:700">${esc(v.kind)}</span> · ${detail}<div style="font-size:.72rem;color:var(--muted)">${esc(v.ref)}</div></div>
+          <div style="flex:1;min-width:140px;font-size:.78rem;color:var(--txt)"><span style="text-transform:capitalize;font-weight:700">${esc(v.kind)}</span> · ${detail}<div style="font-size:.72rem;color:var(--muted)">${esc(v.ref)}${v.ip?' · IP '+esc(v.ip):''}</div></div>
+          <div style="display:flex;gap:6px">${v.doc_image_url?`<a href="${esc(v.doc_image_url)}" target="_blank" title="ID document"><img src="${esc(v.doc_image_url)}" style="width:46px;height:46px;object-fit:cover;border-radius:8px;border:1px solid var(--line,rgba(255,255,255,.08))"></a>`:''}${v.selfie_image_url?`<a href="${esc(v.selfie_image_url)}" target="_blank" title="Live selfie"><img src="${esc(v.selfie_image_url)}" style="width:46px;height:46px;object-fit:cover;border-radius:8px;border:1px solid var(--line,rgba(255,255,255,.08))"></a>`:''}</div>
           <div><span style="color:${stColor};font-weight:700;font-size:.78rem;text-transform:capitalize">${esc(v.status)}</span></div>
           ${v.status==='pending'?`<div style="display:flex;gap:6px">
             <button class="btn btn-sm" onclick="staffDecideVerify('${v.ref}','verified',this)">✔ Approve</button>

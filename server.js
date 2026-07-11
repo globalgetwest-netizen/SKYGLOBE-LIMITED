@@ -1326,7 +1326,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-LAYER3-2026-07-11H',
+  build: 'SECURITY-FOUNDATION-2026-07-11I',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1388,18 +1388,118 @@ async function getClientByEmail(email) {
 
 // ── §7 CLIENT PORTAL ─────────────────────────────────────────────────────────
 // ── SIGN UP ───────────────────────────────────────────────────────────────────
+// ── SECURITY FOUNDATION: one-time codes, private KYC storage ─────────────────
+const _hashCode = c => crypto.createHash('sha256').update(String(c)).digest('hex');
+const _genCode = () => String(crypto.randomInt(100000, 1000000)); // 6 digits
+// Issue a one-time code (verify_email | reset_password), store hashed, email it.
+async function issueAuthCode(email, kind, subject, intro) {
+  const code = _genCode();
+  await dbQuery('POST', 'auth_codes', {
+    email, kind, code_hash: _hashCode(code),
+    expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), used: false, attempts: 0,
+  }).catch(() => {});
+  const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:26px;color:#1a2233">
+    <h2 style="color:#0A2E65;font-family:Georgia,serif">SkyGlobe Group</h2>
+    <p>${intro}</p>
+    <div style="font-size:2rem;font-weight:800;letter-spacing:.3em;color:#0A2E65;background:#f2f6fc;border-radius:12px;padding:18px;text-align:center;margin:16px 0">${code}</div>
+    <p style="font-size:13px;color:#6b7689">This code expires in 30 minutes. If you didn't request it, you can ignore this email — your account stays safe.</p>
+    <p style="font-size:13px;color:#6b7689">One World. One Mission.</p></div>`;
+  sendEmail(email, subject, html).catch(err => console.error('auth code email failed:', err.message));
+  // Also drop it into the in-app inbox so it's never lost if email is delayed.
+  portalDeliver(email, `${intro} Your code: ${code} (expires in 30 minutes).`, 'general').catch(() => {});
+  return code;
+}
+// Verify a code: newest unused, not expired, attempts < 6. Marks used on success.
+async function checkAuthCode(email, kind, code) {
+  const rows = await dbQuery('GET', 'auth_codes', null, { email: `eq.${email}`, kind: `eq.${kind}`, used: 'eq.false', order: 'created_at.desc', limit: 1 }).catch(() => []);
+  const row = rows[0];
+  if (!row) return { ok: false, error: 'No active code. Please request a new one.' };
+  if (new Date(row.expires_at) < new Date()) return { ok: false, error: 'This code has expired. Please request a new one.' };
+  if ((row.attempts || 0) >= 6) return { ok: false, error: 'Too many attempts. Please request a new code.' };
+  if (row.code_hash !== _hashCode(code)) {
+    await dbQuery('PATCH', 'auth_codes', { attempts: (row.attempts || 0) + 1 }, { id: `eq.${row.id}` }).catch(() => {});
+    return { ok: false, error: 'Incorrect code.' };
+  }
+  await dbQuery('PATCH', 'auth_codes', { used: true }, { id: `eq.${row.id}` }).catch(() => {});
+  return { ok: true };
+}
+// Private storage upload for KYC evidence (bucket path prefixed kyc/ — never
+// served publicly; reviewers get short-lived signed URLs).
+async function kycUpload(dataUrl, pathNoExt) {
+  const m = /^data:image\/(png|jpe?g|webp);base64,(.+)$/.exec(String(dataUrl || ''));
+  if (!m) return null;
+  const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
+  const buf = Buffer.from(m[2], 'base64');
+  if (buf.length > 6 * 1024 * 1024) return null; // 6MB cap
+  const path_ = `kyc/${pathNoExt}.${ext}`;
+  await storageUpload(path_, buf, `image/${m[1] === 'jpg' ? 'jpeg' : m[1]}`).catch(() => {});
+  return path_;
+}
+// Short-lived signed URL so an officer can view a private KYC image.
+async function storageSignedUrl(path_, seconds = 300) {
+  try {
+    const r = await fetch(`${SUPA_URL}/storage/v1/object/sign/documents/${path_}`, {
+      method: 'POST', headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ expiresIn: seconds }),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d.signedURL ? `${SUPA_URL}/storage/v1${d.signedURL}` : null;
+  } catch (e) { return null; }
+}
+
 app.post('/api/auth/signup', loginLimiter, async (req, res) => {
   let { name, email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
   email = String(email).trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'Please enter a valid email address.' });
   if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
   try {
     const existing = await getClientByEmail(email);
     if (existing) return res.status(409).json({ error: 'An account with this email already exists. Please log in.' });
-    await dbQuery('POST', 'clients', { email, name: name || '', password_hash: hashPassword(password) });
+    await dbQuery('POST', 'clients', { email, name: name || '', password_hash: hashPassword(password), email_verified: false });
+    await issueAuthCode(email, 'verify_email', 'Confirm your SkyGlobe email', 'Welcome to SkyGlobe Group! Use this code to confirm your email address:');
     const token = signToken(email);
-    res.json({ success: true, token, email, name: name || '' });
+    res.json({ success: true, token, email, name: name || '', email_verified: false });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Confirm email with the 6-digit code.
+app.post('/api/auth/verify-email', loginLimiter, async (req, res) => {
+  let { email, code } = req.body || {};
+  email = String(email || '').trim().toLowerCase();
+  const r = await checkAuthCode(email, 'verify_email', String(code || '').trim());
+  if (!r.ok) return res.status(400).json({ error: r.error });
+  await dbQuery('PATCH', 'clients', { email_verified: true }, { email: `eq.${email}` }).catch(() => {});
+  res.json({ success: true });
+});
+// Resend the email-verification code.
+app.post('/api/auth/resend-verification', loginLimiter, async (req, res) => {
+  const email = String((req.body || {}).email || '').trim().toLowerCase();
+  const c = await getClientByEmail(email);
+  if (c && !c.email_verified) await issueAuthCode(email, 'verify_email', 'Confirm your SkyGlobe email', 'Use this code to confirm your email address:');
+  res.json({ success: true }); // never reveal whether the account exists
+});
+
+// ── PASSWORD RECOVERY ────────────────────────────────────────────────────────
+app.post('/api/auth/forgot-password', loginLimiter, async (req, res) => {
+  const email = String((req.body || {}).email || '').trim().toLowerCase();
+  const c = await getClientByEmail(email);
+  if (c) await issueAuthCode(email, 'reset_password', 'Reset your SkyGlobe password', 'We received a request to reset your password. Use this code to set a new one:');
+  res.json({ success: true }); // always success — never reveal whether the account exists
+});
+app.post('/api/auth/reset-password', loginLimiter, async (req, res) => {
+  let { email, code, password } = req.body || {};
+  email = String(email || '').trim().toLowerCase();
+  if (!password || String(password).length < 6) return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+  const r = await checkAuthCode(email, 'reset_password', String(code || '').trim());
+  if (!r.ok) return res.status(400).json({ error: r.error });
+  const c = await getClientByEmail(email);
+  if (!c) return res.status(400).json({ error: 'Account not found.' });
+  await dbQuery('PATCH', 'clients', { password_hash: hashPassword(String(password)) }, { email: `eq.${email}` });
+  logActivity(email, 'client', 'password_reset', 'Password reset via email code', email);
+  const token = signToken(email);
+  res.json({ success: true, token, email, name: c.name || '' });
 });
 
 // ── LOG IN ──────────────────────────────────────────────────────────────────────
@@ -1531,9 +1631,15 @@ app.post('/api/yunex/verify/request', async (req, res) => {
       business_name: String(b.businessName || '').trim().slice(0, 140),
       business_reg_no: String(b.businessRegNo || '').trim().slice(0, 80),
       details: (b.details && typeof b.details === 'object') ? b.details : {},
+      ip: (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || null,
     };
     if (!row.full_name) return res.status(400).json({ error: 'Full legal name is required.' });
     if (kind === 'business' && !row.business_name) return res.status(400).json({ error: 'Business name is required for business verification.' });
+    // KYC evidence — the identity document and a live selfie — stored PRIVATELY
+    // for the reviewer and retained for dispute & compliance. Never public.
+    const stamp = ref + '-' + Date.now();
+    if (b.documentImage) row.doc_image_path = await kycUpload(b.documentImage, stamp + '-doc').catch(() => null);
+    if (b.selfieImage) row.selfie_image_path = await kycUpload(b.selfieImage, stamp + '-selfie').catch(() => null);
     await dbQuery('POST', 'terra_verifications', row).catch(e => { throw new Error('Could not submit verification: ' + e.message); });
     logActivity(email, 'client', 'terra_verify_request', `Submitted ${kind} verification (${ref})`, ref);
     // notify the platform (portal + email to the trust desk)
@@ -1923,7 +2029,15 @@ app.get('/api/admin/yunex/verifications', async (req, res) => {
     const params = { order: 'created_at.desc', limit: 500 };
     if (status !== 'all') params.status = `eq.${status}`;
     const rows = await dbQuery('GET', 'terra_verifications', null, params).catch(() => []);
-    res.json(Array.isArray(rows) ? rows : []);
+    const out = [];
+    for (const v of (Array.isArray(rows) ? rows : [])) {
+      out.push({
+        ...v,
+        doc_image_url: v.doc_image_path ? await storageSignedUrl(v.doc_image_path).catch(() => null) : null,
+        selfie_image_url: v.selfie_image_path ? await storageSignedUrl(v.selfie_image_path).catch(() => null) : null,
+      });
+    }
+    res.json(out);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

@@ -173,6 +173,7 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
   <input id="au_pass" type="password" placeholder="Password (min 6 characters)">
   <div class="err" id="au_err"></div>
   <button class="btn g grad" style="width:100%;padding:12px" onclick="submitAuth()" id="au_btn">Create my SKYGLOBE ID</button>
+  <div id="forgotRow" style="text-align:center;margin-top:10px;display:none"><a href="#" onclick="showForgot();return false" style="color:#3d5af1;font-size:.84rem">Forgot your password?</a></div>
   <button class="btn o" style="width:100%;margin-top:8px;color:#67708f;border-color:#d7dbe8" onclick="closeAuth()">Cancel</button>
 </div></div>
 
@@ -255,10 +256,11 @@ async function openListing(ref){
 function closeListing(){ $('listingModal').classList.remove('on'); }
 
 /* auth */
-function openAuth(m){ authTab(m); $('authModal').classList.add('on'); }
-function closeAuth(){ $('authModal').classList.remove('on'); $('au_err').textContent=''; }
+const AUTH_BOX_HTML=document.querySelector('#authModal .box').innerHTML;
+function openAuth(m){ document.querySelector('#authModal .box').innerHTML=AUTH_BOX_HTML; authTab(m); $('authModal').classList.add('on'); }
+function closeAuth(){ $('authModal').classList.remove('on'); }
 function authTab(m){ authMode=m; $('tabLogin').classList.toggle('on',m==='login'); $('tabSignup').classList.toggle('on',m==='signup');
-  $('nameWrap').style.display=m==='signup'?'block':'none'; $('authTitle').textContent=m==='signup'?'Join YUNEX':'Welcome back';
+  $('nameWrap').style.display=m==='signup'?'block':'none'; const fr=$('forgotRow'); if(fr)fr.style.display=m==='login'?'block':'none'; $('authTitle').textContent=m==='signup'?'Join YUNEX':'Welcome back';
   $('au_btn').textContent=m==='signup'?'Create my SKYGLOBE ID':'Log in'; }
 async function submitAuth(){
   $('au_err').textContent='';
@@ -270,8 +272,58 @@ async function submitAuth(){
     const r=await fetch(API+url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
     const d=await r.json();
     if(!r.ok||!d.success){$('au_err').textContent=d.error||'Could not sign in.';return;}
-    TOKEN=d.token; localStorage.setItem('sky_token',TOKEN); closeAuth(); await loadMe(); go('id');
+    TOKEN=d.token; localStorage.setItem('sky_token',TOKEN);
+    if(authMode==='signup'&&d.email_verified===false){ showVerifyEmail(email); return; }
+    closeAuth(); await loadMe(); go('id');
   }catch(e){$('au_err').textContent='Network error. Please try again.';}
+}
+function showVerifyEmail(email){
+  $('authTitle').textContent='Confirm your email';
+  document.querySelector('#authModal .box').innerHTML=`
+    <h2 id="authTitle">Confirm your email</h2>
+    <p class="muted" style="margin-top:4px">We sent a 6-digit code to <b>${esc(email)}</b>. Enter it to activate your account. (It's also in your in-app inbox.)</p>
+    <input id="ve_code" placeholder="6-digit code" style="margin:14px 0 8px;letter-spacing:.3em;text-align:center;font-size:1.1rem">
+    <div class="err" id="ve_err"></div>
+    <button class="btn g grad" style="width:100%;padding:12px" onclick="doVerifyEmail('${esc(email)}')">Confirm email</button>
+    <button class="btn o" style="width:100%;margin-top:8px;color:#67708f;border-color:#d7dbe8" onclick="resendVerify('${esc(email)}')">Resend code</button>
+    <button class="btn o" style="width:100%;margin-top:8px;color:#67708f;border-color:#d7dbe8" onclick="skipVerify()">Do this later</button>`;
+}
+async function doVerifyEmail(email){
+  const code=$('ve_code').value.trim();
+  const r=await fetch(API+'/api/auth/verify-email',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,code})});
+  const d=await r.json();
+  if(!r.ok||!d.success){$('ve_err').textContent=d.error||'Could not verify.';return;}
+  closeAuth(); await loadMe(); go('id');
+}
+async function resendVerify(email){ await fetch(API+'/api/auth/resend-verification',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email})}); $('ve_err').style.color='#12864e'; $('ve_err').textContent='A new code was sent.'; }
+async function skipVerify(){ closeAuth(); await loadMe(); go('id'); }
+function showForgot(){
+  document.querySelector('#authModal .box').innerHTML=`
+    <h2>Reset your password</h2>
+    <p class="muted" style="margin-top:4px">Enter your email and we'll send a reset code.</p>
+    <input id="fp_email" type="email" placeholder="Email" style="margin:14px 0 8px">
+    <div class="err" id="fp_err"></div>
+    <button class="btn g grad" style="width:100%;padding:12px" onclick="sendForgot()">Send reset code</button>
+    <button class="btn o" style="width:100%;margin-top:8px;color:#67708f;border-color:#d7dbe8" onclick="closeAuth()">Cancel</button>`;
+}
+async function sendForgot(){
+  const email=$('fp_email').value.trim(); if(!email){$('fp_err').textContent='Enter your email.';return;}
+  await fetch(API+'/api/auth/forgot-password',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email})});
+  document.querySelector('#authModal .box').innerHTML=`
+    <h2>Check your email</h2>
+    <p class="muted" style="margin-top:4px">If an account exists for <b>${esc(email)}</b>, a reset code is on its way. Enter it below with your new password.</p>
+    <input id="rp_code" placeholder="6-digit code" style="margin:14px 0 8px;letter-spacing:.3em;text-align:center">
+    <input id="rp_pass" type="password" placeholder="New password (min 6 characters)" style="margin-bottom:8px">
+    <div class="err" id="rp_err"></div>
+    <button class="btn g grad" style="width:100%;padding:12px" onclick="doReset('${esc(email)}')">Set new password</button>
+    <button class="btn o" style="width:100%;margin-top:8px;color:#67708f;border-color:#d7dbe8" onclick="closeAuth()">Cancel</button>`;
+}
+async function doReset(email){
+  const code=$('rp_code').value.trim(), password=$('rp_pass').value;
+  const r=await fetch(API+'/api/auth/reset-password',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,code,password})});
+  const d=await r.json();
+  if(!r.ok||!d.success){$('rp_err').textContent=d.error||'Could not reset.';return;}
+  TOKEN=d.token; localStorage.setItem('sky_token',TOKEN); closeAuth(); await loadMe(); go('id');
 }
 function logout(){ TOKEN=''; localStorage.removeItem('sky_token'); ME=null; renderAcct(); go('home'); }
 
@@ -362,18 +414,45 @@ function showVerify(kind){
         ${isBiz?`<div><label>Business name</label><input id="v_biz"></div><div><label>Business registration Nº</label><input id="v_reg"></div>`:
           `<div><label>Document type</label><select id="v_doctype"><option value="passport">Passport</option><option value="national_id">National ID</option><option value="drivers_license">Driver's licence</option></select></div><div><label>Document number</label><input id="v_docref"></div>`}
       </div>
+      <div class="row2" style="margin-top:12px">
+        <div>
+          <label>${isBiz?'Business registration document':'Photo of your ID document'}</label>
+          <input type="file" accept="image/*" onchange="kycPick(this,'doc')" style="font-size:.85rem">
+          <div id="kycDocPrev"></div>
+        </div>
+        <div>
+          <label>Live selfie ${isBiz?'of the owner':''}</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" onclick="startSelfie()">📷 Take live selfie</button><input type="file" accept="image/*" capture="user" onchange="kycPick(this,'selfie')" style="font-size:.82rem"></div>
+          <video id="kycVid" playsinline style="display:none;width:100%;max-width:220px;border-radius:10px;margin-top:8px"></video>
+          <div id="kycSelfiePrev"></div>
+        </div>
+      </div>
+      <div class="muted" style="font-size:.78rem;margin-top:8px">🔒 Your document and selfie are stored privately and encrypted at rest — visible only to the TERRA verification officer, retained securely for dispute and compliance. Never shown publicly.</div>
       <button class="btn g grad" style="margin-top:12px" onclick="submitVerify('${kind}')">Submit to TERRA</button>
       <span class="muted" id="v_msg" style="margin-left:10px"></span>
     </div>`;
+}
+let KYC_DOC=null, KYC_SELFIE=null, KYC_STREAM=null;
+function kycCompress(dataUrl,cb){ const img=new Image(); img.onload=()=>{ const max=1100,sc=Math.min(1,max/Math.max(img.width,img.height)); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); cb(cv.toDataURL('image/jpeg',0.85)); }; img.src=dataUrl; }
+function kycPick(input,which){ const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>kycCompress(r.result,d=>{ if(which==='doc'){KYC_DOC=d;$('kycDocPrev').innerHTML='<img src="'+d+'" style="width:100%;max-width:200px;border-radius:8px;margin-top:6px">';} else {KYC_SELFIE=d;$('kycSelfiePrev').innerHTML='<img src="'+d+'" style="width:100%;max-width:160px;border-radius:8px;margin-top:6px">';} }); r.readAsDataURL(f); }
+async function startSelfie(){
+  try{
+    const v=$('kycVid'); v.style.display='block';
+    KYC_STREAM=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}); v.srcObject=KYC_STREAM; await v.play();
+    v.onclick=()=>{ const cv=document.createElement('canvas'); cv.width=v.videoWidth; cv.height=v.videoHeight; cv.getContext('2d').drawImage(v,0,0); kycCompress(cv.toDataURL('image/jpeg',0.9),d=>{KYC_SELFIE=d;$('kycSelfiePrev').innerHTML='<img src="'+d+'" style="width:100%;max-width:160px;border-radius:8px;margin-top:6px"><div class="muted" style="font-size:.74rem">✔ Live selfie captured</div>';}); KYC_STREAM.getTracks().forEach(t=>t.stop()); v.style.display='none'; };
+    $('kycSelfiePrev').innerHTML='<div class="muted" style="font-size:.76rem;margin-top:4px">Tap the video to capture your live selfie.</div>';
+  }catch(e){ $('kycSelfiePrev').innerHTML='<div class="muted" style="font-size:.78rem">Camera unavailable — you can upload a selfie photo instead.</div>'; }
 }
 async function submitVerify(kind){
   const body={kind,fullName:$('v_name').value.trim(),country:$('v_country').value.trim()};
   if(kind==='business'){ body.businessName=$('v_biz').value.trim(); body.businessRegNo=$('v_reg').value.trim(); }
   else { body.documentType=$('v_doctype').value; body.documentRef=$('v_docref').value.trim(); }
+  if(KYC_DOC)body.documentImage=KYC_DOC; if(KYC_SELFIE)body.selfieImage=KYC_SELFIE;
+  $('v_msg').textContent='Submitting…';
   const r=await fetch(API+'/api/yunex/verify/request',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify(body)});
   const d=await r.json();
   $('v_msg').textContent=r.ok?('✔ Submitted ('+d.ref+') — under review'):(d.error||'Could not submit');
-  if(r.ok){ $('verifyForm').innerHTML=''; loadVerifyList(); }
+  if(r.ok){ KYC_DOC=null;KYC_SELFIE=null; $('verifyForm').innerHTML=''; loadVerifyList(); }
 }
 async function loadVerifyList(){
   try{
