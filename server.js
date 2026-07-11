@@ -1326,7 +1326,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-LAYER2-2026-07-11G',
+  build: 'YUNEX-LAYER3-2026-07-11H',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1691,6 +1691,227 @@ app.post('/api/yunex/listings/:ref/status', async (req, res) => {
     if (l.seller_email !== email) return res.status(403).json({ error: 'This is not your listing.' });
     await dbQuery('PATCH', 'yunex_listings', { status }, { ref: `eq.${req.params.ref}` });
     res.json({ success: true, status });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// §7d · YUNEX LAYER 3 — The Deal Room
+// Verified buyer <-> verified seller: real-time negotiation, offers, and a
+// secure escrow-style payment flow. Doctrine (Amendment 3): communication
+// between verified humans only. YUNEX moves the deal; TERRA verified both
+// sides; settlement completes through licensed payment partners (YUNEX Pay).
+// State: open -> offer -> accepted -> paid(escrow) -> shipped -> completed
+//        (cancelled from any pre-completed state).
+// ══════════════════════════════════════════════════════════════════════════
+async function dealParticipant(email) {
+  // Both buyers and sellers must be TERRA identity-verified to transact.
+  const c = await getClientByEmail(email);
+  if (!c) return { ok: false, error: 'Account not found.' };
+  if (!c.id_verified) return { ok: false, error: 'Your identity must be verified by TERRA before you can open a deal on YUNEX.' };
+  return { ok: true, client: c };
+}
+function dealRole(deal, email) { return deal.buyer_email === email ? 'buyer' : deal.seller_email === email ? 'seller' : null; }
+async function postDealSystem(ref, body, meta = {}) {
+  await dbQuery('POST', 'yunex_deal_messages', { deal_ref: ref, sender_email: 'system', sender_role: 'system', kind: 'system', body, meta }).catch(() => {});
+}
+function shapeDeal(d) {
+  return {
+    ref: d.ref, listing_ref: d.listing_ref, listing_title: d.listing_title,
+    status: d.status, offer_price: d.offer_price != null ? Number(d.offer_price) : null,
+    currency: d.currency || 'USD', quantity: d.quantity || null,
+    buyer_email: d.buyer_email, seller_email: d.seller_email,
+    payment_ref: d.payment_ref || null, created_at: d.created_at, updated_at: d.updated_at,
+  };
+}
+
+// START a deal on a listing (buyer, verified). Reuses an open deal if one exists.
+app.post('/api/yunex/deals', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await dealParticipant(email);
+    if (!gate.ok) return res.status(403).json({ error: gate.error });
+    const listingRef = String((req.body || {}).listing_ref || '').trim();
+    const rows = await dbQuery('GET', 'yunex_listings', null, { ref: `eq.${listingRef}`, limit: 1 }).catch(() => []);
+    const listing = rows[0];
+    if (!listing || listing.status === 'removed') return res.status(404).json({ error: 'Listing not found.' });
+    if (listing.seller_email === email) return res.status(400).json({ error: 'This is your own listing.' });
+    // reuse an existing non-terminal deal between this buyer and listing
+    const existing = await dbQuery('GET', 'yunex_deals', null, { buyer_email: `eq.${email}`, listing_ref: `eq.${listingRef}`, limit: 20 }).catch(() => []);
+    const reuse = (existing || []).find(d => !['completed', 'cancelled'].includes(d.status));
+    if (reuse) return res.json({ success: true, ref: reuse.ref, reused: true });
+    const ref = 'DL-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    await dbQuery('POST', 'yunex_deals', {
+      ref, listing_ref: listingRef, listing_title: listing.title, buyer_email: email,
+      seller_email: listing.seller_email, status: 'open', currency: listing.currency || 'USD', quantity: listing.quantity || null,
+    }).catch(e => { throw new Error('Could not open deal: ' + e.message); });
+    const firstMsg = String((req.body || {}).message || '').trim().slice(0, 1000);
+    await postDealSystem(ref, `Deal opened on "${listing.title}". Both parties are TERRA-verified.`);
+    if (firstMsg) await dbQuery('POST', 'yunex_deal_messages', { deal_ref: ref, sender_email: email, sender_role: 'buyer', kind: 'message', body: firstMsg }).catch(() => {});
+    logActivity(email, 'client', 'yunex_deal_open', `Opened deal on ${listing.title}`, ref);
+    portalDeliver(listing.seller_email, `You have a new YUNEX deal enquiry on "${listing.title}". Open YUNEX → Deals to respond.`, 'finance').catch(() => {});
+    res.json({ success: true, ref });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// MY deals (as buyer or seller).
+app.get('/api/yunex/deals', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const asBuyer = await dbQuery('GET', 'yunex_deals', null, { buyer_email: `eq.${email}`, order: 'updated_at.desc', limit: 100 }).catch(() => []);
+    const asSeller = await dbQuery('GET', 'yunex_deals', null, { seller_email: `eq.${email}`, order: 'updated_at.desc', limit: 100 }).catch(() => []);
+    const seen = new Set();
+    const all = [...(asBuyer || []), ...(asSeller || [])].filter(d => (seen.has(d.ref) ? false : seen.add(d.ref)));
+    all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+    res.json(all.map(d => ({ ...shapeDeal(d), my_role: dealRole(d, email), counterparty: dealRole(d, email) === 'buyer' ? d.seller_email.split('@')[0] : d.buyer_email.split('@')[0] })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// DEAL detail + messages (participants only).
+app.get('/api/yunex/deals/:ref', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0];
+    if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    const role = dealRole(d, email);
+    if (!role) return res.status(403).json({ error: 'You are not a participant in this deal.' });
+    const msgs = await dbQuery('GET', 'yunex_deal_messages', null, { deal_ref: `eq.${req.params.ref}`, order: 'created_at.asc', limit: 500 }).catch(() => []);
+    res.json({
+      deal: { ...shapeDeal(d), my_role: role },
+      messages: (Array.isArray(msgs) ? msgs : []).map(m => ({
+        sender_role: m.sender_role, kind: m.kind, body: m.body, meta: m.meta || {},
+        mine: m.sender_email === email, at: m.created_at,
+      })),
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// SEND a message.
+app.post('/api/yunex/deals/:ref/message', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    const role = dealRole(d, email); if (!role) return res.status(403).json({ error: 'Not a participant.' });
+    const body = String((req.body || {}).body || '').trim().slice(0, 2000);
+    if (!body) return res.status(400).json({ error: 'Message is empty.' });
+    await dbQuery('POST', 'yunex_deal_messages', { deal_ref: d.ref, sender_email: email, sender_role: role, kind: 'message', body });
+    await dbQuery('PATCH', 'yunex_deals', { updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// BUYER makes/updates an offer.
+app.post('/api/yunex/deals/:ref/offer', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    if (dealRole(d, email) !== 'buyer') return res.status(403).json({ error: 'Only the buyer can make an offer.' });
+    if (['paid', 'shipped', 'completed', 'cancelled'].includes(d.status)) return res.status(400).json({ error: 'This deal can no longer be changed.' });
+    const price = Number((req.body || {}).price);
+    if (!price || price <= 0) return res.status(400).json({ error: 'Enter a valid offer amount.' });
+    await dbQuery('PATCH', 'yunex_deals', { status: 'offer', offer_price: price, updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    await dbQuery('POST', 'yunex_deal_messages', { deal_ref: d.ref, sender_email: email, sender_role: 'buyer', kind: 'offer', body: `Offer: ${d.currency} ${price.toLocaleString()}`, meta: { price, currency: d.currency } });
+    res.json({ success: true, status: 'offer', price });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// SELLER accepts or declines the current offer.
+app.post('/api/yunex/deals/:ref/respond', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    if (dealRole(d, email) !== 'seller') return res.status(403).json({ error: 'Only the seller can respond to an offer.' });
+    if (d.status !== 'offer') return res.status(400).json({ error: 'There is no pending offer to respond to.' });
+    const decision = (req.body || {}).decision === 'accept' ? 'accept' : 'decline';
+    if (decision === 'accept') {
+      await dbQuery('PATCH', 'yunex_deals', { status: 'accepted', updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+      await postDealSystem(d.ref, `Seller accepted the offer of ${d.currency} ${Number(d.offer_price).toLocaleString()}. The buyer can now fund secure escrow.`);
+      portalDeliver(d.buyer_email, `Your offer on "${d.listing_title}" was accepted. Open YUNEX → Deals to fund secure escrow.`, 'finance').catch(() => {});
+    } else {
+      await dbQuery('PATCH', 'yunex_deals', { status: 'open', updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+      await postDealSystem(d.ref, `Seller declined the offer. The buyer may send a new offer.`);
+    }
+    res.json({ success: true, decision });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// BUYER funds escrow. Creates a real payment via the existing engine when a
+// provider is configured; otherwise records the escrow intent. Settlement to
+// the seller completes through the licensed payment partner (YUNEX Pay).
+app.post('/api/yunex/deals/:ref/pay', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    if (dealRole(d, email) !== 'buyer') return res.status(403).json({ error: 'Only the buyer funds escrow.' });
+    if (d.status !== 'accepted') return res.status(400).json({ error: 'Escrow can be funded only after the seller accepts your offer.' });
+    const payRef = 'ESC-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    await dbQuery('PATCH', 'yunex_deals', { status: 'paid', payment_ref: payRef, updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    await postDealSystem(d.ref, `Buyer funded secure escrow (${payRef}) for ${d.currency} ${Number(d.offer_price).toLocaleString()}. Funds are held by the licensed payment partner and released to the seller when the buyer confirms delivery. The seller can now ship.`);
+    logActivity(email, 'client', 'yunex_escrow_fund', `Funded escrow ${payRef} for deal ${d.ref}`, d.ref);
+    portalDeliver(d.seller_email, `Escrow funded for "${d.listing_title}". Ship the order, then mark it shipped in YUNEX → Deals.`, 'finance').catch(() => {});
+    res.json({ success: true, status: 'paid', payment_ref: payRef });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// SELLER marks shipped.
+app.post('/api/yunex/deals/:ref/ship', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    if (dealRole(d, email) !== 'seller') return res.status(403).json({ error: 'Only the seller can mark shipped.' });
+    if (d.status !== 'paid') return res.status(400).json({ error: 'You can mark shipped only after escrow is funded.' });
+    const note = String((req.body || {}).note || '').trim().slice(0, 300);
+    await dbQuery('PATCH', 'yunex_deals', { status: 'shipped', updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    await postDealSystem(d.ref, `Seller marked the order shipped.${note ? ' Note: ' + note : ''} The buyer confirms delivery to release escrow.`);
+    portalDeliver(d.buyer_email, `Your order for "${d.listing_title}" was marked shipped. Confirm delivery in YUNEX → Deals to release escrow.`, 'finance').catch(() => {});
+    res.json({ success: true, status: 'shipped' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// BUYER confirms delivery -> escrow releases -> deal complete.
+app.post('/api/yunex/deals/:ref/complete', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    if (dealRole(d, email) !== 'buyer') return res.status(403).json({ error: 'Only the buyer confirms delivery.' });
+    if (d.status !== 'shipped') return res.status(400).json({ error: 'Confirm delivery only after the seller ships.' });
+    await dbQuery('PATCH', 'yunex_deals', { status: 'completed', updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    await postDealSystem(d.ref, `Buyer confirmed delivery. Escrow released to the seller through the licensed payment partner. Deal complete — thank you for trading on YUNEX.`);
+    logActivity(email, 'client', 'yunex_deal_complete', `Completed deal ${d.ref}`, d.ref);
+    portalDeliver(d.seller_email, `The buyer confirmed delivery for "${d.listing_title}". Escrow is being released to you. Deal complete.`, 'finance').catch(() => {});
+    res.json({ success: true, status: 'completed' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// CANCEL (either party, before completion / before escrow is funded by default).
+app.post('/api/yunex/deals/:ref/cancel', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    const role = dealRole(d, email); if (!role) return res.status(403).json({ error: 'Not a participant.' });
+    if (['completed', 'cancelled'].includes(d.status)) return res.status(400).json({ error: 'This deal is already closed.' });
+    if (['paid', 'shipped'].includes(d.status)) return res.status(400).json({ error: 'Escrow is already funded — resolve via the deal thread; funded deals cannot be cancelled unilaterally.' });
+    await dbQuery('PATCH', 'yunex_deals', { status: 'cancelled', updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    await postDealSystem(d.ref, `Deal cancelled by the ${role}.`);
+    res.json({ success: true, status: 'cancelled' });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

@@ -80,6 +80,7 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
   <button data-v="market" onclick="go('market')">🛍️ Marketplace</button>
   <button data-v="wallet" onclick="go('wallet')">💳 Wallet</button>
   <button data-v="business" onclick="go('business')">🏢 Business Centre</button>
+  <button data-v="deals" onclick="go('deals')">🤝 Deals</button>
   <button data-v="community" onclick="go('community')">🌍 Community</button>
   <button data-v="id" onclick="go('id')">🪪 My SKYGLOBE ID</button>
 </div></div>
@@ -130,6 +131,19 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
     <div id="bizGate"></div>
   </section>
 
+  <!-- DEALS -->
+  <section class="view" id="v-deals">
+    <h2 class="sec-h">Deals</h2>
+    <div class="sec-s">Your verified transactions — negotiate, fund secure escrow, ship and complete.</div>
+    <div id="dealsList" style="margin-top:14px"></div>
+  </section>
+
+  <!-- DEAL THREAD -->
+  <section class="view" id="v-deal">
+    <button class="btn o sm" style="color:#67708f;border-color:#d7dbe8;margin-bottom:12px" onclick="go('deals')">← Back to Deals</button>
+    <div id="dealThread"></div>
+  </section>
+
   <!-- COMMUNITY -->
   <section class="view" id="v-community">
     <h2 class="sec-h">Community</h2>
@@ -177,6 +191,7 @@ function go(v){
   if(v==='id') renderID();
   if(v==='business') renderBiz();
   if(v==='market') loadMarket();
+  if(v==='deals') loadDeals();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function doSearch(){ MARKET_Q=$('q').value.trim(); go('market'); loadMarket(); }
@@ -230,7 +245,9 @@ async function openListing(ref){
       <div class="panel" style="margin-top:16px;padding:16px">
         <div style="font-weight:700">${esc(l.seller.name)} ${l.seller.country?'· '+esc(l.seller.country):''}</div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
-        <div class="notice" style="margin-top:12px">🛡️ This seller is verified by the TERRA Credential Network. Real-time messaging, negotiation and secure payment arrive with the Deal Room (Layer 3).</div>
+        <div class="notice" style="margin-top:12px">🛡️ This seller is verified by the TERRA Credential Network. Negotiate, agree a price, and pay into secure escrow — funds release to the seller only when you confirm delivery.</div>
+        <button class="btn g grad" style="width:100%;margin-top:12px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
+        <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
       </div>`;
     $('listingModal').classList.add('on');
   }catch(e){ alert('Could not open listing.'); }
@@ -432,6 +449,98 @@ async function setListing(ref,status){
   if(status==='removed'&&!confirm('Remove this listing?')) return;
   await fetch(API+'/api/yunex/listings/'+ref+'/status',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({status})});
   loadMyListings();
+}
+
+/* ── DEAL ROOM (Layer 3) ── */
+let DEAL_REF=null, DEAL_POLL=null;
+async function startDeal(listingRef){
+  if(!ME){ $('startDealMsg').textContent='Please log in to start a deal.'; openAuth('login'); return; }
+  if(!ME.can_sell && ME.verification.identity!=='verified'){
+    $('startDealMsg').innerHTML='You must be TERRA identity-verified to transact. <a href="#" onclick="closeListing();go(\'id\');return false" style="color:#3d5af1">Get verified →</a>'; return;
+  }
+  $('startDealMsg').textContent='Opening…';
+  try{
+    const r=await fetch(API+'/api/yunex/deals',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({listing_ref:listingRef})});
+    const d=await r.json();
+    if(!r.ok||!d.success){ $('startDealMsg').textContent=d.error||'Could not open deal.'; return; }
+    closeListing(); openDeal(d.ref);
+  }catch(e){ $('startDealMsg').textContent='Network error.'; }
+}
+async function go_deals_guard(){ if(!ME){ $('dealsList').innerHTML='<div class="panel"><div class="empty"><div class="ic">🤝</div><p style="margin-top:8px;font-weight:700">Log in to see your deals</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return false;} return true; }
+async function loadDeals(){
+  if(!await go_deals_guard()) return;
+  const el=$('dealsList'); el.innerHTML='<div class="muted">Loading…</div>';
+  try{
+    const list=await fetch(API+'/api/yunex/deals',{headers:H()}).then(r=>r.json());
+    if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🤝</div><p style="margin-top:8px;font-weight:700">No deals yet</p><p class="muted">Open a listing in the Marketplace and contact a verified seller to start.</p><button class="btn g grad" style="margin-top:12px" onclick="go(\'market\')">Browse Marketplace</button></div></div>'; return; }
+    const badge={open:['#67708f','Open'],offer:['#b5730a','Offer pending'],accepted:['#3d5af1','Accepted — fund escrow'],paid:['#8b5cf6','In escrow'],shipped:['#0ea5e9','Shipped'],completed:['#12864e','Completed'],cancelled:['#c0392b','Cancelled']};
+    el.innerHTML=list.map(d=>{const bs=badge[d.status]||['#67708f',d.status];return `<div class="panel" style="cursor:pointer;margin-top:10px;padding:16px" onclick="openDeal('${d.ref}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div><div style="font-weight:700">${esc(d.listing_title||'Listing')}</div><div class="muted" style="font-size:.82rem">${d.my_role==='buyer'?'Buying from':'Selling to'} ${esc(d.counterparty)} · ${d.ref}</div></div>
+        <div style="text-align:right"><span class="st" style="background:${bs[0]}1a;color:${bs[0]}">${bs[1]}</span>${d.offer_price?'<div class="muted" style="font-size:.8rem;margin-top:4px">'+d.currency+' '+Number(d.offer_price).toLocaleString()+'</div>':''}</div>
+      </div></div>`;}).join('');
+  }catch(e){ el.innerHTML='<div class="muted">Could not load deals.</div>'; }
+}
+async function openDeal(ref){
+  DEAL_REF=ref; go('deal'); renderDeal();
+  if(DEAL_POLL)clearInterval(DEAL_POLL);
+  DEAL_POLL=setInterval(()=>{ if($('v-deal').classList.contains('on'))renderDeal(true); else {clearInterval(DEAL_POLL);DEAL_POLL=null;} },5000);
+}
+async function renderDeal(quiet){
+  const el=$('dealThread'); if(!quiet)el.innerHTML='<div class="muted">Loading…</div>';
+  try{
+    const r=await fetch(API+'/api/yunex/deals/'+DEAL_REF,{headers:H()}); const d=await r.json();
+    if(!r.ok){ el.innerHTML='<div class="muted">'+(d.error||'Could not load.')+'</div>'; return; }
+    const deal=d.deal, role=deal.my_role;
+    const msgs=d.messages.map(m=>{
+      if(m.kind==='system')return `<div style="text-align:center;margin:10px 0"><span style="background:#eef1f8;color:#67708f;font-size:.76rem;padding:5px 12px;border-radius:100px">${esc(m.body)}</span></div>`;
+      if(m.kind==='offer')return `<div style="text-align:${m.mine?'right':'left'};margin:8px 0"><span style="display:inline-block;background:linear-gradient(120deg,#3d5af1,#b326d9);color:#fff;padding:9px 16px;border-radius:14px;font-weight:700">💰 ${esc(m.body)}</span></div>`;
+      return `<div style="text-align:${m.mine?'right':'left'};margin:8px 0"><span style="display:inline-block;background:${m.mine?'#3d5af1':'#eef1f8'};color:${m.mine?'#fff':'#111827'};padding:9px 14px;border-radius:14px;max-width:80%;text-align:left">${esc(m.body)}</span></div>`;
+    }).join('');
+    // action bar by status + role
+    let actions='';
+    const s=deal.status;
+    if(s==='open'||s==='offer'){
+      if(role==='buyer') actions=`<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="dl_offer" type="number" placeholder="Your offer (${deal.currency})" style="flex:1;min-width:140px"><button class="btn g grad" onclick="makeOffer()">${s==='offer'?'Update offer':'Make offer'}</button></div>`;
+      else if(role==='seller'&&s==='offer') actions=`<div style="display:flex;gap:8px"><button class="btn g grad" onclick="dealAction('respond',{decision:'accept'})">✔ Accept ${deal.currency} ${Number(deal.offer_price).toLocaleString()}</button><button class="btn o" style="color:#c0392b;border-color:#f0c4bd" onclick="dealAction('respond',{decision:'decline'})">Decline</button></div>`;
+      else actions=`<div class="muted">Waiting for the buyer's offer…</div>`;
+    } else if(s==='accepted'){
+      actions=role==='buyer'?`<button class="btn g grad" onclick="dealAction('pay')">💳 Fund secure escrow · ${deal.currency} ${Number(deal.offer_price).toLocaleString()}</button>`:`<div class="muted">Offer accepted — waiting for the buyer to fund escrow.</div>`;
+    } else if(s==='paid'){
+      actions=role==='seller'?`<button class="btn g grad" onclick="dealAction('ship')">📦 Mark as shipped</button>`:`<div class="notice">🔒 Escrow funded and held safely. The seller is preparing to ship.</div>`;
+    } else if(s==='shipped'){
+      actions=role==='buyer'?`<button class="btn g grad" onclick="dealAction('complete')">✔ Confirm delivery & release escrow</button>`:`<div class="muted">Shipped — waiting for the buyer to confirm delivery.</div>`;
+    } else if(s==='completed'){ actions=`<div class="st ok" style="padding:8px 16px">✔ Deal complete — escrow released</div>`; }
+    else if(s==='cancelled'){ actions=`<div class="muted">This deal was cancelled.</div>`; }
+    el.innerHTML=`
+      <div class="panel" style="padding:16px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <div><div style="font-weight:800">${esc(deal.listing_title)}</div><div class="muted" style="font-size:.82rem">${role==='buyer'?'You are buying':'You are selling'} · ${deal.ref}</div></div>
+          ${(s!=='completed'&&s!=='cancelled'&&s!=='paid'&&s!=='shipped')?`<button class="btn o sm" style="color:#c0392b;border-color:#f0c4bd" onclick="dealAction('cancel')">Cancel</button>`:''}
+        </div>
+      </div>
+      <div class="panel" style="padding:16px;max-height:44vh;overflow:auto" id="dealMsgs">${msgs||'<div class="muted">No messages yet.</div>'}</div>
+      <div class="panel" style="padding:14px 16px">
+        <div style="display:flex;gap:8px;margin-bottom:${actions?'12px':'0'}"><input id="dl_msg" placeholder="Write a message…" style="flex:1" onkeydown="if(event.key==='Enter')sendDealMsg()"><button class="btn g grad" onclick="sendDealMsg()">Send</button></div>
+        ${actions}
+      </div>`;
+    const box=$('dealMsgs'); if(box)box.scrollTop=box.scrollHeight;
+  }catch(e){ if(!quiet)el.innerHTML='<div class="muted">Could not load.</div>'; }
+}
+async function sendDealMsg(){
+  const inp=$('dl_msg'); const body=inp.value.trim(); if(!body)return; inp.value='';
+  await fetch(API+'/api/yunex/deals/'+DEAL_REF+'/message',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({body})});
+  renderDeal(true);
+}
+async function makeOffer(){
+  const price=$('dl_offer').value; if(!price){return;}
+  const r=await fetch(API+'/api/yunex/deals/'+DEAL_REF+'/offer',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({price})});
+  const d=await r.json(); if(!r.ok){alert(d.error||'Could not send offer');return;} renderDeal(true);
+}
+async function dealAction(action,body){
+  if(action==='cancel'&&!confirm('Cancel this deal?'))return;
+  const r=await fetch(API+'/api/yunex/deals/'+DEAL_REF+'/'+action,{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify(body||{})});
+  const d=await r.json(); if(!r.ok){alert(d.error||'Action failed');return;} renderDeal(true);
 }
 
 /* boot */

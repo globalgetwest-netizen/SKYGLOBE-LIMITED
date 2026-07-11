@@ -360,3 +360,36 @@ create index if not exists idx_yunex_listings_pillar on yunex_listings (pillar, 
 
 -- Delegation: responsibilities the CEO assigns to a staff member (Layer: staff/admin shared duties)
 alter table staff_members add column if not exists responsibilities jsonb default '[]'::jsonb;
+
+-- ══════════════════════════════════════════════════════════════════════════
+-- YUNEX LAYER 3 — Deal Room (verified buyer <-> seller negotiation + escrow)
+-- ══════════════════════════════════════════════════════════════════════════
+create table if not exists yunex_deals (
+  id bigint generated always as identity primary key,
+  ref text unique,
+  listing_ref text,
+  listing_title text,
+  buyer_email text,
+  seller_email text,
+  status text default 'open',       -- open | offer | accepted | paid | shipped | completed | cancelled
+  offer_price numeric,
+  currency text default 'USD',
+  quantity text,
+  payment_ref text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+create index if not exists idx_yunex_deals_buyer on yunex_deals (buyer_email);
+create index if not exists idx_yunex_deals_seller on yunex_deals (seller_email);
+
+create table if not exists yunex_deal_messages (
+  id bigint generated always as identity primary key,
+  deal_ref text,
+  sender_email text,
+  sender_role text,                 -- buyer | seller | system
+  kind text default 'message',      -- message | offer | system
+  body text,
+  meta jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+create index if not exists idx_yunex_dmsg_deal on yunex_deal_messages (deal_ref, created_at);
