@@ -744,6 +744,7 @@ const RESPONSIBILITIES = {
   legal_docs:      { key: 'legal_docs',      label: 'Legal Documents',          icon: '📜', desc: 'Assist with legal document requests.' },
   reception:       { key: 'reception',       label: 'AI Reception',             icon: '🛎️', desc: 'Oversee AI reception and client conversations.' },
   announcements:   { key: 'announcements',   label: 'Announcements',            icon: '📣', desc: 'Draft and post announcements.' },
+  user_moderation: { key: 'user_moderation', label: 'User Moderation',          icon: '🛑', desc: 'Suspend or remove users who violate the rules.' },
 };
 const VALID_RESP_KEYS = Object.keys(RESPONSIBILITIES);
 
@@ -1326,7 +1327,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SECURITY-FOUNDATION-2026-07-11I',
+  build: 'YUNEX-TRUST-COMMERCE-2026-07-11J',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1391,6 +1392,43 @@ async function getClientByEmail(email) {
 // ── SECURITY FOUNDATION: one-time codes, private KYC storage ─────────────────
 const _hashCode = c => crypto.createHash('sha256').update(String(c)).digest('hex');
 const _genCode = () => String(crypto.randomInt(100000, 1000000)); // 6 digits
+// A refined, table-based branded HTML email (renders everywhere): deep-navy
+// header with the SkyGlobe logo, gold rule, the code in a premium panel, and a
+// TERRA·YUNEX trust footer. Never a plain white page.
+function brandedCodeEmail({ badge, title, intro, code, note }) {
+  const origin = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#eef1f7">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f7;padding:28px 12px"><tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(4,16,34,.12);font-family:'Segoe UI',Arial,sans-serif">
+      <tr><td style="background:linear-gradient(135deg,#0A2E65,#0a1230);padding:30px 34px 22px;text-align:center">
+        <img src="${origin}/skyglobe-logo.jpg" width="52" height="52" alt="SkyGlobe" style="border-radius:12px;background:#fff;padding:3px">
+        <div style="color:#fff;font-size:1.15rem;font-weight:800;letter-spacing:.22em;margin-top:12px">SKYGLOBE GROUP</div>
+        <div style="color:#9fb3dd;font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;margin-top:4px">${badge}</div>
+        <div style="height:3px;width:64px;background:linear-gradient(90deg,transparent,#D4A73A,transparent);margin:14px auto 0"></div>
+      </td></tr>
+      <tr><td style="padding:32px 34px 8px;color:#1a2233">
+        <h1 style="font-size:1.32rem;color:#0A2E65;margin:0 0 10px;font-family:Georgia,serif">${title}</h1>
+        <p style="font-size:.95rem;line-height:1.65;color:#3c465a;margin:0">${intro}</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:22px 0">
+          <tr><td align="center" style="background:linear-gradient(135deg,#f4f7fc,#eef2fb);border:1px solid #dce4f2;border-radius:14px;padding:22px">
+            <div style="font-size:.6rem;letter-spacing:.3em;color:#8a93a3;text-transform:uppercase;margin-bottom:8px">Your secure code</div>
+            <div style="font-size:2.3rem;font-weight:800;letter-spacing:.34em;color:#0A2E65;font-family:'Courier New',monospace">${code}</div>
+          </td></tr>
+        </table>
+        <p style="font-size:.82rem;color:#6b7689;line-height:1.6;margin:0">${note}</p>
+      </td></tr>
+      <tr><td style="padding:18px 34px 26px">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+          <td style="padding:12px 14px;background:#f7f9fc;border-radius:10px;font-size:.68rem;color:#5b6577;text-align:center">
+            🛡️ Verified &amp; secured by the <b style="color:#0d3b23">TERRA Credential Network</b> · powered by <b style="color:#3d5af1">YUNEX</b> digital verification
+          </td>
+        </tr></table>
+        <div style="text-align:center;margin-top:16px;font-size:.62rem;letter-spacing:.16em;color:#9aa4b8;text-transform:uppercase">One World. One Mission. ✦</div>
+      </td></tr>
+    </table>
+    <div style="max-width:560px;margin:14px auto 0;font-size:.62rem;color:#9aa4b8;text-align:center">© ${new Date().getFullYear()} SkyGlobe Group · Automated security message — please do not reply.</div>
+  </td></tr></table></body></html>`;
+}
 // Issue a one-time code (verify_email | reset_password), store hashed, email it.
 async function issueAuthCode(email, kind, subject, intro) {
   const code = _genCode();
@@ -1398,12 +1436,12 @@ async function issueAuthCode(email, kind, subject, intro) {
     email, kind, code_hash: _hashCode(code),
     expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), used: false, attempts: 0,
   }).catch(() => {});
-  const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:26px;color:#1a2233">
-    <h2 style="color:#0A2E65;font-family:Georgia,serif">SkyGlobe Group</h2>
-    <p>${intro}</p>
-    <div style="font-size:2rem;font-weight:800;letter-spacing:.3em;color:#0A2E65;background:#f2f6fc;border-radius:12px;padding:18px;text-align:center;margin:16px 0">${code}</div>
-    <p style="font-size:13px;color:#6b7689">This code expires in 30 minutes. If you didn't request it, you can ignore this email — your account stays safe.</p>
-    <p style="font-size:13px;color:#6b7689">One World. One Mission.</p></div>`;
+  const html = brandedCodeEmail({
+    badge: kind === 'reset_password' ? 'Account Security · Password Reset' : 'Account Security · Email Verification',
+    title: kind === 'reset_password' ? 'Reset your password' : 'Confirm your email',
+    intro, code,
+    note: 'This code expires in 30 minutes and can be used once. If you didn\'t request it, simply ignore this email — your account remains safe and unchanged.',
+  });
   sendEmail(email, subject, html).catch(err => console.error('auth code email failed:', err.message));
   // Also drop it into the in-app inbox so it's never lost if email is delayed.
   portalDeliver(email, `${intro} Your code: ${code} (expires in 30 minutes).`, 'general').catch(() => {});
@@ -1511,6 +1549,8 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
     const client = await getClientByEmail(email);
     if (!client || !verifyPassword(password, client.password_hash))
       return res.status(401).json({ error: 'Wrong email or password.' });
+    if (client.status === 'removed') return res.status(403).json({ error: 'This account has been closed.' });
+    if (client.status === 'suspended') return res.status(403).json({ error: 'Your account is suspended.' + (client.status_reason ? ' Reason: ' + client.status_reason : '') + ' Contact support@skyglobegroup.com.' });
     const token = signToken(email);
     // Record login session (best-effort — don't fail login if this errors)
     dbQuery('POST', 'session_logs', {
@@ -1665,6 +1705,7 @@ app.get('/api/yunex/verify/status', async (req, res) => {
 async function requireVerifiedSeller(email) {
   const c = await getClientByEmail(email);
   if (!c) return { ok: false, error: 'Account not found.' };
+  if (c.status === 'suspended' || c.status === 'removed') return { ok: false, error: 'Your account is not permitted to trade at this time.' };
   const roles = Array.isArray(c.roles) ? c.roles : [];
   if (!c.id_verified) return { ok: false, error: 'Your identity must be verified by TERRA before you can trade on YUNEX.' };
   if (roles.includes('business') && !c.biz_verified) return { ok: false, error: 'Your business must be verified by TERRA before trading as a business.' };
@@ -1814,6 +1855,7 @@ async function dealParticipant(email) {
   // Both buyers and sellers must be TERRA identity-verified to transact.
   const c = await getClientByEmail(email);
   if (!c) return { ok: false, error: 'Account not found.' };
+  if (c.status === 'suspended' || c.status === 'removed') return { ok: false, error: 'Your account is not permitted to transact at this time.' };
   if (!c.id_verified) return { ok: false, error: 'Your identity must be verified by TERRA before you can open a deal on YUNEX.' };
   return { ok: true, client: c };
 }
@@ -2019,6 +2061,63 @@ app.post('/api/yunex/deals/:ref/cancel', async (req, res) => {
     await postDealSystem(d.ref, `Deal cancelled by the ${role}.`);
     res.json({ success: true, status: 'cancelled' });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+
+// ── USER MODERATION — suspend / remove violators (CEO or delegated staff) ────
+// Enforcement of the ecosystem rules. A suspended user cannot log in or trade;
+// a removed user's account is closed. Every action is logged and reasoned.
+app.get('/api/admin/users', async (req, res) => {
+  if (!hasResponsibility(req, 'user_moderation')) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const q = String(req.query.q || '').trim().toLowerCase();
+    const rows = await dbQuery('GET', 'clients', null, { order: 'created_at.desc', limit: 500 }).catch(() => []);
+    let list = (Array.isArray(rows) ? rows : []).map(c => ({
+      email: c.email, name: c.name || '', country: c.country || null,
+      status: c.status || 'active', status_reason: c.status_reason || null,
+      email_verified: !!c.email_verified, id_verified: !!c.id_verified, biz_verified: !!c.biz_verified,
+      roles: Array.isArray(c.roles) ? c.roles : [], created_at: c.created_at || null,
+    }));
+    if (q) list = list.filter(c => `${c.email} ${c.name} ${c.country}`.toLowerCase().includes(q));
+    res.json(list);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/users/:email/status', async (req, res) => {
+  const who = hasResponsibility(req, 'user_moderation');
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const email = String(req.params.email || '').trim().toLowerCase();
+    const status = ['active', 'suspended', 'removed'].includes((req.body || {}).status) ? req.body.status : null;
+    if (!status) return res.status(400).json({ error: 'Status must be active, suspended or removed.' });
+    const reason = String((req.body || {}).reason || '').trim().slice(0, 300);
+    if ((status === 'suspended' || status === 'removed') && !reason) return res.status(400).json({ error: 'A reason is required to suspend or remove a user.' });
+    const c = await getClientByEmail(email);
+    if (!c) return res.status(404).json({ error: 'User not found.' });
+    await dbQuery('PATCH', 'clients', { status, status_reason: status === 'active' ? null : reason }, { email: `eq.${email}` });
+    // When a user is suspended/removed, hide all their active listings from the market.
+    if (status !== 'active') await dbQuery('PATCH', 'yunex_listings', { status: 'paused' }, { seller_email: `eq.${email}`, status: 'eq.active' }).catch(() => {});
+    logActivity(who, req._role === 'staff' ? 'staff' : 'ceo', 'user_' + status, `${status} ${email}${reason ? ' — ' + reason : ''}`, email);
+    if (status === 'suspended') portalDeliver(email, `Your SkyGlobe account has been suspended. Reason: ${reason}. If you believe this is a mistake, contact support@skyglobegroup.com.`, 'legal').catch(() => {});
+    res.json({ success: true, status });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── MULTI-CURRENCY — display prices in the user's currency (seller price kept) ─
+// Honest, transparent conversion: indicative rates (base USD) for DISPLAY only;
+// the seller's listed price and currency are always preserved and shown.
+const CURRENCY_RATES = {
+  USD: 1, EUR: 0.92, GBP: 0.79, CNY: 7.15, JPY: 157, AED: 3.67, CAD: 1.36, AUD: 1.52,
+  CHF: 0.89, INR: 83.3, NGN: 1550, GHS: 15.2, KES: 129, ZAR: 18.4, BRL: 5.1, MXN: 17.1,
+  SAR: 3.75, EGP: 48, XOF: 605, XAF: 605, TRY: 32.5, KRW: 1370, SGD: 1.35,
+};
+const CURRENCY_SYMBOLS = {
+  USD: '$', EUR: '€', GBP: '£', CNY: '¥', JPY: '¥', AED: 'AED ', CAD: 'C$', AUD: 'A$',
+  CHF: 'CHF ', INR: '₹', NGN: '₦', GHS: 'GH₵', KES: 'KSh ', ZAR: 'R', BRL: 'R$', MXN: 'MX$',
+  SAR: 'SAR ', EGP: 'E£', XOF: 'CFA ', XAF: 'FCFA ', TRY: '₺', KRW: '₩', SGD: 'S$',
+};
+app.get('/api/yunex/currencies', (_req, res) => {
+  res.json({ base: 'USD', rates: CURRENCY_RATES, symbols: CURRENCY_SYMBOLS, list: Object.keys(CURRENCY_RATES) });
 });
 
 // ── ADMIN / TERRA OFFICER: verification review queue ─────────────────────────

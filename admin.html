@@ -1349,6 +1349,13 @@
           </div>
 
           <div class="panel" style="margin-bottom:18px">
+            <h3>🛑 User Moderation <span style="font-size:.68rem;color:#e0a3a3;letter-spacing:.12em">SUSPEND · REMOVE · REINSTATE</span></h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 12px">Enforce the ecosystem rules. Suspend a user who violates the guidelines (they can't log in or trade, and their listings are hidden) or remove them entirely. Every action needs a reason and is logged. You can reinstate anytime.</p>
+            <input id="umSearch" placeholder="Search users by name, email or country…" oninput="loadUsers()" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:12px">
+            <div id="usersList"><div class="skeleton">Search to load users…</div></div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
             <h3>🛡️ YUNEX Trust Desk — Verification Queue <span style="font-size:.68rem;color:#7fd6a3;letter-spacing:.12em">NO VERIFICATION, NO TRADE</span></h3>
             <p style="color:var(--muted);font-size:.88rem;margin:6px 0 12px">Every person and business must be verified by TERRA before they can trade on YUNEX. Review each submission and approve or reject — approval stamps their SKYGLOBE ID with the verified trust mark and unlocks trading.</p>
             <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -1614,13 +1621,42 @@ function switchView(v){
   if(v==='errors') loadErrors();
   if(v==='ipregistry') loadIPRegistry();
   if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); loadStudentRecords(); loadRecordsVault(); }
-  if(v==='credentials'){ loadVerifyQueue('pending'); }
+  if(v==='credentials'){ loadVerifyQueue('pending'); loadUsers(); }
   toggleSidebar(false);
 }
 
 /* ══ Course Catalog manager (CEO adds courses — no code) ══ */
 /* ══ Student Records — the registrar's ledger ══ */
 let SR_ALL=[];
+async function loadUsers(){
+  const box=document.getElementById('usersList'); if(!box) return;
+  const q=(document.getElementById('umSearch')?.value||'').trim();
+  try{
+    const r=await fetch(API+'/api/admin/users'+(q?'?q='+encodeURIComponent(q):''),{headers:{'x-admin-key':KEY}});
+    const list=await r.json(); if(!r.ok) throw new Error(list.error||'load failed');
+    if(!Array.isArray(list)||!list.length){ box.innerHTML='<p style="color:var(--muted);font-size:.85rem">No users'+(q?' match your search':'')+'.</p>'; return; }
+    box.innerHTML=list.slice(0,60).map(u=>{
+      const stCol=u.status==='active'?'#7ee2a8':u.status==='suspended'?'#e0a34c':'#e0736c';
+      const marks=[u.email_verified?'✉️':'',u.id_verified?'🪪':'',u.biz_verified?'🏢':''].filter(Boolean).join(' ');
+      return `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:8px;background:var(--navy3)">
+        <div style="flex:1;min-width:170px"><div style="font-weight:700;color:var(--txt)">${esc(u.name||'—')} <span style="font-size:.8rem">${marks}</span></div><div style="font-size:.74rem;color:var(--muted)">${esc(u.email)}${u.country?' · '+esc(u.country):''}</div></div>
+        <div><span style="color:${stCol};font-weight:700;font-size:.78rem;text-transform:capitalize">${esc(u.status)}</span>${u.status_reason?'<div style="font-size:.7rem;color:var(--muted)">'+esc(u.status_reason)+'</div>':''}</div>
+        <div style="display:flex;gap:6px">
+          ${u.status==='active'?`<button class="btn btn-sm btn-ghost" style="color:#e0a34c;border-color:#e0a34c" onclick="setUserStatus('${esc(u.email)}','suspended')">Suspend</button><button class="btn btn-sm btn-ghost" style="color:#e0736c;border-color:#e0736c" onclick="setUserStatus('${esc(u.email)}','removed')">Remove</button>`:`<button class="btn btn-sm" onclick="setUserStatus('${esc(u.email)}','active')">Reinstate</button>`}
+        </div></div>`;
+    }).join('');
+  }catch(e){ box.innerHTML='<p style="color:#e05c5c;font-size:.85rem">'+esc(e.message)+'</p>'; }
+}
+async function setUserStatus(email,status){
+  let reason='';
+  if(status!=='active'){ reason=prompt('Reason (required, shown to the user & logged):','')||''; if(!reason.trim())return; }
+  else if(!confirm('Reinstate '+email+'?'))return;
+  try{
+    const r=await fetch(API+'/api/admin/users/'+encodeURIComponent(email)+'/status',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({status,reason})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'failed');
+    loadUsers();
+  }catch(e){ alert(e.message); }
+}
 async function loadVerifyQueue(status){
   const box=document.getElementById('verifyQueue'); if(!box) return;
   document.getElementById('vqTabPending').className='btn btn-sm'+(status==='pending'?'':' btn-ghost');

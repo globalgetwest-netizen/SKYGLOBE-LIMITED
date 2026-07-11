@@ -419,3 +419,8 @@ create index if not exists idx_auth_codes on auth_codes (email, kind, used);
 alter table terra_verifications add column if not exists doc_image_path text;
 alter table terra_verifications add column if not exists selfie_image_path text;
 alter table terra_verifications add column if not exists ip text;
+
+-- User moderation: suspend or remove accounts that violate the rules.
+alter table clients add column if not exists status text default 'active';   -- active | suspended | removed
+alter table clients add column if not exists status_reason text;
+alter table clients add column if not exists preferred_currency text;
