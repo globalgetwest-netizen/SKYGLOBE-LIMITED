@@ -7516,7 +7516,7 @@ async function loadInboxDocs() {
       </div>`;
       return;
     }
-    const kindIcon = { 'Identity Card':'🪪', 'Legal Document':'📜', 'Delivered File':'📄' };
+    const kindIcon = { 'Identity Card':'🪪', 'Legal Document':'📜', 'Delivered File':'📄', 'Academy Certificate':'🎓', 'Work Certificate':'🏢', 'Certificate of Recognition':'🏛️' };
     el.innerHTML = docs.map(d => {
       const hasToken = !!d.view_token;
       const expDate = d.token_expires ? new Date(d.token_expires).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';

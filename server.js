@@ -1251,7 +1251,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'CATALOG-50-SCHOOLS-2026-07-11B',
+  build: 'ORGANIZED-2026-07-11D',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1367,7 +1367,11 @@ app.get('/api/auth/me', async (req, res) => {
 // caller already proved who they are by logging in, an expired 72-hour token
 // is transparently renewed here rather than left as a dead link — anonymous,
 // emailed links still expire on schedule, but the dashboard never dead-ends.
-const DOC_KIND_LABELS = { 'ai:identity': 'Identity Card', 'ai:legal-docs': 'Legal Document' };
+const DOC_KIND_LABELS = {
+  'ai:identity': 'Identity Card', 'ai:legal-docs': 'Legal Document',
+  'ai:certificates': 'Academy Certificate', 'ceo:certificates': 'Academy Certificate',
+  'terra:business-certificates': 'Work Certificate', 'terra:recognition-certificates': 'Certificate of Recognition',
+};
 app.get('/api/client/documents', async (req, res) => {
   const email = clientAuth(req);
   if (!email) return res.status(401).json({ error: 'Not logged in.' });
@@ -7809,6 +7813,59 @@ app.get('/api/admin/academy/enrollments', async (req, res) => {
       };
     });
     res.json(list);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── ISSUED DOCUMENTS REGISTRY (CEO/Admin) ────────────────────────────────────
+// A permanent, recoverable ledger of EVERY credential ever issued from the
+// platform: academy certificates (earned & CEO-granted), TERRA work
+// certificates, and TERRA recognition certificates. Read straight from the
+// certificates table (the single source of truth in Supabase), so nothing is
+// ever lost — even if the container is rebuilt, the record survives in the DB.
+// Each row carries a verify link and a freshly-minted secure open link.
+app.get('/api/admin/certificates', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const q = String(req.query.q || '').trim().toLowerCase();
+    const rows = await dbQuery('GET', 'certificates', null, { order: 'created_at.desc', limit: 1000 }).catch(() => []);
+    const canon = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+    const TYPE = {
+      business_work: { label: 'Work Certificate', icon: '🏢' },
+      ownership_recognition: { label: 'Certificate of Recognition', icon: '🏛️' },
+    };
+    const out = [];
+    for (const c of (Array.isArray(rows) ? rows : [])) {
+      const isBiz = c.track_id === 'business_work';
+      const isRec = c.track_id === 'ownership_recognition';
+      const track = (!isBiz && !isRec) ? trackById(c.track_id) : null;
+      const meta = TYPE[c.track_id] || { label: 'Academy Certificate', icon: '🎓' };
+      const entity = c.region || (c.details && (c.details.entityName || c.details.businessName)) || null;
+      const hay = `${c.full_name || ''} ${c.cert_ref || ''} ${entity || ''} ${track?.name || ''}`.toLowerCase();
+      if (q && !hay.includes(q)) continue;
+      out.push({
+        cert_ref: c.cert_ref, full_name: c.full_name, status: c.status || 'valid',
+        type: meta.label, icon: meta.icon,
+        programme: track?.name || (isBiz ? (c.details?.roleTitle || 'Employment') : isRec ? (c.details?.entityType || 'Ownership') : c.track_id),
+        entity, nationality: c.nationality || null,
+        issued_by: c.issued_by || 'system', issued_at: c.created_at || null,
+        verify_url: `${canon}/verify/${c.cert_ref}`,
+      });
+    }
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Re-open any issued certificate by reference — mints a fresh secure view link
+// so the CEO can retrieve and reprint a document at any time in the future.
+app.get('/api/admin/certificates/:ref/open', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const ref = req.params.ref;
+    const docs = await dbQuery('GET', 'documents', null, { ref: `eq.${ref}`, limit: 1 }).catch(() => []);
+    const doc = docs[0];
+    if (!doc) return res.status(404).json({ error: 'Document not found for this reference.' });
+    const token = await createDocToken(doc.id, doc.path, doc.filename, 'ceo@skyglobegroup.com', ref);
+    res.json({ viewUrl: `${baseUrl(req)}/view/${token}` });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
