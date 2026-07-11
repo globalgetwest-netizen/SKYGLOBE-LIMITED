@@ -761,6 +761,7 @@ const RESPONSIBILITIES = {
   reception:       { key: 'reception',       label: 'AI Reception',             icon: '🛎️', desc: 'Oversee AI reception and client conversations.' },
   announcements:   { key: 'announcements',   label: 'Announcements',            icon: '📣', desc: 'Draft and post announcements.' },
   user_moderation: { key: 'user_moderation', label: 'User Moderation',          icon: '🛑', desc: 'Suspend or remove users who violate the rules.' },
+  disputes:        { key: 'disputes',        label: 'Dispute Resolution',       icon: '⚖️', desc: 'Mediate and resolve escrow disputes (refund / release / replace).' },
 };
 const VALID_RESP_KEYS = Object.keys(RESPONSIBILITIES);
 
@@ -1343,7 +1344,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-GATEWAY-DOMAIN-2026-07-11M',
+  build: 'YUNEX-COMMUNITY-2026-07-11S',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1601,6 +1602,31 @@ app.get('/api/auth/me', async (req, res) => {
 const YUNEX_ROLES = ['buyer', 'seller', 'business', 'investor', 'partner'];
 
 // Full SKYGLOBE ID for the logged-in user: identity + roles + verification.
+// A stable, human-readable SKYGLOBE ID number derived from the account — one
+// passport number for the whole ecosystem (never changes).
+function skyglobeIdNumber(c) {
+  const seed = crypto.createHash('sha256').update('skyid:' + (c.email || '') + ':' + (c.created_at || '')).digest('hex').toUpperCase();
+  return 'SKG-' + seed.slice(0, 4) + '-' + seed.slice(4, 8) + '-' + seed.slice(8, 12);
+}
+// Verification level (0–6) and a 0–100 trust score, computed from real state.
+function skyglobeLevel(c) {
+  const roles = Array.isArray(c.roles) ? c.roles : [];
+  let level = 1; // registered
+  if (c.email_verified) level = 1;
+  if (c.id_verified) level = 2; // verified individual
+  if (c.id_verified && (roles.includes('seller') || roles.includes('partner') || roles.includes('investor'))) level = 3; // verified professional
+  if (c.biz_verified) level = 4; // verified business
+  const LABELS = { 0: 'Guest', 1: 'Registered', 2: 'Verified Individual', 3: 'Verified Professional', 4: 'Verified Business', 5: 'Enterprise', 6: 'Government / Institution' };
+  let score = 10;
+  if (c.email_verified) score += 20;
+  if (c.phone) score += 5;
+  if (c.country) score += 5;
+  if (c.id_verified) score += 35;
+  if (c.biz_verified) score += 25;
+  score = Math.min(100, score);
+  return { level, level_label: LABELS[level], trust_score: score };
+}
+
 app.get('/api/skyglobe-id/me', async (req, res) => {
   const email = clientAuth(req);
   if (!email) return res.status(401).json({ error: 'Not logged in.' });
@@ -1611,10 +1637,17 @@ app.get('/api/skyglobe-id/me', async (req, res) => {
     // A verified seller = identity verified (and business-verified if trading as a business).
     const isBusiness = roles.includes('business');
     const canSell = !!c.id_verified && (!isBusiness || !!c.biz_verified);
+    const lvl = skyglobeLevel(c);
     res.json({
       email: c.email, name: c.name || '', phone: c.phone || '', country: c.country || '',
       profile: c.profile || {}, roles,
+      id_number: skyglobeIdNumber(c),
+      email_verified: !!c.email_verified,
+      level: lvl.level, level_label: lvl.level_label, trust_score: lvl.trust_score,
+      status: c.status || 'active',
+      member_since: c.created_at || null,
       verification: {
+        email: c.email_verified ? 'verified' : 'not_verified',
         identity: c.id_verified ? 'verified' : 'not_verified',
         business: c.biz_verified ? 'verified' : (isBusiness ? 'not_verified' : 'not_applicable'),
       },
@@ -1625,6 +1658,41 @@ app.get('/api/skyglobe-id/me', async (req, res) => {
       ],
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Change password (requires the current password) — Security Centre.
+app.post('/api/skyglobe-id/change-password', loginLimiter, async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    if (!newPassword || String(newPassword).length < 6) return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+    const c = await getClientByEmail(email);
+    if (!c || !verifyPassword(String(currentPassword || ''), c.password_hash)) return res.status(401).json({ error: 'Your current password is incorrect.' });
+    await dbQuery('PATCH', 'clients', { password_hash: hashPassword(String(newPassword)) }, { email: `eq.${email}` });
+    logActivity(email, 'client', 'password_change', 'Password changed from Security Centre', email);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Recent sign-in history — Security Centre.
+app.get('/api/skyglobe-id/sessions', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'session_logs', null, { email: `eq.${email}`, order: 'logged_in_at.desc', limit: 20 }).catch(() => []);
+    res.json((Array.isArray(rows) ? rows : []).map(r => ({ at: r.logged_in_at, ip: r.ip || null })));
+  } catch (e) { res.json([]); }
+});
+
+// Activity history — the user's own audit trail.
+app.get('/api/skyglobe-id/activity', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'activity_log', null, { actor: `eq.${email}`, order: 'created_at.desc', limit: 50 }).catch(() => []);
+    res.json((Array.isArray(rows) ? rows : []).map(r => ({ action: r.action, detail: r.detail, at: r.created_at })));
+  } catch (e) { res.json([]); }
 });
 
 // Update core identity profile fields.
@@ -2215,6 +2283,484 @@ const CURRENCY_SYMBOLS = {
 };
 app.get('/api/yunex/corridors', (_req, res) => { res.json({ corridors: YUNEX_CORRIDORS }); });
 
+// ── YUNEX COMMUNITY — the professional network layer ─────────────────────────
+// Verified members post updates, discuss, and connect. Every author carries
+// their TERRA trust marks — this is a business network, not a scroll feed.
+const COMMUNITY_TOPICS = ['General', 'Business', 'Trade', 'Investment', 'Technology', 'Agriculture', 'Announcements', 'Opportunities'];
+async function shapePost(p, viewerEmail) {
+  const author = await getClientByEmail(p.author_email).catch(() => null);
+  let liked = false;
+  if (viewerEmail) { const l = await dbQuery('GET', 'yunex_post_likes', null, { post_ref: `eq.${p.ref}`, user_email: `eq.${viewerEmail}`, limit: 1 }).catch(() => []); liked = l.length > 0; }
+  return {
+    ref: p.ref, category: p.category || 'General', body: p.body || '', image_url: p.image_url || null,
+    likes: p.likes || 0, comments: p.comments || 0, created_at: p.created_at, liked, mine: p.author_email === viewerEmail,
+    author: { name: sellerPublicName(author), country: author?.country || null, trust_marks: listingTrustMarks(author) },
+  };
+}
+// Create a post — verified members (identity-verified).
+app.post('/api/yunex/community/posts', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await dealParticipant(email); // identity-verified
+    if (!gate.ok) return res.status(403).json({ error: 'Verify your identity with TERRA to post in the community.' });
+    const b = req.body || {};
+    const body = String(b.body || '').trim().slice(0, 4000);
+    if (!body) return res.status(400).json({ error: 'Write something to share.' });
+    const category = COMMUNITY_TOPICS.includes(b.category) ? b.category : 'General';
+    const ref = 'PST-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    let image_url = null;
+    if (b.image && /^data:image\/(png|jpe?g|webp);base64,/.test(b.image)) {
+      const m = /^data:image\/(png|jpe?g|webp);base64,(.+)$/.exec(b.image); const buf = Buffer.from(m[2], 'base64');
+      if (buf.length <= 4 * 1024 * 1024) { const ext = m[1] === 'jpeg' ? 'jpg' : m[1]; const path_ = `community/${ref}.${ext}`; await storageUpload(path_, buf, `image/${m[1] === 'jpg' ? 'jpeg' : m[1]}`).catch(() => {}); image_url = storagePublicUrl(path_); }
+    }
+    await dbQuery('POST', 'yunex_posts', { ref, author_email: email, category, body, image_url, likes: 0, comments: 0 }).catch(e => { throw new Error('Could not post: ' + e.message); });
+    logActivity(email, 'client', 'community_post', `Posted in ${category}`, ref);
+    res.json({ success: true, ref });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Feed — public read; filter by category.
+app.get('/api/yunex/community/posts', async (req, res) => {
+  const email = clientAuth(req);
+  try {
+    const params = { order: 'created_at.desc', limit: 60 };
+    if (req.query.category && COMMUNITY_TOPICS.includes(req.query.category)) params.category = `eq.${req.query.category}`;
+    let rows = await dbQuery('GET', 'yunex_posts', null, params).catch(() => []);
+    rows = Array.isArray(rows) ? rows : [];
+    const q = String(req.query.q || '').trim().toLowerCase();
+    if (q) rows = rows.filter(p => (p.body || '').toLowerCase().includes(q));
+    const out = [];
+    for (const p of rows) out.push(await shapePost(p, email));
+    res.json({ topics: COMMUNITY_TOPICS, posts: out });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Post detail + comments.
+app.get('/api/yunex/community/posts/:ref', async (req, res) => {
+  const email = clientAuth(req);
+  try {
+    const rows = await dbQuery('GET', 'yunex_posts', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const p = rows[0]; if (!p) return res.status(404).json({ error: 'Post not found.' });
+    const cs = await dbQuery('GET', 'yunex_post_comments', null, { post_ref: `eq.${p.ref}`, order: 'created_at.asc', limit: 200 }).catch(() => []);
+    const comments = [];
+    for (const c of (Array.isArray(cs) ? cs : [])) { const a = await getClientByEmail(c.author_email).catch(() => null); comments.push({ ref: c.ref, body: c.body, at: c.created_at, mine: c.author_email === email, author: { name: sellerPublicName(a), trust_marks: listingTrustMarks(a) } }); }
+    res.json({ post: await shapePost(p, email), comments });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Comment — verified members.
+app.post('/api/yunex/community/posts/:ref/comment', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await dealParticipant(email);
+    if (!gate.ok) return res.status(403).json({ error: 'Verify your identity to comment.' });
+    const rows = await dbQuery('GET', 'yunex_posts', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const p = rows[0]; if (!p) return res.status(404).json({ error: 'Post not found.' });
+    const body = String((req.body || {}).body || '').trim().slice(0, 2000);
+    if (!body) return res.status(400).json({ error: 'Write a comment.' });
+    await dbQuery('POST', 'yunex_post_comments', { ref: 'CMT-' + crypto.randomBytes(4).toString('hex').toUpperCase(), post_ref: p.ref, author_email: email, body });
+    await dbQuery('PATCH', 'yunex_posts', { comments: (p.comments || 0) + 1 }, { ref: `eq.${p.ref}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Like / unlike (one per user).
+app.post('/api/yunex/community/posts/:ref/like', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_posts', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const p = rows[0]; if (!p) return res.status(404).json({ error: 'Post not found.' });
+    const existing = await dbQuery('GET', 'yunex_post_likes', null, { post_ref: `eq.${p.ref}`, user_email: `eq.${email}`, limit: 1 }).catch(() => []);
+    if (existing.length) {
+      await dbQuery('DELETE', 'yunex_post_likes', null, { post_ref: `eq.${p.ref}`, user_email: `eq.${email}` }).catch(() => {});
+      await dbQuery('PATCH', 'yunex_posts', { likes: Math.max(0, (p.likes || 0) - 1) }, { ref: `eq.${p.ref}` });
+      return res.json({ success: true, liked: false });
+    }
+    await dbQuery('POST', 'yunex_post_likes', { post_ref: p.ref, user_email: email });
+    await dbQuery('PATCH', 'yunex_posts', { likes: (p.likes || 0) + 1 }, { ref: `eq.${p.ref}` });
+    res.json({ success: true, liked: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── YUNEX COMPLAINT & RESOLUTION CENTRE — disputes on escrow deals ───────────
+// A structured, trusted workflow: report -> evidence -> other party responds ->
+// mediation (CEO or delegated officer) -> resolution (refund / release /
+// replace). A dispute freezes the deal until it is resolved, so escrow is never
+// released while a complaint is open.
+async function postDisputeSystem(ref, body) {
+  await dbQuery('POST', 'yunex_dispute_messages', { dispute_ref: ref, sender_email: 'system', sender_role: 'system', body }).catch(() => {});
+}
+function disputeRole(d, email) { return d.buyer_email === email ? 'buyer' : d.seller_email === email ? 'seller' : null; }
+
+// Raise a dispute on a funded/shipped deal (participant only).
+app.post('/api/yunex/deals/:ref/dispute', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_deals', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Deal not found.' });
+    const role = dealRole(d, email); if (!role) return res.status(403).json({ error: 'Not a participant in this deal.' });
+    const open = await dbQuery('GET', 'yunex_disputes', null, { deal_ref: `eq.${d.ref}`, status: 'neq.resolved', limit: 1 }).catch(() => []);
+    if (open.length) return res.status(409).json({ error: 'There is already an open dispute on this deal.' });
+    if (!['paid', 'shipped'].includes(d.status)) return res.status(400).json({ error: 'A dispute can be raised only once escrow is funded (paid or shipped).' });
+    const reason = String((req.body || {}).reason || '').trim().slice(0, 2000);
+    const category = String((req.body || {}).category || 'other').slice(0, 40);
+    if (!reason) return res.status(400).json({ error: 'Please describe the problem.' });
+    const ref = 'DSP-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    const against = role === 'buyer' ? d.seller_email : d.buyer_email;
+    await dbQuery('POST', 'yunex_disputes', {
+      ref, deal_ref: d.ref, raised_by: email, against_email: against,
+      buyer_email: d.buyer_email, seller_email: d.seller_email, category, reason, status: 'open',
+    }).catch(e => { throw new Error('Could not raise dispute: ' + e.message); });
+    // freeze the deal
+    await dbQuery('PATCH', 'yunex_deals', { status: 'disputed', updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    await postDisputeSystem(ref, `Dispute opened by the ${role} on "${d.listing_title}". Escrow is frozen until this is resolved.`);
+    await dbQuery('POST', 'yunex_dispute_messages', { dispute_ref: ref, sender_email: email, sender_role: role, body: reason }).catch(() => {});
+    await postDealSystem(d.ref, `A dispute (${ref}) was opened. Escrow is held until the TERRA resolution team decides.`);
+    portalDeliver(against, `A dispute was opened on your deal "${d.listing_title}". Open YUNEX → Deals → Disputes to respond.`, 'legal').catch(() => {});
+    logActivity(email, 'client', 'dispute_open', `Opened dispute on ${d.ref}`, ref);
+    res.json({ success: true, ref });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// My disputes (as a participant).
+app.get('/api/yunex/disputes', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const asB = await dbQuery('GET', 'yunex_disputes', null, { buyer_email: `eq.${email}`, order: 'updated_at.desc', limit: 100 }).catch(() => []);
+    const asS = await dbQuery('GET', 'yunex_disputes', null, { seller_email: `eq.${email}`, order: 'updated_at.desc', limit: 100 }).catch(() => []);
+    const seen = new Set(); const all = [...(asB || []), ...(asS || [])].filter(d => (seen.has(d.ref) ? false : seen.add(d.ref)));
+    res.json(all.map(d => ({ ref: d.ref, deal_ref: d.deal_ref, category: d.category, status: d.status, resolution: d.resolution || null, my_role: disputeRole(d, email), at: d.created_at })));
+  } catch (e) { res.json([]); }
+});
+
+// Dispute detail + thread (participants and moderators only).
+app.get('/api/yunex/disputes/:ref', async (req, res) => {
+  const email = clientAuth(req);
+  const modName = hasResponsibility(req, 'disputes');
+  try {
+    const rows = await dbQuery('GET', 'yunex_disputes', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Dispute not found.' });
+    const role = email ? disputeRole(d, email) : null;
+    if (!role && !modName) return res.status(403).json({ error: 'Not authorised to view this dispute.' });
+    const msgs = await dbQuery('GET', 'yunex_dispute_messages', null, { dispute_ref: `eq.${d.ref}`, order: 'created_at.asc', limit: 200 }).catch(() => []);
+    res.json({
+      dispute: { ref: d.ref, deal_ref: d.deal_ref, category: d.category, reason: d.reason, status: d.status, resolution: d.resolution || null, resolution_note: d.resolution_note || null, my_role: role, is_mediator: !!modName },
+      messages: (Array.isArray(msgs) ? msgs : []).map(m => ({ role: m.sender_role, body: m.body, evidence_url: m.evidence_url || null, mine: m.sender_email === email, at: m.created_at })),
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Add a message / evidence to a dispute (participant or mediator).
+app.post('/api/yunex/disputes/:ref/message', async (req, res) => {
+  const email = clientAuth(req);
+  const modName = hasResponsibility(req, 'disputes');
+  try {
+    const rows = await dbQuery('GET', 'yunex_disputes', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Dispute not found.' });
+    const role = email ? disputeRole(d, email) : null;
+    if (!role && !modName) return res.status(403).json({ error: 'Not authorised.' });
+    if (d.status === 'resolved') return res.status(400).json({ error: 'This dispute is resolved.' });
+    const body = String((req.body || {}).body || '').trim().slice(0, 2000);
+    let evidence_url = null;
+    if ((req.body || {}).evidence && /^data:image\/(png|jpe?g|webp);base64,/.test(req.body.evidence)) {
+      const p = await kycUpload(req.body.evidence, `dispute-${d.ref}-${Date.now()}`).catch(() => null);
+      if (p) evidence_url = await storageSignedUrl(p, 24 * 3600).catch(() => null);
+    }
+    if (!body && !evidence_url) return res.status(400).json({ error: 'Add a message or evidence.' });
+    const senderRole = modName && !role ? 'mediator' : role;
+    await dbQuery('POST', 'yunex_dispute_messages', { dispute_ref: d.ref, sender_email: email || modName, sender_role: senderRole, body, evidence_url });
+    // status transitions: when the other party first responds, mark responded
+    if (role && role !== disputeRole(d, d.raised_by) && d.status === 'open') await dbQuery('PATCH', 'yunex_disputes', { status: 'responded', updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    if (senderRole === 'mediator' && d.status !== 'mediation') await dbQuery('PATCH', 'yunex_disputes', { status: 'mediation', updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── MEDIATOR (CEO or delegated 'disputes' officer) ───────────────────────────
+app.get('/api/admin/yunex/disputes', async (req, res) => {
+  if (!hasResponsibility(req, 'disputes')) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const status = String(req.query.status || 'open');
+    const params = { order: 'created_at.desc', limit: 300 };
+    if (status !== 'all') params.status = `neq.resolved`;
+    const rows = await dbQuery('GET', 'yunex_disputes', null, params).catch(() => []);
+    res.json(Array.isArray(rows) ? rows : []);
+  } catch (e) { res.json([]); }
+});
+// Resolve: refund_buyer | release_seller | replace. Updates the frozen deal.
+app.post('/api/admin/yunex/disputes/:ref/resolve', async (req, res) => {
+  const who = hasResponsibility(req, 'disputes');
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const resolution = String((req.body || {}).resolution || '');
+    const note = String((req.body || {}).note || '').trim().slice(0, 400);
+    if (!['refund_buyer', 'release_seller', 'replace'].includes(resolution)) return res.status(400).json({ error: 'Choose refund_buyer, release_seller or replace.' });
+    const rows = await dbQuery('GET', 'yunex_disputes', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const d = rows[0]; if (!d) return res.status(404).json({ error: 'Dispute not found.' });
+    if (d.status === 'resolved') return res.status(400).json({ error: 'Already resolved.' });
+    await dbQuery('PATCH', 'yunex_disputes', { status: 'resolved', resolution, resolution_note: note, resolved_by: who, updated_at: new Date().toISOString() }, { ref: `eq.${d.ref}` });
+    // apply to the deal
+    const dealStatus = resolution === 'refund_buyer' ? 'cancelled' : resolution === 'release_seller' ? 'completed' : 'paid';
+    await dbQuery('PATCH', 'yunex_deals', { status: dealStatus, updated_at: new Date().toISOString() }, { ref: `eq.${d.deal_ref}` });
+    const outcome = resolution === 'refund_buyer' ? 'Escrow refunded to the buyer.' : resolution === 'release_seller' ? 'Escrow released to the seller.' : 'Seller to re-ship — escrow remains held.';
+    await postDisputeSystem(d.ref, `Resolved by the TERRA resolution team: ${outcome}${note ? ' Note: ' + note : ''}`);
+    await postDealSystem(d.deal_ref, `Dispute ${d.ref} resolved: ${outcome}`);
+    portalDeliver(d.buyer_email, `Your dispute ${d.ref} has been resolved: ${outcome}`, 'legal').catch(() => {});
+    portalDeliver(d.seller_email, `Your dispute ${d.ref} has been resolved: ${outcome}`, 'legal').catch(() => {});
+    logActivity(who, req._role === 'staff' ? 'staff' : 'ceo', 'dispute_resolve', `${resolution} on ${d.ref} (deal ${d.deal_ref})`, d.ref);
+    res.json({ success: true, resolution, deal_status: dealStatus });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── YUNEX DEAL CENTRE — RFQ (Request for Quotation) ──────────────────────────
+// Buyers post what they need; verified sellers submit quotes; the buyer awards
+// one, which opens a Deal (escrow lifecycle). B2B sourcing, trust-gated.
+function shapeRfq(r, quoteCount) {
+  return {
+    ref: r.ref, title: r.title, pillar: r.pillar,
+    pillar_label: (YUNEX_PILLARS[r.pillar] || {}).label || r.pillar, pillar_icon: (YUNEX_PILLARS[r.pillar] || {}).icon || '•',
+    category: r.category || null, quantity: r.quantity || null,
+    budget: r.budget != null ? Number(r.budget) : null, currency: r.currency || 'USD',
+    corridor: r.corridor || null, corridor_label: (YUNEX_CORRIDORS.find(c => c.key === r.corridor) || {}).label || null,
+    location: r.location || null, description: r.description || '', status: r.status || 'open',
+    created_at: r.created_at, quotes: quoteCount != null ? quoteCount : undefined,
+  };
+}
+// POST an RFQ — verified buyers (identity-verified).
+app.post('/api/yunex/rfqs', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await dealParticipant(email);
+    if (!gate.ok) return res.status(403).json({ error: gate.error });
+    const b = req.body || {};
+    const title = String(b.title || '').trim().slice(0, 160);
+    if (!title) return res.status(400).json({ error: 'What are you sourcing? A title is required.' });
+    const ref = 'RFQ-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    await dbQuery('POST', 'yunex_rfqs', {
+      ref, buyer_email: email, title,
+      pillar: VALID_PILLARS.includes(b.pillar) ? b.pillar : 'trade',
+      category: String(b.category || '').trim().slice(0, 60), quantity: String(b.quantity || '').trim().slice(0, 80),
+      budget: (b.budget != null && b.budget !== '') ? Number(b.budget) || null : null,
+      currency: CURRENCY_RATES[b.currency] ? b.currency : 'USD',
+      corridor: VALID_CORRIDORS.includes(b.corridor) ? b.corridor : null,
+      location: String(b.location || '').trim().slice(0, 120), description: String(b.description || '').trim().slice(0, 3000), status: 'open',
+    }).catch(e => { throw new Error('Could not post RFQ: ' + e.message); });
+    logActivity(email, 'client', 'rfq_post', `Posted RFQ "${title}"`, ref);
+    res.json({ success: true, ref });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Browse OPEN RFQs — verified sellers find sourcing opportunities.
+app.get('/api/yunex/rfqs', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const params = { status: 'eq.open', order: 'created_at.desc', limit: 100 };
+    if (req.query.pillar && VALID_PILLARS.includes(req.query.pillar)) params.pillar = `eq.${req.query.pillar}`;
+    let rows = await dbQuery('GET', 'yunex_rfqs', null, params).catch(() => []);
+    rows = (Array.isArray(rows) ? rows : []).filter(r => r.buyer_email !== email); // don't show your own here
+    res.json({ pillars: Object.values(YUNEX_PILLARS), rfqs: rows.map(r => shapeRfq(r)) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// My RFQs (as buyer) with quote counts.
+app.get('/api/yunex/my-rfqs', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_rfqs', null, { buyer_email: `eq.${email}`, order: 'created_at.desc', limit: 100 }).catch(() => []);
+    const out = [];
+    for (const r of (Array.isArray(rows) ? rows : [])) {
+      const qs = await dbQuery('GET', 'yunex_quotes', null, { rfq_ref: `eq.${r.ref}`, limit: 100 }).catch(() => []);
+      out.push(shapeRfq(r, Array.isArray(qs) ? qs.length : 0));
+    }
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// RFQ detail + quotes (buyer sees all; a seller sees only their own quote).
+app.get('/api/yunex/rfqs/:ref', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_rfqs', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const r = rows[0]; if (!r) return res.status(404).json({ error: 'RFQ not found.' });
+    const isBuyer = r.buyer_email === email;
+    let quotes = await dbQuery('GET', 'yunex_quotes', null, { rfq_ref: `eq.${r.ref}`, order: 'price.asc', limit: 100 }).catch(() => []);
+    quotes = Array.isArray(quotes) ? quotes : [];
+    if (!isBuyer) quotes = quotes.filter(q => q.seller_email === email);
+    // attach seller name/trust for the buyer
+    const shaped = [];
+    for (const q of quotes) {
+      const seller = await getClientByEmail(q.seller_email).catch(() => null);
+      shaped.push({ ref: q.ref, price: Number(q.price) || null, currency: q.currency, lead_time: q.lead_time || null, message: q.message || '', status: q.status, mine: q.seller_email === email, seller: { name: sellerPublicName(seller), trust_marks: listingTrustMarks(seller) }, at: q.created_at, deal_ref: q.deal_ref || null });
+    }
+    res.json({ rfq: { ...shapeRfq(r), is_buyer: isBuyer }, quotes: shaped, my_quote: shaped.find(q => q.mine) || null });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Seller submits (or updates) a quote.
+app.post('/api/yunex/rfqs/:ref/quote', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await requireVerifiedSeller(email);
+    if (!gate.ok) return res.status(403).json({ error: gate.error });
+    const rows = await dbQuery('GET', 'yunex_rfqs', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const r = rows[0]; if (!r) return res.status(404).json({ error: 'RFQ not found.' });
+    if (r.status !== 'open') return res.status(400).json({ error: 'This RFQ is closed.' });
+    if (r.buyer_email === email) return res.status(400).json({ error: 'This is your own RFQ.' });
+    const price = Number((req.body || {}).price);
+    if (!price || price <= 0) return res.status(400).json({ error: 'Enter a valid quote price.' });
+    const message = String((req.body || {}).message || '').trim().slice(0, 1000);
+    const lead_time = String((req.body || {}).lead_time || '').trim().slice(0, 60);
+    const existing = await dbQuery('GET', 'yunex_quotes', null, { rfq_ref: `eq.${r.ref}`, seller_email: `eq.${email}`, limit: 1 }).catch(() => []);
+    if (existing.length) {
+      await dbQuery('PATCH', 'yunex_quotes', { price, currency: r.currency, message, lead_time }, { ref: `eq.${existing[0].ref}` });
+      return res.json({ success: true, ref: existing[0].ref, updated: true });
+    }
+    const qref = 'QT-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    await dbQuery('POST', 'yunex_quotes', { ref: qref, rfq_ref: r.ref, seller_email: email, price, currency: r.currency, message, lead_time, status: 'pending' });
+    portalDeliver(r.buyer_email, `You received a new quote on your RFQ "${r.title}". Open YUNEX → Deals → My Sourcing to review.`, 'finance').catch(() => {});
+    logActivity(email, 'client', 'rfq_quote', `Quoted ${r.currency} ${price} on ${r.ref}`, qref);
+    res.json({ success: true, ref: qref });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Buyer awards a quote → opens a Deal at the quoted price (accepted state).
+app.post('/api/yunex/quotes/:ref/accept', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const qr = await dbQuery('GET', 'yunex_quotes', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const q = qr[0]; if (!q) return res.status(404).json({ error: 'Quote not found.' });
+    const rr = await dbQuery('GET', 'yunex_rfqs', null, { ref: `eq.${q.rfq_ref}`, limit: 1 }).catch(() => []);
+    const r = rr[0]; if (!r) return res.status(404).json({ error: 'RFQ not found.' });
+    if (r.buyer_email !== email) return res.status(403).json({ error: 'Only the buyer can award a quote.' });
+    if (r.status !== 'open') return res.status(400).json({ error: 'This RFQ is already awarded or closed.' });
+    // open a deal already at 'accepted' with the quoted price
+    const dref = 'DL-' + crypto.randomBytes(5).toString('hex').toUpperCase();
+    await dbQuery('POST', 'yunex_deals', {
+      ref: dref, listing_ref: r.ref, listing_title: r.title, buyer_email: email, seller_email: q.seller_email,
+      status: 'accepted', offer_price: q.price, currency: q.currency, quantity: r.quantity || null,
+    }).catch(e => { throw new Error('Could not open deal: ' + e.message); });
+    await postDealSystem(dref, `Deal opened from RFQ "${r.title}". Quote awarded at ${q.currency} ${Number(q.price).toLocaleString()}. The buyer can now fund secure escrow.`);
+    await dbQuery('PATCH', 'yunex_quotes', { status: 'accepted', deal_ref: dref }, { ref: `eq.${q.ref}` });
+    await dbQuery('PATCH', 'yunex_rfqs', { status: 'awarded', updated_at: new Date().toISOString() }, { ref: `eq.${r.ref}` });
+    portalDeliver(q.seller_email, `Your quote on "${r.title}" was awarded! A deal has been opened. Open YUNEX → Deals.`, 'finance').catch(() => {});
+    logActivity(email, 'client', 'rfq_award', `Awarded quote ${q.ref} → deal ${dref}`, dref);
+    res.json({ success: true, deal_ref: dref });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Buyer closes an RFQ.
+app.post('/api/yunex/rfqs/:ref/close', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'yunex_rfqs', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
+    const r = rows[0]; if (!r) return res.status(404).json({ error: 'RFQ not found.' });
+    if (r.buyer_email !== email) return res.status(403).json({ error: 'Not your RFQ.' });
+    await dbQuery('PATCH', 'yunex_rfqs', { status: 'closed', updated_at: new Date().toISOString() }, { ref: `eq.${r.ref}` });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── YUNEX BUSINESS CENTRE — the seller/business operating hub ─────────────────
+// A verified business's command centre: public company profile, catalog,
+// orders and analytics. Trust tier is earned by verification + real activity.
+function businessTier(c, completed) {
+  if (!c.biz_verified) return { key: 'seller', label: 'Verified Seller', color: '#12864e', icon: '🥉' };
+  if (completed >= 25) return { key: 'global', label: 'Global Enterprise', color: '#7c3aed', icon: '💎' };
+  if (completed >= 5) return { key: 'premium', label: 'Premium Business', color: '#a87016', icon: '🥇' };
+  return { key: 'trusted', label: 'Trusted Business', color: '#1e57c9', icon: '🥈' };
+}
+app.get('/api/yunex/business/profile', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const rows = await dbQuery('GET', 'business_profiles', null, { owner_email: `eq.${email}`, limit: 1 }).catch(() => []);
+    res.json(rows[0] || null);
+  } catch (e) { res.json(null); }
+});
+app.post('/api/yunex/business/profile', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const gate = await requireVerifiedSeller(email);
+    if (!gate.ok) return res.status(403).json({ error: gate.error });
+    const b = req.body || {};
+    const patch = {
+      name: String(b.name || '').trim().slice(0, 140), tagline: String(b.tagline || '').trim().slice(0, 160),
+      description: String(b.description || '').trim().slice(0, 3000), sector: String(b.sector || '').trim().slice(0, 80),
+      location: String(b.location || '').trim().slice(0, 120), established: String(b.established || '').trim().slice(0, 20),
+      website: String(b.website || '').trim().slice(0, 200), is_public: b.is_public !== false, updated_at: new Date().toISOString(),
+    };
+    if (b.logoDataUrl && /^data:image\/(png|jpe?g|webp);base64,/.test(b.logoDataUrl)) {
+      const m = /^data:image\/(png|jpe?g|webp);base64,(.+)$/.exec(b.logoDataUrl); const buf = Buffer.from(m[2], 'base64');
+      if (buf.length <= 3 * 1024 * 1024) { const ext = m[1] === 'jpeg' ? 'jpg' : m[1]; const path_ = `business/${crypto.createHash('sha1').update(email).digest('hex').slice(0, 12)}.${ext}`; await storageUpload(path_, buf, `image/${m[1] === 'jpg' ? 'jpeg' : m[1]}`).catch(() => {}); patch.logo_url = storagePublicUrl(path_); }
+    }
+    if (!patch.name) return res.status(400).json({ error: 'Company name is required.' });
+    const existing = await dbQuery('GET', 'business_profiles', null, { owner_email: `eq.${email}`, limit: 1 }).catch(() => []);
+    if (existing.length) await dbQuery('PATCH', 'business_profiles', patch, { owner_email: `eq.${email}` });
+    else await dbQuery('POST', 'business_profiles', { owner_email: email, ...patch });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.get('/api/yunex/business/overview', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const c = await getClientByEmail(email);
+    const listings = await dbQuery('GET', 'yunex_listings', null, { seller_email: `eq.${email}`, limit: 500 }).catch(() => []);
+    const deals = await dbQuery('GET', 'yunex_deals', null, { seller_email: `eq.${email}`, limit: 500 }).catch(() => []);
+    const L = Array.isArray(listings) ? listings : [], D = Array.isArray(deals) ? deals : [];
+    const completed = D.filter(d => d.status === 'completed');
+    const earned = completed.reduce((a, d) => a + (Number(d.offer_price) || 0), 0);
+    const tier = businessTier(c || {}, completed.length);
+    res.json({
+      tier,
+      active_listings: L.filter(l => l.status === 'active').length,
+      total_listings: L.length,
+      active_deals: D.filter(d => !['completed', 'cancelled'].includes(d.status)).length,
+      completed_deals: completed.length,
+      total_earned: earned,
+      response_needed: D.filter(d => d.status === 'offer').length,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── YUNEX WALLET — a real ledger reflecting actual deal & escrow state ────────
+// Honest by doctrine: the wallet shows real money-in-motion derived from the
+// user's deals (escrow held as a buyer, escrow incoming as a seller, completed
+// value). Adding funds and withdrawals settle through licensed payment
+// partners (YUNEX Pay) — we never pretend to be a bank.
+app.get('/api/yunex/wallet', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  try {
+    const asBuyer = await dbQuery('GET', 'yunex_deals', null, { buyer_email: `eq.${email}`, order: 'updated_at.desc', limit: 200 }).catch(() => []);
+    const asSeller = await dbQuery('GET', 'yunex_deals', null, { seller_email: `eq.${email}`, order: 'updated_at.desc', limit: 200 }).catch(() => []);
+    const b = Array.isArray(asBuyer) ? asBuyer : [], s = Array.isArray(asSeller) ? asSeller : [];
+    const held = b.filter(d => ['paid', 'shipped'].includes(d.status)).reduce((a, d) => a + (Number(d.offer_price) || 0), 0);
+    const incoming = s.filter(d => ['paid', 'shipped'].includes(d.status)).reduce((a, d) => a + (Number(d.offer_price) || 0), 0);
+    const spent = b.filter(d => d.status === 'completed').reduce((a, d) => a + (Number(d.offer_price) || 0), 0);
+    const earned = s.filter(d => d.status === 'completed').reduce((a, d) => a + (Number(d.offer_price) || 0), 0);
+    // recent transactions from deal activity (real, dated)
+    const tx = [];
+    for (const d of [...b, ...s]) {
+      const role = d.buyer_email === email ? 'buyer' : 'seller';
+      if (d.status === 'paid' || d.status === 'shipped')
+        tx.push({ type: role === 'buyer' ? 'escrow_funded' : 'escrow_incoming', label: (role === 'buyer' ? 'Escrow funded · ' : 'Escrow incoming · ') + (d.listing_title || 'Deal'), amount: Number(d.offer_price) || 0, currency: d.currency || 'USD', at: d.updated_at, ref: d.ref, sign: role === 'buyer' ? '-' : '+' });
+      if (d.status === 'completed')
+        tx.push({ type: role === 'buyer' ? 'paid' : 'received', label: (role === 'buyer' ? 'Paid · ' : 'Received · ') + (d.listing_title || 'Deal'), amount: Number(d.offer_price) || 0, currency: d.currency || 'USD', at: d.updated_at, ref: d.ref, sign: role === 'buyer' ? '-' : '+' });
+    }
+    tx.sort((a, b2) => new Date(b2.at) - new Date(a.at));
+    res.json({
+      escrow_held: held, escrow_incoming: incoming, total_spent: spent, total_earned: earned,
+      currency: 'USD', // amounts are per-deal in their own currency; USD shown as base
+      active_deals: b.filter(d => !['completed', 'cancelled'].includes(d.status)).length + s.filter(d => !['completed', 'cancelled'].includes(d.status)).length,
+      transactions: tx.slice(0, 30),
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Live global statistics for the Home gateway — real counts, honestly reported.
 app.get('/api/yunex/stats', async (_req, res) => {
   try {
@@ -2289,6 +2835,9 @@ app.post('/api/admin/yunex/verifications/:ref/decide', async (req, res) => {
     await dbQuery('PATCH', 'terra_verifications', { status: decision, reviewed_by: who, review_note: note, reviewed_at: new Date().toISOString() }, { ref: `eq.${req.params.ref}` });
     if (decision === 'verified') {
       const patch = v.kind === 'business' ? { biz_verified: true } : v.kind === 'identity' ? { id_verified: true } : {};
+      // Carry the verified country onto the client profile so the whole
+      // ecosystem (Community, listings, SKYGLOBE ID) reflects vetted facts.
+      if (v.kind === 'identity' && v.country) patch.country = v.country;
       if (Object.keys(patch).length) await dbQuery('PATCH', 'clients', patch, { email: `eq.${v.client_email}` });
     }
     logActivity(who, 'ceo', 'terra_verify_decision', `${decision} ${v.kind} verification for ${v.client_email} (${v.ref})`, v.ref);

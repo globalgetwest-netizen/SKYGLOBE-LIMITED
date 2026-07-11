@@ -430,3 +430,80 @@ alter table yunex_listings add column if not exists details jsonb default '{}'::
 
 -- Trade corridors (features, not brands): China · Gulf · Europe · America · Oceania · Africa
 alter table yunex_listings add column if not exists corridor text;
+
+-- YUNEX Business Centre — company profiles (public business page per verified owner)
+create table if not exists business_profiles (
+  id bigint generated always as identity primary key,
+  owner_email text unique,
+  name text, tagline text, description text, sector text, location text,
+  established text, website text, logo_url text,
+  is_public boolean default true,
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+create index if not exists idx_biz_profiles_owner on business_profiles (owner_email);
+
+-- YUNEX Deal Centre — RFQ (Request for Quotation): buyers post needs, sellers quote
+create table if not exists yunex_rfqs (
+  id bigint generated always as identity primary key,
+  ref text unique, buyer_email text,
+  title text, pillar text, category text, quantity text,
+  budget numeric, currency text default 'USD', corridor text,
+  location text, description text,
+  status text default 'open',        -- open | awarded | closed
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+create index if not exists idx_rfqs_status on yunex_rfqs (status, created_at);
+create index if not exists idx_rfqs_buyer on yunex_rfqs (buyer_email);
+
+create table if not exists yunex_quotes (
+  id bigint generated always as identity primary key,
+  ref text unique, rfq_ref text, seller_email text,
+  price numeric, currency text default 'USD', lead_time text, message text,
+  status text default 'pending',     -- pending | accepted | declined
+  deal_ref text,
+  created_at timestamptz default now()
+);
+create index if not exists idx_quotes_rfq on yunex_quotes (rfq_ref);
+create index if not exists idx_quotes_seller on yunex_quotes (seller_email);
+
+-- YUNEX Complaint & Resolution Centre — disputes on escrow deals
+create table if not exists yunex_disputes (
+  id bigint generated always as identity primary key,
+  ref text unique, deal_ref text,
+  raised_by text, against_email text, buyer_email text, seller_email text,
+  category text, reason text,
+  status text default 'open',       -- open | responded | mediation | resolved
+  resolution text,                  -- refund_buyer | release_seller | replace
+  resolution_note text, resolved_by text,
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+create index if not exists idx_disputes_status on yunex_disputes (status, created_at);
+create index if not exists idx_disputes_deal on yunex_disputes (deal_ref);
+
+create table if not exists yunex_dispute_messages (
+  id bigint generated always as identity primary key,
+  dispute_ref text, sender_email text, sender_role text,  -- buyer | seller | mediator | system
+  body text, evidence_url text,
+  created_at timestamptz default now()
+);
+create index if not exists idx_dispute_msgs on yunex_dispute_messages (dispute_ref, created_at);
+
+-- YUNEX Community — professional network (posts, comments, likes)
+create table if not exists yunex_posts (
+  id bigint generated always as identity primary key,
+  ref text unique, author_email text, category text,
+  body text, image_url text, likes int default 0, comments int default 0,
+  created_at timestamptz default now()
+);
+create index if not exists idx_posts_cat on yunex_posts (category, created_at);
+create table if not exists yunex_post_comments (
+  id bigint generated always as identity primary key,
+  ref text unique, post_ref text, author_email text, body text,
+  created_at timestamptz default now()
+);
+create index if not exists idx_post_comments on yunex_post_comments (post_ref, created_at);
+create table if not exists yunex_post_likes (
+  id bigint generated always as identity primary key,
+  post_ref text, user_email text, created_at timestamptz default now()
+);
+create index if not exists idx_post_likes on yunex_post_likes (post_ref, user_email);
