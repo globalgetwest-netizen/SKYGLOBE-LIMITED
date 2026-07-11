@@ -128,6 +128,22 @@ app.use(cors());
 //  • HTML  → always revalidate (users always get the newest page)
 //  • CSS/JS → 1 hour (fresh enough to pick up edits, still fast on repeat hits)
 //  • images/fonts/icons → 30 days (these rarely change)
+// ── CANONICAL DOMAIN ─────────────────────────────────────────────────────────
+// The site's one true home is skyglobegroup.com. If a visitor lands on the raw
+// Render URL (…​.onrender.com), permanently redirect them to the custom domain
+// so every page, link and address reads skyglobegroup.com — never onrender.com.
+// (Set CANONICAL_HOST on Render to override; empty disables the redirect.)
+const CANONICAL_HOST = (process.env.CANONICAL_HOST || 'skyglobegroup.com').toLowerCase().trim();
+app.use((req, res, next) => {
+  if (!CANONICAL_HOST) return next();
+  const host = String(req.headers.host || '').toLowerCase();
+  // Only redirect the Render default host; leave custom domains & subdomains alone.
+  if (host.endsWith('.onrender.com')) {
+    return res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+  }
+  next();
+});
+
 // ── PLATFORM SUBDOMAINS ──────────────────────────────────────────────────────
 // terra.skyglobegroup.com and yunex.skyglobegroup.com are first-class homes
 // for the two platforms. The root of each subdomain serves its founding page;
@@ -1327,7 +1343,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-VERIFY-CORRIDORS-2026-07-11L',
+  build: 'YUNEX-GATEWAY-DOMAIN-2026-07-11M',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -2198,6 +2214,26 @@ const CURRENCY_SYMBOLS = {
   SAR: 'SAR ', EGP: 'E£', XOF: 'CFA ', XAF: 'FCFA ', TRY: '₺', KRW: '₩', SGD: 'S$',
 };
 app.get('/api/yunex/corridors', (_req, res) => { res.json({ corridors: YUNEX_CORRIDORS }); });
+
+// Live global statistics for the Home gateway — real counts, honestly reported.
+app.get('/api/yunex/stats', async (_req, res) => {
+  try {
+    const [clients, verified, listings, deals] = await Promise.all([
+      dbQuery('GET', 'clients', null, { select: 'email', limit: 100000 }).catch(() => []),
+      dbQuery('GET', 'clients', null, { id_verified: 'eq.true', select: 'email', limit: 100000 }).catch(() => []),
+      dbQuery('GET', 'yunex_listings', null, { status: 'eq.active', select: 'ref', limit: 100000 }).catch(() => []),
+      dbQuery('GET', 'yunex_deals', null, { select: 'ref', limit: 100000 }).catch(() => []),
+    ]);
+    res.json({
+      users: Array.isArray(clients) ? clients.length : 0,
+      verified: Array.isArray(verified) ? verified.length : 0,
+      listings: Array.isArray(listings) ? listings.length : 0,
+      deals: Array.isArray(deals) ? deals.length : 0,
+      corridors: YUNEX_CORRIDORS.length,
+      currencies: Object.keys(CURRENCY_RATES).length,
+    });
+  } catch (e) { res.json({ users: 0, verified: 0, listings: 0, deals: 0, corridors: 6, currencies: 23 }); }
+});
 app.get('/api/yunex/categories', (_req, res) => {
   res.json({ categories: YUNEX_CATEGORIES, conditions: CONDITIONS });
 });

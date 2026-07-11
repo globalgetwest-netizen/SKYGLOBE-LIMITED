@@ -88,25 +88,75 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
 <div class="wrap">
   <!-- HOME -->
   <section class="view on" id="v-home">
+    <!-- HERO -->
     <div class="hero grad">
-      <h1>One verified marketplace for the world's real economy.</h1>
-      <p>Trade, invest and grow with people and businesses whose identity is verified before the first handshake. <b>No verification, no trade.</b></p>
+      <div style="font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:#dfe4ff;font-weight:700;margin-bottom:10px">The Infrastructure Powering the Real Economy</div>
+      <h1>Trade, invest and grow — on one verified global network.</h1>
+      <p>Move money, source products, invest, sell and build — with people and businesses whose identity is verified before the first handshake. <b>No verification, no trade.</b></p>
       <div class="marks">
         <span class="chip">🛡️ Verified by TERRA</span>
         <span class="chip">💳 Payments by YUNEX</span>
         <span class="chip">🧠 Guided by NORIA</span>
       </div>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" style="background:#fff;color:#3d5af1" onclick="go('market')">Explore the Marketplace</button>
+        <button class="btn o" onclick="if(ME){go('id')}else{openAuth('signup')}">Get verified</button>
+      </div>
     </div>
-    <h2 class="sec-h" style="margin-top:26px">The five pillars of YUNEX</h2>
-    <div class="sec-s">Everything the real economy needs — each participant verified, each deal trusted.</div>
-    <div class="grid g5">
-      <div class="card" onclick="go('market')"><div class="ic">🔁</div><h3>Trade</h3><p>Cross-border B2B commerce — verified suppliers, sourcing and settlement.</p></div>
-      <div class="card" onclick="go('market')"><div class="ic">📈</div><h3>Investment</h3><p>Verified projects and opportunities seeking capital and partners.</p></div>
-      <div class="card" onclick="go('market')"><div class="ic">🏝️</div><h3>Assets</h3><p>Land, farms, property and machinery — clearly listed, verified owners.</p></div>
-      <div class="card" onclick="go('market')"><div class="ic">🏢</div><h3>Business</h3><p>Verified company profiles, sourcing, distribution and expansion.</p></div>
-      <div class="card" onclick="go('market')"><div class="ic">💰</div><h3>Finance</h3><p>Wallet, transfers and merchant services — with licensed partners.</p></div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:20px" id="quickActions">
+      <div class="card" style="text-align:center;padding:16px" onclick="go('market')"><div class="ic">🛍️</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Buy</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="ME&&ME.can_sell?go('business'):(ME?go('id'):openAuth('signup'))"><div class="ic">🏷️</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Sell</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='trade';go('market')"><div class="ic">🔁</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Trade</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='investment';go('market')"><div class="ic">📈</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Invest</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='services';go('market')"><div class="ic">🛠️</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Services</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="go('deals')"><div class="ic">🤝</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Deals</div></div>
     </div>
-    <div class="notice" style="margin-top:22px">🛡️ <b>Trust first.</b> Every buyer and seller on YUNEX is verified by the TERRA Credential Network before they can transact. YUNEX connects verified people and businesses — it never becomes the bank, the customs authority or the shipping company; it integrates licensed specialists.</div>
+
+    <!-- MY DASHBOARD (adaptive) -->
+    <div id="homeDash"></div>
+
+    <!-- THE SEVEN ECONOMIC LAYERS -->
+    <h2 class="sec-h" style="margin-top:28px">One platform. Seven economic layers.</h2>
+    <div class="sec-s">Each a complete world of its own — all sharing one identity, one wallet, one standard of trust.</div>
+    <div class="grid g3" style="margin-top:14px">
+      <div class="card" onclick="MARKET_PILLAR='consumer';go('market')"><div class="ic">🛍️</div><h3>Commerce</h3><p>Retail, wholesale and digital goods across every category.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='trade';go('market')"><div class="ic">🔁</div><h3>Trade</h3><p>Cross-border B2B — verified suppliers, sourcing and settlement.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='investment';go('market')"><div class="ic">📈</div><h3>Investment</h3><p>Verified projects and opportunities seeking capital and partners.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='assets';go('market')"><div class="ic">🏝️</div><h3>Assets</h3><p>Land, property, vehicles and machinery — verified owners.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='business';go('market')"><div class="ic">🏢</div><h3>Business</h3><p>Verified company profiles, sourcing, distribution and growth.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='services';go('market')"><div class="ic">🛠️</div><h3>Services</h3><p>Lawyers, engineers, designers, developers and consultants.</p></div>
+      <div class="card" onclick="go('wallet')"><div class="ic">💰</div><h3>Finance</h3><p>Wallet, transfers, escrow and settlement — with licensed partners.</p></div>
+    </div>
+
+    <!-- CORRIDORS -->
+    <h2 class="sec-h" style="margin-top:28px">Global trade corridors</h2>
+    <div class="sec-s">Connecting the world's major economic regions — infrastructure endures as routes evolve.</div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px" id="homeCorridors"></div>
+
+    <!-- GLOBAL STATISTICS -->
+    <div class="panel" style="margin-top:24px;background:linear-gradient(135deg,#0a1230,#111a44);border:none">
+      <div style="color:#dfe4ff;font-weight:800;font-size:1.1rem">The network, in numbers</div>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:14px;margin-top:14px" id="homeStats"></div>
+    </div>
+
+    <!-- TRUST CENTRE -->
+    <h2 class="sec-h" style="margin-top:28px">🛡️ Trust Centre — powered by TERRA</h2>
+    <div class="grid g3" style="margin-top:12px">
+      <div class="card"><div class="ic">🪪</div><h3>Verified Identities</h3><p>Every participant passes TERRA identity (and business) verification with a live check before they can trade.</p></div>
+      <div class="card"><div class="ic">🔒</div><h3>Escrow Protection</h3><p>Funds are held safely and released only when the buyer confirms delivery.</p></div>
+      <div class="card"><div class="ic">🛡️</div><h3>Secured End-to-End</h3><p>Encryption in transit and at rest, hashed passwords, private KYC storage and a full audit trail.</p></div>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="margin-top:30px;padding:24px 0;border-top:1px solid #e8eaf2;text-align:center;color:#8b93b8;font-size:.82rem">
+      <div style="font-weight:800;letter-spacing:.2em;color:#0a1230;margin-bottom:8px">YUNEX <span style="font-weight:500;color:#8b93b8">· A SkyGlobe Group Platform</span></div>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+        <a href="/yunex" style="color:#67708f">About</a><a href="https://skyglobegroup.com/academy" style="color:#67708f">Academy</a><a href="https://skyglobegroup.com" style="color:#67708f">SkyGlobe Group</a><a href="https://wa.me/17373998522" style="color:#67708f">Support</a>
+      </div>
+      <div>© <span id="fyear"></span> SkyGlobe Group · One World. One Mission. ✦ · Verified on skyglobegroup.com</div>
+    </div>
   </section>
 
   <!-- MARKETPLACE -->
@@ -213,6 +263,7 @@ function go(v){
   if(v==='business') renderBiz();
   if(v==='market') loadMarket();
   if(v==='deals') loadDeals();
+  if(v==='home') loadHome();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function doSearch(){ MARKET_Q=$('q').value.trim(); go('market'); loadMarket(); }
@@ -743,6 +794,30 @@ async function dealAction(action,body){
   const d=await r.json(); if(!r.ok){alert(d.error||'Action failed');return;} renderDeal(true);
 }
 
+/* HOME gateway */
+async function loadHome(){
+  const y=document.getElementById('fyear'); if(y)y.textContent=new Date().getFullYear();
+  // corridors
+  try{ if(!CORRIDORS){ CORRIDORS=(await fetch(API+'/api/yunex/corridors').then(r=>r.json())).corridors; }
+    const el=document.getElementById('homeCorridors'); if(el)el.innerHTML=CORRIDORS.map(c=>`<div class="card" style="text-align:center;padding:16px;cursor:pointer" onclick="MARKET_PILLAR='';MARKET_CORRIDOR='${c.key}';go('market')"><div style="font-size:1.6rem">${c.flag}</div><div style="font-weight:700;font-size:.88rem;margin-top:4px">${esc(c.label.replace(' Corridor',''))}</div></div>`).join('');
+  }catch(e){}
+  // stats
+  try{ const s=await fetch(API+'/api/yunex/stats').then(r=>r.json());
+    const el=document.getElementById('homeStats'); if(el){ const tile=(n,l)=>`<div><div style="font-size:1.7rem;font-weight:900;color:#fff">${Number(n).toLocaleString()}</div><div style="font-size:.72rem;color:#9fb3dd;text-transform:uppercase;letter-spacing:.08em">${l}</div></div>`;
+      el.innerHTML=tile(s.users,'Members')+tile(s.verified,'Verified')+tile(s.listings,'Active listings')+tile(s.deals,'Deals')+tile(s.corridors,'Corridors')+tile(s.currencies,'Currencies'); }
+  }catch(e){}
+  // adaptive dashboard for logged-in users
+  const dash=document.getElementById('homeDash'); if(!dash)return;
+  if(!ME){ dash.innerHTML=''; return; }
+  const roles=ME.roles||[];
+  let cards='';
+  cards+=`<div class="card" onclick="go('id')"><div class="ic">🪪</div><h3>My SKYGLOBE ID</h3><p>${ME.can_sell?'✔ Verified — cleared to trade':'Complete TERRA verification to trade'}</p></div>`;
+  cards+=`<div class="card" onclick="go('deals')"><div class="ic">🤝</div><h3>My Deals</h3><p>Track negotiations, escrow and delivery.</p></div>`;
+  if(ME.can_sell) cards+=`<div class="card" onclick="go('business')"><div class="ic">🏢</div><h3>Business Centre</h3><p>Publish and manage your listings.</p></div>`;
+  cards+=`<div class="card" onclick="go('wallet')"><div class="ic">💰</div><h3>Wallet</h3><p>Payments, escrow and settlement.</p></div>`;
+  dash.innerHTML=`<h2 class="sec-h" style="margin-top:26px">Welcome back, ${esc((ME.name||'').split(' ')[0]||'there')}</h2><div class="grid g3" style="margin-top:12px">${cards}</div>`;
+}
+
 /* boot */
-renderAcct(); loadMe(); loadFX();
+renderAcct(); loadMe(); loadFX(); loadHome();
 </script>
