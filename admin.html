@@ -351,52 +351,60 @@
     <aside class="sidebar" id="sidebar">
       <div class="sb-brand">
         <img src="icon-192.png" alt="" onerror="this.src='icon-512.png'">
-        <div class="t">SkyGlobe <span style="color:#ff9f1c;font-size:.6em;vertical-align:.4em">✦</span><small>Ecosystem Command</small></div>
+        <div class="t">SKYGLOBEGROUP <span style="color:#ff9f1c;font-size:.6em;vertical-align:.4em">✦</span><small>Enterprise Command Center</small></div>
       </div>
       <nav class="sb-nav">
-        <!-- The Command Bridge — navigate the ecosystem's architecture
-             (GROUP → NORIA · TERRA · YUNEX → verticals → operations) -->
-        <button class="sb-link core" onclick="toggleCEOAssistant()" title="SKYGLOBE CORE Intelligence — your CEO AI assistant"><span class="ic">🧠</span> SKYGLOBE CORE AI</button>
-        <button class="sb-link active" data-view="dashboard" onclick="switchView('dashboard')"><span class="ic">📊</span> Command Bridge</button>
+        <!-- Enterprise domains: Dashboard → Ecosystem → Identity & Trust →
+             Commerce → Mobility → Academy → People → Communication →
+             Operations → Intelligence → Security -->
+        <button class="sb-link active" data-view="dashboard" onclick="switchView('dashboard')"><span class="ic">🏠</span> Dashboard</button>
 
-        <div class="sb-sec sb-sec--noria"><span class="dot"></span>NORIA · Intelligence</div>
+        <div class="sb-sec sb-sec--noria"><span class="dot"></span>🧠 Intelligence</div>
+        <button class="sb-link core" onclick="toggleCEOAssistant()" title="SKYGLOBEGROUP CORE Intelligence — your CEO AI assistant"><span class="ic">🧠</span> SKYGLOBEGROUP CORE AI</button>
         <button class="sb-link" data-view="reception" onclick="switchView('reception')"><span class="ic">🛎️</span> AI Reception</button>
-        <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
         <button class="sb-link" data-view="analytics" onclick="switchView('analytics')"><span class="ic">📈</span> Analytics</button>
 
-        <div class="sb-sec sb-sec--terra"><span class="dot"></span>TERRA · Trust</div>
+        <div class="sb-sec sb-sec--terra"><span class="dot"></span>🪪 Identity &amp; Trust</div>
+        <button class="sb-link" data-view="trustdesk" onclick="switchView('trustdesk')"><span class="ic">🛡️</span> Trust Desk</button>
         <button class="sb-link" data-view="idcards" onclick="switchView('idcards')"><span class="ic">🪪</span> Digital ID Issuance</button>
         <button class="sb-link" data-view="legaldocs" onclick="switchView('legaldocs')"><span class="ic">⚖️</span> Legal Documents</button>
-        <button class="sb-link" data-view="ipregistry" onclick="switchView('ipregistry')"><span class="ic">🛡️</span> IP Registry</button>
+        <button class="sb-link" data-view="ipregistry" onclick="switchView('ipregistry')"><span class="ic">🔏</span> IP Registry</button>
+        <button class="sb-link" data-view="credentials" onclick="switchView('credentials')"><span class="ic">🏛️</span> Business &amp; Recognition</button>
 
-        <div class="sb-sec sb-sec--yunex"><span class="dot"></span>YUNEX · Economy</div>
+        <div class="sb-sec sb-sec--yunex"><span class="dot"></span>💼 Commerce</div>
         <button class="sb-link" data-view="payments" onclick="switchView('payments')"><span class="ic">💳</span> Payments</button>
         <button class="sb-link" data-view="pricing" onclick="switchView('pricing')"><span class="ic">🏷️</span> Pricing</button>
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
-        <button class="sb-link" data-view="payroll" onclick="switchView('payroll')"><span class="ic">👥</span> Payroll</button>
         <button class="sb-link" data-view="grants" onclick="switchView('grants')"><span class="ic">🎁</span> Complimentary</button>
 
-        <div class="sb-sec sb-sec--vert"><span class="dot"></span>Service Verticals</div>
+        <div class="sb-sec sb-sec--vert"><span class="dot"></span>🌍 Mobility</div>
         <button class="sb-link" data-view="applications" onclick="switchView('applications')"><span class="ic">📋</span> Applications <span class="badge-n" id="navAppsBadge"></span></button>
         <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
-        <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> SkyGlobe Academy</button>
-        <button class="sb-link" data-view="credentials" onclick="switchView('credentials')"><span class="ic">🏛️</span> Business &amp; Recognition</button>
-        <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
 
-        <div class="sb-sec sb-sec--group"><span class="dot"></span>Group &amp; People</div>
-        <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
-        <button class="sb-link" data-view="videos" onclick="switchView('videos')"><span class="ic">🎥</span> Featured Videos</button>
-        <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
-        <button class="sb-link" data-view="departments" onclick="switchView('departments')"><span class="ic">🏢</span> Departments</button>
+        <div class="sb-sec sb-sec--vert"><span class="dot"></span>🎓 Academy</div>
+        <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> SkyGlobeGroup Academy</button>
+
+        <div class="sb-sec sb-sec--group"><span class="dot"></span>👥 People</div>
         <button class="sb-link" data-view="directory" onclick="switchView('directory')"><span class="ic">👤</span> Staff Directory</button>
-        <button class="sb-link" data-view="channels" onclick="switchView('channels')"><span class="ic">💬</span> Dept Channels</button>
-        <button class="sb-link" data-view="tasks" onclick="switchView('tasks')"><span class="ic">📋</span> Task Board</button>
+        <button class="sb-link" data-view="departments" onclick="switchView('departments')"><span class="ic">🏢</span> Departments</button>
+        <button class="sb-link" data-view="payroll" onclick="switchView('payroll')"><span class="ic">👥</span> Payroll</button>
         <button class="sb-link" data-view="attendance" onclick="switchView('attendance')"><span class="ic">🕐</span> Attendance</button>
 
-        <div class="sb-sec sb-sec--ops"><span class="dot"></span>Operations</div>
+        <div class="sb-sec sb-sec--group"><span class="dot"></span>💬 Communication</div>
+        <button class="sb-link" data-view="messages" onclick="switchView('messages')"><span class="ic">💬</span> Messages <span class="badge-n" id="navMsgBadge"></span></button>
+        <button class="sb-link" data-view="team" onclick="switchView('team')"><span class="ic">👥</span> Team Chat <span class="badge-n" id="navTeamBadge"></span></button>
+        <button class="sb-link" data-view="channels" onclick="switchView('channels')"><span class="ic">📡</span> Department Channels</button>
+        <button class="sb-link" data-view="announcements" onclick="switchView('announcements')"><span class="ic">📣</span> Announcements</button>
+        <button class="sb-link" data-view="videos" onclick="switchView('videos')"><span class="ic">🎥</span> Featured Videos</button>
+
+        <div class="sb-sec sb-sec--ops"><span class="dot"></span>📋 Operations</div>
+        <button class="sb-link" data-view="tasks" onclick="switchView('tasks')"><span class="ic">📋</span> Task Board</button>
+        <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
+        <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
+
+        <div class="sb-sec sb-sec--ops"><span class="dot"></span>🛡 Security</div>
         <button class="sb-link" data-view="activity" onclick="switchView('activity')"><span class="ic">🛰️</span> Activity Log</button>
         <button class="sb-link" data-view="errors" onclick="switchView('errors')"><span class="ic">🚨</span> Error Logs</button>
-        <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
       </nav>
       <div class="sb-foot">
         <div class="sb-user"><span class="av" id="userAv">A</span><div><div style="color:var(--txt);font-weight:600" id="userName">admin</div><div style="font-size:0.7rem">Signed in</div></div></div>
@@ -408,7 +416,7 @@
     <div class="main">
       <div class="topbar">
         <button class="hamburger" onclick="toggleSidebar(true)">☰</button>
-        <h2 id="viewTitle">Command Bridge</h2>
+        <h2 id="viewTitle">Executive Dashboard</h2>
         <div class="spacer"></div>
         <button class="btn btn-sm btn-ghost" onclick="loadAll()">⟳ Refresh</button>
       </div>
@@ -1339,13 +1347,23 @@
           <div id="ipTable"></div>
         </section>
 
-        <!-- KIDS ACADEMY -->
-        <section class="view" id="view-credentials">
+        <!-- TRUST DESK — TERRA verification, moderation & dispute resolution -->
+        <section class="view" id="view-trustdesk">
           <div class="panel" style="margin-bottom:18px;padding-top:4px">
             <div style="background:linear-gradient(135deg,rgba(13,59,35,.4),rgba(4,28,16,.2));border:1px solid rgba(127,214,163,.25);border-radius:14px;padding:16px 20px;margin-bottom:18px">
-              <div style="font-weight:800;color:var(--txt);font-size:1.05rem">🏛️ TERRA Credentials — Business &amp; Ownership</div>
-              <div style="color:var(--muted);font-size:.85rem;margin-top:4px">Premium, globally-verifiable documents issued under your authority: work certificates for employees, and recognition certificates for business, company, asset and property owners. Every one appears in the Records Vault and delivers to the recipient. This is separate from the Academy (education).</div>
+              <div style="font-weight:800;color:var(--txt);font-size:1.05rem">🛡️ TERRA Trust Desk — Verification, Moderation &amp; Resolution</div>
+              <div style="color:var(--muted);font-size:.85rem;margin-top:4px">The heart of the trust doctrine: <b style="color:var(--txt)">no verification, no trade</b>. Review identities and businesses, enforce ecosystem rules, and resolve escrow disputes fairly — all in one desk.</div>
             </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3>🛡️ Verification Queue <span style="font-size:.68rem;color:#7fd6a3;letter-spacing:.12em">NO VERIFICATION, NO TRADE</span></h3>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 12px">Every person and business must be verified by TERRA before they can trade on YUNEX. Review each submission and approve or reject — approval stamps their SKYGLOBE ID with the verified trust mark and unlocks trading.</p>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <button class="btn btn-sm" id="vqTabPending" onclick="loadVerifyQueue('pending')">Pending</button>
+              <button class="btn btn-sm btn-ghost" id="vqTabAll" onclick="loadVerifyQueue('all')">All</button>
+            </div>
+            <div id="verifyQueue"><div class="skeleton">Loading…</div></div>
           </div>
 
           <div class="panel" style="margin-bottom:18px">
@@ -1360,15 +1378,15 @@
             <input id="umSearch" placeholder="Search users by name, email or country…" oninput="loadUsers()" style="width:100%;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px;margin-bottom:12px">
             <div id="usersList"><div class="skeleton">Search to load users…</div></div>
           </div>
+        </section>
 
-          <div class="panel" style="margin-bottom:18px">
-            <h3>🛡️ YUNEX Trust Desk — Verification Queue <span style="font-size:.68rem;color:#7fd6a3;letter-spacing:.12em">NO VERIFICATION, NO TRADE</span></h3>
-            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 12px">Every person and business must be verified by TERRA before they can trade on YUNEX. Review each submission and approve or reject — approval stamps their SKYGLOBE ID with the verified trust mark and unlocks trading.</p>
-            <div style="display:flex;gap:8px;margin-bottom:12px">
-              <button class="btn btn-sm" id="vqTabPending" onclick="loadVerifyQueue('pending')">Pending</button>
-              <button class="btn btn-sm btn-ghost" id="vqTabAll" onclick="loadVerifyQueue('all')">All</button>
+        <!-- KIDS ACADEMY -->
+        <section class="view" id="view-credentials">
+          <div class="panel" style="margin-bottom:18px;padding-top:4px">
+            <div style="background:linear-gradient(135deg,rgba(13,59,35,.4),rgba(4,28,16,.2));border:1px solid rgba(127,214,163,.25);border-radius:14px;padding:16px 20px;margin-bottom:18px">
+              <div style="font-weight:800;color:var(--txt);font-size:1.05rem">🏛️ TERRA Credentials — Business &amp; Ownership</div>
+              <div style="color:var(--muted);font-size:.85rem;margin-top:4px">Premium, globally-verifiable documents issued under your authority: work certificates for employees, and recognition certificates for business, company, asset and property owners. Every one appears in the Records Vault and delivers to the recipient. This is separate from the Academy (education).</div>
             </div>
-            <div id="verifyQueue"><div class="skeleton">Loading…</div></div>
           </div>
 
           <div class="panel" style="margin-bottom:18px">
@@ -1603,7 +1621,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Command Bridge',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobe Academy — AI Teachers',credentials:'Business & Recognition — TERRA Credentials',tools:'Quick Tools'};
+  const titles={dashboard:'Executive Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobeGroup Academy',credentials:'Business & Recognition — TERRA Credentials',trustdesk:'TERRA Trust Desk — Verification, Moderation & Resolution',tools:'Quick Tools'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
@@ -1627,7 +1645,7 @@ function switchView(v){
   if(v==='errors') loadErrors();
   if(v==='ipregistry') loadIPRegistry();
   if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); loadStudentRecords(); loadRecordsVault(); }
-  if(v==='credentials'){ loadVerifyQueue('pending'); loadUsers(); loadDisputeQueue(); }
+  if(v==='trustdesk'){ loadVerifyQueue('pending'); loadUsers(); loadDisputeQueue(); }
   toggleSidebar(false);
 }
 

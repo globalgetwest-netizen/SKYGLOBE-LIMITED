@@ -1344,7 +1344,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'YUNEX-NORIA-2026-07-11W',
+  build: 'SKYGLOBEGROUP-ECC-2026-07-15A',
 }));
 
 app.get('/api/test', async (req, res) => {
