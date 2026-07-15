@@ -57,7 +57,18 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
 .empty .ic{font-size:2.6rem}
 .muted{color:#8b93b8;font-size:.86rem}
 .notice{background:linear-gradient(120deg,rgba(61,90,241,.08),rgba(179,38,217,.08));border:1px solid rgba(61,90,241,.2);border-radius:14px;padding:16px 18px;font-size:.9rem;color:#334;line-height:1.6}
-@media(max-width:640px){.row2{grid-template-columns:1fr}.hero h1{font-size:1.55rem}.brand small{display:none}}
+@media(max-width:640px){
+  .row2{grid-template-columns:1fr}.hero h1{font-size:1.55rem}.brand small{display:none}
+  /* Native app feel on phones: brand + account on row 1, search full-width on
+     row 2 — the header can never push the page wider than the screen. */
+  .top .row{flex-wrap:wrap;gap:10px;padding:10px 14px}
+  .search{order:3;flex-basis:100%}
+  .top .acct{margin-left:auto;gap:6px}
+  .top .acct .btn{padding:7px 11px;font-size:.78rem;max-width:110px!important}
+  .acct-badge{display:none}
+}
+/* Hard guard: the page body must never scroll sideways on any device. */
+html,body{max-width:100%;overflow-x:clip}
 /* Auth modal */
 .modal{position:fixed;inset:0;background:rgba(10,18,48,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
 .modal.on{display:flex}
@@ -544,8 +555,9 @@ function renderAcct(){
   const el=$('acct');
   if(!ME){ el.innerHTML='<button class="btn o" onclick="openAuth(\'login\')">Log in</button><button class="btn g grad" onclick="openAuth(\'signup\')">Join YUNEX</button>'; return; }
   const initial=(ME.name||ME.email||'?').trim().charAt(0).toUpperCase();
-  const badge=ME.can_sell?'<span class="chip" style="background:rgba(255,255,255,.16)">✔ Verified</span>':'';
-  el.innerHTML=badge+'<button class="btn o" onclick="go(\'id\')">🪪 '+esc(ME.name||ME.email.split('@')[0])+'</button><button class="btn o sm" onclick="logout()">Log out</button>';
+  const badge=ME.can_sell?'<span class="chip acct-badge" style="background:rgba(255,255,255,.16)">✔ Verified</span>':'';
+  const name=esc(ME.name||ME.email.split('@')[0]);
+  el.innerHTML=badge+'<button class="btn o" style="max-width:160px;overflow:hidden;text-overflow:ellipsis" onclick="go(\'id\')">🪪 '+name+'</button><button class="btn o sm" onclick="logout()">Log out</button>';
 }
 
 /* SKYGLOBE ID view */
