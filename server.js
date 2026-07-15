@@ -164,6 +164,11 @@ app.use((req, res, next) => {
 app.get(['/terra', '/yunex', '/noria'], (req, res) =>
   res.sendFile(path.join(__dirname, req.path.replace(/[^a-z]/g, '') + '.html')));
 
+// The Mobility world — the full travel & services experience (formerly the
+// homepage) lives on at /mobility with every page, form and deep link intact.
+app.get(['/mobility', '/services', '/travel'], (req, res) =>
+  res.sendFile(path.join(__dirname, 'mobility.html')));
+
 app.use(express.static(path.join(__dirname), {
   etag: true,
   lastModified: true,
@@ -1344,7 +1349,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-DIVISIONS-2026-07-15C',
+  build: 'SKYGLOBEGROUP-GATEWAY-2026-07-15D',
 }));
 
 app.get('/api/test', async (req, res) => {
