@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>CEO Portal — SkyGlobe Group</title>
+<title>CEO Portal — SKYGLOBEGROUP</title>
 <link rel="icon" type="image/png" href="icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* SkyGlobe Group Brand System — exact palette */
+    /* SKYGLOBEGROUP Brand System — exact palette */
     --navy:#041022; --navy2:#071B3B; --navy3:#061530; --line:#14315a; --line2:#102747;
     --gold:#D4A73A; --gold2:#F4D77A; --gold-soft:#D4A73A22;
     --txt:#e8eaf0; --muted:#8899bb; --muted2:#64759b;
@@ -332,7 +332,7 @@
 <!-- ════ LOGIN ════ -->
 <div id="loginScreen">
   <div class="login-box">
-    <img src="icon-512.png" alt="SkyGlobe Group" onerror="this.src='icon.svg'">
+    <img src="icon-512.png" alt="SKYGLOBEGROUP" onerror="this.src='icon.svg'">
     <h1>SkyGlobe <span class="gold">Group</span></h1>
     <div class="by">by SKYGLOBEGROUP</div>
     <div class="pill">CEO Portal · Private</div>
@@ -427,7 +427,7 @@
           <div class="bridge-greet">
             <div>
               <h3 id="bridgeGreet">Welcome, CEO</h3>
-              <div class="sub" id="bridgeDate">SkyGlobe Group · Command Bridge <span class="star">✦</span></div>
+              <div class="sub" id="bridgeDate">SKYGLOBEGROUP · Command Bridge <span class="star">✦</span></div>
             </div>
             <div class="sub" style="text-align:right">Terra verifies · YUNEX moves · NORIA thinks <span class="star">✦</span></div>
           </div>
@@ -436,7 +436,7 @@
             var h=new Date().getHours();
             var g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
             document.getElementById('bridgeGreet').textContent=g+', CEO';
-            document.getElementById('bridgeDate').innerHTML=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · SkyGlobe Group Command Bridge <span class="star">✦</span>';
+            document.getElementById('bridgeDate').innerHTML=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · SKYGLOBEGROUP Command Bridge <span class="star">✦</span>';
           })();
           </script>
           <div class="kpis" id="kpis"></div>
@@ -805,7 +805,7 @@
               <h3 style="margin:0">⚖️ Legal Digital Documentation — Order Desk</h3>
               <button onclick="loadLegalDocs()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
             </div>
-            <p style="color:var(--muted);font-size:0.86rem;margin:-6px 0 14px">Every AI-generated, paid legal document. Review it, resend the secure link, or refresh an expired link. Facilitated &amp; Verified by SkyGlobe Group.</p>
+            <p style="color:var(--muted);font-size:0.86rem;margin:-6px 0 14px">Every AI-generated, paid legal document. Review it, resend the secure link, or refresh an expired link. Facilitated &amp; Verified by SKYGLOBEGROUP.</p>
             <div id="legalDocsTable" style="overflow-x:auto">
               <p style="color:var(--muted);font-size:0.9rem">Loading documents…</p>
             </div>
@@ -875,190 +875,49 @@
           </div>
         </section>
 
-        <!-- DEPARTMENTS (CEO COMMAND VIEW) -->
+        <!-- DEPARTMENTS — ENTERPRISE DIVISIONS (CEO COMMAND VIEW) -->
         <section class="view" id="view-departments">
 
           <!-- Hero header -->
           <div class="dept-hero">
             <div class="dh-left">
-              <h2>👑 CEO Command Centre</h2>
-              <p>Full visibility across all SkyGlobe Group departments. As CEO, you have direct authority over every Director and full oversight of all positions, workflows, and communication chains.</p>
+              <h2>👑 SKYGLOBEGROUP — Enterprise Organization</h2>
+              <p>An Enterprise Digital Ecosystem, organized the way global companies scale: <b style="color:var(--txt)">Enterprise → Division → Department → Team → Role</b>. Ten divisions, each a core capability — Intelligence (NORIA), Trust (TERRA), Economy (YUNEX), Mobility, Learning, People, Communication, Operations, Strategy and Technology. As CEO you hold direct authority over every Chief Officer and full oversight of every chain.</p>
             </div>
             <div class="dh-stats">
-              <div class="ds"><div class="dn">5</div><div class="dl">Departments</div></div>
-              <div class="ds"><div class="dn">5</div><div class="dl">Directors</div></div>
-              <div class="ds"><div class="dn" id="cdTotalStaff">20+</div><div class="dl">Positions</div></div>
+              <div class="ds"><div class="dn">10</div><div class="dl">Divisions</div></div>
+              <div class="ds"><div class="dn" id="cdTotalDepts">14</div><div class="dl">Departments</div></div>
+              <div class="ds"><div class="dn" id="cdTotalStaff">—</div><div class="dl">Staff</div></div>
             </div>
           </div>
 
-          <!-- Department cards -->
-          <div class="ceo-dept-grid">
+          <!-- Division cards (rendered live from /api/divisions) -->
+          <div class="ceo-dept-grid" id="divisionsGrid"><div class="skeleton">Loading the enterprise structure…</div></div>
 
-            <!-- Immigration -->
-            <div class="ceo-dept-card">
-              <div class="cdc-head">
-                <div class="cdc-icon">🛂</div>
-                <div><h3>Immigration &amp; Visa Services</h3><div class="cd-sub">Visa applications · Work permits · Travel documentation · Compliance</div></div>
-                <div class="cd-badge">5 Positions</div>
-              </div>
-              <div class="cdc-body">
-                <div class="cdc-director">
-                  <div class="cd-av">I</div>
-                  <div class="cd-info"><strong>Immigration Director</strong><span>Reports directly to CEO</span></div>
-                  <a class="cd-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp</a>
-                </div>
-                <div class="cdc-positions">
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Senior Case Officer</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Visa Processing Officer</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Work Permit Specialist</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Compliance Officer</div><div class="cp-chain">→ Director</div></div>
-                </div>
-              </div>
-              <div class="cdc-foot">
-                <button onclick="switchView('applications')">📋 View Applications</button>
-                <button onclick="switchView('team')">💬 Message Director</button>
-              </div>
-            </div>
-
-            <!-- Operations -->
-            <div class="ceo-dept-card">
-              <div class="cdc-head">
-                <div class="cdc-icon">⚙️</div>
-                <div><h3>Operations &amp; Conference</h3><div class="cd-sub">Conference facilitation · Event logistics · Administrative operations</div></div>
-                <div class="cd-badge">5 Positions</div>
-              </div>
-              <div class="cdc-body">
-                <div class="cdc-director">
-                  <div class="cd-av">O</div>
-                  <div class="cd-info"><strong>Operations Director</strong><span>Reports directly to CEO</span></div>
-                  <a class="cd-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp</a>
-                </div>
-                <div class="cdc-positions">
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Administrative Manager</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Conference Coordinator</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Logistics Officer</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Travel Arrangements Officer</div><div class="cp-chain">→ Director</div></div>
-                </div>
-              </div>
-              <div class="cdc-foot">
-                <button onclick="switchView('applications')">📋 View Applications</button>
-                <button onclick="switchView('team')">💬 Message Director</button>
-              </div>
-            </div>
-
-            <!-- Finance -->
-            <div class="ceo-dept-card">
-              <div class="cdc-head">
-                <div class="cdc-icon">💰</div>
-                <div><h3>Finance &amp; Accounts</h3><div class="cd-sub">Revenue · Payroll · Client billing · Financial reporting</div></div>
-                <div class="cd-badge">5 Positions</div>
-              </div>
-              <div class="cdc-body">
-                <div class="cdc-director">
-                  <div class="cd-av">F</div>
-                  <div class="cd-info"><strong>Finance Director</strong><span>Reports directly to CEO</span></div>
-                  <a class="cd-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp</a>
-                </div>
-                <div class="cdc-positions">
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Accounts Manager</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Payroll Officer</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Billing &amp; Invoicing Specialist</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Financial Reporting Officer</div><div class="cp-chain">→ Director</div></div>
-                </div>
-              </div>
-              <div class="cdc-foot">
-                <button onclick="switchView('finance')">💰 Finance Dashboard</button>
-                <button onclick="switchView('payroll')">👥 Payroll</button>
-              </div>
-            </div>
-
-            <!-- Client Relations -->
-            <div class="ceo-dept-card">
-              <div class="cdc-head">
-                <div class="cdc-icon">🤝</div>
-                <div><h3>Client Relations &amp; Support</h3><div class="cd-sub">Client communications · Onboarding · Post-service follow-up</div></div>
-                <div class="cd-badge">5 Positions</div>
-              </div>
-              <div class="cdc-body">
-                <div class="cdc-director">
-                  <div class="cd-av">C</div>
-                  <div class="cd-info"><strong>Client Relations Director</strong><span>Reports directly to CEO</span></div>
-                  <a class="cd-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp</a>
-                </div>
-                <div class="cdc-positions">
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Senior Client Liaison</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Client Support Officer</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Documentation Clerk</div><div class="cp-chain">→ Director</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">WhatsApp Communications Officer</div><div class="cp-chain">→ Director</div></div>
-                </div>
-              </div>
-              <div class="cdc-foot">
-                <button onclick="switchView('messages')">💬 Client Messages</button>
-                <button onclick="switchView('team')">📡 Team Chat</button>
-              </div>
-            </div>
-
-            <!-- Legal & Compliance -->
-            <div class="ceo-dept-card">
-              <div class="cdc-head">
-                <div class="cdc-icon">🔐</div>
-                <div><h3>Legal &amp; Compliance</h3><div class="cd-sub">Contracts · Regulatory compliance · Document verification</div></div>
-                <div class="cd-badge">3 Positions</div>
-              </div>
-              <div class="cdc-body">
-                <div class="cdc-director">
-                  <div class="cd-av">L</div>
-                  <div class="cd-info"><strong>Legal Counsel / Compliance Advisor</strong><span>Reports directly to CEO</span></div>
-                  <a class="cd-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp</a>
-                </div>
-                <div class="cdc-positions">
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Regulatory Compliance Officer</div><div class="cp-chain">→ Legal Counsel</div></div>
-                  <div class="cdc-pos"><div class="cp-dot"></div><div class="cp-title">Document Verification Specialist</div><div class="cp-chain">→ Legal Counsel</div></div>
-                </div>
-              </div>
-              <div class="cdc-foot">
-                <button onclick="window.open('/letterhead','_blank')">📄 Letterhead Studio</button>
-                <button onclick="switchView('team')">💬 Message Counsel</button>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Communication flow -->
-          <div class="ceo-comm-panel">
+          <!-- Communication flow & authority -->
+          <div class="panel" style="margin-top:18px">
             <h3>📡 Communication Flow &amp; CEO Authority</h3>
-            <div class="comm-flow">
-              <div class="cf-node"><div class="cfn-icon">👤</div><div class="cfn-title">Staff Member</div><div class="cfn-sub">Front-line team</div></div>
-              <div class="cf-arrow">→</div>
-              <div class="cf-node"><div class="cfn-icon">🎯</div><div class="cfn-title">Department Director</div><div class="cfn-sub">Resolves or escalates</div></div>
-              <div class="cf-arrow">→</div>
-              <div class="cf-node ceo"><div class="cfn-icon">👑</div><div class="cfn-title">CEO</div><div class="cfn-sub">Final authority</div></div>
-              <div class="cf-arrow">→</div>
-              <div class="cf-node"><div class="cfn-icon">🎯</div><div class="cfn-title">Director Informed</div><div class="cfn-sub">Cascades decision</div></div>
-              <div class="cf-arrow">→</div>
-              <div class="cf-node"><div class="cfn-icon">👤</div><div class="cfn-title">Staff Actioned</div><div class="cfn-sub">Confirmed &amp; logged</div></div>
-            </div>
-
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">The organization spine: <b style="color:var(--txt)">CEO → Executive Board → Chief Officers → Directors → Managers → Team Leaders → Specialists → Associates</b>. Every division reports upward through its Chief Officer; every escalation has one clear path.</p>
             <div class="auth-grid">
               <div class="auth-item">
                 <div class="ai-label">CEO Exclusive Authority</div>
                 <div class="ai-title">Strategic &amp; Financial Decisions</div>
-                <div class="ai-desc">All service pricing, refund approvals above $200, new hires, contract sign-offs, and any changes to SkyGlobe's service offering require CEO sign-off.</div>
+                <div class="ai-desc">All pricing, refund approvals above $200, hires, contract sign-offs, TERRA verification standards, and any change to SKYGLOBEGROUP’s offerings require CEO sign-off.</div>
               </div>
               <div class="auth-item">
-                <div class="ai-label">Director Authority</div>
-                <div class="ai-title">Operational Decisions</div>
-                <div class="ai-desc">Directors manage day-to-day operations independently: task assignment, client follow-ups, document preparation, and routine approvals within their department.</div>
+                <div class="ai-label">Chief Officer Authority</div>
+                <div class="ai-title">Division Decisions</div>
+                <div class="ai-desc">Chief Officers run their division day-to-day: task assignment, workflow, client follow-ups and routine approvals inside their capability.</div>
               </div>
               <div class="auth-item">
                 <div class="ai-label">Escalation Trigger</div>
-                <div class="ai-title">When to Contact CEO</div>
-                <div class="ai-desc">Legal matters, client complaints unresolved after 24h, financial discrepancies, reputational risk, or any situation outside the Director's defined authority threshold.</div>
+                <div class="ai-title">When to Contact the CEO</div>
+                <div class="ai-desc">Legal matters, disputes unresolved after 24h, financial discrepancies, trust or reputational risk, or anything beyond a division’s defined authority.</div>
               </div>
               <div class="auth-item">
                 <div class="ai-label">Emergency Protocol</div>
                 <div class="ai-title">Direct CEO Access</div>
-                <div class="ai-desc">Any team member may contact CEO directly via WhatsApp for genuine emergencies. First line must read "URGENT —" followed by a one-sentence summary of the issue.</div>
+                <div class="ai-desc">Any team member may contact the CEO directly for genuine emergencies. First line must read "URGENT —" followed by a one-sentence summary.</div>
               </div>
             </div>
           </div>
@@ -1080,11 +939,17 @@
               <div><label class="form-lbl">Department *</label>
                 <select id="sdDept">
                   <option value="">— Select —</option>
-                  <option value="immigration">🛂 Immigration &amp; Visa Services</option>
-                  <option value="operations">⚙️ Operations &amp; Conference</option>
-                  <option value="finance">💰 Finance &amp; Accounts</option>
-                  <option value="client_relations">🤝 Client Relations &amp; Support</option>
-                  <option value="legal">🔐 Legal &amp; Compliance</option>
+                  <option value="intelligence">🧠 Intelligence (NORIA)</option>
+                  <option value="legal">🛡️ Trust Division (TERRA · Legal)</option>
+                  <option value="economic">💜 Economic (YUNEX)</option>
+                  <option value="finance">💳 Finance &amp; Payments</option>
+                  <option value="immigration">🌍 Mobility Division</option>
+                  <option value="learning">🎓 Learning (Academy)</option>
+                  <option value="people">👥 People Division</option>
+                  <option value="client_relations">💬 Communication Division</option>
+                  <option value="operations">⚙️ Enterprise Operations</option>
+                  <option value="strategy">📊 Strategy &amp; Intelligence</option>
+                  <option value="technology">🛠️ Technology Division</option>
                 </select>
               </div>
               <div><label class="form-lbl">WhatsApp Number</label><input type="text" id="sdWa" placeholder="+1 737 000 0000"></div>
@@ -1143,11 +1008,17 @@
               <div><label class="form-lbl">Department</label>
                 <select id="tkDept">
                   <option value="">— All / General —</option>
-                  <option value="immigration">Immigration</option>
-                  <option value="operations">Operations</option>
-                  <option value="finance">Finance</option>
-                  <option value="client_relations">Client Relations</option>
-                  <option value="legal">Legal</option>
+                  <option value="intelligence">🧠 Intelligence (NORIA)</option>
+                  <option value="legal">🛡️ Trust Division (TERRA · Legal)</option>
+                  <option value="economic">💜 Economic (YUNEX)</option>
+                  <option value="finance">💳 Finance &amp; Payments</option>
+                  <option value="immigration">🌍 Mobility Division</option>
+                  <option value="learning">🎓 Learning (Academy)</option>
+                  <option value="people">👥 People Division</option>
+                  <option value="client_relations">💬 Communication Division</option>
+                  <option value="operations">⚙️ Enterprise Operations</option>
+                  <option value="strategy">📊 Strategy &amp; Intelligence</option>
+                  <option value="technology">🛠️ Technology Division</option>
                 </select>
               </div>
               <div><label class="form-lbl">Priority</label>
@@ -1171,11 +1042,17 @@
               <span style="font-size:0.88rem;font-weight:700">Filter:</span>
               <select id="tkFilter" onchange="renderTaskBoard()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--navy2);color:#fff;font-size:0.84rem">
                 <option value="">All Departments</option>
-                <option value="immigration">Immigration</option>
-                <option value="operations">Operations</option>
-                <option value="finance">Finance</option>
-                <option value="client_relations">Client Relations</option>
-                <option value="legal">Legal</option>
+                <option value="intelligence">🧠 Intelligence (NORIA)</option>
+                  <option value="legal">🛡️ Trust Division (TERRA · Legal)</option>
+                  <option value="economic">💜 Economic (YUNEX)</option>
+                  <option value="finance">💳 Finance &amp; Payments</option>
+                  <option value="immigration">🌍 Mobility Division</option>
+                  <option value="learning">🎓 Learning (Academy)</option>
+                  <option value="people">👥 People Division</option>
+                  <option value="client_relations">💬 Communication Division</option>
+                  <option value="operations">⚙️ Enterprise Operations</option>
+                  <option value="strategy">📊 Strategy &amp; Intelligence</option>
+                  <option value="technology">🛠️ Technology Division</option>
               </select>
             </div>
             <button onclick="loadTasks()" class="btn btn-sm btn-ghost">↻ Refresh</button>
@@ -1280,7 +1157,7 @@
         <section class="view" id="view-ipregistry">
           <div class="dept-hero" style="margin-bottom:18px">
             <div style="font-size:1.6rem">🛡️ Brand &amp; IP Registry</div>
-            <div class="cd-sub" style="margin-top:6px">Official internal register of all SkyGlobe Group intellectual property, brand assets, and system layers. CEO-controlled and dated.</div>
+            <div class="cd-sub" style="margin-top:6px">Official internal register of all SKYGLOBEGROUP intellectual property, brand assets, and system layers. CEO-controlled and dated.</div>
           </div>
 
           <!-- OWNERSHIP DECLARATION -->
@@ -1646,6 +1523,7 @@ function switchView(v){
   if(v==='ipregistry') loadIPRegistry();
   if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); loadStudentRecords(); loadRecordsVault(); }
   if(v==='trustdesk'){ loadVerifyQueue('pending'); loadUsers(); loadDisputeQueue(); }
+  if(v==='departments') loadDivisions();
   toggleSidebar(false);
 }
 
@@ -3418,7 +3296,7 @@ setInterval(()=>{ if(KEY) pollTeamBadge(); }, 25000);
    STAFF DIRECTORY
 ══════════════════════════════════════════════════════ */
 let STAFF_DIR = [];
-const DEPT_LABELS = {immigration:'🛂 Immigration',operations:'⚙️ Operations',finance:'💰 Finance',client_relations:'🤝 Client Relations',legal:'🔐 Legal',general:'📢 General'};
+const DEPT_LABELS = {intelligence:'🧠 Intelligence (NORIA)',legal:'🛡️ Trust Division',economic:'💜 Economic (YUNEX)',finance:'💳 Finance & Payments',immigration:'🌍 Mobility',learning:'🎓 Learning (Academy)',people:'👥 People',client_relations:'💬 Communication',operations:'⚙️ Enterprise Operations',strategy:'📊 Strategy',technology:'🛠️ Technology',general:'📢 General'};
 
 let RESP_CATALOG=[];
 async function loadDelegation(){
@@ -3453,6 +3331,35 @@ async function toggleResp(staffId,key,btn){
     const d=await r.json(); if(!r.ok) throw new Error(d.error||'failed');
     loadDelegation();
   }catch(e){ alert(e.message); btn.disabled=false; }
+}
+/* ENTERPRISE DIVISIONS — rendered live from the server's single source of truth */
+async function loadDivisions(){
+  const grid=document.getElementById('divisionsGrid'); if(!grid)return;
+  try{
+    const d=await fetch(API+'/api/divisions').then(r=>r.json());
+    const staff=await fetch(API+'/api/admin/staff',{headers:{'x-admin-key':KEY}}).then(r=>r.ok?r.json():[]).catch(()=>[]);
+    const byDept={}; (Array.isArray(staff)?staff:[]).forEach(m=>{ const k=m.department||'general'; byDept[k]=(byDept[k]||0)+1; });
+    const deptCount=d.divisions.reduce((a,dv)=>a+dv.departments.length,0);
+    const el1=document.getElementById('cdTotalDepts'); if(el1)el1.textContent=deptCount;
+    const el2=document.getElementById('cdTotalStaff'); if(el2)el2.textContent=(Array.isArray(staff)?staff.length:0)||'—';
+    grid.innerHTML=d.divisions.map(dv=>{
+      const staffN=dv.departments.reduce((a,dp)=>a+(byDept[dp.key]||0),0);
+      return `<div class="ceo-dept-card">
+        <div class="cdc-head">
+          <div class="cdc-icon">${dv.icon}</div>
+          <div><h3>${esc(dv.label)}${dv.brand?` <span style="font-size:.66rem;letter-spacing:.16em;color:var(--gold);vertical-align:2px">${esc(dv.brand)}</span>`:''}</h3><div class="cd-sub">${esc(dv.mission)}</div></div>
+          <div class="cd-badge">${staffN?staffN+' staff':'Open roles'}</div>
+        </div>
+        <div class="cdc-body">
+          <div class="cdc-director"><span style="font-size:1.05rem">🎖️</span><div><div style="font-weight:700;color:var(--txt);font-size:.85rem">${esc(dv.officer)}</div><div style="font-size:.72rem;color:var(--muted)">Reports to the CEO</div></div></div>
+          <div style="margin:10px 0 6px;font-size:.66rem;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase">Departments</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">${dv.departments.map(dp=>`<span style="background:var(--navy3);border:1px solid var(--line);border-radius:100px;padding:4px 11px;font-size:.74rem;color:var(--txt)">${dp.icon} ${esc(dp.label)}</span>`).join('')}</div>
+          <div style="margin:10px 0 6px;font-size:.66rem;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase">Teams</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">${dv.teams.map(t=>`<span style="background:rgba(255,255,255,.04);border-radius:100px;padding:3px 9px;font-size:.7rem;color:var(--muted)">${esc(t)}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){ grid.innerHTML='<div class="skeleton">Could not load divisions.</div>'; }
 }
 async function loadDirectory(){
   const el=document.getElementById('dirGrid');
@@ -3519,7 +3426,7 @@ async function addStaffMember(){
 }
 
 function editStaffMember(s){
-  const depts=[['immigration','🛂 Immigration & Visa Services'],['operations','⚙️ Operations & Conference'],['finance','💰 Finance & Accounts'],['client_relations','🤝 Client Relations & Support'],['legal','🔐 Legal & Compliance']];
+  const depts=[['intelligence','🧠 Intelligence (NORIA)'],['legal','🛡️ Trust Division (TERRA · Legal)'],['economic','💜 Economic (YUNEX)'],['finance','💳 Finance & Payments'],['immigration','🌍 Mobility Division'],['learning','🎓 Learning (Academy)'],['people','👥 People Division'],['client_relations','💬 Communication Division'],['operations','⚙️ Enterprise Operations'],['strategy','📊 Strategy & Intelligence'],['technology','🛠️ Technology Division']];
   document.getElementById('modalContent').innerHTML=`
     <button class="close-x" onclick="closeModal()">✕</button>
     <h2 class="gold">✏️ Edit Staff Member</h2>
@@ -3597,12 +3504,18 @@ let ACTIVE_CHAN='general';
 let CHAN_MSGS={};
 let chanPollTimer=null;
 const CHAN_META={
-  general:{icon:'📢',label:'General',sub:'All departments · CEO & Directors'},
-  immigration:{icon:'🛂',label:'Immigration',sub:'Immigration & Visa Services dept'},
-  operations:{icon:'⚙️',label:'Operations',sub:'Operations & Conference dept'},
-  finance:{icon:'💰',label:'Finance',sub:'Finance & Accounts dept'},
-  client_relations:{icon:'🤝',label:'Client Relations',sub:'Client Relations & Support dept'},
-  legal:{icon:'🔐',label:'Legal',sub:'Legal & Compliance dept'},
+  general:{icon:'📢',label:'General',sub:'All divisions · CEO & Chief Officers'},
+  intelligence:{icon:'🧠',label:'Intelligence',sub:'NORIA · AI Operations'},
+  legal:{icon:'🛡️',label:'Trust',sub:'TERRA · Verification, Legal & Compliance'},
+  economic:{icon:'💜',label:'Economic',sub:'YUNEX · Marketplace & Trade'},
+  finance:{icon:'💳',label:'Finance',sub:'Finance & Payments'},
+  immigration:{icon:'🌍',label:'Mobility',sub:'Visas, Immigration & Conferences'},
+  learning:{icon:'🎓',label:'Learning',sub:'SKYGLOBEGROUP Academy'},
+  people:{icon:'👥',label:'People',sub:'People & Culture'},
+  client_relations:{icon:'💬',label:'Communication',sub:'Clients, Support & Community'},
+  operations:{icon:'⚙️',label:'Operations',sub:'Service Delivery & Workflow'},
+  strategy:{icon:'📊',label:'Strategy',sub:'Analytics & Business Intelligence'},
+  technology:{icon:'🛠️',label:'Technology',sub:'Engineering & Infrastructure'},
 };
 
 async function loadChanMsgs(dept){
@@ -3997,7 +3910,7 @@ function printPayslip(id){
     @media print{body{padding:0}}
   </style></head><body><div class="page">
     <div class="header">
-      <div><div class="brand">SkyGlobe Group<small>Global Operations</small></div></div>
+      <div><div class="brand">SKYGLOBEGROUP<small>Global Operations</small></div></div>
       <div class="slip-title"><h2>Payslip</h2><div class="ref">Ref: PR-${String(p.id).padStart(5,'0')}</div></div>
     </div>
     <div class="info-grid">
@@ -4013,9 +3926,9 @@ function printPayslip(id){
     ${p.notes?`<div style="background:#f8f6ef;border-radius:8px;padding:14px 18px;margin-bottom:24px;font-size:0.86rem"><strong>Notes:</strong> ${esc(p.notes)}</div>`:''}
     ${p.paid_date?`<p style="font-size:0.84rem;color:#555;margin-bottom:20px">Payment Date: <strong>${new Date(p.paid_date).toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}</strong></p>`:''}
     <div style="margin-top:40px;display:flex;justify-content:flex-end">
-      <div class="sig-block"><div class="sig-line"></div><div style="font-size:0.78rem;color:#666">Authorised Signatory</div><div style="font-size:0.82rem;font-weight:700;margin-top:2px">SkyGlobe Group</div></div>
+      <div class="sig-block"><div class="sig-line"></div><div style="font-size:0.78rem;color:#666">Authorised Signatory</div><div style="font-size:0.82rem;font-weight:700;margin-top:2px">SKYGLOBEGROUP</div></div>
     </div>
-    <div class="footer"><div>SkyGlobe Group · Global Operations<br>This payslip is an official internal document and is confidential.</div><div style="text-align:right">Generated ${new Date().toLocaleString()}</div></div>
+    <div class="footer"><div>SKYGLOBEGROUP · Global Operations<br>This payslip is an official internal document and is confidential.</div><div style="text-align:right">Generated ${new Date().toLocaleString()}</div></div>
   </div><script>window.onload=()=>window.print();<\/script></body></html>`);
   w.document.close();
 }
@@ -4116,7 +4029,7 @@ function exportIPPDF(){
     <td style="padding:10px 12px;border-bottom:1px solid #e0e0e0">${a.status||'Active/Protected'}</td>
     <td style="padding:10px 12px;border-bottom:1px solid #e0e0e0">${a.registered_date||'—'}</td>
   </tr>${a.usage?`<tr><td colspan="6" style="padding:2px 12px 10px;border-bottom:1px solid #e0e0e0;font-size:0.8rem;color:#555">📌 ${a.usage}</td></tr>`:''}`).join('');
-  win.document.write(`<!DOCTYPE html><html><head><title>SkyGlobe Group — IP Registry</title>
+  win.document.write(`<!DOCTYPE html><html><head><title>SKYGLOBEGROUP — IP Registry</title>
   <style>body{font-family:Georgia,serif;max-width:900px;margin:0 auto;padding:40px;color:#111}h1{color:#c9a84c;font-size:1.7rem;margin-bottom:2px}.sub{color:#555;font-size:0.88rem;margin-bottom:20px}.decl{background:#fdf8ee;border-left:4px solid #c9a84c;padding:14px 18px;border-radius:4px;font-size:0.88rem;line-height:1.7;margin-bottom:28px}table{width:100%;border-collapse:collapse;font-size:0.88rem}th{background:#0a1628;color:#c9a84c;padding:10px 12px;text-align:left;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.08em}.footer{margin-top:36px;font-size:0.76rem;color:#888;border-top:1px solid #ddd;padding-top:14px}@media print{.noprint{display:none}}</style></head><body>
   <h1>SKYGLOBE GROUP</h1>
   <div class="sub">Brand &amp; Intellectual Property Registry &nbsp;·&nbsp; Generated ${today} &nbsp;·&nbsp; CONFIDENTIAL</div>

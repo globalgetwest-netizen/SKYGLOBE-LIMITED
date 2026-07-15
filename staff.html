@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Staff Portal — SkyGlobe Group</title>
+<title>Staff Portal — SKYGLOBEGROUP</title>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -223,7 +223,7 @@
 <!-- ════ LOGIN ════ -->
 <div id="loginScreen">
   <div class="login-box">
-    <img src="icon-192.png" alt="SkyGlobe Group">
+    <img src="icon-192.png" alt="SKYGLOBEGROUP">
     <h1>SkyGlobe <span class="gold">Group</span></h1>
     <div class="pill">Staff Workspace</div>
     <input type="password" id="pwInput" placeholder="Enter your staff password" onkeydown="if(event.key==='Enter')doLogin()">
@@ -355,235 +355,45 @@
         <section class="view" id="view-org">
           <div class="org-tabs">
             <button class="org-tab active" onclick="orgTab('chart',this)">🌳 Org Chart</button>
-            <button class="org-tab" onclick="orgTab('departments',this)">🏛 Departments</button>
+            <button class="org-tab" onclick="orgTab('departments',this)">🏛 Divisions</button>
             <button class="org-tab" onclick="orgTab('comms',this)">📡 Communication Chain</button>
           </div>
 
-          <!-- ORG CHART TAB -->
+          <!-- ORG CHART TAB — Enterprise → Division → Department → Team → Role -->
           <div id="org-chart">
             <div class="org-wrap">
               <div class="org-tree">
-                <!-- CEO -->
                 <div class="org-node">
                   <div class="org-box ceo-box">
                     <div class="ob-icon">👑</div>
                     <div class="ob-title">Chief Executive Officer</div>
-                    <div class="ob-dept">SkyGlobe Group</div>
+                    <div class="ob-dept">SKYGLOBEGROUP</div>
                     <div class="ob-role">Executive Leadership · Full Authority</div>
                   </div>
                 </div>
                 <div class="org-connector-v"></div>
-                <!-- Directors horizontal bar -->
-                <div style="display:flex;justify-content:center;gap:0;width:100%;position:relative">
-                  <div style="position:absolute;top:0;left:12%;right:12%;height:2px;background:var(--line)"></div>
-                  <!-- Immigration Director -->
-                  <div class="org-node" style="flex:1;max-width:220px">
-                    <div class="org-child-line"></div>
-                    <div class="org-box dir-box">
-                      <div class="ob-icon">🛂</div>
-                      <div class="ob-title">Immigration Director</div>
-                      <div class="ob-dept">Immigration Dept</div>
-                      <div class="ob-role">Reports to CEO</div>
-                    </div>
-                  </div>
-                  <!-- Operations Director -->
-                  <div class="org-node" style="flex:1;max-width:220px">
-                    <div class="org-child-line"></div>
-                    <div class="org-box dir-box">
-                      <div class="ob-icon">⚙️</div>
-                      <div class="ob-title">Operations Director</div>
-                      <div class="ob-dept">Operations Dept</div>
-                      <div class="ob-role">Reports to CEO</div>
-                    </div>
-                  </div>
-                  <!-- Finance Director -->
-                  <div class="org-node" style="flex:1;max-width:220px">
-                    <div class="org-child-line"></div>
-                    <div class="org-box dir-box">
-                      <div class="ob-icon">💰</div>
-                      <div class="ob-title">Finance Director</div>
-                      <div class="ob-dept">Finance Dept</div>
-                      <div class="ob-role">Reports to CEO</div>
-                    </div>
-                  </div>
-                  <!-- Client Relations Director -->
-                  <div class="org-node" style="flex:1;max-width:220px">
-                    <div class="org-child-line"></div>
-                    <div class="org-box dir-box">
-                      <div class="ob-icon">🤝</div>
-                      <div class="ob-title">Client Relations Director</div>
-                      <div class="ob-dept">Client Services</div>
-                      <div class="ob-role">Reports to CEO</div>
-                    </div>
-                  </div>
-                </div>
-                <!-- Staff under each director -->
-                <div style="display:flex;justify-content:center;gap:0;width:100%;margin-top:0">
-                  <!-- Under Immigration -->
-                  <div style="flex:1;max-width:220px;display:flex;flex-direction:column;align-items:center">
-                    <div class="org-connector-v" style="height:20px"></div>
-                    <div style="display:flex;flex-direction:column;gap:6px;padding:0 6px;width:100%">
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Case Officer</div></div>
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Visa Specialist</div></div>
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Compliance Officer</div></div>
-                    </div>
-                  </div>
-                  <!-- Under Operations -->
-                  <div style="flex:1;max-width:220px;display:flex;flex-direction:column;align-items:center">
-                    <div class="org-connector-v" style="height:20px"></div>
-                    <div style="display:flex;flex-direction:column;gap:6px;padding:0 6px;width:100%">
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Admin Manager</div></div>
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Conference Coordinator</div></div>
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Logistics Officer</div></div>
-                    </div>
-                  </div>
-                  <!-- Under Finance -->
-                  <div style="flex:1;max-width:220px;display:flex;flex-direction:column;align-items:center">
-                    <div class="org-connector-v" style="height:20px"></div>
-                    <div style="display:flex;flex-direction:column;gap:6px;padding:0 6px;width:100%">
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Accounts Officer</div></div>
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Payroll Officer</div></div>
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Billing Specialist</div></div>
-                    </div>
-                  </div>
-                  <!-- Under Client Relations -->
-                  <div style="flex:1;max-width:220px;display:flex;flex-direction:column;align-items:center">
-                    <div class="org-connector-v" style="height:20px"></div>
-                    <div style="display:flex;flex-direction:column;gap:6px;padding:0 6px;width:100%">
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Client Liaison</div></div>
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Support Officer</div></div>
-                      <div class="org-box staff-box"><div class="ob-title" style="font-size:0.72rem">Documentation Clerk</div></div>
-                    </div>
-                  </div>
-                </div>
+                <div id="orgDivisions" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%"><div class="skeleton">Loading divisions…</div></div>
+                <div style="margin-top:16px;color:var(--muted);font-size:.76rem;text-align:center">Enterprise → Division → Department → Team → Role</div>
               </div>
             </div>
           </div>
 
-          <!-- DEPARTMENTS TAB -->
+          <!-- DIVISIONS TAB -->
           <div id="org-departments" style="display:none">
-
-            <div class="dept-section">
-              <div class="dept-header"><div class="dh-icon">🛂</div><div><h3>Immigration &amp; Visa Services</h3><div class="dh-sub">Handles all visa applications, work permits, and travel documentation</div></div></div>
-              <div class="dept-grid">
-                <div class="pos-card"><div class="pc-role">Director</div><div class="pc-title">Immigration Director</div><div class="pc-reports">↑ Reports directly to CEO</div><a class="pc-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp CEO</a></div>
-                <div class="pos-card"><div class="pc-role">Senior</div><div class="pc-title">Senior Case Officer</div><div class="pc-reports">↑ Reports to Immigration Director</div></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">Visa Processing Officer</div><div class="pc-reports">↑ Reports to Immigration Director</div></div>
-                <div class="pos-card"><div class="pc-role">Specialist</div><div class="pc-title">Work Permit Specialist</div><div class="pc-reports">↑ Reports to Immigration Director</div></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">Compliance Officer</div><div class="pc-reports">↑ Reports to Immigration Director</div></div>
-              </div>
-            </div>
-
-            <div class="dept-section">
-              <div class="dept-header"><div class="dh-icon">⚙️</div><div><h3>Operations &amp; Conference Management</h3><div class="dh-sub">Manages conference facilitation, event logistics and administrative operations</div></div></div>
-              <div class="dept-grid">
-                <div class="pos-card"><div class="pc-role">Director</div><div class="pc-title">Operations Director</div><div class="pc-reports">↑ Reports directly to CEO</div><a class="pc-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp CEO</a></div>
-                <div class="pos-card"><div class="pc-role">Manager</div><div class="pc-title">Administrative Manager</div><div class="pc-reports">↑ Reports to Operations Director</div></div>
-                <div class="pos-card"><div class="pc-role">Coordinator</div><div class="pc-title">Conference Coordinator</div><div class="pc-reports">↑ Reports to Operations Director</div></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">Logistics Officer</div><div class="pc-reports">↑ Reports to Operations Director</div></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">Travel Arrangements Officer</div><div class="pc-reports">↑ Reports to Operations Director</div></div>
-              </div>
-            </div>
-
-            <div class="dept-section">
-              <div class="dept-header"><div class="dh-icon">💰</div><div><h3>Finance &amp; Accounts</h3><div class="dh-sub">Oversees revenue, payroll, client billing and financial reporting</div></div></div>
-              <div class="dept-grid">
-                <div class="pos-card"><div class="pc-role">Director</div><div class="pc-title">Finance Director</div><div class="pc-reports">↑ Reports directly to CEO</div><a class="pc-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp CEO</a></div>
-                <div class="pos-card"><div class="pc-role">Manager</div><div class="pc-title">Accounts Manager</div><div class="pc-reports">↑ Reports to Finance Director</div></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">Payroll Officer</div><div class="pc-reports">↑ Reports to Finance Director</div></div>
-                <div class="pos-card"><div class="pc-role">Specialist</div><div class="pc-title">Billing &amp; Invoicing Specialist</div><div class="pc-reports">↑ Reports to Finance Director</div></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">Financial Reporting Officer</div><div class="pc-reports">↑ Reports to Finance Director</div></div>
-              </div>
-            </div>
-
-            <div class="dept-section">
-              <div class="dept-header"><div class="dh-icon">🤝</div><div><h3>Client Relations &amp; Support</h3><div class="dh-sub">Manages client communications, onboarding and post-service follow-up</div></div></div>
-              <div class="dept-grid">
-                <div class="pos-card"><div class="pc-role">Director</div><div class="pc-title">Client Relations Director</div><div class="pc-reports">↑ Reports directly to CEO</div><a class="pc-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp CEO</a></div>
-                <div class="pos-card"><div class="pc-role">Senior</div><div class="pc-title">Senior Client Liaison</div><div class="pc-reports">↑ Reports to Client Relations Director</div></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">Client Support Officer</div><div class="pc-reports">↑ Reports to Client Relations Director</div></div>
-                <div class="pos-card"><div class="pc-role">Clerk</div><div class="pc-title">Documentation Clerk</div><div class="pc-reports">↑ Reports to Client Relations Director</div></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">WhatsApp Communications Officer</div><div class="pc-reports">↑ Reports to Client Relations Director</div></div>
-              </div>
-            </div>
-
-            <div class="dept-section">
-              <div class="dept-header"><div class="dh-icon">🔐</div><div><h3>Legal &amp; Compliance</h3><div class="dh-sub">Ensures all services meet legal requirements, handles contracts and regulatory compliance</div></div></div>
-              <div class="dept-grid">
-                <div class="pos-card"><div class="pc-role">Advisor</div><div class="pc-title">Legal Counsel / Compliance Advisor</div><div class="pc-reports">↑ Reports directly to CEO</div><a class="pc-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp CEO</a></div>
-                <div class="pos-card"><div class="pc-role">Officer</div><div class="pc-title">Regulatory Compliance Officer</div><div class="pc-reports">↑ Reports to Legal Counsel</div></div>
-                <div class="pos-card"><div class="pc-role">Specialist</div><div class="pc-title">Document Verification Specialist</div><div class="pc-reports">↑ Reports to Legal Counsel</div></div>
-              </div>
-            </div>
-
+            <div id="orgDivisionDetail"><div class="skeleton">Loading…</div></div>
           </div>
 
-          <!-- COMMUNICATION CHAIN TAB -->
+          <!-- COMMS TAB -->
           <div id="org-comms" style="display:none">
-            <div class="note" style="margin-bottom:20px">
-              <strong style="color:var(--txt)">📡 Official Communication Hierarchy</strong><br>
-              All internal communication at SkyGlobe Group follows this chain. Staff raise issues to their Director first. Directors escalate to the CEO when required. Direct CEO contact is reserved for urgent or policy-level matters.
-            </div>
-            <div class="comm-chain">
-              <div class="cc-step">
-                <div class="cc-num">1</div>
-                <div class="cc-body">
-                  <strong>Staff Member raises a matter</strong>
-                  <span>Case Officer, Specialist, Clerk, or any front-line team member identifies an issue, update or request.</span>
-                </div>
-              </div>
-              <div class="cc-step">
-                <div class="cc-num">2</div>
-                <div class="cc-body">
-                  <strong>Reports to Department Director</strong>
-                  <span>Staff member contacts their direct Department Director via Team Chat, WhatsApp or internal message. Director acknowledges within the same working day.</span>
-                </div>
-              </div>
-              <div class="cc-step">
-                <div class="cc-num">3</div>
-                <div class="cc-body">
-                  <strong>Director reviews and acts (or escalates)</strong>
-                  <span>Director resolves operational matters independently. Policy decisions, financial approvals above threshold, or legal matters are escalated to the CEO with a written summary.</span>
-                </div>
-              </div>
-              <div class="cc-step">
-                <div class="cc-num">4</div>
-                <div class="cc-body">
-                  <strong>CEO makes final decision</strong>
-                  <span>CEO reviews escalations, approves or instructs. Decision is communicated back down the chain: CEO → Director → Staff Member.</span>
-                </div>
-              </div>
-              <div class="cc-step">
-                <div class="cc-num">5</div>
-                <div class="cc-body">
-                  <strong>Action is confirmed and logged</strong>
-                  <span>The outcome is noted in the application or staff record. Client is notified by the assigned Client Relations Officer if the matter affects a client file.</span>
-                </div>
-              </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:8px">
-              <div class="pos-card">
-                <div class="pc-role" style="color:#7cb6f7">Staff → Director</div>
-                <div class="pc-title">Internal Issues & Work Updates</div>
-                <div class="pc-reports" style="margin-top:4px">Use Team Chat or WhatsApp for quick matters. For formal requests (leave, resources, client complaints), message your Director directly.</div>
-              </div>
-              <div class="pos-card">
-                <div class="pc-role" style="color:#86d98a">Director → CEO</div>
-                <div class="pc-title">Escalations & Approvals</div>
-                <div class="pc-reports" style="margin-top:4px">Directors contact CEO for: new service pricing, refund approvals, contract sign-offs, legal matters, and any situation outside department authority.</div>
-              </div>
-              <div class="pos-card">
-                <div class="pc-role" style="color:var(--gold)">CEO → All</div>
-                <div class="pc-title">Policy & Strategic Directives</div>
-                <div class="pc-reports" style="margin-top:4px">CEO issues directives via Team Chat or direct message to Directors. Directors cascade instructions to their department staff within 2 hours.</div>
-              </div>
-              <div class="pos-card">
-                <div class="pc-role" style="color:#ef9a9a">Urgent / Emergency</div>
-                <div class="pc-title">Direct CEO WhatsApp</div>
-                <div class="pc-reports" style="margin-top:4px">For genuine emergencies (client legal issue, data breach, urgent deadline), any staff member may contact CEO directly via WhatsApp — state "URGENT" in first line.</div>
-                <a class="pc-wa" href="https://wa.me/17373998522" target="_blank">💬 WhatsApp CEO Now</a>
-              </div>
+            <div class="panel" style="padding:18px">
+              <h3>📡 Communication Chain</h3>
+              <p style="color:var(--muted);font-size:.88rem;margin:8px 0 12px">The organization spine: <b style="color:var(--txt)">CEO → Executive Board → Chief Officers → Directors → Managers → Team Leaders → Specialists → Associates</b>.</p>
+              <ul style="color:var(--muted);font-size:.86rem;line-height:2;padding-left:18px">
+                <li>Route day-to-day questions to your <b style="color:var(--txt)">team leader or department</b> first.</li>
+                <li>Division-level decisions go to your <b style="color:var(--txt)">Chief Officer</b>.</li>
+                <li>Escalate to the <b style="color:var(--txt)">CEO</b> for: legal matters, disputes unresolved after 24h, financial discrepancies, trust or reputational risk.</li>
+                <li>Genuine emergencies: contact the CEO directly — first line must read <b style="color:var(--txt)">"URGENT —"</b> plus a one-sentence summary.</li>
+              </ul>
             </div>
           </div>
         </section>
@@ -736,6 +546,7 @@ function switchView(v){
   if(v==='mytasks') loadMyTasks();
   if(v==='attendance') loadAttendance();
   if(v==='trustdesk') loadStaffVerify('pending');
+  if(v==='org') loadOrgDivisions();
   toggleSidebar(false);
 }
 function toggleSidebar(open){
@@ -1178,12 +989,18 @@ let STAFF_DEPT = null;
 let STAFF_CHAN_MSGS = [];
 let staffChanTimer = null;
 const CHAN_META_S = {
-  immigration:{icon:'🛂',label:'Immigration Channel',sub:'Immigration & Visa Services'},
-  operations:{icon:'⚙️',label:'Operations Channel',sub:'Operations & Conference'},
-  finance:{icon:'💰',label:'Finance Channel',sub:'Finance & Accounts'},
-  client_relations:{icon:'🤝',label:'Client Relations Channel',sub:'Client Relations & Support'},
-  legal:{icon:'🔐',label:'Legal Channel',sub:'Legal & Compliance'},
-  general:{icon:'📢',label:'General Channel',sub:'All departments'},
+  intelligence:{icon:'🧠',label:'Intelligence Channel',sub:'NORIA · AI Operations'},
+  legal:{icon:'🛡️',label:'Trust Channel',sub:'TERRA · Verification, Legal & Compliance'},
+  economic:{icon:'💜',label:'Economic Channel',sub:'YUNEX · Marketplace & Trade'},
+  finance:{icon:'💳',label:'Finance Channel',sub:'Finance & Payments'},
+  immigration:{icon:'🌍',label:'Mobility Channel',sub:'Visas, Immigration & Conferences'},
+  learning:{icon:'🎓',label:'Learning Channel',sub:'SKYGLOBEGROUP Academy'},
+  people:{icon:'👥',label:'People Channel',sub:'People & Culture'},
+  client_relations:{icon:'💬',label:'Communication Channel',sub:'Clients, Support & Community'},
+  operations:{icon:'⚙️',label:'Operations Channel',sub:'Service Delivery & Workflow'},
+  strategy:{icon:'📊',label:'Strategy Channel',sub:'Analytics & Business Intelligence'},
+  technology:{icon:'🛠️',label:'Technology Channel',sub:'Engineering & Infrastructure'},
+  general:{icon:'📢',label:'General Channel',sub:'All divisions'},
 };
 
 async function resolveStaffDept(){
@@ -1341,6 +1158,26 @@ async function updateMyTask(id,status){
 }
 
 /* ── ORG TABS ── */
+let ORG_DIVS=null;
+async function loadOrgDivisions(){
+  if(!ORG_DIVS){ try{ ORG_DIVS=await fetch('/api/divisions').then(r=>r.json()); }catch(e){ return; } }
+  const chart=document.getElementById('orgDivisions');
+  if(chart) chart.innerHTML=ORG_DIVS.divisions.map(d=>`<div class="org-box dir-box" style="min-width:150px;max-width:180px">
+    <div class="ob-icon">${d.icon}</div>
+    <div class="ob-title" style="font-size:.78rem">${esc(d.label)}</div>
+    <div class="ob-dept" style="font-size:.64rem">${esc(d.officer)}</div>
+    ${d.brand?`<div class="ob-role" style="color:var(--gold)">${esc(d.brand)}</div>`:''}
+  </div>`).join('');
+  const det=document.getElementById('orgDivisionDetail');
+  if(det) det.innerHTML=ORG_DIVS.divisions.map(d=>`<div class="dept-section">
+    <div class="dept-header"><div class="dh-icon">${d.icon}</div><div><h3>${esc(d.label)}${d.brand?' · '+esc(d.brand):''}</h3><div class="dh-sub">${esc(d.mission)}</div></div></div>
+    <div class="dept-grid">
+      <div class="pos-card"><div class="pc-role">Chief Officer</div><div class="pc-title">${esc(d.officer)}</div><div class="pc-reports">↑ Reports directly to the CEO</div></div>
+      ${d.departments.map(dp=>`<div class="pos-card"><div class="pc-role">Department</div><div class="pc-title">${dp.icon} ${esc(dp.label)}</div><div class="pc-reports">↑ Reports to the ${esc(d.officer)}</div></div>`).join('')}
+    </div>
+    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">${d.teams.map(t=>`<span style="background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:100px;padding:4px 11px;font-size:.72rem;color:var(--muted)">${esc(t)}</span>`).join('')}</div>
+  </div>`).join('');
+}
 function orgTab(id, btn){
   ['chart','departments','comms'].forEach(t=>{ const el=document.getElementById('org-'+t); if(el)el.style.display=t===id?'block':'none'; });
   document.querySelectorAll('.org-tab').forEach(b=>b.classList.remove('active'));

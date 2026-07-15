@@ -1344,7 +1344,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-NATIVE-2026-07-15B',
+  build: 'SKYGLOBEGROUP-DIVISIONS-2026-07-15C',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -3682,7 +3682,7 @@ app.post('/api/admin/reception/:id/reply', async (req, res) => {
       // their in-app inbox instantly — zero email quota, never blocked.
       await portalDeliver(rec.client_email, body, rec.department).catch(() => {});
     }
-    await sendEmail(rec.client_email, `SkyGlobe Group — ${dept.label}`,
+    await sendEmail(rec.client_email, `SKYGLOBEGROUP — ${dept.label.replace(/^SKYGLOBEGROUP\s+/, '')}`,
       `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a2233">
         <p>Dear ${rec.client_name || 'Client'},</p>
         <div style="line-height:1.6">${body.replace(/\n/g,'<br>')}</div>
@@ -4871,24 +4871,76 @@ const SERVICE_PRODUCT_MAP = {
 // stays false and notifications fall back to RECIPIENT_EMAIL — flip `live` to
 // true per department the moment its address forwards to a real inbox.
 const DEPARTMENTS = {
-  // Ecosystem divisions (ARCHITECTURE.md Amendment 2): division-level names —
-  // everything travel-related lives under Global Mobility's shadow; the
-  // Academy serves every age; Innovation & Technology is the Group's R&D face.
-  travel:    { key: 'travel',    label: 'Global Mobility',           email: 'mobility@skyglobegroup.com', icon: '🌐', live: false },
-  education: { key: 'education', label: 'SkyGlobe Academy',          email: 'education@skyglobegroup.com', icon: '🎓', live: false },
-  legal:     { key: 'legal',     label: 'Legal & Trust Services',    email: 'legal@skyglobegroup.com',    icon: '📜', live: false },
-  identity:  { key: 'identity',  label: 'Digital Identity',          email: 'id@skyglobegroup.com',       icon: '🪪', live: false },
-  finance:   { key: 'finance',   label: 'Finance & Payments',        email: 'finance@skyglobegroup.com',  icon: '💳', live: false },
-  innovation:{ key: 'innovation',label: 'Innovation & Technology',   email: 'innovation@skyglobegroup.com', icon: '🚀', live: false },
-  noria:     { key: 'noria',     label: 'NORIA · AI Assistant',     email: 'noria@skyglobegroup.com',    icon: '✦',  live: false, sticky: true },
-  yunex:     { key: 'yunex',     label: 'Yunex',                    email: 'yunex@skyglobegroup.com',    icon: '◆',  live: false, sticky: true },
-  terra:     { key: 'terra',     label: 'TERRA',                    email: 'terra@skyglobegroup.com',    icon: '🌍', live: false, sticky: true },
+  // SKYGLOBEGROUP is an Enterprise Digital Ecosystem, not a travel agency:
+  // these are DEPARTMENTS inside Enterprise Divisions (see DIVISIONS below).
+  // Keys are stable data joins (staff, messages, channels) — labels evolve,
+  // keys never change so no history or route ever breaks.
+  travel:    { key: 'travel',    label: 'Global Mobility',            email: 'mobility@skyglobegroup.com', icon: '🌍', live: false },
+  education: { key: 'education', label: 'SKYGLOBEGROUP Academy',      email: 'education@skyglobegroup.com', icon: '🎓', live: false },
+  legal:     { key: 'legal',     label: 'Legal Documents & Compliance', email: 'legal@skyglobegroup.com',  icon: '⚖️', live: false },
+  identity:  { key: 'identity',  label: 'Digital Identity & Credentials', email: 'id@skyglobegroup.com',   icon: '🪪', live: false },
+  finance:   { key: 'finance',   label: 'Finance & Payments',         email: 'finance@skyglobegroup.com',  icon: '💳', live: false },
+  innovation:{ key: 'innovation',label: 'Engineering & Infrastructure', email: 'innovation@skyglobegroup.com', icon: '🛠️', live: false },
+  noria:     { key: 'noria',     label: 'NORIA · AI Operations',     email: 'noria@skyglobegroup.com',    icon: '🧠', live: false, sticky: true },
+  yunex:     { key: 'yunex',     label: 'YUNEX · Marketplace & Trade', email: 'yunex@skyglobegroup.com',  icon: '💜', live: false, sticky: true },
+  terra:     { key: 'terra',     label: 'TERRA · Verification & Trust', email: 'terra@skyglobegroup.com', icon: '🛡️', live: false, sticky: true },
+  people:    { key: 'people',    label: 'People & Culture',           email: 'people@skyglobegroup.com',   icon: '👥', live: false },
+  operations:{ key: 'operations',label: 'Service Delivery & Workflow', email: 'operations@skyglobegroup.com', icon: '⚙️', live: false },
+  strategy:  { key: 'strategy',  label: 'Analytics & Business Intelligence', email: 'strategy@skyglobegroup.com', icon: '📊', live: false },
   // CEO mail is sacred: never AI-auto-answered, always queued for a human,
   // and never re-classified away from the CEO's office by the AI.
   ceo:       { key: 'ceo',       label: 'Office of the CEO',        email: 'ceo@skyglobegroup.com',      icon: '👑', live: false, sticky: true, aiAutoAnswer: false },
-  general:   { key: 'general',   label: 'General / Reception',      email: 'support@skyglobegroup.com',  icon: '📨', live: false },
+  general:   { key: 'general',   label: 'Reception & Support',      email: 'support@skyglobegroup.com',  icon: '🛎️', live: false },
 };
 const VALID_DEPT_KEYS = Object.keys(DEPARTMENTS);
+
+// ── ENTERPRISE DIVISIONS — the organizational spine of SKYGLOBEGROUP ─────────
+// Enterprise → Division → Department → Team → Role. Ten divisions, each a
+// business capability of the ecosystem; departments (keys above) live inside
+// them, so new departments slot in without breaking data, URLs or navigation.
+const DIVISIONS = [
+  { key: 'intelligence',  label: 'Intelligence Division',   icon: '🧠', brand: 'NORIA',  officer: 'Chief Intelligence Officer',
+    mission: 'Everything NORIA — the mind of the ecosystem.', departments: ['noria'],
+    teams: ['AI Operations', 'Knowledge Systems', 'Automation', 'Language Intelligence', 'AI Safety', 'AI Analytics'] },
+  { key: 'trust',         label: 'Trust Division',          icon: '🛡️', brand: 'TERRA',  officer: 'Chief Trust Officer',
+    mission: 'Everything TERRA — identity, verification and credentials the world can check.', departments: ['terra', 'identity', 'legal'],
+    teams: ['Verification', 'Digital Identity', 'Credentials', 'Business Verification', 'Legal Documents', 'IP Registry', 'Compliance', 'Audit'] },
+  { key: 'economic',      label: 'Economic Division',       icon: '💜', brand: 'YUNEX',  officer: 'Chief Economic Officer',
+    mission: 'Everything YUNEX — the verified economy in motion.', departments: ['yunex', 'finance'],
+    teams: ['Marketplace', 'Trade & Corridors', 'Assets', 'Investment', 'Payments', 'Escrow', 'Supply Chain', 'Logistics'] },
+  { key: 'mobility',      label: 'Mobility Division',       icon: '🌍', brand: null,     officer: 'Chief Mobility Officer',
+    mission: 'Global mobility — visas, immigration, conferences and study abroad.', departments: ['travel'],
+    teams: ['Visas & Immigration', 'Work Permits', 'Conferences', 'Study Abroad', 'Appointments', 'Country Relations'] },
+  { key: 'learning',      label: 'Learning Division',       icon: '🎓', brand: null,     officer: 'Chief Learning Officer',
+    mission: 'The Academy — knowledge infrastructure for every age.', departments: ['education'],
+    teams: ['Courses', 'Students', 'Instructors', 'Certificates', 'Curriculum', 'Learning Analytics'] },
+  { key: 'people',        label: 'People Division',         icon: '👥', brand: null,     officer: 'Chief People Officer',
+    mission: 'The humans of SKYGLOBEGROUP — hiring, growth and culture.', departments: ['people'],
+    teams: ['Recruitment', 'Staff Directory', 'Attendance', 'Payroll', 'Performance', 'Training'] },
+  { key: 'communication', label: 'Communication Division',  icon: '💬', brand: null,     officer: 'Chief Communications Officer',
+    mission: 'Every conversation — clients, community, media and support.', departments: ['general'],
+    teams: ['Client Messages', 'Reception & Support', 'Customer Success', 'Announcements', 'Media', 'Community'] },
+  { key: 'operations',    label: 'Enterprise Operations',   icon: '⚙️', brand: null,     officer: 'Chief Operations Officer',
+    mission: 'The engine — applications, workflow and service delivery.', departments: ['operations'],
+    teams: ['Applications', 'Workflow', 'Task Board', 'Quality Assurance', 'Service Delivery'] },
+  { key: 'strategy',      label: 'Strategy & Intelligence', icon: '📊', brand: null,     officer: 'Chief Strategy Officer',
+    mission: 'CEO analytics — the numbers that steer the ecosystem.', departments: ['strategy'],
+    teams: ['Analytics', 'Business Intelligence', 'Forecasting', 'Market Research', 'Executive Reports'] },
+  { key: 'technology',    label: 'Technology Division',     icon: '🛠️', brand: null,     officer: 'Chief Technology Officer',
+    mission: 'Everything technical — the platform the ecosystem runs on.', departments: ['innovation'],
+    teams: ['Engineering', 'Infrastructure', 'Security', 'DevOps', 'Database', 'Monitoring'] },
+];
+// The organization spine, for org charts across the portals.
+const ORG_HIERARCHY = ['CEO', 'Executive Board', 'Chief Officers', 'Directors', 'Managers', 'Team Leaders', 'Specialists', 'Associates'];
+app.get('/api/divisions', (req, res) => {
+  res.json({
+    hierarchy: ORG_HIERARCHY,
+    divisions: DIVISIONS.map(d => ({
+      ...d,
+      departments: d.departments.map(k => ({ key: k, label: DEPARTMENTS[k]?.label || k, icon: DEPARTMENTS[k]?.icon || '•', email: DEPARTMENTS[k]?.email || null })),
+    })),
+  });
+});
 
 // Which department addresses are LIVE (receiving mail via Cloudflare Email
 // Routing). Set on Render:  DEPT_EMAILS_LIVE=all   — or a list like
@@ -4907,7 +4959,8 @@ const VALID_DEPT_KEYS = Object.keys(DEPARTMENTS);
 function deptSender(deptKey) {
   const d = DEPARTMENTS[deptKey] || DEPARTMENTS.general;
   const addr = (d.live && d.email) ? d.email : 'support@skyglobegroup.com';
-  return `SkyGlobe ${d.label} <${addr}>`;
+  const nm = d.label.includes('SKYGLOBEGROUP') ? d.label : `SKYGLOBEGROUP ${d.label}`;
+  return `${nm} <${addr}>`;
 }
 
 // Which department owns each priced product.
@@ -5043,7 +5096,7 @@ Message: ${message || '(no message — form submission)'}`;
     if (!rec.needs_human && rec.client_email && rec.suggested_reply) {
       // Portal first (free, instant, quota-proof) — email as a bonus copy.
       const portalPromise = portalDeliver(rec.client_email, rec.suggested_reply, rec.department);
-      sendEmail(rec.client_email, `SkyGlobe Group — ${dept.label}`,
+      sendEmail(rec.client_email, `SKYGLOBEGROUP — ${dept.label.replace(/^SKYGLOBEGROUP\s+/, '')}`,
         `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a2233">
           <p>Dear ${rec.client_name || 'Client'},</p>
           <div style="line-height:1.6">${rec.suggested_reply.replace(/\n/g,'<br>')}</div>
@@ -6395,7 +6448,7 @@ app.get('/api/staff/profile', checkStaffOrAdmin, async (req, res) => {
 });
 
 // ── DEPARTMENT CHANNELS ───────────────────────────────────────────────────────
-const VALID_DEPTS = ['immigration','operations','finance','client_relations','legal','general'];
+const VALID_DEPTS = ['immigration', 'operations', 'finance', 'client_relations', 'legal', 'general', 'intelligence', 'economic', 'learning', 'people', 'strategy', 'technology'];
 
 app.get('/api/dept/messages', checkStaffOrAdmin, async (req, res) => {
   const dept = req.query.dept;
