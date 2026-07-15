@@ -50,7 +50,20 @@ section{scroll-margin-top:80px}
 .btn-outline:hover{border-color:#fff}
 .btn-outline-blue{background:transparent;border:1.5px solid var(--blue-3);color:var(--blue-3)}
 .btn-sm{height:42px;padding:0 20px;font-size:.88rem}
-@media(max-width:980px){.nav .links{display:none}}
+@media(max-width:980px){.nav .links{display:none}.nav .cta .btn-outline{display:none}}
+/* Hamburger + full menu — native-app navigation on phones */
+.burger{display:none;background:none;border:none;cursor:pointer;padding:8px;margin-left:4px}
+.burger span{display:block;width:24px;height:2.5px;border-radius:3px;background:#fff;margin:5px 0;transition:.3s}
+@media(max-width:980px){.burger{display:block}}
+.mmenu{position:fixed;inset:0;z-index:90;background:linear-gradient(165deg,var(--blue-1),var(--blue-2));display:none;flex-direction:column;padding:24px;overflow-y:auto}
+.mmenu.on{display:flex}
+.mmenu .head{display:flex;align-items:center;justify-content:space-between}
+.mmenu .close{background:rgba(255,255,255,.1);border:none;color:#fff;font-size:1.3rem;width:44px;height:44px;border-radius:12px;cursor:pointer}
+.mmenu .plat{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:16px;padding:15px 18px;margin-top:12px;color:#fff;font-weight:700}
+.mmenu .plat img{width:30px;height:30px;object-fit:contain}
+.mmenu .plat small{display:block;font-weight:500;font-size:.72rem;color:#AEC0EC}
+.mmenu .lnk{display:block;color:#DDE6FB;font-weight:600;font-size:1.02rem;padding:13px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
+.mmenu .foot{margin-top:auto;padding-top:24px}
 
 /* ── HERO ── */
 .hero{position:relative;background:linear-gradient(160deg,var(--blue-1) 0%,var(--blue-2) 46%,var(--blue-3) 100%);color:#fff;overflow:hidden}
@@ -194,7 +207,7 @@ section{scroll-margin-top:80px}
 
 /* ── FOOTER ── */
 footer{background:var(--navy-footer);color:#AEBBDD;padding:80px 0 40px;margin-top:112px}
-.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.3fr;gap:40px}
 @media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr}}
 footer .brand{color:#fff;font-weight:900;letter-spacing:.1em;font-size:1.1rem}
 footer .brand small{display:block;color:var(--gold);font-size:.66rem;letter-spacing:.24em;margin-top:6px;font-weight:700}
@@ -225,10 +238,37 @@ footer a:hover{color:var(--gold-2)}
     </div>
     <div class="cta">
       <a class="btn btn-outline btn-sm" href="/yunex/app">Sign In</a>
-      <a class="btn btn-gold btn-sm" href="/yunex/app">Create SKYGLOBE ID</a>
+      <a class="btn btn-gold btn-sm" href="/yunex/app" style="display:var(--cta-d,inline-flex)">Create SKYGLOBE ID</a>
+      <button class="burger" onclick="document.getElementById('mmenu').classList.add('on')" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
+
+<!-- MOBILE MENU — the whole ecosystem in one tap -->
+<div class="mmenu" id="mmenu">
+  <div class="head">
+    <span class="sgg" style="font-size:1.15rem">SKYGLOBEGROUP</span>
+    <button class="close" onclick="document.getElementById('mmenu').classList.remove('on')">✕</button>
+  </div>
+  <div style="margin-top:20px">
+    <a class="plat" href="/noria"><img src="/noria-logo-t.png" alt=""><span>NORIA<small>Artificial Intelligence</small></span></a>
+    <a class="plat" href="/terra"><img src="/terra-logo-t.png" alt=""><span>TERRA<small>Identity &amp; Trust</small></span></a>
+    <a class="plat" href="/yunex"><img src="/yunex-logo-t.png" alt=""><span>YUNEX<small>Commerce &amp; Investment</small></span></a>
+    <a class="plat" href="/academy"><span style="font-size:1.4rem">🎓</span><span>Academy<small>Knowledge &amp; Skills</small></span></a>
+    <a class="plat" href="/mobility"><span style="font-size:1.4rem">🌍</span><span>Mobility<small>Travel &amp; Opportunities</small></span></a>
+  </div>
+  <div style="margin-top:22px">
+    <a class="lnk" href="#solutions" onclick="document.getElementById('mmenu').classList.remove('on')">Solutions</a>
+    <a class="lnk" href="#ecosystem" onclick="document.getElementById('mmenu').classList.remove('on')">Ecosystem</a>
+    <a class="lnk" href="#intelligence" onclick="document.getElementById('mmenu').classList.remove('on')">Intelligence</a>
+    <a class="lnk" href="#trust" onclick="document.getElementById('mmenu').classList.remove('on')">Trust</a>
+  </div>
+  <div class="foot">
+    <a class="btn btn-gold" style="width:100%" href="/yunex/app">Create SKYGLOBE ID</a>
+    <a class="btn btn-outline" style="width:100%;margin-top:12px" href="/yunex/app">Sign In</a>
+    <div style="text-align:center;margin-top:18px;font-size:.82rem;color:#AEC0EC">✉️ support@skyglobegroup.com · 💬 <a href="https://wa.me/17373998522" style="color:#7FD6A3;font-weight:700">WhatsApp</a></div>
+  </div>
+</div>
 
 <!-- HERO -->
 <header class="hero">
@@ -411,6 +451,16 @@ footer a:hover{color:var(--gold-2)}
         <a href="/mobility#about">About SKYGLOBEGROUP</a>
         <a href="/mobility#contact">Contact</a>
         <a href="/mobility#services">Services</a>
+        <a href="https://wa.me/17373998522">💬 WhatsApp: +1 737 399 8522</a>
+      </div>
+      <div>
+        <h4>Write to us</h4>
+        <a href="mailto:support@skyglobegroup.com">✉️ support@skyglobegroup.com</a>
+        <a href="mailto:noria@skyglobegroup.com">🧠 noria@skyglobegroup.com</a>
+        <a href="mailto:terra@skyglobegroup.com">🛡️ terra@skyglobegroup.com</a>
+        <a href="mailto:yunex@skyglobegroup.com">💜 yunex@skyglobegroup.com</a>
+        <a href="mailto:education@skyglobegroup.com">🎓 education@skyglobegroup.com</a>
+        <a href="mailto:mobility@skyglobegroup.com">🌍 mobility@skyglobegroup.com</a>
       </div>
     </div>
     <div class="foot-bottom">
