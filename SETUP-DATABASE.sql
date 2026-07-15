@@ -542,3 +542,17 @@ create table if not exists yunex_saved (
   user_email text, listing_ref text, created_at timestamptz default now()
 );
 create index if not exists idx_saved_user on yunex_saved (user_email, listing_ref);
+
+-- ── SECURITY LOCKDOWN — always last ─────────────────────────────────────────
+-- Enable Row-Level Security on every public table with NO policies:
+-- the anon/public API key can touch nothing; only the server's service_role
+-- key (env var, never in the browser) can read or write.
+-- ⚠️ Requires SUPABASE_KEY on the server to be the SERVICE ROLE key.
+do $$
+declare r record;
+begin
+  for r in select tablename from pg_tables where schemaname = 'public'
+  loop
+    execute format('alter table public.%I enable row level security', r.tablename);
+  end loop;
+end $$;
