@@ -1,5 +1,5 @@
 # fly.io configuration — SkyGlobe Group platform (same app as Render).
-# Deploy: fly launch --copy-config --name skyglobegroup  (first time)
+# Deploy: fly launch --copy-config --name app = "skyglobe-limited-1"  (first time)
 #         fly deploy                                     (updates)
 # Secrets: fly secrets set SUPABASE_URL=... SUPABASE_KEY=... SESSION_SECRET=... \
 #          ADMIN_PASSWORDS=... RESEND_API_KEY=... CANONICAL_HOST=skyglobegroup.com
