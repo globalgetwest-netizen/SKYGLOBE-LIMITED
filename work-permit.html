@@ -206,6 +206,38 @@ body>header,body>nav:not(.eco-nav),nav.topnav,.topnav,body>footer:not(.eco-foot)
 .eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
 .eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
 </style>
+<style id="phero-css">
+.phero{position:relative;overflow:hidden;color:#fff;text-align:center;font-family:"SF Pro Display","Inter","Segoe UI",Arial,sans-serif}
+.phero .pw{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:66px 20px 76px}
+.phero::after{content:"";position:absolute;inset:0;background:radial-gradient(620px 320px at 50% -6%,var(--glow),transparent 62%);pointer-events:none}
+.phero .plogo{height:80px;width:80px;object-fit:contain;filter:drop-shadow(0 8px 26px var(--glow))}
+.phero .peyebrow{margin-top:18px;font-size:.74rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:var(--soft)}
+.phero .pwm{margin-top:12px;font-weight:900;letter-spacing:.02em;font-size:clamp(2rem,5.4vw,3.5rem);line-height:1.05;background:linear-gradient(95deg,#FFFFFF,var(--soft) 40%,var(--tint) 55%,var(--soft) 70%,#FFFFFF);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pflow 9s ease-in-out infinite alternate}
+@keyframes pflow{0%{background-position:0% center}100%{background-position:100% center}}
+.phero .plabel{margin-top:10px;font-size:.84rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#9DBEFF}
+.phero .pflour{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:22px}
+.phero .pflour .ln{height:2px;width:min(150px,26vw);border-radius:2px}
+.phero .pflour .l{background:linear-gradient(90deg,transparent,var(--tint))}
+.phero .pflour .r{background:linear-gradient(90deg,var(--tint),transparent)}
+.phero .pflour .gem{width:9px;height:9px;transform:rotate(45deg);background:linear-gradient(135deg,var(--tint),#9DC2FF,var(--gold2));border-radius:2px;box-shadow:0 0 14px var(--glow)}
+.phero .psub{max-width:680px;margin:22px auto 0;color:#C9D4F2;font-size:1.04rem;line-height:1.85}
+.phero .pacts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.phero .pbtn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 26px;border-radius:14px;font-weight:800;font-size:.95rem;cursor:pointer;border:none;text-decoration:none;font-family:inherit;transition:transform .25s,box-shadow .25s}
+.phero .pbtn.solid{background:linear-gradient(135deg,var(--tint),var(--tint2));color:#04132F;box-shadow:0 8px 26px var(--glow)}
+.phero .pbtn.solid:hover{transform:translateY(-2px)}
+.phero .pbtn.ghost{background:transparent;border:1.5px solid rgba(255,255,255,.45);color:#fff}
+.phero .pbtn.ghost:hover{border-color:#fff}
+.phero .plive{border-top:1px solid rgba(255,255,255,.12);margin-top:52px;padding-top:22px;display:flex;justify-content:center;gap:34px;flex-wrap:wrap}
+.phero .mtr{min-width:148px;text-align:left}
+.phero .mtr .l{font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8FA6DC;margin-bottom:8px}
+.phero .mtr .bar{height:5px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;position:relative}
+.phero .mtr .bar i{position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--tint) 35%,#4E86F0 55%,var(--tint2) 75%,transparent);background-size:220% 100%;animation:mflow 3.6s linear infinite}
+.phero .mtr.m2 .bar i{animation-delay:-1.2s}.phero .mtr.m3 .bar i{animation-delay:-2.4s}
+@keyframes mflow{0%{background-position:100% 0}100%{background-position:-120% 0}}
+.phero .pstatus{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:#7FD6A3}
+.phero .pstatus .d{width:8px;height:8px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.2)}
+@media(max-width:640px){.phero .pw{padding:46px 18px 56px}}
+</style>
 </head>
 <body>
 <nav class="eco-nav"><div class="in">
@@ -230,23 +262,16 @@ body>header,body>nav:not(.eco-nav),nav.topnav,.topnav,body>footer:not(.eco-foot)
 <script src="/noria-widget.js"></script>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-badge">🇪🇺 Europe &amp; Global Work Permit Service</div>
-    <h1>Your <span>European Work Permit</span>,<br>Professionally Handled</h1>
-    <p class="sub">We verify your documents, prepare your complete application, submit it to the relevant authority, and keep you updated — until your permit is in your hands.</p>
-    <div class="hero-trust">
-      <span>✔ Genuine government-issued permits</span>
-      <span>✔ Document review before payment</span>
-      <span>✔ Dedicated application agent</span>
-      <span>✔ Portal tracking &amp; delivery</span>
-    </div>
-    <div class="hero-ctas">
-      <button class="btn-gold" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})">Check My Eligibility →</button>
-      <a href="/packages" class="btn-outline">View All Packages</a>
-    </div>
-  </div>
-</section>
+<section class="phero" style="--tint:#F0742E;--tint2:#E0642A;--soft:#FFC08A;--glow:rgba(240,116,46,.24);--gold2:#E8C566;background:linear-gradient(160deg,#061A52 0%,#0A2E65 45%,#5A2A0C 100%)"><div class="pw">
+  <img class="plogo" src="/skyglobe-logo-t.png" alt="">
+  <div class="peyebrow">A SKYGLOBEGROUP Platform · MOBILITY</div>
+  <div class="pwm">Work Permit</div>
+  <div class="plabel">Europe &amp; Global Mobility</div>
+  <div class="pflour"><span class="ln l"></span><span class="gem"></span><span class="ln r"></span></div>
+  <p class="psub">We verify your documents, prepare your complete application, submit it to the relevant authority, and keep you updated — until your permit is in your hands.</p>
+  <div class="pacts"><a class="pbtn solid" href="#" onclick="document.getElementById('apply')?.scrollIntoView({behavior:'smooth'});return false">Check My Eligibility</a><a class="pbtn ghost" href="/packages">View All Packages</a></div>
+  <div class="plive"><div class="mtr "><div class="l">Applications Guided</div><div class="bar"><i></i></div></div><div class="mtr m2"><div class="l">Corridors Covered</div><div class="bar"><i></i></div></div><div class="mtr m3"><div class="l">Portal Tracking</div><div class="bar"><i></i></div></div><div class="pstatus"><span class="d"></span> Mobility Network · Operational</div></div>
+</div></section>
 
 <!-- HOW IT WORKS -->
 <section class="section" style="background:#fff">
