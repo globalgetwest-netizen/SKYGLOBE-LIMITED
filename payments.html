@@ -37,8 +37,45 @@
   .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
   .toolbar button{background:#fff;border:1px solid var(--line);border-radius:980px;padding:8px 16px;font:inherit;font-size:.82rem;cursor:pointer}
 </style>
+<style id="eco-chrome-css">
+.eco-nav,.eco-foot,.eco-nav *,.eco-foot *{box-sizing:border-box}
+.eco-nav,.eco-foot{width:100%;max-width:100%;flex:0 0 auto;align-self:stretch;grid-column:1/-1}
+/* hide legacy chrome, keep it in DOM so page scripts still work */
+body>header,body>nav:not(.eco-nav),nav.topnav,.topnav,body>footer:not(.eco-foot){display:none !important}
+.eco-nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22);font-family:"SF Pro Display","Inter","Segoe UI",Arial,sans-serif}
+.eco-nav .in{max-width:1180px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
+.eco-nav .bd{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.eco-nav .bd img{height:30px;width:30px;object-fit:contain}
+.eco-nav .wm{font-weight:900;letter-spacing:.04em;font-size:1.02rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:20px}
+.eco-nav .lk a{color:#C9D4E5;text-decoration:none;font-size:.86rem;font-weight:600}
+.eco-nav .lk a:hover{color:#F2D98A}
+.eco-nav .id{background:linear-gradient(135deg,#D4A73A,#E8C566);color:#04132F;padding:8px 16px;border-radius:9px;font-weight:800;font-size:.84rem;text-decoration:none;white-space:nowrap}
+@media(max-width:860px){.eco-nav .lk .eh{display:none}}
+.eco-foot{background:#04132F;color:#AEC0EC;font-family:"SF Pro Display","Inter","Segoe UI",Arial,sans-serif;padding:48px 20px 30px;border-top:1px solid rgba(212,167,58,.18)}
+.eco-foot .in{max-width:1180px;margin:0 auto}
+.eco-foot .ft{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
+@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
+.eco-foot .wm{font-weight:900;letter-spacing:.04em;font-size:1.35rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-foot .tag{color:#D4A73A;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;margin-top:10px}
+.eco-foot p.m{color:#8FA0C4;font-size:.86rem;margin-top:12px;line-height:1.6;max-width:280px}
+.eco-foot h4{color:#fff;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;font-weight:800}
+.eco-foot .col a{display:block;color:#AEC0EC;text-decoration:none;font-size:.88rem;margin-bottom:9px}
+.eco-foot .col a:hover{color:#F2D98A}
+.eco-foot .social{display:flex;gap:12px;align-items:center;margin-top:22px;flex-wrap:wrap}
+.eco-foot .social a{color:#C9D4E5;font-weight:700;font-size:.84rem;text-decoration:none}
+.eco-foot .bot{border-top:1px solid rgba(255,255,255,.1);margin-top:34px;padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#8FA0C4}
+.eco-foot .bot b{color:#fff}
+.eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
+.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
+</style>
 </head>
 <body>
+<nav class="eco-nav"><div class="in">
+  <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
+  <div class="lk"><a class="eh" href="/noria">NORIA</a><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
+</div></nav>
 <header><div class="wrap">
   <div class="brand"><img src="/icon-192.png?v=3" alt="">SkyGlobe<small>GROUP</small></div>
   <a href="/" style="color:#cdd6e6;text-decoration:none;font-size:.9rem">← Back to site</a>
@@ -138,5 +175,14 @@
 </script>
 <script src="/announcements.js?v=2" defer></script>
 <script src="/dept-contact.js?v=7" defer></script>
+<footer class="eco-foot"><div class="in">
+  <div class="ft">
+    <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
+    <div class="col"><h4>Ecosystem</h4><a href="/noria">NORIA — Intelligence</a><a href="/terra">TERRA — Identity &amp; Trust</a><a href="/yunex">YUNEX — Economy</a><a href="/academy">Academy — Learning</a><a href="/mobility">Mobility — Travel</a></div>
+    <div class="col"><h4>Quick Access</h4><a href="/id">SKYGLOBE ID</a><a href="/courses">Academy Programs</a><a href="/terra#documents">Documents &amp; Legal</a><a href="/#ecosystem">Explore Ecosystem</a></div>
+    <div class="col"><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">💬 WhatsApp</a><a href="/#ecosystem">Message Centre</a><div class="social"><a href="https://www.tiktok.com/@SKYGLOBEGROUP" target="_blank" rel="noopener">TikTok</a><a href="https://www.youtube.com/@SKYGLOBEGROUP" target="_blank" rel="noopener">YouTube</a><a href="https://www.instagram.com/SKYGLOBEGROUP" target="_blank" rel="noopener">Instagram</a></div><div style="color:#8FA0C4;font-size:.8rem;margin-top:14px">@SKYGLOBEGROUP · skyglobegroup.com</div></div>
+  </div>
+  <div class="bot"><div>© <span id="ecoYr">2026</span> <b>SKYGLOBEGROUP</b> · All Rights Reserved</div><div class="live"><i></i> Live Ecosystem · Operational</div><div><span style="color:#D4A73A">✦</span> Verified on skyglobegroup.com</div></div>
+</div></footer>
 </body>
 </html>
