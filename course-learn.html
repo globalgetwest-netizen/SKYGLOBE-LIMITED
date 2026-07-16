@@ -4,17 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your Programme — SkyGlobe Certificate Programs</title>
-<meta name="theme-color" content="#041022">
+<meta name="theme-color" content="#061A52">
 <link rel="icon" href="/icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#041022;--navy2:#071B3B;--gold:#D4A73A;--gold-hi:#F4D77A;--gold-deep:#a87016;
+    --navy:#04132F;--navy2:#061A52;--gold:#D4A73A;--gold-hi:#F4D77A;--gold-deep:#a87016;
     --ink:#1a2233;--muted:#6b7689;--line:#e6e9ef;--ok:#1f9d57;
     --font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--font);color:var(--ink);background:#f4f6fa;line-height:1.6}
+  body{font-family:var(--font);color:var(--ink);background:#F8F9FB;line-height:1.6}
   a{color:inherit;text-decoration:none}
   .wrap{max-width:900px;margin:0 auto;padding:0 20px}
   header{background:var(--navy);color:#fff;padding:14px 0;position:sticky;top:0;z-index:40}
@@ -26,10 +25,10 @@
 
   .hero{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#fff;padding:34px 0}
   .hero .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-  .hero h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(1.4rem,3.4vw,1.9rem)}
+  .hero h1{font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;font-weight:600;font-size:clamp(1.4rem,3.4vw,1.9rem)}
   .hero .sub{color:#c3cee0;font-size:.86rem;margin-top:4px}
   .progress-ring{text-align:center}
-  .progress-ring .pct{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold-hi);font-weight:700}
+  .progress-ring .pct{font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:1.8rem;color:var(--gold-hi);font-weight:700}
   .progress-ring .lbl{font-size:.68rem;color:#9fb0c9;text-transform:uppercase;letter-spacing:.1em}
 
   .section{padding:30px 0 60px}
@@ -53,15 +52,15 @@
 
   .cert-box{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:28px;text-align:center;margin-top:26px}
   .cert-box.ready{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,167,58,.15)}
-  .cert-box h2{font-family:'Cormorant Garamond',serif;color:var(--navy);font-size:1.5rem;margin-bottom:8px}
+  .cert-box h2{font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--navy);font-size:1.5rem;margin-bottom:8px}
   .cert-box p{color:var(--muted);font-size:.9rem}
   .photo-pick{margin:16px auto;max-width:320px}
   .photo-pick img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);display:block;margin:0 auto 10px}
   .spin{width:36px;height:36px;border:4px solid #e6e9ef;border-top-color:var(--gold);border-radius:50%;animation:s 1s linear infinite;margin:20px auto}
   @keyframes s{to{transform:rotate(360deg)}}
-  .doc-ref{display:inline-block;background:var(--navy);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.15rem;letter-spacing:.06em;padding:10px 20px;border-radius:12px;border:2px solid var(--gold);margin:10px 0}
+  .doc-ref{display:inline-block;background:var(--navy);color:var(--gold);font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:1.15rem;letter-spacing:.06em;padding:10px 20px;border-radius:12px;border:2px solid var(--gold);margin:10px 0}
   .lesson-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-  .tool{background:#f4f6fa;border:1.5px solid var(--line);color:var(--navy);border-radius:30px;padding:8px 16px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+  .tool{background:#F8F9FB;border:1.5px solid var(--line);color:var(--navy);border-radius:30px;padding:8px 16px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
   .tool.active{border-color:var(--gold);color:var(--gold-deep)}
   .quiz{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px}
   .quiz .q{margin-bottom:14px}
@@ -73,9 +72,9 @@
   .askbox{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px}
   .askbox .row{display:flex;gap:8px}
   .askbox input{flex:1;padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:.88rem;font-family:inherit}
-  .askbox .ans{margin-top:10px;background:#f4f6fa;border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px;font-size:.88rem;color:#3c465a;white-space:pre-wrap;display:none}
+  .askbox .ans{margin-top:10px;background:#F8F9FB;border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px;font-size:.88rem;color:#3c465a;white-space:pre-wrap;display:none}
   .exam-box{background:#fff;border:1.5px solid var(--gold);border-radius:18px;padding:28px;margin-top:26px;box-shadow:0 0 0 3px rgba(212,167,58,.12)}
-  .exam-box h2{font-family:'Cormorant Garamond',serif;color:var(--navy);font-size:1.5rem;margin-bottom:8px}
+  .exam-box h2{font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--navy);font-size:1.5rem;margin-bottom:8px}
   /* ── EXAM ROOM: no select/copy, and a traceable watermark on every screen ── */
   .quiz,.exam-box{-webkit-user-select:none;-moz-user-select:none;user-select:none;position:relative}
   .quiz::after,.exam-box::after{content:var(--wm,'SKYGLOBE ACADEMY');position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:rgba(4,16,34,.055);transform:rotate(-24deg);letter-spacing:.14em;white-space:pre-wrap;text-align:center;z-index:5}
@@ -86,7 +85,7 @@
 </head>
 <body>
 <header><div class="wrap">
-  <a href="/" class="brand"><img src="/icon-192.png" alt="SkyGlobe Group"><div>SKYGLOBE<small>GROUP</small></div></a>
+  <a href="/" class="brand"><img src="/icon-192.png" alt="SKYGLOBEGROUP"><div>SKYGLOBE<small>GROUP</small></div></a>
   <a class="back" href="/courses">← Certificate Programs</a>
 </div></header>
 
@@ -120,7 +119,7 @@
   </div>
 </div></section>
 
-<footer>© <span id="yr"></span> SkyGlobe Group · Knowledge Hub<div class="m">One World. One Mission.</div></footer>
+<footer>© <span id="yr"></span> SKYGLOBEGROUP · Knowledge Hub<div class="m">One World. One Mission.</div></footer>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -370,7 +369,7 @@ async function generateCertificate(){
     document.addEventListener(ev, e => { if (inExam(e.target)) e.preventDefault(); }, true));
   document.addEventListener('keyup', e => {
     if (e.key === 'PrintScreen') {
-      try { navigator.clipboard.writeText('SkyGlobe Academy — examination content is protected.'); } catch(_){}
+      try { navigator.clipboard.writeText('SKYGLOBEGROUP Academy — examination content is protected.'); } catch(_){}
       document.querySelectorAll('.quiz, #examArea').forEach(el => { el.style.filter = 'blur(14px)'; });
       setTimeout(() => document.querySelectorAll('.quiz, #examArea').forEach(el => { el.style.filter = ''; }), 2000);
     }

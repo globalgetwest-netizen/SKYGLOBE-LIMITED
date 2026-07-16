@@ -4,24 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Official Letterhead Studio — SkyGlobe Group</title>
+<title>Official Letterhead Studio — SKYGLOBEGROUP</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
   body { font-family:'Inter',sans-serif; background:#d8dce4; color:#1a1a1a; }
 
   /* ── Login gate ─────────────────────────────────────────── */
-  .gate { position:fixed; inset:0; z-index:999; background:linear-gradient(160deg,#041022,#071B3B); display:flex; align-items:center; justify-content:center; padding:20px; }
+  .gate { position:fixed; inset:0; z-index:999; background:linear-gradient(160deg,#04132F,#061A52); display:flex; align-items:center; justify-content:center; padding:20px; }
   .gate-card { background:#fff; border-radius:20px; padding:44px 38px; width:100%; max-width:390px; box-shadow:0 40px 100px rgba(0,0,0,.5); text-align:center; }
   .gate-card img { height:72px; width:72px; border-radius:16px; margin-bottom:16px; }
-  .gate-card h1 { font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:#041022; letter-spacing:.02em; }
+  .gate-card h1 { font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; font-size:1.8rem; color:#04132F; letter-spacing:.02em; }
   .gate-card h1 span { color:#D4A73A; }
   .gate-card .sub { font-size:.74rem; color:#64748b; letter-spacing:.2em; text-transform:uppercase; margin:8px 0 26px; }
   .gate-card input { width:100%; padding:14px 16px; border:1.5px solid #e2e8f0; border-radius:11px; font-size:.95rem; margin-bottom:14px; transition:.2s; }
   .gate-card input:focus { outline:none; border-color:#D4A73A; box-shadow:0 0 0 3px rgba(212,167,58,.15); }
-  .gate-card button { width:100%; padding:14px; background:#D4A73A; color:#041022; border:none; border-radius:11px; font-weight:700; cursor:pointer; font-size:.95rem; letter-spacing:.02em; transition:.15s; }
+  .gate-card button { width:100%; padding:14px; background:#D4A73A; color:#04132F; border:none; border-radius:11px; font-weight:700; cursor:pointer; font-size:.95rem; letter-spacing:.02em; transition:.15s; }
   .gate-card button:hover { background:#d4b860; }
   .gate-card .err { color:#dc2626; font-size:.82rem; min-height:20px; margin-top:10px; }
   .gate-card .lock { font-size:.72rem; color:#94a3b8; margin-top:18px; }
@@ -29,13 +28,13 @@
   /* ── Studio controls ────────────────────────────────────── */
   .studio { max-width:900px; margin:0 auto; padding:20px 16px 0; }
   .whoami { display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; margin-bottom:16px; }
-  .whoami .badge { display:inline-flex; align-items:center; gap:8px; background:#041022; color:#fff; padding:9px 18px; border-radius:100px; font-size:.82rem; font-weight:600; }
+  .whoami .badge { display:inline-flex; align-items:center; gap:8px; background:#04132F; color:#fff; padding:9px 18px; border-radius:100px; font-size:.82rem; font-weight:600; }
   .whoami .badge .role { color:#D4A73A; text-transform:uppercase; font-size:.68rem; letter-spacing:.12em; }
   .whoami .out { background:#fff; border:1px solid #d8dce4; color:#64748b; padding:8px 16px; border-radius:100px; font-size:.78rem; cursor:pointer; transition:.15s; }
-  .whoami .out:hover { border-color:#D4A73A; color:#041022; }
+  .whoami .out:hover { border-color:#D4A73A; color:#04132F; }
 
   .panel { background:#fff; border-radius:18px; padding:24px; box-shadow:0 4px 28px rgba(0,0,0,.08); margin-bottom:20px; border:1px solid #f0f2f8; }
-  .panel h2 { font-size:.96rem; color:#041022; margin-bottom:4px; display:flex; align-items:center; gap:8px; font-weight:700; }
+  .panel h2 { font-size:.96rem; color:#04132F; margin-bottom:4px; display:flex; align-items:center; gap:8px; font-weight:700; }
   .panel .desc { font-size:.78rem; color:#64748b; margin-bottom:18px; line-height:1.6; }
   .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
   @media(max-width:560px){ .row { grid-template-columns:1fr; } }
@@ -43,10 +42,10 @@
   .field input, .field textarea, .field select { width:100%; padding:11px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:.88rem; font-family:inherit; transition:.2s; }
   .field input:focus, .field textarea:focus, .field select:focus { outline:none; border-color:#D4A73A; box-shadow:0 0 0 3px rgba(212,167,58,.12); }
   .field textarea { resize:vertical; min-height:92px; line-height:1.6; }
-  .btn-gold { background:#D4A73A; color:#041022; border:none; padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; font-size:.9rem; transition:.15s; }
+  .btn-gold { background:#D4A73A; color:#04132F; border:none; padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; font-size:.9rem; transition:.15s; }
   .btn-gold:hover { background:#d4b860; }
   .btn-gold:disabled { opacity:.5; cursor:not-allowed; }
-  .btn-line { background:#fff; border:1.5px solid #d8dce4; color:#041022; padding:11px 20px; border-radius:10px; font-weight:600; cursor:pointer; font-size:.88rem; transition:.15s; }
+  .btn-line { background:#fff; border:1.5px solid #d8dce4; color:#04132F; padding:11px 20px; border-radius:10px; font-weight:600; cursor:pointer; font-size:.88rem; transition:.15s; }
   .btn-line:hover { border-color:#D4A73A; }
   .ai-status { font-size:.8rem; color:#64748b; margin-top:10px; min-height:18px; }
   .ai-status.err { color:#dc2626; }
@@ -57,7 +56,7 @@
   .sig-opt.active { border-color:#D4A73A; background:#fbf6e9; }
   .sig-opt.locked { opacity:.45; cursor:not-allowed; background:#f8fafc; }
   .sig-opt input { margin-top:3px; accent-color:#D4A73A; }
-  .sig-opt .t { font-weight:700; font-size:.86rem; color:#041022; }
+  .sig-opt .t { font-weight:700; font-size:.86rem; color:#04132F; }
   .sig-opt .d { font-size:.74rem; color:#64748b; margin-top:3px; line-height:1.5; }
   .sig-opt .locktag { font-size:.68rem; color:#b45309; font-weight:700; background:#fef3c7; padding:2px 9px; border-radius:6px; margin-left:6px; }
 
@@ -95,7 +94,7 @@
 
   /* Diagonal text watermark */
   .watermark-text { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-  .watermark-text span { position:absolute; font-family:'Cormorant Garamond',serif; font-weight:700; color:rgba(10,22,40,.05); font-size:1.8rem; letter-spacing:.4em; white-space:nowrap; transform:rotate(-30deg); }
+  .watermark-text span { position:absolute; font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; font-weight:700; color:rgba(10,22,40,.05); font-size:1.8rem; letter-spacing:.4em; white-space:nowrap; transform:rotate(-30deg); }
 
   /* DRAFT stamp */
   .draftmark { position:absolute; inset:0; z-index:5; pointer-events:none; display:none; align-items:center; justify-content:center; }
@@ -105,7 +104,7 @@
   /* ── Header ─────────────────────────────────────────────── */
   .lh-header {
     position:relative; z-index:4;
-    background:linear-gradient(135deg, #041022 0%, #071B3B 60%, #132850 100%);
+    background:linear-gradient(135deg, #04132F 0%, #061A52 60%, #132850 100%);
     margin:18px 18px 0; padding:26px 48px 22px;
     display:flex; align-items:center; justify-content:space-between; gap:24px;
     border-radius:4px 4px 0 0;
@@ -118,7 +117,7 @@
   }
   .lh-brand { display:flex; align-items:center; gap:18px; }
   .lh-header img.logo { height:80px; width:80px; border-radius:16px; border:2px solid rgba(212,167,58,.4); }
-  .lh-brand-text .name { font-family:'Cormorant Garamond',serif; font-size:2.05rem; font-weight:700; letter-spacing:.04em; color:#fff; line-height:1; }
+  .lh-brand-text .name { font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; font-size:2.05rem; font-weight:700; letter-spacing:.04em; color:#fff; line-height:1; }
   .lh-brand-text .name span { color:#D4A73A; }
   .lh-brand-text .name-sub { font-size:.64rem; color:#7a90bb; letter-spacing:.28em; text-transform:uppercase; margin-top:6px; display:block; }
   .lh-brand-text .tag { font-size:.62rem; color:#8899bb; letter-spacing:.14em; text-transform:uppercase; margin-top:3px; }
@@ -137,7 +136,7 @@
   .security-strip .sec-item strong { color:#5a4820; }
 
   /* ── Body ───────────────────────────────────────────────── */
-  .lh-body { position:relative; z-index:4; flex:1; padding:44px 64px 28px; font-size:.95rem; line-height:1.85; color:#1a1a2e; font-family:'EB Garamond',Georgia,serif; }
+  .lh-body { position:relative; z-index:4; flex:1; padding:44px 64px 28px; font-size:.95rem; line-height:1.85; color:#1a1a2e; font-family:'EB Garamond',"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
   .lh-body[contenteditable]:focus { outline:2px dashed rgba(212,167,58,.35); border-radius:4px; }
   .lh-date { color:#4a5568; margin-bottom:24px; font-size:.88rem; font-family:'Inter',sans-serif; }
   .lh-ref { font-size:.75rem; color:#8a6f2a; letter-spacing:.1em; margin-bottom:14px; font-family:'Inter',sans-serif; font-weight:600; text-transform:uppercase; }
@@ -147,7 +146,7 @@
   .sign-left { display:flex; flex-direction:column; }
   .sign-block .sig-img { height:72px; width:auto; display:block; margin-bottom:-6px; }
   .sign-divider { width:200px; height:1px; background:linear-gradient(90deg,#D4A73A,transparent); margin:4px 0 8px; }
-  .sign-block .sig-name { font-weight:700; font-size:1rem; color:#041022; font-family:'Inter',sans-serif; }
+  .sign-block .sig-name { font-weight:700; font-size:1rem; color:#04132F; font-family:'Inter',sans-serif; }
   .sign-block .sig-title { font-size:.78rem; color:#4a5568; font-family:'Inter',sans-serif; line-height:1.5; margin-top:2px; }
   .sign-block .sig-company { font-size:.72rem; color:#8a6f2a; font-family:'Inter',sans-serif; letter-spacing:.06em; margin-top:4px; font-weight:600; }
   .sign-block .stamp-img { height:140px; width:140px; opacity:.93; flex-shrink:0; }
@@ -158,7 +157,7 @@
   /* ── Footer ─────────────────────────────────────────────── */
   .lh-footer {
     position:relative; z-index:4;
-    background:linear-gradient(135deg, #041022 0%, #071B3B 100%);
+    background:linear-gradient(135deg, #04132F 0%, #061A52 100%);
     margin:0 18px 18px; padding:16px 48px;
     border-radius:0 0 4px 4px;
   }
@@ -168,7 +167,7 @@
     z-index:5;
   }
   .lh-footer .motto {
-    text-align:center; font-family:'Cormorant Garamond',serif; font-style:italic;
+    text-align:center; font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; font-style:italic;
     font-size:.88rem; color:#D4A73A; padding-bottom:10px; margin-bottom:10px;
     border-bottom:1px solid rgba(212,167,58,.25); letter-spacing:.08em;
   }
@@ -201,7 +200,7 @@
 <!-- LOGIN GATE -->
 <div class="gate" id="gate">
   <div class="gate-card">
-    <img src="icon.svg" onerror="this.src='icon-512.png'" alt="SkyGlobe Group">
+    <img src="icon.svg" onerror="this.src='icon-512.png'" alt="SKYGLOBEGROUP">
     <h1>Sky<span>Globe</span> <span style="color:#fff">Group</span></h1>
     <div class="sub">Official Letterhead Studio · Private</div>
     <input type="password" id="pw" placeholder="Enter your portal password" onkeydown="if(event.key==='Enter')doLogin()">
@@ -259,13 +258,13 @@
   <!-- AI writer -->
   <div class="panel">
     <h2>✨ AI Letter Writer</h2>
-    <div class="desc">Describe what the letter should say. The AI writes a professional, formal letter on SkyGlobe Group headed paper. It never invents facts not given to it.</div>
+    <div class="desc">Describe what the letter should say. The AI writes a professional, formal letter on SKYGLOBEGROUP headed paper. It never invents facts not given to it.</div>
     <div class="row">
       <div class="field"><label>Recipient name &amp; title</label><input id="aiRecipient" placeholder="e.g. The Visa Officer, German Embassy, London"></div>
       <div class="field"><label>Subject / RE line</label><input id="aiSubject" placeholder="e.g. Support Letter for Mr John Doe — UK Work Permit Application"></div>
     </div>
     <div class="field" style="margin-bottom:14px"><label>Instruction — what should the letter say?</label>
-      <textarea id="aiInstruction" placeholder="e.g. Write a formal support letter for Mr James Carter (British, passport GB12345678) confirming that SkyGlobe Group has verified his qualifications and is facilitating his Germany work permit application as a mechanical engineer. Request the authority's kind consideration."></textarea></div>
+      <textarea id="aiInstruction" placeholder="e.g. Write a formal support letter for Mr James Carter (British, passport GB12345678) confirming that SKYGLOBEGROUP has verified his qualifications and is facilitating his Germany work permit application as a mechanical engineer. Request the authority's kind consideration."></textarea></div>
     <div class="row">
       <div class="field"><label>Tone</label>
         <select id="aiTone">
@@ -294,16 +293,16 @@
       </label>
       <label class="sig-opt" data-mode="authorised">
         <input type="radio" name="sigmode" value="authorised" onchange="applyMode()">
-        <div><div class="t">Authorised Signatory <span class="locktag" id="lockAuth" style="display:none">CEO only</span></div><div class="d">Official stamp + "Authorised Signatory, for and on behalf of SkyGlobe Group". For standard official letters.</div></div>
+        <div><div class="t">Authorised Signatory <span class="locktag" id="lockAuth" style="display:none">CEO only</span></div><div class="d">Official stamp + "Authorised Signatory, for and on behalf of SKYGLOBEGROUP". For standard official letters.</div></div>
       </label>
       <label class="sig-opt" data-mode="ceo">
         <input type="radio" name="sigmode" value="ceo" onchange="applyMode()">
-        <div><div class="t">CEO Signed — Saleh Shuaibu <span class="locktag" id="lockCeo" style="display:none">CEO only</span></div><div class="d">Full CEO signature + official company stamp. The highest authority letter SkyGlobe Group can issue.</div></div>
+        <div><div class="t">CEO Signed — Saleh Shuaibu <span class="locktag" id="lockCeo" style="display:none">CEO only</span></div><div class="d">Full CEO signature + official company stamp. The highest authority letter SKYGLOBEGROUP can issue.</div></div>
       </label>
     </div>
     <div class="row" style="margin-top:16px">
       <div class="field"><label>Signatory name</label><input id="sigName" value="Saleh Shuaibu"></div>
-      <div class="field"><label>Signatory title</label><input id="sigTitle" value="Founder & Chief Executive Officer, SkyGlobe Group"></div>
+      <div class="field"><label>Signatory title</label><input id="sigTitle" value="Founder & Chief Executive Officer, SKYGLOBEGROUP"></div>
     </div>
   </div>
 
@@ -330,16 +329,16 @@
   <!-- Watermarks -->
   <div class="watermark"><img src="icon.svg" onerror="this.src='icon-512.png'" alt=""></div>
   <div class="watermark-text" id="wmTextBlock">
-    <span style="top:16%; left:-8%" id="wmt1">SKYGLOBE GROUP · OFFICIAL · SKYGLOBE GROUP · OFFICIAL</span>
-    <span style="top:43%; left:-14%" id="wmt2">SKYGLOBE GROUP · OFFICIAL · SKYGLOBE GROUP · OFFICIAL</span>
-    <span style="top:70%; left:-6%" id="wmt3">SKYGLOBE GROUP · OFFICIAL · SKYGLOBE GROUP · OFFICIAL</span>
+    <span style="top:16%; left:-8%" id="wmt1">SKYGLOBEGROUP · OFFICIAL · SKYGLOBEGROUP · OFFICIAL</span>
+    <span style="top:43%; left:-14%" id="wmt2">SKYGLOBEGROUP · OFFICIAL · SKYGLOBEGROUP · OFFICIAL</span>
+    <span style="top:70%; left:-6%" id="wmt3">SKYGLOBEGROUP · OFFICIAL · SKYGLOBEGROUP · OFFICIAL</span>
   </div>
   <div class="draftmark"><span>DRAFT</span></div>
 
   <!-- Header -->
   <div class="lh-header">
     <div class="lh-brand">
-      <img src="icon.svg" onerror="this.src='icon-512.png'" alt="SkyGlobe Group" class="logo">
+      <img src="icon.svg" onerror="this.src='icon-512.png'" alt="SKYGLOBEGROUP" class="logo">
       <div class="lh-brand-text">
         <div class="name">Sky<span>Globe</span> <span style="color:#fff">Group</span></div>
         <span class="name-sub">Global Operations</span>
@@ -347,7 +346,7 @@
       </div>
     </div>
     <div class="co">
-      <strong>SkyGlobe Group</strong>
+      <strong>SKYGLOBEGROUP</strong>
       skyglobegroup.com<br>
       support@skyglobegroup.com<br>
       WhatsApp: +1 737-399-8522<br>
@@ -357,7 +356,7 @@
 
   <!-- Security strip -->
   <div class="security-strip">
-    <div class="sec-item">🔏 <strong>Verified Document</strong> — SkyGlobe Group</div>
+    <div class="sec-item">🔏 <strong>Verified Document</strong> — SKYGLOBEGROUP</div>
     <div class="sec-item">📋 Ref: <strong id="secRef">—</strong></div>
     <div class="sec-item">🌐 Verify: <strong>skyglobegroup.com</strong></div>
     <div class="sec-item" id="secDate" style="font-size:.62rem">Issued: <strong id="secDateVal">—</strong></div>
@@ -393,21 +392,21 @@
       <div class="sign-divider"></div>
       <div class="sig-name" id="outName">Saleh Shuaibu</div>
       <div class="sig-title" id="outTitle">Founder &amp; Chief Executive Officer</div>
-      <div class="sig-company">SkyGlobe Group · United Kingdom</div>
+      <div class="sig-company">SKYGLOBEGROUP · United Kingdom</div>
     </div>
     <img src="stamp.png" alt="Official Stamp" class="stamp-img">
   </div>
 
   <!-- Footer -->
   <div class="lh-footer">
-    <div class="motto">One World. One Mission. — SkyGlobe Group</div>
+    <div class="motto">One World. One Mission. — SKYGLOBEGROUP</div>
     <div class="contacts">
       <span><strong>✉</strong> support@skyglobegroup.com</span>
       <span><strong>☎</strong> +1 737-399-8522</span>
       <span><strong>🌐</strong> skyglobegroup.com</span>
       <span><strong>💬</strong> WhatsApp: +1 737-399-8522</span>
     </div>
-    <div class="reg" id="legalFooter">SKYGLOBE GROUP · Global Operations · This document is confidential and issued solely to the named recipient. Unauthorised reproduction, distribution or misuse of this document may constitute a criminal offence under applicable law. SkyGlobe Group accepts no liability for any use of this document other than its stated purpose.</div>
+    <div class="reg" id="legalFooter">SKYGLOBEGROUP · Global Operations · This document is confidential and issued solely to the named recipient. Unauthorised reproduction, distribution or misuse of this document may constitute a criminal offence under applicable law. SKYGLOBEGROUP accepts no liability for any use of this document other than its stated purpose.</div>
   </div>
 </div>
 
@@ -489,7 +488,7 @@
     } else if(mode === 'authorised'){
       b.classList.add('no-sigimg');
       document.getElementById('outName').textContent = document.getElementById('sigName').value || 'Authorised Signatory';
-      document.getElementById('outTitle').textContent = 'For and on behalf of SkyGlobe Group';
+      document.getElementById('outTitle').textContent = 'For and on behalf of SKYGLOBEGROUP';
       signBlock.style.display = 'flex';
     } else {
       b.classList.add('is-draft','no-sigimg','no-stamp');
@@ -510,13 +509,13 @@
   function updateWatermark(){
     const name  = (document.getElementById('wmName')?.value  || '').trim();
     const email = (document.getElementById('wmEmail')?.value || '').trim();
-    const base  = name || email ? `ISSUED TO: ${name}${email?' · '+email:''} · CONFIDENTIAL · SKYGLOBE GROUP · ` : 'SKYGLOBE GROUP · OFFICIAL · CONFIDENTIAL · SKYGLOBE GROUP · OFFICIAL · ';
+    const base  = name || email ? `ISSUED TO: ${name}${email?' · '+email:''} · CONFIDENTIAL · SKYGLOBEGROUP · ` : 'SKYGLOBEGROUP · OFFICIAL · CONFIDENTIAL · SKYGLOBEGROUP · OFFICIAL · ';
     const text  = base.repeat(5);
     ['wmt1','wmt2','wmt3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=text; });
     // Update legal footer
     const lf = document.getElementById('legalFooter');
     if(lf && name){
-      lf.textContent = `SKYGLOBE GROUP · Global Operations · This document is confidential and issued solely to ${name}${email?' ('+email+')':''}. Unauthorised reproduction, distribution or misuse of this document may constitute a criminal offence under applicable law.`;
+      lf.textContent = `SKYGLOBEGROUP · Global Operations · This document is confidential and issued solely to ${name}${email?' ('+email+')':''}. Unauthorised reproduction, distribution or misuse of this document may constitute a criminal offence under applicable law.`;
     }
   }
 

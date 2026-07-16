@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Learn with Numa — SkyGlobe Academy</title>
-<meta name="theme-color" content="#041022">
+<title>SKYGLOBEGROUP Academy — SKYGLOBEGROUP Academy</title>
+<meta name="theme-color" content="#061A52">
 <link rel="icon" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#041022;--navy2:#0a1f44;--gold:#D4A73A;--gold-hi:#F4D77A;
+    --navy:#04132F;--navy2:#0A2E65;--gold:#D4A73A;--gold-hi:#F4D77A;
     --sky:#4DA3FF;--sky-d:#2C7BE5;--sky-soft:#DCEBFF;
     --leaf:#3FBF7F;--leaf-soft:#D9F5E6;--sun:#FFC542;--sun-soft:#FFF2CF;
     --ink:#22324a;--muted:#7488a3;--line:#e7ecf3;
@@ -92,7 +92,7 @@
   <a class="back" href="/academy" title="Back to Family Campus">←</a>
   <div class="teacher">
     <div class="av">🔢</div>
-    <div><h1>Numa</h1><small id="subline">Your Mathematics teacher</small></div>
+    <div><h1>Study Guide</h1><small id="subline">Your study guide</small></div>
   </div>
   <div class="scorebar">
     <select id="langSel" title="Learning language" onchange="setLang(this.value)"
@@ -126,7 +126,7 @@ const TOKEN=localStorage.getItem('academyToken')||'';
 const params=new URLSearchParams(location.search);
 const STUDENT=params.get('student');
 const SUBJECT=(params.get('subject')||'mathematics').toLowerCase();
-let TEACHER={name:'Numa',emoji:'🔢',color:'#3B82F6'};
+let TEACHER={name:'Study Guide',emoji:'🔢',color:'#3B82F6'};
 let history=[];
 
 /* ── PER-TEACHER VOICE PROFILES ── */
@@ -165,7 +165,7 @@ function initLangSelect(){
 }
 
 if(!TOKEN||!STUDENT){
-  document.body.innerHTML='<div class="gate"><div style="font-size:3rem">🔒</div><h2 style="font-family:Fredoka;color:#041022">Please open from the Family Campus</h2><a href="/academy">Go to Parent Portal</a></div>';
+  document.body.innerHTML='<div class="gate"><div style="font-size:3rem">🔒</div><h2 style="font-family:Fredoka;color:#04132F">Please open from the Family Campus</h2><a href="/academy">Go to Parent Portal</a></div>';
 }
 function authHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN};}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -420,17 +420,17 @@ function toggleMic(){
 
 /* ── GREETINGS PER SUBJECT ── */
 const FIRST_GREETINGS={
-  mathematics: n=>`Hi ${n}! 👋 I'm Numa, your maths teacher. I'm so happy to meet you! What would you like to learn today — counting, adding, shapes, or something else? 😊`,
-  science:     n=>`Hello ${n}! 🔬 I'm Nova, your science teacher. Science is all around you — in the sky, in your food, in your body! What shall we discover today?`,
-  reading:     n=>`Hi there, ${n}! 📚 I'm Lexi, your reading teacher. Words are magical — shall we explore a story, practise phonics, or build your vocabulary today?`,
-  coding:      n=>`Hey ${n}! 🤖 I'm Cody, your coding teacher. Think of me as your guide to the world of computers and logic! Ready to think like a programmer?`,
-  history:     n=>`Greetings, ${n}! 🗺️ I'm Atlas, your history teacher. We're about to travel through time together. Which part of history shall we explore first?`,
-  arts:        n=>`Hello ${n}! 🎨 I'm Melody, your arts teacher. Every lesson with me is a chance to create something beautiful. Shall we explore colour, music, or drawing today?`,
-  finance:     n=>`Hi ${n}! 💰 I'm Penny, your finance teacher. Let's learn how money works — saving, spending, and making smart choices. Ready to become money-smart?`,
-  health:      n=>`Hi ${n}! 🌟 I'm Vita, your health teacher. A healthy body and happy mind are the greatest gifts you have. What shall we explore — food, movement, or feelings?`,
+  mathematics: n=>`Hi ${n}! 👋 I'm your Academy study guide. I'm so happy to meet you! What would you like to learn today — counting, adding, shapes, or something else? 😊`,
+  science:     n=>`Hello ${n}! 🔬 I'm Nova, your science guide. Science is all around you — in the sky, in your food, in your body! What shall we discover today?`,
+  reading:     n=>`Hi there, ${n}! 📚 I'm Lexi, your reading guide. Words are magical — shall we explore a story, practise phonics, or build your vocabulary today?`,
+  coding:      n=>`Hey ${n}! 🤖 I'm Cody, your coding guide. Think of me as your guide to the world of computers and logic! Ready to think like a programmer?`,
+  history:     n=>`Greetings, ${n}! 🗺️ I'm Atlas, your history guide. We're about to travel through time together. Which part of history shall we explore first?`,
+  arts:        n=>`Hello ${n}! 🎨 I'm Melody, your arts guide. Every lesson with me is a chance to create something beautiful. Shall we explore colour, music, or drawing today?`,
+  finance:     n=>`Hi ${n}! 💰 I'm Penny, your finance guide. Let's learn how money works — saving, spending, and making smart choices. Ready to become money-smart?`,
+  health:      n=>`Hi ${n}! 🌟 I'm Vita, your health guide. A healthy body and happy mind are the greatest gifts you have. What shall we explore — food, movement, or feelings?`,
 };
 const RETURN_GREETINGS={
-  mathematics: n=>`Welcome back, ${n}! 🌟 Ready for more maths fun with Numa? Tell me what you'd like to practise today!`,
+  mathematics: n=>`Welcome back, ${n}! 🌟 Ready for more maths practice? Tell me what you'd like to practise today!`,
   science:     n=>`Great to see you, ${n}! 🔬 Nova here — ready for another amazing science adventure? What question shall we answer today?`,
   reading:     n=>`Welcome back, ${n}! 📖 It's Lexi! I've been waiting for you. Shall we read, write, or play word games today?`,
   coding:      n=>`Hey, ${n} is back! 🤖 Cody here — ready to flex those coding muscles? Let's build something amazing!`,
@@ -449,13 +449,13 @@ async function loadTeacher(){
     const r=await fetch(API+'/api/academy/teacher/'+SUBJECT,{headers:authHeaders()});
     if(r.ok){
       const t=await r.json();
-      TEACHER={name:t.name||'Numa',emoji:t.emoji||'🔢',color:t.color||'#3B82F6'};
+      TEACHER={name:t.name||'Study Guide',emoji:t.emoji||'🔢',color:t.color||'#3B82F6'};
       document.querySelector('.teacher h1').textContent=TEACHER.name;
       document.querySelector('.teacher .av').textContent=TEACHER.emoji;
       document.querySelector('.teacher .av').style.background=`linear-gradient(135deg,${TEACHER.color}cc,${TEACHER.color})`;
       const subLabel=SUBJECT_LABELS[SUBJECT]||SUBJECT;
       document.getElementById('msg').placeholder='Ask '+TEACHER.name+' about '+subLabel+'…';
-      document.title='Learn with '+TEACHER.name+' — SkyGlobe Academy';
+      document.title='Learn with '+TEACHER.name+' — SKYGLOBEGROUP Academy';
     }
   }catch(e){}
 }

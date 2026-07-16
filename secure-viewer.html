@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Secure Document Viewer — SkyGlobe Group</title>
+<title>Secure Document Viewer — SKYGLOBEGROUP</title>
 <link rel="icon" type="image/png" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Inter',sans-serif;background:#07112b;color:#e8eef7;min-height:100vh;-webkit-user-select:none;user-select:none}
@@ -16,7 +15,7 @@
   .hdr{background:#0e1f42;border-bottom:1px solid rgba(201,168,76,0.2);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .hdr-brand{display:flex;align-items:center;gap:10px}
   .hdr-brand img{height:38px;width:38px;border-radius:9px}
-  .hdr-brand .t{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:#fff}
+  .hdr-brand .t{font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:1.2rem;font-weight:700;color:#fff}
   .hdr-brand .t span{color:#c9a84c}
   .hdr-info{font-size:0.8rem;color:#8899bb;text-align:right}
   .hdr-info strong{color:#e8eef7;display:block}
@@ -25,7 +24,7 @@
   .state{display:flex;align-items:center;justify-content:center;min-height:80vh;padding:40px 20px;text-align:center}
   .state-card{background:#0e1f42;border:1px solid rgba(201,168,76,0.2);border-radius:20px;padding:48px 40px;max-width:480px;width:100%}
   .state-card .icon{font-size:3rem;margin-bottom:16px}
-  .state-card h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:10px}
+  .state-card h2{font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:1.8rem;margin-bottom:10px}
   .state-card p{color:#8899bb;font-size:0.9rem;line-height:1.6;margin-bottom:20px}
   .state-card .wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:11px 22px;border-radius:10px;text-decoration:none;font-weight:700;font-size:0.9rem}
 
@@ -76,7 +75,7 @@
 
 <div class="hdr">
   <div class="hdr-brand">
-    <img src="icon-192.png" alt="SkyGlobe Group">
+    <img src="icon-192.png" alt="SKYGLOBEGROUP">
     <div class="t">Sky<span>Globe</span> Group</div>
   </div>
   <div class="hdr-info">
@@ -110,7 +109,7 @@
     <span class="lock">🔏</span>
     <div>
       <strong style="color:#e8eef7" id="secFilename">Document</strong>
-      <span style="color:#64748b"> · Issued by SkyGlobe Group · This is your document — print or save it anytime.</span>
+      <span style="color:#64748b"> · Issued by SKYGLOBEGROUP · This is your document — print or save it anytime.</span>
     </div>
     <span class="exp" id="expiry"></span>
   </div>
@@ -137,9 +136,9 @@
   </div>
 
   <div class="viewer-footer">
-    <strong>CONFIDENTIAL</strong> · This document was issued solely to the registered recipient by SkyGlobe Group.<br>
+    <strong>CONFIDENTIAL</strong> · This document was issued solely to the registered recipient by SKYGLOBEGROUP.<br>
     Please do not share this link — unauthorised redistribution of this document may constitute a criminal offence under applicable law.<br>
-    SkyGlobe Group · <a href="https://skyglobegroup.com" style="color:#c9a84c;text-decoration:none">skyglobegroup.com</a> · support@skyglobegroup.com
+    SKYGLOBEGROUP · <a href="https://skyglobegroup.com" style="color:#c9a84c;text-decoration:none">skyglobegroup.com</a> · support@skyglobegroup.com
   </div>
 </div>
 
@@ -195,7 +194,7 @@
       }
 
       // Watermark with client email — on-screen deterrent only, excluded from print
-      const wmText = `CONFIDENTIAL · ${d.client_email||'SKYGLOBE GROUP'} · REF: ${d.application_ref||''} · SKYGLOBE GROUP · `;
+      const wmText = `CONFIDENTIAL · ${d.client_email||'SKYGLOBEGROUP'} · REF: ${d.application_ref||''} · SKYGLOBEGROUP · `;
       ['wm1','wm2','wm3','wm4','wm5','wm6'].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.textContent = wmText.repeat(4);
