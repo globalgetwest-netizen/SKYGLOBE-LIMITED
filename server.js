@@ -169,6 +169,12 @@ app.get(['/terra', '/yunex', '/noria'], (req, res) =>
 app.get(['/mobility', '/services', '/travel'], (req, res) =>
   res.sendFile(path.join(__dirname, 'mobility.html')));
 
+// SKYGLOBE ID — authentication and identity belong to SKYGLOBEGROUP, not to
+// any single platform. skyglobegroup.com/id is the ecosystem's front door
+// for accounts; the workspace itself lives in the shared app shell.
+app.get(['/id', '/skyglobe-id'], (req, res) =>
+  res.sendFile(path.join(__dirname, 'yunex-app.html')));
+
 app.use(express.static(path.join(__dirname), {
   etag: true,
   lastModified: true,
@@ -1349,7 +1355,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-IA1-2026-07-16B',
+  build: 'SKYGLOBEGROUP-IA2-2026-07-16C',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -4939,6 +4945,30 @@ const DIVISIONS = [
 ];
 // The organization spine, for org charts across the portals.
 const ORG_HIERARCHY = ['CEO', 'Executive Board', 'Chief Officers', 'Directors', 'Managers', 'Team Leaders', 'Specialists', 'Associates'];
+// ── IA-2: SITE CONFIG — Admin controls everything, frontend renders ─────────
+// One key/value store for every dynamic surface: announcement bar, banners,
+// featured sections, footer content. Admin edits; no code changes needed.
+const SITE_CONFIG_KEYS = ['announcement']; // extend as surfaces are onboarded
+app.get('/api/site-config', async (_req, res) => {
+  try {
+    const rows = await dbQuery('GET', 'site_config', null, { limit: 100 }).catch(() => []);
+    const out = {};
+    for (const r of (Array.isArray(rows) ? rows : [])) if (SITE_CONFIG_KEYS.includes(r.key)) out[r.key] = r.value || null;
+    res.json(out);
+  } catch (e) { res.json({}); }
+});
+app.post('/api/admin/site-config', checkAdmin, async (req, res) => {
+  try {
+    const { key, value } = req.body || {};
+    if (!SITE_CONFIG_KEYS.includes(key)) return res.status(400).json({ error: 'Unknown config key.' });
+    const existing = await dbQuery('GET', 'site_config', null, { key: `eq.${key}`, limit: 1 }).catch(() => []);
+    if (existing.length) await dbQuery('PATCH', 'site_config', { value, updated_at: new Date().toISOString() }, { key: `eq.${key}` });
+    else await dbQuery('POST', 'site_config', { key, value });
+    logActivity('admin', 'ceo', 'site_config', `Updated ${key}`, key);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/divisions', (req, res) => {
   res.json({
     hierarchy: ORG_HIERARCHY,

@@ -69,6 +69,11 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
 }
 /* Hard guard: the page body must never scroll sideways on any device. */
 html,body{max-width:100%;overflow-x:clip}
+/* Living meters — activity signals, never raw operational numbers */
+.hmeter{height:5px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;position:relative}
+.hmeter i{position:absolute;inset:0;border-radius:6px;background:linear-gradient(90deg,transparent,#e8c566 35%,#4e86f0 55%,#f0742e 75%,transparent);background-size:220% 100%;animation:hflow 3.6s linear infinite}
+.hmeter.m2 i{animation-delay:-1.2s}.hmeter.m3 i{animation-delay:-2.4s}
+@keyframes hflow{0%{background-position:120% 0}100%{background-position:-120% 0}}
 /* Auth modal */
 .modal{position:fixed;inset:0;background:rgba(10,18,48,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
 .modal.on{display:flex}
@@ -83,7 +88,7 @@ html,body{max-width:100%;overflow-x:clip}
 <div class="top"><div class="row">
   <a class="brand" href="/yunex"><img src="/yunex-logo-t.png" alt="YUNEX"><span>YUNEX<small>A SKYGLOBE GROUP PLATFORM</small></span></a>
   <div class="search"><span>🔎</span><input id="q" placeholder="Search products, suppliers, services, opportunities…"><button class="btn g grad sm" onclick="doSearch()">Search</button></div>
-  <div class="acct" id="acct"><button class="btn o" onclick="openAuth('login')">Log in</button><button class="btn g grad" onclick="openAuth('signup')">Join YUNEX</button></div>
+  <div class="acct" id="acct"><button class="btn o" onclick="openAuth('login')">Log in</button><button class="btn g grad" onclick="openAuth('signup')">Get Started</button></div>
 </div></div>
 
 <div class="nav"><div class="row" id="nav">
@@ -148,8 +153,16 @@ html,body{max-width:100%;overflow-x:clip}
 
     <!-- GLOBAL STATISTICS -->
     <div class="panel" style="margin-top:24px;background:linear-gradient(135deg,#0a1230,#111a44);border:none">
-      <div style="color:#dfe4ff;font-weight:800;font-size:1.1rem">The network, in numbers</div>
-      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:14px;margin-top:14px" id="homeStats"></div>
+      <div style="color:#dfe4ff;font-weight:800;font-size:1.1rem">The network, in living signals</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;margin-top:16px;align-items:end" id="homeStats">
+        <div><div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#9fb3dd;text-transform:uppercase;margin-bottom:8px">Members</div><div class="hmeter"><i></i></div></div>
+        <div><div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#9fb3dd;text-transform:uppercase;margin-bottom:8px">Verified Identities</div><div class="hmeter m2"><i></i></div></div>
+        <div><div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#9fb3dd;text-transform:uppercase;margin-bottom:8px">Live Listings</div><div class="hmeter m3"><i></i></div></div>
+        <div><div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#9fb3dd;text-transform:uppercase;margin-bottom:8px">Escrow Deals</div><div class="hmeter"><i></i></div></div>
+        <div><div style="font-size:1.55rem;font-weight:900;color:#fff">6</div><div style="font-size:.68rem;color:#9fb3dd;text-transform:uppercase;letter-spacing:.08em">Corridors</div></div>
+        <div><div style="font-size:1.55rem;font-weight:900;color:#fff">23</div><div style="font-size:.68rem;color:#9fb3dd;text-transform:uppercase;letter-spacing:.08em">Currencies</div></div>
+      </div>
+      <div style="margin-top:16px;display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:700;color:#7FD6A3"><span style="width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18)"></span> Live Ecosystem · Operational</div>
     </div>
 
     <!-- TRUST CENTRE -->
@@ -166,7 +179,7 @@ html,body{max-width:100%;overflow-x:clip}
       <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
         <a href="/yunex" style="color:#67708f">About</a><a href="https://skyglobegroup.com/academy" style="color:#67708f">Academy</a><a href="https://skyglobegroup.com" style="color:#67708f">SkyGlobe Group</a><a href="https://wa.me/17373998522" style="color:#67708f">Support</a>
       </div>
-      <div>© <span id="fyear"></span> SkyGlobe Group · One World. One Mission. ✦ · Verified on skyglobegroup.com · ✉️ <a href="mailto:yunex@skyglobegroup.com" style="color:inherit;font-weight:600">yunex@skyglobegroup.com</a></div>
+      <div>© <span id="fyear"></span> SkyGlobe Group · One World. One Mission. ✦ · Verified on skyglobegroup.com · ✉️ yunex@skyglobegroup.com</div>
     </div>
   </section>
 
@@ -287,7 +300,7 @@ html,body{max-width:100%;overflow-x:clip}
 
 <!-- AUTH MODAL -->
 <div class="modal" id="authModal"><div class="box">
-  <h2 id="authTitle">Join YUNEX</h2>
+  <h2 id="authTitle">Create your SKYGLOBE ID</h2>
   <p class="muted" style="margin-top:4px">One SKYGLOBE ID for the entire ecosystem.</p>
   <div class="tabs"><button id="tabLogin" onclick="authTab('login')">Log in</button><button id="tabSignup" class="on" onclick="authTab('signup')">Sign up</button></div>
   <div id="nameWrap"><input id="au_name" placeholder="Full name"></div>
@@ -534,7 +547,7 @@ const AUTH_BOX_HTML=document.querySelector('#authModal .box').innerHTML;
 function openAuth(m){ document.querySelector('#authModal .box').innerHTML=AUTH_BOX_HTML; authTab(m); $('authModal').classList.add('on'); }
 function closeAuth(){ $('authModal').classList.remove('on'); }
 function authTab(m){ authMode=m; $('tabLogin').classList.toggle('on',m==='login'); $('tabSignup').classList.toggle('on',m==='signup');
-  $('nameWrap').style.display=m==='signup'?'block':'none'; const fr=$('forgotRow'); if(fr)fr.style.display=m==='login'?'block':'none'; $('authTitle').textContent=m==='signup'?'Join YUNEX':'Welcome back';
+  $('nameWrap').style.display=m==='signup'?'block':'none'; const fr=$('forgotRow'); if(fr)fr.style.display=m==='login'?'block':'none'; $('authTitle').textContent=m==='signup'?'Create your SKYGLOBE ID':'Welcome back';
   $('au_btn').textContent=m==='signup'?'Create my SKYGLOBE ID':'Log in'; }
 async function submitAuth(){
   $('au_err').textContent='';
@@ -611,7 +624,7 @@ async function loadMe(){
 }
 function renderAcct(){
   const el=$('acct');
-  if(!ME){ el.innerHTML='<button class="btn o" onclick="openAuth(\'login\')">Log in</button><button class="btn g grad" onclick="openAuth(\'signup\')">Join YUNEX</button>'; return; }
+  if(!ME){ el.innerHTML='<button class="btn o" onclick="openAuth(\'login\')">Log in</button><button class="btn g grad" onclick="openAuth(\'signup\')">Get Started</button>'; return; }
   const initial=(ME.name||ME.email||'?').trim().charAt(0).toUpperCase();
   const badge=ME.can_sell?'<span class="chip acct-badge" style="background:rgba(255,255,255,.16)">✔ Verified</span>':'';
   const name=esc(ME.name||ME.email.split('@')[0]);
@@ -1534,11 +1547,6 @@ async function loadHome(){
   try{ if(!CORRIDORS){ CORRIDORS=(await fetch(API+'/api/yunex/corridors').then(r=>r.json())).corridors; }
     const el=document.getElementById('homeCorridors'); if(el)el.innerHTML=CORRIDORS.map(c=>`<div class="card" style="text-align:center;padding:16px;cursor:pointer" onclick="MARKET_PILLAR='';MARKET_CORRIDOR='${c.key}';go('market')"><div style="font-size:1.6rem">${c.flag}</div><div style="font-weight:700;font-size:.88rem;margin-top:4px">${esc(c.label.replace(' Corridor',''))}</div></div>`).join('');
   }catch(e){}
-  // stats
-  try{ const s=await fetch(API+'/api/yunex/stats').then(r=>r.json());
-    const el=document.getElementById('homeStats'); if(el){ const tile=(n,l)=>`<div><div style="font-size:1.7rem;font-weight:900;color:#fff">${Number(n).toLocaleString()}</div><div style="font-size:.72rem;color:#9fb3dd;text-transform:uppercase;letter-spacing:.08em">${l}</div></div>`;
-      el.innerHTML=tile(s.users,'Members')+tile(s.verified,'Verified')+tile(s.listings,'Active listings')+tile(s.deals,'Deals')+tile(s.corridors,'Corridors')+tile(s.currencies,'Currencies'); }
-  }catch(e){}
   // adaptive dashboard for logged-in users
   const dash=document.getElementById('homeDash'); if(!dash)return;
   if(!ME){ dash.innerHTML=''; return; }
@@ -1551,6 +1559,16 @@ async function loadHome(){
   dash.innerHTML=`<h2 class="sec-h" style="margin-top:26px">Welcome back, ${esc((ME.name||'').split(' ')[0]||'there')}</h2><div class="grid g3" style="margin-top:12px">${cards}</div>`;
 }
 
+/* Ecosystem entry: skyglobegroup.com/id lands on the SKYGLOBE ID workspace;
+   ?auth=signup|login opens authentication for visitors (SKYGLOBEGROUP owns auth) */
+(function(){
+  const qs=new URLSearchParams(location.search); const want=qs.get('auth');
+  const isIdPath=location.pathname==='/id'||location.pathname==='/skyglobe-id';
+  setTimeout(()=>{
+    if(isIdPath) go('id');
+    if(want&&!TOKEN) openAuth(want==='login'?'login':'signup');
+  }, 350);
+})();
 /* boot */
 renderAcct(); loadMe(); loadFX(); loadHome();
 </script>

@@ -402,6 +402,8 @@
         <button class="sb-link" data-view="tools" onclick="switchView('tools')"><span class="ic">🧰</span> Quick Tools</button>
         <button class="sb-link" data-view="offerings" onclick="switchView('offerings')"><span class="ic">✨</span> Future Services</button>
 
+        <div class="sb-sec sb-sec--ops"><span class="dot"></span>⚙ Administration</div>
+        <button class="sb-link" data-view="siteconfig" onclick="switchView('siteconfig')"><span class="ic">🖥️</span> Site Settings</button>
         <div class="sb-sec sb-sec--ops"><span class="dot"></span>🛡 Security</div>
         <button class="sb-link" data-view="activity" onclick="switchView('activity')"><span class="ic">🛰️</span> Activity Log</button>
         <button class="sb-link" data-view="errors" onclick="switchView('errors')"><span class="ic">🚨</span> Error Logs</button>
@@ -1153,6 +1155,24 @@
           <div id="errorFeed" style="display:flex;flex-direction:column;gap:8px"></div>
         </section>
 
+        <!-- SITE SETTINGS — admin-controlled dynamic content (IA-2) -->
+        <section class="view" id="view-siteconfig">
+          <div class="dept-hero" style="margin-bottom:18px">
+            <div style="font-size:1.6rem">🖥️ Site Settings</div>
+            <div class="cd-sub" style="margin-top:6px">Dynamic content across the public ecosystem — edit here, live everywhere. No code, no redeploy.</div>
+          </div>
+          <div style="background:var(--navy3);border:1px solid var(--line);border-radius:16px;padding:22px 24px;max-width:720px">
+            <div style="color:var(--gold);font-size:0.72rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px">📣 Homepage Announcement Bar</div>
+            <p style="color:var(--muted);font-size:0.84rem;margin:0 0 12px">Shown at the very top of skyglobegroup.com. Leave empty and save to hide the bar.</p>
+            <input id="scAnnouncement" maxlength="240" placeholder="e.g. YUNEX Marketplace is now live — create your SKYGLOBE ID today." style="width:100%;background:var(--navy2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:11px 13px;font-size:0.9rem;font-family:inherit">
+            <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">
+              <button class="btn btn-sm" onclick="saveSiteConfig('announcement',document.getElementById('scAnnouncement').value.trim())">💾 Save &amp; publish</button>
+              <button class="btn btn-sm btn-ghost" onclick="loadSiteConfig()">↻ Reload</button>
+              <span id="scStatus" style="color:var(--muted);font-size:0.82rem"></span>
+            </div>
+          </div>
+        </section>
+
         <!-- IP REGISTRY -->
         <section class="view" id="view-ipregistry">
           <div class="dept-hero" style="margin-bottom:18px">
@@ -1498,7 +1518,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Executive Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobeGroup Academy',credentials:'Business & Recognition — TERRA Credentials',trustdesk:'TERRA Trust Desk — Verification, Moderation & Resolution',tools:'Quick Tools'};
+  const titles={dashboard:'Executive Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobeGroup Academy',credentials:'Business & Recognition — TERRA Credentials',trustdesk:'TERRA Trust Desk — Verification, Moderation & Resolution',tools:'Quick Tools',siteconfig:'Site Settings — Dynamic Content'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
@@ -1524,6 +1544,7 @@ function switchView(v){
   if(v==='academy'){ loadAcademyTeachers(); loadCourseCatalog(); loadFlyerTracks(); loadStudentRecords(); loadRecordsVault(); }
   if(v==='trustdesk'){ loadVerifyQueue('pending'); loadUsers(); loadDisputeQueue(); }
   if(v==='departments') loadDivisions();
+  if(v==='siteconfig') loadSiteConfig();
   toggleSidebar(false);
 }
 
@@ -2022,6 +2043,23 @@ function timeAgo(d){
   if(s<86400)return Math.floor(s/3600)+'h ago';
   if(s<604800)return Math.floor(s/86400)+'d ago';
   return new Date(d).toLocaleDateString();
+}
+/* ── SITE SETTINGS (IA-2 dynamic content) ── */
+async function loadSiteConfig(){
+  const st=document.getElementById('scStatus'); st.textContent='Loading…';
+  try{
+    const c=await fetch(API+'/api/site-config').then(r=>r.json());
+    document.getElementById('scAnnouncement').value=(typeof c.announcement==='string'?c.announcement:'')||'';
+    st.textContent='';
+  }catch(e){ st.textContent='Could not load.'; }
+}
+async function saveSiteConfig(key,value){
+  const st=document.getElementById('scStatus'); st.textContent='Saving…';
+  try{
+    const r=await fetch(API+'/api/admin/site-config',{method:'POST',headers:{'content-type':'application/json','x-admin-key':KEY},body:JSON.stringify({key,value})});
+    const j=await r.json().catch(()=>({}));
+    st.textContent=(r.ok&&j.success)?'✔ Published live.':(j.error||'Save failed.');
+  }catch(e){ st.textContent='Save failed.'; }
 }
 async function loadActivity(){
   const feed=document.getElementById('activityFeed'); if(!feed)return;

@@ -543,6 +543,16 @@ create table if not exists yunex_saved (
 );
 create index if not exists idx_saved_user on yunex_saved (user_email, listing_ref);
 
+-- Site Config — admin-controlled dynamic content (IA-2)
+-- One key/value store for every dynamic public surface: announcement bar,
+-- banners, featured sections. Admin edits in Site Settings; no redeploy needed.
+create table if not exists site_config (
+  id bigint generated always as identity primary key,
+  key text unique not null,
+  value jsonb,
+  updated_at timestamptz default now()
+);
+
 -- ── SECURITY LOCKDOWN — always last ─────────────────────────────────────────
 -- Enable Row-Level Security on every public table with NO policies:
 -- the anon/public API key can touch nothing; only the server's service_role

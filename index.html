@@ -269,9 +269,32 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .rise{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease}
 .rise.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.rise{transition:none;opacity:1;transform:none}}
+/* Announcement bar — admin-managed via site_config */
+.annc{display:none;background:linear-gradient(90deg,#04132F,#0A2E65,#04132F);color:#F2D98A;text-align:center;padding:9px 16px;font-size:.86rem;font-weight:600;letter-spacing:.02em;border-bottom:1px solid rgba(212,167,58,.25)}
+.annc b{color:#fff}
+/* Message Centre — internal messaging, no external mail app */
+.msgc{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(4,10,28,.66);backdrop-filter:blur(6px)}
+.msgc.on{display:flex}
+.msgc .card{width:100%;max-width:480px;max-height:92vh;overflow:auto;background:linear-gradient(170deg,#0A2E65,#061A52 60%,#04132F);border:1px solid rgba(212,167,58,.3);border-radius:20px;padding:26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.msgc h3{color:#fff;font-size:1.2rem;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.msgc .sub2{color:#AEC0EC;font-size:.84rem;margin:0 0 16px}
+.msgc label{display:block;color:#D9E2FA;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:12px 0 5px}
+.msgc input,.msgc select,.msgc textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(174,192,236,.3);border-radius:11px;color:#fff;padding:11px 13px;font-size:.92rem;font-family:inherit}
+.msgc select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#AEC0EC 50%),linear-gradient(135deg,#AEC0EC 50%,transparent 50%);background-position:calc(100% - 19px) 50%,calc(100% - 14px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.msgc select option{background:#0A2E65;color:#fff}
+.msgc textarea{min-height:110px;resize:vertical}
+.msgc input:focus,.msgc select:focus,.msgc textarea:focus{outline:none;border-color:var(--gold)}
+.msgc .send{width:100%;margin-top:18px;background:linear-gradient(135deg,var(--gold),#E8C566);color:#04132F;font-weight:800;border:none;border-radius:12px;padding:13px;font-size:.95rem;cursor:pointer;font-family:inherit}
+.msgc .send:disabled{opacity:.6;cursor:default}
+.msgc .close2{float:right;background:none;border:none;color:#AEC0EC;font-size:1.25rem;cursor:pointer;line-height:1;padding:2px 6px}
+.msgc .note{color:#8FD6AC;font-size:.86rem;font-weight:700;margin-top:12px;display:none;text-align:center}
+.msgc .err{color:#FF9D9D;font-size:.84rem;margin-top:12px;display:none;text-align:center}
 </style>
 </head>
 <body>
+
+<!-- ANNOUNCEMENT — admin-managed, hidden until set -->
+<div class="annc" id="annc"></div>
 
 <!-- NAV -->
 <nav class="nav">
@@ -285,8 +308,8 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
       <a href="/academy">Academy</a>
     </div>
     <div class="cta">
-      <a class="btn btn-outline btn-sm" href="/yunex/app">Sign In</a>
-      <a class="btn btn-gold btn-sm" href="/yunex/app" style="display:var(--cta-d,inline-flex)">Create SKYGLOBE ID</a>
+      <a class="btn btn-outline btn-sm" href="/id?auth=login">Sign In</a>
+      <a class="btn btn-gold btn-sm" href="/id?auth=signup" style="display:var(--cta-d,inline-flex)">Create SKYGLOBE ID</a>
       <button class="burger" onclick="document.getElementById('mmenu').classList.add('on')" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -312,9 +335,9 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <a class="lnk" href="#trust" onclick="document.getElementById('mmenu').classList.remove('on')">Trust</a>
   </div>
   <div class="foot">
-    <a class="btn btn-gold" style="width:100%" href="/yunex/app">Create SKYGLOBE ID</a>
-    <a class="btn btn-outline" style="width:100%;margin-top:12px" href="/yunex/app">Sign In</a>
-    <div style="text-align:center;margin-top:18px;font-size:.82rem;color:#AEC0EC">✉️ support@skyglobegroup.com · 💬 <a href="https://wa.me/17373998522" style="color:#7FD6A3;font-weight:700">WhatsApp</a></div>
+    <a class="btn btn-gold" style="width:100%" href="/id?auth=signup">Create SKYGLOBE ID</a>
+    <a class="btn btn-outline" style="width:100%;margin-top:12px" href="/id?auth=login">Sign In</a>
+    <div style="text-align:center;margin-top:18px;font-size:.82rem;color:#AEC0EC"><a href="#" onclick="return openMsg('general')" style="color:#AEC0EC">✉️ Message Centre</a> · 💬 <a href="https://wa.me/17373998522" style="color:#7FD6A3;font-weight:700">WhatsApp</a></div>
   </div>
 </div>
 
@@ -329,7 +352,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <div class="pillars-line"><span style="color:#B9A0F7">Intelligence</span><i style="color:var(--gold)">•</i><span style="color:#8FD6AC">Trust</span><i style="color:var(--orange)">•</i><span style="color:#FFC08A">Commerce</span><i style="color:var(--gold)">•</i><span style="color:#F2D98A">Learning</span><i style="color:var(--pink)">•</i><span style="color:#9DBEFF">Mobility</span></div>
     <p class="sub">One intelligent ecosystem connecting <b>people</b>, <b>businesses</b>, <b>governments</b>, <b>investors</b> and <b>institutions</b> through AI, digital trust, trade, education and global mobility.</p>
     <div class="actions">
-      <a class="btn btn-gold" href="/yunex/app">Create SKYGLOBE ID</a>
+      <a class="btn btn-gold" href="/id?auth=signup">Create SKYGLOBE ID</a>
       <a class="btn btn-outline" href="#ecosystem">Explore Ecosystem</a>
     </div>
     <div class="dock">
@@ -464,7 +487,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
       <h2>Your SKYGLOBE ID is the beginning.</h2>
       <p>One identity for the whole ecosystem — learn, trade, invest, travel and build with it.</p>
       <div class="actions">
-        <a class="btn btn-gold" href="/yunex/app">Create SKYGLOBE ID</a>
+        <a class="btn btn-gold" href="/id?auth=signup">Create SKYGLOBE ID</a>
         <a class="btn btn-outline" href="/terra">Learn about TERRA verification</a>
       </div>
     </div>
@@ -496,12 +519,12 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <div class="foot-grid">
       <div class="fc-start">
         <h4>Quick Access</h4>
-        <a href="/yunex/app">Create SKYGLOBE ID</a>
+        <a href="/id?auth=signup">Create SKYGLOBE ID</a>
         <a href="/#ecosystem">Explore Ecosystem</a>
         <a href="/yunex/app">Marketplace</a>
         <a href="/academy">Academy</a>
         <a href="/mobility">Mobility</a>
-        <a href="mailto:support@skyglobegroup.com">Support</a>
+        <a href="#" onclick="return openMsg('general')">Support</a>
       </div>
       <div class="fc-co">
         <h4>Company</h4>
@@ -513,12 +536,12 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
       </div>
       <div class="fc-mail">
         <h4>Contact</h4>
-        <a class="mailchip" href="mailto:support@skyglobegroup.com"><span class="mi" style="background:rgba(212,167,58,.16)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Support</b><br>support@skyglobegroup.com</span></a>
-        <a class="mailchip" href="mailto:noria@skyglobegroup.com"><span class="mi" style="background:rgba(124,58,237,.18)"><img src="/noria-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>NORIA</b><br>noria@skyglobegroup.com</span></a>
-        <a class="mailchip" href="mailto:terra@skyglobegroup.com"><span class="mi" style="background:rgba(18,134,78,.18)"><img src="/terra-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>TERRA</b><br>terra@skyglobegroup.com</span></a>
-        <a class="mailchip" href="mailto:yunex@skyglobegroup.com"><span class="mi" style="background:rgba(124,58,237,.18)"><img src="/yunex-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>YUNEX</b><br>yunex@skyglobegroup.com</span></a>
-        <a class="mailchip" href="mailto:education@skyglobegroup.com"><span class="mi" style="background:rgba(212,167,58,.16)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Academy</b><br>education@skyglobegroup.com</span></a>
-        <a class="mailchip" href="mailto:mobility@skyglobegroup.com"><span class="mi" style="background:rgba(18,134,78,.18)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Mobility</b><br>mobility@skyglobegroup.com</span></a>
+        <a class="mailchip" href="#" onclick="return openMsg('general')"><span class="mi" style="background:rgba(212,167,58,.16)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Support</b><br>support@skyglobegroup.com</span></a>
+        <a class="mailchip" href="#" onclick="return openMsg('noria')"><span class="mi" style="background:rgba(124,58,237,.18)"><img src="/noria-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>NORIA</b><br>noria@skyglobegroup.com</span></a>
+        <a class="mailchip" href="#" onclick="return openMsg('terra')"><span class="mi" style="background:rgba(18,134,78,.18)"><img src="/terra-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>TERRA</b><br>terra@skyglobegroup.com</span></a>
+        <a class="mailchip" href="#" onclick="return openMsg('yunex')"><span class="mi" style="background:rgba(124,58,237,.18)"><img src="/yunex-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>YUNEX</b><br>yunex@skyglobegroup.com</span></a>
+        <a class="mailchip" href="#" onclick="return openMsg('education')"><span class="mi" style="background:rgba(212,167,58,.16)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Academy</b><br>education@skyglobegroup.com</span></a>
+        <a class="mailchip" href="#" onclick="return openMsg('travel')"><span class="mi" style="background:rgba(18,134,78,.18)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Mobility</b><br>mobility@skyglobegroup.com</span></a>
         <a class="mailchip" href="https://wa.me/17373998522"><span class="mi" style="background:rgba(43,182,115,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="#2BB673"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.1.5.1.7-.1l1-1.1c.2-.3.4-.2.7-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.2 1.2z"/></svg></span><span><b>WhatsApp</b><br>+1 737 399 8522</span></a>
       </div>
     </div>
@@ -543,6 +566,35 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     </div>
   </div>
 </footer>
+
+<!-- MESSAGE CENTRE — write to any division without leaving the ecosystem -->
+<div class="msgc" id="msgc" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="card">
+    <button class="close2" onclick="document.getElementById('msgc').classList.remove('on')">✕</button>
+    <h3><img src="/skyglobe-logo-t.png" alt="" style="width:26px;height:26px;object-fit:contain">Message Centre</h3>
+    <p class="sub2">Your message goes straight to the right team inside the ecosystem — replies arrive in your email.</p>
+    <form id="msgForm" onsubmit="return sendMsg(event)">
+      <label for="mcDept">To</label>
+      <select id="mcDept">
+        <option value="general">Support · Reception</option>
+        <option value="noria">NORIA · Intelligence</option>
+        <option value="terra">TERRA · Identity &amp; Trust</option>
+        <option value="yunex">YUNEX · Commerce &amp; Investment</option>
+        <option value="education">Academy · Learning</option>
+        <option value="travel">Mobility · Travel</option>
+      </select>
+      <label for="mcName">Your name</label>
+      <input id="mcName" maxlength="100" required autocomplete="name">
+      <label for="mcEmail">Your email</label>
+      <input id="mcEmail" type="email" maxlength="200" required autocomplete="email">
+      <label for="mcMsg">Message</label>
+      <textarea id="mcMsg" maxlength="3000" required></textarea>
+      <button class="send" id="mcSend" type="submit">Send message</button>
+      <div class="note" id="mcOk">✔ Sent — our team will reply to your email.</div>
+      <div class="err" id="mcErr"></div>
+    </form>
+  </div>
+</div>
 
 <script>
 /* Living-network hero: slow particles + connection lines (calm, never flashy) */
@@ -578,6 +630,46 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     const set=(id,v)=>{ const el=document.getElementById(id); if(el&&v!=null)el.textContent=Number(v).toLocaleString(); };
     set('stMembers',s.users); set('stVerified',s.verified); set('stListings',s.listings); set('stDeals',s.deals);
     set('lbMembers',s.users); set('lbVerified',s.verified); set('lbListings',s.listings);
+  }).catch(()=>{});
+})();
+/* Message Centre — internal messaging, no external mail app */
+function openMsg(dept){
+  const m=document.getElementById('msgc');
+  document.getElementById('mcDept').value=dept||'general';
+  document.getElementById('mcOk').style.display='none';
+  document.getElementById('mcErr').style.display='none';
+  m.classList.add('on');
+  document.getElementById('mmenu').classList.remove('on');
+  setTimeout(()=>document.getElementById('mcName').focus(),150);
+  return false;
+}
+async function sendMsg(e){
+  e.preventDefault();
+  const btn=document.getElementById('mcSend'),ok=document.getElementById('mcOk'),er=document.getElementById('mcErr');
+  ok.style.display='none';er.style.display='none';btn.disabled=true;btn.textContent='Sending…';
+  try{
+    const r=await fetch('/api/dept-message',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+      dept:document.getElementById('mcDept').value,
+      name:document.getElementById('mcName').value.trim(),
+      email:document.getElementById('mcEmail').value.trim(),
+      message:document.getElementById('mcMsg').value.trim()
+    })});
+    const j=await r.json().catch(()=>({}));
+    if(r.ok&&j.success){ ok.style.display='block'; document.getElementById('mcMsg').value=''; }
+    else{ er.textContent=j.error||'Something went wrong — please try again.'; er.style.display='block'; }
+  }catch(_){ er.textContent='Network issue — please try again.'; er.style.display='block'; }
+  btn.disabled=false;btn.textContent='Send message';
+  return false;
+}
+/* Announcement — admin-managed via site_config, silent if unset */
+(function(){
+  fetch('/api/site-config').then(r=>r.json()).then(c=>{
+    const a=c&&c.announcement;
+    if(a&&typeof a==='string'&&a.trim()){
+      const el=document.getElementById('annc');
+      el.textContent=a.trim().slice(0,240);
+      el.style.display='block';
+    }
   }).catch(()=>{});
 })();
 /* PWA — the ecosystem installs and feels native on any device */
