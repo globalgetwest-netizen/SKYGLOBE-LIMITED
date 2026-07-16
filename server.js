@@ -1016,7 +1016,7 @@ app.get('/yunex-app', (req, res) => res.sendFile(path.join(__dirname, 'yunex-app
 app.get('/packages', (req, res) => res.sendFile(path.join(__dirname, 'packages.html')));
 app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));
 app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));
-app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html'))); // the Academy serves every age — proud new address, old one kept forever
+app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'academy.html'))); // Academy pillar page — curriculum lives one level deeper at /kids-academy
 app.get('/legal-documents', (req, res) => res.sendFile(path.join(__dirname, 'legal-documents.html')));
 
 // ── §8 AI FEATURES ───────────────────────────────────────────────────────────
@@ -1355,7 +1355,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-IA2-2026-07-16C',
+  build: 'SKYGLOBEGROUP-ACADEMY-2026-07-16D',
 }));
 
 app.get('/api/test', async (req, res) => {
