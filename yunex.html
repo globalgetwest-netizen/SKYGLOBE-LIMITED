@@ -2,185 +2,481 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YUNEX — The Economic Engine of Africa | SkyGlobe Group</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20100%20100%22%20width%3D%2288%22%20height%3D%2288%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22yy2%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%220%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%233d5af1%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23b326d9%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id%3D%22ystar2%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffb347%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e65100%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20d%3D%22M14%2012h22l14%2026%2014-26h22L60%2058v30H40V58z%22%20fill%3D%22url%28%23yy2%29%22/%3E%3Cpath%20d%3D%22M50%206l3.5%2010%2010%203.5-10%203.5L50%2033l-3.5-10-10-3.5%2010-3.5z%22%20fill%3D%22url%28%23ystar2%29%22/%3E%3Cg%20fill%3D%22%233d5af1%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2246%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2260%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2274%22%20r%3D%223%22/%3E%3C/g%3E%3C/svg%3E">
-<meta name="description" content="YUNEX is Africa's economic layer — payments, commerce, trade, marketplace and financial services. Built by Africans, for Africa. A SkyGlobe Group platform.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>YUNEX — Africa's Economic Infrastructure | SKYGLOBEGROUP</title>
+<meta name="description" content="Trade. Commerce. Payments. Investment. One trusted economic network connecting Africa with the world — powered by trust, built for long-term prosperity.">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=3">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="manifest" href="/manifest.json?v=3">
+<meta name="theme-color" content="#061A52">
 <style>
-:root{--navy:#f8fafc;--navy2:#eef2f8;--panel:#ffffff;--gold:#a87016;--blue:#4f8ef7;--ink:#111827;--mut:#4B5563;--line:rgba(4,16,34,.12)}
+/* ═════════ SKYGLOBEGROUP HOMEPAGE DESIGN SYSTEM ═════════
+   White 70 · Royal Blue 20 · Gold 5 · Orange 3 · Purple 1 · Pink 1
+   One font · 8-point grid · calm motion · 1440 max width          */
+:root{
+  --blue-1:#061A52; --blue-2:#0A2E65; --blue-3:#123E87;
+  --navy-footer:#04132F;
+  --white:#FFFFFF; --warm:#F8F9FB;
+  --gold:#D4A73A; --gold-2:#E8C566;
+  --orange:#F0742E; --purple:#7C3AED; --pink:#E85D9E;
+  --ink:#0B1530; --muted:#5A6684; --line:#E7EAF2;
+  --r:20px; --shadow:0 10px 40px rgba(6,26,82,.08); --shadow-h:0 18px 56px rgba(6,26,82,.14);
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;background:var(--navy);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased}
-a{color:var(--gold);text-decoration:none}
-.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.hbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
-.hbrand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.14em;font-size:1.05rem;color:#041022}
-.hbrand .ymark{width:34px;height:34px;border-radius:9px;background:radial-gradient(circle at 32% 30%,#14264a,#080f1f);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--gold)}
-.hbrand small{display:block;font-size:.58rem;letter-spacing:.3em;color:var(--mut);font-weight:600}
-.hback{font-size:.82rem;color:var(--mut);border:1px solid rgba(4,16,34,.15);padding:7px 14px;border-radius:999px}
-.hback:hover{color:var(--gold);border-color:var(--gold)}
-.hero{padding:84px 0 70px;text-align:center;background:radial-gradient(ellipse 90% 70% at 50% -10%,rgba(79,142,247,.14),transparent),radial-gradient(ellipse 60% 50% at 15% 10%,rgba(201,168,76,.08),transparent)}
-.kicker{display:inline-block;font-size:.72rem;letter-spacing:.34em;color:var(--blue);border:1px solid rgba(79,142,247,.35);padding:7px 18px;border-radius:999px;margin-bottom:26px;font-weight:700}
-.hero h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(2.6rem,7vw,4.6rem);letter-spacing:.16em;color:#041022}
-.hero h1 .dot{color:var(--blue)}
-.hero .tag{font-family:Georgia,serif;font-style:italic;font-size:clamp(1.05rem,2.6vw,1.45rem);color:var(--gold);margin:14px 0 22px}
-.hero p.lead{max-width:660px;margin:0 auto;color:var(--mut);font-size:1.02rem}
-.hero .cta{display:inline-block;margin-top:34px;background:linear-gradient(135deg,#4f8ef7,#2f5fd0);color:#fff;font-weight:700;padding:15px 38px;border-radius:999px;letter-spacing:.06em;box-shadow:0 10px 30px rgba(79,142,247,.25)}
-.hero .cta:hover{filter:brightness(1.08)}
-section{padding:64px 0;border-top:1px solid rgba(4,16,34,.06)}
-h2.sec{font-family:Georgia,serif;font-size:clamp(1.5rem,3.4vw,2.1rem);color:#041022;text-align:center;margin-bottom:10px}
-p.sub{text-align:center;color:var(--mut);max-width:640px;margin:0 auto 40px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 20px;box-shadow:0 6px 20px rgba(4,16,34,.06)}
-.card .ic{font-size:1.5rem;margin-bottom:10px}
-.card h3{color:var(--gold);font-size:1rem;margin-bottom:8px;letter-spacing:.04em}
-.card p{color:var(--mut);font-size:.9rem}
-.mani{background:#ffffff;border-radius:18px;border:1px solid var(--line);border-left:4px solid #4f8ef7;box-shadow:0 8px 26px rgba(4,16,34,.07);padding:44px 34px;max-width:820px;margin:0 auto}
-.mani p{font-family:Georgia,serif;font-size:1.06rem;color:#374151;margin-bottom:16px}
-.mani p b{color:var(--gold)}
-.mani .sig{text-align:right;font-style:italic;color:var(--mut);font-size:.9rem}
-.formbox{max-width:560px;margin:0 auto;background:#ffffff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 26px rgba(4,16,34,.07);padding:34px 28px}
-.formbox label{display:block;font-size:.78rem;letter-spacing:.1em;color:var(--mut);margin:14px 0 6px;text-transform:uppercase}
-.formbox input,.formbox select,.formbox textarea{width:100%;background:#ffffff;border:1px solid rgba(4,16,34,.18);border-radius:10px;color:#111827;padding:12px 14px;font-size:.95rem;font-family:inherit}
-.formbox input:focus,.formbox select:focus,.formbox textarea:focus{outline:none;border-color:var(--blue)}
-.formbox button{width:100%;margin-top:22px;background:linear-gradient(135deg,#4f8ef7,#2f5fd0);border:none;color:#fff;font-weight:700;font-size:1rem;padding:15px;border-radius:999px;cursor:pointer;letter-spacing:.05em}
-.formbox button:disabled{opacity:.6;cursor:wait}
-.okmsg{display:none;text-align:center;padding:30px 10px}
-.okmsg .big{font-size:2.4rem}
-.okmsg h3{color:var(--blue);margin:10px 0 6px}
-.okmsg p{color:var(--mut);font-size:.92rem}
-footer{border-top:1px solid var(--line);padding:34px 0;text-align:center;color:var(--mut);font-size:.82rem}
-footer .parent{letter-spacing:.22em;color:var(--gold);font-weight:700;font-size:.78rem;margin-bottom:6px}
-.africa-note{display:inline-block;margin-top:10px;font-size:.74rem;color:var(--blue);border:1px solid rgba(79,142,247,.3);padding:5px 14px;border-radius:999px;letter-spacing:.08em}
-@media(max-width:640px){.hero{padding:60px 0 50px}section{padding:48px 0}.mani{padding:30px 20px}}
+html,body{max-width:100%;overflow-x:clip}
+html{scroll-behavior:smooth}
+body{font-family:'Inter','Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--ink);background:var(--white);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:1440px;margin:0 auto;padding:0 48px}
+@media(max-width:760px){.wrap{padding:0 20px}}
+section{scroll-margin-top:80px}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:50;background:rgba(6,26,82,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08)}
+.nav .wrap{display:flex;align-items:center;gap:32px;height:72px}
+.nav .logo{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.06em;color:#fff;font-size:1.02rem}
+.nav .logo img{width:36px;height:36px;border-radius:10px}
+.nav .links{display:flex;gap:28px;flex:1}
+.nav .links a{color:#C9D4F2;font-size:.92rem;font-weight:600;transition:color .25s}
+.nav .links a:hover{color:#fff}
+.nav .cta{display:flex;gap:12px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 26px;border-radius:14px;font-weight:700;font-size:.95rem;cursor:pointer;border:none;font-family:inherit;white-space:nowrap;transition:transform .3s ease,box-shadow .3s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#231903;box-shadow:0 6px 24px rgba(212,167,58,.35)}
+.btn-gold:hover{box-shadow:0 10px 32px rgba(212,167,58,.5)}
+.btn-outline{background:transparent;border:1.5px solid rgba(255,255,255,.45);color:#fff}
+.btn-outline:hover{border-color:#fff}
+.btn-outline-blue{background:transparent;border:1.5px solid var(--blue-3);color:var(--blue-3)}
+.btn-sm{height:42px;padding:0 20px;font-size:.88rem}
+@media(max-width:980px){.nav .links{display:none}.nav .cta .btn-outline{display:none}}
+/* Hamburger + full menu — native-app navigation on phones */
+.burger{display:none;background:none;border:none;cursor:pointer;padding:8px;margin-left:4px}
+.burger span{display:block;width:24px;height:2.5px;border-radius:3px;background:#fff;margin:5px 0;transition:.3s}
+@media(max-width:980px){.burger{display:block}}
+.mmenu{position:fixed;inset:0;z-index:90;background:linear-gradient(165deg,var(--blue-1),var(--blue-2));display:none;flex-direction:column;padding:24px;overflow-y:auto}
+.mmenu.on{display:flex}
+.mmenu .head{display:flex;align-items:center;justify-content:space-between}
+.mmenu .close{background:rgba(255,255,255,.1);border:none;color:#fff;font-size:1.3rem;width:44px;height:44px;border-radius:12px;cursor:pointer}
+.mmenu .plat{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:16px;padding:15px 18px;margin-top:12px;color:#fff;font-weight:700}
+.mmenu .plat img{width:30px;height:30px;object-fit:contain}
+.mmenu .plat small{display:block;font-weight:500;font-size:.72rem;color:#AEC0EC}
+.mmenu .lnk{display:block;color:#DDE6FB;font-weight:600;font-size:1.02rem;padding:13px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
+.mmenu .foot{margin-top:auto;padding-top:24px}
+
+/* ── HERO ── */
+.hero{position:relative;background:linear-gradient(160deg,var(--blue-1) 0%,var(--blue-2) 46%,var(--blue-3) 100%);color:#fff;overflow:hidden}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.hero .wrap{position:relative;padding-top:112px;padding-bottom:128px;text-align:center}
+.hero .wordmark{font-size:clamp(2.3rem,6.4vw,4.5rem);font-weight:900;letter-spacing:-0.015em;line-height:1.05;color:#fff;display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap}
+.hero .mission{font-size:clamp(1.7rem,4.4vw,3.4rem);font-weight:800;margin-top:44px;line-height:1.18}
+.hero .mission2{font-size:clamp(1.15rem,2.6vw,2rem);font-weight:500;color:#C9D4F2;margin-top:10px}
+.hero .pillars-line{margin-top:30px;font-size:1rem;font-weight:700;letter-spacing:.06em;color:#E8EEFF;display:flex;justify-content:center;flex-wrap:wrap;gap:6px 0;padding:0 8px}
+.hero .pillars-line i{font-style:normal;margin:0 10px}
+.hero .pillars-line span{white-space:nowrap}
+@media(max-width:640px){.hero .pillars-line{font-size:.86rem}.hero .pillars-line i{margin:0 7px}}
+.dock{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:52px}
+.dock a{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(10px);border-radius:16px;padding:13px 22px;font-weight:700;font-size:.92rem;color:#fff;transition:transform .3s ease,background .3s ease}
+.dock a:hover{transform:translateY(-3px);background:rgba(255,255,255,.13)}
+.dock img{width:26px;height:26px;object-fit:contain}
+.dock small{display:block;font-weight:500;font-size:.68rem;color:#AEC0EC;letter-spacing:.02em}
+.livebar{position:relative;border-top:1px solid rgba(255,255,255,.12);margin-top:64px;padding:22px 0 0;display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.livebar .m{text-align:center}
+.livebar .m .n{font-size:1.25rem;font-weight:800;color:#fff}
+.livebar .m .l{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8FA6DC;margin-top:2px}
+.livebar .status{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:#7FD6A3}
+.livebar .status .d{width:8px;height:8px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.2);animation:starbreathe 2.6s ease-in-out infinite}
+.wm-w{color:#fff}
+.wm-g{background:linear-gradient(100deg,#F2D98A 5%,var(--gold) 85%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.wm-b{background:linear-gradient(100deg,#7FB0FF,#4E86F0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.wm-o{background:linear-gradient(100deg,#FFA25E,var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent}
+.wm-p{background:linear-gradient(100deg,#FF9DC7,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .eyebrow{font-size:.74rem;font-weight:800;letter-spacing:.34em;text-transform:uppercase;color:#9FB4E8;margin-bottom:28px}
+/* ═══ THE SKYGLOBEGROUP MASTER WORDMARK ═══
+   One word, five brand colors flowing as a single silk gradient:
+   White → Gold → Sky Blue → Orange → Pink → White. The gradient drifts
+   slowly (living, regal), the word carries a soft golden aura. */
+.sgg{font-weight:900;letter-spacing:.01em;
+  background:linear-gradient(92deg,#FFFFFF 0%,#F7E7B4 14%,#E8C566 30%,#9DC2FF 50%,#FFA25E 68%,#FF9DC7 84%,#FFFFFF 100%);
+  background-size:160% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:sggflow 9s ease-in-out infinite alternate;
+  filter:drop-shadow(0 2px 18px rgba(212,167,58,.30)) drop-shadow(0 0 2px rgba(255,255,255,.18))}
+.sgg-dark{font-weight:900;
+  background:linear-gradient(92deg,var(--blue-1) 0%,var(--blue-3) 22%,#B98A1E 42%,#3D66C9 58%,#C25A16 74%,#C24E86 88%,var(--blue-1) 100%);
+  background-size:160% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:sggflow 9s ease-in-out infinite alternate}
+@keyframes sggflow{0%{background-position:0% center}100%{background-position:100% center}}
+/* Jewel underline beneath the hero wordmark */
+.wm-flourish{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:26px}
+.wm-flourish .ln{height:2px;width:min(150px,26vw);border-radius:2px}
+.wm-flourish .ln.l{background:linear-gradient(90deg,transparent,var(--gold-2))}
+.wm-flourish .ln.r{background:linear-gradient(90deg,var(--gold-2),transparent)}
+.wm-flourish .gem{width:9px;height:9px;transform:rotate(45deg);background:linear-gradient(135deg,var(--gold-2),#9DC2FF,var(--orange));border-radius:2px;box-shadow:0 0 14px rgba(212,167,58,.6)}
+/* Score lines — living meters instead of raw numbers (honest: activity, not claims) */
+.meter{min-width:150px;text-align:left}
+.meter .l{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8FA6DC;margin-bottom:8px}
+.meter .bar{height:5px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;position:relative}
+.meter .bar i{position:absolute;inset:0;border-radius:6px;background:linear-gradient(90deg,transparent,var(--gold-2) 35%,#4E86F0 55%,var(--orange) 75%,transparent);background-size:220% 100%;animation:meterflow 3.6s linear infinite}
+.meter.m2 .bar i{animation-delay:-1.2s}
+.meter.m3 .bar i{animation-delay:-2.4s}
+@keyframes meterflow{0%{background-position:120% 0}100%{background-position:-120% 0}}
+.meter-dark .l{color:#8FA6DC}
+.meter-dark .bar{background:rgba(255,255,255,.14)}
+.hero::after{content:'';position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,.14),transparent 60%);top:-420px;left:50%;transform:translateX(-50%);pointer-events:none}
+.nstar{vertical-align:-4px;margin-left:14px;filter:drop-shadow(0 0 10px rgba(212,167,58,.55));animation:starbreathe 4.5s ease-in-out infinite}
+@keyframes starbreathe{0%,100%{opacity:.92;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+.nstar-s{vertical-align:-2px;margin-left:6px}
+.hero h1{font-size:clamp(1.6rem,4.2vw,2.6rem);font-weight:800;margin-top:40px;line-height:1.25}
+.hero .sub{max-width:680px;margin:24px auto 0;color:#C9D4F2;font-size:1.06rem;line-height:1.9}
+.hero .sub b{color:#fff;font-weight:600}
+.hero .actions{display:flex;gap:16px;justify-content:center;margin-top:48px;flex-wrap:wrap}
+.hero .pillbar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:56px}
+.hero .pill{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);border-radius:100px;padding:9px 20px;font-size:.84rem;font-weight:600;color:#DDE6FB}
+
+/* ── ECOSYSTEM NAVIGATOR ── */
+.navigator{position:relative;margin-top:-64px;z-index:5}
+.navigator .panel{background:rgba(255,255,255,.98);border-radius:24px;box-shadow:0 24px 80px rgba(4,19,47,.25);padding:40px 44px;max-width:1080px;margin:0 auto}
+.navigator h2{font-size:1.5rem;font-weight:800;text-align:center}
+.navigator p.lead{text-align:center;color:var(--muted);margin-top:8px;font-size:.95rem}
+.nav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:32px}
+.nav-item{border-radius:var(--r);padding:22px 20px;background:var(--warm);cursor:pointer;transition:transform .35s ease,box-shadow .35s ease;display:block}
+.nav-item:hover{transform:translateY(-6px);box-shadow:var(--shadow-h);background:#fff}
+.nav-item .ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;color:#fff;margin-bottom:14px}
+.nav-item h3{font-size:.98rem;font-weight:700}
+.nav-item span{display:block;font-size:.8rem;color:var(--muted);margin-top:4px}
+.nav-item .go{display:block;margin-top:12px;font-size:.8rem;font-weight:700}
+
+/* ── SECTION HEADERS ── */
+.sec{padding:112px 0}
+.sec.warm{background:var(--warm)}
+.sec-eyebrow{font-size:.78rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--blue-3);text-align:center}
+.sec-eyebrow::after{content:'';display:block;width:56px;height:3px;border-radius:3px;margin:14px auto 0;background:linear-gradient(90deg,var(--gold),#4E86F0,var(--orange))}
+.sec-title{font-size:clamp(1.8rem,3.4vw,2.5rem);font-weight:800;text-align:center;margin-top:12px;line-height:1.25}
+.sec-sub{text-align:center;color:var(--muted);max-width:640px;margin:16px auto 0;font-size:1rem}
+
+/* ── ECOSYSTEM ARCHITECTURE ── */
+.eco{max-width:860px;margin:64px auto 0;position:relative}
+.eco::before{content:'';position:absolute;left:50%;top:12px;bottom:12px;width:2px;transform:translateX(-50%);background:linear-gradient(180deg,var(--blue-3),var(--purple) 30%,var(--gold) 55%,var(--orange) 80%,var(--blue-3));opacity:.35}
+.eco-root{position:relative;text-align:center;margin-bottom:48px}
+.eco-root .box{display:inline-block;background:linear-gradient(135deg,var(--blue-1),var(--blue-3));color:#fff;border-radius:18px;padding:18px 44px;font-weight:800;letter-spacing:.1em;box-shadow:var(--shadow-h)}
+.eco-node{position:relative;display:flex;align-items:center;gap:28px;margin:36px 0;background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:28px 34px;transition:transform .35s ease,box-shadow .35s ease}
+.eco-node:hover{transform:translateY(-4px);box-shadow:var(--shadow-h)}
+.eco-node .dot{position:absolute;left:50%;top:-22px;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 5px rgba(212,167,58,.18)}
+.eco-node .ic{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;color:#fff;flex-shrink:0}
+.eco-node .lg{width:76px;height:76px;border-radius:20px;background:linear-gradient(160deg,#F4F7FF,#E9EFFC);box-shadow:inset 0 0 0 1px rgba(18,62,135,.08),0 6px 18px rgba(6,26,82,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.eco-node .lg img{width:56px;height:56px;object-fit:contain}
+.eco-node h3{font-size:1.25rem;font-weight:800}
+.eco-node .tag{font-size:.74rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.eco-node p{color:var(--muted);font-size:.92rem;margin-top:6px}
+.eco-node .open{margin-left:auto;white-space:nowrap;font-weight:700;font-size:.88rem}
+@media(max-width:760px){.eco-node{flex-direction:column;text-align:center;gap:14px}.eco-node .open{margin:0}}
+
+/* ── SOLUTIONS ── */
+.sol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-top:56px}
+.sol{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:32px 28px;transition:transform .35s ease,box-shadow .35s ease;display:block}
+.sol:hover{transform:translateY(-6px);box-shadow:var(--shadow-h)}
+.sol .em{font-size:1.9rem}
+.sol h3{font-size:1.08rem;font-weight:800;margin-top:14px}
+.sol p{color:var(--muted);font-size:.88rem;margin-top:8px}
+.sol .go{display:inline-block;margin-top:16px;font-weight:700;font-size:.85rem;color:var(--blue-3)}
+
+/* ── LIVE INTELLIGENCE ── */
+.stats-band{background:linear-gradient(135deg,var(--blue-1),var(--blue-2));border-radius:28px;color:#fff;padding:56px 48px;margin-top:56px;box-shadow:var(--shadow-h)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:32px;text-align:center}
+.stat .n{font-size:2.3rem;font-weight:900;background:linear-gradient(120deg,#fff,var(--gold-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .l{font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#B9C7EC;margin-top:6px}
+
+/* ── TRUST ── */
+.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:56px}
+.trust{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:36px 30px}
+.trust .ic{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,var(--blue-2),var(--blue-3));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.trust:nth-child(2) .ic{background:linear-gradient(135deg,var(--gold),var(--gold-2))}
+.trust:nth-child(3) .ic{background:linear-gradient(135deg,var(--orange),#F79B5B)}
+.trust:nth-child(4) .ic{background:linear-gradient(135deg,var(--purple),#9F67F5)}
+.trust:nth-child(5) .ic{background:linear-gradient(135deg,#12864E,#2BB673)}
+.trust:nth-child(6) .ic{background:linear-gradient(135deg,var(--pink),#F27FB4)}
+.trust h3{font-size:1.1rem;font-weight:800;margin-top:18px}
+.trust p{color:var(--muted);font-size:.9rem;margin-top:10px;line-height:1.75}
+.trust .gold{color:var(--gold);font-weight:800}
+
+/* ── CTA ── */
+.cta-final{background:linear-gradient(160deg,var(--blue-1),var(--blue-3));border-radius:32px;color:#fff;text-align:center;padding:88px 40px;position:relative;overflow:hidden}
+.cta-final::after{content:'';position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,.22),transparent 65%);top:-260px;right:-160px}
+.cta-final h2{font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:900;position:relative}
+.cta-final p{color:#C9D4F2;margin-top:16px;font-size:1.02rem;position:relative}
+.cta-final .actions{margin-top:40px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative}
+
+/* ── FOOTER ── */
+footer{background:linear-gradient(180deg,#051636 0%,var(--navy-footer) 40%);color:#AEBBDD;padding:0 0 40px;margin-top:112px;position:relative;overflow:hidden}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),#4E86F0 35%,var(--orange) 65%,var(--pink))}
+footer::after{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,.08),transparent 65%);bottom:-460px;left:50%;transform:translateX(-50%);pointer-events:none}
+/* The signature crown of the footer */
+.foot-sig{text-align:center;padding:72px 0 56px;position:relative}
+.foot-sig .wm{font-size:clamp(1.5rem,3.4vw,2.2rem)}
+.foot-sig .tag{margin-top:12px;font-size:.78rem;font-weight:700;letter-spacing:.34em;text-transform:uppercase;color:var(--gold)}
+.foot-sig .ln{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:26px}
+.foot-sig .ln span{height:1.5px;width:min(180px,30vw)}
+.foot-sig .ln .l{background:linear-gradient(90deg,transparent,rgba(212,167,58,.7))}
+.foot-sig .ln .r{background:linear-gradient(90deg,rgba(212,167,58,.7),transparent)}
+.foot-sig .gem{width:8px;height:8px;transform:rotate(45deg);background:linear-gradient(135deg,var(--gold-2),#9DC2FF,var(--orange));border-radius:2px;box-shadow:0 0 12px rgba(212,167,58,.55)}
+.foot-sig .mission-f{max-width:520px;margin:18px auto 0;color:#C9D4E5;font-size:.95rem;line-height:1.8}
+/* Zone 2 — the five pillars, official logos, equal weight */
+.foot-eco{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:64px}
+@media(max-width:860px){.foot-eco{grid-template-columns:repeat(2,1fr)}.foot-eco a:last-child{grid-column:1/-1}}
+.foot-eco a{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:24px 14px;margin:0;transition:transform .3s ease,border-color .3s ease,background .3s ease}
+.foot-eco a:hover{transform:translateY(-4px);border-color:rgba(212,167,58,.4);background:rgba(255,255,255,.08)}
+.foot-eco img{width:42px;height:42px;object-fit:contain}
+.foot-eco b{color:#fff;font-size:.95rem;letter-spacing:.04em}
+.foot-eco span{font-size:.74rem;color:#C9D4E5}
+.foot-grid{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:56px;position:relative}
+@media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr;gap:32px}.fc-mail{grid-column:1/-1}}
+@media(max-width:520px){.foot-grid{grid-template-columns:1fr}}
+/* Column headers — each carries its brand color with a gradient underline */
+footer h4{color:#fff;font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;font-weight:800;display:inline-block;position:relative;padding-bottom:10px}
+footer h4::after{content:'';position:absolute;left:0;bottom:0;height:2.5px;width:100%;border-radius:3px}
+.fc-eco h4::after{background:linear-gradient(90deg,var(--gold),var(--gold-2))}
+.fc-start h4::after{background:linear-gradient(90deg,#4E86F0,#9DC2FF)}
+.fc-co h4::after{background:linear-gradient(90deg,var(--orange),#F79B5B)}
+.fc-mail h4::after{background:linear-gradient(90deg,var(--pink),#FF9DC7)}
+footer a{display:flex;align-items:center;gap:9px;font-size:.9rem;margin:12px 0;transition:color .25s,transform .25s}
+footer a:hover{color:#fff;transform:translateX(4px)}
+footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.fc-eco a:hover{color:var(--gold-2)} .fc-start a:hover{color:#9DC2FF} .fc-co a:hover{color:#F79B5B}
+/* Email chips — glass capsules */
+.mailchip{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:.82rem;line-height:1.45;color:#C9D4E5;transition:background .25s,border-color .25s,transform .25s}
+.mailchip b{color:#fff;font-size:.78rem;letter-spacing:.04em}
+.mailchip:hover{background:rgba(255,255,255,.1);border-color:rgba(212,167,58,.4);transform:translateX(4px);color:#fff}
+.mailchip .mi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+/* Social band — official icons, white by default, brand color on hover */
+.foot-social{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:64px}
+.foot-social .icons{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.foot-social .icons a{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff;margin:0;transition:transform .25s ease,color .25s ease,border-color .25s ease}
+.foot-social .icons a:hover{transform:translateY(-4px)}
+.foot-social .icons a.tk:hover{color:#69C9D0;border-color:#69C9D0}
+.foot-social .icons a.yt:hover{color:#FF4444;border-color:#FF4444}
+.foot-social .icons a.ig:hover{color:#E4405F;border-color:#E4405F}
+.foot-social .icons a.th:hover{color:var(--gold-2);border-color:var(--gold-2)}
+.foot-social .icons a.wa:hover{color:#25D366;border-color:#25D366}
+.foot-social .handle{font-size:.84rem;color:#C9D4E5;letter-spacing:.06em}
+.foot-social .handle b{color:#fff}
+.foot-bottom{border-top:1px solid rgba(255,255,255,.1);margin-top:56px;padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:.82rem}
+.foot-bottom .gold{color:var(--gold)}
+.foot-bottom .live{display:flex;align-items:center;gap:8px;color:#7FD6A3;font-weight:700}
+.foot-bottom .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
+
+/* calm entrance */
+.rise{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease}
+.rise.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rise{transition:none;opacity:1;transform:none}}
+</style><style>
+/* YUNEX identity layer — purple innovation + orange commerce over royal blue */
+:root{--yx-p:#7C3AED;--yx-p2:#9F67F5;--yx-o:#F0742E;--yx-o2:#F79B5B}
+.hero{background:linear-gradient(160deg,#061A52 0%,#1B1B5E 45%,#3A1D66 100%)}
+.hero::after{background:radial-gradient(circle,rgba(240,116,46,.14),transparent 60%)}
+.btn-yx{background:linear-gradient(135deg,var(--yx-p),var(--yx-o));color:#fff;box-shadow:0 6px 24px rgba(124,58,237,.4)}
+.btn-yx:hover{box-shadow:0 10px 32px rgba(240,116,46,.5)}
+.sec-eyebrow{color:var(--yx-p)}
+.sec-eyebrow::after{background:linear-gradient(90deg,var(--yx-p),var(--yx-o),var(--gold))}
+.ywm{font-weight:900;letter-spacing:.06em;background:linear-gradient(95deg,#FFFFFF 0%,#D8C6FF 35%,var(--yx-p2) 50%,#FFC59A 65%,#FFFFFF 100%);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sggflow 9s ease-in-out infinite alternate}
+/* Trusted transaction timeline */
+.flow{max-width:900px;margin:56px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;position:relative}
+.flow::before{content:'';position:absolute;top:26px;left:8%;right:8%;height:2.5px;border-radius:3px;background:linear-gradient(90deg,var(--yx-p),var(--yx-o),var(--gold),#12864E)}
+.fstep{text-align:center;padding:0 10px;position:relative}
+.fstep .n{width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto;position:relative;z-index:1;border:2.5px solid var(--yx-p)}
+.fstep:nth-child(2) .n{border-color:var(--yx-o)} .fstep:nth-child(3) .n{border-color:var(--gold)}
+.fstep:nth-child(4) .n{border-color:#12864E} .fstep:nth-child(5) .n{border-color:var(--yx-p)}
+.fstep b{display:block;margin-top:14px;font-size:.92rem}
+.fstep span{display:block;font-size:.78rem;color:var(--muted);margin-top:4px;line-height:1.5}
+@media(max-width:760px){.flow{grid-template-columns:1fr;gap:22px}.flow::before{display:none}}
 </style>
 </head>
 <body>
 
-<header><div class="wrap hbar">
-  <div class="hbrand"><img src="/yunex-logo-t.png" alt="YUNEX" style="width:38px;height:38px;object-fit:contain"><span>YUNEX<small>A SKYGLOBE GROUP PLATFORM</small></span></div>
-  <a class="hback" href="/">← SkyGlobe Group</a>
-</div></header>
-
-<div class="hero"><div class="wrap">
-  <div style="margin-bottom:20px;display:flex;justify-content:center"><img src="/yunex-logo-t.png" alt="YUNEX" style="height:132px;width:auto;object-fit:contain;filter:drop-shadow(0 14px 34px rgba(79,142,247,.30))"></div>
-  <span class="kicker">THE ECONOMIC LAYER</span>
-  <h1>YUNEX<span class="dot">.</span></h1>
-  <div class="tag">The engine of Africa's economy.</div>
-  <p class="lead">Africa's economic infrastructure — payments, commerce, trade, marketplace and financial services that let a continent of 1.4 billion people finally trade with itself. Built by Africans. Governed in Africa. For Africa alone.</p>
-  <a class="cta" href="/yunex/app">Enter YUNEX →</a> <a class="cta" href="#early" style="background:#fff;color:#2f5fd0;border:1.5px solid rgba(79,142,247,.45);box-shadow:0 6px 18px rgba(79,142,247,.12)">Request Early Access</a>
-</div></div>
-
-<section><div class="wrap">
-  <h2 class="sec">What YUNEX Is</h2>
-  <p class="sub">Africa trades more with the outside world than with itself — not for lack of ambition, but for lack of rails. YUNEX builds the rails.</p>
-  <div class="grid">
-    <div class="card"><div class="ic">💳</div><h3>Payments &amp; Wallets</h3><p>Cross-border payments, digital wallets, remittances and merchant rails — money that moves across 54 countries as easily as a message.</p></div>
-    <div class="card"><div class="ic">🛒</div><h3>Commerce &amp; Marketplace</h3><p>A continental marketplace and B2B commerce where a maker in Kumasi sells to a buyer in Kigali with confidence on both sides.</p></div>
-    <div class="card"><div class="ic">🚚</div><h3>Trade &amp; Logistics</h3><p>Supply chain, customs integration, export–import systems — the practical machinery that turns AfCFTA from a treaty into a living economy.</p></div>
-    <div class="card"><div class="ic">📈</div><h3>Finance &amp; Investment</h3><p>Credit, insurance, SME support, investment and freelancing infrastructure — capital finding African talent, and talent finding its worth at home.</p></div>
-  </div>
-</div></section>
-
-<section><div class="wrap">
-  <h2 class="sec">The YUNEX Family</h2>
-  <p class="sub">One economic layer, a growing family of products — clean names, continental reach. Corridors are features, never brands: trade routes change, infrastructure does not.</p>
-  <div class="grid">
-    <div class="card"><div class="ic">💳</div><h3>YUNEX Pay</h3><p>Payments, wallets and settlement — money that moves across 54 countries as easily as a message. <span style="color:var(--blue);font-weight:700;font-size:.78rem;letter-spacing:.08em">IN FOUNDATION</span></p></div>
-    <div class="card" style="border-color:rgba(201,168,76,.5)"><div class="ic">🌐</div><h3>YUNEX Trade ✦</h3><p><em style="color:var(--gold)">Africa's gateway to global commerce.</em> Verified cross-border B2B trade — launching with the <strong>China Corridor</strong> (sourcing, verified suppliers, settlement, AI translation &amp; negotiation), then the Gulf, Europe, and the Africa Corridor: the continent trading with itself. <span style="color:var(--gold);font-weight:700;font-size:.78rem;letter-spacing:.08em">COMING</span></p></div>
-    <div class="card"><div class="ic">🛒</div><h3>YUNEX Market</h3><p>The consumer marketplace — where a maker in Kumasi sells to a buyer in Kigali with confidence on both sides. <span style="color:var(--mut);font-weight:700;font-size:.78rem;letter-spacing:.08em">PLANNED</span></p></div>
-  </div>
-  <div style="max-width:820px;margin:22px auto 0;background:#f0f8f3;border:1px solid rgba(63,174,106,.4);border-radius:16px;padding:22px 24px">
-    <div style="font-size:.7rem;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:#3fae6a;margin-bottom:8px">🛡️ TRUST BY DESIGN — THE YUNEX TRADE RULE</div>
-    <p style="color:var(--mut);font-size:.88rem;line-height:1.7;margin:0">Every person on YUNEX Trade is <strong style="color:#041022">a real, verified human or business</strong>. Individuals register with their <strong style="color:#041022">national identity</strong> (real KYC, verified through TERRA). Businesses — and every partner of a business — register with their <strong style="color:#041022">government-issued business registration and the legal identity of each owner and partner</strong>, from their own country. Buyers and sellers across China, the Gulf, Europe, the Americas, Asia and all of Africa showcase products, list, negotiate and transact <strong style="color:#041022">in real time, with real people</strong> — end-to-end encrypted, with zero tolerance for illegal activity: the system detects, blocks and reports it, under full platform control. No verification, no trade.</p>
-  </div>
-  <p style="text-align:center;color:var(--mut);font-size:.88rem;max-width:680px;margin:26px auto 0;line-height:1.7">How it will work: a Ghanaian business owner finds a verified supplier through <strong style="color:#041022">YUNEX Trade</strong> · <strong style="color:#3fae6a">TERRA</strong> verifies the supplier · <strong style="color:var(--blue)">YUNEX</strong> handles payment · <strong style="color:#ff9f1c">NORIA ✦</strong> negotiates, translates and analyzes · logistics partners deliver.</p>
-</div></section>
-
-<section style="background:var(--navy2)"><div class="wrap">
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:32px;align-items:start">
-    <div>
-      <span style="display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);background:#fdf6e3;border:1px solid rgba(212,167,58,.45);padding:6px 14px;border-radius:999px;margin-bottom:16px">YUNEX TRADE <span style="color:#e65100">✦</span></span>
-      <h2 style="font-family:Georgia,serif;font-size:clamp(1.7rem,3.6vw,2.4rem);color:#041022;line-height:1.2;margin-bottom:14px">Africa's Gateway to Global Commerce.</h2>
-      <p style="color:var(--mut);font-size:.95rem;line-height:1.7;margin-bottom:18px">Real-time verified trade between humans and businesses. Every participant KYC-verified by TERRA. Every transaction end-to-end encrypted. Both sides see products, quantity and quality — negotiate, bargain, and arrange shipping with real people. No exceptions.</p>
-      <div style="background:#f0f8f3;border:1px solid rgba(63,174,106,.4);border-left:4px solid #2c7d4c;border-radius:12px;padding:16px 18px;margin-bottom:20px">
-        <div style="font-size:.72rem;font-weight:800;letter-spacing:.18em;color:#2c7d4c;margin-bottom:6px">TRUST BY DESIGN</div>
-        <p style="color:#374151;font-size:.85rem;line-height:1.65;margin:0 0 8px">National-identity KYC via TERRA for every individual. Government business registration and legal identity verification for every organisation — and every partner of it. Zero tolerance for unverified activity.</p>
-        <div style="font-weight:800;color:#041022;font-size:.85rem">"No verification, no trade."</div>
-      </div>
-      <a href="#early" style="display:inline-block;border:1.5px solid rgba(4,16,34,.3);color:#041022;font-weight:700;padding:12px 26px;border-radius:12px;font-size:.9rem">Register Interest</a>
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap">
+    <a class="logo" href="/yunex"><img src="/yunex-logo-t.png" alt="" style="border-radius:0"><span class="ywm">YUNEX</span> <span style="color:var(--yx-o2)">✦</span></a>
+    <div class="links">
+      <a href="/yunex/app">Marketplace</a>
+      <a href="#gateways">Trade</a>
+      <a href="#gateways">Payments</a>
+      <a href="#gateways">Investment</a>
+      <a href="#flow">How it works</a>
+      <a href="/">SKYGLOBEGROUP</a>
     </div>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div style="background:#ffffff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 4px 14px rgba(4,16,34,.05)">
-        <span style="font-size:1.3rem">🌏</span><div><div style="font-weight:800;color:#041022;font-size:.94rem">China Corridor <span style="font-size:.64rem;letter-spacing:.14em;color:#a87016;background:#fdf6e3;border:1px solid rgba(212,167,58,.45);padding:2px 9px;border-radius:999px;vertical-align:1px">COMING</span></div><div style="color:var(--mut);font-size:.82rem">Direct trade routes, verified merchants, sourcing &amp; settlement, NORIA translation &amp; negotiation.</div></div>
-      </div>
-      <div style="background:#ffffff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 4px 14px rgba(4,16,34,.05)">
-        <span style="font-size:1.3rem">🕌</span><div><div style="font-weight:800;color:#041022;font-size:.94rem">Gulf Corridor <span style="font-size:.64rem;letter-spacing:.14em;color:#6B7280;background:#f1f5f9;border:1px solid rgba(4,16,34,.12);padding:2px 9px;border-radius:999px;vertical-align:1px">PLANNED</span></div><div style="color:var(--mut);font-size:.82rem">GCC markets, multi-currency logistics, regional commerce.</div></div>
-      </div>
-      <div style="background:#ffffff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 4px 14px rgba(4,16,34,.05)">
-        <span style="font-size:1.3rem">🏛️</span><div><div style="font-weight:800;color:#041022;font-size:.94rem">Europe Corridor <span style="font-size:.64rem;letter-spacing:.14em;color:#6B7280;background:#f1f5f9;border:1px solid rgba(4,16,34,.12);padding:2px 9px;border-radius:999px;vertical-align:1px">PLANNED</span></div><div style="color:var(--mut);font-size:.82rem">EU compliance, customs intelligence, cross-continental supply.</div></div>
-      </div>
-      <div style="background:#ffffff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 4px 14px rgba(4,16,34,.05)">
-        <span style="font-size:1.3rem">🌍</span><div><div style="font-weight:800;color:#041022;font-size:.94rem">Africa Corridor <span style="font-size:.64rem;letter-spacing:.14em;color:#2c7d4c;background:#f0f8f3;border:1px solid rgba(63,174,106,.4);padding:2px 9px;border-radius:999px;vertical-align:1px">THE MISSION</span></div><div style="color:var(--mut);font-size:.82rem">Pan-African trade, AfCFTA integration, local settlement — the continent trading with itself.</div></div>
-      </div>
+    <div class="cta">
+      <a class="btn btn-outline btn-sm" href="/yunex/app">Sign In</a>
+      <a class="btn btn-yx btn-sm" href="/yunex/app" style="display:var(--cta-d,inline-flex)">Create SKYGLOBE ID</a>
+      <button class="burger" onclick="document.getElementById('mmenu').classList.add('on')" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
-</div></section>
+</nav>
 
-<section><div class="wrap">
-  <h2 class="sec">The Manifesto</h2>
-  <div class="mani">
-    <p>A continent of traders was carved into markets too small to prosper alone. Borders drawn in distant rooms still tax a farmer's harvest and a young builder's dream. Money crosses oceans more easily than it crosses the river to the next country.</p>
-    <p><b>YUNEX exists to end this.</b> We are building the economic engine of Africa — where payment is instant, trade is trusted, credit is earned by real work, and a young person's enterprise can reach every corner of the continent from day one.</p>
-    <p>YUNEX runs on trust — the trust TERRA builds. Together they are one ecosystem: <b>Terra verifies, YUNEX moves.</b> The wealth Africa creates will circulate in Africa, build in Africa, and belong to Africa.</p>
-    <p class="sig">— YUNEX · A SkyGlobe Group Platform</p>
+<!-- MOBILE MENU -->
+<div class="mmenu" id="mmenu">
+  <div class="head">
+    <span class="ywm" style="font-size:1.15rem">YUNEX</span>
+    <button class="close" onclick="document.getElementById('mmenu').classList.remove('on')">✕</button>
   </div>
-</div></section>
-
-<section id="early"><div class="wrap">
-  <h2 class="sec">Request Early Access</h2>
-  <p class="sub">YUNEX is being built. Merchants, builders, institutions and partners who share the mission — register your interest. Every message reaches the YUNEX desk directly.</p>
-  <div class="formbox">
-    <form id="yunexForm">
-      <label>Full name</label><input id="yfName" required maxlength="120" placeholder="Your full name">
-      <label>Email</label><input id="yfEmail" type="email" required maxlength="160" placeholder="you@example.com">
-      <label>I am a…</label>
-      <select id="yfRole"><option>Individual / Early supporter</option><option>Merchant / Trader</option><option>SME / Business</option><option>Developer / Fintech</option><option>Government / Institution</option><option>Investor / Partner</option></select>
-      <label>Your message (optional)</label>
-      <textarea id="yfMsg" rows="4" maxlength="2000" placeholder="Tell us how you want to trade, build or partner on YUNEX…"></textarea>
-      <button type="submit" id="yfBtn">Power the Economic Engine</button>
-    </form>
-    <div class="okmsg" id="yfOk"><div class="big">◆</div><h3>Welcome to YUNEX</h3><p>Your registration has been received by the YUNEX desk. We will be in touch — check your email and your SkyGlobe account inbox.</p></div>
+  <div style="margin-top:20px">
+    <a class="plat" href="/yunex/app"><img src="/yunex-logo-t.png" alt=""><span>Enter YUNEX<small>Marketplace · Deals · Wallet</small></span></a>
+    <a class="plat" href="/terra"><img src="/terra-logo-t.png" alt=""><span>TERRA<small>Get verified to trade</small></span></a>
+    <a class="plat" href="/noria"><img src="/noria-logo-t.png" alt=""><span>NORIA<small>Intelligent search &amp; insight</small></span></a>
+    <a class="plat" href="/"><img src="/skyglobe-logo-t.png" alt=""><span>SKYGLOBEGROUP<small>The ecosystem gateway</small></span></a>
   </div>
-</div></section>
+  <div class="foot">
+    <a class="btn btn-yx" style="width:100%" href="/yunex/app">Create SKYGLOBE ID</a>
+    <a class="btn btn-outline" style="width:100%;margin-top:12px" href="/yunex/app">Sign In</a>
+    <div style="text-align:center;margin-top:18px;font-size:.82rem;color:#AEC0EC">✉️ yunex@skyglobegroup.com</div>
+  </div>
+</div>
 
-<footer><div class="wrap">
-  <div class="parent">SKYGLOBE GROUP</div>
-  <div>YUNEX — The Economic Layer · One World. One Mission.</div>
-  <span class="africa-note">◆ BUILT FOR AFRICA · BY AFRICANS · ACCESS RESERVED FOR THE CONTINENT</span>
-</div></footer>
+<!-- HERO -->
+<header class="hero">
+  <canvas id="net"></canvas>
+  <div class="wrap">
+    <div style="display:flex;justify-content:center"><img src="/yunex-logo-t.png" alt="YUNEX" style="height:100px;filter:drop-shadow(0 8px 28px rgba(240,116,46,.4))"></div>
+    <div class="wordmark" style="margin-top:20px"><span class="ywm">YUNEX</span></div>
+    <div style="margin-top:10px;font-size:.82rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#FFC59A">Africa's Economic Infrastructure</div>
+    <div class="wm-flourish"><span class="ln l" style="background:linear-gradient(90deg,transparent,rgba(240,116,46,.8))"></span><span class="gem" style="background:linear-gradient(135deg,var(--yx-p2),var(--gold-2),var(--yx-o))"></span><span class="ln r" style="background:linear-gradient(90deg,rgba(240,116,46,.8),transparent)"></span></div>
+    <div class="mission">One trusted economic network,<br>connecting Africa with the world.</div>
+    <p class="sub"><b>Trade.</b> <b>Commerce.</b> <b>Payments.</b> <b>Investment.</b><br>Powered by trust. Built for long-term prosperity.</p>
+    <div class="actions">
+      <a class="btn btn-yx" href="/yunex/app">Create SKYGLOBE ID</a>
+      <a class="btn btn-outline" href="/yunex/app">Explore YUNEX</a>
+    </div>
+    <div class="pillars-line" style="margin-top:44px">
+      <span style="color:#D8C6FF">Marketplace</span><i style="color:var(--yx-o)">•</i>
+      <span style="color:#FFC59A">Trade Corridors</span><i style="color:var(--gold)">•</i>
+      <span style="color:#F2D98A">Payments &amp; Escrow</span><i style="color:var(--yx-p2)">•</i>
+      <span style="color:#D8C6FF">Investment</span><i style="color:var(--yx-o)">•</i>
+      <span style="color:#8FD6AC">Business Network</span>
+    </div>
+    <div class="livebar">
+      <div class="meter"><div class="l">Live Listings</div><div class="bar"><i></i></div></div>
+      <div class="meter m2"><div class="l">Escrow Deals</div><div class="bar"><i></i></div></div>
+      <div class="meter m3"><div class="l">Verified Businesses</div><div class="bar"><i></i></div></div>
+      <div class="m"><div class="n">6</div><div class="l">Trade Corridors</div></div>
+      <div class="m"><div class="n">23</div><div class="l">Currencies</div></div>
+      <div class="m status"><span class="d"></span> Economic Network · Operational</div>
+    </div>
+  </div>
+</header>
+
+<!-- ECONOMIC GATEWAYS -->
+<section class="sec" id="gateways">
+  <div class="wrap">
+    <div class="sec-eyebrow rise">Economic Gateways</div>
+    <h2 class="sec-title rise">Five workspaces. One economy.</h2>
+    <p class="sec-sub rise">Every gateway is a complete operational environment — and every participant inside it is TERRA-verified.</p>
+    <div class="sol-grid">
+      <a class="sol rise" href="/yunex/app"><img src="/yunex-logo-t.png" alt="" style="width:34px;height:34px"><h3>Marketplace</h3><p>Consumer and business marketplace with verified suppliers across seven pillars.</p><b class="go" style="color:var(--yx-p)">Browse listings →</b></a>
+      <a class="sol rise" href="/yunex/app"><img src="/yunex-logo-t.png" alt="" style="width:34px;height:34px"><h3>Trade</h3><p>Import, export, sourcing and negotiation across six trade corridors.</p><b class="go" style="color:var(--yx-o)">Open Trade →</b></a>
+      <a class="sol rise" href="/yunex/app"><img src="/yunex-logo-t.png" alt="" style="width:34px;height:34px"><h3>Payments</h3><p>Wallet, escrow protection and settlement through licensed partners.</p><b class="go" style="color:var(--gold)">Open Wallet →</b></a>
+      <a class="sol rise" href="/yunex/app"><img src="/yunex-logo-t.png" alt="" style="width:34px;height:34px"><h3>Investment</h3><p>Verified projects, assets and opportunities seeking capital and partners.</p><b class="go" style="color:var(--yx-p)">See opportunities →</b></a>
+      <a class="sol rise" href="/yunex/app"><img src="/yunex-logo-t.png" alt="" style="width:34px;height:34px"><h3>Business</h3><p>Registration, TERRA verification, storefronts, insights and the partner network.</p><b class="go" style="color:var(--yx-o)">Business Centre →</b></a>
+      <a class="sol rise" href="/terra"><img src="/terra-logo-t.png" alt="" style="width:34px;height:34px"><h3>Trust, built in</h3><p>Every user, business and deal carries TERRA verification — no verification, no trade.</p><b class="go" style="color:#12864E">How TERRA works →</b></a>
+    </div>
+  </div>
+</section>
+
+<!-- TRUSTED TRANSACTION FLOW -->
+<section class="sec warm" id="flow">
+  <div class="wrap">
+    <div class="sec-eyebrow rise">How it works</div>
+    <h2 class="sec-title rise">Every deal follows one trusted path.</h2>
+    <p class="sec-sub rise">From discovery to release — funds protected at every step, both parties verified before the first handshake.</p>
+    <div class="flow">
+      <div class="fstep rise"><div class="n">🔎</div><b>Discover</b><span>Find verified suppliers and review their TERRA trust marks</span></div>
+      <div class="fstep rise"><div class="n">🤝</div><b>Negotiate</b><span>Agree terms and price in the deal room</span></div>
+      <div class="fstep rise"><div class="n">🔒</div><b>Secure</b><span>Funds held safely in escrow — never at risk</span></div>
+      <div class="fstep rise"><div class="n">🚚</div><b>Deliver</b><span>Shipment tracked until the buyer confirms receipt</span></div>
+      <div class="fstep rise"><div class="n">⭐</div><b>Release</b><span>Funds released, both parties rated — reviews earned only through real trade</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="sec">
+  <div class="wrap">
+    <div class="cta-final rise" style="background:linear-gradient(160deg,#061A52,#3A1D66)">
+      <h2>The economy is open. Enter verified.</h2>
+      <p>One SKYGLOBE ID unlocks the marketplace, trade corridors, wallet and investment network.</p>
+      <div class="actions">
+        <a class="btn btn-yx" href="/yunex/app">Create SKYGLOBE ID</a>
+        <a class="btn btn-outline" href="/terra">Get TERRA verified</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-sig">
+      <div class="wm"><span class="ywm" style="font-size:1.6rem">YUNEX</span> <span style="color:var(--yx-o2)">✦</span></div>
+      <div class="tag" style="color:var(--yx-o2)">The Economic Infrastructure of SKYGLOBEGROUP</div>
+      <div class="ln"><span class="l"></span><span class="gem"></span><span class="r"></span></div>
+    </div>
+    <div class="foot-grid">
+      <div class="fc-start">
+        <h4>YUNEX</h4>
+        <a href="/yunex/app">Marketplace</a>
+        <a href="/yunex/app">Deals &amp; Sourcing</a>
+        <a href="/yunex/app">Wallet</a>
+        <a href="/yunex/app">Business Centre</a>
+        <a href="/yunex/app">Community</a>
+      </div>
+      <div class="fc-eco">
+        <h4>Ecosystem</h4>
+        <a href="/">SKYGLOBEGROUP</a>
+        <a href="/noria">NORIA — Intelligence</a>
+        <a href="/terra">TERRA — Trust</a>
+        <a href="/academy">Academy — Learning</a>
+        <a href="/mobility">Mobility — Travel</a>
+      </div>
+      <div class="fc-mail">
+        <h4>Contact</h4>
+        <a class="mailchip" href="mailto:yunex@skyglobegroup.com"><span class="mi" style="background:rgba(124,58,237,.18)"><img src="/yunex-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain"></span><span><b>YUNEX</b><br>yunex@skyglobegroup.com</span></a>
+        <a class="mailchip" href="mailto:support@skyglobegroup.com"><span class="mi" style="background:rgba(212,167,58,.16)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain"></span><span><b>Support</b><br>support@skyglobegroup.com</span></a>
+        <a class="mailchip" href="https://wa.me/17373998522"><span class="mi" style="background:rgba(43,182,115,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="#2BB673"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.1.5.1.7-.1l1-1.1c.2-.3.4-.2.7-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.2 1.2z"/></svg></span><span><b>WhatsApp</b><br>+1 737 399 8522</span></a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <div>© 2026 <b style="color:#fff">SKYGLOBEGROUP</b> · <span class="ywm">YUNEX</span> · All Rights Reserved</div>
+      <div class="live"><i></i> Economic Network · Operational</div>
+      <div><span class="gold">✦</span> Verified on skyglobegroup.com</div>
+    </div>
+  </div>
+</footer>
 
 <script>
-document.getElementById('yunexForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  var btn=document.getElementById('yfBtn'); btn.disabled=true; btn.textContent='Sending…';
-  try{
-    var r=await fetch('/api/dept-message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      dept:'yunex',
-      name:document.getElementById('yfName').value.trim(),
-      email:document.getElementById('yfEmail').value.trim(),
-      message:'Service: YUNEX Early Access ('+document.getElementById('yfRole').value+')\n\n'+(document.getElementById('yfMsg').value.trim()||'Early access registration.')
-    })});
-    if(!r.ok) throw new Error('send failed');
-    document.getElementById('yunexForm').style.display='none';
-    document.getElementById('yfOk').style.display='block';
-  }catch(err){ btn.disabled=false; btn.textContent='Power the Economic Engine'; alert('Could not send right now — please try again in a moment.'); }
-});
+/* Living trade routes — purple/orange particles (inherited motion language) */
+(function(){
+  const c=document.getElementById('net'); if(!c)return;
+  const x=c.getContext('2d'); let W,H,pts=[];
+  function size(){ W=c.width=c.offsetWidth; H=c.height=c.offsetHeight;
+    const n=Math.min(70,Math.floor(W/22));
+    pts=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:Math.random()*1.6+.6,
+      hue:['124,58,237','240,116,46','212,167,58','185,199,236'][Math.floor(Math.random()*4)]}));
+  }
+  size(); addEventListener('resize',size);
+  (function tick(){
+    x.clearRect(0,0,W,H);
+    for(const p of pts){ p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1;
+      x.beginPath(); x.arc(p.x,p.y,p.r,0,7); x.fillStyle='rgba('+p.hue+',.8)'; x.fill(); }
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;
+      if(d<16000){ x.beginPath(); x.moveTo(a.x,a.y); x.lineTo(b.x,b.y);
+        x.strokeStyle='rgba(216,198,255,'+(0.13*(1-d/16000)).toFixed(3)+')'; x.lineWidth=.7; x.stroke(); } }
+    requestAnimationFrame(tick);
+  })();
+})();
+(function(){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.12});
+  document.querySelectorAll('.rise').forEach(el=>io.observe(el));
+})();
+if('serviceWorker' in navigator){ addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{})); }
 </script>
-<div style="position:fixed;left:14px;bottom:14px;z-index:99990;display:flex;gap:8px">
-<button onclick="history.back()" aria-label="Back to previous page" title="Back" style="width:42px;height:42px;border-radius:50%;border:1px solid rgba(201,168,76,.45);background:rgba(7,17,35,.88);color:#e9c86a;font-size:1.15rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);line-height:1">‹</button>
-<button onclick="history.forward()" aria-label="Forward" title="Forward" style="width:42px;height:42px;border-radius:50%;border:1px solid rgba(201,168,76,.45);background:rgba(7,17,35,.88);color:#e9c86a;font-size:1.15rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);line-height:1">›</button>
-</div>
 </body>
 </html>
