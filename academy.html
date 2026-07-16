@@ -308,6 +308,13 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .msgc .close2{float:right;background:none;border:none;color:#AEC0EC;font-size:1.25rem;cursor:pointer;line-height:1;padding:2px 6px}
 .msgc .note{color:#8FD6AC;font-size:.86rem;font-weight:700;margin-top:12px;display:none;text-align:center}
 .msgc .err{color:#FF9D9D;font-size:.84rem;margin-top:12px;display:none;text-align:center}
+
+/* SKYGLOBE ID — in-place authentication (never leaves the platform) */
+.msgc .authtabs{display:flex;gap:8px;margin:16px 0 6px}
+.msgc .authtabs button{flex:1;padding:11px;border-radius:10px;border:1px solid rgba(174,192,236,.3);background:rgba(255,255,255,.05);color:#AEC0EC;font-weight:700;font-size:.86rem;cursor:pointer;font-family:inherit}
+.msgc .authtabs button.on{background:linear-gradient(135deg,var(--gold),#E8C566);color:#04132F;border-color:transparent}
+.msgc .au-badge{margin:12px 0 2px;padding:9px 12px;border-radius:10px;background:rgba(212,167,58,.16);color:#F2D98A;font-size:.82rem;font-weight:700;text-align:center;display:none}
+.msgc .au-fine{font-size:.74rem;color:#8FA0C4;text-align:center;margin-top:12px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -324,8 +331,8 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
       <a href="/">SKYGLOBEGROUP</a>
     </div>
     <div class="cta">
-      <a class="btn btn-outline btn-sm" href="/id?auth=login&from=academy">Student Portal</a>
-      <a class="btn btn-acad btn-sm" href="/id?auth=signup&from=academy" style="display:var(--cta-d,inline-flex)">Create SKYGLOBE ID</a>
+      <a class="btn btn-outline btn-sm" href="#" data-auth-kind="login" onclick="return openAuth('login')">Student Portal</a>
+      <a class="btn btn-acad btn-sm" href="#" data-auth-kind="signup" onclick="return openAuth('signup')" style="display:var(--cta-d,inline-flex)">Create SKYGLOBE ID</a>
       <button class="burger" onclick="document.getElementById('mmenu').classList.add('on')" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -344,8 +351,8 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <a class="plat" href="/"><img src="/skyglobe-logo-t.png" alt=""><span>SKYGLOBEGROUP<small>The ecosystem gateway</small></span></a>
   </div>
   <div class="foot">
-    <a class="btn btn-acad" style="width:100%" href="/id?auth=signup&from=academy">Create SKYGLOBE ID</a>
-    <a class="btn btn-outline" style="width:100%;margin-top:12px" href="/id?auth=login&from=academy">Student Portal</a>
+    <a class="btn btn-acad" style="width:100%" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
+    <a class="btn btn-outline" style="width:100%;margin-top:12px" href="#" data-auth-kind="login" onclick="return openAuth('login')">Student Portal</a>
     <div style="text-align:center;margin-top:18px;font-size:.82rem;color:#AEC0EC"><a href="#" onclick="return openMsg('education')" style="color:#AEC0EC">✉️ Message the Academy</a></div>
   </div>
 </div>
@@ -367,7 +374,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     </div>
     <p class="sub">One learning ecosystem connecting <b>children</b>, <b>students</b>, <b>professionals</b> and <b>lifelong learners</b> through structured education, recognised certification and personalised learning journeys.</p>
     <div class="actions">
-      <a class="btn btn-acad" href="/id?auth=signup&from=academy">Create SKYGLOBE ID</a>
+      <a class="btn btn-acad" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
       <a class="btn btn-outline" href="#areas">Explore Academy</a>
       <a class="btn btn-outline" href="#programs">Browse Programs</a>
     </div>
@@ -476,8 +483,8 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <p class="sec-sub rise">Every credential earned in the Academy is sealed by TERRA — the trust layer of the ecosystem.</p>
     <div class="sol-grid">
       <a class="sol rise" href="/terra#verify"><img src="/terra-logo-t.png" alt="" style="width:34px;height:34px"><h3>Certificate Verification</h3><p>Anyone can verify a certificate reference or QR seal in seconds.</p><b class="go" style="color:#12864E">Verify now →</b></a>
-      <a class="sol rise" href="/id?auth=signup&from=academy"><span class="em">🪪</span><h3>Digital Credentials</h3><p>Your achievements live in your SKYGLOBE ID — always with you.</p><b class="go" style="color:var(--acad)">Create your ID →</b></a>
-      <a class="sol rise" href="/id?auth=login&from=academy"><span class="em">🗂️</span><h3>Academic Records</h3><p>Complete transcripts and records, maintained by our registrar.</p><b class="go" style="color:var(--acad)">Student portal →</b></a>
+      <a class="sol rise" href="#" data-auth-kind="signup" onclick="return openAuth('signup')"><span class="em">🪪</span><h3>Digital Credentials</h3><p>Your achievements live in your SKYGLOBE ID — always with you.</p><b class="go" style="color:var(--acad)">Create your ID →</b></a>
+      <a class="sol rise" href="#" data-auth-kind="login" onclick="return openAuth('login')"><span class="em">🗂️</span><h3>Academic Records</h3><p>Complete transcripts and records, maintained by our registrar.</p><b class="go" style="color:var(--acad)">Student portal →</b></a>
       <a class="sol rise" href="/kids-academy"><span class="em">💼</span><h3>Professional Programs</h3><p>Career credentials that employers recognise and can check.</p><b class="go" style="color:var(--acad)">Browse programs →</b></a>
       <a class="sol rise" href="/kids-academy"><span class="em">⭐</span><h3>Skills Recognition</h3><p>Practical capability, formally recognised and recorded.</p><b class="go" style="color:var(--acad)">Get recognised →</b></a>
     </div>
@@ -520,9 +527,9 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
       <h2>Ready to begin learning?</h2>
       <p>One SKYGLOBE ID opens the whole Academy — programs, certificates and your personal learning journey.</p>
       <div class="actions">
-        <a class="btn btn-acad" href="/id?auth=signup&from=academy">Create SKYGLOBE ID</a>
+        <a class="btn btn-acad" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
         <a class="btn btn-outline" href="#programs">Explore Programs</a>
-        <a class="btn btn-outline" href="/id?auth=login&from=academy">Student Portal</a>
+        <a class="btn btn-outline" href="#" data-auth-kind="login" onclick="return openAuth('login')">Student Portal</a>
       </div>
     </div>
   </div>
@@ -539,8 +546,8 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <div class="foot-grid">
       <div class="fc-start">
         <h4>Academy</h4>
-        <a href="/id?auth=signup&from=academy">Create SKYGLOBE ID</a>
-        <a href="/id?auth=login&from=academy">Student Portal</a>
+        <a href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
+        <a href="#" data-auth-kind="login" onclick="return openAuth('login')">Student Portal</a>
         <a href="#programs">Browse Programs</a>
         <a href="/terra#verify">Verify a Certificate</a>
       </div>
@@ -566,6 +573,38 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     </div>
   </div>
 </footer>
+
+
+<!-- SKYGLOBE ID — create or sign in without leaving this platform -->
+<div class="msgc" id="authc" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="card">
+    <button class="close2" onclick="document.getElementById('authc').classList.remove('on')">✕</button>
+    <h3><img src="/skyglobe-logo-t.png" alt="" style="width:26px;height:26px;object-fit:contain">SKYGLOBE ID</h3>
+    <p class="sub2" id="au_sub">One identity for the entire ecosystem — create it here, use it everywhere.</p>
+    <div class="au-badge" id="au_badge"></div>
+    <div class="authtabs">
+      <button id="au_tabLogin" type="button" onclick="authTab('login')">Log in</button>
+      <button id="au_tabSignup" type="button" class="on" onclick="authTab('signup')">Create SKYGLOBE ID</button>
+    </div>
+    <form id="au_form" onsubmit="return submitAuth(event)">
+      <div id="au_nameWrap"><label for="au_name">Full name</label><input id="au_name" maxlength="100" autocomplete="name"></div>
+      <label for="au_email">Email</label><input id="au_email" type="email" maxlength="200" autocomplete="email">
+      <label for="au_pass">Password</label><input id="au_pass" type="password" maxlength="200" autocomplete="current-password" placeholder="At least 6 characters">
+      <button class="send" id="au_btn" type="submit">Create my SKYGLOBE ID</button>
+      <div class="err" id="au_err"></div>
+      <div class="au-fine">Everyone can create a SKYGLOBE ID and explore freely. Verification (TERRA) is only required before engaging in trade, business or investment.</div>
+    </form>
+    <div id="au_verify" style="display:none">
+      <p class="sub2">We sent a 6-digit code to <b class="au-vemail"></b>. Enter it to confirm your email.</p>
+      <label for="au_code">Verification code</label>
+      <input id="au_code" maxlength="6" inputmode="numeric" placeholder="123456">
+      <button class="send" type="button" onclick="submitVerify(event)">Confirm email</button>
+      <div class="err" id="au_verr"></div>
+      <div style="text-align:center;margin-top:10px"><a href="#" onclick="resendCode();return false" style="color:#AEC0EC;font-size:.84rem">Resend code</a></div>
+    </div>
+    <div class="note" id="au_ok" style="display:none"></div>
+  </div>
+</div>
 
 <!-- MESSAGE CENTRE — write to any division without leaving the ecosystem -->
 <div class="msgc" id="msgc" onclick="if(event.target===this)this.classList.remove('on')">
@@ -654,6 +693,85 @@ async function sendMsg(e){
   const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.12});
   document.querySelectorAll('.rise').forEach(el=>io.observe(el));
 })();
+
+/* SKYGLOBE ID — in-place authentication. SKYGLOBEGROUP owns identity, so a
+   visitor creates or signs into their ID right where they are — never pushed
+   to another platform. One account, used everywhere. */
+window.__authFrom='academy';
+var AUTH_CTX={academy:{badge:'🎓 Your learning identity — and the whole ecosystem'},mobility:{badge:'🌍 Your mobility identity — and the whole ecosystem'},terra:{badge:'🛡️ A trusted identity, verified by TERRA'},yunex:{badge:'💜 Trade, invest and build across the ecosystem'},'':{badge:''}};
+var AUTH_MODE='signup';
+function openAuth(m){
+  if(localStorage.getItem('sky_token')){ location.href='/id'; return false; }
+  authTab(m||'signup');
+  var ctx=AUTH_CTX[window.__authFrom||'']||AUTH_CTX[''];
+  var bd=document.getElementById('au_badge'); if(bd){ bd.style.display=ctx.badge?'block':'none'; bd.textContent=ctx.badge; }
+  document.getElementById('au_err').textContent='';
+  var ok=document.getElementById('au_ok'); ok.style.display='none';
+  document.getElementById('au_form').style.display='block';
+  document.getElementById('au_verify').style.display='none';
+  document.getElementById('authc').classList.add('on');
+  var mm=document.getElementById('mmenu'); if(mm)mm.classList.remove('on');
+  setTimeout(function(){document.getElementById('au_email').focus();},150);
+  return false;
+}
+function authTab(m){ AUTH_MODE=m;
+  document.getElementById('au_tabLogin').classList.toggle('on',m==='login');
+  document.getElementById('au_tabSignup').classList.toggle('on',m==='signup');
+  document.getElementById('au_nameWrap').style.display=m==='signup'?'block':'none';
+  document.getElementById('au_pass').setAttribute('autocomplete',m==='signup'?'new-password':'current-password');
+  document.getElementById('au_btn').textContent=m==='signup'?'Create my SKYGLOBE ID':'Log in';
+}
+async function submitAuth(e){ e.preventDefault();
+  var err=document.getElementById('au_err'); err.textContent='';
+  var name=document.getElementById('au_name').value.trim();
+  var email=document.getElementById('au_email').value.trim();
+  var pass=document.getElementById('au_pass').value;
+  if(!email||!pass){ err.textContent='Email and password are required.'; return false; }
+  var btn=document.getElementById('au_btn'); var orig=btn.textContent; btn.disabled=true; btn.textContent='Please wait…';
+  try{
+    var url=AUTH_MODE==='signup'?'/api/auth/signup':'/api/auth/login';
+    var body=AUTH_MODE==='signup'?{name:name,email:email,password:pass}:{email:email,password:pass};
+    var r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    var d=await r.json().catch(function(){return {};});
+    if(!r.ok||!d.success){ err.textContent=d.error||'Could not sign in.'; btn.disabled=false; btn.textContent=orig; return false; }
+    localStorage.setItem('sky_token',d.token);
+    if(AUTH_MODE==='signup'){ var pm={academy:'study',mobility:'mobility',yunex:'buyer'}; var pu=pm[window.__authFrom||''];
+      if(pu){ try{ await fetch('/api/skyglobe-id/profile',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+d.token},body:JSON.stringify({profile:{purpose:pu}})}); }catch(_){ } } }
+    if(AUTH_MODE==='signup'&&d.email_verified===false){ window.__authEmail=email; showAuthVerify(email); btn.disabled=false; btn.textContent=orig; return false; }
+    authSuccess(d.name||name||email);
+  }catch(_){ err.textContent='Network error. Please try again.'; }
+  btn.disabled=false; btn.textContent=orig; return false;
+}
+function showAuthVerify(email){
+  document.getElementById('au_form').style.display='none';
+  var v=document.getElementById('au_verify'); v.style.display='block';
+  v.querySelector('.au-vemail').textContent=email;
+  setTimeout(function(){document.getElementById('au_code').focus();},120);
+}
+async function submitVerify(e){ if(e)e.preventDefault();
+  var code=document.getElementById('au_code').value.trim(); var ve=document.getElementById('au_verr'); ve.style.color=''; ve.textContent='';
+  var r=await fetch('/api/auth/verify-email',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:window.__authEmail,code:code})});
+  var d=await r.json().catch(function(){return {};});
+  if(!r.ok||!d.success){ ve.textContent=d.error||'Invalid code.'; return false; }
+  authSuccess(document.getElementById('au_name').value.trim()||window.__authEmail); return false;
+}
+async function resendCode(){ await fetch('/api/auth/resend-verification',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:window.__authEmail})}); var ve=document.getElementById('au_verr'); ve.style.color='#8FD6AC'; ve.textContent='A new code was sent.'; }
+function authSuccess(name){
+  document.getElementById('au_form').style.display='none';
+  document.getElementById('au_verify').style.display='none';
+  var ok=document.getElementById('au_ok'); ok.style.display='block';
+  ok.innerHTML='✔ Welcome, '+(name||'').replace(/[<>]/g,'')+' — your SKYGLOBE ID is ready.<div style="margin-top:14px"><a class="send" style="display:block;text-decoration:none;color:#04132F" href="/id">Open my SKYGLOBE ID</a></div><div style="margin-top:10px"><a href="#" onclick="document.getElementById(\'authc\').classList.remove(\'on\');return false" style="color:#AEC0EC;font-size:.85rem">Continue browsing</a></div>';
+  applyAuthState();
+}
+function applyAuthState(){
+  if(!localStorage.getItem('sky_token')) return;
+  var cta=document.querySelector('nav.nav .cta'); if(!cta) return;
+  var lg=cta.querySelector('[data-auth-kind="login"]'); var sg=cta.querySelector('[data-auth-kind="signup"]');
+  if(lg) lg.style.display='none';
+  if(sg){ sg.textContent='My SKYGLOBE ID'; sg.setAttribute('href','/id'); sg.removeAttribute('onclick'); sg.removeAttribute('data-auth-kind'); }
+}
+applyAuthState();
+
 if('serviceWorker' in navigator){ addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{})); }
 </script>
 </body>
