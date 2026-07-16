@@ -1349,7 +1349,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-GATEWAY-2026-07-15D',
+  build: 'SKYGLOBEGROUP-IA1-2026-07-16B',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1712,7 +1712,7 @@ app.post('/api/skyglobe-id/profile', async (req, res) => {
     if (b.country != null) patch.country = String(b.country).trim().slice(0, 60);
     if (b.profile && typeof b.profile === 'object') {
       const p = {};
-      for (const k of ['dob', 'residence', 'language', 'gender', 'city']) if (b.profile[k] != null) p[k] = String(b.profile[k]).slice(0, 120);
+      for (const k of ['dob', 'residence', 'language', 'gender', 'city', 'address']) if (b.profile[k] != null) p[k] = String(b.profile[k]).slice(0, 240);
       patch.profile = p;
     }
     if (!Object.keys(patch).length) return res.status(400).json({ error: 'Nothing to update.' });
@@ -1884,7 +1884,7 @@ function shapeListing(l, seller) {
     details: {
       brand: d.brand || null, manufacturer: d.manufacturer || null, origin: d.origin || null,
       condition: d.condition || null, warranty: d.warranty || null, unit: d.unit || null,
-      min_order: d.min_order || null, sku: d.sku || null,
+      min_order: d.min_order || null, sku: d.sku || null, video_url: d.video_url || null,
       specs: Array.isArray(d.specs) ? d.specs : [],
     },
     status: l.status || 'active', created_at: l.created_at || null,
@@ -1927,6 +1927,8 @@ app.post('/api/yunex/listings', async (req, res) => {
       origin: String(d.origin || '').trim().slice(0, 60), condition: CONDITIONS.includes(d.condition) ? d.condition : null,
       warranty: String(d.warranty || '').trim().slice(0, 80), unit: String(d.unit || '').trim().slice(0, 30),
       min_order: String(d.min_order || '').trim().slice(0, 40), sku: String(d.sku || '').trim().slice(0, 60),
+      // Product video — a link to YouTube/TikTok/Vimeo or a direct MP4 (https only)
+      video_url: /^https:\/\/\S{8,290}$/.test(String(d.video_url || '').trim()) ? String(d.video_url).trim() : null,
       specs: Array.isArray(d.specs) ? d.specs.filter(x => x && x.k).slice(0, 20).map(x => ({ k: String(x.k).slice(0, 50), v: String(x.v || '').slice(0, 120) })) : [],
     };
     const row = {
