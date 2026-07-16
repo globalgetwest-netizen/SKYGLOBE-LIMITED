@@ -72,8 +72,10 @@ section{scroll-margin-top:80px}
 .hero .wordmark{font-size:clamp(2.3rem,6.4vw,4.5rem);font-weight:900;letter-spacing:-0.015em;line-height:1.05;color:#fff;display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap}
 .hero .mission{font-size:clamp(1.7rem,4.4vw,3.4rem);font-weight:800;margin-top:44px;line-height:1.18}
 .hero .mission2{font-size:clamp(1.15rem,2.6vw,2rem);font-weight:500;color:#C9D4F2;margin-top:10px}
-.hero .pillars-line{margin-top:30px;font-size:1rem;font-weight:700;letter-spacing:.06em;color:#E8EEFF}
+.hero .pillars-line{margin-top:30px;font-size:1rem;font-weight:700;letter-spacing:.06em;color:#E8EEFF;display:flex;justify-content:center;flex-wrap:wrap;gap:6px 0;padding:0 8px}
 .hero .pillars-line i{font-style:normal;margin:0 10px}
+.hero .pillars-line span{white-space:nowrap}
+@media(max-width:640px){.hero .pillars-line{font-size:.86rem}.hero .pillars-line i{margin:0 7px}}
 .dock{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:52px}
 .dock a{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(10px);border-radius:16px;padding:13px 22px;font-weight:700;font-size:.92rem;color:#fff;transition:transform .3s ease,background .3s ease}
 .dock a:hover{transform:translateY(-3px);background:rgba(255,255,255,.13)}
@@ -206,16 +208,50 @@ section{scroll-margin-top:80px}
 .cta-final .actions{margin-top:40px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative}
 
 /* ── FOOTER ── */
-footer{background:var(--navy-footer);color:#AEBBDD;padding:80px 0 40px;margin-top:112px}
-.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.3fr;gap:40px}
-@media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr}}
-footer .brand{color:#fff;font-weight:900;letter-spacing:.1em;font-size:1.1rem}
-footer .brand small{display:block;color:var(--gold);font-size:.66rem;letter-spacing:.24em;margin-top:6px;font-weight:700}
-footer h4{color:#fff;font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:18px}
-footer a{display:block;font-size:.9rem;margin:10px 0;transition:color .25s}
-footer a:hover{color:var(--gold-2)}
-.foot-bottom{border-top:1px solid rgba(255,255,255,.1);margin-top:56px;padding-top:28px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.82rem}
+footer{background:linear-gradient(180deg,#051636 0%,var(--navy-footer) 40%);color:#AEBBDD;padding:0 0 40px;margin-top:112px;position:relative;overflow:hidden}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),#4E86F0 35%,var(--orange) 65%,var(--pink))}
+footer::after{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,.08),transparent 65%);bottom:-460px;left:50%;transform:translateX(-50%);pointer-events:none}
+/* The signature crown of the footer */
+.foot-sig{text-align:center;padding:72px 0 56px;position:relative}
+.foot-sig .wm{font-size:clamp(1.5rem,3.4vw,2.2rem)}
+.foot-sig .tag{margin-top:12px;font-size:.78rem;font-weight:700;letter-spacing:.34em;text-transform:uppercase;color:var(--gold)}
+.foot-sig .ln{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:26px}
+.foot-sig .ln span{height:1.5px;width:min(180px,30vw)}
+.foot-sig .ln .l{background:linear-gradient(90deg,transparent,rgba(212,167,58,.7))}
+.foot-sig .ln .r{background:linear-gradient(90deg,rgba(212,167,58,.7),transparent)}
+.foot-sig .gem{width:8px;height:8px;transform:rotate(45deg);background:linear-gradient(135deg,var(--gold-2),#9DC2FF,var(--orange));border-radius:2px;box-shadow:0 0 12px rgba(212,167,58,.55)}
+.foot-sig .mission-f{max-width:520px;margin:18px auto 0;color:#C9D4E5;font-size:.95rem;line-height:1.8}
+/* Zone 2 — the five pillars, official logos, equal weight */
+.foot-eco{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:64px}
+@media(max-width:860px){.foot-eco{grid-template-columns:repeat(2,1fr)}.foot-eco a:last-child{grid-column:1/-1}}
+.foot-eco a{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:24px 14px;margin:0;transition:transform .3s ease,border-color .3s ease,background .3s ease}
+.foot-eco a:hover{transform:translateY(-4px);border-color:rgba(212,167,58,.4);background:rgba(255,255,255,.08)}
+.foot-eco img{width:42px;height:42px;object-fit:contain}
+.foot-eco b{color:#fff;font-size:.95rem;letter-spacing:.04em}
+.foot-eco span{font-size:.74rem;color:#C9D4E5}
+.foot-grid{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:56px;position:relative}
+@media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr;gap:32px}.fc-mail{grid-column:1/-1}}
+@media(max-width:520px){.foot-grid{grid-template-columns:1fr}}
+/* Column headers — each carries its brand color with a gradient underline */
+footer h4{color:#fff;font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;font-weight:800;display:inline-block;position:relative;padding-bottom:10px}
+footer h4::after{content:'';position:absolute;left:0;bottom:0;height:2.5px;width:100%;border-radius:3px}
+.fc-eco h4::after{background:linear-gradient(90deg,var(--gold),var(--gold-2))}
+.fc-start h4::after{background:linear-gradient(90deg,#4E86F0,#9DC2FF)}
+.fc-co h4::after{background:linear-gradient(90deg,var(--orange),#F79B5B)}
+.fc-mail h4::after{background:linear-gradient(90deg,var(--pink),#FF9DC7)}
+footer a{display:flex;align-items:center;gap:9px;font-size:.9rem;margin:12px 0;transition:color .25s,transform .25s}
+footer a:hover{color:#fff;transform:translateX(4px)}
+footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.fc-eco a:hover{color:var(--gold-2)} .fc-start a:hover{color:#9DC2FF} .fc-co a:hover{color:#F79B5B}
+/* Email chips — glass capsules */
+.mailchip{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:.82rem;line-height:1.45;color:#C9D4E5;transition:background .25s,border-color .25s,transform .25s}
+.mailchip b{color:#fff;font-size:.78rem;letter-spacing:.04em}
+.mailchip:hover{background:rgba(255,255,255,.1);border-color:rgba(212,167,58,.4);transform:translateX(4px);color:#fff}
+.mailchip .mi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.foot-bottom{border-top:1px solid rgba(255,255,255,.1);margin-top:56px;padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:.82rem}
 .foot-bottom .gold{color:var(--gold)}
+.foot-bottom .live{display:flex;align-items:center;gap:8px;color:#7FD6A3;font-weight:700}
+.foot-bottom .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
 
 /* calm entrance */
 .rise{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease}
@@ -254,8 +290,8 @@ footer a:hover{color:var(--gold-2)}
     <a class="plat" href="/noria"><img src="/noria-logo-t.png" alt=""><span>NORIA<small>Artificial Intelligence</small></span></a>
     <a class="plat" href="/terra"><img src="/terra-logo-t.png" alt=""><span>TERRA<small>Identity &amp; Trust</small></span></a>
     <a class="plat" href="/yunex"><img src="/yunex-logo-t.png" alt=""><span>YUNEX<small>Commerce &amp; Investment</small></span></a>
-    <a class="plat" href="/academy"><span style="font-size:1.4rem">🎓</span><span>Academy<small>Knowledge &amp; Skills</small></span></a>
-    <a class="plat" href="/mobility"><span style="font-size:1.4rem">🌍</span><span>Mobility<small>Travel &amp; Opportunities</small></span></a>
+    <a class="plat" href="/academy"><img src="/skyglobe-logo-t.png" alt=""><span>Academy<small>Knowledge &amp; Skills</small></span></a>
+    <a class="plat" href="/mobility"><img src="/skyglobe-logo-t.png" alt=""><span>Mobility<small>Travel &amp; Opportunities</small></span></a>
   </div>
   <div style="margin-top:22px">
     <a class="lnk" href="#solutions" onclick="document.getElementById('mmenu').classList.remove('on')">Solutions</a>
@@ -320,7 +356,7 @@ footer a:hover{color:var(--gold-2)}
 <!-- ECOSYSTEM -->
 <section class="sec" id="ecosystem">
   <div class="wrap">
-    <div class="sec-eyebrow rise">01 · The Ecosystem</div>
+    <div class="sec-eyebrow rise">The Ecosystem</div>
     <h2 class="sec-title rise">Five platforms. One connected world.</h2>
     <p class="sec-sub rise">Every platform strengthens the others — your identity travels with you, your trust is portable, your opportunities multiply.</p>
     <div class="eco">
@@ -342,7 +378,7 @@ footer a:hover{color:var(--gold-2)}
       </div>
       <div class="eco-node rise"><span class="dot"></span>
         <div class="ic" style="background:linear-gradient(135deg,var(--gold),var(--gold-2))">🎓</div>
-        <div><div class="tag" style="color:var(--gold)">Learning</div><h3>Academy</h3><p>Knowledge that carries proof wherever you go.</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px"><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Courses</span><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">AI Teachers</span><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Certificates</span><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Transcripts</span><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Every Age</span></div></div>
+        <div><div class="tag" style="color:var(--gold)">Learning</div><h3>Academy</h3><p>Knowledge that carries proof wherever you go.</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px"><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Courses</span><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Expert-Built Curriculum</span><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Certificates</span><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Transcripts</span><span style="background:#B98A1E12;color:#B98A1E;border-radius:100px;padding:4px 12px;font-size:.74rem;font-weight:600">Every Age</span></div></div>
         <a class="open" style="color:var(--gold)" href="/academy">Open Academy →</a>
       </div>
       <div class="eco-node rise"><span class="dot"></span>
@@ -357,11 +393,11 @@ footer a:hover{color:var(--gold-2)}
 <!-- SOLUTIONS -->
 <section class="sec warm" id="solutions">
   <div class="wrap">
-    <div class="sec-eyebrow rise">02 · Solutions</div>
+    <div class="sec-eyebrow rise">Solutions</div>
     <h2 class="sec-title rise">What would you like to do?</h2>
     <p class="sec-sub rise">Eight clear entry points. Wherever you start, your SKYGLOBE ID connects the rest.</p>
     <div class="sol-grid">
-      <a class="sol rise" href="/academy"><span class="em">🎓</span><h3>Learn</h3><p>Certificate programs taught with AI — from beginner to executive.</p><b class="go">Start learning →</b></a>
+      <a class="sol rise" href="/academy"><span class="em">🎓</span><h3>Learn</h3><p>Certificate programs from beginner to executive — with credentials the world can verify.</p><b class="go">Start learning →</b></a>
       <a class="sol rise" href="/yunex/app"><span class="em">🔁</span><h3>Trade</h3><p>Cross-border B2B with verified partners across six trade corridors.</p><b class="go">Enter the market →</b></a>
       <a class="sol rise" href="/yunex/app"><span class="em">📈</span><h3>Invest</h3><p>Verified projects and opportunities seeking capital and partners.</p><b class="go">See opportunities →</b></a>
       <a class="sol rise" href="/mobility#services"><span class="em">✈️</span><h3>Travel</h3><p>Visas, work permits and conferences — handled end to end.</p><b class="go">Explore mobility →</b></a>
@@ -376,7 +412,7 @@ footer a:hover{color:var(--gold-2)}
 <!-- LIVE INTELLIGENCE -->
 <section class="sec" id="intelligence">
   <div class="wrap">
-    <div class="sec-eyebrow rise">03 · Live Intelligence</div>
+    <div class="sec-eyebrow rise">Live Intelligence</div>
     <h2 class="sec-title rise">A living network, in living signals.</h2>
     <p class="sec-sub rise">Every signal below flows from real activity in the ecosystem — never invented, always alive.</p>
     <div class="stats-band rise">
@@ -396,7 +432,7 @@ footer a:hover{color:var(--gold-2)}
 <!-- TRUST -->
 <section class="sec warm" id="trust">
   <div class="wrap">
-    <div class="sec-eyebrow rise">04 · Why Trust SKYGLOBEGROUP</div>
+    <div class="sec-eyebrow rise">Why Trust SKYGLOBEGROUP</div>
     <h2 class="sec-title rise">Trust is not a promise at <span class="sgg-dark">SKYGLOBEGROUP</span>. It's the architecture.</h2>
     <div class="trust-grid">
       <div class="trust rise"><div class="ic">🛡️</div><h3><span class="gold">No verification, no trade</span></h3><p>Every participant passes TERRA identity verification — a real document and a live selfie check — before they can trade. Not optional. Ever.</p></div>
@@ -423,49 +459,63 @@ footer a:hover{color:var(--gold-2)}
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- FOOTER — the control center of the ecosystem -->
 <footer>
   <div class="wrap">
+
+    <!-- ZONE 1 · Brand -->
+    <div class="foot-sig">
+      <div class="wm"><span class="sgg">SKYGLOBEGROUP</span> <svg class="nstar-s" width="20" height="20" viewBox="0 0 24 24"><defs><linearGradient id="nsf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D4A73A"/><stop offset=".5" stop-color="#4E86F0"/><stop offset="1" stop-color="#F0742E"/></linearGradient></defs><path d="M12 0l2.6 8.2L24 12l-9.4 3.8L12 24l-2.6-8.2L0 12l9.4-3.8z" fill="url(#nsf)"/></svg></div>
+      <div class="tag">One World · One Mission</div>
+      <p class="mission-f">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p>
+      <div class="ln"><span class="l"></span><span class="gem"></span><span class="r"></span></div>
+    </div>
+
+    <!-- ZONE 2 · Ecosystem pillars — official logos, equal family members -->
+    <div class="foot-eco">
+      <a href="/noria"><img src="/noria-logo-t.png" alt="NORIA"><b>NORIA</b><span>Artificial Intelligence</span></a>
+      <a href="/terra"><img src="/terra-logo-t.png" alt="TERRA"><b>TERRA</b><span>Identity &amp; Trust</span></a>
+      <a href="/yunex"><img src="/yunex-logo-t.png" alt="YUNEX"><b>YUNEX</b><span>Commerce &amp; Economy</span></a>
+      <a href="/academy"><img src="/skyglobe-logo-t.png" alt="Academy"><b>Academy</b><span>Learning</span></a>
+      <a href="/mobility"><img src="/skyglobe-logo-t.png" alt="Mobility"><b>Mobility</b><span>Travel &amp; Mobility</span></a>
+    </div>
+
+    <!-- ZONES 3–5 · Quick Access · Company · Contact -->
     <div class="foot-grid">
-      <div>
-        <div class="brand"><span class="sgg">SKYGLOBEGROUP</span> <svg class="nstar-s" width="15" height="15" viewBox="0 0 24 24"><defs><linearGradient id="ns2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D4A73A"/><stop offset=".5" stop-color="#4E86F0"/><stop offset="1" stop-color="#F0742E"/></linearGradient></defs><path d="M12 0l2.6 8.2L24 12l-9.4 3.8L12 24l-2.6-8.2L0 12l9.4-3.8z" fill="url(#ns2)"/></svg><small>ONE WORLD · ONE MISSION</small></div>
-        <p style="font-size:.88rem;margin-top:18px;max-width:320px;line-height:1.8">An enterprise digital ecosystem — intelligence, trust, commerce, learning and mobility, connected through one identity.</p>
-      </div>
-      <div>
-        <h4>Ecosystem</h4>
-        <a href="/noria">NORIA — Intelligence</a>
-        <a href="/terra">TERRA — Identity &amp; Trust</a>
-        <a href="/yunex">YUNEX — Economy</a>
-        <a href="/academy">Academy — Learning</a>
-        <a href="/mobility#services">Mobility — Travel</a>
-      </div>
-      <div>
-        <h4>Start</h4>
+      <div class="fc-start">
+        <h4>Quick Access</h4>
         <a href="/yunex/app">Create SKYGLOBE ID</a>
-        <a href="/yunex/app">Sign in</a>
+        <a href="/#ecosystem">Explore Ecosystem</a>
         <a href="/yunex/app">Marketplace</a>
-        <a href="/academy">Courses</a>
+        <a href="/academy">Academy</a>
+        <a href="/mobility">Mobility</a>
+        <a href="mailto:support@skyglobegroup.com">Support</a>
       </div>
-      <div>
+      <div class="fc-co">
         <h4>Company</h4>
-        <a href="/mobility#about">About SKYGLOBEGROUP</a>
-        <a href="/mobility#contact">Contact</a>
+        <a href="/mobility#about">About</a>
         <a href="/mobility#services">Services</a>
-        <a href="https://wa.me/17373998522">💬 WhatsApp: +1 737 399 8522</a>
+        <a href="/mobility#contact">Contact</a>
+        <a href="/mobility#privacy">Privacy</a>
+        <a href="/mobility#terms">Terms</a>
       </div>
-      <div>
-        <h4>Write to us</h4>
-        <a href="mailto:support@skyglobegroup.com">✉️ support@skyglobegroup.com</a>
-        <a href="mailto:noria@skyglobegroup.com">🧠 noria@skyglobegroup.com</a>
-        <a href="mailto:terra@skyglobegroup.com">🛡️ terra@skyglobegroup.com</a>
-        <a href="mailto:yunex@skyglobegroup.com">💜 yunex@skyglobegroup.com</a>
-        <a href="mailto:education@skyglobegroup.com">🎓 education@skyglobegroup.com</a>
-        <a href="mailto:mobility@skyglobegroup.com">🌍 mobility@skyglobegroup.com</a>
+      <div class="fc-mail">
+        <h4>Contact</h4>
+        <a class="mailchip" href="mailto:support@skyglobegroup.com"><span class="mi" style="background:rgba(212,167,58,.16)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Support</b><br>support@skyglobegroup.com</span></a>
+        <a class="mailchip" href="mailto:noria@skyglobegroup.com"><span class="mi" style="background:rgba(124,58,237,.18)"><img src="/noria-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>NORIA</b><br>noria@skyglobegroup.com</span></a>
+        <a class="mailchip" href="mailto:terra@skyglobegroup.com"><span class="mi" style="background:rgba(18,134,78,.18)"><img src="/terra-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>TERRA</b><br>terra@skyglobegroup.com</span></a>
+        <a class="mailchip" href="mailto:yunex@skyglobegroup.com"><span class="mi" style="background:rgba(124,58,237,.18)"><img src="/yunex-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>YUNEX</b><br>yunex@skyglobegroup.com</span></a>
+        <a class="mailchip" href="mailto:education@skyglobegroup.com"><span class="mi" style="background:rgba(212,167,58,.16)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Academy</b><br>education@skyglobegroup.com</span></a>
+        <a class="mailchip" href="mailto:mobility@skyglobegroup.com"><span class="mi" style="background:rgba(18,134,78,.18)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Mobility</b><br>mobility@skyglobegroup.com</span></a>
+        <a class="mailchip" href="https://wa.me/17373998522"><span class="mi" style="background:rgba(43,182,115,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="#2BB673"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.1.5.1.7-.1l1-1.1c.2-.3.4-.2.7-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.2 1.2z"/></svg></span><span><b>WhatsApp</b><br>+1 737 399 8522</span></a>
       </div>
     </div>
+
+    <!-- Bottom bar -->
     <div class="foot-bottom">
-      <div>© 2026 SKYGLOBEGROUP · All rights reserved</div>
-      <div><span class="gold">✦</span> Verified on skyglobegroup.com</div>
+      <div>© 2026 <b style="color:#fff">SKYGLOBEGROUP</b> · All Rights Reserved</div>
+      <div class="live"><i></i> Live Ecosystem · Operational</div>
+      <div><span class="gold">✦</span> Verified on skyglobegroup.com · <a href="/mobility#privacy" style="display:inline;margin:0">Privacy</a> · <a href="/mobility#terms" style="display:inline;margin:0">Terms</a></div>
     </div>
   </div>
 </footer>
