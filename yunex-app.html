@@ -544,7 +544,12 @@ function closeListing(){ $('listingModal').classList.remove('on'); }
 
 /* auth */
 const AUTH_BOX_HTML=document.querySelector('#authModal .box').innerHTML;
-function openAuth(m){ document.querySelector('#authModal .box').innerHTML=AUTH_BOX_HTML; authTab(m); $('authModal').classList.add('on'); }
+function openAuth(m){ document.querySelector('#authModal .box').innerHTML=AUTH_BOX_HTML; authTab(m);
+  const ctx=(typeof ID_CONTEXT!=='undefined'&&ID_CONTEXT[window.__idFrom||''])||null;
+  if(ctx){ const sub=document.querySelector('#authModal .box .muted');
+    if(sub){ sub.textContent=ctx.sub;
+      if(ctx.badge){ const bd=document.createElement('div'); bd.style.cssText='margin:12px 0 2px;padding:9px 12px;border-radius:10px;background:linear-gradient(135deg,#f3f0ff,#eef4ff);color:#3d5af1;font-size:.82rem;font-weight:700;text-align:center'; bd.textContent=ctx.badge; sub.parentNode.insertBefore(bd,sub.nextSibling); } } }
+  $('authModal').classList.add('on'); }
 function closeAuth(){ $('authModal').classList.remove('on'); }
 function authTab(m){ authMode=m; $('tabLogin').classList.toggle('on',m==='login'); $('tabSignup').classList.toggle('on',m==='signup');
   $('nameWrap').style.display=m==='signup'?'block':'none'; const fr=$('forgotRow'); if(fr)fr.style.display=m==='login'?'block':'none'; $('authTitle').textContent=m==='signup'?'Create your SKYGLOBE ID':'Welcome back';
@@ -1559,10 +1564,21 @@ async function loadHome(){
   dash.innerHTML=`<h2 class="sec-h" style="margin-top:26px">Welcome back, ${esc((ME.name||'').split(' ')[0]||'there')}</h2><div class="grid g3" style="margin-top:12px">${cards}</div>`;
 }
 
-/* Ecosystem entry: skyglobegroup.com/id lands on the SKYGLOBE ID workspace;
-   ?auth=signup|login opens authentication for visitors (SKYGLOBEGROUP owns auth) */
+/* Ecosystem entry: skyglobegroup.com/id lands on the SKYGLOBE ID workspace.
+   ?auth=signup|login opens authentication (SKYGLOBEGROUP owns identity, not YUNEX).
+   ?from=academy|mobility|terra|yunex tells us WHY the person is signing up, so the
+   ID modal speaks to their purpose — one identity, many doors. */
+const ID_CONTEXT={
+  academy:{title:'Create your SKYGLOBE ID',sub:'One identity for your learning journey — and the whole ecosystem.',badge:'🎓 Continue to SKYGLOBEGROUP Academy'},
+  mobility:{title:'Create your SKYGLOBE ID',sub:'One identity for global mobility — and the whole ecosystem.',badge:'🌍 Continue to SKYGLOBEGROUP Mobility'},
+  terra:{title:'Create your SKYGLOBE ID',sub:'One trusted identity for the whole ecosystem.',badge:'🛡️ Verified by TERRA'},
+  yunex:{title:'Create your SKYGLOBE ID',sub:'One identity to trade, invest and build — across the ecosystem.',badge:'💜 Continue to YUNEX'},
+  '':{title:'Create your SKYGLOBE ID',sub:'One SKYGLOBE ID for the entire ecosystem.',badge:''}
+};
+window.__idFrom='';
 (function(){
   const qs=new URLSearchParams(location.search); const want=qs.get('auth');
+  const from=(qs.get('from')||'').toLowerCase(); window.__idFrom=ID_CONTEXT[from]?from:'';
   const isIdPath=location.pathname==='/id'||location.pathname==='/skyglobe-id';
   setTimeout(()=>{
     if(isIdPath) go('id');
