@@ -1355,7 +1355,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-HEROES-2026-07-16K',
+  build: 'SKYGLOBEGROUP-SCHOOLS-2026-07-16L',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -8857,10 +8857,10 @@ function assetDataUri(name) {
 // Real organisational divisions: every certificate names the school that
 // issued it, exactly as universities issue through their faculties.
 const TRACK_SCHOOLS = {
-  digital_marketing: 'School of Business & Enterprise',
+  digital_marketing: 'School of Business & Entrepreneurship',
   content_creation: 'School of Creative Arts & Media',
   entertainment_media: 'School of Creative Arts & Media',
-  business_entrepreneurship: 'School of Business & Enterprise',
+  business_entrepreneurship: 'School of Business & Entrepreneurship',
   tourism_hospitality: 'School of Hospitality & Tourism',
   surveying_built_env: 'School of the Built Environment',
   fashion_design: 'School of Creative Arts & Media',
@@ -8872,10 +8872,10 @@ const TRACK_SCHOOLS = {
   cloud_computing: 'School of Technology & Digital Sciences', cybersecurity: 'School of Technology & Digital Sciences',
   data_science: 'School of Technology & Digital Sciences', artificial_intelligence: 'School of Technology & Digital Sciences',
   software_development: 'School of Technology & Digital Sciences', web_development: 'School of Technology & Digital Sciences',
-  project_management: 'School of Business & Enterprise', human_resources: 'School of Business & Enterprise',
-  supply_chain: 'School of Business & Enterprise', logistics_transport: 'School of Business & Enterprise',
-  small_business_mgmt: 'School of Business & Enterprise', franchise_mgmt: 'School of Business & Enterprise',
-  ecommerce: 'School of Business & Enterprise', social_media_marketing: 'School of Business & Enterprise',
+  project_management: 'School of Business & Entrepreneurship', human_resources: 'School of Business & Entrepreneurship',
+  supply_chain: 'School of Business & Entrepreneurship', logistics_transport: 'School of Business & Entrepreneurship',
+  small_business_mgmt: 'School of Business & Entrepreneurship', franchise_mgmt: 'School of Business & Entrepreneurship',
+  ecommerce: 'School of Business & Entrepreneurship', social_media_marketing: 'School of Business & Entrepreneurship',
   financial_planning: 'School of Finance & Investment', accounting: 'School of Finance & Investment',
   tax_preparation: 'School of Finance & Investment', investment_analysis: 'School of Finance & Investment',
   risk_management: 'School of Finance & Investment',
@@ -8901,7 +8901,7 @@ function trackSchool(track) {
   if (/teach|educat|classroom|esl|curriculum|school|tutor/.test(n)) return 'School of Education';
   if (/environment|sustainab|renewable|solar|wind|waste|recycl|green|climate|conservation/.test(n)) return 'School of Environment & Sustainability';
   if (/finance|account|tax|invest|audit|insurance|banking/.test(n)) return 'School of Finance & Investment';
-  if (/business|market|sales|management|entrepreneur|commerce|logistics|supply/.test(n)) return 'School of Business & Enterprise';
+  if (/business|market|sales|management|entrepreneur|commerce|logistics|supply/.test(n)) return 'School of Business & Entrepreneurship';
   if (/media|film|music|design|art|photo|fashion|creative/.test(n)) return 'School of Creative Arts & Media';
   if (/hotel|hospital|tourism|travel|culinary|catering/.test(n)) return 'School of Hospitality & Tourism';
   if (/build|construct|survey|architect|engineer|civil/.test(n)) return 'School of the Built Environment';

@@ -376,7 +376,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <div class="actions">
       <a class="btn btn-acad" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
       <a class="btn btn-outline" href="#areas">Explore Academy</a>
-      <a class="btn btn-outline" href="#programs">Browse Programs</a>
+      <a class="btn btn-outline" href="/courses">Browse Programs</a>
     </div>
     <div class="livebar">
       <div class="meter"><div class="l">Learners</div><div class="bar"><i></i></div></div>
@@ -442,24 +442,40 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
   </div>
 </section>
 
-<!-- PROGRAM AREAS -->
+<!-- OUR SCHOOLS — the Academy's real academic structure -->
 <section class="sec warm" id="programs">
   <div class="wrap">
-    <div class="sec-eyebrow rise">Program Areas</div>
-    <h2 class="sec-title rise">Eight pathways of knowledge.</h2>
-    <p class="sec-sub rise">A short introduction here — each pathway opens into its complete curriculum.</p>
-    <div class="sol-grid">
-      <a class="sol rise" href="/kids-academy"><span class="em">🤖</span><h3>AI &amp; Technology</h3><p>Understand and build the intelligent world.</p><b class="go" style="color:var(--acad)">Open pathway →</b></a>
-      <a class="sol rise" href="/kids-academy"><span class="em">🔬</span><h3>Science</h3><p>From curiosity to discovery, at every level.</p><b class="go" style="color:var(--acad)">Open pathway →</b></a>
-      <a class="sol rise" href="/kids-academy"><span class="em">⚙️</span><h3>Engineering</h3><p>Design, build and solve real problems.</p><b class="go" style="color:var(--acad)">Open pathway →</b></a>
-      <a class="sol rise" href="/kids-academy"><span class="em">📊</span><h3>Business</h3><p>Commerce, strategy and financial literacy.</p><b class="go" style="color:var(--acad)">Open pathway →</b></a>
-      <a class="sol rise" href="/kids-academy"><span class="em">🗣️</span><h3>Languages</h3><p>Communicate confidently across the world.</p><b class="go" style="color:var(--acad)">Open pathway →</b></a>
-      <a class="sol rise" href="/kids-academy"><span class="em">🎨</span><h3>Arts</h3><p>Creativity, design and cultural expression.</p><b class="go" style="color:var(--acad)">Open pathway →</b></a>
-      <a class="sol rise" href="/kids-academy"><span class="em">🫀</span><h3>Health</h3><p>Wellbeing, biology and care for life.</p><b class="go" style="color:var(--acad)">Open pathway →</b></a>
-      <a class="sol rise" href="/kids-academy"><span class="em">🌍</span><h3>Global Studies</h3><p>History, society and how the world connects.</p><b class="go" style="color:var(--acad)">Open pathway →</b></a>
+    <div class="sec-eyebrow rise">Our Schools</div>
+    <h2 class="sec-title rise">Every discipline, taught within its <span class="sgg-dark">School</span>.</h2>
+    <p class="sec-sub rise">Like the world's finest institutions, every programme belongs to a School — each with its own faculty, standards and certification. Choose a School to see its programmes.</p>
+    <div class="sol-grid" id="schoolsGrid">
+      <a class="sol rise" href="/courses" data-school="School of Technology & Digital Sciences"><span class="em">💻</span><h3>Technology &amp; Digital Sciences</h3><p>Coding, cloud, cybersecurity, data &amp; AI.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Business & Entrepreneurship"><span class="em">💼</span><h3>Business &amp; Entrepreneurship</h3><p>Business, management, marketing &amp; commerce.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Finance & Investment"><span class="em">💰</span><h3>Finance &amp; Investment</h3><p>Accounting, tax, planning &amp; investment.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Health & Wellbeing"><span class="em">🩺</span><h3>Health &amp; Wellbeing</h3><p>Clinical support, care &amp; wellness professions.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Creative Arts & Media"><span class="em">🎨</span><h3>Creative Arts &amp; Media</h3><p>Design, photography, film &amp; content.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Education"><span class="em">🎓</span><h3>Education</h3><p>Teaching, instructional design &amp; leadership.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Environment & Sustainability"><span class="em">🌍</span><h3>Environment &amp; Sustainability</h3><p>Sustainability, renewable energy &amp; conservation.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Hospitality & Tourism"><span class="em">🌴</span><h3>Hospitality &amp; Tourism</h3><p>Hospitality, tourism &amp; culinary arts.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of the Built Environment"><span class="em">📐</span><h3>The Built Environment</h3><p>Surveying, construction &amp; the built world.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Agriculture & Natural Resources"><span class="em">🌾</span><h3>Agriculture &amp; Natural Resources</h3><p>Farming, fishing &amp; agribusiness.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
+      <a class="sol rise" href="/courses" data-school="School of Vocational Trades & Safety"><span class="em">🛠️</span><h3>Vocational Trades &amp; Safety</h3><p>Hands-on trades — learn a skill, earn proof.</p><b class="go" style="color:var(--acad)">Explore School →</b></a>
     </div>
   </div>
 </section>
+<script>
+/* Live programme counts per School — reads the same catalog the admin uses */
+(function(){
+  fetch('/api/courses/catalog').then(r=>r.json()).then(d=>{
+    const tracks=(d&&d.tracks)||[]; const counts={};
+    tracks.forEach(t=>{ const s=t.school||'School of Professional Studies'; counts[s]=(counts[s]||0)+1; });
+    document.querySelectorAll('#schoolsGrid .sol').forEach(a=>{
+      const n=counts[a.getAttribute('data-school')]; if(!n)return;
+      const go=a.querySelector('.go'); if(go) go.textContent=n+' programme'+(n>1?'s':'')+' →';
+    });
+  }).catch(()=>{});
+})();
+</script>
 
 <!-- WHY ACADEMY -->
 <section class="sec" id="why">
@@ -528,7 +544,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
       <p>One SKYGLOBE ID opens the whole Academy — programs, certificates and your personal learning journey.</p>
       <div class="actions">
         <a class="btn btn-acad" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
-        <a class="btn btn-outline" href="#programs">Explore Programs</a>
+        <a class="btn btn-outline" href="/courses">Explore Programs</a>
         <a class="btn btn-outline" href="#" data-auth-kind="login" onclick="return openAuth('login')">Student Portal</a>
       </div>
     </div>
@@ -548,7 +564,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
         <h4>Academy</h4>
         <a href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
         <a href="#" data-auth-kind="login" onclick="return openAuth('login')">Student Portal</a>
-        <a href="#programs">Browse Programs</a>
+        <a href="/courses">Browse Programs</a>
         <a href="/terra#verify">Verify a Certificate</a>
       </div>
       <div class="fc-eco">

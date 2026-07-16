@@ -1,4 +1,4 @@
-/* SkyGlobe Group — shared NORIA identity strip widget.
+/* SKYGLOBEGROUP — shared NORIA identity strip widget.
    One file, included on any page with:
      <script src="/noria-widget.js"></script>
    Replaces the ~470-line inline copy that used to be duplicated on every
@@ -64,7 +64,7 @@
     '<div class="noria-strip-live">LIVE</div></div>' +
     '<div class="noria-overlay" id="noriaOverlay" onclick="if(event.target===this)window.noriaOvClose()">' +
     '<div class="noria-overlay-panel"><div class="noria-ov-header">' + logoSvg +
-    '<div><div class="noria-ov-title">NORIA</div><div class="noria-ov-tag">AI Intelligence \xB7 SkyGlobe Group</div></div>' +
+    '<div><div class="noria-ov-title">NORIA</div><div class="noria-ov-tag">SKYGLOBEGROUP</div></div>' +
     '<button class="noria-ov-close" onclick="window.noriaOvClose()">✕ Close</button></div>' +
     '<div class="noria-ov-msgs" id="noriaOvMsgs"></div>' +
     '<div class="noria-ov-foot"><input class="noria-ov-inp" id="noriaOvInput" type="text" autocomplete="off" placeholder="Ask NORIA anything..." onkeydown="if(event.key===\'Enter\')window.noriaOvSend()"/>' +
@@ -92,7 +92,7 @@
     var o = document.getElementById('noriaOverlay');
     if (!o) return;
     o.classList.add('open');
-    if (!_nh.length) _addMsg('👋 Hello! I\'m <strong>NORIA</strong> — SkyGlobe Group\'s AI Intelligence Assistant. Ask me about visas, work permits, university admissions, conferences, scholarships, travel documentation and all our services.', 'bot');
+    if (!_nh.length) _addMsg('👋 Hello! I\'m <strong>NORIA</strong> — SKYGLOBEGROUP\'s Intelligence Assistant. Ask me about visas, work permits, university admissions, conferences, scholarships, travel documentation and all our services.', 'bot');
   }
   window.noriaOvOpen = _open; // public hook — ecosystem cards & links can open NORIA
   window.noriaOvClose = function () {
