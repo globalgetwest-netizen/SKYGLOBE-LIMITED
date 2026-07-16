@@ -566,6 +566,9 @@ async function submitAuth(){
     if(!r.ok||!d.success){$('au_err').textContent=d.error||'Could not sign in.';return;}
     TOKEN=d.token; localStorage.setItem('sky_token',TOKEN);
     if(authMode==='signup'&&d.email_verified===false){ showVerifyEmail(email); return; }
+    /* Remember why they joined so their SKYGLOBE ID is typed correctly
+       (Academy → Student ID, Mobility → Traveller ID). */
+    if(authMode==='signup'){ const pm={academy:'study',mobility:'mobility',yunex:'buyer'}; const pu=pm[window.__idFrom||'']; if(pu){ try{ await fetch(API+'/api/skyglobe-id/profile',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({profile:{purpose:pu}})}); }catch(_){} } }
     closeAuth(); await loadMe(); go('id');
   }catch(e){$('au_err').textContent='Network error. Please try again.';}
 }
@@ -625,6 +628,9 @@ async function loadMe(){
     const r=await fetch(API+'/api/skyglobe-id/me',{headers:H()});
     if(!r.ok){ if(r.status===401){logout();} ME=null; renderAcct(); return; }
     ME=await r.json(); renderAcct();
+    /* If the ID workspace is already on screen (e.g. landed on /id before
+       the profile finished loading), re-render it now that ME is ready. */
+    const idView=$('v-id'); if(idView&&idView.classList.contains('on')) renderID();
   }catch(e){ ME=null; renderAcct(); }
 }
 function renderAcct(){
@@ -638,22 +644,41 @@ function renderAcct(){
 
 /* SKYGLOBE ID view */
 function stTag(s){ return s==='verified'?'<span class="st ok">✔ Verified</span>':s==='pending'?'<span class="st pend">⏳ Under review</span>':s==='not_applicable'?'<span class="st no">—</span>':'<span class="st no">Not verified</span>'; }
+function idType(ME){
+  const r=(ME.roles||[]); const pf=(ME.profile||{});
+  if(pf.purpose==='study'||pf.purpose==='academy') return {label:'Student ID',icon:'🎓'};
+  if(r.includes('investor')) return {label:'Investor ID',icon:'📈'};
+  if(r.includes('seller')||r.includes('business')) return {label:'Trader ID',icon:'🏷️'};
+  if(pf.purpose==='mobility'||pf.purpose==='travel') return {label:'Traveller ID',icon:'🌍'};
+  if(r.includes('buyer')) return {label:'Buyer ID',icon:'🛍️'};
+  return {label:'Member ID',icon:'🪪'};
+}
 async function renderID(){
   if(!ME){ return; }
   const el=$('idContent');
   const roles=(ME.roles||[]);
-  const lvlPct=Math.round((ME.level||1)/6*100);
-  const tsColor=ME.trust_score>=70?'#12864e':ME.trust_score>=40?'#b5730a':'#8b93b8';
+  const pf=(ME.profile||{});
+  const it=idType(ME);
+  const idDetail=(lab,val)=>`<div><div style="font-size:.58rem;letter-spacing:.14em;color:#c9d3ff;text-transform:uppercase">${lab}</div><div style="font-weight:700;font-size:.86rem;margin-top:2px;color:${val?'#fff':'#9fb0ff'}">${val?esc(val):'—'}</div></div>`;
   el.innerHTML=`
-    <!-- DIGITAL ID CARD -->
-    <div class="panel" style="background:linear-gradient(120deg,#3d5af1,#b326d9);color:#fff;border:none;padding:0;overflow:hidden">
+    <!-- DIGITAL ID CARD — professional identity credential -->
+    <div class="panel" style="background:linear-gradient(120deg,#061A52,#3d5af1 55%,#b326d9);color:#fff;border:none;padding:0;overflow:hidden">
       <div style="padding:22px 24px;position:relative">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
           <div style="display:flex;align-items:center;gap:14px">
             <div style="width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:800">${esc((ME.name||ME.email||'?').charAt(0).toUpperCase())}</div>
-            <div><div style="font-size:1.25rem;font-weight:800">${esc(ME.name||'Your name')}</div><div style="color:#dfe4ff;font-size:.84rem">${esc(ME.email)}${ME.country?' · '+esc(ME.country):''}</div></div>
+            <div><div style="font-size:1.25rem;font-weight:800">${esc(ME.name||'Your name')}</div><div style="color:#dfe4ff;font-size:.84rem">${esc(ME.email)}</div></div>
           </div>
-          <div style="text-align:right"><div style="font-size:.6rem;letter-spacing:.2em;color:#c9d3ff;text-transform:uppercase">SKYGLOBE ID</div><div style="font-weight:800;font-family:monospace;letter-spacing:.05em">${esc(ME.id_number||'')}</div></div>
+          <div style="text-align:right"><div style="font-size:.6rem;letter-spacing:.2em;color:#c9d3ff;text-transform:uppercase">SKYGLOBE ID</div><div style="font-weight:800;font-family:monospace;letter-spacing:.05em">${esc(ME.id_number||'')}</div><div style="margin-top:8px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);padding:4px 10px;border-radius:100px;font-size:.76rem;font-weight:800">${it.icon} ${it.label}</div></div>
+        </div>
+        <!-- professional identity grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.16)">
+          ${idDetail('Nationality',pf.nationality)}
+          ${idDetail('Continent',pf.continent)}
+          ${idDetail('Country of residence',ME.country)}
+          ${idDetail('Date of birth',pf.dob)}
+          ${idDetail('Member since',ME.member_since?new Date(ME.member_since).getFullYear():'')}
+          ${idDetail('Status',ME.verification&&ME.verification.identity==='verified'?'✔ Verified':'Registered')}
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
           <span class="chip">Level ${ME.level} · ${esc(ME.level_label)}</span>
@@ -671,7 +696,7 @@ async function renderID(){
       <div class="sec-h" style="font-size:1.05rem">Your verification level</div>
       <div class="sec-s">Unlock more of the ecosystem as you verify. Level ${ME.level} of 6.</div>
       <div style="display:flex;gap:6px;margin-top:12px">
-        ${[['1','Registered'],['2','Individual'],['3','Professional'],['4','Business'],['5','Enterprise'],['6','Institution']].map(([n,l])=>`<div style="flex:1;text-align:center"><div style="height:6px;border-radius:100px;background:${Number(n)<=ME.level?'linear-gradient(120deg,#3d5af1,#b326d9)':'#e8eaf2'}"></div><div style="font-size:.62rem;color:${Number(n)<=ME.level?'#3d5af1':'#8b93b8'};margin-top:4px;font-weight:${Number(n)<=ME.level?'700':'500'}">${l}</div></div>`).join('')}
+        ${[['1','Registered'],['2','Individual'],['3','Professional'],['4','Business'],['5','Corporate'],['6','Institution']].map(([n,l])=>`<div style="flex:1;text-align:center"><div style="height:6px;border-radius:100px;background:${Number(n)<=ME.level?'linear-gradient(120deg,#3d5af1,#b326d9)':'#e8eaf2'}"></div><div style="font-size:.62rem;color:${Number(n)<=ME.level?'#3d5af1':'#8b93b8'};margin-top:4px;font-weight:${Number(n)<=ME.level?'700':'500'}">${l}</div></div>`).join('')}
       </div>
     </div>
 
@@ -707,9 +732,13 @@ async function renderID(){
         <div><label>SKYGLOBE ID</label><input value="${esc(ME.id_number||'')}" disabled style="background:#f2f4fa;color:#67708f;font-family:monospace"></div>
         <div><label>Full name</label><input id="p_name" value="${esc(ME.name||'')}"></div>
         <div><label>Phone</label><input id="p_phone" value="${esc(ME.phone||'')}"></div>
-        <div><label>Country</label><input id="p_country" value="${esc(ME.country||'')}"></div>
-        <div><label>City / Residence</label><input id="p_res" value="${esc((ME.profile||{}).residence||'')}"></div>
-        <div style="grid-column:1/-1"><label>Home address</label><input id="p_addr" value="${esc((ME.profile||{}).address||'')}" placeholder="Street, area, house number — used for deliveries and verification only"></div>
+        <div><label>Nationality</label><input id="p_nat" value="${esc(pf.nationality||'')}" placeholder="e.g. Nigerian"></div>
+        <div><label>Continent</label><select id="p_cont"><option value="">Select…</option>${['Africa','Europe','Asia','North America','South America','Oceania','Middle East'].map(c=>`<option${pf.continent===c?' selected':''}>${c}</option>`).join('')}</select></div>
+        <div><label>Country of residence</label><input id="p_country" value="${esc(ME.country||'')}"></div>
+        <div><label>City / Residence</label><input id="p_res" value="${esc(pf.residence||'')}"></div>
+        <div><label>Date of birth</label><input id="p_dob" type="date" value="${esc(pf.dob||'')}"></div>
+        <div><label>Primary purpose</label><select id="p_purpose"><option value="">Select…</option>${[['study','Study / Learning'],['mobility','Travel / Mobility'],['buyer','Buying'],['seller','Selling / Trading'],['investor','Investment'],['business','Business'],['general','General member']].map(([v,l])=>`<option value="${v}"${pf.purpose===v?' selected':''}>${l}</option>`).join('')}</select></div>
+        <div style="grid-column:1/-1"><label>Home address</label><input id="p_addr" value="${esc(pf.address||'')}" placeholder="Street, area, house number — used for deliveries and verification only"></div>
       </div>
       <div class="muted" style="font-size:.74rem;margin-top:8px">🔒 Your email and personal details are private — never shown publicly. Buyers and sellers only ever see your name and verification status.</div>
       <button class="btn g grad" style="margin-top:14px" onclick="saveProfile()">Save profile</button>
@@ -729,11 +758,19 @@ async function renderID(){
       <div style="margin-top:16px"><label>Recent sign-ins</label><div id="sec_sessions" class="muted" style="font-size:.84rem">Loading…</div></div>
     </div>
 
-    <!-- MY DOCUMENTS -->
+    <!-- DIGITAL DOCUMENTS -->
     <div class="panel">
-      <div class="sec-h" style="font-size:1.05rem">🗂️ My Documents & Certificates</div>
-      <div class="sec-s">Every certificate and document issued to you, verifiable anytime.</div>
+      <div class="sec-h" style="font-size:1.05rem">🗂️ Digital Documents & Certificates</div>
+      <div class="sec-s">Certificates, credentials and identity documents issued to you — each sealed and verifiable through TERRA.</div>
       <div id="id_docs" style="margin-top:10px"><div class="muted">Loading…</div></div>
+    </div>
+
+    <!-- LEGAL DOCUMENTS -->
+    <div class="panel">
+      <div class="sec-h" style="font-size:1.05rem">📜 Legal Documents</div>
+      <div class="sec-s">Agreements, contracts and legal records prepared for you — professionally drafted and securely sealed.</div>
+      <div id="id_legal" style="margin-top:10px"><div class="muted">Loading…</div></div>
+      <div style="margin-top:12px"><a class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" href="/terra#services">Request a legal document</a></div>
     </div>
 
     <!-- ACTIVITY -->
@@ -758,11 +795,14 @@ async function loadSessions(){
   }catch(e){}
 }
 async function loadIdDocs(){
-  const el=$('id_docs'); if(!el)return;
+  const el=$('id_docs'), le=$('id_legal'); if(!el)return;
+  const ic={'Academy Certificate':'🎓','Work Certificate':'🏢','Certificate of Recognition':'🏛️','Identity Card':'🪪','Legal Document':'📜'};
+  const row=d=>`<div style="display:flex;align-items:center;gap:10px;border:1px solid #e8eaf2;border-radius:10px;padding:9px 12px;margin-bottom:6px"><span style="font-size:1.1rem">${ic[d.kind]||'📄'}</span><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:.85rem">${esc(d.kind||'Document')}</div><div class="muted" style="font-size:.74rem">${esc(d.ref||'')}</div></div>${d.view_token?`<a class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" href="/view/${esc(d.view_token)}" target="_blank">Open</a>`:''}</div>`;
   try{ const docs=await fetch(API+'/api/client/documents',{headers:H()}).then(r=>r.json());
-    if(!Array.isArray(docs)||!docs.length){ el.innerHTML='<div class="muted" style="font-size:.85rem">No documents yet. Certificates and files delivered to you appear here.</div>'; return; }
-    const ic={'Academy Certificate':'🎓','Work Certificate':'🏢','Certificate of Recognition':'🏛️','Identity Card':'🪪','Legal Document':'📜'};
-    el.innerHTML=docs.map(d=>`<div style="display:flex;align-items:center;gap:10px;border:1px solid #e8eaf2;border-radius:10px;padding:9px 12px;margin-bottom:6px"><span style="font-size:1.1rem">${ic[d.kind]||'📄'}</span><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:.85rem">${esc(d.kind||'Document')}</div><div class="muted" style="font-size:.74rem">${esc(d.ref||'')}</div></div>${d.view_token?`<a class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" href="/view/${esc(d.view_token)}" target="_blank">Open</a>`:''}</div>`).join('');
+    const list=Array.isArray(docs)?docs:[];
+    const legal=list.filter(d=>d.kind==='Legal Document'), digital=list.filter(d=>d.kind!=='Legal Document');
+    el.innerHTML=digital.length?digital.map(row).join(''):'<div class="muted" style="font-size:.85rem">No digital documents yet. Certificates and credentials delivered to you appear here.</div>';
+    if(le) le.innerHTML=legal.length?legal.map(row).join(''):'<div class="muted" style="font-size:.85rem">No legal documents yet. Agreements prepared for you appear here.</div>';
   }catch(e){ el.innerHTML='<div class="muted">Could not load documents.</div>'; }
 }
 async function loadIdActivity(){
@@ -774,7 +814,7 @@ async function loadIdActivity(){
 }
 async function addRole(role){ await fetch(API+'/api/skyglobe-id/roles',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify({role})}); await loadMe(); renderID(); }
 async function saveProfile(){
-  const body={name:$('p_name').value.trim(),phone:$('p_phone').value.trim(),country:$('p_country').value.trim(),profile:{residence:$('p_res').value.trim(),address:$('p_addr').value.trim()}};
+  const body={name:$('p_name').value.trim(),phone:$('p_phone').value.trim(),country:$('p_country').value.trim(),profile:{residence:$('p_res').value.trim(),address:$('p_addr').value.trim(),nationality:$('p_nat').value.trim(),continent:$('p_cont').value,dob:$('p_dob').value,purpose:$('p_purpose').value}};
   const r=await fetch(API+'/api/skyglobe-id/profile',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify(body)});
   $('p_msg').textContent=r.ok?'✔ Saved':'Could not save'; await loadMe();
 }
@@ -1580,6 +1620,15 @@ window.__idFrom='';
   const qs=new URLSearchParams(location.search); const want=qs.get('auth');
   const from=(qs.get('from')||'').toLowerCase(); window.__idFrom=ID_CONTEXT[from]?from:'';
   const isIdPath=location.pathname==='/id'||location.pathname==='/skyglobe-id';
+  /* On the SKYGLOBE ID path the workspace is identity-first, not YUNEX.
+     Re-skin the header so a student / traveller / member never feels dropped
+     into a marketplace. The signed-in workspace is shared; the identity is universal. */
+  if(isIdPath){
+    const br=document.querySelector('.top .brand');
+    if(br){ br.setAttribute('href','/id'); br.innerHTML='<img src="/skyglobe-logo-t.png" alt="SKYGLOBE ID"><span>SKYGLOBE ID<small>A SKYGLOBEGROUP PLATFORM</small></span>'; }
+    const sr=document.querySelector('.top .search'); if(sr) sr.style.display='none';
+    document.title='SKYGLOBE ID — SKYGLOBEGROUP';
+  }
   setTimeout(()=>{
     if(isIdPath) go('id');
     if(want&&!TOKEN) openAuth(want==='login'?'login':'signup');

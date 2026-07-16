@@ -1355,7 +1355,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-MOBILITY-2026-07-16E',
+  build: 'SKYGLOBEGROUP-ID-2026-07-16F',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -1627,7 +1627,7 @@ function skyglobeLevel(c) {
   if (c.id_verified) level = 2; // verified individual
   if (c.id_verified && (roles.includes('seller') || roles.includes('partner') || roles.includes('investor'))) level = 3; // verified professional
   if (c.biz_verified) level = 4; // verified business
-  const LABELS = { 0: 'Guest', 1: 'Registered', 2: 'Verified Individual', 3: 'Verified Professional', 4: 'Verified Business', 5: 'Enterprise', 6: 'Government / Institution' };
+  const LABELS = { 0: 'Guest', 1: 'Registered', 2: 'Verified Individual', 3: 'Verified Professional', 4: 'Verified Business', 5: 'Corporate', 6: 'Government / Institution' };
   let score = 10;
   if (c.email_verified) score += 20;
   if (c.phone) score += 5;
@@ -1718,7 +1718,7 @@ app.post('/api/skyglobe-id/profile', async (req, res) => {
     if (b.country != null) patch.country = String(b.country).trim().slice(0, 60);
     if (b.profile && typeof b.profile === 'object') {
       const p = {};
-      for (const k of ['dob', 'residence', 'language', 'gender', 'city', 'address']) if (b.profile[k] != null) p[k] = String(b.profile[k]).slice(0, 240);
+      for (const k of ['dob', 'residence', 'language', 'gender', 'city', 'address', 'nationality', 'continent', 'purpose']) if (b.profile[k] != null) p[k] = String(b.profile[k]).slice(0, 240);
       patch.profile = p;
     }
     if (!Object.keys(patch).length) return res.status(400).json({ error: 'Nothing to update.' });
@@ -2964,7 +2964,7 @@ function businessHandle(name, email) {
 }
 function businessTier(c, completed) {
   if (!c.biz_verified) return { key: 'seller', label: 'Verified Seller', color: '#12864e', icon: '🥉' };
-  if (completed >= 25) return { key: 'global', label: 'Global Enterprise', color: '#7c3aed', icon: '💎' };
+  if (completed >= 25) return { key: 'global', label: 'Global Leader', color: '#7c3aed', icon: '💎' };
   if (completed >= 5) return { key: 'premium', label: 'Premium Business', color: '#a87016', icon: '🥇' };
   return { key: 'trusted', label: 'Trusted Business', color: '#1e57c9', icon: '🥈' };
 }
