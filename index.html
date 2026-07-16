@@ -248,6 +248,18 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .mailchip b{color:#fff;font-size:.78rem;letter-spacing:.04em}
 .mailchip:hover{background:rgba(255,255,255,.1);border-color:rgba(212,167,58,.4);transform:translateX(4px);color:#fff}
 .mailchip .mi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+/* Social band — official icons, white by default, brand color on hover */
+.foot-social{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:64px}
+.foot-social .icons{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.foot-social .icons a{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff;margin:0;transition:transform .25s ease,color .25s ease,border-color .25s ease}
+.foot-social .icons a:hover{transform:translateY(-4px)}
+.foot-social .icons a.tk:hover{color:#69C9D0;border-color:#69C9D0}
+.foot-social .icons a.yt:hover{color:#FF4444;border-color:#FF4444}
+.foot-social .icons a.ig:hover{color:#E4405F;border-color:#E4405F}
+.foot-social .icons a.th:hover{color:var(--gold-2);border-color:var(--gold-2)}
+.foot-social .icons a.wa:hover{color:#25D366;border-color:#25D366}
+.foot-social .handle{font-size:.84rem;color:#C9D4E5;letter-spacing:.06em}
+.foot-social .handle b{color:#fff}
 .foot-bottom{border-top:1px solid rgba(255,255,255,.1);margin-top:56px;padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:.82rem}
 .foot-bottom .gold{color:var(--gold)}
 .foot-bottom .live{display:flex;align-items:center;gap:8px;color:#7FD6A3;font-weight:700}
@@ -509,6 +521,18 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
         <a class="mailchip" href="mailto:mobility@skyglobegroup.com"><span class="mi" style="background:rgba(18,134,78,.18)"><img src="/skyglobe-logo-t.png" alt="" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"></span><span><b>Mobility</b><br>mobility@skyglobegroup.com</span></a>
         <a class="mailchip" href="https://wa.me/17373998522"><span class="mi" style="background:rgba(43,182,115,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="#2BB673"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.1.5.1.7-.1l1-1.1c.2-.3.4-.2.7-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.2 1.2z"/></svg></span><span><b>WhatsApp</b><br>+1 737 399 8522</span></a>
       </div>
+    </div>
+
+    <!-- Social identity — one handle everywhere -->
+    <div class="foot-social">
+      <div class="icons">
+        <a class="tk" href="https://www.tiktok.com/@SKYGLOBEGROUP" target="_blank" rel="noopener" aria-label="TikTok"><svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M12.9 2h3.1a5.6 5.6 0 0 0 5 4.9v3.1a8.7 8.7 0 0 1-5-1.6v6.9A6.7 6.7 0 1 1 9.3 8.6v3.3a3.4 3.4 0 1 0 3.6 3.4V2z"/></svg></a>
+        <a class="yt" href="https://www.youtube.com/@SKYGLOBEGROUP" target="_blank" rel="noopener" aria-label="YouTube"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.3-.4-4.8a2.5 2.5 0 0 0-1.8-1.8C19.3 5 12 5 12 5s-7.3 0-8.8.4A2.5 2.5 0 0 0 1.4 7.2C1 8.7 1 12 1 12s0 3.3.4 4.8a2.5 2.5 0 0 0 1.8 1.8c1.5.4 8.8.4 8.8.4s7.3 0 8.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.5.4-4.8.4-4.8zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg></a>
+        <a class="ig" href="https://www.instagram.com/SKYGLOBEGROUP" target="_blank" rel="noopener" aria-label="Instagram"><svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.2.1 4.7 1.7 4.8 4.8.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 3.1-1.6 4.7-4.8 4.8-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-3.2-.1-4.7-1.7-4.8-4.8-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9C2.4 4 3.9 2.4 7.1 2.3 8.4 2.2 8.8 2.2 12 2.2zm0 3.7a6.1 6.1 0 1 0 0 12.2 6.1 6.1 0 0 0 0-12.2zm0 10.1a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-10.4a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z"/></svg></a>
+        <a class="th" href="https://www.threads.net/@SKYGLOBEGROUP" target="_blank" rel="noopener" aria-label="Threads"><svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M17.7 11.2c1.3.6 2.2 1.5 2.7 2.7.7 1.6.7 4.2-1.2 6.1-1.5 1.4-3.4 2-5.8 2-2.7 0-4.9-.9-6.3-2.7-1.4-1.7-2-3.9-2-6.3s.7-4.6 2-6.3C8.5 4.9 10.7 4 13.4 4c2.6 0 4.7.9 6.1 2.6.7.9 1.3 2 1.6 3.2l-2 .5c-.3-1-.7-1.8-1.2-2.5-1.1-1.4-2.8-2.1-5-2.1-2.1 0-3.7.7-4.8 2-1 1.3-1.6 3.1-1.6 5.4s.6 4.1 1.6 5.4c1.1 1.3 2.7 2 4.8 2 1.9 0 3.3-.5 4.4-1.6 1.3-1.3 1.3-3 .9-4-.2-.6-.7-1.1-1.3-1.5-.1 1.1-.4 2-1 2.7-.7.9-1.8 1.4-3.1 1.5-1 0-1.9-.2-2.7-.7-.9-.6-1.5-1.5-1.5-2.6-.1-2.1 1.6-3.6 4.2-3.7.9 0 1.7 0 2.5.1-.3-1.5-1.3-2.3-2.8-2.3-1 0-2 .4-2.5 1.4L8.3 8.6c.9-1.4 2.4-2.2 4.2-2.2 2.9 0 4.7 1.8 4.9 5 .1 0 .2.1.3.1v-.3zm-4.5 4.4c1.1-.1 2.3-.9 2.5-3.1-.5-.1-1-.2-1.6-.2h-.8c-1.8.1-2.4 1-2.4 1.8.1 1.1 1.2 1.6 2.3 1.5z"/></svg></a>
+        <a class="wa" href="https://wa.me/17373998522" target="_blank" rel="noopener" aria-label="WhatsApp"><svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.1.5.1.7-.1l1-1.1c.2-.3.4-.2.7-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.2 1.2z"/></svg></a>
+      </div>
+      <div class="handle">Follow <b>@SKYGLOBEGROUP</b> everywhere · <b>skyglobegroup.com</b></div>
     </div>
 
     <!-- Bottom bar -->
