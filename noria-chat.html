@@ -113,6 +113,39 @@ button{font-family:inherit;cursor:pointer}
 .row .tools button{width:32px;height:32px;padding:0;justify-content:center}
 .row .tools button .isvg{width:15px;height:15px}
 .row .tools button.playing{border-color:var(--purple);color:var(--purple);background:#F2EDFE}
+/* conversation-language chooser */
+.langwrap{position:relative}
+.langbtn{display:inline-flex;align-items:center;gap:6px;background:#F2EFFA;border:1px solid var(--line);border-radius:100px;padding:6px 12px;font-size:.78rem;font-weight:800;color:var(--purple);cursor:pointer}
+.langbtn span[data-ic] .sgic{width:15px;height:15px}
+.langmenu{position:absolute;right:0;top:calc(100% + 8px);z-index:70;width:230px;max-height:340px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 44px rgba(4,19,47,.16);padding:6px;display:none}
+.langmenu.on{display:block}
+.langmenu button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;background:none;border:none;border-radius:9px;padding:9px 11px;font-size:.83rem;font-weight:600;color:var(--ink);text-align:left;cursor:pointer}
+.langmenu button:hover{background:#F2F0FA;color:var(--purple)}
+.langmenu button.on{background:#EFEAFD;color:var(--purple);font-weight:800}
+.langmenu .grp{font-size:.66rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#9AA6BE;padding:9px 11px 4px}
+/* in-workspace platform action chip */
+.row .act{display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:linear-gradient(135deg,#F4F0FE,#EDE6FC);border:1px solid #E0D4FA;border-radius:12px;padding:9px 13px;font-size:.8rem;font-weight:700;color:var(--purple);text-decoration:none}
+.row .act:hover{border-color:var(--purple);box-shadow:0 8px 20px rgba(124,58,237,.14)}
+.row .act .sgic{width:17px;height:17px}
+.row .act b{font-weight:800}.row .act small{color:#7A6BA8;font-weight:600}
+/* premium per-message audio player */
+.aplayer{display:flex;align-items:center;gap:10px;margin-top:12px;background:#F7F5FC;border:1px solid var(--line);border-radius:12px;padding:8px 12px;max-width:440px}
+.aplayer button{background:none;border:none;padding:0;display:flex;align-items:center;color:var(--purple);cursor:pointer}
+.aplayer .pp{width:34px;height:34px;justify-content:center;background:linear-gradient(135deg,var(--purple),var(--purple-2));color:#fff;border-radius:50%;flex-shrink:0}
+.aplayer .pp .isvg{width:16px;height:16px}
+.aplayer .rp .isvg,.aplayer .vb .isvg{width:16px;height:16px}
+.aplayer .track{flex:1;height:6px;background:#E4DEF3;border-radius:100px;overflow:hidden;cursor:default}
+.aplayer .fill{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--purple-2));border-radius:100px;transition:width .1s linear}
+.aplayer .tt{font-size:.72rem;font-weight:700;color:var(--muted);min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.aplayer .vol{display:flex;align-items:center;gap:5px}
+.aplayer .vs{width:56px;accent-color:var(--purple)}
+@media(max-width:520px){.aplayer .vol{display:none}}
+/* live mic waveform inside composer */
+.livewave{display:none;align-items:center;justify-content:center;gap:3px;height:26px;padding:2px 0 8px}
+.livewave.on{display:flex}
+.livewave i{width:3px;height:70%;background:linear-gradient(180deg,var(--purple),var(--purple-2));border-radius:3px;transform:scaleY(.2);transform-origin:center;transition:transform .06s linear}
+.composer .ic.rec{color:#fff;background:var(--purple);border-color:var(--purple);animation:pulse 1.3s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,.5)}50%{box-shadow:0 0 0 7px rgba(124,58,237,0)}}
 /* voice overlay */
 .voice{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#061A52,#3B1D6E);color:#fff;text-align:center;padding:20px}
 .voice.on{display:flex}
@@ -134,6 +167,10 @@ button{font-family:inherit;cursor:pointer}
   <button class="menu" onclick="toggleSide()" data-ic="☰" aria-label="Menu"></button>
   <a class="brand" href="/noria"><img src="/noria-logo-t.png" alt="NORIA"><div><b>NORIA</b><small>THE INTELLIGENCE LAYER</small></div></a>
   <div class="right">
+    <div class="langwrap">
+      <button class="langbtn" id="langBtn" onclick="toggleLangMenu()" aria-label="Conversation language"><span data-ic="🌍"></span><span id="langNow">Auto</span></button>
+      <div class="langmenu" id="langMenu"></div>
+    </div>
     <a class="eh" href="/">SKYGLOBEGROUP</a>
     <a class="eh" href="/noria">NORIA Home</a>
     <a class="id" href="/id">SKYGLOBE ID</a>
@@ -173,6 +210,7 @@ button{font-family:inherit;cursor:pointer}
 
     <div class="composer">
       <div class="attach" id="attach"><span id="attachName"></span><button onclick="clearAttach()"><i data-ic="✕"></i>remove</button></div>
+      <div class="livewave" id="liveWave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="box">
         <textarea id="input" rows="1" placeholder="Ask NORIA anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}" oninput="grow(this)"></textarea>
         <div class="bar">
@@ -227,8 +265,130 @@ var I={
  speak:'<svg class="isvg" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>',
  stopSpeak:'<svg class="isvg" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><rect x="15" y="9" width="6" height="6" rx="1" fill="currentColor" stroke="none"/></svg>',
  globe:'<svg class="isvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
- square:'<svg class="isvg" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></svg>'
+ square:'<svg class="isvg" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></svg>',
+ play2:'<svg class="isvg" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8V4z" fill="currentColor" stroke="none"/></svg>',
+ pause:'<svg class="isvg" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
+ replay:'<svg class="isvg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/></svg>',
+ vol:'<svg class="isvg" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>'
 };
+
+/* ═══ Conversation language ═══ */
+var LANGS=[
+ {c:'',n:'Auto — match me',bcp:''},
+ {g:'Popular'},
+ {c:'English',n:'English',bcp:'en-US'},
+ {c:'Arabic',n:'العربية · Arabic',bcp:'ar-SA'},
+ {c:'French',n:'Français · French',bcp:'fr-FR'},
+ {c:'Spanish',n:'Español · Spanish',bcp:'es-ES'},
+ {c:'Portuguese',n:'Português · Portuguese',bcp:'pt-PT'},
+ {c:'Chinese',n:'中文 · Chinese',bcp:'zh-CN'},
+ {c:'Hindi',n:'हिन्दी · Hindi',bcp:'hi-IN'},
+ {g:'African languages'},
+ {c:'Hausa',n:'Hausa',bcp:'ha-NG'},
+ {c:'Swahili',n:'Kiswahili · Swahili',bcp:'sw-KE'},
+ {c:'Yoruba',n:'Yorùbá · Yoruba',bcp:'yo-NG'},
+ {c:'Igbo',n:'Igbo',bcp:'ig-NG'},
+ {c:'Amharic',n:'አማርኛ · Amharic',bcp:'am-ET'},
+ {c:'Zulu',n:'isiZulu · Zulu',bcp:'zu-ZA'},
+ {c:'Somali',n:'Soomaali · Somali',bcp:'so-SO'},
+ {g:'More'},
+ {c:'German',n:'Deutsch · German',bcp:'de-DE'},
+ {c:'Turkish',n:'Türkçe · Turkish',bcp:'tr-TR'},
+ {c:'Russian',n:'Русский · Russian',bcp:'ru-RU'},
+ {c:'Japanese',n:'日本語 · Japanese',bcp:'ja-JP'},
+ {c:'Korean',n:'한국어 · Korean',bcp:'ko-KR'},
+ {c:'Italian',n:'Italiano · Italian',bcp:'it-IT'},
+ {c:'Urdu',n:'اردو · Urdu',bcp:'ur-PK'}
+];
+function convLang(){ return localStorage.getItem('noria_lang')||''; }
+function speechLang(){ var l=convLang(); for(var i=0;i<LANGS.length;i++){ if(LANGS[i].c===l&&LANGS[i].bcp) return LANGS[i].bcp; } return 'en-US'; }
+function buildLangMenu(){
+  var m=document.getElementById('langMenu'), cur=convLang(), h='';
+  LANGS.forEach(function(L){
+    if(L.g){ h+='<div class="grp">'+L.g+'</div>'; return; }
+    h+='<button class="'+(L.c===cur?'on':'')+'" onclick="setLang(\''+L.c.replace(/'/g,"\\'")+'\')">'+L.n+(L.c===cur?' '+I.check:'')+'</button>';
+  });
+  m.innerHTML=h;
+  document.getElementById('langNow').textContent=cur||'Auto';
+}
+function toggleLangMenu(){ document.getElementById('langMenu').classList.toggle('on'); }
+function setLang(c){ localStorage.setItem('noria_lang',c); buildLangMenu(); document.getElementById('langMenu').classList.remove('on'); }
+document.addEventListener('click',function(e){ var w=document.querySelector('.langwrap'); if(w&&!w.contains(e.target))document.getElementById('langMenu').classList.remove('on'); });
+
+/* ═══ Ecosystem intelligence — NORIA understands every platform, guides in-workspace ═══ */
+var ECOSYSTEM_SYS='You are NORIA, the Intelligence Layer of SKYGLOBEGROUP. You are not a narrow chatbot — you understand the ENTIRE ecosystem and help the user from ONE conversation without sending them away unexpectedly. The ecosystem: '
+ +'TERRA — identity verification, digital identity, KYC, business verification, certificates, trust, legal documentation, digital credentials, verification history, QR verification, identity records. '
+ +'YUNEX — marketplace, trade, business centre, assets, investment, services, wallet, escrow, orders, suppliers, products, negotiation, logistics, payments, finance, business profiles. '
+ +'Academy — schools, programs, courses, certificates, learning, research, knowledge library, students, parents, teachers, institutions, corporate learning, academic records, progress, graduation. '
+ +'Mobility — countries, visas, immigration, flights, hotels, scholarships, universities, embassies, travel insurance, conferences, country intelligence, document requirements, travel preparation. '
+ +'Documents — legal documents, contracts, certificates, government forms, business documents, templates, verification, digital archive, electronic signatures. '
+ +'When a user asks about any of these, answer the question directly and completely inside this conversation. Detect which platform the task belongs to and explain the exact steps. If completing the task requires opening that platform, say so clearly and guide them — never pretend to perform actions you cannot. Be warm, precise, professional. Use short paragraphs and clear structure.';
+function buildSystem(){
+  var s=ECOSYSTEM_SYS, lang=convLang();
+  if(lang) s+=' The user has chosen '+lang+' as their conversation language: reply ENTIRELY and naturally in '+lang+', unless they explicitly write in or request another language.';
+  return s;
+}
+var INTENT=[
+ {re:/\b(verif|identit|kyc|credential|certificat|notari|attest|trust|legal doc)/i,label:'Identity & Verification',plat:'TERRA',href:'/terra/verify',ic:'🛡'},
+ {re:/\b(marketplace|trade|trading|sell|selling|buy|buying|product|supplier|escrow|wallet|invest|order|logistic)/i,label:'Marketplace & Trade',plat:'YUNEX',href:'/yunex/app',ic:'💜'},
+ {re:/\b(course|study|school|programme|program|scholarship|learn|student|admission|graduat|tuition|academ)/i,label:'Learning & Admissions',plat:'Academy',href:'/academy',ic:'🎓'},
+ {re:/\b(visa|immigrat|relocat|passport|work permit|flight|hotel|travel|embassy|conference|abroad)/i,label:'Global Mobility',plat:'Mobility',href:'/mobility',ic:'🌍'},
+ {re:/\b(translat)/i,label:'Translation workspace',plat:'NORIA',href:'/noria/translation',ic:'🈯'},
+ {re:/\b(document|contract|\bform\b|template|draft|agreement|proposal|letter|sign)/i,label:'Documents workspace',plat:'NORIA',href:'/noria/documents',ic:'📄'}
+];
+function intentFor(text){ for(var i=0;i<INTENT.length;i++){ if(INTENT[i].re.test(text))return INTENT[i]; } return null; }
+function intentChipHtml(it){ return '<a class="act" href="'+it.href+'">'+sgIcon(it.ic)+'<span><b>Continue in '+it.plat+'</b> <small>· '+it.label+'</small></span>'+I.send+'</a>'; }
+
+/* ═══ Natural spoken text — strip markdown so NORIA never reads symbols aloud ═══ */
+function spoken(s){
+  s=String(s||'');
+  s=s.replace(/```[\s\S]*?```/g,'. ');
+  s=s.replace(/`([^`]+)`/g,'$1');
+  s=s.replace(/!\[[^\]]*\]\([^)]*\)/g,'');
+  s=s.replace(/\[([^\]]+)\]\([^)]*\)/g,'$1');
+  s=s.replace(/^\s{0,3}#{1,6}\s*/gm,'');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'$1');
+  s=s.replace(/\*([^*]+)\*/g,'$1');
+  s=s.replace(/__([^_]+)__/g,'$1');
+  s=s.replace(/^\s*[-*•]\s+/gm,'');
+  s=s.replace(/[*_#>`~|]/g,' ');
+  s=s.replace(/["“”«»]/g,'');
+  s=s.replace(/\s+/g,' ').trim();
+  return s;
+}
+
+/* ═══ Premium per-message audio player (play/pause/replay/progress/volume) ═══ */
+function buildPlayer(raw){
+  var text=spoken(raw).slice(0,3200);
+  var el=document.createElement('div'); el.className='aplayer';
+  el.innerHTML='<button class="pp" aria-label="Play"></button>'
+    +'<div class="track"><div class="fill"></div></div>'
+    +'<span class="tt">0:00</span>'
+    +'<button class="rp" aria-label="Replay">'+I.replay+'</button>'
+    +'<span class="vol"><button class="vb" aria-label="Volume">'+I.vol+'</button><input class="vs" type="range" min="0" max="1" step="0.05" value="1"></span>';
+  var pp=el.querySelector('.pp'),fill=el.querySelector('.fill'),tt=el.querySelector('.tt'),rp=el.querySelector('.rp'),vs=el.querySelector('.vs');
+  var rate=1.02,vol=1,playing=false,t0=0,elapsed=0,raf=0,u=null;
+  var total=Math.max(2,text.length/(13*rate));
+  function fmt(s){ s=Math.max(0,Math.floor(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+  function icon(){ pp.innerHTML=playing?I.pause:I.play2; }
+  function loop(){ if(!playing)return; var e=elapsed+(Date.now()-t0)/1000; var p=Math.min(1,e/total); fill.style.width=(p*100)+'%'; tt.textContent=fmt(e); raf=requestAnimationFrame(loop); }
+  function start(){ window.speechSynthesis.cancel();
+    u=new SpeechSynthesisUtterance(text); u.rate=rate; u.volume=vol; u.lang=speechLang();
+    u.onend=u.onerror=function(){ playing=false; elapsed=total; fill.style.width='100%'; tt.textContent=fmt(total); icon(); cancelAnimationFrame(raf); };
+    window.speechSynthesis.speak(u); t0=Date.now(); playing=true; icon(); cancelAnimationFrame(raf); raf=requestAnimationFrame(loop);
+  }
+  function play(){ if(playing)return;
+    if(elapsed>=total){ elapsed=0; start(); return; }
+    if(window.speechSynthesis.paused&&u){ window.speechSynthesis.resume(); t0=Date.now(); playing=true; icon(); raf=requestAnimationFrame(loop); }
+    else start();
+  }
+  function pause(){ if(!playing)return; try{window.speechSynthesis.pause();}catch(_){} elapsed+=(Date.now()-t0)/1000; playing=false; icon(); cancelAnimationFrame(raf); }
+  function toggle(){ playing?pause():play(); }
+  pp.onclick=toggle; rp.onclick=function(){ elapsed=0; start(); };
+  vs.oninput=function(){ vol=parseFloat(vs.value); if(u)u.volume=vol; };
+  icon();
+  return {el:el,api:{play:play,toggle:toggle,pause:pause}};
+}
 
 var CONVS=JSON.parse(localStorage.getItem('noria_convs')||'[]'); // [{id,title,msgs:[{role,content}]}]
 var CUR=null, BUSY=false, ATTACH=null;
@@ -278,16 +438,12 @@ function addRow(role,content,tools){
 }
 function copyTxt(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText;
   navigator.clipboard.writeText(txt).then(function(){ btn.innerHTML=I.check; setTimeout(function(){btn.innerHTML=I.copy;},1400); }); }
-var SPEAKING=null;
 function speakTxt(btn){
-  if(SPEAKING===btn){ window.speechSynthesis.cancel(); btn.classList.remove('playing'); btn.innerHTML=I.speak; SPEAKING=null; return; }
-  if(SPEAKING){ SPEAKING.classList.remove('playing'); SPEAKING.innerHTML=I.speak; }
-  window.speechSynthesis.cancel();
-  var txt=btn.closest('.body').querySelector('.txt').innerText;
-  var u=new SpeechSynthesisUtterance(txt.slice(0,1400)); u.rate=1.02;
-  SPEAKING=btn; btn.classList.add('playing'); btn.innerHTML=I.stopSpeak;
-  u.onend=u.onerror=function(){ if(SPEAKING===btn){btn.classList.remove('playing');btn.innerHTML=I.speak;SPEAKING=null;} };
-  window.speechSynthesis.speak(u);
+  var body=btn.closest('.body');
+  var ex=body.querySelector('.aplayer');
+  if(ex){ ex._api.toggle(); return; }
+  var raw=body.querySelector('.txt').innerText;
+  var pl=buildPlayer(raw); pl.el._api=pl.api; body.appendChild(pl.el); pl.api.play();
 }
 function askTranslate(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText.slice(0,800);
   var lang=prompt('Translate this reply into which language?\n\n(e.g. French, Arabic, Swahili, Spanish, Chinese, Hausa…)\nFor 78+ languages side by side, open the Translation workspace.','French');
@@ -322,18 +478,21 @@ async function send(){
   txtEl.innerHTML='<span class="think"><i></i><i></i><i></i></span>';
   try{
     var history=CONVS[CUR].msgs.slice(0,-1).slice(-10).map(function(m){return {role:m.role==='user'?'user':'assistant',content:m.content};});
-    var r=await fetch('/api/noria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history})});
+    var r=await fetch('/api/noria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history,system:buildSystem()})});
     var d=await r.json();
     var ans=(d&&(d.reply||d.answer))||'NORIA is momentarily unavailable — please try again.';
     /* typewriter render for a live, streaming feel */
     txtEl.innerHTML=''; var i=0; var chunk=Math.max(2,Math.round(ans.length/220));
     (function type(){ i+=chunk; txtEl.innerHTML=md(ans.slice(0,i)); scrollEnd();
       if(i<ans.length){ setTimeout(type,12); } else {
+        var it=intentFor(visible);
+        if(it){ var chip=document.createElement('div'); chip.innerHTML=intentChipHtml(it); botRow.querySelector('.body').appendChild(chip.firstChild); }
         var tools=document.createElement('div'); tools.className='tools';
         tools.innerHTML='<button onclick="copyTxt(this)" title="Copy" aria-label="Copy">'+I.copy+'</button>'+
           '<button onclick="speakTxt(this)" title="Listen" aria-label="Listen">'+I.speak+'</button>'+
           '<button onclick="askTranslate(this)" title="Translate" aria-label="Translate">'+I.globe+'</button>';
         botRow.querySelector('.body').appendChild(tools);
+        if(AUTO_SPEAK){ AUTO_SPEAK=false; var pl=buildPlayer(ans); pl.el._api=pl.api; botRow.querySelector('.body').appendChild(pl.el); pl.api.play(); }
       } })();
     CONVS[CUR].msgs.push({role:'assistant',content:ans}); saveAll(); renderConvs();
     if(VOICE_MODE){ speakAnswer(ans); }
@@ -341,23 +500,46 @@ async function send(){
   BUSY=false; document.getElementById('sendBtn').disabled=false;
 }
 
-/* ── microphone dictation (Web Speech API) ── */
-var REC=null, RECON=false;
+/* ── inline native voice: tap-to-record, live waveform, auto-send, spoken reply ── */
+var REC=null, RECON=false, AUTO_SPEAK=false;
+var micStream=null, micCtx=null, micRAF=0;
 function makeRec(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return null;
-  var r=new SR(); r.lang='en-US'; r.interimResults=true; r.continuous=false; return r;
+  var r=new SR(); r.lang=speechLang(); r.interimResults=true; r.continuous=false; return r;
+}
+async function startWave(){
+  var lw=document.getElementById('liveWave'); lw.classList.add('on');
+  try{
+    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    micCtx=new (window.AudioContext||window.webkitAudioContext)();
+    var src=micCtx.createMediaStreamSource(micStream);
+    var an=micCtx.createAnalyser(); an.fftSize=64; src.connect(an);
+    var data=new Uint8Array(an.frequencyBinCount);
+    var bars=lw.querySelectorAll('i');
+    (function draw(){ an.getByteFrequencyData(data);
+      for(var i=0;i<bars.length;i++){ var v=data[i]||0; bars[i].style.transform='scaleY('+(0.18+v/255*1.7).toFixed(2)+')'; }
+      micRAF=requestAnimationFrame(draw); })();
+  }catch(_){}
+}
+function stopWave(){
+  cancelAnimationFrame(micRAF);
+  document.getElementById('liveWave').classList.remove('on');
+  if(micStream){ micStream.getTracks().forEach(function(t){t.stop();}); micStream=null; }
+  if(micCtx){ try{micCtx.close();}catch(_){} micCtx=null; }
 }
 function toggleMic(){
   var btn=document.getElementById('micBtn');
   if(RECON){ try{REC.stop();}catch(_){} return; }
   REC=makeRec();
   if(!REC){ alert('Voice input is not supported in this browser. Try Chrome or Safari.'); return; }
-  var inp=document.getElementById('input'); var base=inp.value;
-  REC.onresult=function(ev){ var t=''; for(var i=0;i<ev.results.length;i++)t+=ev.results[i][0].transcript;
-    inp.value=(base?base+' ':'')+t; grow(inp); };
-  REC.onend=function(){ RECON=false; btn.classList.remove('rec'); };
-  REC.onerror=function(){ RECON=false; btn.classList.remove('rec'); };
-  RECON=true; btn.classList.add('rec'); REC.start();
+  window.speechSynthesis.cancel();
+  var inp=document.getElementById('input'); var heard='';
+  REC.onresult=function(ev){ heard=''; for(var i=0;i<ev.results.length;i++)heard+=ev.results[i][0].transcript;
+    inp.value=heard; grow(inp); };
+  REC.onend=function(){ RECON=false; btn.classList.remove('rec'); stopWave();
+    if(heard.trim()){ AUTO_SPEAK=true; send(); } };
+  REC.onerror=function(){ RECON=false; btn.classList.remove('rec'); stopWave(); };
+  RECON=true; btn.classList.add('rec'); startWave(); REC.start();
 }
 
 /* ── full voice conversation mode ── */
@@ -386,12 +568,13 @@ function voiceCycle(){
 function speakAnswer(ans){
   var st=document.getElementById('vState');
   st.textContent='Speaking…';
-  var u=new SpeechSynthesisUtterance(ans.slice(0,1400)); u.rate=1.02;
+  var u=new SpeechSynthesisUtterance(spoken(ans).slice(0,1600)); u.rate=1.02; u.lang=speechLang();
   u.onend=function(){ if(VOICE_MODE)st.textContent='Tap the microphone to reply'; };
   window.speechSynthesis.speak(u);
 }
 
 document.querySelectorAll('[data-ic]').forEach(function(e){e.innerHTML=sgIcon(e.getAttribute('data-ic'));});
+buildLangMenu();
 renderConvs();
 if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>
