@@ -76,7 +76,7 @@ a{text-decoration:none;color:inherit}
 
 <nav class="eco-nav"><div class="in">
   <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
-  <div class="lk"><a class="eh" href="/noria">NORIA</a><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
+  <div class="lk"><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
 </div></nav>
 
 <header class="hero"><div class="in">
@@ -88,7 +88,7 @@ a{text-decoration:none;color:inherit}
   <div class="flour"><span class="ln l"></span><span class="gem"></span><span class="ln r"></span></div>
   <p class="lead">NORIA is the intelligence of the ecosystem — it understands your questions, connects to TERRA, YUNEX, the Academy and Mobility, drafts and translates documents, and supports you across every platform. One intelligence, everywhere.</p>
   <div class="acts">
-    <button class="btn solid" onclick="if(window.noriaOvOpen){window.noriaOvOpen()}else{location.href='/noria/chat'}">💬 Start a Conversation</button>
+    <a class="btn solid" href="/noria/chat">Start a Conversation</a>
     <a class="btn ghost" href="/noria/knowledge">Explore Knowledge</a>
   </div>
 </div></header>
@@ -130,6 +130,5 @@ a{text-decoration:none;color:inherit}
 document.getElementById('yr').textContent=new Date().getFullYear();
 if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>
-<script src="/noria-widget.js" defer></script>
 </body>
 </html>

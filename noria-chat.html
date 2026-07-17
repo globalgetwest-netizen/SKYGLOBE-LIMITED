@@ -102,6 +102,11 @@ button{font-family:inherit;cursor:pointer}
 .dock::-webkit-scrollbar{display:none}
 .dock a{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:100px;padding:6px 13px;font-size:.76rem;font-weight:700;color:var(--muted);text-decoration:none}
 .dock a:hover{border-color:var(--purple);color:var(--purple)}
+.isvg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.composer .ic .isvg{width:20px;height:20px}
+.row .tools button{width:32px;height:32px;padding:0;justify-content:center}
+.row .tools button .isvg{width:15px;height:15px}
+.row .tools button.playing{border-color:var(--purple);color:var(--purple);background:#F2EDFE}
 /* voice overlay */
 .voice{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#061A52,#3B1D6E);color:#fff;text-align:center;padding:20px}
 .voice.on{display:flex}
@@ -112,7 +117,9 @@ button{font-family:inherit;cursor:pointer}
 .voice .waves i{width:6px;border-radius:4px;background:linear-gradient(180deg,#C9B3F7,#9F67F5);animation:wv 1s ease-in-out infinite;font-style:normal}
 @keyframes wv{0%,100%{height:12px}50%{height:52px}}
 .voice .hint{margin-top:26px;color:#9DBEFF;font-size:.84rem}
-.voice .stopv{margin-top:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:100px;padding:11px 30px;font-weight:800}
+.voice .stopv{margin-top:18px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.45);color:#fff;border-radius:50%;width:74px;height:74px;display:flex;align-items:center;justify-content:center;font-weight:800;transition:.2s}
+.voice .stopv:hover{background:rgba(255,255,255,.2);transform:scale(1.05)}
+.voice .closev{margin-top:16px;background:none;border:none;color:#9DBEFF;font-size:.86rem;font-weight:700}
 </style>
 </head>
 <body>
@@ -163,12 +170,12 @@ button{font-family:inherit;cursor:pointer}
       <div class="box">
         <textarea id="input" rows="1" placeholder="Ask NORIA anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}" oninput="grow(this)"></textarea>
         <div class="bar">
-          <button class="ic" title="New conversation" onclick="newConv()">＋</button>
-          <button class="ic" title="Upload a file" onclick="document.getElementById('file').click()">📎</button>
+          <button class="ic" title="New conversation" onclick="newConv()"><svg class="isvg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="ic" title="Upload a file" onclick="document.getElementById('file').click()"><svg class="isvg" viewBox="0 0 24 24"><path d="M21.4 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.2-9.19a4 4 0 0 1 5.65 5.66l-9.2 9.19a2 2 0 0 1-2.82-2.83l8.49-8.48" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <input type="file" id="file" hidden accept=".txt,.md,.csv,.json,image/*" onchange="pickFile(this)">
-          <button class="ic" id="micBtn" title="Voice input" onclick="toggleMic()">🎤</button>
-          <button class="ic" title="Voice conversation" onclick="openVoice()">🎧</button>
-          <button class="send" id="sendBtn" onclick="send()" title="Send">➤</button>
+          <button class="ic" id="micBtn" title="Voice input" onclick="toggleMic()"><svg class="isvg" viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="11" rx="3" stroke="currentColor" fill="none" stroke-width="1.8"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5M8.5 21.5h7" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="ic" title="Voice conversation" onclick="openVoice()"><svg class="isvg" viewBox="0 0 24 24"><path d="M3 10v4M7 7v10M11 4v16M15 7v10M19 10v4" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="send" id="sendBtn" onclick="send()" title="Send"><svg class="isvg" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
       <div class="fine">NORIA is the operating intelligence of SKYGLOBEGROUP · verify important decisions with our professional team</div>
@@ -197,12 +204,26 @@ button{font-family:inherit;cursor:pointer}
     <i style="animation-delay:0s"></i><i style="animation-delay:.12s"></i><i style="animation-delay:.24s"></i><i style="animation-delay:.36s"></i><i style="animation-delay:.48s"></i><i style="animation-delay:.6s"></i><i style="animation-delay:.72s"></i>
   </div>
   <div class="hint">Speak naturally — NORIA listens, thinks and replies aloud</div>
-  <button class="stopv" id="vBtn" onclick="voiceCycle()">🎤 Start speaking</button>
-  <button class="stopv" style="margin-top:10px;background:none" onclick="closeVoice()">Close</button>
+  <button class="stopv" id="vBtn" onclick="voiceCycle()" aria-label="Speak"><svg class="isvg" viewBox="0 0 24 24" style="width:22px;height:22px;margin:0 auto"><rect x="9" y="2.5" width="6" height="11" rx="3" stroke="currentColor" fill="none" stroke-width="1.8"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5M8.5 21.5h7" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <button class="closev" onclick="closeVoice()">Close</button>
 </div>
 
 <script>
 /* ═══ NORIA Conversation Workspace — premium client ═══ */
+var I={
+ plus:'<svg class="isvg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+ clip:'<svg class="isvg" viewBox="0 0 24 24"><path d="M21.4 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.2-9.19a4 4 0 0 1 5.65 5.66l-9.2 9.19a2 2 0 0 1-2.82-2.83l8.49-8.48"/></svg>',
+ mic:'<svg class="isvg" viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5M8.5 21.5h7"/></svg>',
+ wave:'<svg class="isvg" viewBox="0 0 24 24"><path d="M3 10v4M7 7v10M11 4v16M15 7v10M19 10v4M23 11.5v1"/></svg>',
+ send:'<svg class="isvg" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+ copy:'<svg class="isvg" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+ check:'<svg class="isvg" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>',
+ speak:'<svg class="isvg" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>',
+ stopSpeak:'<svg class="isvg" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><rect x="15" y="9" width="6" height="6" rx="1" fill="currentColor" stroke="none"/></svg>',
+ globe:'<svg class="isvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+ square:'<svg class="isvg" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></svg>'
+};
+
 var CONVS=JSON.parse(localStorage.getItem('noria_convs')||'[]'); // [{id,title,msgs:[{role,content}]}]
 var CUR=null, BUSY=false, ATTACH=null;
 function saveAll(){ try{ localStorage.setItem('noria_convs',JSON.stringify(CONVS.slice(0,30))); }catch(_){} }
@@ -242,17 +263,25 @@ function addRow(role,content,tools){
   var div=document.createElement('div'); div.className='row '+(role==='user'?'user':'bot');
   var av=role==='user'?'<div class="av">You</div>':'<div class="av"><img src="/noria-logo-t.png" alt=""></div>';
   var toolsHtml=(role!=='user'&&tools)?'<div class="tools">'+
-      '<button onclick="copyTxt(this)" title="Copy">📋 Copy</button>'+
-      '<button onclick="speakTxt(this)" title="Listen">🔊 Listen</button>'+
-      '<button onclick="askTranslate(this)" title="Translate">🈯 Translate</button>'+
+      '<button onclick="copyTxt(this)" title="Copy" aria-label="Copy">'+I.copy+'</button>'+
+      '<button onclick="speakTxt(this)" title="Listen" aria-label="Listen">'+I.speak+'</button>'+
+      '<button onclick="askTranslate(this)" title="Translate" aria-label="Translate">'+I.globe+'</button>'+
     '</div>':'';
   div.innerHTML=av+'<div class="body"><div class="who">'+(role==='user'?'You':'NORIA')+'</div><div class="txt">'+md(content)+'</div>'+toolsHtml+'</div>';
   t.appendChild(div); scrollEnd(); return div;
 }
-function copyTxt(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText; navigator.clipboard.writeText(txt).then(function(){btn.textContent='✓ Copied';setTimeout(function(){btn.innerHTML='📋 Copy';},1400);}); }
-function speakTxt(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText;
+function copyTxt(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText;
+  navigator.clipboard.writeText(txt).then(function(){ btn.innerHTML=I.check; setTimeout(function(){btn.innerHTML=I.copy;},1400); }); }
+var SPEAKING=null;
+function speakTxt(btn){
+  if(SPEAKING===btn){ window.speechSynthesis.cancel(); btn.classList.remove('playing'); btn.innerHTML=I.speak; SPEAKING=null; return; }
+  if(SPEAKING){ SPEAKING.classList.remove('playing'); SPEAKING.innerHTML=I.speak; }
   window.speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(txt.slice(0,1200)); u.rate=1.02; window.speechSynthesis.speak(u);
+  var txt=btn.closest('.body').querySelector('.txt').innerText;
+  var u=new SpeechSynthesisUtterance(txt.slice(0,1400)); u.rate=1.02;
+  SPEAKING=btn; btn.classList.add('playing'); btn.innerHTML=I.stopSpeak;
+  u.onend=u.onerror=function(){ if(SPEAKING===btn){btn.classList.remove('playing');btn.innerHTML=I.speak;SPEAKING=null;} };
+  window.speechSynthesis.speak(u);
 }
 function askTranslate(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText.slice(0,800);
   document.getElementById('input').value='Translate this into French:\n\n'+txt; grow(document.getElementById('input')); document.getElementById('input').focus(); }
@@ -265,14 +294,14 @@ function pickFile(inp){
   else{ r.onload=function(){ ATTACH={name:f.name,text:String(r.result).slice(0,6000)}; showAttach(f.name); }; r.readAsText(f); }
   inp.value='';
 }
-function showAttach(name){ var a=document.getElementById('attach'); a.style.display='flex'; document.getElementById('attachName').textContent='📎 '+name; }
+function showAttach(name){ var a=document.getElementById('attach'); a.style.display='flex'; document.getElementById('attachName').innerHTML=I.clip.replace('isvg','isvg\' style=\'width:14px;height:14px;display:inline-block;vertical-align:-2px')+' '+name; }
 function clearAttach(){ ATTACH=null; document.getElementById('attach').style.display='none'; }
 
 async function send(){
   if(BUSY)return;
   var inp=document.getElementById('input'); var q=inp.value.trim();
   if(!q&&!ATTACH)return;
-  var visible=q||('📎 '+(ATTACH?ATTACH.name:'attachment'));
+  var visible=q||('Attached: '+(ATTACH?ATTACH.name:'file'));
   var full=q+(ATTACH?'\n\n[Attached file "'+ATTACH.name+'" contents]:\n'+ATTACH.text:'');
   inp.value=''; grow(inp); clearAttach();
   if(CUR===null){ CONVS.unshift({id:Date.now(),title:q.slice(0,44)||'Attachment',msgs:[]}); CUR=0; }
@@ -291,7 +320,9 @@ async function send(){
     (function type(){ i+=chunk; txtEl.innerHTML=md(ans.slice(0,i)); scrollEnd();
       if(i<ans.length){ setTimeout(type,12); } else {
         var tools=document.createElement('div'); tools.className='tools';
-        tools.innerHTML='<button onclick="copyTxt(this)">📋 Copy</button><button onclick="speakTxt(this)">🔊 Listen</button><button onclick="askTranslate(this)">🈯 Translate</button>';
+        tools.innerHTML='<button onclick="copyTxt(this)" title="Copy" aria-label="Copy">'+I.copy+'</button>'+
+          '<button onclick="speakTxt(this)" title="Listen" aria-label="Listen">'+I.speak+'</button>'+
+          '<button onclick="askTranslate(this)" title="Translate" aria-label="Translate">'+I.globe+'</button>';
         botRow.querySelector('.body').appendChild(tools);
       } })();
     CONVS[CUR].msgs.push({role:'assistant',content:ans}); saveAll(); renderConvs();
@@ -324,22 +355,22 @@ var VOICE_MODE=false;
 function openVoice(){ VOICE_MODE=true; document.getElementById('voice').classList.add('on'); }
 function closeVoice(){ VOICE_MODE=false; window.speechSynthesis.cancel(); document.getElementById('voice').classList.remove('on');
   document.getElementById('vState').textContent='Tap the microphone to speak'; document.getElementById('vWaves').style.visibility='hidden';
-  document.getElementById('vBtn').textContent='🎤 Start speaking'; }
+  document.getElementById('vBtn').innerHTML=I.mic; }
 function voiceCycle(){
   var st=document.getElementById('vState'), wv=document.getElementById('vWaves'), b=document.getElementById('vBtn');
   window.speechSynthesis.cancel();
   var r=makeRec();
   if(!r){ st.textContent='Voice is not supported in this browser'; return; }
-  st.textContent='Listening…'; wv.style.visibility='visible'; b.textContent='■ Stop';
+  st.textContent='Listening…'; wv.style.visibility='visible'; b.innerHTML=I.square;
   var heard='';
   r.onresult=function(ev){ heard=''; for(var i=0;i<ev.results.length;i++)heard+=ev.results[i][0].transcript; st.textContent='“'+heard.slice(0,80)+'”'; };
   r.onend=function(){
-    wv.style.visibility='hidden'; b.textContent='🎤 Start speaking';
+    wv.style.visibility='hidden'; b.innerHTML=I.mic;
     if(!heard.trim()){ st.textContent='I didn’t catch that — tap to try again'; return; }
     st.textContent='Thinking…';
     document.getElementById('input').value=heard; send();
   };
-  r.onerror=function(){ wv.style.visibility='hidden'; st.textContent='Microphone unavailable — check permissions'; b.textContent='🎤 Start speaking'; };
+  r.onerror=function(){ wv.style.visibility='hidden'; st.textContent='Microphone unavailable — check permissions'; b.innerHTML=I.mic; };
   r.start();
 }
 function speakAnswer(ans){
