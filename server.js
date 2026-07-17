@@ -1024,7 +1024,8 @@ for (const w of TERRA_WORKSPACES) {
 app.get('/noria', (req, res) => res.sendFile(path.join(__dirname, 'noria.html')));
 // ── NORIA MODULE REGISTRY (Architecture Blueprint · Phase 4) ─────────────────
 app.get(['/noria/chat', '/noria/voice'], (req, res) => res.sendFile(path.join(__dirname, 'noria-chat.html')));
-const NORIA_WORKSPACES = ['knowledge','documents','translation','automation'];
+app.get('/noria/translation', (req, res) => res.sendFile(path.join(__dirname, 'noria-translate.html')));
+const NORIA_WORKSPACES = ['knowledge','documents','automation'];
 for (const w of NORIA_WORKSPACES) {
   app.get('/noria/' + w, (req, res) => res.sendFile(path.join(__dirname, 'noria-workspace.html')));
 }
@@ -1378,7 +1379,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-NORIA-2026-07-17F',
+  build: 'SKYGLOBEGROUP-NORIA-2026-07-17G',
 }));
 
 app.get('/api/test', async (req, res) => {

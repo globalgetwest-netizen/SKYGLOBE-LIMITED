@@ -50,6 +50,7 @@ a{text-decoration:none;color:inherit}
 .mod{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px 22px;box-shadow:0 12px 34px rgba(4,19,47,.05);transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column}
 .mod:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(4,19,47,.1);border-color:rgba(124,58,237,.5)}
 .mod .mic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:linear-gradient(150deg,#F2ECFF,#E4D8FB)}
+.mod .mic .sgic{width:24px;height:24px;stroke:#7C3AED}
 .mod h3{font-size:1.05rem;margin:12px 0 6px;color:var(--navy2)}
 .mod p{font-size:.88rem;color:var(--muted);flex:1}
 .mod .go{margin-top:14px;font-size:.84rem;font-weight:800;color:var(--purple)}
@@ -98,12 +99,12 @@ a{text-decoration:none;color:inherit}
   <h2 class="sec-t">Every capability, its own workspace.</h2>
   <p class="sec-s">NORIA is not a single chatbox — it is a set of connected intelligence workspaces. Open any one.</p>
   <div class="grid">
-    <a class="mod" href="/noria/chat"><div class="mic">💬</div><h3>Conversations</h3><p>Talk to NORIA about anything across the ecosystem.</p><div class="go">Open workspace →</div></a>
-    <a class="mod" href="/noria/knowledge"><div class="mic">📚</div><h3>Knowledge</h3><p>Ask, research and learn — connected to the Academy.</p><div class="go">Open workspace →</div></a>
-    <a class="mod" href="/noria/documents"><div class="mic">📄</div><h3>Documents</h3><p>Understand, draft and verify documents with TERRA.</p><div class="go">Open workspace →</div></a>
-    <a class="mod" href="/noria/translation"><div class="mic">🈯</div><h3>Translation</h3><p>Translate text and documents across languages.</p><div class="go">Open workspace →</div></a>
-    <a class="mod" href="/noria/voice"><div class="mic">🎙️</div><h3>Voice</h3><p>Speak with NORIA — natural voice interaction.</p><div class="go">Open workspace →</div></a>
-    <a class="mod" href="/noria/automation"><div class="mic">⚙️</div><h3>Automation</h3><p>Get things done — guidance, drafting and workflow.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/chat"><div class="mic" data-ic="💬"></div><h3>Conversations</h3><p>Talk to NORIA about anything across the ecosystem.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/knowledge"><div class="mic" data-ic="📚"></div><h3>Knowledge</h3><p>Ask, research and learn — connected to the Academy.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/documents"><div class="mic" data-ic="📄"></div><h3>Documents</h3><p>Understand, draft and verify documents with TERRA.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/translation"><div class="mic" data-ic="🈯"></div><h3>Translation</h3><p>Translate text and documents across languages.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/voice"><div class="mic" data-ic="🎙"></div><h3>Voice</h3><p>Speak with NORIA — natural voice interaction.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/automation"><div class="mic" data-ic="⚙"></div><h3>Automation</h3><p>Get things done — guidance, drafting and workflow.</p><div class="go">Open workspace →</div></a>
   </div>
 </div></section>
 
@@ -121,12 +122,14 @@ a{text-decoration:none;color:inherit}
     <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
     <div><h4>NORIA</h4><a href="/noria/chat">Conversations</a><a href="/noria/knowledge">Knowledge</a><a href="/noria/documents">Documents</a><a href="/noria/translation">Translation</a></div>
     <div><h4>Ecosystem</h4><a href="/terra">TERRA</a><a href="/yunex">YUNEX</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a></div>
-    <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">💬 WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
+    <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
   </div>
   <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · NORIA · All Rights Reserved</div><div class="live"><i></i> Intelligence · Operational</div></div>
 </footer>
 
+<script src="/sg-icons.js"></script>
 <script>
+document.querySelectorAll('.mic[data-ic]').forEach(function(e){e.innerHTML=sgIcon(e.getAttribute('data-ic'));});
 document.getElementById('yr').textContent=new Date().getFullYear();
 if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>

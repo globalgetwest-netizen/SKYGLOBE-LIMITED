@@ -73,6 +73,8 @@ a{text-decoration:none;color:inherit}
 .eco-foot .bot b{color:#fff}
 .eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
 .eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
+.mod .mic{color:#E0642A}.mod .mic .sgic{width:24px;height:24px}
+.whero .ic .sgic{width:46px;height:46px;stroke:#fff}
 </style>
 </head>
 <body>
@@ -110,11 +112,12 @@ a{text-decoration:none;color:inherit}
     <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
     <div><h4>Mobility</h4><a href="/mobility/countries">Countries</a><a href="/mobility/visas">Visas</a><a href="/mobility/travel">Travel</a><a href="/mobility/conferences">Conferences</a></div>
     <div><h4>Ecosystem</h4><a href="/noria">NORIA</a><a href="/terra">TERRA</a><a href="/yunex">YUNEX</a><a href="/academy">Academy</a></div>
-    <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">💬 WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
+    <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
   </div>
   <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · Mobility · All Rights Reserved</div><div class="live"><i></i> Mobility Network · Operational</div></div>
 </footer>
 
+<script src="/sg-icons.js"></script>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
 /* ── ACADEMY WORKSPACE REGISTRY — every module is a real, unique destination ── */
@@ -196,7 +199,7 @@ if(!WS[key])key='countries';
 var w=WS[key];
 document.title='SKYGLOBEGROUP Mobility — '+w.title;
 document.getElementById('crumbNow').textContent=w.title;
-document.getElementById('wIcon').textContent=w.icon;
+document.getElementById('wIcon').innerHTML=sgIcon(w.icon,46);
 document.getElementById('wEyebrow').textContent='Mobility · '+w.eyebrow;
 document.getElementById('wTitle').textContent=w.title;
 document.getElementById('wDesc').textContent=w.desc;
@@ -204,7 +207,7 @@ document.getElementById('wFlow').innerHTML=w.flow.map(function(f,ix){return (ix?
 document.getElementById('wSecT').textContent='Inside '+w.title;
 document.getElementById('wSecS').textContent='Every item below is a real destination — choose where to go.';
 document.getElementById('wGrid').innerHTML=w.mods.map(function(m){
-  return '<a class="mod" href="'+m.h+'"><div class="mic">'+m.i+'</div><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="go">Open →</div></a>';
+  return '<a class="mod" href="'+m.h+'"><div class="mic">'+sgIcon(m.i)+'</div><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="go">Open →</div></a>';
 }).join('');
 document.getElementById('wSibs').innerHTML=ORDER.map(function(k){
   return '<a href="/mobility/'+k+'"'+(k===key?' class="on"':'')+'>'+WS[k].title+'</a>';

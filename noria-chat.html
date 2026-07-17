@@ -103,6 +103,12 @@ button{font-family:inherit;cursor:pointer}
 .dock a{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:100px;padding:6px 13px;font-size:.76rem;font-weight:700;color:var(--muted);text-decoration:none}
 .dock a:hover{border-color:var(--purple);color:var(--purple)}
 .isvg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.side .foot a .sgic,.dock a .sgic{width:16px;height:16px}
+.side .new{display:inline-flex;align-items:center;justify-content:center;gap:7px}.side .new .sgic{width:17px;height:17px}
+.starters button b{display:flex;align-items:center;gap:6px}.starters button b .sgic{width:15px;height:15px}
+.top .menu .sgic{width:22px;height:22px}
+.side .conv .del .sgic{width:15px;height:15px}
+.attach button{display:inline-flex;align-items:center;gap:4px}.attach button .sgic{width:12px;height:12px}
 .composer .ic .isvg{width:20px;height:20px}
 .row .tools button{width:32px;height:32px;padding:0;justify-content:center}
 .row .tools button .isvg{width:15px;height:15px}
@@ -125,7 +131,7 @@ button{font-family:inherit;cursor:pointer}
 <body>
 
 <div class="top">
-  <button class="menu" onclick="toggleSide()">☰</button>
+  <button class="menu" onclick="toggleSide()" data-ic="☰" aria-label="Menu"></button>
   <a class="brand" href="/noria"><img src="/noria-logo-t.png" alt="NORIA"><div><b>NORIA</b><small>THE INTELLIGENCE LAYER</small></div></a>
   <div class="right">
     <a class="eh" href="/">SKYGLOBEGROUP</a>
@@ -136,14 +142,14 @@ button{font-family:inherit;cursor:pointer}
 
 <div class="shell">
   <aside class="side" id="side">
-    <button class="new" onclick="newConv()">＋ New Conversation</button>
+    <button class="new" onclick="newConv()"><i data-ic="＋"></i>New Conversation</button>
     <div class="sect">Recent</div>
     <div class="list" id="convList"></div>
     <div class="foot">
-      <a href="/noria/knowledge">📚 Knowledge</a>
-      <a href="/noria/documents">📄 Documents</a>
-      <a href="/noria/translation">🈯 Translation</a>
-      <a href="/noria/automation">⚙️ Automation</a>
+      <a href="/noria/knowledge"><i data-ic="📚"></i>Knowledge</a>
+      <a href="/noria/documents"><i data-ic="📄"></i>Documents</a>
+      <a href="/noria/translation"><i data-ic="🈯"></i>Translation</a>
+      <a href="/noria/automation"><i data-ic="⚙"></i>Automation</a>
     </div>
   </aside>
   <div class="scrim" id="scrim" onclick="toggleSide(false)"></div>
@@ -155,18 +161,18 @@ button{font-family:inherit;cursor:pointer}
         <h1>How can NORIA help you today?</h1>
         <p>One intelligence · Every platform · Every workflow · One conversation</p>
         <div class="starters">
-          <button onclick="starter('Guide me step by step to get TERRA verified so I can trade on YUNEX.')"><b>🛡️ TERRA</b>Get verified to trade</button>
-          <button onclick="starter('Which Academy programme should I choose to start a career in technology?')"><b>🎓 Academy</b>Choose my programme</button>
-          <button onclick="starter('What do I need for a European work permit, step by step?')"><b>🌍 Mobility</b>European work permit</button>
-          <button onclick="starter('Draft a professional partnership proposal letter for my business.')"><b>📄 Documents</b>Draft a document</button>
-          <button onclick="starter('Translate “Welcome to our global marketplace” into French, Arabic and Swahili.')"><b>🈯 Translate</b>Across languages</button>
-          <button onclick="starter('How do I list my first product on the YUNEX marketplace?')"><b>💜 YUNEX</b>Sell my first product</button>
+          <button onclick="starter('Guide me step by step to get TERRA verified so I can trade on YUNEX.')"><b><i data-ic="🛡"></i>TERRA</b>Get verified to trade</button>
+          <button onclick="starter('Which Academy programme should I choose to start a career in technology?')"><b><i data-ic="🎓"></i>Academy</b>Choose my programme</button>
+          <button onclick="starter('What do I need for a European work permit, step by step?')"><b><i data-ic="🌍"></i>Mobility</b>European work permit</button>
+          <button onclick="starter('Draft a professional partnership proposal letter for my business.')"><b><i data-ic="📄"></i>Documents</b>Draft a document</button>
+          <button onclick="starter('Translate “Welcome to our global marketplace” into French, Arabic and Swahili.')"><b><i data-ic="🈯"></i>Translate</b>Across languages</button>
+          <button onclick="starter('How do I list my first product on the YUNEX marketplace?')"><b><i data-ic="💜"></i>YUNEX</b>Sell my first product</button>
         </div>
       </div>
     </div></div>
 
     <div class="composer">
-      <div class="attach" id="attach"><span id="attachName"></span><button onclick="clearAttach()">✕ remove</button></div>
+      <div class="attach" id="attach"><span id="attachName"></span><button onclick="clearAttach()"><i data-ic="✕"></i>remove</button></div>
       <div class="box">
         <textarea id="input" rows="1" placeholder="Ask NORIA anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}" oninput="grow(this)"></textarea>
         <div class="bar">
@@ -182,15 +188,14 @@ button{font-family:inherit;cursor:pointer}
     </div>
 
     <nav class="dock">
-      <a href="/noria/knowledge">📚 Knowledge</a>
-      <a href="/noria/research" onclick="this.href='/noria/knowledge'">🔬 Research</a>
-      <a href="/noria/translation">🈯 Translate</a>
-      <a href="/noria/documents">📄 Documents</a>
-      <a href="/terra">🛡️ TERRA</a>
-      <a href="/yunex/app">💜 YUNEX</a>
-      <a href="/academy">🎓 Academy</a>
-      <a href="/mobility">🌍 Mobility</a>
-      <a href="/id">🪪 SKYGLOBE ID</a>
+      <a href="/noria/knowledge"><i data-ic="📚"></i>Knowledge</a>
+      <a href="/noria/translation"><i data-ic="🈯"></i>Translate</a>
+      <a href="/noria/documents"><i data-ic="📄"></i>Documents</a>
+      <a href="/terra"><i data-ic="🛡"></i>TERRA</a>
+      <a href="/yunex/app"><i data-ic="💜"></i>YUNEX</a>
+      <a href="/academy"><i data-ic="🎓"></i>Academy</a>
+      <a href="/mobility"><i data-ic="🌍"></i>Mobility</a>
+      <a href="/id"><i data-ic="🪪"></i>SKYGLOBE ID</a>
     </nav>
   </main>
 </div>
@@ -208,6 +213,7 @@ button{font-family:inherit;cursor:pointer}
   <button class="closev" onclick="closeVoice()">Close</button>
 </div>
 
+<script src="/sg-icons.js"></script>
 <script>
 /* ═══ NORIA Conversation Workspace — premium client ═══ */
 var I={
@@ -245,7 +251,7 @@ function toggleSide(force){ var s=document.getElementById('side'),c=document.get
 function renderConvs(){
   var el=document.getElementById('convList');
   el.innerHTML=CONVS.map(function(c,i){
-    return '<button class="conv'+(CUR===i?' on':'')+'" onclick="openConv('+i+')"><span>'+esc(c.title||'New conversation')+'</span><span class="del" onclick="event.stopPropagation();delConv('+i+')">🗑</span></button>';
+    return '<button class="conv'+(CUR===i?' on':'')+'" onclick="openConv('+i+')"><span>'+esc(c.title||'New conversation')+'</span><span class="del" onclick="event.stopPropagation();delConv('+i+')">'+sgIcon('🗑')+'</span></button>';
   }).join('')||'<div style="padding:10px 12px;color:#9AA6BE;font-size:.8rem">No conversations yet.</div>';
 }
 function newConv(){ CUR=null; document.getElementById('thread').innerHTML=document.getElementById('thread').innerHTML.includes('hello')?document.getElementById('thread').innerHTML:''; location.reload(); }
@@ -284,7 +290,11 @@ function speakTxt(btn){
   window.speechSynthesis.speak(u);
 }
 function askTranslate(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText.slice(0,800);
-  document.getElementById('input').value='Translate this into French:\n\n'+txt; grow(document.getElementById('input')); document.getElementById('input').focus(); }
+  var lang=prompt('Translate this reply into which language?\n\n(e.g. French, Arabic, Swahili, Spanish, Chinese, Hausa…)\nFor 78+ languages side by side, open the Translation workspace.','French');
+  if(lang===null) return;
+  lang=(lang||'').trim();
+  if(!lang){ location.href='/noria/translation'; return; }
+  document.getElementById('input').value='Translate this into '+lang+':\n\n'+txt; grow(document.getElementById('input')); document.getElementById('input').focus(); }
 function starter(q){ document.getElementById('input').value=q; send(); }
 function pickFile(inp){
   var f=inp.files&&inp.files[0]; if(!f)return;
@@ -381,6 +391,7 @@ function speakAnswer(ans){
   window.speechSynthesis.speak(u);
 }
 
+document.querySelectorAll('[data-ic]').forEach(function(e){e.innerHTML=sgIcon(e.getAttribute('data-ic'));});
 renderConvs();
 if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>
