@@ -1355,7 +1355,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-SCHOOLS-2026-07-16L',
+  build: 'SKYGLOBEGROUP-ARCH-2026-07-17A',
 }));
 
 app.get('/api/test', async (req, res) => {
@@ -7987,8 +7987,14 @@ app.get('/api/academy/timetable/:studentId', async (req, res) => {
 // Standalone admission portal page
 app.get('/academy/admission', (req, res) => res.sendFile(path.join(__dirname, 'academy-admission.html')));
 
-// Academy page routes
-app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'academy-portal.html')));
+// ── ACADEMY MODULE REGISTRY (Architecture Blueprint · Phase 4) ───────────────
+// Every Academy workspace is a REAL, UNIQUE destination — no funnel to /courses.
+// One adaptive workspace shell renders the correct module from the path.
+// (Duplicate '/academy'→academy-portal.html removed: academy.html at line ~1019 owns /academy.)
+const ACADEMY_WORKSPACES = ['learning','programs','schools','certificates','library','skills','research','community','professional','students','parents','educators','corporate'];
+for (const w of ACADEMY_WORKSPACES) {
+  app.get('/academy/' + w, (req, res) => res.sendFile(path.join(__dirname, 'academy-workspace.html')));
+}
 app.get('/academy/learn', (req, res) => res.sendFile(path.join(__dirname, 'academy-learn.html')));
 
 // ── §14 PAGE ROUTES ──────────────────────────────────────────────────────────
