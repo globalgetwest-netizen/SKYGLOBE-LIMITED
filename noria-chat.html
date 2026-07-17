@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NORIA — Conversation Workspace</title>
+<meta name="description" content="NORIA — the operating intelligence of SKYGLOBEGROUP. One conversation, every capability.">
+<meta name="theme-color" content="#061A52">
+<link rel="icon" href="/noria-logo-t.png">
+<style>
+:root{--navy:#04132F;--navy2:#061A52;--blue:#0A2E65;--purple:#7C3AED;--purple-2:#9F67F5;--soft:#C9B3F7;--gold:#D4A73A;--gold-2:#E8C566;--ink:#0F1C3A;--muted:#5A6B8C;--line:#e4e8f0;--bg:#F8F9FB;--font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);display:flex;flex-direction:column}
+button{font-family:inherit;cursor:pointer}
+/* ── top bar ── */
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22);flex-shrink:0}
+.top .menu{background:none;border:none;color:#C9D4E5;font-size:1.3rem;display:none}
+.top .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.top .brand img{height:30px;width:30px;object-fit:contain}
+.top .brand b{font-weight:900;letter-spacing:.05em;font-size:1.05rem;background:linear-gradient(95deg,#FFFFFF,#C9B3F7 40%,#9F67F5 55%,#C9B3F7 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.top .brand small{display:block;color:#9DBEFF;font-size:.56rem;letter-spacing:.22em;font-weight:700}
+.top .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.top .right a{color:#C9D4E5;font-size:.84rem;font-weight:600;text-decoration:none}
+.top .right a:hover{color:#C9B3F7}
+.top .right .id{background:linear-gradient(135deg,#7C3AED,#9F67F5);color:#fff;padding:7px 14px;border-radius:9px;font-weight:800;font-size:.8rem}
+@media(max-width:760px){.top .right .eh{display:none}}
+/* ── layout ── */
+.shell{flex:1;display:flex;min-height:0}
+/* left sidebar */
+.side{width:250px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0}
+.side .new{margin:14px 12px 8px;background:linear-gradient(135deg,var(--purple),var(--purple-2));color:#fff;border:none;border-radius:12px;padding:11px;font-weight:800;font-size:.88rem}
+.side .sect{padding:12px 16px 6px;font-size:.64rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#9AA6BE}
+.side .list{flex:1;overflow-y:auto;padding:0 8px 10px}
+.side .conv{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:none;border-radius:10px;padding:9px 10px;font-size:.84rem;color:var(--ink);margin-bottom:2px;overflow:hidden}
+.side .conv span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.side .conv:hover{background:#F2F0FA}
+.side .conv.on{background:#EFEAFB;font-weight:700}
+.side .conv .del{color:#B9C2D6;font-size:.9rem;border:none;background:none;padding:2px}
+.side .conv .del:hover{color:#c0392b}
+.side .foot{border-top:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.side .foot a{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:.82rem;text-decoration:none;padding:7px 8px;border-radius:9px;font-weight:600}
+.side .foot a:hover{background:#F2F0FA;color:var(--purple)}
+@media(max-width:900px){
+  .side{position:fixed;left:0;top:0;bottom:0;z-index:80;transform:translateX(-100%);transition:transform .25s;box-shadow:20px 0 60px rgba(4,19,47,.2);padding-top:54px}
+  .side.open{transform:none}
+  .top .menu{display:block}
+}
+.scrim{position:fixed;inset:0;background:rgba(4,19,47,.4);z-index:70;display:none}
+.scrim.on{display:block}
+/* main */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.msgs{flex:1;overflow-y:auto;padding:26px 16px 10px;scroll-behavior:smooth}
+.msgs .in{max-width:820px;margin:0 auto}
+/* welcome state */
+.hello{text-align:center;padding:7vh 12px 20px}
+.hello img{height:76px;width:76px;object-fit:contain;filter:drop-shadow(0 8px 26px rgba(124,58,237,.35))}
+.hello h1{margin-top:14px;font-weight:900;font-size:clamp(1.5rem,4vw,2.2rem);background:linear-gradient(95deg,#061A52,#7C3AED 55%,#061A52);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hello p{color:var(--muted);margin-top:8px;font-size:.95rem}
+.starters{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;max-width:680px;margin:26px auto 0}
+.starters button{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;text-align:left;font-size:.84rem;color:var(--ink);transition:.2s}
+.starters button:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 10px 24px rgba(4,19,47,.08)}
+.starters button b{display:block;color:var(--purple);margin-bottom:3px;font-size:.8rem}
+/* messages */
+.row{display:flex;gap:12px;margin-bottom:22px}
+.row .av{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem}
+.row.user .av{background:linear-gradient(135deg,#0A2E65,#123E87);color:#fff}
+.row.bot .av{background:#fff;border:1px solid var(--line);padding:4px}
+.row.bot .av img{width:100%;height:100%;object-fit:contain}
+.row .body{min-width:0;flex:1}
+.row .who{font-size:.76rem;font-weight:800;color:var(--muted);margin-bottom:4px;letter-spacing:.03em}
+.row .txt{font-size:.94rem;line-height:1.75;word-wrap:break-word;white-space:pre-wrap}
+.row.user .txt{background:#EEF2FB;border-radius:14px;padding:12px 15px}
+.row .txt code{background:#F0F2F8;border-radius:5px;padding:1px 6px;font-size:.85em}
+.row .txt pre{background:#0A1930;color:#D9E2FA;border-radius:12px;padding:14px;overflow-x:auto;font-size:.82rem;line-height:1.6;margin:10px 0}
+.row .txt pre code{background:none;color:inherit;padding:0}
+.row .txt strong{color:#061A52}
+.row .tools{display:flex;gap:6px;margin-top:8px;opacity:.85}
+.row .tools button{background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:.72rem;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:5px}
+.row .tools button:hover{border-color:var(--purple);color:var(--purple)}
+.think{display:inline-flex;gap:5px;align-items:center;padding:6px 2px}
+.think i{width:7px;height:7px;border-radius:50%;background:var(--purple-2);animation:bl 1.2s infinite;font-style:normal}
+.think i:nth-child(2){animation-delay:.18s}.think i:nth-child(3){animation-delay:.36s}
+@keyframes bl{0%,80%,100%{opacity:.25;transform:scale(.85)}40%{opacity:1;transform:scale(1)}}
+/* composer */
+.composer{flex-shrink:0;padding:10px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(248,249,251,0),var(--bg) 40%)}
+.composer .box{max-width:820px;margin:0 auto;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:10px 12px;box-shadow:0 14px 40px rgba(4,19,47,.08);transition:border-color .2s}
+.composer .box:focus-within{border-color:var(--purple)}
+.composer textarea{width:100%;border:none;outline:none;resize:none;font-family:inherit;font-size:.95rem;line-height:1.6;max-height:160px;color:var(--ink);background:none;padding:4px 6px}
+.composer .bar{display:flex;align-items:center;gap:4px;margin-top:6px}
+.composer .ic{width:36px;height:36px;border-radius:10px;border:none;background:none;color:#7A88A8;font-size:1.05rem;display:flex;align-items:center;justify-content:center;transition:.15s}
+.composer .ic:hover{background:#F2F0FA;color:var(--purple)}
+.composer .ic.rec{background:#FDECEA;color:#c0392b;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.3)}50%{box-shadow:0 0 0 8px rgba(192,57,43,0)}}
+.composer .send{margin-left:auto;width:38px;height:38px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--purple),var(--purple-2));color:#fff;font-size:1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(124,58,237,.35)}
+.composer .send:disabled{opacity:.45;box-shadow:none}
+.composer .fine{text-align:center;font-size:.7rem;color:#9AA6BE;margin-top:8px}
+.composer .attach{display:none;max-width:820px;margin:0 auto 8px;background:#EFEAFB;border-radius:12px;padding:8px 12px;font-size:.8rem;color:var(--purple);font-weight:700;align-items:center;gap:8px}
+.composer .attach button{border:none;background:none;color:#c0392b;font-weight:800}
+/* workspace dock */
+.dock{flex-shrink:0;display:flex;gap:6px;overflow-x:auto;padding:8px 14px;background:#fff;border-top:1px solid var(--line);scrollbar-width:none}
+.dock::-webkit-scrollbar{display:none}
+.dock a{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:100px;padding:6px 13px;font-size:.76rem;font-weight:700;color:var(--muted);text-decoration:none}
+.dock a:hover{border-color:var(--purple);color:var(--purple)}
+/* voice overlay */
+.voice{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#061A52,#3B1D6E);color:#fff;text-align:center;padding:20px}
+.voice.on{display:flex}
+.voice img{height:64px;width:64px;object-fit:contain}
+.voice h2{margin-top:16px;font-weight:900;letter-spacing:.04em}
+.voice .state{margin-top:8px;color:#C9B3F7;font-size:.95rem;font-weight:700;min-height:1.4em}
+.voice .waves{display:flex;gap:5px;align-items:center;height:60px;margin-top:22px}
+.voice .waves i{width:6px;border-radius:4px;background:linear-gradient(180deg,#C9B3F7,#9F67F5);animation:wv 1s ease-in-out infinite;font-style:normal}
+@keyframes wv{0%,100%{height:12px}50%{height:52px}}
+.voice .hint{margin-top:26px;color:#9DBEFF;font-size:.84rem}
+.voice .stopv{margin-top:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:100px;padding:11px 30px;font-weight:800}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <button class="menu" onclick="toggleSide()">☰</button>
+  <a class="brand" href="/noria"><img src="/noria-logo-t.png" alt="NORIA"><div><b>NORIA</b><small>THE INTELLIGENCE LAYER</small></div></a>
+  <div class="right">
+    <a class="eh" href="/">SKYGLOBEGROUP</a>
+    <a class="eh" href="/noria">NORIA Home</a>
+    <a class="id" href="/id">SKYGLOBE ID</a>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="side" id="side">
+    <button class="new" onclick="newConv()">＋ New Conversation</button>
+    <div class="sect">Recent</div>
+    <div class="list" id="convList"></div>
+    <div class="foot">
+      <a href="/noria/knowledge">📚 Knowledge</a>
+      <a href="/noria/documents">📄 Documents</a>
+      <a href="/noria/translation">🈯 Translation</a>
+      <a href="/noria/automation">⚙️ Automation</a>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim" onclick="toggleSide(false)"></div>
+
+  <main class="main">
+    <div class="msgs" id="msgs"><div class="in" id="thread">
+      <div class="hello" id="hello">
+        <img src="/noria-logo-t.png" alt="NORIA">
+        <h1>How can NORIA help you today?</h1>
+        <p>One intelligence · Every platform · Every workflow · One conversation</p>
+        <div class="starters">
+          <button onclick="starter('Guide me step by step to get TERRA verified so I can trade on YUNEX.')"><b>🛡️ TERRA</b>Get verified to trade</button>
+          <button onclick="starter('Which Academy programme should I choose to start a career in technology?')"><b>🎓 Academy</b>Choose my programme</button>
+          <button onclick="starter('What do I need for a European work permit, step by step?')"><b>🌍 Mobility</b>European work permit</button>
+          <button onclick="starter('Draft a professional partnership proposal letter for my business.')"><b>📄 Documents</b>Draft a document</button>
+          <button onclick="starter('Translate “Welcome to our global marketplace” into French, Arabic and Swahili.')"><b>🈯 Translate</b>Across languages</button>
+          <button onclick="starter('How do I list my first product on the YUNEX marketplace?')"><b>💜 YUNEX</b>Sell my first product</button>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="composer">
+      <div class="attach" id="attach"><span id="attachName"></span><button onclick="clearAttach()">✕ remove</button></div>
+      <div class="box">
+        <textarea id="input" rows="1" placeholder="Ask NORIA anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}" oninput="grow(this)"></textarea>
+        <div class="bar">
+          <button class="ic" title="New conversation" onclick="newConv()">＋</button>
+          <button class="ic" title="Upload a file" onclick="document.getElementById('file').click()">📎</button>
+          <input type="file" id="file" hidden accept=".txt,.md,.csv,.json,image/*" onchange="pickFile(this)">
+          <button class="ic" id="micBtn" title="Voice input" onclick="toggleMic()">🎤</button>
+          <button class="ic" title="Voice conversation" onclick="openVoice()">🎧</button>
+          <button class="send" id="sendBtn" onclick="send()" title="Send">➤</button>
+        </div>
+      </div>
+      <div class="fine">NORIA is the operating intelligence of SKYGLOBEGROUP · verify important decisions with our professional team</div>
+    </div>
+
+    <nav class="dock">
+      <a href="/noria/knowledge">📚 Knowledge</a>
+      <a href="/noria/research" onclick="this.href='/noria/knowledge'">🔬 Research</a>
+      <a href="/noria/translation">🈯 Translate</a>
+      <a href="/noria/documents">📄 Documents</a>
+      <a href="/terra">🛡️ TERRA</a>
+      <a href="/yunex/app">💜 YUNEX</a>
+      <a href="/academy">🎓 Academy</a>
+      <a href="/mobility">🌍 Mobility</a>
+      <a href="/id">🪪 SKYGLOBE ID</a>
+    </nav>
+  </main>
+</div>
+
+<!-- Voice conversation mode -->
+<div class="voice" id="voice">
+  <img src="/noria-logo-t.png" alt="NORIA">
+  <h2>NORIA</h2>
+  <div class="state" id="vState">Tap the microphone to speak</div>
+  <div class="waves" id="vWaves" style="visibility:hidden">
+    <i style="animation-delay:0s"></i><i style="animation-delay:.12s"></i><i style="animation-delay:.24s"></i><i style="animation-delay:.36s"></i><i style="animation-delay:.48s"></i><i style="animation-delay:.6s"></i><i style="animation-delay:.72s"></i>
+  </div>
+  <div class="hint">Speak naturally — NORIA listens, thinks and replies aloud</div>
+  <button class="stopv" id="vBtn" onclick="voiceCycle()">🎤 Start speaking</button>
+  <button class="stopv" style="margin-top:10px;background:none" onclick="closeVoice()">Close</button>
+</div>
+
+<script>
+/* ═══ NORIA Conversation Workspace — premium client ═══ */
+var CONVS=JSON.parse(localStorage.getItem('noria_convs')||'[]'); // [{id,title,msgs:[{role,content}]}]
+var CUR=null, BUSY=false, ATTACH=null;
+function saveAll(){ try{ localStorage.setItem('noria_convs',JSON.stringify(CONVS.slice(0,30))); }catch(_){} }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* light markdown: **bold**, `code`, ```blocks```, - lists */
+function md(s){
+  s=esc(s);
+  s=s.replace(/```([\s\S]*?)```/g,function(_,c){return '<pre><code>'+c.replace(/^\w+\n/,'')+'</code></pre>';});
+  s=s.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  s=s.replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/^###?\s*(.+)$/gm,'<strong>$1</strong>');
+  s=s.replace(/^[-•]\s+/gm,'• ');
+  return s;
+}
+function grow(t){ t.style.height='auto'; t.style.height=Math.min(t.scrollHeight,160)+'px'; }
+function toggleSide(force){ var s=document.getElementById('side'),c=document.getElementById('scrim');
+  var open=force!==undefined?force:!s.classList.contains('open');
+  s.classList.toggle('open',open); c.classList.toggle('on',open); }
+function renderConvs(){
+  var el=document.getElementById('convList');
+  el.innerHTML=CONVS.map(function(c,i){
+    return '<button class="conv'+(CUR===i?' on':'')+'" onclick="openConv('+i+')"><span>'+esc(c.title||'New conversation')+'</span><span class="del" onclick="event.stopPropagation();delConv('+i+')">🗑</span></button>';
+  }).join('')||'<div style="padding:10px 12px;color:#9AA6BE;font-size:.8rem">No conversations yet.</div>';
+}
+function newConv(){ CUR=null; document.getElementById('thread').innerHTML=document.getElementById('thread').innerHTML.includes('hello')?document.getElementById('thread').innerHTML:''; location.reload(); }
+function delConv(i){ CONVS.splice(i,1); if(CUR===i)CUR=null; saveAll(); renderConvs(); }
+function openConv(i){
+  CUR=i; renderConvs(); toggleSide(false);
+  var t=document.getElementById('thread'); t.innerHTML='';
+  CONVS[i].msgs.forEach(function(m){ addRow(m.role,m.content,false); });
+  scrollEnd();
+}
+function scrollEnd(){ var m=document.getElementById('msgs'); m.scrollTop=m.scrollHeight; }
+function addRow(role,content,tools){
+  var hello=document.getElementById('hello'); if(hello)hello.remove();
+  var t=document.getElementById('thread');
+  var div=document.createElement('div'); div.className='row '+(role==='user'?'user':'bot');
+  var av=role==='user'?'<div class="av">You</div>':'<div class="av"><img src="/noria-logo-t.png" alt=""></div>';
+  var toolsHtml=(role!=='user'&&tools)?'<div class="tools">'+
+      '<button onclick="copyTxt(this)" title="Copy">📋 Copy</button>'+
+      '<button onclick="speakTxt(this)" title="Listen">🔊 Listen</button>'+
+      '<button onclick="askTranslate(this)" title="Translate">🈯 Translate</button>'+
+    '</div>':'';
+  div.innerHTML=av+'<div class="body"><div class="who">'+(role==='user'?'You':'NORIA')+'</div><div class="txt">'+md(content)+'</div>'+toolsHtml+'</div>';
+  t.appendChild(div); scrollEnd(); return div;
+}
+function copyTxt(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText; navigator.clipboard.writeText(txt).then(function(){btn.textContent='✓ Copied';setTimeout(function(){btn.innerHTML='📋 Copy';},1400);}); }
+function speakTxt(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(txt.slice(0,1200)); u.rate=1.02; window.speechSynthesis.speak(u);
+}
+function askTranslate(btn){ var txt=btn.closest('.body').querySelector('.txt').innerText.slice(0,800);
+  document.getElementById('input').value='Translate this into French:\n\n'+txt; grow(document.getElementById('input')); document.getElementById('input').focus(); }
+function starter(q){ document.getElementById('input').value=q; send(); }
+function pickFile(inp){
+  var f=inp.files&&inp.files[0]; if(!f)return;
+  if(f.size>400*1024&&!f.type.startsWith('image/')){ alert('Please choose a text file under 400 KB.'); inp.value=''; return; }
+  var r=new FileReader();
+  if(f.type.startsWith('image/')){ ATTACH={name:f.name,text:'[The user attached an image: '+f.name+'. Describe what you can help with regarding images and ask them to describe its contents if needed.]'}; showAttach(f.name); }
+  else{ r.onload=function(){ ATTACH={name:f.name,text:String(r.result).slice(0,6000)}; showAttach(f.name); }; r.readAsText(f); }
+  inp.value='';
+}
+function showAttach(name){ var a=document.getElementById('attach'); a.style.display='flex'; document.getElementById('attachName').textContent='📎 '+name; }
+function clearAttach(){ ATTACH=null; document.getElementById('attach').style.display='none'; }
+
+async function send(){
+  if(BUSY)return;
+  var inp=document.getElementById('input'); var q=inp.value.trim();
+  if(!q&&!ATTACH)return;
+  var visible=q||('📎 '+(ATTACH?ATTACH.name:'attachment'));
+  var full=q+(ATTACH?'\n\n[Attached file "'+ATTACH.name+'" contents]:\n'+ATTACH.text:'');
+  inp.value=''; grow(inp); clearAttach();
+  if(CUR===null){ CONVS.unshift({id:Date.now(),title:q.slice(0,44)||'Attachment',msgs:[]}); CUR=0; }
+  CONVS[CUR].msgs.push({role:'user',content:visible}); saveAll(); renderConvs();
+  addRow('user',visible,false);
+  BUSY=true; document.getElementById('sendBtn').disabled=true;
+  var botRow=addRow('bot','',false); var txtEl=botRow.querySelector('.txt');
+  txtEl.innerHTML='<span class="think"><i></i><i></i><i></i></span>';
+  try{
+    var history=CONVS[CUR].msgs.slice(0,-1).slice(-10).map(function(m){return {role:m.role==='user'?'user':'assistant',content:m.content};});
+    var r=await fetch('/api/noria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history})});
+    var d=await r.json();
+    var ans=(d&&(d.reply||d.answer))||'NORIA is momentarily unavailable — please try again.';
+    /* typewriter render for a live, streaming feel */
+    txtEl.innerHTML=''; var i=0; var chunk=Math.max(2,Math.round(ans.length/220));
+    (function type(){ i+=chunk; txtEl.innerHTML=md(ans.slice(0,i)); scrollEnd();
+      if(i<ans.length){ setTimeout(type,12); } else {
+        var tools=document.createElement('div'); tools.className='tools';
+        tools.innerHTML='<button onclick="copyTxt(this)">📋 Copy</button><button onclick="speakTxt(this)">🔊 Listen</button><button onclick="askTranslate(this)">🈯 Translate</button>';
+        botRow.querySelector('.body').appendChild(tools);
+      } })();
+    CONVS[CUR].msgs.push({role:'assistant',content:ans}); saveAll(); renderConvs();
+    if(VOICE_MODE){ speakAnswer(ans); }
+  }catch(e){ txtEl.textContent='Network issue — please try again.'; }
+  BUSY=false; document.getElementById('sendBtn').disabled=false;
+}
+
+/* ── microphone dictation (Web Speech API) ── */
+var REC=null, RECON=false;
+function makeRec(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return null;
+  var r=new SR(); r.lang='en-US'; r.interimResults=true; r.continuous=false; return r;
+}
+function toggleMic(){
+  var btn=document.getElementById('micBtn');
+  if(RECON){ try{REC.stop();}catch(_){} return; }
+  REC=makeRec();
+  if(!REC){ alert('Voice input is not supported in this browser. Try Chrome or Safari.'); return; }
+  var inp=document.getElementById('input'); var base=inp.value;
+  REC.onresult=function(ev){ var t=''; for(var i=0;i<ev.results.length;i++)t+=ev.results[i][0].transcript;
+    inp.value=(base?base+' ':'')+t; grow(inp); };
+  REC.onend=function(){ RECON=false; btn.classList.remove('rec'); };
+  REC.onerror=function(){ RECON=false; btn.classList.remove('rec'); };
+  RECON=true; btn.classList.add('rec'); REC.start();
+}
+
+/* ── full voice conversation mode ── */
+var VOICE_MODE=false;
+function openVoice(){ VOICE_MODE=true; document.getElementById('voice').classList.add('on'); }
+function closeVoice(){ VOICE_MODE=false; window.speechSynthesis.cancel(); document.getElementById('voice').classList.remove('on');
+  document.getElementById('vState').textContent='Tap the microphone to speak'; document.getElementById('vWaves').style.visibility='hidden';
+  document.getElementById('vBtn').textContent='🎤 Start speaking'; }
+function voiceCycle(){
+  var st=document.getElementById('vState'), wv=document.getElementById('vWaves'), b=document.getElementById('vBtn');
+  window.speechSynthesis.cancel();
+  var r=makeRec();
+  if(!r){ st.textContent='Voice is not supported in this browser'; return; }
+  st.textContent='Listening…'; wv.style.visibility='visible'; b.textContent='■ Stop';
+  var heard='';
+  r.onresult=function(ev){ heard=''; for(var i=0;i<ev.results.length;i++)heard+=ev.results[i][0].transcript; st.textContent='“'+heard.slice(0,80)+'”'; };
+  r.onend=function(){
+    wv.style.visibility='hidden'; b.textContent='🎤 Start speaking';
+    if(!heard.trim()){ st.textContent='I didn’t catch that — tap to try again'; return; }
+    st.textContent='Thinking…';
+    document.getElementById('input').value=heard; send();
+  };
+  r.onerror=function(){ wv.style.visibility='hidden'; st.textContent='Microphone unavailable — check permissions'; b.textContent='🎤 Start speaking'; };
+  r.start();
+}
+function speakAnswer(ans){
+  var st=document.getElementById('vState');
+  st.textContent='Speaking…';
+  var u=new SpeechSynthesisUtterance(ans.slice(0,1400)); u.rate=1.02;
+  u.onend=function(){ if(VOICE_MODE)st.textContent='Tap the microphone to reply'; };
+  window.speechSynthesis.speak(u);
+}
+
+renderConvs();
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
+</script>
+</body>
+</html>
