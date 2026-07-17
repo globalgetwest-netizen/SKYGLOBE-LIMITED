@@ -168,6 +168,12 @@ app.get(['/terra', '/yunex', '/noria'], (req, res) =>
 // homepage) lives on at /mobility with every page, form and deep link intact.
 app.get(['/mobility', '/services', '/travel'], (req, res) =>
   res.sendFile(path.join(__dirname, 'mobility.html')));
+// ── MOBILITY MODULE REGISTRY (Architecture Blueprint · Phase 4) ──────────────
+// Every Mobility workspace is a REAL, UNIQUE destination.
+const MOBILITY_WORKSPACES = ['countries','visas','immigration','universities','employers','travel','flights','insurance','conferences','opportunities'];
+for (const w of MOBILITY_WORKSPACES) {
+  app.get('/mobility/' + w, (req, res) => res.sendFile(path.join(__dirname, 'mobility-workspace.html')));
+}
 
 // SKYGLOBE ID — authentication and identity belong to SKYGLOBEGROUP, not to
 // any single platform. skyglobegroup.com/id is the ecosystem's front door
@@ -1361,7 +1367,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-ARCH-2026-07-17B',
+  build: 'SKYGLOBEGROUP-ARCH-2026-07-17C',
 }));
 
 app.get('/api/test', async (req, res) => {
