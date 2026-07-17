@@ -1009,6 +1009,12 @@ app.get('/digitalization', (req, res) => res.sendFile(path.join(__dirname, 'digi
 app.get('/conferences', (req, res) => res.sendFile(path.join(__dirname, 'conferences.html')));
 app.get('/showreel', (req, res) => res.sendFile(path.join(__dirname, 'showreel.html')));
 app.get('/terra', (req, res) => res.sendFile(path.join(__dirname, 'terra.html')));
+// ── TERRA MODULE REGISTRY (Architecture Blueprint · Phase 4) ─────────────────
+// Every TERRA workspace is a REAL, UNIQUE destination — no funnel to #verify.
+const TERRA_WORKSPACES = ['identity','verify','business','credentials','legal','trust'];
+for (const w of TERRA_WORKSPACES) {
+  app.get('/terra/' + w, (req, res) => res.sendFile(path.join(__dirname, 'terra-workspace.html')));
+}
 app.get('/noria', (req, res) => res.sendFile(path.join(__dirname, 'noria.html')));
 app.get('/yunex', (req, res) => res.sendFile(path.join(__dirname, 'yunex.html')));
 app.get('/yunex/app', (req, res) => res.sendFile(path.join(__dirname, 'yunex-app.html')));
@@ -1355,7 +1361,7 @@ app.get('/api/version', (_req, res) => res.json({
   platform: 'SkyGlobe Group Ecosystem',
   academy: 'v3-credential-standard',
   certificate: 'CERTIFICATE v3 — SkyGlobe Global Credential Standard · Real Logos · Terra Verified',
-  build: 'SKYGLOBEGROUP-ARCH-2026-07-17A',
+  build: 'SKYGLOBEGROUP-ARCH-2026-07-17B',
 }));
 
 app.get('/api/test', async (req, res) => {
