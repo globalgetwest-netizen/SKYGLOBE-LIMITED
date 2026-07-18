@@ -40,6 +40,18 @@ a{text-decoration:none;color:inherit}
 .g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .card{background:#fff;border:1px solid #e8eaf2;border-radius:16px;padding:22px;transition:transform .15s,box-shadow .15s}
+/* immersive listing view */
+.listing-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;align-items:start}
+@media(max-width:840px){.listing-hero{grid-template-columns:1fr}}
+.lg-main{position:relative;width:100%;height:430px;border-radius:16px;overflow:hidden;background:linear-gradient(120deg,#eef1fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:4rem;border:1px solid #eef0f6}
+.lg-main img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#f7f8fc}
+@media(max-width:840px){.lg-main{height:320px}}
+.lg-thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
+.lg-thumbs img{width:66px;height:66px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid #e0e3ee;flex:0 0 auto}
+.lg-thumbs img.on{border-color:#7c3aed}
+.vwrap{position:relative;width:100%;padding-top:56.25%;margin-top:12px;border-radius:12px;overflow:hidden;background:#000}
+.vwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.listing-body{display:grid;gap:14px;margin-top:18px}
 .lc-img{position:relative;height:160px;border-radius:12px;overflow:hidden;margin:-4px -4px 14px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;background:linear-gradient(125deg,#eef1fb,#f6f0fb)}
 .lc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#eef1f8}
 .card:hover .lc-img img{transform:scale(1.04)}
@@ -274,6 +286,12 @@ html,body{max-width:100%;overflow-x:clip}
     <div id="storefrontContent"></div>
   </section>
 
+  <!-- LISTING — full immersive product / asset / investment page -->
+  <section class="view" id="v-listing">
+    <button class="btn o sm" style="color:#67708f;border-color:#d7dbe8;margin-bottom:14px" onclick="backFromListing()">← Back</button>
+    <div id="listingView"></div>
+  </section>
+
   <!-- SKYGLOBE ID -->
   <section class="view" id="v-id">
     <div id="idContent"><div class="panel"><div class="empty"><div class="ic">🪪</div><p style="margin-top:8px;font-weight:700">Log in to see your SKYGLOBE ID</p><p class="muted">One account for the whole ecosystem — Academy, Travel, YUNEX and more.</p><button class="btn g grad" style="margin-top:14px" onclick="openAuth('login')">Log in</button></div></div></div>
@@ -500,17 +518,33 @@ async function renderCorridorTabs(){
   const all=[{key:'',label:'All corridors',flag:'🌐'},...CORRIDORS];
   el.innerHTML='<span style="font-size:.74rem;color:#8b93b8;align-self:center;margin-right:2px">Corridor:</span>'+all.map(c=>`<button onclick="MARKET_CORRIDOR='${c.key}';loadMarket()" style="cursor:pointer;font-family:inherit;font-weight:600;font-size:.78rem;border-radius:100px;padding:5px 12px;border:1px solid ${MARKET_CORRIDOR===c.key?'#3d5af1':'#e0e3ee'};background:${MARKET_CORRIDOR===c.key?'#eef2ff':'#fff'};color:${MARKET_CORRIDOR===c.key?'#3d5af1':'#67708f'}">${c.flag} ${esc(c.label.replace(' Corridor',''))}</button>`).join('');
 }
-async function openListing(ref){
+/* Inline product video — YouTube/Vimeo embed or direct MP4, else a link. */
+function videoEmbed(url){
+  if(!url) return '';
+  const yt=String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  if(yt) return `<div class="vwrap"><iframe src="https://www.youtube-nocookie.com/embed/${yt[1]}" title="Product video" allow="encrypted-media;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+  const vim=String(url).match(/vimeo\.com\/(\d+)/);
+  if(vim) return `<div class="vwrap"><iframe src="https://player.vimeo.com/video/${vim[1]}" title="Product video" allowfullscreen loading="lazy"></iframe></div>`;
+  if(/\.mp4($|\?)/i.test(url)) return `<video controls preload="metadata" style="width:100%;border-radius:12px;margin-top:12px;background:#000"><source src="${esc(url)}"></video>`;
+  return `<a href="${esc(url)}" target="_blank" rel="noopener" class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:12px;display:inline-flex;align-items:center;gap:6px">▶ Watch product video</a>`;
+}
+var LISTING_RETURN='market';
+function backFromListing(){ go(LISTING_RETURN||'market'); }
+async function openListing(ref,fromView){
+  if(fromView) LISTING_RETURN=fromView;
+  go('listing');
+  const host=$('listingView'); host.innerHTML='<div class="panel"><div class="muted">Loading…</div></div>';
   try{
     const l=await fetch(API+'/api/yunex/listings/'+ref).then(r=>r.json());
-    if(l.error){ alert(l.error); return; }
+    if(l.error){ host.innerHTML='<div class="panel"><div class="empty"><div class="ic">🔎</div><p style="margin-top:8px;font-weight:700">'+esc(l.error)+'</p></div></div>'; return; }
     const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color}">${terraBadge(15)} ${esc(m.label)}</span>`).join(' ');
     const d=l.details||{};
     const hasImgs=l.images&&l.images.length;
     const gallery=hasImgs?`
-      <div id="lgMain" style="width:100%;height:280px;border-radius:14px;background:#f2f4fa center/contain no-repeat url('${esc(l.images[0])}')"></div>
-      ${l.images.length>1?`<div style="display:flex;gap:8px;margin-top:8px;overflow-x:auto">${l.images.map((s,i)=>`<img src="${esc(s)}" onclick="document.getElementById('lgMain').style.backgroundImage='url(&quot;${esc(s)}&quot;)'" style="width:58px;height:58px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e0e3ee;flex:0 0 auto">`).join('')}</div>`:''}`:
-      `<div style="height:220px;border-radius:14px;background:linear-gradient(120deg,#eef1fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:3.4rem">${l.pillar_icon}</div>`;
+      <div class="lg-main" id="lgMain">${l.pillar_icon}<img src="${esc(l.images[0])}" alt="" onerror="this.remove()"></div>
+      ${l.images.length>1?`<div class="lg-thumbs">${l.images.map((s,i)=>`<img src="${esc(s)}" onclick="lgSwap(this,'${esc(s)}')" class="${i===0?'on':''}">`).join('')}</div>`:''}`:
+      `<div class="lg-main lg-noimg">${l.pillar_icon}</div>`;
+    const sampleBanner=l.showcase?`<div style="background:#fff3d6;color:#8a5a00;font-size:.74rem;font-weight:800;border-radius:8px;padding:8px 12px;margin-bottom:12px">SAMPLE listing — a demonstration of how a real, verified listing appears. Real sellers publish their own product photos, video and details.</div>`:'';
     const specRows=[
       d.brand?['Brand',d.brand]:null, d.manufacturer?['Manufacturer',d.manufacturer]:null,
       d.origin?['Country of origin',d.origin]:null, d.condition?['Condition',d.condition]:null,
@@ -518,35 +552,47 @@ async function openListing(ref){
       l.quantity?['Availability',l.quantity]:null,
       ...(d.specs||[]).map(s=>[s.k,s.v]),
     ].filter(Boolean);
-    const specTable=specRows.length?`<table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:.86rem">${specRows.map((r,i)=>`<tr style="background:${i%2?'#f8fafc':'#fff'}"><td style="padding:8px 12px;color:#67708f;font-weight:600;width:42%;border-bottom:1px solid #eef0f6">${esc(r[0])}</td><td style="padding:8px 12px;color:#111827;border-bottom:1px solid #eef0f6">${esc(r[1])}</td></tr>`).join('')}</table>`:'';
-    $('listingModalBody').innerHTML=`
-      ${gallery}
-      <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em;margin-top:14px">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-        <h2 style="margin:6px 0 2px">${esc(l.title)}</h2>
-        <button id="saveBtn_${l.ref}" onclick="toggleSave('${l.ref}')" title="Save" style="background:none;border:none;cursor:pointer;font-size:1.5rem;line-height:1;margin-top:6px">${l.saved?'❤️':'🤍'}</button>
+    const specTable=specRows.length?`<table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:.88rem">${specRows.map((r,i)=>`<tr style="background:${i%2?'#f8fafc':'#fff'}"><td style="padding:9px 13px;color:#67708f;font-weight:600;width:40%;border-bottom:1px solid #eef0f6">${esc(r[0])}</td><td style="padding:9px 13px;color:#111827;font-weight:600;border-bottom:1px solid #eef0f6">${esc(r[1])}</td></tr>`).join('')}</table>`:'';
+    host.innerHTML=`
+      ${sampleBanner}
+      <div class="listing-hero">
+        <div class="lg-col">${gallery}${videoEmbed(d.video_url)}</div>
+        <div class="buy-col">
+          <div class="panel" style="position:sticky;top:76px">
+            <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>
+            ${l.corridor_label?`<div style="font-size:.7rem;color:#3d5af1;margin-top:2px">${l.corridor_flag||''} ${esc(l.corridor_label)}</div>`:''}
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+              <h1 style="margin:7px 0 2px;font-size:1.5rem;line-height:1.25">${esc(l.title)}</h1>
+              <button id="saveBtn_${l.ref}" onclick="toggleSave('${l.ref}')" title="Save" style="background:none;border:none;cursor:pointer;font-size:1.5rem;line-height:1;margin-top:6px">${l.saved?'❤️':'🤍'}</button>
+            </div>
+            ${d.brand?`<div class="muted" style="font-size:.84rem">by ${esc(d.brand)}</div>`:''}
+            <div style="font-size:1.7rem;font-weight:800;margin-top:12px">${money(l)}</div>
+            ${d.unit?`<div class="muted" style="font-size:.82rem">per ${esc(d.unit)}${d.min_order?' · min order '+esc(d.min_order):''}</div>`:''}
+            ${l.quantity?`<div class="muted" style="font-size:.82rem;margin-top:4px">📦 ${esc(l.quantity)}</div>`:''}
+            ${l.location?`<div class="muted" style="margin-top:6px">📍 ${esc(l.location)}</div>`:''}
+            <button class="btn g grad" style="width:100%;margin-top:14px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
+            <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
+            <div class="notice" style="margin-top:12px">🛡️ Verified by the TERRA Credential Network. Agree a price and pay into secure escrow — funds release only when you confirm delivery.</div>
+          </div>
+        </div>
       </div>
-      ${d.brand?`<div class="muted" style="font-size:.84rem">by ${esc(d.brand)}</div>`:''}
-      ${d.video_url?`<a href="${esc(d.video_url)}" target="_blank" rel="noopener" class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:10px;display:inline-flex;align-items:center;gap:6px">▶ Watch product video</a>`:''}
-      <div style="font-size:1.4rem;margin-top:10px">${money(l)}</div>
-      ${d.unit?`<div class="muted" style="font-size:.82rem">per ${esc(d.unit)}${d.min_order?' · min order '+esc(d.min_order):''}</div>`:''}
-      ${l.location?`<div class="muted" style="margin-top:6px">📍 ${esc(l.location)}</div>`:''}
-      ${specTable?`<div style="font-weight:700;margin-top:16px">Specifications</div>${specTable}`:''}
-      ${l.description?`<div style="font-weight:700;margin-top:16px">Description</div><p style="margin-top:6px;line-height:1.7;color:#334;white-space:pre-wrap">${esc(l.description)}</p>`:''}
-      <div class="panel" style="margin-top:16px;padding:16px">
-        <div style="font-weight:700">${esc(l.seller.name)} ${l.seller.country?'· '+esc(l.seller.country):''}</div>
-        <div style="margin-top:4px">${ratingLine(l.seller.rating)}</div>
-        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
-        ${l.seller.handle?`<button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:10px" onclick="closeListing();openStorefront('${esc(l.seller.handle)}')">🏢 View verified company page →</button>`:''}
-        <div class="notice" style="margin-top:12px">🛡️ This seller is verified by the TERRA Credential Network. Negotiate, agree a price, and pay into secure escrow — funds release to the seller only when you confirm delivery.</div>
-        <button class="btn g grad" style="width:100%;margin-top:12px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
-        <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
-      </div>
-      <div id="relatedBox" style="margin-top:16px"></div>`;
-    $('listingModal').classList.add('on');
+      <div class="listing-body">
+        ${specTable?`<div class="panel"><div style="font-weight:800;font-size:1.05rem">Specifications</div>${specTable}</div>`:''}
+        ${l.description?`<div class="panel"><div style="font-weight:800;font-size:1.05rem">Description</div><p style="margin-top:8px;line-height:1.8;color:#334;white-space:pre-wrap">${esc(l.description)}</p></div>`:''}
+        <div class="panel">
+          <div style="font-weight:800;font-size:1.05rem;margin-bottom:8px">About the seller</div>
+          <div style="font-weight:700">${esc(l.seller.name)} ${l.seller.country?'· '+esc(l.seller.country):''}</div>
+          <div style="margin-top:4px">${ratingLine(l.seller.rating)}</div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
+          ${l.seller.handle?`<button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:12px" onclick="openStorefront('${esc(l.seller.handle)}')">🏢 View verified company page →</button>`:''}
+        </div>
+        <div id="relatedBox"></div>
+      </div>`;
+    window.scrollTo({top:0,behavior:'smooth'});
     loadRelated(l.ref);
-  }catch(e){ alert('Could not open listing.'); }
+  }catch(e){ host.innerHTML='<div class="panel"><div class="muted">Could not open listing.</div></div>'; }
 }
+function lgSwap(thumb,src){ const m=$('lgMain'); const img=m.querySelector('img'); if(img){img.src=src;} else { m.insertAdjacentHTML('beforeend','<img src="'+src.replace(/"/g,'&quot;')+'" onerror="this.remove()">'); } m.parentElement.querySelectorAll('.lg-thumbs img').forEach(t=>t.classList.remove('on')); thumb.classList.add('on'); }
 async function toggleSave(ref){
   if(!ME){ openAuth('login'); return; }
   const r=await fetch(API+'/api/yunex/saved/'+ref,{method:'POST',headers:H()});
