@@ -210,14 +210,74 @@ async function runTranslate(){
 }
 function copyOut(btn){ var t=document.getElementById('output'); if(t.classList.contains('ph'))return;
   navigator.clipboard.writeText(t.innerText).then(function(){ btn.classList.add('on'); setTimeout(function(){btn.classList.remove('on');},1200); }); }
+/* ── Natural, language-correct voice (not the robotic default) ── */
+/* Map each catalogue language to a BCP-47 locale so the browser reads it with
+   the RIGHT pronunciation and the best available natural/neural voice. */
+var BCP={
+ 'English':'en-US','French':'fr-FR','Spanish':'es-ES','Portuguese':'pt-PT','Arabic':'ar-SA',
+ 'Chinese (Simplified)':'zh-CN','Chinese (Traditional)':'zh-TW','Hindi':'hi-IN','Swahili':'sw-KE',
+ 'Hausa':'ha-NG','Yoruba':'yo-NG','Igbo':'ig-NG','Amharic':'am-ET','Zulu':'zu-ZA','Xhosa':'xh-ZA',
+ 'Afrikaans':'af-ZA','Somali':'so-SO','Oromo':'om-ET','Tigrinya':'ti-ET','Shona':'sn-ZW','Ndebele':'nr-ZA',
+ 'Kinyarwanda':'rw-RW','Kirundi':'rn-BI','Luganda':'lg-UG','Kikuyu':'ki-KE','Luo':'luo-KE','Sesotho':'st-ZA',
+ 'Setswana':'tn-ZA','Chichewa (Nyanja)':'ny-MW','Bambara':'bm-ML','Malagasy':'mg-MG','Wolof':'wo-SN',
+ 'Lingala':'ln-CD','Kikongo':'kg-CD','Twi (Akan)':'ak-GH','Ewe':'ee-GH','Fula (Fulani)':'ff-SN',
+ 'Tamazight (Berber)':'zgh-MA','Kanuri':'kr-NG','Tiv':'tiv-NG',
+ 'German':'de-DE','Italian':'it-IT','Dutch':'nl-NL','Russian':'ru-RU','Ukrainian':'uk-UA','Polish':'pl-PL',
+ 'Romanian':'ro-RO','Greek':'el-GR','Czech':'cs-CZ','Hungarian':'hu-HU','Swedish':'sv-SE','Norwegian':'nb-NO',
+ 'Danish':'da-DK','Finnish':'fi-FI','Turkish':'tr-TR','Serbian':'sr-RS','Croatian':'hr-HR','Bulgarian':'bg-BG',
+ 'Hebrew':'he-IL','Persian (Farsi)':'fa-IR','Urdu':'ur-PK','Bengali':'bn-BD','Punjabi':'pa-IN','Tamil':'ta-IN',
+ 'Telugu':'te-IN','Gujarati':'gu-IN','Marathi':'mr-IN','Pashto':'ps-AF','Kurdish':'ku-TR',
+ 'Japanese':'ja-JP','Korean':'ko-KR','Vietnamese':'vi-VN','Thai':'th-TH','Indonesian':'id-ID','Malay':'ms-MY',
+ 'Filipino (Tagalog)':'fil-PH','Khmer':'km-KH','Burmese':'my-MM'
+};
+function bcpFor(name){ if(!name||name==='Auto')return ''; return BCP[name]||name.split(' ')[0].toLowerCase().slice(0,2); }
+var VOICES=[];
+function loadVoices(){ try{ VOICES=window.speechSynthesis.getVoices()||[]; }catch(_){ VOICES=[]; } }
+if('speechSynthesis' in window){ loadVoices(); window.speechSynthesis.onvoiceschanged=loadVoices; }
+/* Choose the most natural voice for a locale. NORIA's voice is neutral: we rank
+   natural / neural / cloud voices first (they sound human, not robotic) and, all
+   else equal, prefer a gender-neutral option over a strongly gendered one. */
+function pickVoice(code){
+  if(!VOICES.length) loadVoices();
+  if(!VOICES.length) return null;
+  var base=(code||'en').toLowerCase().split('-')[0];
+  var cands=VOICES.filter(function(v){ return v.lang && v.lang.toLowerCase().split('-')[0]===base; });
+  if(!cands.length) return null;
+  function score(v){
+    var n=(v.name+' '+v.lang).toLowerCase(), s=0;
+    if(/natural|neural/.test(n)) s+=8;          // Microsoft/Google natural voices — clearest
+    if(/google/.test(n)) s+=5;
+    if(/premium|enhanced|siri|online/.test(n)) s+=4;
+    if(!v.localService) s+=3;                    // cloud voices are usually higher quality
+    if(/neutral|neu\b/.test(n)) s+=3;            // prefer explicitly neutral voices
+    if(/\bmale\b|\bfemale\b|man|woman/.test(n)) s-=1; // mild nudge away from strongly gendered
+    if(v.lang.toLowerCase()===(code||'').toLowerCase()) s+=1; // exact region match
+    return s;
+  }
+  cands.sort(function(a,b){ return score(b)-score(a); });
+  return cands[0];
+}
+/* strip any stray markdown/symbols so the voice never reads them aloud */
+function spoken(s){ return String(s||'')
+  .replace(/```[\s\S]*?```/g,' ').replace(/`([^`]+)`/g,'$1')
+  .replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1')
+  .replace(/^#{1,6}\s*/gm,'').replace(/[*_#>`~|]/g,' ')
+  .replace(/["“”«»]/g,'').replace(/\s+/g,' ').trim(); }
 var SPK=null;
 function speak(id,btn){
-  var el=document.getElementById(id); var txt=el.classList&&el.classList.contains('ph')?'':el.value!==undefined?el.value:el.innerText;
+  var el=document.getElementById(id);
+  var raw=el.value!==undefined?el.value:(el.classList&&el.classList.contains('ph')?'':el.innerText);
+  var txt=spoken(raw);
   if(!txt||!txt.trim())return;
   if(SPK===btn){ window.speechSynthesis.cancel(); btn.classList.remove('on'); SPK=null; return; }
   if(SPK)SPK.classList.remove('on');
   window.speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(txt.slice(0,1400)); u.rate=1;
+  // read the translation in the TARGET language, the source in the FROM language
+  var langName=(id==='output')?document.getElementById('to').value:document.getElementById('from').value;
+  var code=bcpFor(langName);
+  var u=new SpeechSynthesisUtterance(txt.slice(0,3000));
+  if(code){ u.lang=code; var v=pickVoice(code); if(v)u.voice=v; }
+  u.rate=0.98; u.pitch=1.0; u.volume=1;   // calm, clear, human cadence
   SPK=btn; btn.classList.add('on');
   u.onend=u.onerror=function(){ if(SPK===btn){btn.classList.remove('on');SPK=null;} };
   window.speechSynthesis.speak(u);
