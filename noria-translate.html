@@ -114,7 +114,7 @@ button,select,textarea{font-family:inherit}
 
   <div class="panes">
     <div class="pane src">
-      <textarea id="input" placeholder="Enter text to translate…" oninput="count()" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter')translate()"></textarea>
+      <textarea id="input" placeholder="Enter text to translate…" oninput="count()" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter')runTranslate()"></textarea>
       <div class="bar">
         <span class="ct" id="ct">0 characters</span>
         <span class="sp"></span>
@@ -133,7 +133,7 @@ button,select,textarea{font-family:inherit}
   </div>
 
   <div class="go">
-    <button id="goBtn" onclick="translate()"><svg class="isvg" viewBox="0 0 24 24"><path d="M5 8h9M9.5 4.2V8c0 4-1.8 6.8-5 8.2M8 8.5c0 3 1.8 5 5.5 6.8"/><path d="M14 20.5l4-9 4 9M15.4 17.5h5.2"/></svg> Translate</button>
+    <button id="goBtn" onclick="runTranslate()"><svg class="isvg" viewBox="0 0 24 24"><path d="M5 8h9M9.5 4.2V8c0 4-1.8 6.8-5 8.2M8 8.5c0 3 1.8 5 5.5 6.8"/><path d="M14 20.5l4-9 4 9M15.4 17.5h5.2"/></svg> Translate</button>
   </div>
 
   <div class="chips" id="chips"><span>Quick languages</span></div>
@@ -177,7 +177,7 @@ fillSelect(document.getElementById('to'),false,'French');
 /* quick-language chips */
 ['French','Arabic','Swahili','Spanish','Chinese (Simplified)','Portuguese','Hausa','English'].forEach(function(l){
   var b=document.createElement('button'); b.textContent=l;
-  b.onclick=function(){ document.getElementById('to').value=l; if(document.getElementById('input').value.trim())translate(); };
+  b.onclick=function(){ document.getElementById('to').value=l; if(document.getElementById('input').value.trim())runTranslate(); };
   document.getElementById('chips').appendChild(b);
 });
 
@@ -192,7 +192,7 @@ document.getElementById('swap').onclick=function(){
   if(!out.classList.contains('ph')){ document.getElementById('input').value=out.innerText; count(); out.className='out ph'; out.textContent='Translation appears here.'; }
 };
 var BUSY=false;
-async function translate(){
+async function runTranslate(){
   if(BUSY)return;
   var txt=document.getElementById('input').value.trim();
   var out=document.getElementById('output');
