@@ -601,7 +601,7 @@ async function sendMsg(e){
    visitor creates or signs into their ID right where they are — never pushed
    to another platform. One account, used everywhere. */
 window.__authFrom='yunex';
-var AUTH_CTX={academy:{badge:'🎓 Your learning identity — and the whole ecosystem'},mobility:{badge:'🌍 Your mobility identity — and the whole ecosystem'},terra:{badge:'🛡️ A trusted identity, verified by TERRA'},yunex:{badge:'💜 Trade, invest and build across the ecosystem'},'':{badge:''}};
+var AUTH_CTX={academy:{badge:'Your learning identity — and the whole ecosystem'},mobility:{badge:'Your mobility identity — and the whole ecosystem'},terra:{badge:'A trusted identity, verified by TERRA'},yunex:{badge:'Trade, invest and build across the ecosystem'},'':{badge:''}};
 var AUTH_MODE='signup';
 function openAuth(m){
   if(localStorage.getItem('sky_token')){ location.href='/id'; return false; }

@@ -88,7 +88,7 @@ html,body{max-width:100%;overflow-x:clip}
 
 <div class="top"><div class="row">
   <a class="brand" href="/yunex"><img src="/yunex-logo-t.png" alt="YUNEX"><span>YUNEX<small>A SKYGLOBE GROUP PLATFORM</small></span></a>
-  <div class="search"><span>🔎</span><input id="q" placeholder="Search products, suppliers, services, opportunities…"><button class="btn g grad sm" onclick="doSearch()">Search</button></div>
+  <div class="search"><span><svg class="sgic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><input id="q" placeholder="Search products, suppliers, services, opportunities…"><button class="btn g grad sm" onclick="doSearch()">Search</button></div>
   <div class="acct" id="acct"><button class="btn o" onclick="openAuth('login')">Log in</button><button class="btn g grad" onclick="openAuth('signup')">Get Started</button></div>
 </div></div>
 
@@ -111,9 +111,9 @@ html,body{max-width:100%;overflow-x:clip}
       <h1>Trade, invest and grow — on one verified global network.</h1>
       <p>Move money, source products, invest, sell and build — with people and businesses whose identity is verified before the first handshake. <b>No verification, no trade.</b></p>
       <div class="marks">
-        <span class="chip">🛡️ Verified by TERRA</span>
-        <span class="chip">💳 Payments by YUNEX</span>
-        <span class="chip">🧠 Guided by NORIA</span>
+        <span class="chip"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> Verified by TERRA</span>
+        <span class="chip"><svg class="sgic" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.5h19M6 15h4"/></svg> Payments by YUNEX</span>
+        <span class="chip"><svg class="sgic" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5.8V15a3 3 0 0 0 4 2.8V19a2 2 0 0 0 4 0V5a2 2 0 0 0-4 0M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5.8V15a3 3 0 0 1-4 2.8"/></svg> Guided by NORIA</span>
       </div>
       <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn" style="background:#fff;color:#3d5af1" onclick="go('market')">Explore the Marketplace</button>
@@ -123,12 +123,12 @@ html,body{max-width:100%;overflow-x:clip}
 
     <!-- QUICK ACTIONS -->
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:20px" id="quickActions">
-      <div class="card" style="text-align:center;padding:16px" onclick="go('market')"><div class="ic">🛍️</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Buy</div></div>
-      <div class="card" style="text-align:center;padding:16px" onclick="ME&&ME.can_sell?go('business'):(ME?go('id'):openAuth('signup'))"><div class="ic">🏷️</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Sell</div></div>
-      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='trade';go('market')"><div class="ic">🔁</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Trade</div></div>
-      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='investment';go('market')"><div class="ic">📈</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Invest</div></div>
-      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='services';go('market')"><div class="ic">🛠️</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Services</div></div>
-      <div class="card" style="text-align:center;padding:16px" onclick="go('deals')"><div class="ic">🤝</div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Deals</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Buy</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="ME&&ME.can_sell?go('business'):(ME?go('id'):openAuth('signup'))"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V4h9l8.6 8.6a2 2 0 0 1 0 .8z"/><circle cx="7.5" cy="8.5" r="1.2"/></svg></div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Sell</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='trade';go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Trade</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='investment';go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6M19 7h-3M19 7v3"/></svg></div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Invest</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="MARKET_PILLAR='services';go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5.3 5.3l-8.7 8.7-5.3-5.3 8.7-8.7z"/><path d="M3 21l3.5-1 2.5-2.5-2-2L4.5 18 3 21z"/></svg></div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Services</div></div>
+      <div class="card" style="text-align:center;padding:16px" onclick="go('deals')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2M13.5 13.5l3 3a1.4 1.4 0 0 0 2-2l-4.4-4.4a3 3 0 0 0-4.2 0l-.9.9a1.4 1.4 0 0 1-2-2l2.8-2.8a5 5 0 0 1 6.3-.6"/><path d="M3.5 4.5L3 14l6 6a1.4 1.4 0 0 0 2-2"/><path d="M3.5 5h6"/></svg></div><div style="font-weight:700;font-size:.9rem;margin-top:6px">Deals</div></div>
     </div>
 
     <!-- MY DASHBOARD (adaptive) -->
@@ -138,13 +138,13 @@ html,body{max-width:100%;overflow-x:clip}
     <h2 class="sec-h" style="margin-top:28px">One platform. Seven economic layers.</h2>
     <div class="sec-s">Each a complete world of its own — all sharing one identity, one wallet, one standard of trust.</div>
     <div class="grid g3" style="margin-top:14px">
-      <div class="card" onclick="MARKET_PILLAR='consumer';go('market')"><div class="ic">🛍️</div><h3>Commerce</h3><p>Retail, wholesale and digital goods across every category.</p></div>
-      <div class="card" onclick="MARKET_PILLAR='trade';go('market')"><div class="ic">🔁</div><h3>Trade</h3><p>Cross-border B2B — verified suppliers, sourcing and settlement.</p></div>
-      <div class="card" onclick="MARKET_PILLAR='investment';go('market')"><div class="ic">📈</div><h3>Investment</h3><p>Verified projects and opportunities seeking capital and partners.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='consumer';go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></div><h3>Commerce</h3><p>Retail, wholesale and digital goods across every category.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='trade';go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><h3>Trade</h3><p>Cross-border B2B — verified suppliers, sourcing and settlement.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='investment';go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6M19 7h-3M19 7v3"/></svg></div><h3>Investment</h3><p>Verified projects and opportunities seeking capital and partners.</p></div>
       <div class="card" onclick="MARKET_PILLAR='assets';go('market')"><div class="ic">🏝️</div><h3>Assets</h3><p>Land, property, vehicles and machinery — verified owners.</p></div>
-      <div class="card" onclick="MARKET_PILLAR='business';go('market')"><div class="ic">🏢</div><h3>Business</h3><p>Verified company profiles, sourcing, distribution and growth.</p></div>
-      <div class="card" onclick="MARKET_PILLAR='services';go('market')"><div class="ic">🛠️</div><h3>Services</h3><p>Lawyers, engineers, designers, developers and consultants.</p></div>
-      <div class="card" onclick="go('wallet')"><div class="ic">💰</div><h3>Finance</h3><p>Wallet, transfers, escrow and settlement — with licensed partners.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='business';go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg></div><h3>Business</h3><p>Verified company profiles, sourcing, distribution and growth.</p></div>
+      <div class="card" onclick="MARKET_PILLAR='services';go('market')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5.3 5.3l-8.7 8.7-5.3-5.3 8.7-8.7z"/><path d="M3 21l3.5-1 2.5-2.5-2-2L4.5 18 3 21z"/></svg></div><h3>Services</h3><p>Lawyers, engineers, designers, developers and consultants.</p></div>
+      <div class="card" onclick="go('wallet')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M9 3h6l-1.4 2.8H10.4L9 3z"/><path d="M12 5.8c-3.6 2.8-5.4 5.6-5.4 8.4a5.4 5.4 0 0 0 10.8 0c0-2.8-1.8-5.6-5.4-8.4z"/><path d="M12 10.5v5M10.7 11.7h2.4a1.1 1.1 0 0 1 0 2.2h-2.4"/></svg></div><h3>Finance</h3><p>Wallet, transfers, escrow and settlement — with licensed partners.</p></div>
     </div>
 
     <!-- CORRIDORS -->
@@ -167,11 +167,11 @@ html,body{max-width:100%;overflow-x:clip}
     </div>
 
     <!-- TRUST CENTRE -->
-    <h2 class="sec-h" style="margin-top:28px">🛡️ Trust Centre — powered by TERRA</h2>
+    <h2 class="sec-h" style="margin-top:28px"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> Trust Centre — powered by TERRA</h2>
     <div class="grid g3" style="margin-top:12px">
-      <div class="card"><div class="ic">🪪</div><h3>Verified Identities</h3><p>Every participant passes TERRA identity (and business) verification with a live check before they can trade.</p></div>
-      <div class="card"><div class="ic">🔒</div><h3>Escrow Protection</h3><p>Funds are held safely and released only when the buyer confirms delivery.</p></div>
-      <div class="card"><div class="ic">🛡️</div><h3>Secured End-to-End</h3><p>Encryption in transit and at rest, hashed passwords, private KYC storage and a full audit trail.</p></div>
+      <div class="card"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="11.5" r="2.2"/><path d="M13 10h5M13 13.5h4M4.6 16.4c.5-1.5 1.9-2.4 3.4-2.4s2.9.9 3.4 2.4"/></svg></div><h3>Verified Identities</h3><p>Every participant passes TERRA identity (and business) verification with a live check before they can trade.</p></div>
+      <div class="card"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></div><h3>Escrow Protection</h3><p>Funds are held safely and released only when the buyer confirms delivery.</p></div>
+      <div class="card"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Secured End-to-End</h3><p>Encryption in transit and at rest, hashed passwords, private KYC storage and a full audit trail.</p></div>
     </div>
 
     <!-- FOOTER -->
@@ -189,13 +189,13 @@ html,body{max-width:100%;overflow-x:clip}
     <h2 class="sec-h">Marketplace</h2>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
       <div class="sec-s">Browse verified listings across every pillar. Every seller is verified by TERRA.</div>
-      <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:#67708f">💱 Show prices in <select id="curPick" onchange="setCurrency(this.value)" style="width:auto;padding:6px 10px"></select></label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:#67708f"><svg class="sgic" viewBox="0 0 24 24"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg> Show prices in <select id="curPick" onchange="setCurrency(this.value)" style="width:auto;padding:6px 10px"></select></label>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px">
-      <button class="btn g grad sm" id="mtabBrowse" onclick="marketTab('browse')">🛍️ Browse</button>
-      <button class="btn o sm" id="mtabTrending" style="color:#67708f;border-color:#d7dbe8" onclick="marketTab('trending')">🔥 Trending</button>
-      <button class="btn o sm" id="mtabSaved" style="color:#67708f;border-color:#d7dbe8" onclick="marketTab('saved')">🤍 Saved</button>
-      <button class="btn o sm" id="mtabSell" style="color:#67708f;border-color:#d7dbe8" onclick="marketTab('sell')">➕ Sell</button>
+      <button class="btn g grad sm" id="mtabBrowse" onclick="marketTab('browse')"><svg class="sgic" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg> Browse</button>
+      <button class="btn o sm" id="mtabTrending" style="color:#67708f;border-color:#d7dbe8" onclick="marketTab('trending')"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 2c1.2 3 4.2 4.2 4.2 8.2a4.2 4.2 0 0 1-8.4 0c0-1.2.4-2.2 1-3 .2 1.2 1 1.8 1.6 2 .2-2.6-.4-5.4 1.6-7.2z"/></svg> Trending</button>
+      <button class="btn o sm" id="mtabSaved" style="color:#67708f;border-color:#d7dbe8" onclick="marketTab('saved')"><svg class="sgic" viewBox="0 0 24 24"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg> Saved</button>
+      <button class="btn o sm" id="mtabSell" style="color:#67708f;border-color:#d7dbe8" onclick="marketTab('sell')"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Sell</button>
     </div>
     <div id="pillarTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px"></div>
     <div id="corridorTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 2px"></div>
@@ -228,10 +228,10 @@ html,body{max-width:100%;overflow-x:clip}
   <section class="view" id="v-deals">
     <h2 class="sec-h">Deal Centre</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">
-      <button class="btn g grad sm" id="dtabDeals" onclick="dealTab('deals')">🤝 My Deals</button>
-      <button class="btn o sm" id="dtabSourcing" style="color:#67708f;border-color:#d7dbe8" onclick="dealTab('sourcing')">📋 Sourcing (RFQ)</button>
-      <button class="btn o sm" id="dtabMyrfq" style="color:#67708f;border-color:#d7dbe8" onclick="dealTab('myrfq')">🗂️ My Requests</button>
-      <button class="btn o sm" id="dtabDisputes" style="color:#67708f;border-color:#d7dbe8" onclick="dealTab('disputes')">⚖️ Disputes</button>
+      <button class="btn g grad sm" id="dtabDeals" onclick="dealTab('deals')"><svg class="sgic" viewBox="0 0 24 24"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2M13.5 13.5l3 3a1.4 1.4 0 0 0 2-2l-4.4-4.4a3 3 0 0 0-4.2 0l-.9.9a1.4 1.4 0 0 1-2-2l2.8-2.8a5 5 0 0 1 6.3-.6"/><path d="M3.5 4.5L3 14l6 6a1.4 1.4 0 0 0 2-2"/><path d="M3.5 5h6"/></svg> My Deals</button>
+      <button class="btn o sm" id="dtabSourcing" style="color:#67708f;border-color:#d7dbe8" onclick="dealTab('sourcing')"><svg class="sgic" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4a3 3 0 0 1 6 0v1H9zM8.5 11h7M8.5 15h5"/></svg> Sourcing (RFQ)</button>
+      <button class="btn o sm" id="dtabMyrfq" style="color:#67708f;border-color:#d7dbe8" onclick="dealTab('myrfq')"><svg class="sgic" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg> My Requests</button>
+      <button class="btn o sm" id="dtabDisputes" style="color:#67708f;border-color:#d7dbe8" onclick="dealTab('disputes')"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 3v18M8 21h8M5.5 7h13M5.5 7l-3 6a3 3 0 0 0 6 0l-3-6zM18.5 7l-3 6a3 3 0 0 0 6 0l-3-6z"/><circle cx="12" cy="4.5" r="1.4"/></svg> Disputes</button>
     </div>
     <div id="dealsPane"><div id="dealsList" style="margin-top:14px"></div></div>
     <div id="sourcingPane" style="display:none"></div>
@@ -250,8 +250,8 @@ html,body{max-width:100%;overflow-x:clip}
     <h2 class="sec-h">Community</h2>
     <div class="sec-s">The verified business network — knowledge, opportunities and trusted voices.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">
-      <button class="btn g grad sm" id="ctabFeed" onclick="commTab('feed')">🗣️ Feed</button>
-      <button class="btn o sm" id="ctabEvents" style="color:#67708f;border-color:#d7dbe8" onclick="commTab('events')">📅 Events & Opportunities</button>
+      <button class="btn g grad sm" id="ctabFeed" onclick="commTab('feed')"><svg class="sgic" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 0 1-13.1 8L3 21l1-4.9A9 9 0 1 1 21 12z"/></svg> Feed</button>
+      <button class="btn o sm" id="ctabEvents" style="color:#67708f;border-color:#d7dbe8" onclick="commTab('events')"><svg class="sgic" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg> Events & Opportunities</button>
     </div>
     <div id="commFeedPane">
       <div id="communityCompose"></div>
@@ -273,13 +273,13 @@ html,body{max-width:100%;overflow-x:clip}
 
   <!-- SKYGLOBE ID -->
   <section class="view" id="v-id">
-    <div id="idContent"><div class="panel"><div class="empty"><div class="ic">🪪</div><p style="margin-top:8px;font-weight:700">Log in to see your SKYGLOBE ID</p><p class="muted">One account for the whole ecosystem — Academy, Travel, YUNEX and more.</p><button class="btn g grad" style="margin-top:14px" onclick="openAuth('login')">Log in</button></div></div></div>
+    <div id="idContent"><div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="11.5" r="2.2"/><path d="M13 10h5M13 13.5h4M4.6 16.4c.5-1.5 1.9-2.4 3.4-2.4s2.9.9 3.4 2.4"/></svg></div><p style="margin-top:8px;font-weight:700">Log in to see your SKYGLOBE ID</p><p class="muted">One account for the whole ecosystem — Academy, Travel, YUNEX and more.</p><button class="btn g grad" style="margin-top:14px" onclick="openAuth('login')">Log in</button></div></div></div>
   </section>
 </div>
 
 <!-- GUIDED LIVE SELFIE OVERLAY -->
 <div id="selfieOverlay" style="display:none;position:fixed;inset:0;z-index:80;background:#0a1230;flex-direction:column;align-items:center;justify-content:center;padding:20px">
-  <div style="color:#fff;text-align:center;margin-bottom:8px"><div style="font-size:.62rem;letter-spacing:.24em;color:#9fb3dd;text-transform:uppercase">🛡️ TERRA Live Identity Check</div></div>
+  <div style="color:#fff;text-align:center;margin-bottom:8px"><div style="font-size:.62rem;letter-spacing:.24em;color:#9fb3dd;text-transform:uppercase"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> TERRA Live Identity Check</div></div>
   <div style="position:relative;width:280px;height:340px;max-width:80vw">
     <video id="selfieVideo" playsinline muted style="width:100%;height:100%;object-fit:cover;border-radius:50%/45%;transform:scaleX(-1);background:#000"></video>
     <div style="position:absolute;inset:0;border-radius:50%/45%;box-shadow:0 0 0 3px rgba(61,90,241,.8),0 0 0 2000px rgba(10,18,48,.55);pointer-events:none"></div>
@@ -290,7 +290,7 @@ html,body{max-width:100%;overflow-x:clip}
   </div>
   <div id="selfieDots" style="display:flex;gap:8px;margin-top:18px"></div>
   <button onclick="closeSelfie()" style="margin-top:24px;background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;font-family:inherit;font-weight:600;padding:9px 22px;border-radius:100px;cursor:pointer">Cancel</button>
-  <div style="color:#6b7bb0;font-size:.68rem;margin-top:14px;max-width:300px;text-align:center">🔒 Your live check is private, encrypted, and reviewed only by a TERRA verification officer.</div>
+  <div style="color:#6b7bb0;font-size:.68rem;margin-top:14px;max-width:300px;text-align:center"><svg class="sgic" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Your live check is private, encrypted, and reviewed only by a TERRA verification officer.</div>
 </div>
 
 <!-- LISTING MODAL -->
@@ -352,12 +352,12 @@ async function openSearch(q){
   const el=$('searchResults'); el.innerHTML='<div class="panel"><div class="muted">NORIA is searching…</div></div>';
   try{
     const d=await fetch(API+'/api/yunex/search?q='+encodeURIComponent(q)).then(r=>r.json());
-    if(!d.total){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🔍</div><p style="margin-top:8px;font-weight:700">Nothing found for “'+esc(q)+'”</p><p class="muted">Try different words, or browse the marketplace pillars.</p></div></div>'; return; }
+    if(!d.total){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><p style="margin-top:8px;font-weight:700">Nothing found for “'+esc(q)+'”</p><p class="muted">Try different words, or browse the marketplace pillars.</p></div></div>'; return; }
     let html='';
-    if(d.listings.length){ html+=`<div class="sec-h" style="font-size:1.05rem;margin-top:4px">🛍️ Products & listings (${d.listings.length})</div><div class="grid g3" style="margin:10px 0 18px">${d.listings.map(l=>listingCard(l)).join('')}</div>`; }
-    if(d.companies.length){ html+=`<div class="sec-h" style="font-size:1.05rem">🏢 Verified companies (${d.companies.length})</div><div class="grid g3" style="margin:10px 0 18px">${d.companies.map(c=>`<div class="card" style="cursor:pointer" onclick="openStorefront('${esc(c.handle)}')"><div style="display:flex;align-items:center;gap:8px"><span style="background:${c.tier.color};color:#fff;padding:3px 9px;border-radius:100px;font-size:.68rem;font-weight:700">${c.tier.icon} ${esc(c.tier.label)}</span></div><h3 style="margin-top:8px;font-size:1rem">${esc(c.name)}</h3>${c.tagline?`<div class="muted" style="font-size:.82rem">${esc(c.tagline)}</div>`:''}<div style="margin-top:6px">${(c.trust_marks||[]).map(m=>`<span class="st ok" style="font-size:.66rem">${terraBadge(11)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ')}</div></div>`).join('')}</div>`; }
-    if(d.rfqs.length){ html+=`<div class="sec-h" style="font-size:1.05rem">📋 Sourcing opportunities (${d.rfqs.length})</div><div style="margin:10px 0 18px;display:grid;gap:8px">${d.rfqs.map(r=>`<div class="panel" style="cursor:pointer;padding:14px" onclick="go('deals');dealTab('sourcing')"><div style="font-weight:700">${esc(r.title)}</div><div class="muted" style="font-size:.82rem">${r.budget!=null?'Budget '+fmtCur(r.budget,r.currency)+' '+r.currency:''}${r.quantity?' · '+esc(r.quantity):''}</div></div>`).join('')}</div>`; }
-    if(d.events.length){ html+=`<div class="sec-h" style="font-size:1.05rem">📅 Events & opportunities (${d.events.length})</div><div style="margin:10px 0 18px;display:grid;gap:8px">${d.events.map(e=>`<div class="panel" style="cursor:pointer;padding:14px" onclick="go('community');commTab('events')"><div style="font-weight:700">${esc(e.title)}</div><div class="muted" style="font-size:.82rem">${esc(e.type)}${e.starts_at?' · '+esc(e.starts_at):''}${e.location?' · '+esc(e.location):''}</div></div>`).join('')}</div>`; }
+    if(d.listings.length){ html+=`<div class="sec-h" style="font-size:1.05rem;margin-top:4px"><svg class="sgic" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg> Products & listings (${d.listings.length})</div><div class="grid g3" style="margin:10px 0 18px">${d.listings.map(l=>listingCard(l)).join('')}</div>`; }
+    if(d.companies.length){ html+=`<div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg> Verified companies (${d.companies.length})</div><div class="grid g3" style="margin:10px 0 18px">${d.companies.map(c=>`<div class="card" style="cursor:pointer" onclick="openStorefront('${esc(c.handle)}')"><div style="display:flex;align-items:center;gap:8px"><span style="background:${c.tier.color};color:#fff;padding:3px 9px;border-radius:100px;font-size:.68rem;font-weight:700">${c.tier.icon} ${esc(c.tier.label)}</span></div><h3 style="margin-top:8px;font-size:1rem">${esc(c.name)}</h3>${c.tagline?`<div class="muted" style="font-size:.82rem">${esc(c.tagline)}</div>`:''}<div style="margin-top:6px">${(c.trust_marks||[]).map(m=>`<span class="st ok" style="font-size:.66rem">${terraBadge(11)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ')}</div></div>`).join('')}</div>`; }
+    if(d.rfqs.length){ html+=`<div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4a3 3 0 0 1 6 0v1H9zM8.5 11h7M8.5 15h5"/></svg> Sourcing opportunities (${d.rfqs.length})</div><div style="margin:10px 0 18px;display:grid;gap:8px">${d.rfqs.map(r=>`<div class="panel" style="cursor:pointer;padding:14px" onclick="go('deals');dealTab('sourcing')"><div style="font-weight:700">${esc(r.title)}</div><div class="muted" style="font-size:.82rem">${r.budget!=null?'Budget '+fmtCur(r.budget,r.currency)+' '+r.currency:''}${r.quantity?' · '+esc(r.quantity):''}</div></div>`).join('')}</div>`; }
+    if(d.events.length){ html+=`<div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg> Events & opportunities (${d.events.length})</div><div style="margin:10px 0 18px;display:grid;gap:8px">${d.events.map(e=>`<div class="panel" style="cursor:pointer;padding:14px" onclick="go('community');commTab('events')"><div style="font-weight:700">${esc(e.title)}</div><div class="muted" style="font-size:.82rem">${esc(e.type)}${e.starts_at?' · '+esc(e.starts_at):''}${e.location?' · '+esc(e.location):''}</div></div>`).join('')}</div>`; }
     el.innerHTML=html;
   }catch(e){ el.innerHTML='<div class="panel"><div class="muted">Search failed. Try again.</div></div>'; }
 }
@@ -386,8 +386,8 @@ function listingCard(l){
     <div style="font-size:.7rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div style="font-size:.68rem;color:#3d5af1;margin-top:2px">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
     <h3 style="margin-top:5px;font-size:1rem">${esc(l.title)}</h3>
     <div style="margin-top:8px">${money(l)}</div>
-    ${l.saves?`<div style="font-size:.72rem;color:#c0392b;margin-top:4px">❤️ ${l.saves} saved</div>`:''}
-    ${l.location?`<div class="muted" style="font-size:.8rem;margin-top:4px">📍 ${esc(l.location)}</div>`:''}
+    ${l.saves?`<div style="font-size:.72rem;color:#c0392b;margin-top:4px"><svg class="sgic" viewBox="0 0 24 24"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg> ${l.saves} saved</div>`:''}
+    ${l.location?`<div class="muted" style="font-size:.8rem;margin-top:4px"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> ${esc(l.location)}</div>`:''}
     <div style="margin-top:10px;padding-top:10px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap">
       <span class="muted" style="font-size:.8rem">${esc(l.seller.name)}</span>${marks}
     </div>
@@ -400,16 +400,16 @@ function renderSellPane(grid,attempt){
     grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">⏳</div><p class="muted" style="margin-top:8px">Opening your seller workspace…</p></div>';
     setTimeout(()=>{ if(MARKET_TAB==='sell')renderSellPane(grid,attempt+1); },400); return;
   }
-  if(!ME){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">➕</div><p style="margin-top:8px;font-weight:700">Log in to sell on YUNEX</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div>'; return; }
-  if(!ME.can_sell){ grid.innerHTML='<div style="grid-column:1/-1"><div class="notice">🛡️ <b>No verification, no trade.</b> Verify your identity with TERRA to publish listings — it protects every buyer and gives you the verified trust mark.</div><button class="btn g grad" style="margin-top:14px" onclick="go(\'id\')">Get verified →</button></div>'; return; }
+  if(!ME){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div><p style="margin-top:8px;font-weight:700">Log in to sell on YUNEX</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div>'; return; }
+  if(!ME.can_sell){ grid.innerHTML='<div style="grid-column:1/-1"><div class="notice"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> <b>No verification, no trade.</b> Verify your identity with TERRA to publish listings — it protects every buyer and gives you the verified trust mark.</div><button class="btn g grad" style="margin-top:14px" onclick="go(\'id\')">Get verified →</button></div>'; return; }
   grid.innerHTML='<div style="grid-column:1/-1">'+SELL_PANE+'</div>';
   fillCurrencies(); fillCategories(); loadMyListings();
 }
 const SELL_PANE=`    <div class="panel">
-      <div class="sec-h" style="font-size:1.05rem">➕ Create a listing</div>
+      <div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Create a listing</div>
       <div class="sec-s">Publish across any pillar. Buyers see it instantly with your verified trust mark.</div>
       <div class="row2" style="margin-top:10px">
-        <div><label>Pillar</label><select id="nl_pillar" onchange="fillCategories()"><option value="consumer">🛍️ Marketplace</option><option value="trade">🔁 Trade</option><option value="services">🛠️ Services</option><option value="assets">🏝️ Assets</option><option value="investment">📈 Investment</option><option value="business">🏢 Business</option><option value="finance">💰 Finance</option><option value="digital">💻 Digital</option></select></div>
+        <div><label>Pillar</label><select id="nl_pillar" onchange="fillCategories()"><option value="consumer"><svg class="sgic" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg> Marketplace</option><option value="trade"><svg class="sgic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg> Trade</option><option value="services"><svg class="sgic" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5.3 5.3l-8.7 8.7-5.3-5.3 8.7-8.7z"/><path d="M3 21l3.5-1 2.5-2.5-2-2L4.5 18 3 21z"/></svg> Services</option><option value="assets">🏝️ Assets</option><option value="investment"><svg class="sgic" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6M19 7h-3M19 7v3"/></svg> Investment</option><option value="business"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg> Business</option><option value="finance"><svg class="sgic" viewBox="0 0 24 24"><path d="M9 3h6l-1.4 2.8H10.4L9 3z"/><path d="M12 5.8c-3.6 2.8-5.4 5.6-5.4 8.4a5.4 5.4 0 0 0 10.8 0c0-2.8-1.8-5.6-5.4-8.4z"/><path d="M12 10.5v5M10.7 11.7h2.4a1.1 1.1 0 0 1 0 2.2h-2.4"/></svg> Finance</option><option value="digital"><svg class="sgic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M2 20.5h20"/></svg> Digital</option></select></div>
         <div><label>Category</label><select id="nl_cat"></select></div>
         <div style="grid-column:1/-1"><label>Title</label><input id="nl_title" placeholder="e.g. Solar Power Bank 30000mAh — Wholesale"></div>
         <div><label>Price</label><input id="nl_price" type="number" placeholder="e.g. 45"></div>
@@ -418,7 +418,7 @@ const SELL_PANE=`    <div class="panel">
         <div><label>Minimum order</label><input id="nl_moq" placeholder="e.g. 50 units"></div>
         <div><label>Quantity / stock available</label><input id="nl_qty" placeholder="e.g. 500 units in stock"></div>
         <div><label>Location</label><input id="nl_loc" placeholder="City, Country"></div>
-        <div><label>Trade corridor (optional)</label><select id="nl_corridor"><option value="">— None —</option><option value="china">🇨🇳 China</option><option value="gulf">🌙 Gulf</option><option value="europe">🇪🇺 Europe</option><option value="america">🌎 America</option><option value="oceania">🌏 Oceania</option><option value="africa">🌍 Africa</option></select></div>
+        <div><label>Trade corridor (optional)</label><select id="nl_corridor"><option value="">— None —</option><option value="china">🇨🇳 China</option><option value="gulf"><svg class="sgic" viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.6 6.6 0 0 0 21 12.8z"/></svg> Gulf</option><option value="europe">🇪🇺 Europe</option><option value="america"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> America</option><option value="oceania"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> Oceania</option><option value="africa"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> Africa</option></select></div>
         <div><label>Brand</label><input id="nl_brand" placeholder="e.g. SunCharge"></div>
         <div><label>Manufacturer</label><input id="nl_maker" placeholder="e.g. SunCharge Ltd"></div>
         <div><label>Country of origin</label><input id="nl_origin" placeholder="e.g. Ghana"></div>
@@ -459,21 +459,21 @@ async function loadMarket(){
     if(tab==='trending'){
       const d=await fetch(API+'/api/yunex/trending').then(r=>r.json());
       if(MARKET_TAB!==tab)return;
-      grid.innerHTML=d.listings.length?d.listings.map(l=>listingCard(l)).join(''):'<div class="empty" style="grid-column:1/-1"><div class="ic">🔥</div><p style="margin-top:8px;font-weight:700">Nothing trending yet</p><p class="muted">Popular listings will surface here.</p></div>';
+      grid.innerHTML=d.listings.length?d.listings.map(l=>listingCard(l)).join(''):'<div class="empty" style="grid-column:1/-1"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 2c1.2 3 4.2 4.2 4.2 8.2a4.2 4.2 0 0 1-8.4 0c0-1.2.4-2.2 1-3 .2 1.2 1 1.8 1.6 2 .2-2.6-.4-5.4 1.6-7.2z"/></svg></div><p style="margin-top:8px;font-weight:700">Nothing trending yet</p><p class="muted">Popular listings will surface here.</p></div>';
       return;
     }
     if(tab==='saved'){
-      if(!ME){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">🤍</div><p style="margin-top:8px;font-weight:700">Log in to see saved items</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div>'; return; }
+      if(!ME){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg></div><p style="margin-top:8px;font-weight:700">Log in to see saved items</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div>'; return; }
       const d=await fetch(API+'/api/yunex/saved',{headers:H()}).then(r=>r.json());
       if(MARKET_TAB!==tab)return;
-      grid.innerHTML=d.listings.length?d.listings.map(l=>listingCard(l)).join(''):'<div class="empty" style="grid-column:1/-1"><div class="ic">🤍</div><p style="margin-top:8px;font-weight:700">No saved items yet</p><p class="muted">Tap the heart on any listing to save it here.</p></div>';
+      grid.innerHTML=d.listings.length?d.listings.map(l=>listingCard(l)).join(''):'<div class="empty" style="grid-column:1/-1"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg></div><p style="margin-top:8px;font-weight:700">No saved items yet</p><p class="muted">Tap the heart on any listing to save it here.</p></div>';
       return;
     }
     const qs=new URLSearchParams(); if(MARKET_PILLAR)qs.set('pillar',MARKET_PILLAR); if(MARKET_CORRIDOR)qs.set('corridor',MARKET_CORRIDOR); if(MARKET_Q)qs.set('q',MARKET_Q);
     const r=await fetch(API+'/api/yunex/listings?'+qs.toString()); const d=await r.json();
     if(MARKET_TAB!==tab)return;
     MARKET_PILLARS=d.pillars; renderPillarTabs(); renderCorridorTabs();
-    if(!d.listings.length){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">🛍️</div><p style="margin-top:8px;font-weight:700">No listings yet'+(MARKET_Q||MARKET_PILLAR?' for this filter':'')+'</p><p class="muted">Verified sellers publish products, services, assets and opportunities here.</p></div>'; return; }
+    if(!d.listings.length){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></div><p style="margin-top:8px;font-weight:700">No listings yet'+(MARKET_Q||MARKET_PILLAR?' for this filter':'')+'</p><p class="muted">Verified sellers publish products, services, assets and opportunities here.</p></div>'; return; }
     grid.innerHTML=d.listings.map(l=>listingCard(l)).join('');
   }catch(e){ if(MARKET_TAB===tab)grid.innerHTML='<div class="empty" style="grid-column:1/-1"><p class="muted">Could not load listings.</p></div>'; }
 }
@@ -513,22 +513,22 @@ async function openListing(ref){
       <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em;margin-top:14px">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
         <h2 style="margin:6px 0 2px">${esc(l.title)}</h2>
-        <button id="saveBtn_${l.ref}" onclick="toggleSave('${l.ref}')" title="Save" style="background:none;border:none;cursor:pointer;font-size:1.5rem;line-height:1;margin-top:6px">${l.saved?'❤️':'🤍'}</button>
+        <button id="saveBtn_${l.ref}" onclick="toggleSave('${l.ref}')" title="Save" style="background:none;border:none;cursor:pointer;font-size:1.5rem;line-height:1;margin-top:6px">${l.saved?`<svg class="sgic" viewBox="0 0 24 24" style="fill:currentColor;stroke:currentColor"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg>`:`<svg class="sgic" viewBox="0 0 24 24"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg>`}</button>
       </div>
       ${d.brand?`<div class="muted" style="font-size:.84rem">by ${esc(d.brand)}</div>`:''}
       ${d.video_url?`<a href="${esc(d.video_url)}" target="_blank" rel="noopener" class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:10px;display:inline-flex;align-items:center;gap:6px">▶ Watch product video</a>`:''}
       <div style="font-size:1.4rem;margin-top:10px">${money(l)}</div>
       ${d.unit?`<div class="muted" style="font-size:.82rem">per ${esc(d.unit)}${d.min_order?' · min order '+esc(d.min_order):''}</div>`:''}
-      ${l.location?`<div class="muted" style="margin-top:6px">📍 ${esc(l.location)}</div>`:''}
+      ${l.location?`<div class="muted" style="margin-top:6px"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> ${esc(l.location)}</div>`:''}
       ${specTable?`<div style="font-weight:700;margin-top:16px">Specifications</div>${specTable}`:''}
       ${l.description?`<div style="font-weight:700;margin-top:16px">Description</div><p style="margin-top:6px;line-height:1.7;color:#334;white-space:pre-wrap">${esc(l.description)}</p>`:''}
       <div class="panel" style="margin-top:16px;padding:16px">
         <div style="font-weight:700">${esc(l.seller.name)} ${l.seller.country?'· '+esc(l.seller.country):''}</div>
         <div style="margin-top:4px">${ratingLine(l.seller.rating)}</div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${marks}</div>
-        ${l.seller.handle?`<button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:10px" onclick="closeListing();openStorefront('${esc(l.seller.handle)}')">🏢 View verified company page →</button>`:''}
-        <div class="notice" style="margin-top:12px">🛡️ This seller is verified by the TERRA Credential Network. Negotiate, agree a price, and pay into secure escrow — funds release to the seller only when you confirm delivery.</div>
-        <button class="btn g grad" style="width:100%;margin-top:12px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
+        ${l.seller.handle?`<button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:10px" onclick="closeListing();openStorefront('${esc(l.seller.handle)}')"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg> View verified company page →</button>`:''}
+        <div class="notice" style="margin-top:12px"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> This seller is verified by the TERRA Credential Network. Negotiate, agree a price, and pay into secure escrow — funds release to the seller only when you confirm delivery.</div>
+        <button class="btn g grad" style="width:100%;margin-top:12px" onclick="startDeal('${l.ref}')"><svg class="sgic" viewBox="0 0 24 24"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2M13.5 13.5l3 3a1.4 1.4 0 0 0 2-2l-4.4-4.4a3 3 0 0 0-4.2 0l-.9.9a1.4 1.4 0 0 1-2-2l2.8-2.8a5 5 0 0 1 6.3-.6"/><path d="M3.5 4.5L3 14l6 6a1.4 1.4 0 0 0 2-2"/><path d="M3.5 5h6"/></svg> Contact seller / Make an offer</button>
         <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
       </div>
       <div id="relatedBox" style="margin-top:16px"></div>`;
@@ -540,7 +540,7 @@ async function toggleSave(ref){
   if(!ME){ openAuth('login'); return; }
   const r=await fetch(API+'/api/yunex/saved/'+ref,{method:'POST',headers:H()});
   const d=await r.json(); if(!r.ok)return;
-  const b=$('saveBtn_'+ref); if(b)b.textContent=d.saved?'❤️':'🤍';
+  const b=$('saveBtn_'+ref); if(b)b.innerHTML=d.saved?`<svg class="sgic" viewBox="0 0 24 24" style="fill:currentColor;stroke:currentColor"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg>`:`<svg class="sgic" viewBox="0 0 24 24"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg>`;
 }
 async function loadRelated(ref){
   try{
@@ -649,7 +649,7 @@ function renderAcct(){
   const initial=(ME.name||ME.email||'?').trim().charAt(0).toUpperCase();
   const badge=ME.can_sell?'<span class="chip acct-badge" style="background:rgba(255,255,255,.16)">✔ Verified</span>':'';
   const name=esc(ME.name||ME.email.split('@')[0]);
-  el.innerHTML=badge+'<button class="btn o" style="max-width:160px;overflow:hidden;text-overflow:ellipsis" onclick="go(\'id\')">🪪 '+name+'</button><button class="btn o sm" onclick="logout()">Log out</button>';
+  el.innerHTML=badge+'<button class="btn o" style="max-width:160px;overflow:hidden;text-overflow:ellipsis" onclick="go(\'id\')"><svg class="sgic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="11.5" r="2.2"/><path d="M13 10h5M13 13.5h4M4.6 16.4c.5-1.5 1.9-2.4 3.4-2.4s2.9.9 3.4 2.4"/></svg> '+name+'</button><button class="btn o sm" onclick="logout()">Log out</button>';
 }
 
 /* SKYGLOBE ID view */
@@ -711,7 +711,7 @@ async function renderID(){
     </div>
 
     <div class="panel">
-      <div class="sec-h" style="font-size:1.05rem">🛡️ TERRA Verification</div>
+      <div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> TERRA Verification</div>
       <div class="sec-s">Your trust status. This is what unlocks trading on YUNEX.</div>
       <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:10px">
         <div><label>Email</label>${stTag(ME.verification.email)}</div>
@@ -750,14 +750,14 @@ async function renderID(){
         <div><label>Primary purpose</label><select id="p_purpose"><option value="">Select…</option>${[['study','Study / Learning'],['mobility','Travel / Mobility'],['buyer','Buying'],['seller','Selling / Trading'],['investor','Investment'],['business','Business'],['general','General member']].map(([v,l])=>`<option value="${v}"${pf.purpose===v?' selected':''}>${l}</option>`).join('')}</select></div>
         <div style="grid-column:1/-1"><label>Home address</label><input id="p_addr" value="${esc(pf.address||'')}" placeholder="Street, area, house number — used for deliveries and verification only"></div>
       </div>
-      <div class="muted" style="font-size:.74rem;margin-top:8px">🔒 Your email and personal details are private — never shown publicly. Buyers and sellers only ever see your name and verification status.</div>
+      <div class="muted" style="font-size:.74rem;margin-top:8px"><svg class="sgic" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Your email and personal details are private — never shown publicly. Buyers and sellers only ever see your name and verification status.</div>
       <button class="btn g grad" style="margin-top:14px" onclick="saveProfile()">Save profile</button>
       <span class="muted" id="p_msg" style="margin-left:10px"></span>
     </div>
 
     <!-- SECURITY CENTRE -->
     <div class="panel">
-      <div class="sec-h" style="font-size:1.05rem">🔒 Security Centre</div>
+      <div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Security Centre</div>
       <div class="sec-s">Change your password and review recent sign-ins.</div>
       <div class="row2" style="margin-top:10px">
         <div><label>Current password</label><input id="sec_cur" type="password" placeholder="Current password"></div>
@@ -770,14 +770,14 @@ async function renderID(){
 
     <!-- DIGITAL DOCUMENTS -->
     <div class="panel">
-      <div class="sec-h" style="font-size:1.05rem">🗂️ Digital Documents & Certificates</div>
+      <div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg> Digital Documents & Certificates</div>
       <div class="sec-s">Certificates, credentials and identity documents issued to you — each sealed and verifiable through TERRA.</div>
       <div id="id_docs" style="margin-top:10px"><div class="muted">Loading…</div></div>
     </div>
 
     <!-- LEGAL DOCUMENTS -->
     <div class="panel">
-      <div class="sec-h" style="font-size:1.05rem">📜 Legal Documents</div>
+      <div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H16a1.5 1.5 0 0 1 1.5 1.5V18a3 3 0 0 0 3 3H8a3 3 0 0 1-3-3V4.5z"/><path d="M9 8h5M9 12h5"/></svg> Legal Documents</div>
       <div class="sec-s">Agreements, contracts and legal records prepared for you — professionally drafted and securely sealed.</div>
       <div id="id_legal" style="margin-top:10px"><div class="muted">Loading…</div></div>
       <div style="margin-top:12px"><a class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" href="/terra#services">Request a legal document</a></div>
@@ -847,12 +847,12 @@ function showVerify(kind){
         </div>
         <div>
           <label>Live selfie ${isBiz?'of the owner':''}</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" onclick="startSelfie()">📷 Take live selfie</button><input type="file" accept="image/*" capture="user" onchange="kycPick(this,'selfie')" style="font-size:.82rem"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" onclick="startSelfie()"><svg class="sgic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.4"/><path d="M8.5 7l1.4-2.6h4.2L15.5 7"/></svg> Take live selfie</button><input type="file" accept="image/*" capture="user" onchange="kycPick(this,'selfie')" style="font-size:.82rem"></div>
           <video id="kycVid" playsinline style="display:none;width:100%;max-width:220px;border-radius:10px;margin-top:8px"></video>
           <div id="kycSelfiePrev"></div>
         </div>
       </div>
-      <div class="muted" style="font-size:.78rem;margin-top:8px">🔒 Your document and selfie are stored privately and encrypted at rest — visible only to the TERRA verification officer, retained securely for dispute and compliance. Never shown publicly.</div>
+      <div class="muted" style="font-size:.78rem;margin-top:8px"><svg class="sgic" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Your document and selfie are stored privately and encrypted at rest — visible only to the TERRA verification officer, retained securely for dispute and compliance. Never shown publicly.</div>
       <button class="btn g grad" style="margin-top:12px" onclick="submitVerify('${kind}')">Submit to TERRA</button>
       <span class="muted" id="v_msg" style="margin-left:10px"></span>
     </div>`;
@@ -935,9 +935,9 @@ async function loadVerifyList(){
 /* Business Centre gate */
 function renderBiz(){
   const el=$('bizGate');
-  if(!ME){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🏢</div><p style="margin-top:8px;font-weight:700">Log in to open your Business Centre</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return; }
+  if(!ME){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg></div><p style="margin-top:8px;font-weight:700">Log in to open your Business Centre</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return; }
   if(!ME.can_sell){
-    el.innerHTML=`<div class="panel"><div class="notice">🛡️ <b>No verification, no trade.</b> To sell, list assets, or offer services on YUNEX, your identity${ (ME.roles||[]).includes('business')?' and business':'' } must be verified by TERRA. This protects every buyer and gives you a verified trust mark that investors and partners can check worldwide.</div>
+    el.innerHTML=`<div class="panel"><div class="notice"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> <b>No verification, no trade.</b> To sell, list assets, or offer services on YUNEX, your identity${ (ME.roles||[]).includes('business')?' and business':'' } must be verified by TERRA. This protects every buyer and gives you a verified trust mark that investors and partners can check worldwide.</div>
       <div style="margin-top:16px"><button class="btn g grad" onclick="go('id')">Go to My SKYGLOBE ID to get verified →</button></div></div>`;
     return;
   }
@@ -946,7 +946,7 @@ function renderBiz(){
     <div id="bizInsights"></div>
     <div id="bizProfile"></div>
     <div class="panel" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
-      <div><div class="sec-h" style="font-size:1.05rem">🛍️ Products &amp; listings</div>
+      <div><div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg> Products &amp; listings</div>
       <div class="sec-s">Your catalogue lives in the Marketplace — the one place that owns product management.</div></div>
       <button class="btn g grad" onclick="go('market');marketTab('sell')">Open Marketplace → Sell</button>
     </div>`;
@@ -966,7 +966,7 @@ async function loadBizInsights(){
     const corr=d.corridor_breakdown.length?d.corridor_breakdown.map(c=>`<span class="st ok" style="background:#f6f0fb;color:#8b5cf6;padding:5px 11px;font-size:.76rem">${esc(c.label)} · ${c.count}</span>`).join(' '):'<span class="muted" style="font-size:.82rem">Assign corridors to listings to map your trade lanes.</span>';
     const tops=d.top_listings.length?d.top_listings.map((t,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f7"><div style="min-width:0"><div style="font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i+1}. ${esc(t.title)}</div><div class="muted" style="font-size:.72rem">${t.count} completed deal${t.count>1?'s':''}</div></div><div style="font-weight:800;color:#12864e;white-space:nowrap">${usd(t.value)}</div></div>`).join(''):'<div class="muted" style="font-size:.84rem">Your best-selling listings appear here once deals complete.</div>';
     el.innerHTML=`<div class="panel">
-      <div class="sec-h" style="font-size:1.05rem">📊 Business Insights</div>
+      <div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M8 17v-5M13 17V8M18 17v-8"/></svg> Business Insights</div>
       <div class="sec-s">Live intelligence from your real deals — nothing invented.</div>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:12px">
         <div class="card" style="padding:14px"><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">Total revenue</div><div style="font-size:1.35rem;font-weight:900;color:#0a1230;margin-top:3px">${usd(d.revenue_total)}</div></div>
@@ -1001,7 +1001,7 @@ async function loadBizOverview(){
           ${tiles.map(x=>`<div><div style="font-size:1.4rem;font-weight:900;color:#fff">${x[1]}</div><div style="font-size:.68rem;color:#9fb3dd;text-transform:uppercase;letter-spacing:.06em">${x[0]}</div></div>`).join('')}
         </div>
       </div>
-      ${o.response_needed>0?`<div class="notice" style="margin-top:12px">⚡ You have <b>${o.response_needed}</b> offer${o.response_needed>1?'s':''} awaiting your response. <a href="#" onclick="go('deals');return false" style="color:#3d5af1">Open Deals →</a></div>`:''}`;
+      ${o.response_needed>0?`<div class="notice" style="margin-top:12px"><svg class="sgic" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg> You have <b>${o.response_needed}</b> offer${o.response_needed>1?'s':''} awaiting your response. <a href="#" onclick="go('deals');return false" style="color:#3d5af1">Open Deals →</a></div>`:''}`;
   }catch(e){}
 }
 async function openStorefront(handle){
@@ -1009,7 +1009,7 @@ async function openStorefront(handle){
   const el=$('storefrontContent'); el.innerHTML='<div class="panel"><div class="muted">Loading company page…</div></div>';
   try{
     const s=await fetch(API+'/api/yunex/storefront/'+encodeURIComponent(handle)).then(r=>r.json());
-    if(s.error){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🏢</div><p style="margin-top:8px;font-weight:700">Company page not available</p><p class="muted">This business has no public storefront.</p></div></div>'; return; }
+    if(s.error){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg></div><p style="margin-top:8px;font-weight:700">Company page not available</p><p class="muted">This business has no public storefront.</p></div></div>'; return; }
     const marks=(s.trust_marks||[]).map(m=>`<span class="st ok" style="background:#ffffff22;color:#fff;padding:4px 11px;font-size:.74rem">${terraBadge(14)} ${esc(m.label)}</span>`).join(' ');
     const since=s.member_since?new Date(s.member_since).toLocaleDateString(undefined,{year:'numeric',month:'long'}):null;
     const logo=s.logo_url?`<div style="width:82px;height:82px;border-radius:18px;background:#fff center/cover url('${esc(s.logo_url)}');flex-shrink:0"></div>`:`<div style="width:82px;height:82px;border-radius:18px;background:linear-gradient(120deg,#3d5af1,#b326d9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;flex-shrink:0">${esc((s.name||'C').charAt(0).toUpperCase())}</div>`;
@@ -1031,7 +1031,7 @@ async function openStorefront(handle){
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid #ffffff1a">
           <div><div style="font-size:1.5rem;font-weight:900">${s.completed_deals}</div><div style="font-size:.68rem;color:#9fb3dd;text-transform:uppercase">Completed deals</div></div>
           <div><div style="font-size:1.5rem;font-weight:900">${s.active_listings}</div><div style="font-size:.68rem;color:#9fb3dd;text-transform:uppercase">Active listings</div></div>
-          ${s.website?`<div style="grid-column:1/-1"><a href="${esc(s.website)}" target="_blank" rel="noopener" style="color:#9fb3dd;font-size:.85rem">🔗 ${esc(s.website)}</a></div>`:''}
+          ${s.website?`<div style="grid-column:1/-1"><a href="${esc(s.website)}" target="_blank" rel="noopener" style="color:#9fb3dd;font-size:.85rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg> ${esc(s.website)}</a></div>`:''}
         </div>
       </div>
       ${facts.length?`<div class="panel"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">${facts.map(f=>`<div><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">${esc(f[0])}</div><div style="font-weight:700;margin-top:2px">${esc(f[1])}</div></div>`).join('')}</div></div>`:''}
@@ -1057,9 +1057,9 @@ async function loadBizProfile(){
   try{ pr=await fetch(API+'/api/yunex/business/profile',{headers:H()}).then(r=>r.json())||{}; }catch(e){}
   el.innerHTML=`
     <div class="panel">
-      <div class="sec-h" style="font-size:1.05rem">🏢 Company Profile</div>
+      <div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg> Company Profile</div>
       <div class="sec-s">Your public business page — shown to buyers and partners with your verified tier.</div>
-      ${pr.handle?`<div class="notice" style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">🌍 Your public storefront is live. <button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" onclick="openStorefront('${esc(pr.handle)}')">View my company page →</button></div>`:''}
+      ${pr.handle?`<div class="notice" style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> Your public storefront is live. <button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" onclick="openStorefront('${esc(pr.handle)}')">View my company page →</button></div>`:''}
       <div class="row2" style="margin-top:10px">
         <div><label>Company name</label><input id="bp_name" value="${esc(pr.name||ME.name||'')}"></div>
         <div><label>Tagline</label><input id="bp_tag" value="${esc(pr.tagline||'')}" placeholder="One line about your business"></div>
@@ -1143,7 +1143,7 @@ async function loadDisputes(){
   el.innerHTML='<div class="panel"><div class="muted">Loading…</div></div>';
   try{
     const list=await fetch(API+'/api/yunex/disputes',{headers:H()}).then(r=>r.json());
-    if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">⚖️</div><p style="margin-top:8px;font-weight:700">No disputes</p><p class="muted">If something goes wrong with a funded deal, open it in “My Deals” and raise a dispute. Our TERRA resolution team mediates fairly.</p></div></div>'; return; }
+    if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 3v18M8 21h8M5.5 7h13M5.5 7l-3 6a3 3 0 0 0 6 0l-3-6zM18.5 7l-3 6a3 3 0 0 0 6 0l-3-6z"/><circle cx="12" cy="4.5" r="1.4"/></svg></div><p style="margin-top:8px;font-weight:700">No disputes</p><p class="muted">If something goes wrong with a funded deal, open it in “My Deals” and raise a dispute. Our TERRA resolution team mediates fairly.</p></div></div>'; return; }
     const badge={open:['#b5730a','Open'],responded:['#3d5af1','Responded'],mediation:['#8b5cf6','In mediation'],resolved:['#12864e','Resolved']};
     el.innerHTML=list.map(d=>{const b=badge[d.status]||['#67708f',d.status];return `<div class="panel" style="cursor:pointer" onclick="openDispute('${d.ref}')"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div style="font-weight:700">Dispute ${esc(d.ref)}</div><div class="muted" style="font-size:.8rem">${esc((d.category||'').replace(/_/g,' '))} · you are the ${esc(d.my_role||'party')}</div></div><span class="st" style="background:${b[0]}1a;color:${b[0]}">${b[1]}</span></div>${d.resolution?`<div class="muted" style="font-size:.8rem;margin-top:6px">Outcome: ${esc(d.resolution.replace(/_/g,' '))}</div>`:''}</div>`;}).join('');
   }catch(e){ el.innerHTML='<div class="muted">Could not load.</div>'; }
@@ -1156,10 +1156,10 @@ async function openDispute(ref){
   const msgs=r.messages.map(m=>{
     if(m.role==='system')return `<div style="text-align:center;margin:8px 0"><span style="background:#eef1f8;color:#67708f;font-size:.74rem;padding:4px 12px;border-radius:100px">${esc(m.body)}</span></div>`;
     const mine=m.mine, isMod=m.role==='mediator';
-    return `<div style="text-align:${mine?'right':'left'};margin:8px 0"><span style="display:inline-block;background:${isMod?'#fff4e0':mine?'#3d5af1':'#eef1f8'};color:${mine?'#fff':'#111827'};padding:9px 14px;border-radius:14px;max-width:82%;text-align:left">${isMod?'⚖️ <b>Mediator:</b> ':''}${esc(m.body||'')}${m.evidence_url?`<br><a href="${esc(m.evidence_url)}" target="_blank" style="color:${mine?'#fff':'#3d5af1'}">📎 View evidence</a>`:''}</span></div>`;
+    return `<div style="text-align:${mine?'right':'left'};margin:8px 0"><span style="display:inline-block;background:${isMod?'#fff4e0':mine?'#3d5af1':'#eef1f8'};color:${mine?'#fff':'#111827'};padding:9px 14px;border-radius:14px;max-width:82%;text-align:left">${isMod?'⚖️ <b>Mediator:</b> ':''}${esc(m.body||'')}${m.evidence_url?`<br><a href="${esc(m.evidence_url)}" target="_blank" style="color:${mine?'#fff':'#3d5af1'}"><svg class="sgic" viewBox="0 0 24 24"><path d="M21.4 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.2-9.19a4 4 0 0 1 5.65 5.66l-9.2 9.19a2 2 0 0 1-2.82-2.83l8.49-8.48"/></svg> View evidence</a>`:''}</span></div>`;
   }).join('');
   $('listingModalBody').innerHTML=`
-    <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase">⚖️ Dispute · ${esc((d.category||'').replace(/_/g,' '))}</div>
+    <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 3v18M8 21h8M5.5 7h13M5.5 7l-3 6a3 3 0 0 0 6 0l-3-6zM18.5 7l-3 6a3 3 0 0 0 6 0l-3-6z"/><circle cx="12" cy="4.5" r="1.4"/></svg> Dispute · ${esc((d.category||'').replace(/_/g,' '))}</div>
     <h2 style="margin:4px 0">${esc(d.ref)}</h2><div class="muted">Status: ${esc(d.status)}${d.resolution?' · '+esc(d.resolution.replace(/_/g,' ')):''}</div>
     <div class="panel" style="padding:14px;max-height:40vh;overflow:auto;margin-top:12px">${msgs||'<div class="muted">No messages.</div>'}</div>
     ${d.status!=='resolved'?`<div style="display:flex;gap:8px;margin-top:12px"><input id="dsp_msg" placeholder="Add a message…" style="flex:1"><button class="btn g grad" onclick="sendDisputeMsg()">Send</button></div>
@@ -1185,15 +1185,15 @@ async function loadSourcing(){
   el.innerHTML='<div class="panel"><div class="muted">Loading opportunities…</div></div>';
   try{
     const d=await fetch(API+'/api/yunex/rfqs',{headers:H()}).then(r=>r.json());
-    let post=`<div class="panel"><div class="sec-h" style="font-size:1.05rem">📋 Post a sourcing request (RFQ)</div><div class="sec-s">Tell verified sellers what you need — receive competitive quotes.</div>
+    let post=`<div class="panel"><div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4a3 3 0 0 1 6 0v1H9zM8.5 11h7M8.5 15h5"/></svg> Post a sourcing request (RFQ)</div><div class="sec-s">Tell verified sellers what you need — receive competitive quotes.</div>
       <div class="row2" style="margin-top:10px">
         <div style="grid-column:1/-1"><label>What are you sourcing?</label><input id="rq_title" placeholder="e.g. 10 tonnes Grade-A cocoa, monthly"></div>
-        <div><label>Pillar</label><select id="rq_pillar"><option value="trade">🔁 Trade</option><option value="consumer">🛍️ Marketplace</option><option value="services">🛠️ Services</option><option value="assets">🏝️ Assets</option><option value="business">🏢 Business</option></select></div>
+        <div><label>Pillar</label><select id="rq_pillar"><option value="trade"><svg class="sgic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg> Trade</option><option value="consumer"><svg class="sgic" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg> Marketplace</option><option value="services"><svg class="sgic" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5.3 5.3l-8.7 8.7-5.3-5.3 8.7-8.7z"/><path d="M3 21l3.5-1 2.5-2.5-2-2L4.5 18 3 21z"/></svg> Services</option><option value="assets">🏝️ Assets</option><option value="business"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg> Business</option></select></div>
         <div><label>Quantity</label><input id="rq_qty" placeholder="e.g. 10 tonnes"></div>
         <div><label>Budget</label><input id="rq_budget" type="number" placeholder="Optional"></div>
         <div><label>Currency</label><select id="rq_cur"></select></div>
         <div><label>Location</label><input id="rq_loc" placeholder="City, Country"></div>
-        <div><label>Corridor</label><select id="rq_corr"><option value="">— None —</option><option value="china">🇨🇳 China</option><option value="gulf">🌙 Gulf</option><option value="europe">🇪🇺 Europe</option><option value="america">🌎 America</option><option value="oceania">🌏 Oceania</option><option value="africa">🌍 Africa</option></select></div>
+        <div><label>Corridor</label><select id="rq_corr"><option value="">— None —</option><option value="china">🇨🇳 China</option><option value="gulf"><svg class="sgic" viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.6 6.6 0 0 0 21 12.8z"/></svg> Gulf</option><option value="europe">🇪🇺 Europe</option><option value="america"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> America</option><option value="oceania"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> Oceania</option><option value="africa"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> Africa</option></select></div>
         <div style="grid-column:1/-1"><label>Details</label><textarea id="rq_desc" rows="2" placeholder="Specifications, terms, delivery…"></textarea></div>
       </div>
       <button class="btn g grad" style="margin-top:12px" onclick="postRfq()">Post request</button><span class="muted" id="rq_msg" style="margin-left:10px"></span></div>`;
@@ -1218,7 +1218,7 @@ async function openRfq(ref){
   $('listingModalBody').innerHTML=`
     <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase">${rfq.pillar_icon} ${esc(rfq.pillar_label)}${rfq.category?' · '+esc(rfq.category):''} · RFQ</div>
     <h2 style="margin:6px 0">${esc(rfq.title)}</h2>
-    ${rfq.quantity?`<div class="muted">Quantity: ${esc(rfq.quantity)}</div>`:''}${rfq.budget!=null?`<div style="margin-top:2px"><b>Budget: ${fmtCur(rfq.budget,rfq.currency)} ${rfq.currency}</b></div>`:''}${rfq.location?`<div class="muted" style="margin-top:2px">📍 ${esc(rfq.location)}</div>`:''}
+    ${rfq.quantity?`<div class="muted">Quantity: ${esc(rfq.quantity)}</div>`:''}${rfq.budget!=null?`<div style="margin-top:2px"><b>Budget: ${fmtCur(rfq.budget,rfq.currency)} ${rfq.currency}</b></div>`:''}${rfq.location?`<div class="muted" style="margin-top:2px"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> ${esc(rfq.location)}</div>`:''}
     <p style="margin-top:12px;line-height:1.6;color:#334;white-space:pre-wrap">${esc(rfq.description||'')}</p>
     ${rfq.is_buyer?`<div class="notice" style="margin-top:12px">This is your request. See quotes in “My Requests”.</div>`:`
     <div class="panel" style="margin-top:14px;padding:16px">
@@ -1244,7 +1244,7 @@ async function loadMyRfqs(){
   el.innerHTML='<div class="panel"><div class="muted">Loading…</div></div>';
   try{
     const list=await fetch(API+'/api/yunex/my-rfqs',{headers:H()}).then(r=>r.json());
-    if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🗂️</div><p style="margin-top:8px;font-weight:700">No sourcing requests yet</p><p class="muted">Post an RFQ under “Sourcing” to receive quotes from verified sellers.</p></div></div>'; return; }
+    if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></div><p style="margin-top:8px;font-weight:700">No sourcing requests yet</p><p class="muted">Post an RFQ under “Sourcing” to receive quotes from verified sellers.</p></div></div>'; return; }
     el.innerHTML=list.map(r=>`<div class="panel" style="cursor:pointer" onclick="openMyRfq('${r.ref}')"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div style="font-weight:700">${esc(r.title)}</div><div class="muted" style="font-size:.8rem">${esc(r.ref)} · ${r.status}</div></div><div style="text-align:right"><span class="st ${r.status==='open'?'pend':'ok'}">${r.quotes||0} quote${r.quotes===1?'':'s'}</span></div></div></div>`).join('');
   }catch(e){ el.innerHTML='<div class="muted">Could not load.</div>'; }
 }
@@ -1280,13 +1280,13 @@ async function startDeal(listingRef){
     closeListing(); openDeal(d.ref);
   }catch(e){ $('startDealMsg').textContent='Network error.'; }
 }
-async function go_deals_guard(){ if(!ME){ $('dealsList').innerHTML='<div class="panel"><div class="empty"><div class="ic">🤝</div><p style="margin-top:8px;font-weight:700">Log in to see your deals</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return false;} return true; }
+async function go_deals_guard(){ if(!ME){ $('dealsList').innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2M13.5 13.5l3 3a1.4 1.4 0 0 0 2-2l-4.4-4.4a3 3 0 0 0-4.2 0l-.9.9a1.4 1.4 0 0 1-2-2l2.8-2.8a5 5 0 0 1 6.3-.6"/><path d="M3.5 4.5L3 14l6 6a1.4 1.4 0 0 0 2-2"/><path d="M3.5 5h6"/></svg></div><p style="margin-top:8px;font-weight:700">Log in to see your deals</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return false;} return true; }
 async function loadDeals(){
   if(!await go_deals_guard()) return;
   const el=$('dealsList'); el.innerHTML='<div class="muted">Loading…</div>';
   try{
     const list=await fetch(API+'/api/yunex/deals',{headers:H()}).then(r=>r.json());
-    if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🤝</div><p style="margin-top:8px;font-weight:700">No deals yet</p><p class="muted">Open a listing in the Marketplace and contact a verified seller to start.</p><button class="btn g grad" style="margin-top:12px" onclick="go(\'market\')">Browse Marketplace</button></div></div>'; return; }
+    if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2M13.5 13.5l3 3a1.4 1.4 0 0 0 2-2l-4.4-4.4a3 3 0 0 0-4.2 0l-.9.9a1.4 1.4 0 0 1-2-2l2.8-2.8a5 5 0 0 1 6.3-.6"/><path d="M3.5 4.5L3 14l6 6a1.4 1.4 0 0 0 2-2"/><path d="M3.5 5h6"/></svg></div><p style="margin-top:8px;font-weight:700">No deals yet</p><p class="muted">Open a listing in the Marketplace and contact a verified seller to start.</p><button class="btn g grad" style="margin-top:12px" onclick="go(\'market\')">Browse Marketplace</button></div></div>'; return; }
     const badge={open:['#67708f','Open'],offer:['#b5730a','Offer pending'],accepted:['#3d5af1','Accepted — fund escrow'],paid:['#8b5cf6','In escrow'],shipped:['#0ea5e9','Shipped'],completed:['#12864e','Completed'],cancelled:['#c0392b','Cancelled']};
     el.innerHTML=list.map(d=>{const bs=badge[d.status]||['#67708f',d.status];return `<div class="panel" style="cursor:pointer;margin-top:10px;padding:16px" onclick="openDeal('${d.ref}')">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -1308,7 +1308,7 @@ async function renderDeal(quiet){
     const deal=d.deal, role=deal.my_role;
     const msgs=d.messages.map(m=>{
       if(m.kind==='system')return `<div style="text-align:center;margin:10px 0"><span style="background:#eef1f8;color:#67708f;font-size:.76rem;padding:5px 12px;border-radius:100px">${esc(m.body)}</span></div>`;
-      if(m.kind==='offer')return `<div style="text-align:${m.mine?'right':'left'};margin:8px 0"><span style="display:inline-block;background:linear-gradient(120deg,#3d5af1,#b326d9);color:#fff;padding:9px 16px;border-radius:14px;font-weight:700">💰 ${esc(m.body)}</span></div>`;
+      if(m.kind==='offer')return `<div style="text-align:${m.mine?'right':'left'};margin:8px 0"><span style="display:inline-block;background:linear-gradient(120deg,#3d5af1,#b326d9);color:#fff;padding:9px 16px;border-radius:14px;font-weight:700"><svg class="sgic" viewBox="0 0 24 24"><path d="M9 3h6l-1.4 2.8H10.4L9 3z"/><path d="M12 5.8c-3.6 2.8-5.4 5.6-5.4 8.4a5.4 5.4 0 0 0 10.8 0c0-2.8-1.8-5.6-5.4-8.4z"/><path d="M12 10.5v5M10.7 11.7h2.4a1.1 1.1 0 0 1 0 2.2h-2.4"/></svg> ${esc(m.body)}</span></div>`;
       return `<div style="text-align:${m.mine?'right':'left'};margin:8px 0"><span style="display:inline-block;background:${m.mine?'#3d5af1':'#eef1f8'};color:${m.mine?'#fff':'#111827'};padding:9px 14px;border-radius:14px;max-width:80%;text-align:left">${esc(m.body)}</span></div>`;
     }).join('');
     // action bar by status + role
@@ -1319,16 +1319,16 @@ async function renderDeal(quiet){
       else if(role==='seller'&&s==='offer') actions=`<div style="display:flex;gap:8px"><button class="btn g grad" onclick="dealAction('respond',{decision:'accept'})">✔ Accept ${deal.currency} ${Number(deal.offer_price).toLocaleString()}</button><button class="btn o" style="color:#c0392b;border-color:#f0c4bd" onclick="dealAction('respond',{decision:'decline'})">Decline</button></div>`;
       else actions=`<div class="muted">Waiting for the buyer's offer…</div>`;
     } else if(s==='accepted'){
-      actions=role==='buyer'?`<button class="btn g grad" onclick="dealAction('pay')">💳 Fund secure escrow · ${deal.currency} ${Number(deal.offer_price).toLocaleString()}</button>`:`<div class="muted">Offer accepted — waiting for the buyer to fund escrow.</div>`;
+      actions=role==='buyer'?`<button class="btn g grad" onclick="dealAction('pay')"><svg class="sgic" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.5h19M6 15h4"/></svg> Fund secure escrow · ${deal.currency} ${Number(deal.offer_price).toLocaleString()}</button>`:`<div class="muted">Offer accepted — waiting for the buyer to fund escrow.</div>`;
     } else if(s==='paid'){
-      actions=(role==='seller'?`<button class="btn g grad" onclick="dealAction('ship')">📦 Mark as shipped</button>`:`<div class="notice">🔒 Escrow funded and held safely. The seller is preparing to ship.</div>`)+`<button class="btn o sm" style="margin-left:8px;color:#c0392b;border-color:#f0c4bd" onclick="raiseDispute('${deal.ref}')">⚖️ Raise a dispute</button>`;
+      actions=(role==='seller'?`<button class="btn g grad" onclick="dealAction('ship')"><svg class="sgic" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg> Mark as shipped</button>`:`<div class="notice"><svg class="sgic" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Escrow funded and held safely. The seller is preparing to ship.</div>`)+`<button class="btn o sm" style="margin-left:8px;color:#c0392b;border-color:#f0c4bd" onclick="raiseDispute('${deal.ref}')"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 3v18M8 21h8M5.5 7h13M5.5 7l-3 6a3 3 0 0 0 6 0l-3-6zM18.5 7l-3 6a3 3 0 0 0 6 0l-3-6z"/><circle cx="12" cy="4.5" r="1.4"/></svg> Raise a dispute</button>`;
     } else if(s==='shipped'){
-      actions=(role==='buyer'?`<button class="btn g grad" onclick="dealAction('complete')">✔ Confirm delivery & release escrow</button>`:`<div class="muted">Shipped — waiting for the buyer to confirm delivery.</div>`)+`<button class="btn o sm" style="margin-left:8px;color:#c0392b;border-color:#f0c4bd" onclick="raiseDispute('${deal.ref}')">⚖️ Raise a dispute</button>`;
+      actions=(role==='buyer'?`<button class="btn g grad" onclick="dealAction('complete')">✔ Confirm delivery & release escrow</button>`:`<div class="muted">Shipped — waiting for the buyer to confirm delivery.</div>`)+`<button class="btn o sm" style="margin-left:8px;color:#c0392b;border-color:#f0c4bd" onclick="raiseDispute('${deal.ref}')"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 3v18M8 21h8M5.5 7h13M5.5 7l-3 6a3 3 0 0 0 6 0l-3-6zM18.5 7l-3 6a3 3 0 0 0 6 0l-3-6z"/><circle cx="12" cy="4.5" r="1.4"/></svg> Raise a dispute</button>`;
     } else if(s==='completed'){
       actions=`<div class="st ok" style="padding:8px 16px">✔ Deal complete — escrow released</div>`;
       if(role==='buyer'&&!deal.reviewed){ actions+=`
         <div class="panel" style="padding:14px;margin-top:12px">
-          <div style="font-weight:700">⭐ Rate this seller</div>
+          <div style="font-weight:700"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 18.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg> Rate this seller</div>
           <div class="sec-s">Your honest review helps the whole verified market.</div>
           <div id="starPick" style="font-size:1.8rem;margin-top:6px">${[1,2,3,4,5].map(i=>`<span onclick="pickStar(${i})" data-s="${i}" style="cursor:pointer;color:#d7dbe8">★</span>`).join('')}</div>
           <textarea id="rv_comment" rows="2" placeholder="How was the product, communication and delivery?" style="width:100%;margin-top:8px"></textarea>
@@ -1337,7 +1337,7 @@ async function renderDeal(quiet){
         </div>`; }
       else if(role==='buyer'&&deal.reviewed){ actions+=`<div class="muted" style="margin-top:10px">✔ Thank you — you reviewed this deal.</div>`; }
     }
-    else if(s==='disputed'){ actions=`<div class="notice">⚖️ A dispute is open on this deal. Escrow is frozen until the TERRA resolution team decides. Track it under Deals → Disputes.</div>`; }
+    else if(s==='disputed'){ actions=`<div class="notice"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 3v18M8 21h8M5.5 7h13M5.5 7l-3 6a3 3 0 0 0 6 0l-3-6zM18.5 7l-3 6a3 3 0 0 0 6 0l-3-6z"/><circle cx="12" cy="4.5" r="1.4"/></svg> A dispute is open on this deal. Escrow is frozen until the TERRA resolution team decides. Track it under Deals → Disputes.</div>`; }
     else if(s==='cancelled'){ actions=`<div class="muted">This deal was cancelled.</div>`; }
     el.innerHTML=`
       <div class="panel" style="padding:16px 18px">
@@ -1381,7 +1381,7 @@ async function dealAction(action,body){
 /* WALLET */
 async function loadWallet(){
   const el=document.getElementById('walletContent'); if(!el)return;
-  if(!ME){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">💳</div><p style="margin-top:8px;font-weight:700">Log in to open your wallet</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return; }
+  if(!ME){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.5h19M6 15h4"/></svg></div><p style="margin-top:8px;font-weight:700">Log in to open your wallet</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return; }
   el.innerHTML='<div class="panel"><div class="muted">Loading…</div></div>';
   try{
     const w=await fetch(API+'/api/yunex/wallet',{headers:H()}).then(r=>r.json());
@@ -1400,11 +1400,11 @@ async function loadWallet(){
         </div>
       </div>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px">
-        <div class="card" style="text-align:center;padding:16px;opacity:.85"><div class="ic">➕</div><div style="font-weight:700;font-size:.88rem;margin-top:6px">Add funds</div><div class="muted" style="font-size:.72rem">via licensed partner</div></div>
+        <div class="card" style="text-align:center;padding:16px;opacity:.85"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div><div style="font-weight:700;font-size:.88rem;margin-top:6px">Add funds</div><div class="muted" style="font-size:.72rem">via licensed partner</div></div>
         <div class="card" style="text-align:center;padding:16px;opacity:.85"><div class="ic">↗️</div><div style="font-weight:700;font-size:.88rem;margin-top:6px">Withdraw</div><div class="muted" style="font-size:.72rem">via licensed partner</div></div>
-        <div class="card" style="text-align:center;padding:16px" onclick="go('deals')"><div class="ic">🤝</div><div style="font-weight:700;font-size:.88rem;margin-top:6px">My Deals</div><div class="muted" style="font-size:.72rem">${w.active_deals} active</div></div>
+        <div class="card" style="text-align:center;padding:16px" onclick="go('deals')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2M13.5 13.5l3 3a1.4 1.4 0 0 0 2-2l-4.4-4.4a3 3 0 0 0-4.2 0l-.9.9a1.4 1.4 0 0 1-2-2l2.8-2.8a5 5 0 0 1 6.3-.6"/><path d="M3.5 4.5L3 14l6 6a1.4 1.4 0 0 0 2-2"/><path d="M3.5 5h6"/></svg></div><div style="font-weight:700;font-size:.88rem;margin-top:6px">My Deals</div><div class="muted" style="font-size:.72rem">${w.active_deals} active</div></div>
       </div>
-      <div class="notice" style="margin-top:16px">🔒 Escrow protects every deal: your funds are held safely and released to the seller only when you confirm delivery. Adding funds and withdrawals settle through licensed payment partners under each country's law — YUNEX never holds deposits as a bank.</div>
+      <div class="notice" style="margin-top:16px"><svg class="sgic" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Escrow protects every deal: your funds are held safely and released to the seller only when you confirm delivery. Adding funds and withdrawals settle through licensed payment partners under each country's law — YUNEX never holds deposits as a bank.</div>
       <div class="panel">
         <div class="sec-h" style="font-size:1.05rem">Transactions</div>
         <div id="walletTx" style="margin-top:8px"></div>
@@ -1425,8 +1425,8 @@ async function loadCommunity(){
   const compose=$('communityCompose'), topics=$('communityTopics'), feed=$('communityFeed');
   if(!compose)return;
   // composer — only for identity-verified members
-  if(!ME){ compose.innerHTML='<div class="panel"><div class="empty"><div class="ic">🌍</div><p style="margin-top:8px;font-weight:700">Join the verified network</p><p class="muted">Log in and verify your identity with TERRA to share, connect and post opportunities.</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; }
-  else if(ME.verification&&ME.verification.identity!=='verified'){ compose.innerHTML='<div class="notice">🛡️ Verify your identity with TERRA to post in the Community. You can read the feed freely.<div style="margin-top:10px"><button class="btn g grad sm" onclick="go(\'id\')">Verify my identity</button></div></div>'; }
+  if(!ME){ compose.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg></div><p style="margin-top:8px;font-weight:700">Join the verified network</p><p class="muted">Log in and verify your identity with TERRA to share, connect and post opportunities.</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; }
+  else if(ME.verification&&ME.verification.identity!=='verified'){ compose.innerHTML='<div class="notice"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> Verify your identity with TERRA to post in the Community. You can read the feed freely.<div style="margin-top:10px"><button class="btn g grad sm" onclick="go(\'id\')">Verify my identity</button></div></div>'; }
   else compose.innerHTML=`<div class="panel">
     <div style="display:flex;gap:10px;align-items:flex-start">
       <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(120deg,#3d5af1,#b326d9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0">${esc((ME.name||'Y').trim().charAt(0).toUpperCase())}</div>
@@ -1434,7 +1434,7 @@ async function loadCommunity(){
         <textarea id="pc_body" rows="2" placeholder="Share knowledge, an opportunity or an update with the verified network…" style="width:100%"></textarea>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px">
           <select id="pc_cat" style="max-width:180px">${COMMUNITY_TOPICS_FALLBACK.map(t=>`<option>${t}</option>`).join('')}</select>
-          <label class="btn o sm" style="color:#67708f;border-color:#d7dbe8;cursor:pointer">🖼️ Image<input id="pc_img" type="file" accept="image/*" style="display:none" onchange="pcPreview()"></label>
+          <label class="btn o sm" style="color:#67708f;border-color:#d7dbe8;cursor:pointer"><svg class="sgic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="M20.5 16l-5-5-8 8"/></svg> Image<input id="pc_img" type="file" accept="image/*" style="display:none" onchange="pcPreview()"></label>
           <span id="pc_imgname" class="muted" style="font-size:.78rem"></span>
           <span style="flex:1"></span>
           <button class="btn g grad" onclick="submitPost()">Post</button>
@@ -1448,7 +1448,7 @@ async function loadCommunity(){
     const d=await fetch(API+'/api/yunex/community/posts?'+qs.toString(),{headers:H()}).then(r=>r.json());
     COMMUNITY_TOPICS_FALLBACK=d.topics||COMMUNITY_TOPICS_FALLBACK;
     topics.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap">'+communityChip('All',!COMM_CAT)+d.topics.map(t=>communityChip(t,COMM_CAT===t)).join('')+'</div>';
-    if(!d.posts.length){ feed.innerHTML='<div class="panel"><div class="empty"><div class="ic">💬</div><p style="margin-top:8px;font-weight:700">No posts yet'+(COMM_CAT?' in '+esc(COMM_CAT):'')+'</p><p class="muted">Be the first verified member to share here.</p></div></div>'; return; }
+    if(!d.posts.length){ feed.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5z"/></svg></div><p style="margin-top:8px;font-weight:700">No posts yet'+(COMM_CAT?' in '+esc(COMM_CAT):'')+'</p><p class="muted">Be the first verified member to share here.</p></div></div>'; return; }
     feed.innerHTML=d.posts.map(p=>postCard(p)).join('');
   }catch(e){ feed.innerHTML='<div class="panel"><div class="muted">Could not load the feed.</div></div>'; }
 }
@@ -1467,8 +1467,8 @@ function postCard(p){
     <p style="margin:12px 0 0;line-height:1.6;color:#2a3350;white-space:pre-wrap">${esc(p.body)}</p>
     ${p.image_url?`<div style="margin-top:12px;border-radius:12px;overflow:hidden"><img src="${esc(p.image_url)}" style="width:100%;display:block"></div>`:''}
     <div style="display:flex;gap:18px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #f0f2f7">
-      <button onclick="toggleLike('${p.ref}')" style="background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;color:${p.liked?'#c0392b':'#67708f'}"><span id="lk_${p.ref}">${p.liked?'❤️':'🤍'} ${p.likes}</span></button>
-      <button onclick="openPost('${p.ref}')" style="background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;color:#67708f">💬 ${p.comments}</button>
+      <button onclick="toggleLike('${p.ref}')" style="background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;color:${p.liked?'#c0392b':'#67708f'}"><span id="lk_${p.ref}">${p.liked?`<svg class="sgic" viewBox="0 0 24 24" style="fill:currentColor;stroke:currentColor"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg>`:`<svg class="sgic" viewBox="0 0 24 24"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg>`} ${p.likes}</span></button>
+      <button onclick="openPost('${p.ref}')" style="background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;color:#67708f"><svg class="sgic" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5z"/></svg> ${p.comments}</button>
     </div></div>`;
 }
 function pcPreview(){ const f=$('pc_img').files[0]; $('pc_imgname').textContent=f?f.name:''; }
@@ -1488,7 +1488,7 @@ async function toggleLike(ref){
   if(!ME){ openAuth('login'); return; }
   const r=await fetch(API+'/api/yunex/community/posts/'+ref+'/like',{method:'POST',headers:H()});
   const d=await r.json(); if(!r.ok)return;
-  const el=$('lk_'+ref); if(el){ const n=parseInt(el.textContent.replace(/\D/g,''))||0; const nn=d.liked?n+1:Math.max(0,n-1); el.textContent=(d.liked?'❤️':'🤍')+' '+nn; el.parentElement.style.color=d.liked?'#c0392b':'#67708f'; }
+  const el=$('lk_'+ref); if(el){ const n=parseInt(el.textContent.replace(/\D/g,''))||0; const nn=d.liked?n+1:Math.max(0,n-1); el.innerHTML=(d.liked?`<svg class="sgic" viewBox="0 0 24 24" style="fill:currentColor;stroke:currentColor"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg>`:`<svg class="sgic" viewBox="0 0 24 24"><path d="M20.8 8.6c0-2.5-2-4.3-4.4-4.3-1.6 0-3 .9-3.7 2.2-.7-1.3-2.1-2.2-3.7-2.2C6.6 4.3 4.6 6.1 4.6 8.6c0 4 6.1 8 7.4 8.9 1.3-.9 7.4-4.9 7.4-8.9z"/></svg>`)+' '+nn; el.parentElement.style.color=d.liked?'#c0392b':'#67708f'; }
 }
 async function openPost(ref){
   const d=await fetch(API+'/api/yunex/community/posts/'+ref,{headers:H()}).then(r=>r.json());
@@ -1528,16 +1528,16 @@ function evtChip(label,key,active){return `<button onclick="setEvtType('${key}')
 function setEvtType(k){ EVT_TYPE=k; loadEvents(); }
 async function loadEvents(){
   const compose=$('eventsCompose'), types=$('eventsTypes'), feed=$('eventsFeed'); if(!compose)return;
-  if(!ME){ compose.innerHTML='<div class="panel"><div class="empty"><div class="ic">📅</div><p style="margin-top:8px;font-weight:700">Discover verified events & opportunities</p><p class="muted">Log in and verify your identity to post and register.</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; }
-  else if(ME.verification&&ME.verification.identity!=='verified'){ compose.innerHTML='<div class="notice">🛡️ Verify your identity with TERRA to post an event or opportunity. You can browse and register freely once verified.</div>'; }
+  if(!ME){ compose.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div><p style="margin-top:8px;font-weight:700">Discover verified events & opportunities</p><p class="muted">Log in and verify your identity to post and register.</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; }
+  else if(ME.verification&&ME.verification.identity!=='verified'){ compose.innerHTML='<div class="notice"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> Verify your identity with TERRA to post an event or opportunity. You can browse and register freely once verified.</div>'; }
   else compose.innerHTML=`<div class="panel">
-    <div class="sec-h" style="font-size:1.05rem">➕ Post an event or opportunity</div>
+    <div class="sec-h" style="font-size:1.05rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Post an event or opportunity</div>
     <div class="row2" style="margin-top:10px">
       <div><label>Type</label><select id="ev_type">${EVENT_TYPES_FALLBACK.map(t=>`<option value="${t.key}">${t.icon} ${t.label}</option>`).join('')}</select></div>
       <div><label>Date / when</label><input id="ev_when" placeholder="e.g. 15 Aug 2026, 10:00 GMT"></div>
       <div style="grid-column:1/-1"><label>Title</label><input id="ev_title" placeholder="e.g. West Africa Cocoa Expo 2026"></div>
       <div><label>Location</label><input id="ev_loc" placeholder="City / Online"></div>
-      <div><label>Corridor</label><select id="ev_corr"><option value="">— None —</option><option value="china">🇨🇳 China</option><option value="gulf">🌙 Gulf</option><option value="europe">🇪🇺 Europe</option><option value="america">🌎 America</option><option value="oceania">🌏 Oceania</option><option value="africa">🌍 Africa</option></select></div>
+      <div><label>Corridor</label><select id="ev_corr"><option value="">— None —</option><option value="china">🇨🇳 China</option><option value="gulf"><svg class="sgic" viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.6 6.6 0 0 0 21 12.8z"/></svg> Gulf</option><option value="europe">🇪🇺 Europe</option><option value="america"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> America</option><option value="oceania"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> Oceania</option><option value="africa"><svg class="sgic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/></svg> Africa</option></select></div>
       <div style="grid-column:1/-1"><label>Link (optional)</label><input id="ev_link" placeholder="https://"></div>
       <div style="grid-column:1/-1"><label>Details</label><textarea id="ev_desc" rows="2" placeholder="What it's about, who should attend, terms…"></textarea></div>
     </div>
@@ -1548,7 +1548,7 @@ async function loadEvents(){
     const d=await fetch(API+'/api/yunex/events?'+qs.toString(),{headers:H()}).then(r=>r.json());
     EVENT_TYPES_FALLBACK=d.types||EVENT_TYPES_FALLBACK;
     types.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap">'+evtChip('All','',!EVT_TYPE)+d.types.map(t=>evtChip(t.icon+' '+t.label,t.key,EVT_TYPE===t.key)).join('')+'</div>';
-    if(!d.events.length){ feed.innerHTML='<div class="panel"><div class="empty"><div class="ic">📅</div><p style="margin-top:8px;font-weight:700">No events yet'+(EVT_TYPE?' in this category':'')+'</p><p class="muted">Verified members post trade fairs, webinars, tenders and opportunities here.</p></div></div>'; return; }
+    if(!d.events.length){ feed.innerHTML='<div class="panel"><div class="empty"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div><p style="margin-top:8px;font-weight:700">No events yet'+(EVT_TYPE?' in this category':'')+'</p><p class="muted">Verified members post trade fairs, webinars, tenders and opportunities here.</p></div></div>'; return; }
     feed.innerHTML=d.events.map(e=>eventCard(e)).join('');
   }catch(e){ feed.innerHTML='<div class="panel"><div class="muted">Could not load events.</div></div>'; }
 }
@@ -1565,7 +1565,7 @@ function eventCard(e){
       </div>
     </div>
     ${e.description?`<p style="margin:12px 0 0;line-height:1.6;color:#2a3350;white-space:pre-wrap">${esc(e.description)}</p>`:''}
-    ${e.link?`<div style="margin-top:8px"><a href="${esc(e.link)}" target="_blank" rel="noopener" style="color:#3d5af1;font-size:.85rem">🔗 ${esc(e.link)}</a></div>`:''}
+    ${e.link?`<div style="margin-top:8px"><a href="${esc(e.link)}" target="_blank" rel="noopener" style="color:#3d5af1;font-size:.85rem"><svg class="sgic" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg> ${esc(e.link)}</a></div>`:''}
     <div style="display:flex;gap:12px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #f0f2f7;flex-wrap:wrap">
       <button onclick="rsvpEvent('${e.ref}')" class="btn ${e.going?'o':'g grad'} sm" ${e.going?'style="color:#12864e;border-color:#bfe6cf"':''}><span id="rsvp_${e.ref}">${e.going?'✓ Registered':'Register interest'}</span></button>
       <span class="muted" style="font-size:.8rem"><b id="rsvpn_${e.ref}">${e.rsvps}</b> registered</span>
@@ -1607,10 +1607,10 @@ async function loadHome(){
   if(!ME){ dash.innerHTML=''; return; }
   const roles=ME.roles||[];
   let cards='';
-  cards+=`<div class="card" onclick="go('id')"><div class="ic">🪪</div><h3>My SKYGLOBE ID</h3><p>${ME.can_sell?'✔ Verified — cleared to trade':'Complete TERRA verification to trade'}</p></div>`;
-  cards+=`<div class="card" onclick="go('deals')"><div class="ic">🤝</div><h3>My Deals</h3><p>Track negotiations, escrow and delivery.</p></div>`;
-  if(ME.can_sell) cards+=`<div class="card" onclick="go('business')"><div class="ic">🏢</div><h3>Business Centre</h3><p>Publish and manage your listings.</p></div>`;
-  cards+=`<div class="card" onclick="go('wallet')"><div class="ic">💰</div><h3>Wallet</h3><p>Payments, escrow and settlement.</p></div>`;
+  cards+=`<div class="card" onclick="go('id')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="11.5" r="2.2"/><path d="M13 10h5M13 13.5h4M4.6 16.4c.5-1.5 1.9-2.4 3.4-2.4s2.9.9 3.4 2.4"/></svg></div><h3>My SKYGLOBE ID</h3><p>${ME.can_sell?'✔ Verified — cleared to trade':'Complete TERRA verification to trade'}</p></div>`;
+  cards+=`<div class="card" onclick="go('deals')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2M13.5 13.5l3 3a1.4 1.4 0 0 0 2-2l-4.4-4.4a3 3 0 0 0-4.2 0l-.9.9a1.4 1.4 0 0 1-2-2l2.8-2.8a5 5 0 0 1 6.3-.6"/><path d="M3.5 4.5L3 14l6 6a1.4 1.4 0 0 0 2-2"/><path d="M3.5 5h6"/></svg></div><h3>My Deals</h3><p>Track negotiations, escrow and delivery.</p></div>`;
+  if(ME.can_sell) cards+=`<div class="card" onclick="go('business')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M9.5 21.5v-3h5v3"/></svg></div><h3>Business Centre</h3><p>Publish and manage your listings.</p></div>`;
+  cards+=`<div class="card" onclick="go('wallet')"><div class="ic"><svg class="sgic" viewBox="0 0 24 24"><path d="M9 3h6l-1.4 2.8H10.4L9 3z"/><path d="M12 5.8c-3.6 2.8-5.4 5.6-5.4 8.4a5.4 5.4 0 0 0 10.8 0c0-2.8-1.8-5.6-5.4-8.4z"/><path d="M12 10.5v5M10.7 11.7h2.4a1.1 1.1 0 0 1 0 2.2h-2.4"/></svg></div><h3>Wallet</h3><p>Payments, escrow and settlement.</p></div>`;
   dash.innerHTML=`<h2 class="sec-h" style="margin-top:26px">Welcome back, ${esc((ME.name||'').split(' ')[0]||'there')}</h2><div class="grid g3" style="margin-top:12px">${cards}</div>`;
 }
 
@@ -1619,10 +1619,10 @@ async function loadHome(){
    ?from=academy|mobility|terra|yunex tells us WHY the person is signing up, so the
    ID modal speaks to their purpose — one identity, many doors. */
 const ID_CONTEXT={
-  academy:{title:'Create your SKYGLOBE ID',sub:'One identity for your learning journey — and the whole ecosystem.',badge:'🎓 Continue to SKYGLOBEGROUP Academy'},
-  mobility:{title:'Create your SKYGLOBE ID',sub:'One identity for global mobility — and the whole ecosystem.',badge:'🌍 Continue to SKYGLOBEGROUP Mobility'},
-  terra:{title:'Create your SKYGLOBE ID',sub:'One trusted identity for the whole ecosystem.',badge:'🛡️ Verified by TERRA'},
-  yunex:{title:'Create your SKYGLOBE ID',sub:'One identity to trade, invest and build — across the ecosystem.',badge:'💜 Continue to YUNEX'},
+  academy:{title:'Create your SKYGLOBE ID',sub:'One identity for your learning journey — and the whole ecosystem.',badge:'Continue to SKYGLOBEGROUP Academy'},
+  mobility:{title:'Create your SKYGLOBE ID',sub:'One identity for global mobility — and the whole ecosystem.',badge:'Continue to SKYGLOBEGROUP Mobility'},
+  terra:{title:'Create your SKYGLOBE ID',sub:'One trusted identity for the whole ecosystem.',badge:'Verified by TERRA'},
+  yunex:{title:'Create your SKYGLOBE ID',sub:'One identity to trade, invest and build — across the ecosystem.',badge:'Continue to YUNEX'},
   '':{title:'Create your SKYGLOBE ID',sub:'One SKYGLOBE ID for the entire ecosystem.',badge:''}
 };
 window.__idFrom='';
