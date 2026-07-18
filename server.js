@@ -1223,6 +1223,39 @@ app.post('/api/noria', async (req, res) => {
   }
 });
 
+// NORIA Translation — a real translator. This MUST bypass the NORIA RAG engine
+// (which is trained only on SkyGlobe/visa knowledge and would answer as a visa
+// assistant instead of translating). It goes straight to the general LLM cascade
+// (Gemini → Groq → Claude) which follows instructions exactly. No visa-FAQ
+// fallback here: if every engine is down we return a clear error, never an
+// unrelated answer masquerading as a translation.
+app.post('/api/translate', async (req, res) => {
+  const { text, from, to } = req.body || {};
+  const body = String(text || '').trim();
+  if (!body) return res.status(400).json({ error: 'Text is required.' });
+  if (body.length > 8000) return res.status(400).json({ error: 'Text is too long (8000 characters max).' });
+  const target = (String(to || '').trim()) || 'English';
+  const src = String(from || '').trim();
+  const srcClause = (!src || /^auto/i.test(src))
+    ? 'Detect the source language automatically.'
+    : ('The source language is ' + src + '.');
+  const sys = 'You are a professional, faithful translator. ' + srcClause +
+    ' Translate the user\'s text into ' + target + '. Preserve meaning, tone, names, numbers and line breaks. ' +
+    'Do NOT add explanations, notes, quotation marks or language labels. Output ONLY the translated text.';
+  try {
+    const out = await Promise.race([
+      generateText(body, { system: sys, maxTokens: 1800, temperature: 0.2 }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('translate-timeout')), 25000)),
+    ]);
+    const t = String(out || '').trim();
+    if (!t) throw new Error('empty translation');
+    res.json({ translation: t, target });
+  } catch (e) {
+    console.error('NORIA translate failed:', e.message);
+    res.status(503).json({ error: 'The translation engine is momentarily unavailable — please try again in a moment.' });
+  }
+});
+
 // Built-in FAQ responder — keyword-matched answers so the public assistant
 // always replies helpfully even when every AI engine is unavailable.
 function skyglobeFaqAnswer(q) {

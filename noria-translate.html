@@ -200,14 +200,11 @@ async function translate(){
   var from=document.getElementById('from').value, to=document.getElementById('to').value;
   BUSY=true; var btn=document.getElementById('goBtn'); btn.disabled=true;
   out.className='out'; out.textContent='Translating…';
-  var srcClause=(from==='Auto')?'(detect the source language automatically)':('from '+from);
-  var prompt='You are a professional translator. Translate the following text '+srcClause+' into '+to+
-    '. Preserve meaning, tone, names and formatting. Return ONLY the translated text — no explanations, no quotes, no language labels.\n\nText:\n'+txt;
   try{
-    var r=await fetch('/api/noria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,history:[]})});
+    var r=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,from:from,to:to})});
     var d=await r.json();
-    var ans=(d&&(d.reply||d.answer)||'').trim();
-    out.textContent=ans||'NORIA could not translate that just now — please try again.';
+    var ans=(d&&(d.translation||d.reply)||'').trim();
+    out.textContent=ans||(d&&d.error)||'NORIA could not translate that just now — please try again.';
   }catch(e){ out.textContent='Network issue — please try again.'; }
   BUSY=false; btn.disabled=false;
 }
