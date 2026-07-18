@@ -1240,11 +1240,10 @@ app.post('/api/noria', async (req, res) => {
 // (Gemini → Groq → Claude) which follows instructions exactly. No visa-FAQ
 // fallback here: if every engine is down we return a clear error, never an
 // unrelated answer masquerading as a translation.
-app.post('/api/translate', async (req, res) => {
-  const { text, from, to } = req.body || {};
+async function doTranslate(text, from, to) {
   const body = String(text || '').trim();
-  if (!body) return res.status(400).json({ error: 'Text is required.' });
-  if (body.length > 8000) return res.status(400).json({ error: 'Text is too long (8000 characters max).' });
+  if (!body) return { status: 400, json: { error: 'Text is required.' } };
+  if (body.length > 8000) return { status: 400, json: { error: 'Text is too long (8000 characters max).' } };
   const target = (String(to || '').trim()) || 'English';
   const src = String(from || '').trim();
   const srcClause = (!src || /^auto/i.test(src))
@@ -1260,11 +1259,26 @@ app.post('/api/translate', async (req, res) => {
     ]);
     const t = String(out || '').trim();
     if (!t) throw new Error('empty translation');
-    res.json({ translation: t, target });
+    return { status: 200, json: { translation: t, target } };
   } catch (e) {
     console.error('NORIA translate failed:', e.message);
-    res.status(503).json({ error: 'The translation engine is momentarily unavailable — please try again in a moment.' });
+    return { status: 503, json: { error: 'The translation engine is momentarily unavailable — please try again in a moment.', detail: e.message } };
   }
+}
+
+app.post('/api/translate', async (req, res) => {
+  const { text, from, to } = req.body || {};
+  const r = await doTranslate(text, from, to);
+  res.status(r.status).json(r.json);
+});
+
+// Browser-testable translation check — open this URL directly:
+//   /api/translate?text=Hello%20world&to=French
+// If it returns {"translation":"Bonjour le monde"} the server + engines are
+// healthy and any remaining failure is a stale/cached page in the browser.
+app.get('/api/translate', async (req, res) => {
+  const r = await doTranslate(req.query.text, req.query.from, req.query.to);
+  res.status(r.status).json(r.json);
 });
 
 // Built-in FAQ responder — keyword-matched answers so the public assistant
