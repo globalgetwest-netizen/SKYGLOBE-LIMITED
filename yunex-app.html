@@ -25,8 +25,9 @@ a{text-decoration:none;color:inherit}
 /* Section nav */
 .nav{position:sticky;top:59px;z-index:30;background:#fff;border-bottom:1px solid #e8eaf2}
 .nav .row{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:0 14px;overflow-x:auto}
-.nav button{background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:.9rem;color:#67708f;padding:15px 16px;border-bottom:3px solid transparent;white-space:nowrap}
+.nav button{display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:.9rem;color:#67708f;padding:15px 16px;border-bottom:3px solid transparent;white-space:nowrap}
 .nav button.on{color:var(--blue);border-bottom-color:var(--purple)}
+.nav button .sgic{width:18px;height:18px}
 .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 80px}
 .view{display:none}.view.on{display:block}
 /* Hero */
@@ -92,13 +93,13 @@ html,body{max-width:100%;overflow-x:clip}
 </div></div>
 
 <div class="nav"><div class="row" id="nav">
-  <button class="on" data-v="home" onclick="go('home')">🏠 Home</button>
-  <button data-v="market" onclick="go('market')">🛍️ Marketplace</button>
-  <button data-v="wallet" onclick="go('wallet')">💳 Wallet</button>
-  <button data-v="business" onclick="go('business')">🏢 Business Centre</button>
-  <button data-v="deals" onclick="go('deals')">🤝 Deals</button>
-  <button data-v="community" onclick="go('community')">🌍 Community</button>
-  <button data-v="id" onclick="go('id')">🪪 My SKYGLOBE ID</button>
+  <button class="on" data-v="home" onclick="go('home')"><i data-ic="🏠"></i>Home</button>
+  <button data-v="market" onclick="go('market')"><i data-ic="🛍"></i>Marketplace</button>
+  <button data-v="wallet" onclick="go('wallet')"><i data-ic="💳"></i>Wallet</button>
+  <button data-v="business" onclick="go('business')"><i data-ic="🏢"></i>Business Centre</button>
+  <button data-v="deals" onclick="go('deals')"><i data-ic="🤝"></i>Deals</button>
+  <button data-v="community" onclick="go('community')"><i data-ic="🌍"></i>Community</button>
+  <button data-v="id" onclick="go('id')"><i data-ic="🪪"></i>My SKYGLOBE ID</button>
 </div></div>
 
 <div class="wrap">
@@ -312,6 +313,7 @@ html,body{max-width:100%;overflow-x:clip}
   <button class="btn o" style="width:100%;margin-top:8px;color:#67708f;border-color:#d7dbe8" onclick="closeAuth()">Cancel</button>
 </div></div>
 
+<script src="/sg-icons.js"></script>
 <script>
 const API='';
 let TOKEN=localStorage.getItem('sky_token')||'';
@@ -320,9 +322,11 @@ const $=id=>document.getElementById(id);
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function H(){return TOKEN?{authorization:'Bearer '+TOKEN}:{};}
 
+var NAV_VIEWS=['home','market','wallet','business','deals','community','id'];
 function go(v){
+  var target=$('v-'+v); if(!target) return;
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
-  $('v-'+v).classList.add('on');
+  target.classList.add('on');
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   if(v==='id') renderID();
   if(v==='business') renderBiz();
@@ -331,8 +335,14 @@ function go(v){
   if(v==='home') loadHome();
   if(v==='wallet') loadWallet();
   if(v==='community') loadCommunity();
+  // keep the URL in sync so sections are shareable / deep-linkable (e.g. /yunex/app#wallet)
+  if(NAV_VIEWS.indexOf(v)>-1){ try{ history.replaceState(null,'','#'+v); }catch(_){} }
   window.scrollTo({top:0,behavior:'smooth'});
 }
+/* Deep-link support: open the section named in the URL hash, and respond to
+   back/forward + in-page hash links. */
+function goFromHash(){ var v=(location.hash||'').replace(/^#/,''); if(v&&NAV_VIEWS.indexOf(v)>-1) go(v); }
+window.addEventListener('hashchange',goFromHash);
 function doSearch(){ const q=$('q').value.trim(); if(!q){ go('market'); return; } openSearch(q); }
 /* NORIA unified search */
 function stars(avg){ const n=Math.round(avg||0); let s=''; for(let i=1;i<=5;i++)s+=`<span style="color:${i<=n?'#f5a623':'#d7dbe8'}">★</span>`; return s; }
@@ -1635,5 +1645,8 @@ window.__idFrom='';
   }, 350);
 })();
 /* boot */
+document.querySelectorAll('#nav [data-ic]').forEach(function(e){ if(typeof sgIcon==='function') e.innerHTML=sgIcon(e.getAttribute('data-ic')); });
 renderAcct(); loadMe(); loadFX(); loadHome();
+/* open the section named in the URL hash (deep link from the landing footer etc.) */
+goFromHash();
 </script>

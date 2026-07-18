@@ -282,6 +282,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .flow::before{content:'';position:absolute;top:26px;left:8%;right:8%;height:2.5px;border-radius:3px;background:linear-gradient(90deg,var(--yx-p),var(--yx-o),var(--gold),#12864E)}
 .fstep{text-align:center;padding:0 10px;position:relative}
 .fstep .n{width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto;position:relative;z-index:1;border:2.5px solid var(--yx-p)}
+.fstep .n .sgic{width:24px;height:24px;stroke:var(--yx-p)}
 .fstep:nth-child(2) .n{border-color:var(--yx-o)} .fstep:nth-child(3) .n{border-color:var(--gold)}
 .fstep:nth-child(4) .n{border-color:#12864E} .fstep:nth-child(5) .n{border-color:var(--yx-p)}
 .fstep b{display:block;margin-top:14px;font-size:.92rem}
@@ -350,7 +351,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
   <div class="foot">
     <a class="btn btn-yx" style="width:100%" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
     <a class="btn btn-outline" style="width:100%;margin-top:12px" href="#" data-auth-kind="login" onclick="return openAuth('login')">Sign In</a>
-    <div style="text-align:center;margin-top:18px;font-size:.82rem;color:#AEC0EC">✉️ yunex@skyglobegroup.com</div>
+    <div style="text-align:center;margin-top:18px;font-size:.82rem;color:#AEC0EC;display:flex;align-items:center;justify-content:center;gap:7px"><span data-ic="✉"></span> yunex@skyglobegroup.com</div>
   </div>
 </div>
 
@@ -410,11 +411,11 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <h2 class="sec-title rise">Every deal follows one trusted path.</h2>
     <p class="sec-sub rise">From discovery to release — funds protected at every step, both parties verified before the first handshake.</p>
     <div class="flow">
-      <div class="fstep rise"><div class="n">🔎</div><b>Discover</b><span>Find verified suppliers and review their TERRA trust marks</span></div>
-      <div class="fstep rise"><div class="n">🤝</div><b>Negotiate</b><span>Agree terms and price in the deal room</span></div>
-      <div class="fstep rise"><div class="n">🔒</div><b>Secure</b><span>Funds held safely in escrow — never at risk</span></div>
-      <div class="fstep rise"><div class="n">🚚</div><b>Deliver</b><span>Shipment tracked until the buyer confirms receipt</span></div>
-      <div class="fstep rise"><div class="n">⭐</div><b>Release</b><span>Funds released, both parties rated — reviews earned only through real trade</span></div>
+      <div class="fstep rise"><div class="n" data-ic="🔎"></div><b>Discover</b><span>Find verified suppliers and review their TERRA trust marks</span></div>
+      <div class="fstep rise"><div class="n" data-ic="🤝"></div><b>Negotiate</b><span>Agree terms and price in the deal room</span></div>
+      <div class="fstep rise"><div class="n" data-ic="🔒"></div><b>Secure</b><span>Funds held safely in escrow — never at risk</span></div>
+      <div class="fstep rise"><div class="n" data-ic="🚚"></div><b>Deliver</b><span>Shipment tracked until the buyer confirms receipt</span></div>
+      <div class="fstep rise"><div class="n" data-ic="⭐"></div><b>Release</b><span>Funds released, both parties rated — reviews earned only through real trade</span></div>
     </div>
   </div>
 </section>
@@ -444,11 +445,11 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
     <div class="foot-grid">
       <div class="fc-start">
         <h4>YUNEX</h4>
-        <a href="/yunex/app">Marketplace</a>
-        <a href="/yunex/app">Deals &amp; Sourcing</a>
-        <a href="/yunex/app">Wallet</a>
-        <a href="/yunex/app">Business Centre</a>
-        <a href="/yunex/app">Community</a>
+        <a href="/yunex/app#market">Marketplace</a>
+        <a href="/yunex/app#deals">Deals &amp; Sourcing</a>
+        <a href="/yunex/app#wallet">Wallet</a>
+        <a href="/yunex/app#business">Business Centre</a>
+        <a href="/yunex/app#community">Community</a>
       </div>
       <div class="fc-eco">
         <h4>Ecosystem</h4>
@@ -534,7 +535,10 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
   </div>
 </div>
 
+<script src="/sg-icons.js"></script>
 <script>
+/* premium SVG icons — every icon has a meaning, none decorative */
+document.querySelectorAll('[data-ic]').forEach(function(e){ if(typeof sgIcon==='function') e.innerHTML=sgIcon(e.getAttribute('data-ic')); });
 /* Message Centre — internal messaging, no external mail app */
 function openMsg(dept){
   const m=document.getElementById('msgc');
