@@ -2106,6 +2106,42 @@ function shapeListing(l, seller) {
   };
 }
 
+// ── YUNEX SHOWCASE CATALOG ───────────────────────────────────────────────────
+// A curated set of realistic listings, served ONLY when the live database has no
+// active listings of its own, so the marketplace looks alive and premium from
+// day one and gives sellers a reference for what great listings look like. Real
+// seller listings always take precedence — the moment any exist, the showcase
+// steps aside.
+const YUNEX_SHOWCASE = (() => {
+  let raw = [];
+  try { raw = require('./yunex-showcase.js'); } catch (e) { console.warn('YUNEX showcase catalog not loaded:', e.message); }
+  return raw.map((o, i) => {
+    const P = YUNEX_PILLARS[o.pillar] || {};
+    const C = YUNEX_CORRIDORS.find(c => c.key === o.corridor) || {};
+    return {
+      ref: 'YXS-' + String(i + 1).padStart(3, '0'),
+      pillar: o.pillar, pillar_label: P.label || o.pillar, pillar_icon: P.icon || '•',
+      category: o.category || null, corridor: o.corridor || null,
+      corridor_label: C.label || null, corridor_flag: C.flag || null,
+      title: o.title, description: o.description || '',
+      price: o.price != null ? Number(o.price) : null, currency: o.currency || 'USD',
+      quantity: o.quantity || null, location: o.location || null,
+      images: o.img ? [o.img] : [],
+      details: Object.assign({ brand: null, manufacturer: null, origin: null, condition: null, warranty: null, unit: null, min_order: null, sku: null, video_url: null, specs: [] }, o.details || {}),
+      status: 'active', created_at: null, saves: o.saves || 0, showcase: true,
+      seller: { name: o.seller || 'Verified Seller', country: o.country || null,
+        trust_marks: [{ key: 'identity', label: 'Identity Verified', color: '#1e57c9' }, { key: 'business', label: 'Business Verified', color: '#a87016' }] },
+    };
+  });
+})();
+function showcaseFilter({ pillar, corridor, q } = {}) {
+  let rows = YUNEX_SHOWCASE;
+  if (pillar && VALID_PILLARS.includes(pillar)) rows = rows.filter(l => l.pillar === pillar);
+  if (corridor && VALID_CORRIDORS.includes(corridor)) rows = rows.filter(l => l.corridor === corridor);
+  if (q) { const s = String(q).toLowerCase(); rows = rows.filter(l => `${l.title} ${l.description} ${l.category} ${l.location}`.toLowerCase().includes(s)); }
+  return rows;
+}
+
 // CREATE a listing — verified sellers only (Layer 1 gate).
 app.post('/api/yunex/listings', async (req, res) => {
   const email = clientAuth(req);
@@ -2182,16 +2218,22 @@ app.get('/api/yunex/listings', async (req, res) => {
     const emails = [...new Set(rows.map(l => l.seller_email))];
     const sellers = {};
     for (const em of emails) sellers[em] = await getClientByEmail(em).catch(() => null);
-    res.json({
-      pillars: Object.values(YUNEX_PILLARS),
-      listings: rows.map(l => shapeListing(l, sellers[l.seller_email])),
-    });
+    let listings = rows.map(l => shapeListing(l, sellers[l.seller_email]));
+    // No real listings yet → present the curated showcase so the marketplace is alive.
+    if (listings.length === 0) listings = showcaseFilter({ pillar: req.query.pillar, corridor: req.query.corridor, q });
+    res.json({ pillars: Object.values(YUNEX_PILLARS), listings });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // LISTING detail.
 app.get('/api/yunex/listings/:ref', async (req, res) => {
   try {
+    // Showcase listing (curated catalog) — returned directly.
+    if (String(req.params.ref).startsWith('YXS-')) {
+      const sc = YUNEX_SHOWCASE.find(x => x.ref === req.params.ref);
+      if (!sc) return res.status(404).json({ error: 'Listing not found.' });
+      return res.json(sc);
+    }
     const rows = await dbQuery('GET', 'yunex_listings', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []);
     const l = rows[0];
     if (!l || l.status === 'removed') return res.status(404).json({ error: 'Listing not found.' });
@@ -2568,9 +2610,12 @@ app.get('/api/yunex/search', async (req, res) => {
       if (sc > 0) { const owner = await getClientByEmail(bp.owner_email).catch(() => null); companies.push({ score: sc, handle: bp.handle, name: bp.name, tagline: bp.tagline || null, tier: businessTier(owner || {}, 0), trust_marks: listingTrustMarks(owner) }); }
     }
     companies.sort((a, b) => b.score - a.score);
+    // Fall back to the showcase for listings when the DB has none, so search works on day one.
+    let listItems = listings.slice(0, 24).map(x => x.item);
+    if (listItems.length === 0) listItems = showcaseFilter({ q }).slice(0, 24);
     res.json({
-      q, total: listings.length + rfqs.length + events.length + companies.length,
-      listings: listings.slice(0, 24).map(x => x.item), rfqs: rfqs.slice(0, 10), events: events.slice(0, 10), companies: companies.slice(0, 8),
+      q, total: listItems.length + rfqs.length + events.length + companies.length,
+      listings: listItems, rfqs: rfqs.slice(0, 10), events: events.slice(0, 10), companies: companies.slice(0, 8),
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2584,12 +2629,22 @@ app.get('/api/yunex/trending', async (req, res) => {
     rows.sort((a, b) => (counts[b.ref] || 0) - (counts[a.ref] || 0));
     const out = [];
     for (const l of rows.slice(0, 12)) { const seller = await getClientByEmail(l.seller_email).catch(() => null); const s = shapeListing(l, seller); s.saves = counts[l.ref] || 0; out.push(s); }
+    // No real listings yet → trend the most-saved showcase listings.
+    if (out.length === 0) { res.json({ listings: [...YUNEX_SHOWCASE].sort((a, b) => (b.saves || 0) - (a.saves || 0)).slice(0, 12) }); return; }
     res.json({ listings: out });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 // Related listings — same pillar/category, excluding the given listing.
 app.get('/api/yunex/listings/:ref/related', async (req, res) => {
   try {
+    // Showcase detail → related showcase items in the same pillar.
+    if (String(req.params.ref).startsWith('YXS-')) {
+      const b = YUNEX_SHOWCASE.find(x => x.ref === req.params.ref);
+      if (!b) return res.json({ listings: [] });
+      const rel = YUNEX_SHOWCASE.filter(x => x.ref !== b.ref && x.pillar === b.pillar)
+        .sort((a, c) => ((c.category === b.category) - (a.category === b.category))).slice(0, 6);
+      return res.json({ listings: rel });
+    }
     const base = (await dbQuery('GET', 'yunex_listings', null, { ref: `eq.${req.params.ref}`, limit: 1 }).catch(() => []))[0];
     if (!base) return res.json({ listings: [] });
     let rows = await dbQuery('GET', 'yunex_listings', null, { pillar: `eq.${base.pillar}`, status: 'eq.active', limit: 60 }).catch(() => []);

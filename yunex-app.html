@@ -40,6 +40,10 @@ a{text-decoration:none;color:inherit}
 .g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .card{background:#fff;border:1px solid #e8eaf2;border-radius:16px;padding:22px;transition:transform .15s,box-shadow .15s}
+.lc-img{position:relative;height:160px;border-radius:12px;overflow:hidden;margin:-4px -4px 14px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;background:linear-gradient(125deg,#eef1fb,#f6f0fb)}
+.lc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#eef1f8}
+.card:hover .lc-img img{transform:scale(1.04)}
+.lc-img img{transition:transform .35s ease}
 .card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(10,18,48,.1)}
 .card .ic{font-size:1.7rem}
 .card h3{margin-top:12px;font-size:1.05rem}
@@ -384,7 +388,9 @@ function renderCurrencyPicker(){ const el=document.getElementById('curPick'); if
 function setCurrency(c){ MYCUR=c; localStorage.setItem('sky_cur',c); if($('v-market').classList.contains('on'))loadMarket(); }
 function listingCard(l){
   const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color};padding:3px 9px;font-size:.7rem">${terraBadge(13)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ');
-  const img=(l.images&&l.images[0])?`<div style="height:150px;border-radius:12px;background:#eef1f8 center/cover url('${esc(l.images[0])}');margin:-4px -4px 12px"></div>`:`<div style="height:110px;border-radius:12px;background:linear-gradient(120deg,#eef1fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:-4px -4px 12px">${l.pillar_icon}</div>`;
+  const img=(l.images&&l.images[0])
+    ?`<div class="lc-img">${l.pillar_icon}<img src="${esc(l.images[0])}" alt="" loading="lazy" onerror="this.remove()"></div>`
+    :`<div class="lc-img lc-noimg">${l.pillar_icon}</div>`;
   return `<div class="card" style="cursor:pointer" onclick="openListing('${l.ref}')">
     ${img}
     <div style="font-size:.7rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div style="font-size:.68rem;color:#3d5af1;margin-top:2px">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
