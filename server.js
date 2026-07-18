@@ -1193,6 +1193,33 @@ app.post('/api/noria', async (req, res) => {
   if (!message || !String(message).trim())
     return res.status(400).json({ error: 'Message is required.' });
   const q = String(message).trim();
+
+  // TRANSLATION FAST-PATH — if the user is asking to translate, do a REAL
+  // translation via the general LLM cascade instead of the visa RAG engine
+  // (which would answer as a visa assistant and never translate). This makes
+  // translation work through /api/noria too, so an older cached Translate page
+  // or the in-chat "Translate" button still produce real translations.
+  const isTranslateRequest =
+    /^\s*you are a professional translator/i.test(q) ||   // Translation workspace prompt
+    /^\s*translate\b/i.test(q) ||                          // "Translate this into French: ..."
+    /\btranslate\b[\s\S]{0,80}\binto\b/i.test(q);          // "... translate X into Y ..."
+  if (isTranslateRequest) {
+    try {
+      const out = await Promise.race([
+        generateText(q, {
+          system: 'You are a professional, faithful translator. Follow the user\'s translation request exactly. Preserve meaning, tone, names, numbers and line breaks. Output ONLY the translated text — no explanations, notes, quotation marks or language labels.',
+          maxTokens: 1800, temperature: 0.2,
+        }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('translate-timeout')), 25000)),
+      ]);
+      const t = String(out || '').trim();
+      if (t) return res.json({ reply: t, source: 'translate' });
+    } catch (e) {
+      console.error('NORIA inline translate failed, falling through to normal reply:', e.message);
+      // fall through to the normal ladder rather than fail outright
+    }
+  }
+
   const sys = (typeof system === 'string' && system.trim() ? system.trim() : '') + NORIA_SECRECY;
   // NORIA must never hang. Three-tier ladder, each with a hard clock:
   //  1. dedicated NORIA engine — 8s only (free-tier cold starts take ~50s;
