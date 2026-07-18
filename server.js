@@ -47,7 +47,7 @@ app.use((req, res, next) => {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
-      "connect-src 'self' https://api.groq.com https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com http://localhost:*",
+      "connect-src 'self' https://api.groq.com https://api.cerebras.ai https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com http://localhost:*",
       // Allow our own pages (e.g. the showreel) to be embedded in same-origin
       // iframes, and allow YouTube video embeds in the homepage video panel.
       "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://youtube.com",
@@ -435,10 +435,21 @@ async function claudeGenerate(prompt, { maxTokens = 2048, system } = {}) {
 // Gemini-primary (free) → Claude fallback (premium). Always returns text or throws.
 async function generateText(prompt, opts = {}) {
   // FULL 24/7 CASCADE — the same resilience the CEO assistant enjoys:
+  //   0. Cerebras (rotated free keys — fast, effectively unlimited) if configured
   //   1. fast single Gemini call (honours opts exactly)
-  //   2. the hardened chain: Ollama → Groq → 3 Gemini models with retries
+  //   2. the hardened chain: Ollama → Cerebras → Groq → 3 Gemini models with retries
   //   3. Claude (if configured)
   // One engine having a bad minute must never surface as "can't load".
+  if (USE_CEREBRAS) {
+    try {
+      const msgs = [
+        { role: 'system', content: opts.system || 'You are a helpful, precise expert. Follow the user instructions exactly.' },
+        { role: 'user', content: prompt },
+      ];
+      const t = await cerebrasChat(msgs, { maxTokens: opts.maxTokens || 2048, temperature: opts.temperature ?? 0.72 });
+      if (t && String(t).trim()) return t;
+    } catch (e) { console.warn('[AI] Cerebras failed, engaging Gemini:', e.message); }
+  }
   let gemErr;
   try {
     return await geminiGenerate(prompt, opts);
@@ -1093,7 +1104,7 @@ app.post('/api/chat', async (req, res) => {
   // Academy and CEO assistant). The assistant works as long as ANY one engine
   // is configured. If none are configured, fall back to the built-in FAQ so the
   // assistant is NEVER dead — it always gives a useful answer.
-  if (!USE_OLLAMA && !USE_GROQ && !process.env.GEMINI_API_KEY)
+  if (!USE_OLLAMA && !USE_CEREBRAS && !USE_GROQ && !process.env.GEMINI_API_KEY)
     return res.json({ reply: skyglobeFaqAnswer(userMsg), source: 'faq' });
 
   try {
@@ -1367,12 +1378,25 @@ app.post('/api/admin/documents/:id/new-token', checkAdmin, async (req, res) => {
 
 app.get('/api/test-ai', async (req, res) => {
   // Tests BOTH engines so you can see exactly what's configured and working.
-  const out = { gemini: { configured: !!process.env.GEMINI_API_KEY }, claude: { configured: !!process.env.ANTHROPIC_API_KEY } };
+  const out = {
+    cerebras: { configured: USE_CEREBRAS, keys: CEREBRAS_KEYS.count, model: CEREBRAS_MODEL },
+    groq: { configured: USE_GROQ },
+    gemini: { configured: !!process.env.GEMINI_API_KEY },
+    claude: { configured: !!process.env.ANTHROPIC_API_KEY },
+  };
+  if (USE_CEREBRAS) {
+    try { out.cerebras.reply = await cerebrasChat([{ role: 'user', content: 'Say: AI is working!' }], { maxTokens: 30 }); out.cerebras.ok = true; }
+    catch (e) { out.cerebras.ok = false; out.cerebras.error = e.message; }
+  }
+  if (USE_GROQ) {
+    try { out.groq.reply = await askGroq('You are a helpful assistant.', 'Say: AI is working!'); out.groq.ok = true; }
+    catch (e) { out.groq.ok = false; out.groq.error = e.message; }
+  }
   try { out.gemini.reply = await geminiGenerate('Say: AI is working!', { maxTokens: 30 }); out.gemini.ok = true; }
   catch (e) { out.gemini.ok = false; out.gemini.error = e.message; }
   try { out.claude.reply = await claudeGenerate('Say: AI is working!', { maxTokens: 30 }); out.claude.ok = true; }
   catch (e) { out.claude.ok = false; out.claude.error = e.message; }
-  out.documents_will_work = !!(out.gemini.ok || out.claude.ok);
+  out.documents_will_work = !!(out.cerebras.ok || out.groq.ok || out.gemini.ok || out.claude.ok);
   res.json(out);
 });
 
@@ -6717,8 +6741,8 @@ app.post('/api/ceo/assistant', checkAdmin, async (req, res) => {
 
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!USE_OLLAMA && !USE_GROQ && !geminiKey && !anthropicKey)
-    return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add a free GROQ_API_KEY (from console.groq.com) to your Render environment variables.' });
+  if (!USE_OLLAMA && !USE_CEREBRAS && !USE_GROQ && !geminiKey && !anthropicKey)
+    return res.status(503).json({ error: 'CEO AI Assistant is not yet configured. Add a free CEREBRAS_API_KEY (from cloud.cerebras.ai) or GROQ_API_KEY (from console.groq.com) to your Render environment variables.' });
 
   try {
     // Pull live snapshot — keep row counts small so the prompt stays lean and fast.
@@ -6866,6 +6890,41 @@ ${ecosystemSnapshot}`;
       } catch (e) { console.error('Ollama unreachable, falling back:', e.message); return false; }
     }
 
+    // 1.5) CEREBRAS — very fast free cloud with rotated keys
+    async function tryCerebras() {
+      if (streamed || !USE_CEREBRAS) return streamed;
+      const msgs = [{ role: 'system', content: systemPrompt }, ...messages];
+      const tries = Math.min(CEREBRAS_KEYS.count, 4);
+      for (let n = 0; n < tries; n++) {
+        const key = CEREBRAS_KEYS.next();
+        try {
+          const cr = await fetch('https://api.cerebras.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+            body: JSON.stringify({ model: CEREBRAS_MODEL, messages: msgs, temperature: 0.7, max_tokens: 2048, stream: true }),
+            signal: AbortSignal.timeout(60000),
+          });
+          if (cr.status === 429 || cr.status === 401 || cr.status === 402 || cr.status === 403) { console.warn('[Cerebras CEO] key limited (' + cr.status + '), rotating'); continue; }
+          if (!cr.ok) { console.error('Cerebras down, falling back:', cr.status); return false; }
+          const reader = cr.body.getReader(); const dec = new TextDecoder(); let buf = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            const lines = buf.split('\n'); buf = lines.pop();
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const payload = line.slice(6).trim();
+              if (payload === '[DONE]') return streamed;
+              try { const d = JSON.parse(payload); const t = d.choices?.[0]?.delta?.content; if (t) { streamed = true; sendChunk(t); } } catch {}
+            }
+          }
+          if (streamed) return true;
+        } catch (e) { console.error('Cerebras unreachable, rotating/falling back:', e.message); }
+      }
+      return streamed;
+    }
+
     // 2) GROQ — fast free cloud (always on)
     async function tryGroq() {
       if (streamed || !USE_GROQ) return streamed;
@@ -6957,7 +7016,7 @@ ${ecosystemSnapshot}`;
     }
 
     // Run the cascade — stop at the first engine that actually produces output.
-    const ok = await tryOllama() || await tryGroq() || await tryGemini() || await tryAnthropic();
+    const ok = await tryOllama() || await tryCerebras() || await tryGroq() || await tryGemini() || await tryAnthropic();
     if (ok) { sendDone(); return; }
     if (streamed) { sendDone(); return; } // partial output already sent
     sendError('All AI engines are temporarily unavailable. Please try again in a moment.');
@@ -7188,6 +7247,70 @@ async function askGroq(systemPrompt, userPrompt, contents = null) {
 }
 const USE_GROQ = !!process.env.GROQ_API_KEY;
 
+// ── CEREBRAS ENGINE (FREE cloud AI — Llama/Qwen on Cerebras wafer-scale, very
+// fast) with KEY ROTATION. Set CEREBRAS_API_KEY to one key, or several separated
+// by commas/spaces/newlines — each call advances to the next key round-robin, and
+// a rate-limited or rejected key is skipped automatically. This is what keeps
+// NORIA alive when a single free key hits its cap. CEREBRAS_MODEL overrides the
+// model (default: llama-3.3-70b).
+function makeRotor(envName) {
+  const keys = String(process.env[envName] || '').split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
+  let i = 0;
+  return {
+    has: keys.length > 0,
+    count: keys.length,
+    next() { if (!keys.length) return null; const k = keys[i % keys.length]; i++; return k; },
+  };
+}
+const CEREBRAS_KEYS = makeRotor('CEREBRAS_API_KEY');
+const USE_CEREBRAS = CEREBRAS_KEYS.has;
+const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'llama-3.3-70b';
+
+async function cerebrasChat(messages, { maxTokens = 4096, temperature = 0.7 } = {}) {
+  if (!CEREBRAS_KEYS.has) throw new Error('CEREBRAS_API_KEY not set');
+  const tries = Math.min(CEREBRAS_KEYS.count, 4); // rotate through up to 4 keys on failure
+  let lastErr = 'Cerebras unavailable';
+  for (let n = 0; n < tries; n++) {
+    const key = CEREBRAS_KEYS.next();
+    try {
+      const res = await fetch('https://api.cerebras.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+        body: JSON.stringify({ model: CEREBRAS_MODEL, messages, temperature, max_tokens: maxTokens }),
+        signal: AbortSignal.timeout(45000),
+      });
+      if (res.status === 429 || res.status === 401 || res.status === 402 || res.status === 403) {
+        lastErr = `Cerebras ${res.status} — rotating to next key`;
+        console.warn('[Cerebras] key limited/rejected (' + res.status + '), rotating');
+        continue; // try the next rotated key
+      }
+      if (!res.ok) throw new Error(`Cerebras error ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
+      const data = await res.json();
+      const text = (data.choices?.[0]?.message?.content || '').trim();
+      if (text) return text;
+      lastErr = 'Cerebras returned an empty response';
+    } catch (e) {
+      lastErr = e.message;
+      console.warn('[Cerebras] call failed, rotating:', e.message);
+    }
+  }
+  throw new Error(lastErr);
+}
+
+async function askCerebras(systemPrompt, userPrompt, contents = null) {
+  const messages = [{ role: 'system', content: systemPrompt }];
+  if (Array.isArray(contents)) {
+    for (const c of contents) {
+      const role = c.role === 'model' ? 'assistant' : 'user';
+      const text = (c.parts || []).map(p => p.text || '').join('');
+      if (text) messages.push({ role, content: text });
+    }
+  } else if (userPrompt) {
+    messages.push({ role: 'user', content: userPrompt });
+  }
+  return cerebrasChat(messages, { maxTokens: 4096, temperature: 0.7 });
+}
+
 // ── ROBUST GEMINI CALL WITH RETRY + MODEL FALLBACK ────────────────────────────
 // Shared by the CEO assistant AND the academy tutor. Tries multiple models, and
 // retries transient errors (429/500/503) with a short backoff before moving on.
@@ -7196,7 +7319,11 @@ async function callGeminiWithRetry(prompt, systemPrompt, maxRetries = 2) {
   // instead of returning early, so one engine being down never breaks the call.
   if (USE_OLLAMA) {
     try { const t = await askOllama(systemPrompt, prompt); if (t) return t; }
-    catch (e) { console.error('Ollama failed, falling through to Groq:', e.message); }
+    catch (e) { console.error('Ollama failed, falling through:', e.message); }
+  }
+  if (USE_CEREBRAS) {
+    try { const t = await askCerebras(systemPrompt, prompt); if (t) return t; }
+    catch (e) { console.error('Cerebras failed, falling through to Groq:', e.message); }
   }
   if (USE_GROQ) {
     try { const t = await askGroq(systemPrompt, prompt); if (t) return t; }
@@ -7261,14 +7388,18 @@ async function academyAskGemini(systemPrompt, contents, maxTokens = 1500) {
   // because the first engine hiccuped.
   if (USE_OLLAMA) {
     try { const t = await askOllama(systemPrompt, null, contents); if (t) return t; }
-    catch (e) { console.error('Academy Ollama failed, falling through to Groq:', e.message); }
+    catch (e) { console.error('Academy Ollama failed, falling through:', e.message); }
+  }
+  if (USE_CEREBRAS) {
+    try { const t = await askCerebras(systemPrompt, null, contents); if (t) return t; }
+    catch (e) { console.error('Academy Cerebras failed, falling through to Groq:', e.message); }
   }
   if (USE_GROQ) {
     try { const t = await askGroq(systemPrompt, null, contents); if (t) return t; }
     catch (e) { console.error('Academy Groq failed, falling through to Gemini:', e.message); }
   }
   const geminiKey = process.env.GEMINI_API_KEY;
-  if (!geminiKey) throw new Error('AI teacher is busy right now. Please try again in a moment.');
+  if (!geminiKey && !USE_CEREBRAS && !USE_GROQ && !USE_OLLAMA) throw new Error('AI teacher is busy right now. Please try again in a moment.');
   // 2.0-flash is most reliable on free tier — try it first, then newer models as fallback.
   const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
   // BLOCK_ONLY_HIGH lets all educational content through while still blocking
@@ -8653,7 +8784,7 @@ app.post('/api/courses/enrollment/:id/step/:idx/content', async (req, res) => {
       await dbQuery('PATCH', 'course_enrollments', { steps }, { id: `eq.${req.params.id}` }).catch(() => {});
       return res.json({ content: banked.content.text });
     }
-    if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY && !USE_GROQ && !USE_OLLAMA)
+    if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY && !USE_CEREBRAS && !USE_GROQ && !USE_OLLAMA)
       return res.status(500).json({ error: 'AI not configured. Please contact support.' });
     const prompt = `You are an expert instructor writing lesson ${idx + 1} of a professional certificate programme in "${track?.name}", titled "${step.title}". Write a COMPLETE lesson (1000-1500 words) a self-study learner can master on their own, structured exactly as:
 
