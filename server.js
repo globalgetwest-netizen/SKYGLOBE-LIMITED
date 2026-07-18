@@ -2112,9 +2112,11 @@ function shapeListing(l, seller) {
 // day one and gives sellers a reference for what great listings look like. Real
 // seller listings always take precedence — the moment any exist, the showcase
 // steps aside.
+let YUNEX_SEED = { listings: [], rfqs: [], events: [], posts: [], companies: [] };
+try { YUNEX_SEED = Object.assign(YUNEX_SEED, require('./yunex-showcase.js')); }
+catch (e) { console.warn('YUNEX showcase catalog not loaded:', e.message); }
 const YUNEX_SHOWCASE = (() => {
-  let raw = [];
-  try { raw = require('./yunex-showcase.js'); } catch (e) { console.warn('YUNEX showcase catalog not loaded:', e.message); }
+  const raw = YUNEX_SEED.listings || [];
   return raw.map((o, i) => {
     const P = YUNEX_PILLARS[o.pillar] || {};
     const C = YUNEX_CORRIDORS.find(c => c.key === o.corridor) || {};
@@ -2141,6 +2143,35 @@ function showcaseFilter({ pillar, corridor, q } = {}) {
   if (q) { const s = String(q).toLowerCase(); rows = rows.filter(l => `${l.title} ${l.description} ${l.category} ${l.location}`.toLowerCase().includes(s)); }
   return rows;
 }
+const SHOWCASE_TRUST = [{ key: 'identity', label: 'Identity Verified', color: '#1e57c9' }, { key: 'business', label: 'Business Verified', color: '#a87016' }];
+// Shaped showcase Sourcing / Events / Posts / Companies (served when the DB is empty).
+const YUNEX_SHOWCASE_RFQS = (YUNEX_SEED.rfqs || []).map((r, i) => {
+  const C = YUNEX_CORRIDORS.find(c => c.key === r.corridor) || {};
+  return { ref: 'RQS-' + String(i + 1).padStart(3, '0'), title: r.title, pillar: r.pillar,
+    pillar_label: (YUNEX_PILLARS[r.pillar] || {}).label || r.pillar, pillar_icon: (YUNEX_PILLARS[r.pillar] || {}).icon || '•',
+    category: r.category || null, quantity: r.quantity || null, budget: r.budget != null ? Number(r.budget) : null, currency: r.currency || 'USD',
+    corridor: r.corridor || null, corridor_label: C.label || null, location: r.location || null, description: r.description || '', status: 'open', created_at: null, showcase: true };
+});
+const SHOWCASE_EVENT_TYPES = { event: { label: 'Event', icon: '📅' }, webinar: { label: 'Webinar', icon: '💻' }, tender: { label: 'Tender', icon: '📑' } };
+const YUNEX_SHOWCASE_EVENTS = (YUNEX_SEED.events || []).map((e, i) => {
+  const ty = SHOWCASE_EVENT_TYPES[e.type] || SHOWCASE_EVENT_TYPES.event;
+  const C = YUNEX_CORRIDORS.find(c => c.key === e.corridor) || {};
+  return { ref: 'EVS-' + String(i + 1).padStart(3, '0'), type: e.type, type_label: ty.label, type_icon: ty.icon,
+    title: e.title || '', description: e.description || '', location: e.location || null,
+    corridor: e.corridor || null, corridor_label: C.label || null, starts_at: e.starts_at || null, link: e.link || null,
+    rsvps: e.rsvps || 0, going: false, mine: false, status: 'open', created_at: null, showcase: true,
+    host: { name: e.host || 'YUNEX', country: e.country || null, trust_marks: SHOWCASE_TRUST } };
+});
+const YUNEX_SHOWCASE_POSTS = (YUNEX_SEED.posts || []).map((p, i) => ({
+  ref: 'PSS-' + String(i + 1).padStart(3, '0'), category: p.category || 'General', body: p.body || '', image_url: null,
+  likes: p.likes || 0, comments: p.comments || 0, created_at: null, liked: false, mine: false, showcase: true,
+  author: { name: p.author || 'YUNEX', country: p.country || null, trust_marks: SHOWCASE_TRUST },
+}));
+const YUNEX_SHOWCASE_COMPANIES = (YUNEX_SEED.companies || []).map((c) => ({
+  handle: c.handle, name: c.name, tagline: c.tagline || null, sector: c.sector || null,
+  location: c.location || null, country: c.country || null, established: c.established || null, description: c.description || null,
+  seller: c.seller, tier: { key: 'trusted', label: 'Trusted Business', color: '#1e57c9', icon: '🥈' }, trust_marks: SHOWCASE_TRUST, showcase: true,
+}));
 
 // CREATE a listing — verified sellers only (Layer 1 gate).
 app.post('/api/yunex/listings', async (req, res) => {
@@ -2610,12 +2641,14 @@ app.get('/api/yunex/search', async (req, res) => {
       if (sc > 0) { const owner = await getClientByEmail(bp.owner_email).catch(() => null); companies.push({ score: sc, handle: bp.handle, name: bp.name, tagline: bp.tagline || null, tier: businessTier(owner || {}, 0), trust_marks: listingTrustMarks(owner) }); }
     }
     companies.sort((a, b) => b.score - a.score);
-    // Fall back to the showcase for listings when the DB has none, so search works on day one.
+    // Fall back to the showcase when the DB has none, so search works on day one.
     let listItems = listings.slice(0, 24).map(x => x.item);
     if (listItems.length === 0) listItems = showcaseFilter({ q }).slice(0, 24);
+    let companyItems = companies.slice(0, 8);
+    if (companyItems.length === 0) companyItems = YUNEX_SHOWCASE_COMPANIES.filter(c => `${c.name} ${c.tagline} ${c.sector} ${c.description}`.toLowerCase().includes(q)).slice(0, 8);
     res.json({
-      q, total: listItems.length + rfqs.length + events.length + companies.length,
-      listings: listItems, rfqs: rfqs.slice(0, 10), events: events.slice(0, 10), companies: companies.slice(0, 8),
+      q, total: listItems.length + rfqs.length + events.length + companyItems.length,
+      listings: listItems, rfqs: rfqs.slice(0, 10), events: events.slice(0, 10), companies: companyItems,
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2775,7 +2808,12 @@ app.get('/api/yunex/community/posts', async (req, res) => {
     if (q) rows = rows.filter(p => (p.body || '').toLowerCase().includes(q));
     const out = [];
     for (const p of rows) out.push(await shapePost(p, email));
-    res.json({ topics: COMMUNITY_TOPICS, posts: out });
+    let posts = out;
+    if (posts.length === 0) {
+      posts = YUNEX_SHOWCASE_POSTS;
+      if (req.query.category && COMMUNITY_TOPICS.includes(req.query.category)) posts = posts.filter(p => p.category === req.query.category);
+    }
+    res.json({ topics: COMMUNITY_TOPICS, posts });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 // Post detail + comments.
@@ -2888,7 +2926,13 @@ app.get('/api/yunex/events', async (req, res) => {
     if (q) rows = rows.filter(e => (e.title || '').toLowerCase().includes(q) || (e.description || '').toLowerCase().includes(q));
     const out = [];
     for (const e of rows) out.push(await shapeEvent(e, email));
-    res.json({ types: EVENT_TYPES, events: out });
+    let events = out;
+    if (events.length === 0) {
+      events = YUNEX_SHOWCASE_EVENTS;
+      if (req.query.type && EVENT_TYPES.some(t => t.key === req.query.type)) events = events.filter(e => e.type === req.query.type);
+      if (req.query.corridor && VALID_CORRIDORS.includes(req.query.corridor)) events = events.filter(e => e.corridor === req.query.corridor);
+    }
+    res.json({ types: EVENT_TYPES, events });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 // Event detail.
@@ -3105,14 +3149,18 @@ app.post('/api/yunex/rfqs', async (req, res) => {
 });
 // Browse OPEN RFQs — verified sellers find sourcing opportunities.
 app.get('/api/yunex/rfqs', async (req, res) => {
-  const email = clientAuth(req);
-  if (!email) return res.status(401).json({ error: 'Not logged in.' });
+  const email = clientAuth(req); // optional — sourcing requests are browsable by guests
   try {
     const params = { status: 'eq.open', order: 'created_at.desc', limit: 100 };
     if (req.query.pillar && VALID_PILLARS.includes(req.query.pillar)) params.pillar = `eq.${req.query.pillar}`;
     let rows = await dbQuery('GET', 'yunex_rfqs', null, params).catch(() => []);
     rows = (Array.isArray(rows) ? rows : []).filter(r => r.buyer_email !== email); // don't show your own here
-    res.json({ pillars: Object.values(YUNEX_PILLARS), rfqs: rows.map(r => shapeRfq(r)) });
+    let rfqs = rows.map(r => shapeRfq(r));
+    if (rfqs.length === 0) {
+      rfqs = YUNEX_SHOWCASE_RFQS;
+      if (req.query.pillar && VALID_PILLARS.includes(req.query.pillar)) rfqs = rfqs.filter(r => r.pillar === req.query.pillar);
+    }
+    res.json({ pillars: Object.values(YUNEX_PILLARS), rfqs });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 // My RFQs (as buyer) with quote counts.
@@ -3359,6 +3407,20 @@ app.get('/api/yunex/storefront/:handle', async (req, res) => {
   try {
     const rows = await dbQuery('GET', 'business_profiles', null, { handle: `eq.${req.params.handle}`, limit: 1 }).catch(() => []);
     const bp = rows[0];
+    // Showcase company storefront (curated) — served when no DB profile exists.
+    if (!bp) {
+      const sc = YUNEX_SHOWCASE_COMPANIES.find(c => c.handle === req.params.handle);
+      if (sc) {
+        const scListings = YUNEX_SHOWCASE.filter(l => l.seller && l.seller.name === sc.seller);
+        return res.json({
+          handle: sc.handle, name: sc.name, tagline: sc.tagline, description: sc.description,
+          sector: sc.sector, location: sc.location, established: sc.established, website: null, logo_url: null,
+          country: sc.country, tier: sc.tier, trust_marks: sc.trust_marks,
+          rating: { average: 4.8, count: 36 }, member_since: null, completed_deals: 42,
+          listings: scListings,
+        });
+      }
+    }
     if (!bp || bp.is_public === false) return res.status(404).json({ error: 'Storefront not found.' });
     const owner = await getClientByEmail(bp.owner_email).catch(() => null);
     const listings = await dbQuery('GET', 'yunex_listings', null, { seller_email: `eq.${bp.owner_email}`, status: 'eq.active', order: 'created_at.desc', limit: 60 }).catch(() => []);
