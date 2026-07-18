@@ -47,6 +47,7 @@ app.use((req, res, next) => {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
+      "media-src 'self' data: blob:",
       "connect-src 'self' https://api.groq.com https://api.cerebras.ai https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com http://localhost:*",
       // Allow our own pages (e.g. the showreel) to be embedded in same-origin
       // iframes, and allow YouTube video embeds in the homepage video panel.
@@ -1298,6 +1299,91 @@ app.post('/api/translate', async (req, res) => {
   const r = await doTranslate(text, from, to);
   res.status(r.status).json(r.json);
 });
+
+// ── NORIA VOICE — server-side text-to-speech ─────────────────────────────────
+// A real, neutral NORIA voice that sounds identical on every device (not the
+// user's local browser voices). Provider cascade — the first configured one wins:
+//   1. ElevenLabs  (ELEVENLABS_API_KEY)      — best quality, neutral, 29+ languages
+//   2. Google Cloud TTS (GOOGLE_TTS_API_KEY) — very broad language coverage
+//   3. Groq PlayAI (existing GROQ_API_KEY)   — English + Arabic
+// If none are configured (or all fail) we return 503 with fallback:'browser' so
+// the page gracefully uses the on-device voice it already has. Returns audio/mpeg.
+async function ttsElevenLabs(text, lang) {
+  const key = process.env.ELEVENLABS_API_KEY;
+  if (!key) return null;
+  const voice = process.env.ELEVEN_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'; // stable default; set a neutral voice id to taste
+  const model = process.env.ELEVEN_MODEL || 'eleven_multilingual_v2';
+  try {
+    const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?output_format=mp3_44100_128', {
+      method: 'POST',
+      headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, model_id: model, voice_settings: { stability: 0.5, similarity_boost: 0.75, use_speaker_boost: true } }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!r.ok) { console.warn('[TTS] ElevenLabs', r.status, (await r.text().catch(() => '')).slice(0, 160)); return null; }
+    const buf = Buffer.from(await r.arrayBuffer());
+    return buf.length ? buf : null;
+  } catch (e) { console.warn('[TTS] ElevenLabs error:', e.message); return null; }
+}
+async function ttsGoogle(text, lang) {
+  const key = process.env.GOOGLE_TTS_API_KEY;
+  if (!key) return null;
+  const languageCode = (lang && lang.indexOf('-') > -1) ? lang : (lang ? (lang + '-' + lang.toUpperCase()) : 'en-US');
+  async function call(gender) {
+    try {
+      const r = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key=' + key, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: { text }, voice: { languageCode, ssmlGender: gender }, audioConfig: { audioEncoding: 'MP3', speakingRate: 0.98 } }),
+        signal: AbortSignal.timeout(30000),
+      });
+      if (!r.ok) { console.warn('[TTS] Google', gender, r.status, (await r.text().catch(() => '')).slice(0, 160)); return null; }
+      const d = await r.json();
+      return d.audioContent ? Buffer.from(d.audioContent, 'base64') : null;
+    } catch (e) { console.warn('[TTS] Google error:', e.message); return null; }
+  }
+  return (await call('NEUTRAL')) || (await call('FEMALE'));
+}
+async function ttsGroq(text, lang) {
+  if (!USE_GROQ) return null;
+  const arabic = String(lang || 'en').toLowerCase().indexOf('ar') === 0;
+  const model = arabic ? 'playai-tts-arabic' : 'playai-tts';
+  const voice = arabic ? (process.env.GROQ_TTS_VOICE_AR || 'Amira-PlayAI') : (process.env.GROQ_TTS_VOICE || 'Celeste-PlayAI');
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/audio/speech', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.GROQ_API_KEY },
+      body: JSON.stringify({ model, input: text, voice, response_format: 'mp3' }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!r.ok) { console.warn('[TTS] Groq', r.status, (await r.text().catch(() => '')).slice(0, 160)); return null; }
+    const buf = Buffer.from(await r.arrayBuffer());
+    return buf.length ? buf : null;
+  } catch (e) { console.warn('[TTS] Groq error:', e.message); return null; }
+}
+const TTS_CONFIGURED = () => !!(process.env.ELEVENLABS_API_KEY || process.env.GOOGLE_TTS_API_KEY || USE_GROQ);
+app.post('/api/tts', async (req, res) => {
+  const { text, lang } = req.body || {};
+  const body = String(text || '').trim().slice(0, 3000);
+  if (!body) return res.status(400).json({ error: 'Text is required.' });
+  if (!TTS_CONFIGURED()) return res.status(503).json({ error: 'No server voice configured.', fallback: 'browser' });
+  try {
+    const audio = (await ttsElevenLabs(body, lang)) || (await ttsGoogle(body, lang)) || (await ttsGroq(body, lang));
+    if (!audio) return res.status(503).json({ error: 'Voice engines unavailable.', fallback: 'browser' });
+    res.set('Content-Type', 'audio/mpeg');
+    res.set('Cache-Control', 'no-store');
+    res.send(audio);
+  } catch (e) {
+    console.error('NORIA TTS failed:', e.message);
+    res.status(503).json({ error: 'Voice temporarily unavailable.', fallback: 'browser' });
+  }
+});
+// Diagnostic: which voice provider is live? open /api/tts-status
+app.get('/api/tts-status', (_req, res) => res.json({
+  elevenlabs: !!process.env.ELEVENLABS_API_KEY,
+  google: !!process.env.GOOGLE_TTS_API_KEY,
+  groq_playai: USE_GROQ,
+  server_voice_available: TTS_CONFIGURED(),
+}));
 
 // Browser-testable translation check — open this URL directly:
 //   /api/translate?text=Hello%20world&to=French

@@ -238,6 +238,7 @@ button{font-family:inherit;cursor:pointer}
 </div>
 
 <script src="/sg-icons.js"></script>
+<script src="/noria-voice.js"></script>
 <script>
 /* ═══ NORIA Conversation Workspace — premium client ═══ */
 var I={
@@ -325,22 +326,10 @@ var INTENT=[
 function intentFor(text){ for(var i=0;i<INTENT.length;i++){ if(INTENT[i].re.test(text))return INTENT[i]; } return null; }
 function intentChipHtml(it){ return '<a class="act" href="'+it.href+'">'+sgIcon(it.ic)+'<span><b>Continue in '+it.plat+'</b> <small>· '+it.label+'</small></span>'+I.send+'</a>'; }
 
-/* ═══ Natural spoken text — strip markdown so NORIA never reads symbols aloud ═══ */
+/* ═══ Natural-sentence cleaner — shared logic from /noria-voice.js ═══ */
 function spoken(s){
-  s=String(s||'');
-  s=s.replace(/```[\s\S]*?```/g,'. ');
-  s=s.replace(/`([^`]+)`/g,'$1');
-  s=s.replace(/!\[[^\]]*\]\([^)]*\)/g,'');
-  s=s.replace(/\[([^\]]+)\]\([^)]*\)/g,'$1');
-  s=s.replace(/^\s{0,3}#{1,6}\s*/gm,'');
-  s=s.replace(/\*\*([^*]+)\*\*/g,'$1');
-  s=s.replace(/\*([^*]+)\*/g,'$1');
-  s=s.replace(/__([^_]+)__/g,'$1');
-  s=s.replace(/^\s*[-*•]\s+/gm,'');
-  s=s.replace(/[*_#>`~|]/g,' ');
-  s=s.replace(/["“”«»]/g,'');
-  s=s.replace(/\s+/g,' ').trim();
-  return s;
+  if(typeof noriaSpeechText==='function') return noriaSpeechText(s);
+  return String(s||'').replace(/[*_#>`~|]/g,' ').replace(/["“”«»]/g,'').replace(/\s+/g,' ').trim();
 }
 
 /* ═══ Natural, neutral voice selection (not the robotic default) ═══ */
@@ -396,6 +385,33 @@ function buildPlayer(raw){
   return {el:el,api:{play:play,toggle:toggle,pause:pause}};
 }
 
+/* Audio-backed player — real seekable NORIA server voice (accurate progress/seek). */
+function buildAudioPlayer(audio){
+  var el=document.createElement('div'); el.className='aplayer';
+  el.innerHTML='<button class="pp" aria-label="Play"></button>'
+    +'<div class="track"><div class="fill"></div></div>'
+    +'<span class="tt">0:00</span>'
+    +'<button class="rp" aria-label="Replay">'+I.replay+'</button>'
+    +'<span class="vol"><button class="vb" aria-label="Volume">'+I.vol+'</button><input class="vs" type="range" min="0" max="1" step="0.05" value="1"></span>';
+  var pp=el.querySelector('.pp'),fill=el.querySelector('.fill'),tt=el.querySelector('.tt'),rp=el.querySelector('.rp'),vs=el.querySelector('.vs'),track=el.querySelector('.track');
+  function fmt(s){ s=Math.max(0,Math.floor(s||0)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+  function icon(){ pp.innerHTML=audio.paused?I.play2:I.pause; }
+  audio.addEventListener('timeupdate',function(){ var d=audio.duration||0; if(d){ fill.style.width=(audio.currentTime/d*100)+'%'; tt.textContent=fmt(audio.currentTime);} });
+  audio.addEventListener('play',icon); audio.addEventListener('pause',icon); audio.addEventListener('ended',function(){ icon(); });
+  pp.onclick=function(){ audio.paused?audio.play():audio.pause(); };
+  rp.onclick=function(){ audio.currentTime=0; audio.play(); };
+  vs.oninput=function(){ audio.volume=parseFloat(vs.value); };
+  track.onclick=function(e){ var r=track.getBoundingClientRect(), d=audio.duration||0; if(d) audio.currentTime=Math.min(d,Math.max(0,(e.clientX-r.left)/r.width*d)); };
+  icon();
+  return {el:el,api:{play:function(){audio.play();},toggle:function(){audio.paused?audio.play():audio.pause();},pause:function(){audio.pause();}}};
+}
+/* Speak a message into its body — premium server voice first, browser voice fallback. */
+async function speakInto(body,raw){
+  var audio=(typeof noriaServerVoice==='function')?await noriaServerVoice(spoken(raw),speechLang()):null;
+  var pl=audio?buildAudioPlayer(audio):buildPlayer(raw);
+  pl.el._api=pl.api; body.appendChild(pl.el); pl.api.play();
+}
+
 var CONVS=JSON.parse(localStorage.getItem('noria_convs')||'[]'); // [{id,title,msgs:[{role,content}]}]
 var CUR=null, BUSY=false, ATTACH=null;
 function saveAll(){ try{ localStorage.setItem('noria_convs',JSON.stringify(CONVS.slice(0,30))); }catch(_){} }
@@ -448,8 +464,7 @@ function speakTxt(btn){
   var body=btn.closest('.body');
   var ex=body.querySelector('.aplayer');
   if(ex){ ex._api.toggle(); return; }
-  var raw=body.querySelector('.txt').innerText;
-  var pl=buildPlayer(raw); pl.el._api=pl.api; body.appendChild(pl.el); pl.api.play();
+  speakInto(body, body.querySelector('.txt').innerText);
 }
 async function askTranslate(btn){
   var body=btn.closest('.body'); var txt=body.querySelector('.txt').innerText;
@@ -506,7 +521,7 @@ async function send(){
           '<button onclick="speakTxt(this)" title="Listen" aria-label="Listen">'+I.speak+'</button>'+
           '<button onclick="askTranslate(this)" title="Translate" aria-label="Translate">'+I.globe+'</button>';
         botRow.querySelector('.body').appendChild(tools);
-        if(AUTO_SPEAK){ AUTO_SPEAK=false; var pl=buildPlayer(ans); pl.el._api=pl.api; botRow.querySelector('.body').appendChild(pl.el); pl.api.play(); }
+        if(AUTO_SPEAK){ AUTO_SPEAK=false; speakInto(botRow.querySelector('.body'), ans); }
       } })();
     CONVS[CUR].msgs.push({role:'assistant',content:ans}); saveAll(); renderConvs();
   }catch(e){ txtEl.textContent='Network issue — please try again.'; }

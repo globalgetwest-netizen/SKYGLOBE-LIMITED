@@ -150,6 +150,7 @@ button,select,textarea{font-family:inherit}
   <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · NORIA · All Rights Reserved</div><div class="live"><i></i> Intelligence · Operational</div></div>
 </footer>
 
+<script src="/noria-voice.js"></script>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
 /* ── Language catalogue — Africa-forward, grouped ── */
@@ -257,30 +258,48 @@ function pickVoice(code){
   cands.sort(function(a,b){ return score(b)-score(a); });
   return cands[0];
 }
-/* strip any stray markdown/symbols so the voice never reads them aloud */
-function spoken(s){ return String(s||'')
-  .replace(/```[\s\S]*?```/g,' ').replace(/`([^`]+)`/g,'$1')
-  .replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1')
-  .replace(/^#{1,6}\s*/gm,'').replace(/[*_#>`~|]/g,' ')
-  .replace(/["“”«»]/g,'').replace(/\s+/g,' ').trim(); }
+/* Natural-sentence cleaner — shared logic from /noria-voice.js (fallback inline). */
+function spoken(s){
+  if(typeof noriaSpeechText==='function') return noriaSpeechText(s);
+  return String(s||'').replace(/[*_#>`~|]/g,' ').replace(/["“”«»]/g,'').replace(/\s+/g,' ').trim();
+}
 var SPK=null;
-function speak(id,btn){
+function stopVoice(){
+  if(!SPK)return;
+  try{ if(SPK.audio){ SPK.audio.pause(); SPK.audio.currentTime=0; } }catch(_){}
+  try{ window.speechSynthesis.cancel(); }catch(_){}
+  if(SPK.btn)SPK.btn.classList.remove('on');
+  SPK=null;
+}
+function browserSpeak(txt,code,btn){
+  var u=new SpeechSynthesisUtterance(txt.slice(0,3000));
+  if(code){ u.lang=code; var v=pickVoice(code); if(v)u.voice=v; }
+  u.rate=0.98; u.pitch=1.0; u.volume=1;   // calm, clear, human cadence
+  SPK={btn:btn};
+  u.onend=u.onerror=function(){ if(SPK&&SPK.btn===btn){btn.classList.remove('on');SPK=null;} };
+  window.speechSynthesis.speak(u);
+}
+async function speak(id,btn){
   var el=document.getElementById(id);
   var raw=el.value!==undefined?el.value:(el.classList&&el.classList.contains('ph')?'':el.innerText);
   var txt=spoken(raw);
   if(!txt||!txt.trim())return;
-  if(SPK===btn){ window.speechSynthesis.cancel(); btn.classList.remove('on'); SPK=null; return; }
-  if(SPK)SPK.classList.remove('on');
-  window.speechSynthesis.cancel();
+  if(SPK&&SPK.btn===btn){ stopVoice(); return; }   // click again to stop
+  stopVoice();
   // read the translation in the TARGET language, the source in the FROM language
   var langName=(id==='output')?document.getElementById('to').value:document.getElementById('from').value;
   var code=bcpFor(langName);
-  var u=new SpeechSynthesisUtterance(txt.slice(0,3000));
-  if(code){ u.lang=code; var v=pickVoice(code); if(v)u.voice=v; }
-  u.rate=0.98; u.pitch=1.0; u.volume=1;   // calm, clear, human cadence
-  SPK=btn; btn.classList.add('on');
-  u.onend=u.onerror=function(){ if(SPK===btn){btn.classList.remove('on');SPK=null;} };
-  window.speechSynthesis.speak(u);
+  btn.classList.add('on');
+  // 1) premium NORIA server voice (same on every device)
+  var audio=(typeof noriaServerVoice==='function')?await noriaServerVoice(txt,code):null;
+  if(SPK||!btn.classList.contains('on')){ /* superseded/cancelled while awaiting */ if(audio){try{audio.pause();}catch(_){}} return; }
+  if(audio){
+    SPK={btn:btn,audio:audio};
+    audio.onended=audio.onerror=function(){ if(SPK&&SPK.audio===audio){btn.classList.remove('on');SPK=null;} };
+    try{ await audio.play(); return; }catch(_){ SPK=null; }
+  }
+  // 2) fall back to the on-device natural voice
+  browserSpeak(txt,code,btn);
 }
 if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>
