@@ -2167,10 +2167,27 @@ const YUNEX_SHOWCASE_POSTS = (YUNEX_SEED.posts || []).map((p, i) => ({
   likes: p.likes || 0, comments: p.comments || 0, created_at: null, liked: false, mine: false, showcase: true,
   author: { name: p.author || 'YUNEX', country: p.country || null, trust_marks: SHOWCASE_TRUST },
 }));
+// TERRA Trust Authority — build the PUBLIC verification record (verified status +
+// facts + a checkable reference). Raw documents are never exposed here; they are
+// only shared inside a real transaction, with the seller's consent.
+const CC_MAP = { China: 'CN', Ethiopia: 'ET', Nigeria: 'NG', Ghana: 'GH', Kenya: 'KE', 'United Arab Emirates': 'AE', Germany: 'DE', Poland: 'PL', Spain: 'ES', 'United States': 'US', Australia: 'AU', 'DR Congo': 'CD', 'Türkiye': 'TR', 'South Africa': 'ZA', Rwanda: 'RW', Bahrain: 'BH', Sudan: 'SD', "Côte d'Ivoire": 'CI', Zambia: 'ZM', Netherlands: 'NL', Brazil: 'BR', Egypt: 'EG', Morocco: 'MA' };
+function terraVerificationRef(country, seed) {
+  const cc = CC_MAP[country] || (String(country || 'XX').match(/[A-Za-z]{2}/) || ['XX'])[0].toUpperCase();
+  const h = crypto.createHash('sha1').update('YUNEX-TERRA-' + String(seed || '')).digest('hex').slice(0, 7).toUpperCase();
+  return 'TERRA-' + cc + '-26-' + h;
+}
 const YUNEX_SHOWCASE_COMPANIES = (YUNEX_SEED.companies || []).map((c) => ({
   handle: c.handle, name: c.name, tagline: c.tagline || null, sector: c.sector || null,
   location: c.location || null, country: c.country || null, established: c.established || null, description: c.description || null,
   seller: c.seller, tier: { key: 'trusted', label: 'Trusted Business', color: '#1e57c9', icon: '🥈' }, trust_marks: SHOWCASE_TRUST, showcase: true,
+  verification: {
+    verified: true, sample: true,
+    legal_name: c.legal_name || c.name.toUpperCase(),
+    business_type: c.business_type || null, country: c.country || null,
+    authority: c.authority || null, reg_number: c.reg_number || null,
+    verified_date: '18 July 2026', status: 'Active',
+    reference: terraVerificationRef(c.country, c.handle),
+  },
 }));
 
 // CREATE a listing — verified sellers only (Layer 1 gate).
@@ -3415,8 +3432,8 @@ app.get('/api/yunex/storefront/:handle', async (req, res) => {
         return res.json({
           handle: sc.handle, name: sc.name, tagline: sc.tagline, description: sc.description,
           sector: sc.sector, location: sc.location, established: sc.established, website: null, logo_url: null,
-          country: sc.country, tier: sc.tier, trust_marks: sc.trust_marks,
-          rating: { average: 4.8, count: 36 }, member_since: null, completed_deals: 42,
+          country: sc.country, tier: sc.tier, trust_marks: sc.trust_marks, verification: sc.verification,
+          rating: { average: 4.8, count: 36 }, member_since: null, completed_deals: 42, active_listings: scListings.length,
           listings: scListings,
         });
       }
@@ -3437,6 +3454,16 @@ app.get('/api/yunex/storefront/:handle', async (req, res) => {
       logo_url: bp.logo_url || null,
       country: owner?.country || null,
       tier, trust_marks: listingTrustMarks(owner),
+      verification: {
+        verified: !!owner?.biz_verified, sample: false,
+        legal_name: bp.legal_name || owner?.legal_name || bp.name || null,
+        business_type: bp.business_type || null, country: owner?.country || null,
+        authority: bp.reg_authority || null,
+        reg_number: bp.reg_number || null,
+        verified_date: owner?.biz_verified_at ? new Date(owner.biz_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : null,
+        status: owner?.biz_verified ? 'Active' : 'Unverified',
+        reference: owner?.biz_verified ? terraVerificationRef(owner?.country, bp.handle) : null,
+      },
       rating: await sellerRating(bp.owner_email),
       member_since: owner?.created_at || null,
       completed_deals: completed,

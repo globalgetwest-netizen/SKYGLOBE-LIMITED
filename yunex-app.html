@@ -388,9 +388,10 @@ function renderCurrencyPicker(){ const el=document.getElementById('curPick'); if
 function setCurrency(c){ MYCUR=c; localStorage.setItem('sky_cur',c); if($('v-market').classList.contains('on'))loadMarket(); }
 function listingCard(l){
   const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color};padding:3px 9px;font-size:.7rem">${terraBadge(13)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ');
+  const sampleTag=l.showcase?`<span style="position:absolute;top:8px;left:8px;z-index:2;background:rgba(6,18,48,.72);color:#fff;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:100px">SAMPLE</span>`:'';
   const img=(l.images&&l.images[0])
-    ?`<div class="lc-img">${l.pillar_icon}<img src="${esc(l.images[0])}" alt="" loading="lazy" onerror="this.remove()"></div>`
-    :`<div class="lc-img lc-noimg">${l.pillar_icon}</div>`;
+    ?`<div class="lc-img">${sampleTag}${l.pillar_icon}<img src="${esc(l.images[0])}" alt="" loading="lazy" onerror="this.remove()"></div>`
+    :`<div class="lc-img lc-noimg">${sampleTag}${l.pillar_icon}</div>`;
   return `<div class="card" style="cursor:pointer" onclick="openListing('${l.ref}')">
     ${img}
     <div style="font-size:.7rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div style="font-size:.68rem;color:#3d5af1;margin-top:2px">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
@@ -1014,11 +1015,61 @@ async function loadBizOverview(){
       ${o.response_needed>0?`<div class="notice" style="margin-top:12px">⚡ You have <b>${o.response_needed}</b> offer${o.response_needed>1?'s':''} awaiting your response. <a href="#" onclick="go('deals');return false" style="color:#3d5af1">Open Deals →</a></div>`:''}`;
   }catch(e){}
 }
+/* ── TERRA Trust Authority — public verified-business panel (raw documents stay
+   private; shared only inside a real transaction with the seller's consent) ── */
+var CUR_STOREFRONT=null;
+function vRow(label,val){ return val?`<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #eef0f6"><span class="muted" style="font-size:.8rem">${label}</span><span style="font-weight:700;font-size:.85rem;text-align:right">${esc(val)}</span></div>`:''; }
+function verifyPanel(v){
+  if(!v||!v.verified) return '';
+  const sc=v.status==='Active'?'#12864e':'#c0392b';
+  return `<div class="panel" style="border:1.5px solid #d3e2ff;background:linear-gradient(180deg,#f7faff,#ffffff)">
+    <div style="display:flex;align-items:center;gap:11px">
+      ${terraBadge(24)}
+      <div style="line-height:1.25"><div style="font-weight:800;font-size:1.02rem;color:#0a2f66">Verified Business</div><div class="muted" style="font-size:.74rem">Independently verified by TERRA · Trust Authority</div></div>
+      <span style="margin-left:auto;background:${sc}1a;color:${sc};padding:4px 12px;border-radius:100px;font-size:.72rem;font-weight:800">● ${esc(v.status||'')}</span>
+    </div>
+    ${v.sample?`<div style="background:#fff3d6;color:#8a5a00;font-size:.72rem;font-weight:800;border-radius:8px;padding:7px 11px;margin-top:10px">SAMPLE verification — demonstration only. Real sellers show their own TERRA-verified facts.</div>`:''}
+    <div style="margin-top:10px">
+      ${vRow('Legal name',v.legal_name)}${vRow('Business type',v.business_type)}${vRow('Country',v.country)}${vRow('Registration authority',v.authority)}${vRow('Registration No.',v.reg_number)}${vRow('Verified',v.verified_date)}${vRow('Verification ref',v.reference)}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5" onclick="viewVerification()">View verification details</button>
+      <button class="btn o sm" style="color:#67708f;border-color:#d7dbe8" onclick="requestVerification()">Request additional documents</button>
+    </div>
+    <div class="muted" style="font-size:.72rem;margin-top:10px">🔒 Registration & legal documents are kept private. They can be shared with you inside a live deal or escrow, with the seller's consent — watermarked and access-logged.</div>
+  </div>`;
+}
+function viewVerification(){
+  const v=CUR_STOREFRONT&&CUR_STOREFRONT.verification; if(!v)return;
+  const sc=v.status==='Active'?'#12864e':'#c0392b';
+  const body=`<div style="display:flex;align-items:center;gap:11px;margin-bottom:12px">${terraBadge(30)}<div><div style="font-weight:800;font-size:1.1rem">Verification Details</div><div class="muted" style="font-size:.78rem">TERRA independently verified this business.</div></div></div>
+    ${v.sample?`<div style="background:#fff3d6;color:#8a5a00;font-size:.74rem;font-weight:800;border-radius:8px;padding:8px 12px;margin-bottom:12px">SAMPLE — demonstration only, not a real registration.</div>`:''}
+    ${vRow('Business',CUR_STOREFRONT.name)}${vRow('Legal name',v.legal_name)}${vRow('Business type',v.business_type)}${vRow('Country',v.country)}${vRow('Registration authority',v.authority)}${vRow('Registration No.',v.reg_number)}${vRow('Verified on',v.verified_date)}
+    <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #eef0f6"><span class="muted" style="font-size:.8rem">Status</span><span style="font-weight:800;font-size:.85rem;color:${sc}">● ${esc(v.status||'')}</span></div>
+    ${vRow('Verification reference',v.reference)}
+    <div style="background:#f2f6ff;border-radius:10px;padding:11px 13px;margin-top:14px;font-size:.82rem;color:#33406b">TERRA is a Trust Authority: we confirm <b>we have independently verified these documents</b> — we do not publish the raw documents. This protects the business from identity theft and forgery while giving you confidence to deal.</div>`;
+  openModal('Verification',body);
+}
+function requestVerification(){
+  const name=CUR_STOREFRONT?CUR_STOREFRONT.name:'this business';
+  openModal('Request additional documents',`<p style="font-size:.9rem;color:#33406b">For a serious order, escrow, tender or supplier onboarding, ${esc(name)} can grant you access to verified documents — certificate of incorporation, tax registration, export licence, permits, ISO certificates or a bank verification letter.</p>
+    <p style="font-size:.86rem;color:#5a6684;margin-top:10px">Documents are shared only with your consent, <b>watermarked with your name and a timestamp</b>, access-logged, and can expire after the transaction.</p>
+    <button class="btn g grad" style="margin-top:14px;width:100%" onclick="closeModal();if(!ME){openAuth('login');return;} go('deals');">${'Start a deal to request documents'}</button>`);
+}
+function openModal(title,html){
+  var m=document.getElementById('sgModal');
+  if(!m){ m=document.createElement('div'); m.id='sgModal'; m.style.cssText='position:fixed;inset:0;z-index:120;background:rgba(6,18,48,.55);display:flex;align-items:center;justify-content:center;padding:18px'; document.body.appendChild(m); m.addEventListener('click',e=>{if(e.target===m)closeModal();}); }
+  m.innerHTML=`<div style="background:#fff;border-radius:18px;max-width:460px;width:100%;max-height:88vh;overflow:auto;padding:22px;box-shadow:0 24px 70px rgba(4,19,47,.3)"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="font-weight:800;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:#8b5cf6">${esc(title)}</div><button onclick="closeModal()" style="background:none;border:none;font-size:1.3rem;color:#9aa6be;cursor:pointer">×</button></div>${html}</div>`;
+  m.style.display='flex';
+}
+function closeModal(){ var m=document.getElementById('sgModal'); if(m)m.style.display='none'; }
+
 async function openStorefront(handle){
   go('storefront');
   const el=$('storefrontContent'); el.innerHTML='<div class="panel"><div class="muted">Loading company page…</div></div>';
   try{
     const s=await fetch(API+'/api/yunex/storefront/'+encodeURIComponent(handle)).then(r=>r.json());
+    CUR_STOREFRONT=s;
     if(s.error){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🏢</div><p style="margin-top:8px;font-weight:700">Company page not available</p><p class="muted">This business has no public storefront.</p></div></div>'; return; }
     const marks=(s.trust_marks||[]).map(m=>`<span class="st ok" style="background:#ffffff22;color:#fff;padding:4px 11px;font-size:.74rem">${terraBadge(14)} ${esc(m.label)}</span>`).join(' ');
     const since=s.member_since?new Date(s.member_since).toLocaleDateString(undefined,{year:'numeric',month:'long'}):null;
@@ -1044,6 +1095,7 @@ async function openStorefront(handle){
           ${s.website?`<div style="grid-column:1/-1"><a href="${esc(s.website)}" target="_blank" rel="noopener" style="color:#9fb3dd;font-size:.85rem">🔗 ${esc(s.website)}</a></div>`:''}
         </div>
       </div>
+      ${verifyPanel(s.verification)}
       ${facts.length?`<div class="panel"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">${facts.map(f=>`<div><div class="muted" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em">${esc(f[0])}</div><div style="font-weight:700;margin-top:2px">${esc(f[1])}</div></div>`).join('')}</div></div>`:''}
       ${s.description?`<div class="panel"><div class="sec-h" style="font-size:1.05rem">About</div><p style="margin-top:6px;line-height:1.7;color:#334;white-space:pre-wrap">${esc(s.description)}</p></div>`:''}
       <div class="panel"><div class="sec-h" style="font-size:1.05rem">Listings from ${esc(s.name)}</div>${grid}</div>
