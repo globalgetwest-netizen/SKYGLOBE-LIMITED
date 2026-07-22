@@ -2041,8 +2041,44 @@ async function requireVerifiedSeller(email) {
 // Single source of truth — pillars, categories and corridors live in
 // yunex/src/config so the marketplace UI, the data modules and these routes can
 // never disagree. (Edit them there, not here.)
-const { PILLARS: YUNEX_PILLARS, CATEGORIES: YUNEX_CATEGORIES, VALID_PILLARS } = require('./yunex/src/config/pillars');
-const { CORRIDORS: YUNEX_CORRIDORS, VALID_CORRIDORS } = require('./yunex/src/config/corridors');
+// RESILIENT LOAD: if the yunex/ folder didn't make it into a deploy, fall back to
+// an inline copy so the WHOLE SITE never goes down over one missing data module.
+let YUNEX_PILLARS, YUNEX_CATEGORIES, VALID_PILLARS, YUNEX_CORRIDORS, VALID_CORRIDORS;
+try {
+  ({ PILLARS: YUNEX_PILLARS, CATEGORIES: YUNEX_CATEGORIES, VALID_PILLARS } = require('./yunex/src/config/pillars'));
+  ({ CORRIDORS: YUNEX_CORRIDORS, VALID_CORRIDORS } = require('./yunex/src/config/corridors'));
+} catch (e) {
+  console.warn('[YUNEX] config modules not found (yunex/ folder missing from deploy?) — using inline fallback:', e.message);
+  YUNEX_PILLARS = {
+    trade:      { key: 'trade',      label: 'Trade',      icon: '🔁' },
+    investment: { key: 'investment', label: 'Investment', icon: '📈' },
+    assets:     { key: 'assets',     label: 'Assets',     icon: '🏝️' },
+    business:   { key: 'business',   label: 'Business',   icon: '🏢' },
+    finance:    { key: 'finance',    label: 'Finance',    icon: '💰' },
+    services:   { key: 'services',   label: 'Services',   icon: '🛠️' },
+    consumer:   { key: 'consumer',   label: 'Marketplace', icon: '🛍️' },
+  };
+  YUNEX_CATEGORIES = {
+    consumer: ['Electronics', 'Fashion & Apparel', 'Home & Furniture', 'Health & Beauty', 'Food & Grocery', 'Sports & Outdoors', 'Baby & Kids', 'Automotive', 'Jewelry & Watches', 'Books & Media', 'Phones & Accessories', 'Computers'],
+    trade: ['Agriculture & Produce', 'Raw Materials', 'Industrial Equipment', 'Construction Materials', 'Machinery', 'Textiles & Fabrics', 'Chemicals', 'Packaging', 'Metals & Minerals', 'Renewable Energy', 'Medical Supplies', 'Food Ingredients'],
+    services: ['Consulting', 'Legal Services', 'Engineering', 'Design & Creative', 'Software & Development', 'Marketing & Media', 'Logistics & Freight', 'Translation', 'Accounting & Finance', 'Architecture', 'Training', 'Repair & Maintenance'],
+    assets: ['Land', 'Residential Property', 'Commercial Property', 'Vehicles', 'Heavy Machinery', 'Equipment', 'Farms', 'Warehouses'],
+    investment: ['Startups', 'Real Estate Projects', 'Agriculture Projects', 'Franchises', 'Manufacturing', 'Energy Projects', 'SME Equity'],
+    business: ['Wholesale', 'Distribution', 'Manufacturing', 'Import / Export', 'Sourcing', 'Private Label', 'Dropshipping'],
+    finance: ['Business Loans', 'Trade Finance', 'Insurance', 'Merchant Services'],
+    digital: ['Software', 'AI Models & APIs', 'Templates', 'Digital Art', 'Music', 'E-Books', 'Domains', 'Cloud Services', 'Online Courses'],
+  };
+  VALID_PILLARS = Object.keys(YUNEX_PILLARS);
+  YUNEX_CORRIDORS = [
+    { key: 'china',   label: 'China Corridor',   flag: '🇨🇳', blurb: 'Verified suppliers, sourcing & settlement with China.' },
+    { key: 'gulf',    label: 'Gulf Corridor',    flag: '🌙', blurb: 'Trade with the Gulf & Middle East markets.' },
+    { key: 'europe',  label: 'Europe Corridor',  flag: '🇪🇺', blurb: 'Sourcing and export with European partners.' },
+    { key: 'america', label: 'America Corridor',  flag: '🌎', blurb: 'North & South American trade lanes.' },
+    { key: 'oceania', label: 'Oceania Corridor', flag: '🌏', blurb: 'Australia, New Zealand & the Pacific.' },
+    { key: 'africa',  label: 'Africa Corridor',  flag: '🌍', blurb: 'The continent trading with itself — AfCFTA, the mission.' },
+  ];
+  VALID_CORRIDORS = YUNEX_CORRIDORS.map(c => c.key);
+}
 
 function listingTrustMarks(seller) {
   const marks = [];
