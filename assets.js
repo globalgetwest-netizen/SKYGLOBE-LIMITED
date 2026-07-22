@@ -19,6 +19,7 @@ const CATEGORIES = {
   investment: ['Startups', 'Real Estate Projects', 'Agriculture Projects', 'Franchises', 'Manufacturing', 'Energy Projects', 'SME Equity'],
   business:   ['Wholesale', 'Distribution', 'Manufacturing', 'Import / Export', 'Sourcing', 'Private Label', 'Dropshipping'],
   finance:    ['Business Loans', 'Trade Finance', 'Insurance', 'Merchant Services'],
+  digital:    ['Software', 'AI Models & APIs', 'Templates', 'Digital Art', 'Music', 'E-Books', 'Domains', 'Cloud Services', 'Online Courses'],
 };
 
 const VALID_PILLARS = Object.keys(PILLARS);

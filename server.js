@@ -2038,16 +2038,11 @@ async function requireVerifiedSeller(email) {
 // search. Every listing carries the seller's TERRA trust marks. Only verified
 // sellers can publish — the gate from Layer 1 is enforced on every create.
 // ══════════════════════════════════════════════════════════════════════════
-const YUNEX_PILLARS = {
-  trade:      { key: 'trade',      label: 'Trade',      icon: '🔁' },
-  investment: { key: 'investment', label: 'Investment', icon: '📈' },
-  assets:     { key: 'assets',     label: 'Assets',     icon: '🏝️' },
-  business:   { key: 'business',   label: 'Business',   icon: '🏢' },
-  finance:    { key: 'finance',    label: 'Finance',    icon: '💰' },
-  services:   { key: 'services',   label: 'Services',   icon: '🛠️' },
-  consumer:   { key: 'consumer',   label: 'Marketplace',icon: '🛍️' },
-};
-const VALID_PILLARS = Object.keys(YUNEX_PILLARS);
+// Single source of truth — pillars, categories and corridors live in
+// yunex/src/config so the marketplace UI, the data modules and these routes can
+// never disagree. (Edit them there, not here.)
+const { PILLARS: YUNEX_PILLARS, CATEGORIES: YUNEX_CATEGORIES, VALID_PILLARS } = require('./yunex/src/config/pillars');
+const { CORRIDORS: YUNEX_CORRIDORS, VALID_CORRIDORS } = require('./yunex/src/config/corridors');
 
 function listingTrustMarks(seller) {
   const marks = [];
@@ -2059,29 +2054,9 @@ function sellerPublicName(seller) {
   if (!seller) return 'Verified Seller';
   return seller.name || (seller.email ? seller.email.split('@')[0] : 'Verified Seller');
 }
-// ── PRODUCT CATEGORIES — a curated taxonomy per pillar (premium, organised) ───
-const YUNEX_CATEGORIES = {
-  consumer: ['Electronics', 'Fashion & Apparel', 'Home & Furniture', 'Health & Beauty', 'Food & Grocery', 'Sports & Outdoors', 'Baby & Kids', 'Automotive', 'Jewelry & Watches', 'Books & Media', 'Phones & Accessories', 'Computers'],
-  trade: ['Agriculture & Produce', 'Raw Materials', 'Industrial Equipment', 'Construction Materials', 'Machinery', 'Textiles & Fabrics', 'Chemicals', 'Packaging', 'Metals & Minerals', 'Renewable Energy', 'Medical Supplies', 'Food Ingredients'],
-  services: ['Consulting', 'Legal Services', 'Engineering', 'Design & Creative', 'Software & Development', 'Marketing & Media', 'Logistics & Freight', 'Translation', 'Accounting & Finance', 'Architecture', 'Training', 'Repair & Maintenance'],
-  assets: ['Land', 'Residential Property', 'Commercial Property', 'Vehicles', 'Heavy Machinery', 'Equipment', 'Farms', 'Warehouses'],
-  investment: ['Startups', 'Real Estate Projects', 'Agriculture Projects', 'Franchises', 'Manufacturing', 'Energy Projects', 'SME Equity'],
-  business: ['Wholesale', 'Distribution', 'Manufacturing', 'Import / Export', 'Sourcing', 'Private Label', 'Dropshipping'],
-  finance: ['Business Loans', 'Trade Finance', 'Insurance', 'Merchant Services'],
-  digital: ['Software', 'AI Models & APIs', 'Templates', 'Digital Art', 'Music', 'E-Books', 'Domains', 'Cloud Services', 'Online Courses'],
-};
+// Product categories (YUNEX_CATEGORIES) and trade corridors (YUNEX_CORRIDORS)
+// are imported above from yunex/src/config — no second copy here.
 const CONDITIONS = ['New', 'Used - Like New', 'Used - Good', 'Refurbished', 'For Parts', 'N/A'];
-
-// ── TRADE CORRIDORS — global trade lanes (features inside YUNEX Trade) ────────
-const YUNEX_CORRIDORS = [
-  { key: 'china',   label: 'China Corridor',   flag: '🇨🇳', blurb: 'Verified suppliers, sourcing & settlement with China.' },
-  { key: 'gulf',    label: 'Gulf Corridor',    flag: '🌙', blurb: 'Trade with the Gulf & Middle East markets.' },
-  { key: 'europe',  label: 'Europe Corridor',  flag: '🇪🇺', blurb: 'Sourcing and export with European partners.' },
-  { key: 'america', label: 'America Corridor',  flag: '🌎', blurb: 'North & South American trade lanes.' },
-  { key: 'oceania', label: 'Oceania Corridor', flag: '🌏', blurb: 'Australia, New Zealand & the Pacific.' },
-  { key: 'africa',  label: 'Africa Corridor',  flag: '🌍', blurb: 'The continent trading with itself — AfCFTA, the mission.' },
-];
-const VALID_CORRIDORS = YUNEX_CORRIDORS.map(c => c.key);
 
 function shapeListing(l, seller) {
   const d = l.details || {};

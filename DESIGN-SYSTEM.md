@@ -1,117 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Certificate Verification — SKYGLOBEGROUP</title>
-<meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/icon-192.png">
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Inter,sans-serif;background:#F8F9FB;color:#1a2233;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:30px}
-  .card{background:#fff;border-radius:22px;max-width:480px;width:100%;padding:38px 34px;box-shadow:0 24px 60px rgba(4,16,34,.12);text-align:center;border-top:6px solid #D4A73A}
-  .brand{font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;font-weight:700;letter-spacing:.1em;color:#04132F;font-size:1.1rem;text-transform:uppercase;margin-bottom:6px}
-  .brand span{color:#a87016}
-  .ic{font-size:3rem;margin:10px 0}
-  h1{font-family:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:1.6rem;color:#04132F;margin-bottom:6px}
-  .status{display:inline-block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;padding:5px 16px;border-radius:20px;margin-bottom:18px}
-  .status.valid{background:#e8f9f1;color:#1f9d57}
-  .status.invalid{background:#fdecea;color:#a93226}
-  .rows{text-align:left;background:#f9fafc;border-radius:14px;padding:16px 20px;margin-top:8px}
-  .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e6e9ef;font-size:.88rem}
-  .row:last-child{border-bottom:none}
-  .row .k{color:#6b7689;font-weight:600}
-  .row .v{color:#04132F;font-weight:700;text-align:right}
-  .note{margin-top:20px;font-size:.78rem;color:#6b7689;line-height:1.6}
-  a{color:#a87016}
-</style>
-<style id="eco-chrome-css">
-.eco-nav,.eco-foot,.eco-nav *,.eco-foot *{box-sizing:border-box}
-.eco-nav,.eco-foot{width:100%;max-width:100%;flex:0 0 auto;align-self:stretch;grid-column:1/-1}
-.eco-foot{margin-top:auto}
-.eco-nav+*{margin-top:24px}
-/* hide legacy chrome, keep it in DOM so page scripts still work */
-body>header,body>nav:not(.eco-nav),nav.topnav,.topnav,body>footer:not(.eco-foot){display:none !important}
-.eco-nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22);font-family:"SF Pro Display","Inter","Segoe UI",Arial,sans-serif}
-.eco-nav .in{max-width:1180px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
-.eco-nav .bd{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
-.eco-nav .bd img{height:30px;width:30px;object-fit:contain}
-.eco-nav .wm{font-weight:900;letter-spacing:.04em;font-size:1.02rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
-.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:20px}
-.eco-nav .lk a{color:#C9D4E5;text-decoration:none;font-size:.86rem;font-weight:600}
-.eco-nav .lk a:hover{color:#F2D98A}
-.eco-nav .id{background:linear-gradient(135deg,#D4A73A,#E8C566);color:#04132F;padding:8px 16px;border-radius:9px;font-weight:800;font-size:.84rem;text-decoration:none;white-space:nowrap}
-@media(max-width:860px){.eco-nav .lk .eh{display:none}}
-.eco-foot{background:#04132F;color:#AEC0EC;font-family:"SF Pro Display","Inter","Segoe UI",Arial,sans-serif;padding:48px 20px 30px;border-top:1px solid rgba(212,167,58,.18)}
-.eco-foot .in{max-width:1180px;margin:0 auto}
-.eco-foot .ft{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
-@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
-.eco-foot .wm{font-weight:900;letter-spacing:.04em;font-size:1.35rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
-.eco-foot .tag{color:#D4A73A;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;margin-top:10px}
-.eco-foot p.m{color:#8FA0C4;font-size:.86rem;margin-top:12px;line-height:1.6;max-width:280px}
-.eco-foot h4{color:#fff;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;font-weight:800}
-.eco-foot .col a{display:block;color:#AEC0EC;text-decoration:none;font-size:.88rem;margin-bottom:9px}
-.eco-foot .col a:hover{color:#F2D98A}
-.eco-foot .social{display:flex;gap:12px;align-items:center;margin-top:22px;flex-wrap:wrap}
-.eco-foot .social a{color:#C9D4E5;font-weight:700;font-size:.84rem;text-decoration:none}
-.eco-foot .bot{border-top:1px solid rgba(255,255,255,.1);margin-top:34px;padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#8FA0C4}
-.eco-foot .bot b{color:#fff}
-.eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
-.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
-</style>
-</head>
-<body>
-<nav class="eco-nav"><div class="in">
-  <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
-  <div class="lk"><a class="eh" href="/noria">NORIA</a><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
-</div></nav>
-<div class="card">
-  <div class="brand">SKY<span>GLOBE</span> GROUP</div>
-  <div id="content"><div class="ic">⏳</div><h1>Checking…</h1></div>
-</div>
-<script>
-const certRef = location.pathname.split('/verify/')[1] || location.pathname.split('/').pop();
-async function run(){
-  const box = document.getElementById('content');
-  try{
-    const r = await fetch('/api/certificates/verify/' + encodeURIComponent(certRef));
-    const d = await r.json();
-    if (!r.ok || !d.valid) {
-      box.innerHTML = `<div class="ic">❌</div><h1>Not Verified</h1><div class="status invalid">Invalid or unknown</div>
-        <p class="note">${d.error || 'We could not verify a certificate with this reference.'} If you believe this is an error, contact <a href="https://wa.me/17373998522">SkyGlobe support</a>.</p>`;
-      return;
-    }
-    // Document-aware rendering: one verified authority (TERRA), but each
-    // document type shows ITS OWN record — never another document's fields.
-    const HEADS = { academic:'Academic Credential Verified', business_work:'Work Certificate Verified', recognition:'Ownership Recognition Verified' };
-    const BADGES = { academic:'Authentic · SKYGLOBEGROUP Academy', business_work:'Genuinely Issued · TERRA Verified', recognition:'Verified Owner & Entity · TERRA' };
-    const head = HEADS[d.kind] || 'Certificate Verified';
-    const badge = BADGES[d.kind] || 'Authentic · SKYGLOBEGROUP';
-    const fields = Array.isArray(d.fields) && d.fields.length ? d.fields : [
-      { label:'Name', value:d.fullName }, { label:'Programme', value:d.track },
-      { label:'Level', value:d.tier }, { label:'Graduation Year', value:d.graduationYear } ];
-    const rows = fields.map(f=>`<div class="row"><span class="k">${esc(f.label)}</span><span class="v">${esc(f.value)}</span></div>`).join('')
-      + `<div class="row"><span class="k">Reference</span><span class="v">${esc(d.certRef)}</span></div>`
-      + (d.verifiedBy ? `<div class="row"><span class="k">Verified By</span><span class="v">${esc(d.verifiedBy)}</span></div>` : '');
-    box.innerHTML = `<div class="ic">✅</div><h1>${esc(head)}</h1><div class="status valid">${esc(badge)}</div>
-      <div class="rows">${rows}</div>
-      <p class="note">${esc(d.note || 'This certificate was issued and is verified by SKYGLOBEGROUP.')} Personal contact details are kept private and are never shown on this public verification page.</p>`;
-  }catch(e){
-    box.innerHTML = '<div class="ic">⚠️</div><h1>Verification unavailable</h1><p class="note">Please try again shortly.</p>';
-  }
-}
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-run();
-</script>
-<footer class="eco-foot"><div class="in">
-  <div class="ft">
-    <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
-    <div class="col"><h4>Ecosystem</h4><a href="/noria">NORIA — Intelligence</a><a href="/terra">TERRA — Identity &amp; Trust</a><a href="/yunex">YUNEX — Economy</a><a href="/academy">Academy — Learning</a><a href="/mobility">Mobility — Travel</a></div>
-    <div class="col"><h4>Quick Access</h4><a href="/id">SKYGLOBE ID</a><a href="/courses">Academy Programs</a><a href="/terra#documents">Documents &amp; Legal</a><a href="/#ecosystem">Explore Ecosystem</a></div>
-    <div class="col"><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">💬 WhatsApp</a><a href="/#ecosystem">Message Centre</a><div class="social"><a href="https://www.tiktok.com/@SKYGLOBEGROUP" target="_blank" rel="noopener">TikTok</a><a href="https://www.youtube.com/@SKYGLOBEGROUP" target="_blank" rel="noopener">YouTube</a><a href="https://www.instagram.com/SKYGLOBEGROUP" target="_blank" rel="noopener">Instagram</a></div><div style="color:#8FA0C4;font-size:.8rem;margin-top:14px">@SKYGLOBEGROUP · skyglobegroup.com</div></div>
-  </div>
-  <div class="bot"><div>© <span id="ecoYr">2026</span> <b>SKYGLOBEGROUP</b> · All Rights Reserved</div><div class="live"><i></i> Live Ecosystem · Operational</div><div><span style="color:#D4A73A">✦</span> Verified on skyglobegroup.com</div></div>
-</div></footer>
-</body>
-</html>
+# SKYGLOBE GROUP — DESIGN SYSTEM v1.0
+
+The visual constitution of the ecosystem. Every new product, screen and feature reuses these
+standards so users always recognise they are inside the SKYGLOBE GROUP family.
+Companion to `ARCHITECTURE.md` (§4 Design Constitution) and implemented in `skyglobe-ds.css`.
+
+## 1. Brand philosophy
+Premium · Professional · Elegant · Modern · Intelligent · Trustworthy · Innovative · Calm ·
+Fast · Human-centered · Accessible · Scalable. Every interaction intentional.
+
+## 2. Color law
+
+| Token | Hex | Use |
+|---|---|---|
+| Deep Royal Blue | `#0A2E65` | Trust, navigation, brand structure, hero & CTA sections |
+| Premium Gold | `#D4A73A` (hi `#F4D77A`) | Premium actions, highlights, key metrics — **scarce by law** |
+| Vibrant Orange | `#ff9f1c → #e65100` | **Reserved: the NORIA ✦ + live activity only.** Never errors. |
+| Midnight Navy | `#041022 / #071B3B` | Command centers (CEO & staff portals), footers, dark immersive sections |
+| Soft White | `#F8FAFC / #f7f8fb` | Content, forms, documentation |
+| Charcoal | `#111827 / #041022` | Primary text on light |
+| Grays | `#D1D5DB` secondary-on-dark · `#9CA3AF` muted · `#4B5563` secondary-on-light | text scale |
+
+**Usage ratio target:** ~60% light surfaces · 25% blue · 10% gold · 5% orange.
+
+**The two-world rule (ruled by the CEO's eye, 2026-07):** royal blue lights the public stage;
+**midnight navy powers the command center** — dashboards and portals stay deep and quiet so gold
+data glows and eyes rest. Never repaint globally; tune surfaces individually.
+
+**Platform identities (constitutional — follows the real logos, overrides any advisory doc):**
+
+| Platform | Primary | Secondary | Identity |
+|---|---|---|---|
+| SKYGLOBE GROUP | Deep Royal Blue | Gold | The ecosystem |
+| NORIA | Orange ✦ | Gold | Intelligence |
+| TERRA | Green `#3fae6a` | Deep blue | Trust |
+| YUNEX | Blue→Purple `#3d5af1→#b326d9` | Gold | Economy |
+| Global Mobility | Deep blue | White | Mobility |
+| Academy | Blue | Gold | Learning |
+| Health (future) | Blue | Green | Care |
+
+## 3. Typography
+**Inter** everywhere (loaded with system fallback). Georgia serif reserved for display/manifesto
+headlines. Hierarchy: Display → Heading → Subheading → Body → Caption. Few weights. Large
+headlines, short sentences, confident language (“Continue”, “Verify Identity”).
+
+## 4. Layout & shape
+8-point spacing (8/16/24/32/48/64/80/96). Radii: buttons & inputs 12px · cards 14–16px ·
+dialogs 18–20px. Shadows soft and layered — never heavy.
+
+## 5. Icons
+One family per surface. Today the ecosystem speaks emoji (consistent, zero-weight);
+**the migration to a single stroke icon family (Lucide-style) is law for the progressive
+rebuild** — applied layer by layer as each service is rebuilt, never as a big bang.
+Icon colors: navigation blue · primary gold · commerce/live orange · success green ·
+warning amber · danger red · inactive gray. Color never the only signal.
+
+## 6. Navigation
+Desktop: top navigation — Home · **Platforms ✦ (NORIA / TERRA / YUNEX, featured with authority)** ·
+Global Mobility · Academy · Solutions · Company · Dashboard · CTA.
+Mobile: **bottom navigation** — Home · Discover · **NORIA ✦ (elevated center)** · Services · Profile.
+Every page carries Back/Next navigation.
+
+## 7. Backgrounds per section
+Hero deep blue · content white · feature strips light gray · CTA blue · footer midnight.
+
+## 8. Motion
+Fade, slide, gentle scale, soft glow. Nothing appears instantly; nothing distracts.
+`prefers-reduced-motion` always respected.
+
+## 9. Accessibility
+High contrast (per the text scale above), 48px touch targets, focus states, screen-reader
+labels, keyboard paths. Dark/light theming: Horizon phase.
+
+## 10. Native experience
+The layout adapts per device; the language never changes. Phone = single column + bottom nav.
+Tablet = two columns. Desktop = workspace. TV/watch: Horizon phase.
