@@ -2193,6 +2193,10 @@ app.post('/api/yunex/listings', async (req, res) => {
         images.push(storagePublicUrl(path_));
       }
     }
+    // Real media required — a listing must carry at least one real photo of the
+    // actual product/asset/project. Keeps the marketplace trustworthy (no empty or
+    // stock-only listings).
+    if (!images.length) return res.status(400).json({ error: 'At least one real product photo is required to publish a listing.' });
     const cats = YUNEX_CATEGORIES[pillar] || [];
     const d = b.details || {};
     const details = {
@@ -8783,6 +8787,14 @@ const COURSE_TRACKS = [
   { id: 'tax_preparation',       name: 'Tax Preparation',                       emoji: '🧮', category: 'professional' },
   { id: 'investment_analysis',   name: 'Investment Analysis',                   emoji: '📈', category: 'professional' },
   { id: 'risk_management',       name: 'Risk Management & Insurance',           emoji: '🛡️', category: 'professional' },
+  // ── Markets & Trading (School of Finance & Investment) — education with honest
+  //    risk framing; these are learning programmes, NOT financial advice ──
+  { id: 'forex_trading',         name: 'Forex & Currency Trading',              emoji: '💱', category: 'professional' },
+  { id: 'technical_analysis',    name: 'Technical & Chart Analysis',            emoji: '📊', category: 'professional' },
+  { id: 'trading_risk_psych',    name: 'Trading Risk Management & Psychology',  emoji: '🧠', category: 'professional' },
+  { id: 'crypto_trading',        name: 'Cryptocurrency & Digital Asset Trading', emoji: '🪙', category: 'professional' },
+  { id: 'financial_markets',     name: 'Financial Markets & Economics',         emoji: '🏦', category: 'professional' },
+  { id: 'stock_investing',       name: 'Stock Market Investing',                emoji: '📈', category: 'professional' },
   // ── Creative & Design ──
   { id: 'graphic_design',        name: 'Graphic Design',                        emoji: '🎨', category: 'professional' },
   { id: 'digital_photography',   name: 'Digital Photography',                   emoji: '📷', category: 'professional' },
@@ -9032,6 +9044,12 @@ app.post('/api/courses/enrollment/:id/step/:idx/content', async (req, res) => {
     }
     if (!process.env.GEMINI_API_KEY && !process.env.ANTHROPIC_API_KEY && !USE_CEREBRAS && !USE_GROQ && !USE_OLLAMA)
       return res.status(500).json({ error: 'AI not configured. Please contact support.' });
+    // Trading / markets programmes must teach responsibly: real risk, no hype,
+    // no promises of profit — education, never financial advice.
+    const TRADING_TRACKS = ['forex_trading', 'technical_analysis', 'trading_risk_psych', 'crypto_trading', 'financial_markets', 'stock_investing', 'investment_analysis'];
+    const tradingClause = TRADING_TRACKS.includes(enr.track_id)
+      ? `\n\nRESPONSIBLE-TRADING REQUIREMENT (mandatory for this programme): This is financial EDUCATION, not financial advice or a signal service. Be honest that trading forex, crypto and stocks is HIGH RISK and that most retail traders lose money. Never promise profits, "guaranteed" returns, or that anyone can "trade perfectly". Emphasise risk management, position sizing, only risking money one can afford to lose, regulation, and how to spot scams, pump-and-dumps and fake "gurus". End the THEORY section with a one-line reminder that outcomes are never guaranteed and learners should seek a licensed professional before investing real money.`
+      : '';
     const prompt = `You are an expert instructor writing lesson ${idx + 1} of a professional certificate programme in "${track?.name}", titled "${step.title}". Write a COMPLETE lesson (1000-1500 words) a self-study learner can master on their own, structured exactly as:
 
 THEORY — teach the full concept from first principles: definitions, why it matters in ${track?.name}, the key frameworks or rules, and common mistakes to avoid.
@@ -9042,7 +9060,7 @@ PRACTICAL — hands-on instructions the learner performs themselves: numbered st
 
 PRACTICE ACTIONS — 3 short tasks to complete before taking this lesson's test.
 
-Plain text only: use the four section labels above in capitals, blank lines between paragraphs, numbered lists as "1." — no markdown symbols like # or *.`;
+Plain text only: use the four section labels above in capitals, blank lines between paragraphs, numbered lists as "1." — no markdown symbols like # or *.${tradingClause}`;
     const content = await generateText(prompt, { maxTokens: 2600, temperature: 0.6 });
     bankPut('lesson', enr.track_id, step.title, { text: content }); // free for every future student
     steps[idx] = { ...step, content };
@@ -9315,6 +9333,12 @@ const TRACK_SCHOOLS = {
   project_management: 'School of Business & Entrepreneurship', human_resources: 'School of Business & Entrepreneurship',
   supply_chain: 'School of Business & Entrepreneurship', logistics_transport: 'School of Business & Entrepreneurship',
   small_business_mgmt: 'School of Business & Entrepreneurship', franchise_mgmt: 'School of Business & Entrepreneurship',
+  forex_trading: 'School of Finance & Investment', technical_analysis: 'School of Finance & Investment',
+  trading_risk_psych: 'School of Finance & Investment', crypto_trading: 'School of Finance & Investment',
+  financial_markets: 'School of Finance & Investment', stock_investing: 'School of Finance & Investment',
+  investment_analysis: 'School of Finance & Investment', financial_planning: 'School of Finance & Investment',
+  accounting: 'School of Finance & Investment', tax_preparation: 'School of Finance & Investment',
+  risk_management: 'School of Finance & Investment',
   ecommerce: 'School of Business & Entrepreneurship', social_media_marketing: 'School of Business & Entrepreneurship',
   financial_planning: 'School of Finance & Investment', accounting: 'School of Finance & Investment',
   tax_preparation: 'School of Finance & Investment', investment_analysis: 'School of Finance & Investment',

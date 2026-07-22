@@ -458,8 +458,9 @@ const SELL_PANE=`    <div class="panel">
       <label style="margin-top:12px">Specifications (optional)</label>
       <div id="nl_specs"></div>
       <button type="button" class="btn o sm" style="color:#3d5af1;border-color:#c9d2f5;margin-top:6px" onclick="addSpecRow()">+ Add specification</button>
-      <div style="margin-top:14px"><label>Product photos (up to 8 — first is the cover)</label>
+      <div style="margin-top:14px"><label>Product photos <span style="color:#c0392b">*required</span> (up to 8 — first is the cover)</label>
         <input type="file" accept="image/*" multiple onchange="pickListingImages(this)" style="font-size:.85rem">
+        <div class="muted" style="font-size:.74rem;margin-top:4px">📸 Use your OWN real photos of the actual item — not stock images. Real photos build buyer trust and sell faster.</div>
         <div id="nl_imgs" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
       </div>
       <div style="margin-top:14px"><label>Product video (optional — YouTube, TikTok or a direct video link)</label>
@@ -1203,8 +1204,9 @@ async function createListing(){
   const specs=[...document.querySelectorAll('#nl_specs > div')].map(r=>{const i=r.querySelectorAll('input');return {k:i[0].value.trim(),v:i[1].value.trim()};}).filter(x=>x.k);
   const body={pillar:g('nl_pillar')||document.getElementById('nl_pillar').value,category:g('nl_cat'),corridor:document.getElementById('nl_corridor')?document.getElementById('nl_corridor').value:'',title:g('nl_title'),price:g('nl_price'),currency:document.getElementById('nl_cur').value,quantity:g('nl_qty'),location:g('nl_loc'),description:g('nl_desc'),images:NL_IMAGES,
     details:{brand:g('nl_brand'),manufacturer:g('nl_maker'),origin:g('nl_origin'),condition:document.getElementById('nl_cond').value,warranty:g('nl_warr'),unit:g('nl_unit'),min_order:g('nl_moq'),video_url:g('nl_video'),specs}};
-  if(!body.title){ $('nl_msg').textContent='A title is required.'; return; }
-  $('nl_msg').textContent='Publishing…';
+  if(!body.title){ $('nl_msg').style.color='#c0392b'; $('nl_msg').textContent='A title is required.'; return; }
+  if(!NL_IMAGES.length){ $('nl_msg').style.color='#c0392b'; $('nl_msg').textContent='Please add at least one real photo of your actual product, asset or project — no stock images. Buyers trust listings they can see.'; return; }
+  $('nl_msg').style.color=''; $('nl_msg').textContent='Publishing…';
   try{
     const r=await fetch(API+'/api/yunex/listings',{method:'POST',headers:{'content-type':'application/json',...H()},body:JSON.stringify(body)});
     const d=await r.json();
