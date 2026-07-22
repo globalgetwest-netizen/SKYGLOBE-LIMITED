@@ -302,7 +302,8 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .pleft{display:flex;align-items:center;gap:14px;flex-shrink:0}
 .plogo{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.02em;color:#0b1220;font-size:.98rem;text-decoration:none;flex-shrink:0}
 .plogo img{width:30px;height:30px;object-fit:contain}
-.pcenter{flex:1;display:flex;justify-content:center;align-items:center;gap:22px;font-size:.9rem;font-weight:500}
+.pcenter{flex:1;display:flex;justify-content:center;align-items:center;gap:17px;font-size:.88rem;font-weight:500}
+@media(max-width:1240px){.pcenter{gap:13px;font-size:.84rem}}
 .pcenter a{color:#1d1d1f;text-decoration:none;white-space:nowrap}.pcenter a:hover{color:#0a5bd6}
 .pright{display:flex;align-items:center;gap:16px;flex-shrink:0}
 .psupport{color:#1d1d1f;font-size:.9rem;font-weight:500;text-decoration:none;white-space:nowrap}.psupport:hover{color:#0a5bd6}
@@ -340,7 +341,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
   <div class="pwrap">
     <a class="plogo" href="/"><img src="/skyglobe-logo-t.png" alt="SKYGLOBEGROUP"><span>SKYGLOBEGROUP</span></a>
     <div class="pcenter">
-      <a href="/noria">Noria</a><a href="/terra">Terra</a><a href="/yunex">Yunex</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a><a href="/yunex/app">Store</a><a href="/noria/chat">AI Mode</a><a href="/academy#finance">Forex</a><a href="/certificate-verify">Certificate</a><a href="#" onclick="return openMsg('general')">Support</a>
+      <a href="/noria">Noria</a><a href="/terra">Terra</a><a href="/yunex">Yunex</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a><a href="/yunex/app">Store</a><a href="/noria/chat">AI Mode</a><a href="/academy#finance">Forex</a><a href="/certificate-verify">Certificate</a><a href="/corridors">Corridors</a><a href="/africa">Africa</a><a href="/support">Support</a>
     </div>
     <div class="pright">
       <button class="psearch" onclick="openSiteSearch()" aria-label="Search"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
@@ -660,7 +661,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
    ecosystem's intelligence/search layer. */
 function openSiteSearch(){ var b=document.getElementById('psearchbar'); if(b){b.classList.add('on'); var i=document.getElementById('psearchinput'); if(i)i.focus();} }
 function closeSiteSearch(){ var b=document.getElementById('psearchbar'); if(b)b.classList.remove('on'); }
-function doSiteSearch(e){ e.preventDefault(); var q=(document.getElementById('psearchinput').value||'').trim(); if(!q)return false; try{localStorage.setItem('noria_q',q);}catch(_){} location.href='/noria/chat'; return false; }
+function doSiteSearch(e){ e.preventDefault(); var q=(document.getElementById('psearchinput').value||'').trim(); if(!q)return false; location.href='/search?q='+encodeURIComponent(q); return false; }
 document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeSiteSearch(); });
 /* Living-network hero: slow particles + connection lines (calm, never flashy) */
 (function(){
@@ -698,7 +699,8 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeSiteSe
   }).catch(()=>{});
 })();
 /* Message Centre — internal messaging, no external mail app */
-function openMsg(dept){
+function openMsg(dept){ location.href='/support'; return false; }
+function _openMsgLegacy(dept){
   const m=document.getElementById('msgc');
   document.getElementById('mcDept').value=dept||'general';
   document.getElementById('mcOk').style.display='none';
@@ -745,7 +747,8 @@ async function sendMsg(e){
 window.__authFrom='';
 var AUTH_CTX={academy:{badge:'🎓 Your learning identity — and the whole ecosystem'},mobility:{badge:'🌍 Your mobility identity — and the whole ecosystem'},terra:{badge:'🛡️ A trusted identity, verified by TERRA'},yunex:{badge:'💜 Trade, invest and build across the ecosystem'},'':{badge:''}};
 var AUTH_MODE='signup';
-function openAuth(m){
+function openAuth(m){ if(localStorage.getItem('sky_token')){ location.href='/id'; return false; } location.href='/signin?mode='+(m||'login')+(window.__authFrom?'&ctx='+window.__authFrom:'')+'&from='+encodeURIComponent(location.pathname+location.search); return false; }
+function _openAuthLegacy(m){
   if(localStorage.getItem('sky_token')){ location.href='/id'; return false; }
   authTab(m||'signup');
   var ctx=AUTH_CTX[window.__authFrom||'']||AUTH_CTX[''];

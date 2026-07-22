@@ -118,9 +118,14 @@ html,body{max-width:100%;overflow-x:clip}
 .hmeter.m2 i{animation-delay:-1.2s}.hmeter.m3 i{animation-delay:-2.4s}
 @keyframes hflow{0%{background-position:120% 0}100%{background-position:-120% 0}}
 /* Auth modal */
-.modal{position:fixed;inset:0;background:rgba(10,18,48,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
-.modal.on{display:flex}
-.modal .box{background:#fff;border-radius:20px;padding:30px;max-width:400px;width:100%}
+/* Native full-screen sheet — no floating popup. Covers the page, scrolls. */
+.modal{position:fixed;inset:0;background:#fff;display:none;z-index:60;overflow-y:auto}
+.modal.on{display:block}
+@keyframes sheetIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.modal .box{background:#fff;border-radius:0;padding:24px 22px 56px;max-width:620px;width:100%;margin:0 auto;position:relative;animation:sheetIn .24s ease}
+.modal .sheet-bar{position:sticky;top:0;z-index:2;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);margin:-24px -22px 12px;padding:12px 18px;border-bottom:1px solid #eef0f6;display:flex;align-items:center;gap:10px}
+.modal .sheet-bar b{font-weight:800;color:#0b1220;font-size:.92rem}
+.modal .sheet-x{margin-left:auto;background:#f1f3f9;border:none;width:34px;height:34px;border-radius:50%;font-size:1.1rem;color:#67708f;cursor:pointer;line-height:1}
 .modal h2{font-size:1.3rem}.modal .tabs{display:flex;gap:8px;margin:16px 0}
 .modal .tabs button{flex:1;padding:9px;border-radius:10px;border:1px solid #d7dbe8;background:#fbfcff;font-weight:700;cursor:pointer;font-family:inherit;color:#67708f}
 .modal .tabs button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
@@ -342,9 +347,9 @@ html,body{max-width:100%;overflow-x:clip}
 </div>
 
 <!-- LISTING MODAL -->
-<div class="modal" id="listingModal"><div class="box" style="max-width:560px;max-height:88vh;overflow:auto">
+<div class="modal" id="listingModal"><div class="box">
+  <div class="sheet-bar"><b>YUNEX</b><button class="sheet-x" onclick="closeListing()" aria-label="Close">✕</button></div>
   <div id="listingModalBody"></div>
-  <button class="btn o" style="width:100%;margin-top:14px;color:#67708f;border-color:#d7dbe8" onclick="closeListing()">Close</button>
 </div></div>
 
 <!-- AUTH MODAL -->
@@ -655,7 +660,8 @@ function closeListing(){ $('listingModal').classList.remove('on'); }
 
 /* auth */
 const AUTH_BOX_HTML=document.querySelector('#authModal .box').innerHTML;
-function openAuth(m){ document.querySelector('#authModal .box').innerHTML=AUTH_BOX_HTML; authTab(m);
+function openAuth(m){ if(localStorage.getItem('sky_token')){ location.href='/id'; return false; } location.href='/signin?mode='+(m||'login')+(window.__authFrom?'&ctx='+window.__authFrom:'')+'&from='+encodeURIComponent(location.pathname+location.search); return false; }
+function _openAuthLegacy(m){ document.querySelector('#authModal .box').innerHTML=AUTH_BOX_HTML; authTab(m);
   const ctx=(typeof ID_CONTEXT!=='undefined'&&ID_CONTEXT[window.__idFrom||''])||null;
   if(ctx){ const sub=document.querySelector('#authModal .box .muted');
     if(sub){ sub.textContent=ctx.sub;

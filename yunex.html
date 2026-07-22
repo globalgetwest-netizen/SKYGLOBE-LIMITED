@@ -536,7 +536,8 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 
 <script>
 /* Message Centre — internal messaging, no external mail app */
-function openMsg(dept){
+function openMsg(dept){ location.href='/support'; return false; }
+function _openMsgLegacy(dept){
   const m=document.getElementById('msgc');
   document.getElementById('mcDept').value=dept||'general';
   document.getElementById('mcOk').style.display='none';
@@ -599,7 +600,8 @@ async function sendMsg(e){
 window.__authFrom='yunex';
 var AUTH_CTX={academy:{badge:'🎓 Your learning identity — and the whole ecosystem'},mobility:{badge:'🌍 Your mobility identity — and the whole ecosystem'},terra:{badge:'🛡️ A trusted identity, verified by TERRA'},yunex:{badge:'💜 Trade, invest and build across the ecosystem'},'':{badge:''}};
 var AUTH_MODE='signup';
-function openAuth(m){
+function openAuth(m){ if(localStorage.getItem('sky_token')){ location.href='/id'; return false; } location.href='/signin?mode='+(m||'login')+(window.__authFrom?'&ctx='+window.__authFrom:'')+'&from='+encodeURIComponent(location.pathname+location.search); return false; }
+function _openAuthLegacy(m){
   if(localStorage.getItem('sky_token')){ location.href='/id'; return false; }
   authTab(m||'signup');
   var ctx=AUTH_CTX[window.__authFrom||'']||AUTH_CTX[''];

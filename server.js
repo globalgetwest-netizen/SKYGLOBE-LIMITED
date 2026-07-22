@@ -1049,6 +1049,50 @@ app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-pe
 app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));
 app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'academy.html'))); // Academy pillar page — curriculum lives one level deeper at /kids-academy
 app.get('/legal-documents', (req, res) => res.sendFile(path.join(__dirname, 'legal-documents.html')));
+app.get('/support', (req, res) => res.sendFile(path.join(__dirname, 'support.html')));
+app.get(['/signin', '/login', '/signup'], (req, res) => res.sendFile(path.join(__dirname, 'signin.html')));
+app.get('/search', (req, res) => res.sendFile(path.join(__dirname, 'search.html')));
+app.get('/africa', (req, res) => res.sendFile(path.join(__dirname, 'africa.html')));
+app.get('/corridors', (req, res) => res.redirect('/yunex/app#market')); // corridors live inside YUNEX Trade
+
+// ── SITE-WIDE SEARCH — searches across the whole ecosystem (pages, marketplace,
+// courses). Powers the nav 🔍 and the Support search. ──
+const SITE_PAGES = [
+  { title: 'NORIA — Intelligence', url: '/noria', desc: 'AI assistant, translation and documents.', tags: 'noria ai assistant intelligence translate chat knowledge' },
+  { title: 'NORIA Translate', url: '/noria/translation', desc: 'Translate text into 80+ languages.', tags: 'translate language translation noria' },
+  { title: 'TERRA — Trust & Verification', url: '/terra', desc: 'Identity, KYC, credentials and verification.', tags: 'terra verify identity kyc trust credential document' },
+  { title: 'YUNEX — Marketplace', url: '/yunex/app', desc: 'Buy, sell, trade and invest with verified partners.', tags: 'yunex marketplace store buy sell trade invest wallet escrow deals corridors' },
+  { title: 'Academy — Learning', url: '/academy', desc: 'Courses, exams and verified certificates.', tags: 'academy course learn certificate exam forex trading crypto stocks finance' },
+  { title: 'Mobility — Travel', url: '/mobility', desc: 'Visas, immigration, flights and relocation.', tags: 'mobility visa travel immigration flight relocation passport' },
+  { title: 'SKYGLOBE ID', url: '/id', desc: 'Your account and verification status.', tags: 'id account profile verification sign in' },
+  { title: 'Support Centre', url: '/support', desc: 'Help, contact, FAQs, technical support, track a request.', tags: 'support help faq contact chat technical report track problem' },
+];
+app.get('/api/search', async (req, res) => {
+  const q = String(req.query.q || '').trim().toLowerCase();
+  if (!q) return res.json({ q: '', pages: [], listings: [], courses: [] });
+  const terms = q.split(/\s+/).filter(Boolean);
+  const score = (txt) => { const t = String(txt || '').toLowerCase(); return terms.every(w => t.includes(w)) ? 2 : (terms.some(w => t.includes(w)) ? 1 : 0); };
+  try {
+    const pages = SITE_PAGES.map(p => ({ p, s: score(p.title + ' ' + p.desc + ' ' + p.tags) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).map(x => x.p);
+    let rows = await dbQuery('GET', 'yunex_listings', null, { status: 'eq.active', limit: 200 }).catch(() => []);
+    rows = (Array.isArray(rows) ? rows : []).map(l => shapeListing(l, null));
+    if (!rows.length) rows = YUNEX_SHOWCASE;
+    const listings = rows.map(l => ({ l, s: score(l.title + ' ' + l.description + ' ' + l.category + ' ' + l.location) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 8).map(x => x.l);
+    const courses = allCourseTracks().map(t => ({ t, s: score(t.name + ' ' + trackSchool(t)) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 8).map(x => ({ id: x.t.id, name: x.t.name, emoji: x.t.emoji, school: trackSchool(x.t) }));
+    res.json({ q, pages, listings, courses });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// Track a request by reference (SKY-YEAR-XXXX).
+app.get('/api/track/:ref', async (req, res) => {
+  const ref = String(req.params.ref || '').trim().toUpperCase();
+  if (!/^SKY-\d{4}-[A-Z0-9]{2,8}$/i.test(ref)) return res.status(400).json({ error: 'Invalid reference format.' });
+  try {
+    const rows = await dbQuery('GET', 'applications', null, { ref: `eq.${ref}`, limit: 1 }).catch(() => []);
+    const a = (Array.isArray(rows) ? rows : [])[0];
+    if (a) return res.json({ status: String(a.status || 'received').replace(/_/g, ' '), detail: a.service ? ('Service: ' + a.service) : null });
+    return res.status(404).json({ error: 'No request found for that reference.' });
+  } catch (e) { res.status(500).json({ error: 'Could not check right now.' }); }
+});
 
 // ── §8 AI FEATURES ───────────────────────────────────────────────────────────
 // ── AI CHAT ───────────────────────────────────────────────────────────────────
@@ -1617,6 +1661,22 @@ function clientAuth(req) {
   const token = h.startsWith('Bearer ') ? h.slice(7) : '';
   return verifyToken(token);
 }
+// Purpose-scoped, 24h verification-link token (separate from session tokens).
+function signVerifyToken(email) {
+  const payload = Buffer.from(JSON.stringify({ email, p: 'verify', iat: Date.now() })).toString('base64url');
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
+  return payload + '.' + sig;
+}
+function readVerifyToken(token) {
+  if (!token || !token.includes('.')) return null;
+  const [payload, sig] = token.split('.');
+  if (crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url') !== sig) return null;
+  try {
+    const d = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    if (d.p !== 'verify' || Date.now() - d.iat > 24 * 60 * 60 * 1000) return null;
+    return d.email;
+  } catch { return null; }
+}
 
 async function getClientByEmail(email) {
   const rows = await dbQuery('GET', 'clients', null, { email: `eq.${email}`, limit: 1 });
@@ -1631,7 +1691,7 @@ const _genCode = () => String(crypto.randomInt(100000, 1000000)); // 6 digits
 // A refined, table-based branded HTML email (renders everywhere): deep-navy
 // header with the SkyGlobe logo, gold rule, the code in a premium panel, and a
 // TERRA·YUNEX trust footer. Never a plain white page.
-function brandedCodeEmail({ badge, title, intro, code, note }) {
+function brandedCodeEmail({ badge, title, intro, code, note, link }) {
   const origin = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#eef1f7">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f7;padding:28px 12px"><tr><td align="center">
@@ -1651,6 +1711,10 @@ function brandedCodeEmail({ badge, title, intro, code, note }) {
             <div style="font-size:2.3rem;font-weight:800;letter-spacing:.34em;color:#0A2E65;font-family:'Courier New',monospace">${code}</div>
           </td></tr>
         </table>
+        ${link ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 18px"><tr><td align="center">
+          <a href="${link}" style="display:inline-block;background:linear-gradient(135deg,#0A2E65,#123E87);color:#ffffff;text-decoration:none;font-weight:700;font-size:.98rem;padding:14px 34px;border-radius:11px">Verify my email →</a>
+          <div style="font-size:.72rem;color:#8a93a3;margin-top:10px">Prefer the code? Enter it in the app. This link and code expire in 24 hours.</div>
+        </td></tr></table>` : ''}
         <p style="font-size:.82rem;color:#6b7689;line-height:1.6;margin:0">${note}</p>
       </td></tr>
       <tr><td style="padding:18px 34px 26px">
@@ -1665,6 +1729,37 @@ function brandedCodeEmail({ badge, title, intro, code, note }) {
     <div style="max-width:560px;margin:14px auto 0;font-size:.62rem;color:#9aa4b8;text-align:center">© ${new Date().getFullYear()} SkyGlobe Group · Automated security message — please do not reply.</div>
   </td></tr></table></body></html>`;
 }
+// Premium, department-branded email — every message from any department goes out
+// on the same navy/gold SKYGLOBEGROUP template, with that department's identity in
+// the header and a professional signature. Never a plain white page.
+function brandedDeptEmail({ dept, heading, bodyHtml, ref, quote }) {
+  const origin = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+  const d = dept || { label: 'Reception & Support', icon: '🛎️' };
+  const label = String(d.label || 'Support').replace(/^SKYGLOBEGROUP\s+/, '');
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#eef1f7">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f7;padding:28px 12px"><tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(4,16,34,.12);font-family:'Segoe UI',Arial,sans-serif">
+      <tr><td style="background:linear-gradient(135deg,#0A2E65,#0a1230);padding:28px 34px 20px;text-align:center">
+        <img src="${origin}/skyglobe-logo.jpg" width="48" height="48" alt="SKYGLOBEGROUP" style="border-radius:11px;background:#fff;padding:3px">
+        <div style="color:#fff;font-size:1.02rem;font-weight:800;letter-spacing:.2em;margin-top:10px">SKYGLOBEGROUP</div>
+        <div style="color:#9fb3dd;font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;margin-top:5px">${d.icon || ''} ${label}</div>
+        <div style="height:3px;width:60px;background:linear-gradient(90deg,transparent,#D4A73A,transparent);margin:13px auto 0"></div>
+      </td></tr>
+      <tr><td style="padding:30px 34px 6px;color:#1a2233">
+        <h1 style="font-size:1.24rem;color:#0A2E65;margin:0 0 12px;font-family:Georgia,serif">${heading}</h1>
+        <div style="font-size:.95rem;line-height:1.7;color:#3c465a">${bodyHtml}</div>
+        ${ref ? `<div style="margin-top:16px;font-size:.84rem;color:#5b6577">Reference: <b style="color:#0A2E65">${ref}</b></div>` : ''}
+        ${quote ? `<div style="background:#f5f7fc;border-left:4px solid #D4A73A;border-radius:8px;padding:13px 15px;margin:16px 0;font-size:.88rem;color:#4a5568"><div style="font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#8a93a3;margin-bottom:5px">Your message</div>${quote}</div>` : ''}
+      </td></tr>
+      <tr><td style="padding:14px 34px 26px">
+        <div style="padding:12px 14px;background:#f7f9fc;border-radius:10px;font-size:.72rem;color:#5b6577;text-align:center">${d.icon || ''} <b>${label}</b> · Simply reply to this email and our team will follow up personally.</div>
+        <div style="padding:10px 14px 0;font-size:.66rem;color:#8a93a3;text-align:center">🛡️ Secured by the <b style="color:#0d3b23">TERRA Credential Network</b> · powered by <b style="color:#3d5af1">YUNEX</b></div>
+        <div style="text-align:center;margin-top:12px;font-size:.62rem;letter-spacing:.16em;color:#9aa4b8;text-transform:uppercase">One World · One Mission ✦</div>
+      </td></tr>
+    </table>
+  </td></tr></table></body></html>`;
+}
+
 // Issue a one-time code (verify_email | reset_password), store hashed, email it.
 async function issueAuthCode(email, kind, subject, intro) {
   const code = _genCode();
@@ -1672,10 +1767,12 @@ async function issueAuthCode(email, kind, subject, intro) {
     email, kind, code_hash: _hashCode(code),
     expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), used: false, attempts: 0,
   }).catch(() => {});
+  const origin = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+  const link = kind === 'verify_email' ? `${origin}/verify-email?token=${encodeURIComponent(signVerifyToken(email))}` : null;
   const html = brandedCodeEmail({
     badge: kind === 'reset_password' ? 'Account Security · Password Reset' : 'Account Security · Email Verification',
     title: kind === 'reset_password' ? 'Reset your password' : 'Confirm your email',
-    intro, code,
+    intro, code, link,
     note: 'This code expires in 30 minutes and can be used once. If you didn\'t request it, simply ignore this email — your account remains safe and unchanged.',
   });
   sendEmail(email, subject, html).catch(err => console.error('auth code email failed:', err.message));
@@ -1746,6 +1843,30 @@ app.post('/api/auth/verify-email', loginLimiter, async (req, res) => {
   if (!r.ok) return res.status(400).json({ error: r.error });
   await dbQuery('PATCH', 'clients', { email_verified: true }, { email: `eq.${email}` }).catch(() => {});
   res.json({ success: true });
+});
+// Confirm email by clicking the link in the email — verifies on the website and
+// shows a premium, branded confirmation page (native, no popup).
+function verifyResultPage(ok, detail) {
+  const origin = process.env.PUBLIC_ORIGIN || 'https://skyglobegroup.com';
+  const head = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Email verification · SKYGLOBEGROUP</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,'Segoe UI',Inter,Arial,sans-serif;background:linear-gradient(160deg,#f4f7fc,#eef1f7);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{max-width:460px;width:100%;background:#fff;border-radius:20px;box-shadow:0 24px 70px rgba(4,19,47,.14);overflow:hidden;text-align:center}
+  .top{background:linear-gradient(135deg,#0A2E65,#0a1230);padding:30px 30px 22px}.top img{width:52px;height:52px;border-radius:12px;background:#fff;padding:3px}
+  .top .n{color:#fff;font-weight:800;letter-spacing:.2em;margin-top:12px;font-size:1.02rem}.top .r{height:3px;width:60px;background:linear-gradient(90deg,transparent,#D4A73A,transparent);margin:12px auto 0}
+  .body{padding:34px 34px 30px}.ic{width:66px;height:66px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:2rem}
+  h1{font-size:1.4rem;color:#0A2E65;margin-bottom:10px}p{color:#54607a;line-height:1.65;font-size:.96rem}
+  .btn{display:inline-block;margin-top:22px;background:linear-gradient(135deg,#0A2E65,#123E87);color:#fff;text-decoration:none;font-weight:700;padding:13px 30px;border-radius:11px}
+  .fine{font-size:.68rem;letter-spacing:.14em;color:#9aa4b8;text-transform:uppercase;margin-top:22px}</style></head><body><div class="card">
+  <div class="top"><img src="${origin}/skyglobe-logo.jpg" alt="SKYGLOBEGROUP"><div class="n">SKYGLOBEGROUP</div><div class="r"></div></div><div class="body">`;
+  const foot = `<div class="fine">One World · One Mission ✦</div></div></div></body></html>`;
+  if (ok) return head + `<div class="ic" style="background:#e7f7ee;color:#12864e">✓</div><h1>Email verified</h1><p><b>${detail}</b> is now confirmed. Your SKYGLOBE ID is active — welcome to the ecosystem.</p><a class="btn" href="${origin}/id">Open my SKYGLOBE ID</a>` + foot;
+  return head + `<div class="ic" style="background:#fdecec;color:#c0392b">!</div><h1>Link invalid or expired</h1><p>${detail}</p><a class="btn" href="${origin}/">Back to SKYGLOBEGROUP</a>` + foot;
+}
+app.get('/verify-email', async (req, res) => {
+  const email = readVerifyToken(String(req.query.token || ''));
+  if (!email) return res.status(400).send(verifyResultPage(false, 'This verification link is invalid or has expired. Please sign in and request a new one.'));
+  await dbQuery('PATCH', 'clients', { email_verified: true }, { email: `eq.${email}` }).catch(() => {});
+  res.send(verifyResultPage(true, email));
 });
 // Resend the email-verification code.
 app.post('/api/auth/resend-verification', loginLimiter, async (req, res) => {
@@ -5501,12 +5622,12 @@ Message: ${message || '(no message — form submission)'}`;
       // Portal first (free, instant, quota-proof) — email as a bonus copy.
       const portalPromise = portalDeliver(rec.client_email, rec.suggested_reply, rec.department);
       sendEmail(rec.client_email, `SKYGLOBEGROUP — ${dept.label.replace(/^SKYGLOBEGROUP\s+/, '')}`,
-        `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a2233">
-          <p>Dear ${rec.client_name || 'Client'},</p>
-          <div style="line-height:1.6">${rec.suggested_reply.replace(/\n/g,'<br>')}</div>
-          <p style="margin-top:16px;font-size:13px;color:#6b7689">If you need anything further, simply reply to this email and one of our team members will follow up personally.</p>
-          <p style="font-size:13px;color:#6b7689">${dept.icon} ${dept.label} · SkyGlobe Group · One World. One Mission.</p>
-        </div>`,
+        brandedDeptEmail({
+          dept,
+          heading: `Dear ${rec.client_name || 'Client'},`,
+          bodyHtml: rec.suggested_reply.replace(/</g, '&lt;').replace(/\n/g, '<br>'),
+          ref,
+        }),
         undefined, deptSender(rec.department)
       ).catch(async (err) => {
         // ZERO-SILENT-FAILURE RULE: if the auto-answer could not be emailed
@@ -5532,13 +5653,13 @@ Message: ${message || '(no message — form submission)'}`;
         `Thank you for contacting SkyGlobe Group. Your message has been received and assigned to our ${dept.label} team${ref ? ` (reference ${ref})` : ''}. A specialist will reply to you shortly.`,
         rec.department).catch(() => {});
       sendEmail(rec.client_email, `We've received your message — ${dept.label}`,
-        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a2233">
-          <h2 style="color:#a87016;font-family:Georgia,serif">${dept.icon} Message received</h2>
-          <p>Dear ${rec.client_name || 'Client'},</p>
-          <p>Thank you for contacting SkyGlobe Group. Your message has been received and assigned to our <strong>${dept.label}</strong> team${ref ? ` (reference <strong>${ref}</strong>)` : ''}. A specialist will reply to you shortly.</p>
-          <div style="background:#f7f8fb;border-left:4px solid #c9a84c;padding:12px 14px;margin:16px 0;font-size:14px;color:#444"><strong>Your message:</strong><br>${String(message || '').slice(0, 600).replace(/</g, '&lt;').replace(/\n/g, '<br>')}</div>
-          <p style="font-size:13px;color:#6b7689">You can reply to this email at any time — it reaches the same team. ${dept.icon} ${dept.label} · SkyGlobe Group · One World. One Mission.</p>
-        </div>`,
+        brandedDeptEmail({
+          dept,
+          heading: 'Message received',
+          bodyHtml: `Dear ${rec.client_name || 'Client'},<br><br>Thank you for contacting SKYGLOBEGROUP. Your message has been received and assigned to our <b>${String(dept.label).replace(/^SKYGLOBEGROUP\s+/, '')}</b> team. A specialist will reply to you shortly.`,
+          ref,
+          quote: String(message || '').slice(0, 600).replace(/</g, '&lt;').replace(/\n/g, '<br>'),
+        }),
         undefined, deptSender(rec.department)
       ).catch(err => console.error('[ai-reception] acknowledgement email failed:', err.message));
     }

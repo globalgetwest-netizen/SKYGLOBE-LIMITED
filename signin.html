@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — SKYGLOBEGROUP</title>
+<link rel="icon" href="/skyglobe-logo-t.png">
+<style>
+:root{--navy:#0A2E65;--ink:#0b1220;--muted:#5b6472;--line:#ececf1;--gold:#D4A73A;--blue:#0a5bd6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(160deg,#f6f8fc,#eef1f7);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.top{height:60px;display:flex;align-items:center;padding:0 24px;max-width:1080px;margin:0 auto;width:100%}
+.top .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:.98rem}
+.top .brand img{width:28px;height:28px;object-fit:contain}
+.top a.home{margin-left:auto;color:var(--blue);font-weight:600;font-size:.9rem}
+.mid{flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:430px;background:#fff;border-radius:20px;box-shadow:0 24px 60px rgba(4,19,47,.12);overflow:hidden}
+.head{background:linear-gradient(135deg,#0A2E65,#0a1230);padding:26px 28px 20px;text-align:center;color:#fff}
+.head img{width:46px;height:46px;border-radius:11px;background:#fff;padding:3px}
+.head .t{font-weight:800;letter-spacing:.16em;margin-top:10px;font-size:.95rem}
+.head .s{color:#9fb3dd;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;margin-top:4px}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;background:none;border:none;padding:16px;font-weight:700;font-size:.95rem;color:var(--muted);cursor:pointer;font-family:inherit;border-bottom:2.5px solid transparent}
+.tabs button.on{color:var(--navy);border-bottom-color:var(--navy)}
+.body{padding:26px 28px 30px}
+label{display:block;font-size:.82rem;font-weight:700;margin:12px 0 6px}
+input.f{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 14px;font-size:.98rem;font-family:inherit;outline:none;color:var(--ink)}
+input.f:focus{border-color:var(--blue)}
+.btn{width:100%;margin-top:18px;background:var(--navy);color:#fff;border:none;border-radius:11px;padding:13px;font-weight:700;font-size:1rem;cursor:pointer}
+.btn:disabled{opacity:.6}
+.err{color:#c0392b;font-size:.86rem;margin-top:10px;min-height:1em}
+.fine{text-align:center;font-size:.8rem;color:var(--muted);margin-top:14px}
+.fine a{color:var(--blue);font-weight:600}
+.vbox{text-align:center}.vbox .big{font-size:2rem}
+.badge{background:#eef4ff;color:var(--navy);border-radius:10px;padding:9px 12px;font-size:.82rem;font-weight:600;text-align:center;margin-bottom:8px;display:none}
+footer{text-align:center;padding:20px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#9aa4b8}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="brand" href="/"><img src="/skyglobe-logo-t.png" alt=""><span>SKYGLOBEGROUP</span></a>
+  <a class="home" href="/">← Home</a>
+</div>
+<div class="mid"><div class="card">
+  <div class="head"><img src="/skyglobe-logo-t.png" alt=""><div class="t">SKYGLOBE ID</div><div class="s">One account · the whole ecosystem</div></div>
+  <div class="tabs">
+    <button id="tabLogin" onclick="setMode('login')">Log in</button>
+    <button id="tabSignup" onclick="setMode('signup')">Create SKYGLOBE ID</button>
+  </div>
+  <div class="body">
+    <div class="badge" id="badge"></div>
+    <!-- auth form -->
+    <form id="form" onsubmit="return submitAuth(event)">
+      <div id="nameWrap" style="display:none"><label>Full name</label><input class="f" id="name" autocomplete="name"></div>
+      <label>Email address</label><input class="f" id="email" type="email" autocomplete="email" required>
+      <label>Password</label><input class="f" id="pass" type="password" required>
+      <button class="btn" id="btn" type="submit">Log in</button>
+      <div class="err" id="err"></div>
+      <div class="fine" id="forgotRow"><a href="#" onclick="return forgot()">Forgot password?</a></div>
+    </form>
+    <!-- verify step -->
+    <div id="verify" style="display:none" class="vbox">
+      <div class="big">📩</div>
+      <h3 style="margin-top:8px;color:var(--navy)">Confirm your email</h3>
+      <p style="color:var(--muted);font-size:.9rem;margin-top:6px">We sent a 6-digit code and a verification link to <b id="vemail"></b>. Enter the code, or just click the link in the email.</p>
+      <label style="text-align:left">Verification code</label><input class="f" id="code" inputmode="numeric" style="text-align:center;letter-spacing:.3em;font-size:1.2rem">
+      <button class="btn" onclick="submitVerify()">Verify email</button>
+      <div class="err" id="verr"></div>
+      <div class="fine"><a href="#" onclick="return resend()">Resend code</a> · <a href="#" onclick="skipVerify();return false">Do this later</a></div>
+    </div>
+  </div>
+</div></div>
+<footer>One World · One Mission ✦</footer>
+<script>
+var MODE='login', EMAIL='';
+function qp(k){var m=location.search.match(new RegExp('[?&]'+k+'=([^&]*)'));return m?decodeURIComponent(m[1].replace(/\+/g,' ')):'';}
+var FROM=qp('from')||'/id';
+if(localStorage.getItem('sky_token')){ location.replace(FROM); }
+function setMode(m){ MODE=m;
+  document.getElementById('tabLogin').classList.toggle('on',m==='login');
+  document.getElementById('tabSignup').classList.toggle('on',m==='signup');
+  document.getElementById('nameWrap').style.display=m==='signup'?'block':'none';
+  document.getElementById('pass').setAttribute('autocomplete',m==='signup'?'new-password':'current-password');
+  document.getElementById('btn').textContent=m==='signup'?'Create my SKYGLOBE ID':'Log in';
+  document.getElementById('forgotRow').style.display=m==='login'?'block':'none';
+  document.getElementById('err').textContent='';
+}
+async function submitAuth(e){ e.preventDefault(); var err=document.getElementById('err'); err.textContent='';
+  var name=document.getElementById('name').value.trim(), email=document.getElementById('email').value.trim(), pass=document.getElementById('pass').value;
+  if(!email||!pass){ err.textContent='Email and password are required.'; return false; }
+  var btn=document.getElementById('btn'), o=btn.textContent; btn.disabled=true; btn.textContent='Please wait…';
+  try{
+    var url=MODE==='signup'?'/api/auth/signup':'/api/auth/login';
+    var body=MODE==='signup'?{name:name,email:email,password:pass}:{email:email,password:pass};
+    var r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    var d=await r.json().catch(function(){return {};});
+    if(!r.ok||!d.success){ err.textContent=d.error||'Could not sign in.'; btn.disabled=false; btn.textContent=o; return false; }
+    localStorage.setItem('sky_token',d.token); EMAIL=email;
+    if(MODE==='signup'&&d.email_verified===false){ showVerify(email); btn.disabled=false; btn.textContent=o; return false; }
+    location.replace(FROM);
+  }catch(_){ err.textContent='Network error. Please try again.'; btn.disabled=false; btn.textContent=o; }
+  return false;
+}
+function showVerify(email){ document.getElementById('form').style.display='none'; document.getElementById('verify').style.display='block'; document.getElementById('vemail').textContent=email; }
+function skipVerify(){ location.replace(FROM); }
+async function submitVerify(){ var code=document.getElementById('code').value.trim(), ve=document.getElementById('verr'); ve.style.color='#c0392b'; ve.textContent='';
+  var r=await fetch('/api/auth/verify-email',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:EMAIL,code:code})});
+  var d=await r.json().catch(function(){return {};});
+  if(!r.ok||!d.success){ ve.textContent=d.error||'Incorrect code.'; return; }
+  ve.style.color='#12864e'; ve.textContent='✔ Verified! Redirecting…'; setTimeout(function(){location.replace(FROM);},700);
+}
+async function resend(){ await fetch('/api/auth/resend-verification',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:EMAIL})}).catch(function(){}); var ve=document.getElementById('verr'); ve.style.color='#12864e'; ve.textContent='A new code is on its way.'; return false; }
+async function forgot(){ var email=document.getElementById('email').value.trim(); var err=document.getElementById('err'); if(!email){ err.textContent='Enter your email above first.'; return false; }
+  await fetch('/api/auth/forgot-password',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:email})}).catch(function(){}); err.style.color='#12864e'; err.textContent='If that account exists, a reset code has been emailed.'; return false; }
+// context badge (from=academy etc.)
+var CTX={academy:'🎓 Your learning identity across the ecosystem',mobility:'🌍 Your mobility identity across the ecosystem',terra:'🛡️ A trusted identity, verified by TERRA',yunex:'💜 Trade, invest and build across the ecosystem'};
+(function(){ var f=qp('ctx'); if(CTX[f]){ var b=document.getElementById('badge'); b.style.display='block'; b.textContent=CTX[f]; } setMode(qp('mode')==='signup'?'signup':'login'); })();
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
+</script>
+</body>
+</html>
