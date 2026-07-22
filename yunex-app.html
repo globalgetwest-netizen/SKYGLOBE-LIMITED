@@ -36,9 +36,10 @@ a{text-decoration:none;color:inherit}
 .hero .marks{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
 .chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:7px 15px;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:7px}
 /* Pillars */
-.grid{display:grid;gap:16px;margin-top:22px}
+.grid{display:grid;gap:18px;margin-top:22px}
 .g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(228px,1fr))}
+@media(max-width:520px){.g3{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}}
 .card{background:#fff;border:1px solid #e8eaf2;border-radius:16px;padding:22px;transition:transform .15s,box-shadow .15s}
 /* immersive listing view */
 .listing-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;align-items:start}
@@ -52,11 +53,19 @@ a{text-decoration:none;color:inherit}
 .vwrap{position:relative;width:100%;padding-top:56.25%;margin-top:12px;border-radius:12px;overflow:hidden;background:#000}
 .vwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .listing-body{display:grid;gap:14px;margin-top:18px}
-.lc-img{position:relative;height:160px;border-radius:12px;overflow:hidden;margin:-4px -4px 14px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;background:linear-gradient(125deg,#eef1fb,#f6f0fb)}
-.lc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#eef1f8}
-.card:hover .lc-img img{transform:scale(1.04)}
-.lc-img img{transition:transform .35s ease}
+/* premium marketplace listing card — consistent 4:3 image, tight rhythm */
+.lcard{padding:12px;border-radius:15px}
+.lc-img{position:relative;aspect-ratio:4/3;overflow:hidden;margin:-12px -12px 12px;border-radius:15px 15px 0 0;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:linear-gradient(125deg,#eef1fb,#f6f0fb)}
+.lc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#eef1f8;transition:transform .4s ease}
+.lcard:hover .lc-img img{transform:scale(1.05)}
 .card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(10,18,48,.1)}
+.lcard:hover{box-shadow:0 14px 30px rgba(10,18,48,.12)}
+.lc-cat{font-size:.66rem;font-weight:800;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em;line-height:1.3}
+.lc-corr{font-size:.66rem;color:#3d5af1;margin-top:2px;font-weight:600}
+.lc-title{font-size:.92rem;line-height:1.34;margin-top:5px;font-weight:700;color:#0f1c3a;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.48em}
+.lc-price{margin-top:6px;font-size:1rem;color:#0f1c3a}.lc-price b{font-weight:800}
+.lc-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:.74rem;color:#67708f}
+.lc-seller{margin-top:9px;padding-top:9px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:.75rem}
 .card .ic{font-size:1.7rem}
 .card h3{margin-top:12px;font-size:1.05rem}
 .card p{color:#67708f;font-size:.86rem;margin-top:6px;line-height:1.55}
@@ -410,16 +419,13 @@ function listingCard(l){
   const img=(l.images&&l.images[0])
     ?`<div class="lc-img">${sampleTag}${l.pillar_icon}<img src="${esc(l.images[0])}" alt="" loading="lazy" onerror="this.remove()"></div>`
     :`<div class="lc-img lc-noimg">${sampleTag}${l.pillar_icon}</div>`;
-  return `<div class="card" style="cursor:pointer" onclick="openListing('${l.ref}')">
+  return `<div class="card lcard" style="cursor:pointer" onclick="openListing('${l.ref}')">
     ${img}
-    <div style="font-size:.7rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div style="font-size:.68rem;color:#3d5af1;margin-top:2px">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
-    <h3 style="margin-top:5px;font-size:1rem">${esc(l.title)}</h3>
-    <div style="margin-top:8px">${money(l)}</div>
-    ${l.saves?`<div style="font-size:.72rem;color:#c0392b;margin-top:4px">❤️ ${l.saves} saved</div>`:''}
-    ${l.location?`<div class="muted" style="font-size:.8rem;margin-top:4px">📍 ${esc(l.location)}</div>`:''}
-    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap">
-      <span class="muted" style="font-size:.8rem">${esc(l.seller.name)}</span>${marks}
-    </div>
+    <div class="lc-cat">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div class="lc-corr">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
+    <h3 class="lc-title">${esc(l.title)}</h3>
+    <div class="lc-price">${money(l)}</div>
+    <div class="lc-meta">${l.location?`<span>📍 ${esc(l.location)}</span>`:''}${l.saves?`<span style="color:#c0392b">❤️ ${l.saves}</span>`:''}</div>
+    <div class="lc-seller"><span class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%">${esc(l.seller.name)}</span>${marks}</div>
   </div>`;
 }
 /* Marketplace › Sell — the ONE place that owns product management (IA standard) */
