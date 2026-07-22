@@ -1,229 +1,173 @@
-/* SkyGlobe Group — Department Contact Strip + On-Site Message Form
-   Every public page shows the professional email of the department that owns
-   it. The "Message this department" button opens a premium ON-SITE form (no
-   mail app involved) that feeds straight into the AI Reception — answered by
-   AI within minutes or escalated to the department's specialists. The address
-   itself is click-to-copy for clients who prefer their own email. */
-(function () {
-  'use strict';
-  if (window.__sgDeptContact) return; window.__sgDeptContact = true;
+# SKYGLOBE GROUP — Architecture Specification
 
-  var DEPTS = {
-    travel:    { icon: '🌐', label: 'Global Mobility',           email: 'mobility@skyglobegroup.com' },
-    education: { icon: '🎓', label: 'SkyGlobe Academy',          email: 'education@skyglobegroup.com' },
-    legal:     { icon: '📜', label: 'Legal & Trust Services',    email: 'legal@skyglobegroup.com' },
-    identity:  { icon: '🪪', label: 'Digital Identity',          email: 'id@skyglobegroup.com' },
-    finance:   { icon: '💳', label: 'Finance & Payments',        email: 'finance@skyglobegroup.com' },
-    innovation:{ icon: '🚀', label: 'Innovation & Technology',   email: 'innovation@skyglobegroup.com' },
-    general:   { icon: '📨', label: 'SkyGlobe Group',            email: 'support@skyglobegroup.com' },
-  };
-  var PAGE_DEPT = {
-    'work-permit': 'travel', 'conferences': 'travel', 'packages': 'travel',
-    'courses': 'education', 'course-learn': 'education', 'academy-admission': 'education',
-    'academy-portal': 'education', 'skyglobe-kids-academy': 'education',
-    'legal-documents': 'legal',
-    'digital-id': 'identity', 'digitalization': 'innovation', 'id-verify': 'identity',
-    'payments': 'finance', 'pay': 'finance',
-    'more-services': 'general', 'index': 'general', '': 'general',
-  };
+**The founding reference for every product, design, and engineering decision in the ecosystem.**
 
-  function pageKey() {
-    var p = location.pathname.replace(/^\/+|\/+$/g, '').replace(/\.html$/i, '');
-    return PAGE_DEPT.hasOwnProperty(p) ? PAGE_DEPT[p] : 'general';
-  }
+> *“We don’t build applications. We build the infrastructure upon which Africa builds its future.”*
 
-  // Services offered by each department — shown as a selector in the form so
-  // the message arrives pre-classified ("according to the system of services
-  // of that particular email").
-  var SERVICES = {
-    travel:    ['Student Visa', 'Work Visa / Permit', 'Tourist / Visit Visa', 'Flight & Hotel Letters', 'Travel Insurance', 'Conference Invitation', 'Other'],
-    education: ['Certificate Programs', 'SkyGlobe Academy Admission', 'University Admission', 'Scholarship Support', 'Other'],
-    legal:     ['AI Legal Document', 'Notarisation / Apostille', 'Document Verification', 'Other'],
-    identity:  ['Premium Digital ID', 'ID Verification', 'Digitalization Services', 'Other'],
-    finance:   ['Payment Issue', 'Refund Request', 'Invoice / Receipt', 'Other'],
-    innovation:['Digitalization Services', 'Technology Partnership', 'Developer / API Enquiry', 'Product Idea', 'Other'],
-    general:   ['General Enquiry', 'Complaint', 'Partnership', 'Other'],
-  };
-  var EMAIL_DEPT = { 'visas@skyglobegroup.com': 'travel' }; // legacy alias — old address works forever
-  Object.keys(DEPTS).forEach(function (k) { EMAIL_DEPT[DEPTS[k].email] = k; });
+- **Status:** Living constitution — Part I is permanent; Part II is revised as the ecosystem grows.
+- **Owner:** Office of the CEO, SkyGlobe Group.
+- **Rule of use:** When any future decision conflicts with this document, either the decision changes or this document is *deliberately* amended — never silently ignored.
 
-  var deptKey = null, dept = null;
+---
 
-  function copyAddress(el) {
-    var done = function () {
-      var old = el.textContent;
-      el.textContent = '✓ Copied to clipboard';
-      setTimeout(function () { el.textContent = old; }, 1600);
-    };
-    try { navigator.clipboard.writeText(dept.email).then(done, done); }
-    catch (e) { done(); }
-  }
+# PART I — THE CONSTITUTION (permanent)
 
-  function openForm(forKey) {
-    var k = (forKey && DEPTS[forKey]) ? forKey : deptKey;
-    var d = DEPTS[k] || DEPTS.general;
-    var svcOptions = (SERVICES[k] || SERVICES.general)
-      .map(function (sv) { return '<option>' + sv + '</option>'; }).join('');
-    var existing = document.getElementById('sgdcModal');
-    if (existing) existing.remove();
-    var m = document.createElement('div');
-    m.id = 'sgdcModal';
-    m.style.cssText = 'position:fixed;inset:0;z-index:99995;background:rgba(4,8,18,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px';
-    m.innerHTML =
-      '<div style="position:relative;width:min(480px,96vw);background:linear-gradient(160deg,#0e1730,#0b1120);border:1px solid rgba(212,167,58,.35);border-radius:18px;padding:26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.6);font-family:\'Segoe UI\',system-ui,sans-serif;color:#eef2fb">' +
-      '<button id="sgdcX" aria-label="Close" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#8fa0c0;cursor:pointer;font-size:.85rem;line-height:1">✕</button>' +
-      '<div style="font-size:.64rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#e9c86a;margin-bottom:4px">' + d.icon + ' ' + d.label + '</div>' +
-      '<h3 style="margin:0 0 4px;font-size:1.2rem">Message this department</h3>' +
-      '<p style="margin:0 0 16px;font-size:.78rem;color:#8fa0c0;line-height:1.5">Delivered instantly to our AI concierge — you\'ll get a reply by email within minutes, and a specialist follows up personally when needed.</p>' +
-      '<div id="sgdcBody">' +
-      '<input id="sgdcName" placeholder="Your full name" style="width:100%;margin-bottom:10px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#eef2fb;font-size:.9rem;font-family:inherit;box-sizing:border-box">' +
-      '<input id="sgdcEmail" type="email" placeholder="Your email address" style="width:100%;margin-bottom:10px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#eef2fb;font-size:.9rem;font-family:inherit;box-sizing:border-box">' +
-      '<select id="sgdcSvc" style="width:100%;margin-bottom:10px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:#141d36;color:#eef2fb;font-size:.9rem;font-family:inherit;box-sizing:border-box">' +
-      '<option value="">— Which service is this about? —</option>' + svcOptions + '</select>' +
-      '<textarea id="sgdcMsg" placeholder="How can we help? Include your application reference if you have one." style="width:100%;min-height:110px;margin-bottom:6px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#eef2fb;font-size:.9rem;font-family:inherit;line-height:1.5;box-sizing:border-box;resize:vertical"></textarea>' +
-      '<div id="sgdcErr" style="display:none;color:#ff9c9c;font-size:.78rem;margin-bottom:8px"></div>' +
-      '<button id="sgdcSend" style="width:100%;padding:13px;border:none;border-radius:11px;background:linear-gradient(135deg,#f7d774,#e4b132);color:#181000;font-weight:800;font-size:.9rem;cursor:pointer;box-shadow:0 8px 22px rgba(228,177,50,.35);font-family:inherit">Send message</button>' +
-      '<div style="text-align:center;margin-top:12px;font-size:.72rem;color:#8fa0c0">or write from your own email: <b class="sgdc-copyonly" data-mail="' + d.email + '" title="Click to copy" style="color:#c9d4ea;cursor:copy">' + d.email + '</b></div>' +
-      '</div></div>';
-    m.addEventListener('click', function (e) { if (e.target === m) m.remove(); });
-    document.body.appendChild(m);
-    document.getElementById('sgdcX').onclick = function () { m.remove(); };
-    document.getElementById('sgdcSend').onclick = function () {
-      var name = document.getElementById('sgdcName').value.trim();
-      var email = document.getElementById('sgdcEmail').value.trim();
-      var msg = document.getElementById('sgdcMsg').value.trim();
-      var err = document.getElementById('sgdcErr');
-      if (!name || !email || !msg) { err.textContent = 'Please fill in your name, email and message.'; err.style.display = 'block'; return; }
-      var btn = document.getElementById('sgdcSend');
-      btn.disabled = true; btn.textContent = 'Sending…';
-      fetch('/api/dept-message', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dept: k, name: name, email: email,
-          message: (document.getElementById('sgdcSvc').value ? 'Service: ' + document.getElementById('sgdcSvc').value + '\n\n' : '') + msg }),
-      }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
-        .then(function (res) {
-          if (!res.ok) throw new Error((res.d && res.d.error) || 'Could not send. Please try again.');
-          document.getElementById('sgdcBody').innerHTML =
-            '<div style="text-align:center;padding:26px 6px">' +
-            '<div style="font-size:2.4rem;margin-bottom:10px">✅</div>' +
-            '<div style="font-weight:700;font-size:1.02rem;margin-bottom:6px">Message received</div>' +
-            '<div style="font-size:.8rem;color:#8fa0c0;line-height:1.6">Our AI concierge is already reading it — check <b style="color:#c9d4ea">' + email.replace(/</g, '&lt;') + '</b> for a reply within minutes. A ' + d.label + ' specialist follows up personally if your case needs one.</div>' +
-            '</div>';
-        })
-        .catch(function (e) { err.textContent = e.message; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Send message'; });
-    };
-  }
+## 1. Mission
 
-  function mount() {
-    deptKey = pageKey(); dept = DEPTS[deptKey] || DEPTS.general;
-    var footer = document.querySelector('footer');
-    var strip = document.createElement('div');
-    strip.setAttribute('role', 'complementary');
-    strip.style.cssText = 'background:linear-gradient(135deg,#0b1120,#131c33);border-top:1px solid rgba(212,167,58,.25);padding:26px 20px;text-align:center;font-family:"Segoe UI",system-ui,sans-serif';
-    strip.innerHTML =
-      '<div style="max-width:820px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">' +
-      '<span style="font-size:1.5rem">' + dept.icon + '</span>' +
-      '<div style="text-align:left;min-width:0">' +
-        '<div style="font-size:.66rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#e9c86a">' + dept.label + ' · Direct line</div>' +
-        '<span id="sgdcAddr" title="Click to copy" style="color:#eef2fb;font-weight:700;font-size:1.02rem;cursor:copy;word-break:break-all">' + dept.email + '</span>' +
-        '<div style="font-size:.72rem;color:#8fa0c0;margin-top:2px">AI-assisted inbox — answered 24/7, escalated to our specialists when needed. Click any address to message that department right here.</div>' +
-      '</div>' +
-      '<button id="sgdcOpen" style="flex-shrink:0;border:none;background:linear-gradient(135deg,#f7d774,#e4b132);color:#181000;font-size:.8rem;font-weight:800;padding:11px 20px;border-radius:999px;cursor:pointer;box-shadow:0 6px 18px rgba(228,177,50,.35);font-family:inherit">💬 Message this department</button>' +
-      '</div>' +
-      '<button id="sgdcAllBtn" style="margin-top:14px;background:none;border:none;color:#8fa0c0;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:inherit">▾ View all department contacts</button>' +
-      '<div id="sgdcAll" style="display:none;max-width:820px;margin:12px auto 0;display:none;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px">' +
-      Object.keys(DEPTS).map(function (k) {
-        var d2 = DEPTS[k];
-        return '<div class="sgdc-chip" data-mail="' + d2.email + '" title="Click to copy" style="cursor:copy;display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:11px;background:#182342;border:1px solid rgba(212,167,58,.4);text-align:left;box-shadow:0 3px 10px rgba(0,0,0,.3)">' +
-          '<span style="font-size:1.05rem">' + d2.icon + '</span><div style="min-width:0"><div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#f0c75e">' + d2.label + '</div>' +
-          '<div style="font-size:.8rem;color:#ffffff;font-weight:700;word-break:break-all">' + d2.email + '</div></div></div>';
-      }).join('') +
-      '</div>';
-    if (footer && footer.parentNode) footer.parentNode.insertBefore(strip, footer);
-    else document.body.appendChild(strip);
-    document.getElementById('sgdcOpen').addEventListener('click', function () { openForm(); });
-    var addr = document.getElementById('sgdcAddr');
-    addr.setAttribute('title', 'Click to message this department');
-    addr.style.cursor = 'pointer';
-    addr.addEventListener('click', function () { openForm(); });
-    // Full directory toggle + click-to-copy chips
-    var allBtn = document.getElementById('sgdcAllBtn'), all = document.getElementById('sgdcAll');
-    allBtn.addEventListener('click', function () {
-      var open = all.style.display !== 'none';
-      all.style.display = open ? 'none' : 'grid';
-      allBtn.textContent = open ? '▾ View all department contacts' : '▴ Hide department contacts';
-    });
-    // chips are handled by the delegated click handler (opens that dept's form)
-  }
+SkyGlobe Group is a **digital ecosystem**, not a travel company. Travel is one service the Group renders; it does not define the Group.
 
-  // Site-wide behavior for every listed address & number — all inside the
-  // website, never an app chooser:
-  //  · click a department EMAIL  → that department's message form opens here
-  //  · click the copy-only line inside the form → address copied
-  //  · click the PHONE number    → dials on mobile, copies on desktop
-  document.addEventListener('click', function (e) {
-    if (!e.target.closest) return;
-    var copyEl = e.target.closest('.sgdc-copyonly[data-mail]');
-    if (copyEl) {
-      e.preventDefault();
-      var mail0 = copyEl.getAttribute('data-mail');
-      var done0 = function () {
-        var old0 = copyEl.textContent;
-        copyEl.textContent = '✓ Copied';
-        setTimeout(function () { copyEl.textContent = old0; }, 1400);
-      };
-      try { navigator.clipboard.writeText(mail0).then(done0, done0); } catch (err) { done0(); }
-      return;
-    }
-    var el = e.target.closest('.sg-copy[data-mail], .sgdc-chip[data-mail]');
-    if (el) {
-      e.preventDefault();
-      var mail = el.getAttribute('data-mail');
-      openForm(EMAIL_DEPT[mail] || 'general');
-      return;
-    }
-    var tel = e.target.closest('.sg-tel[data-tel]');
-    if (tel) {
-      var num = tel.getAttribute('data-tel');
-      if (window.matchMedia && window.matchMedia('(pointer:coarse)').matches) {
-        location.href = 'tel:' + num; // phones: place the call
-        return;
-      }
-      e.preventDefault(); // desktops: copy, never an app chooser
-      var done = function () {
-        var old = tel.textContent;
-        tel.textContent = '✓ Copied: ' + num;
-        setTimeout(function () { tel.textContent = old; }, 1600);
-      };
-      try { navigator.clipboard.writeText(num).then(done, done); } catch (err) { done(); }
-    }
-  });
+The Group builds **foundational digital infrastructure** — trust, economy, and intelligence — designed uniquely for Africa’s needs, while serving clients globally through its service verticals.
 
-  // ── PAGE NAVIGATION — Back / Next on every page ─────────────────────────
-  // Premium floating pair (bottom-left): ‹ returns to the previous page,
-  // › goes forward again. Works with the browser history, so it respects
-  // both real page changes and in-page navigation.
-  function mountNav() {
-    if (document.getElementById('sgNavPair')) return;
-    if (document.querySelector('.nav-arrows')) return; // page has its own site-wide pair
-    var wrap = document.createElement('div');
-    wrap.id = 'sgNavPair';
-    wrap.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:99990;display:flex;gap:8px';
-    function mkBtn(label, title, fn) {
-      var b = document.createElement('button');
-      b.textContent = label;
-      b.setAttribute('aria-label', title); b.title = title;
-      b.style.cssText = 'width:42px;height:42px;border-radius:50%;border:1px solid rgba(212,167,58,.45);background:rgba(7,17,35,.88);backdrop-filter:blur(6px);color:#e9c86a;font-size:1.15rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);line-height:1;transition:transform .15s';
-      b.onmouseover = function(){ b.style.transform='scale(1.08)'; };
-      b.onmouseout = function(){ b.style.transform=''; };
-      b.onclick = fn;
-      return b;
-    }
-    wrap.appendChild(mkBtn('‹', 'Back to previous page', function(){ history.back(); }));
-    wrap.appendChild(mkBtn('›', 'Forward', function(){ history.forward(); }));
-    document.body.appendChild(wrap);
-  }
+We separate **vision from claims**: we do not claim to be the first in the world. Large-scale digital public infrastructure exists elsewhere (India’s Aadhaar/UPI, Estonia’s X-Road, Brazil’s Pix). Our claim — defensible in any room — is a **new architecture uniquely designed for Africa, African-owned and African-governed.**
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ mount(); mountNav(); });
-  else { mount(); mountNav(); }
-})();
+## 2. The Ecosystem Architecture
+
+```
+                        SKYGLOBE GROUP
+              Global Innovation & Infrastructure
+                               │
+            ┌──────────────────┴──────────────────┐
+            ▼                                     ▼
+         TERRA                                 YUNEX
+   Trust Infrastructure               Economic Infrastructure
+   identity · verification            payments · commerce
+   records · security                 trade · finance
+            └──────────────────┬──────────────────┘
+                               ▼
+                            NORIA ✦
+                     The Intelligence Layer
+        (not a product beside the platforms — the intelligence
+         that runs WITHIN every platform and every vertical)
+                               │
+    ───────────────────────────────────────────────────────────
+      SECTOR VERTICALS (thin applications on the layers above)
+      Travel & Mobility · Education (Academy) · Legal · Digital
+      Identity · Finance · future: Health, Agriculture, Justice…
+    ───────────────────────────────────────────────────────────
+                               │
+        Governments · Banks · Businesses · NGOs · Individuals
+```
+
+**Level definitions**
+
+| Level | Name | Role |
+|---|---|---|
+| 1 | **SKYGLOBE GROUP** | The architect of the ecosystem. Research, innovation, governance, investment, partnerships. Global. |
+| 2 | **TERRA** — Africa Trust Infrastructure | *Who are you? Is this real? Can this be trusted?* Identity, business identity, authentication, verification, certificates, documents, signatures, compliance, fraud intelligence, security, data exchange, APIs. |
+| 2 | **YUNEX** — Africa Economic Infrastructure | *Now that we trust each other, let us transact.* Payments, wallets, banking integration, cross-border commerce, marketplace, SME & supply-chain infrastructure, logistics, investment, merchant platform. |
+| 3 | **NORIA** — The Intelligence Layer | Embedded intelligence powering every layer: triage, verification, fraud detection, drafting, tutoring, advising, conversation. NORIA is **not a chatbot product**; it is the mind inside every SkyGlobe surface. |
+| 4 | National Integration Layer | Per-country adapters (identity, payments, government services, tax). Countries keep control of their systems; we provide the bridges. **Horizon phase.** |
+| 5 | Developer Platform | Public APIs/SDKs exposing identity, payments, AI, verification, notifications. **Horizon phase.** |
+| 6 | Sector Solutions | Thin vertical applications reusing the layers: Travel, Education, Legal, ID, Finance today; Health, Agriculture, Justice, Tourism, Energy tomorrow. |
+
+**Dependency rule:** economy runs on trust; both run on intelligence. `Terra verifies, YUNEX moves, NORIA thinks.`
+
+**Global vs. Africa-only:** SKYGLOBE GROUP and NORIA are global. TERRA and YUNEX are Africa-only by mission. Products live *inside* the platforms as sub-brands — never as new sibling companies.
+
+**The YUNEX product family (naming law):** two clean words, no geographic suffix — YUNEX already means Africa.
+
+| Product | Scope |
+|---|---|
+| **YUNEX Pay** | Payments, wallets, settlement |
+| **YUNEX Trade** | Cross-border B2B commerce — the flagship. Tagline: *“Africa’s gateway to global commerce.”* |
+| **YUNEX Market** | Consumer marketplace (later) |
+| **YUNEX Logistics · YUNEX Capital** | As the family grows |
+
+**Corridors are features, never brands:** inside YUNEX Trade, trade corridors are launched as features — **China Corridor** first (verified suppliers, sourcing, settlement, NORIA translation & negotiation), then Gulf, Europe, and the deepest one: the **Africa Corridor** (AfCFTA — the continent trading with itself). A corridor name must never appear in a product or company name; corridors change, infrastructure does not.
+
+**The canonical user story (reuse in every pitch):** a Ghanaian business owner finds a verified supplier through YUNEX Trade → TERRA verifies the supplier → YUNEX handles payment → NORIA negotiates, translates and analyzes → logistics partners deliver.
+
+**Brand protection (governance requirement):** before YUNEX or TERRA take money or sign partners, run trademark searches and register the marks (Ghana/ARIPO first, then key markets). Known collisions to navigate: “Yunex Traffic” (Siemens spin-off, different industry) and the many existing “Terra” marks — TERRA always rides with “A SkyGlobe Group Platform.”
+
+## 3. Governance & Brand Law
+
+1. **Masterbrand:** SKYGLOBE GROUP stands *above* all products, never beside them. Every platform carries “A SkyGlobe Group Platform.”
+2. **TERRA and YUNEX are Africa-only** by mission: built for Africa, by Africans, access reserved for the continent (geo, device, and identity gating when they launch as products). SkyGlobe Group and its service verticals remain global.
+3. **The NORIA Star (✦):** a small orange four-point star appears on every SkyGlobe Group logo and platform mark, at the **upper-right of the emblem** (“the star above the globe”). Defined once, never moved. It honors NORIA and declares: *intelligence lives inside everything we build.*
+4. **Office of the CEO is sacred:** ceo@ is never listed publicly, never AI-auto-answered, never re-classified by the AI. Public submissions addressed to it reroute to General.
+5. **Data dignity:** no real person’s religion or private attributes visible on public surfaces; machine-readable layers only where operationally required. No sample data based on real nationalities or names of any group we serve.
+6. **Zero-silent-failure:** any automated action that fails (an email, a delivery, a payment fulfilment) must surface — to the human queue, the error log, or both. Silence is forbidden by architecture.
+
+## 4. Design Constitution
+
+**Philosophy:** Elegant · Calm · Intelligent · Premium · Fast · Accessible · Consistent · Human-centered · Scalable. Every interaction intentional. This is a Digital Operating System, not “an app.”
+
+**Ecosystem palette (the corrected law — honoring the real logos):**
+
+| Surface | Colors |
+|---|---|
+| **SkyGlobe Group (parent)** | Deep navy `#041022 / #0A2E65` + premium gold `#D4A73A / #c9a84c` — the signature, unchanged |
+| **TERRA** | Green accent `#3fae6a` (+ globe blues) on the shared navy — secure, alive, grounded |
+| **YUNEX** | Blue → purple accent `#3d5af1 → #b326d9` on the shared navy — dynamic, modern, economic |
+| **NORIA** | The orange star `#ff9f1c → #e65100` + gold — reserved; orange elsewhere appears **only** for live activity/progress (i.e., where the intelligence is working) |
+
+**Color rules:** blue = structure/trust/navigation · gold = premium moments, used sparingly so it keeps its power · green = TERRA/trust states & success · orange = NORIA + live activity only. Color is never the sole carrier of meaning (icon + word always accompany it).
+
+**Type:** one family per surface (system stack: `'Segoe UI', system-ui, -apple-system, sans-serif`; Georgia serif reserved for display/manifesto headlines). Scale: Display → Heading → Body → Caption. No decorative fonts.
+
+**Spacing:** 8-point system (8 / 16 / 24 / 32 / 48 / 64).
+
+**Components:** premium cards (soft radius, comfortable spacing, one primary action, minimal noise); buttons — primary filled (gold or context accent), secondary outlined, tertiary text; one rounded icon family; pill CTAs.
+
+**Motion:** nothing appears instantly — cards rise gently, pages slide, buttons respond subtly; motion reinforces understanding, never distracts.
+
+**Text:** short, clear, imperative. “Continue”, “Verify Identity” — never “Click here to…”.
+
+**Accessibility from the start:** high contrast, adjustable text, screen-reader labels, focus states, keyboard paths.
+
+The living implementation of this section is **`skyglobe-ds.css`** — the ecosystem design tokens and components. Every new page imports it.
+
+---
+
+# PART II — THE ROLLING TECHNICAL BLUEPRINT (revised as we grow)
+
+## 5. What exists today (Phase 0 — in production)
+
+The Group is **not** a paper vision. The shared-services layer that usually takes years is live:
+
+| Shared service | Implementation today |
+|---|---|
+| **Authentication** | One client account system (scrypt-hashed, signed sessions) serving all verticals; role-based CEO/staff auth with department attribution |
+| **Payments (proto-YUNEX)** | One engine: initialize → verify → fulfil, products across travel, legal, ID, education; CEO complimentary grants with signed claim links |
+| **Trust (proto-TERRA)** | Digital ID issuance & public verification; legal document generation; signed, expiring unlock links; document delivery vault |
+| **Intelligence (NORIA)** | AI triage of all 9 department inboxes; auto-answer with confidence gating; human escalation with CEO assignment; conversational loop in client Messages; AI legal drafting; CEO command-centre assistant |
+| **Notifications** | Email with automatic failover (Resend → Brevo), portal-first in-app delivery (zero quota), SSE live push, weekly provider keep-alive |
+| **Communications** | 9 professional addresses on Cloudflare Email Routing → worker → inbound AI pipeline with 4-layer loop immunity |
+| **Presence** | skyglobegroup.com (global portal) · terra.skyglobegroup.com · yunex.skyglobegroup.com (worker-served sovereign subdomains) |
+
+**Stack reality:** Node/Express monolith (`server.js`) + static HTML surfaces + Supabase (Postgres/storage) + Render hosting + Cloudflare (DNS, email routing, workers). Single repo. No build pipeline — by design, for operational simplicity at this stage.
+
+## 6. The evolution path (evolve, never rebuild)
+
+The engine is renamed in our thinking: `server.js` and its services are the **SkyGlobe Core**. Every experience — public site, TERRA, YUNEX, dashboards, portals — is a *face* on that core. Travel keeps every URL and function; it is re-homed as the first vertical, never diminished (it funds the mission).
+
+| Phase | Deliverable | Status |
+|---|---|---|
+| 1 | This specification | ✅ |
+| 2 | `skyglobe-ds.css` design tokens & components | ✅ |
+| 3 | Admin portal → **Command Bridge**: ecosystem-layer navigation (Group / NORIA / TERRA / YUNEX / Verticals / Operations), morning briefing greeting | ✅ |
+| 4 | Role-scoped staff portal: department-scoped reception queues; foundation for full permissions | ✅ first increment |
+| 5 | Public portal rebalance: Group-first hero + ecosystem section; travel first-among-equals | ✅ first increment |
+| 6 | Unified client dashboard: module gateway (“Good morning” → Travel / Documents / Payments / Messages) | ✅ first increment |
+| 7 | NORIA founding page + full repositioning of all copy to “intelligence layer” | Next |
+| 8 | Full roles & permissions matrix (visa officer, admissions, finance, support, AI supervisor…) with audit trail | Next |
+| 9 | TERRA/YUNEX first real products (candidate: TERRA credential verification API; YUNEX unified merchant checkout) | Planned |
+| 10 | Developer platform (public APIs), national adapters, sector verticals (health first, under the strictest privacy rules we have ever written) | Horizon |
+
+## 7. Security & privacy model (current increment)
+
+- Roles: `ceo` (master key — everything), `staff` (operational tools; reception queues scoped to their department when one is set; CEO-only surfaces return 401).
+- All admin/staff actions attributed by name in the activity log.
+- Client data: clients see only their own records (session-scoped queries).
+- Secrets live in environment variables only; never in the repo.
+- Public forms are rate-limited, sanitized, and CEO-rerouted (see §3.4).
+
+## 8. Amendment log
+
+| Date | Change |
+|---|---|
+| 2026-07 | Founding version: constitution, palette law, ecosystem levels, Phase 0 inventory, phases 1–6 executed. |
+| 2026-07 | Amendment 1: YUNEX product family naming law (Pay · Trade · Market), corridors-as-features doctrine (China Corridor first, Africa Corridor as the AfCFTA mission), canonical user story, brand-protection requirement. |
+| 2026-07 | Amendment 2 — Division realignment & the ecosystem gateway. Departments renamed to division level: **Global Mobility** (🌐 mobility@, everything travel — visas, permits, migration, flights, hotels, insurance, recruitment, conferences; legacy visas@ aliased forever), **SkyGlobe Academy** (🎓 education for every age — /academy is the proud address, /kids-academy redirects), **Legal & Trust Services** (📜, TERRA-shadow), **Digital Identity** (🪪, TERRA-shadow), **Finance & Payments** (💳, YUNEX-shadow), and the new **Innovation & Technology** (🚀 innovation@ — digitalization, partnerships, developer enquiries, R&D). Public portal becomes the ecosystem gateway: dark navy hero ("Building the Intelligent Foundation of Tomorrow"), honest stats, Explore Ecosystem / Partner With Us, Solutions-for-Every-World audience doors (Individuals · Businesses · Governments & Institutions · Developers), principles strip (Security · Transparency · Innovation · Human Progress). Every page carries Back/Next navigation. Backend target architecture recorded: one unified foundation (identity, payments, notifications, AI — already shared) with platform services that grow independently; API gateway, separated data domains, and container infrastructure are Phase 4 tools, adopted only when scale demands — never before. |
+| 2026-07 | **Amendment 4 — SKYGLOBE ID, Terra Trust Marks & the YUNEX pillars.** **(a) SKYGLOBE ID — the layered identity model.** One account for the whole ecosystem; the account evolves, never multiplies. Signup stays simple (name, email, phone, country, password). Capabilities unlock through layers: **Identity** (core profile: photo, names, DOB where required, nationality, residence, language, contacts) → **Verification via TERRA** (identity: national ID/passport/licence + liveness where implemented; address: utility/bank/government document; business: registration + tax + licence — each with statuses Not Started / Pending Review / Verified / Rejected / Expired) → **Roles** (multiple simultaneously: student, traveller, buyer, seller, business owner, investor, developer, employer, employee, partner) → **Service enrollment** (each service onboards separately: Travel terms + travel profile; YUNEX seller = policies + business verification + payout method; buyer = policies + delivery + payment) → **Credentials** (one SKYGLOBE ID backed by TERRA carrying verifiable credentials — Identity Verified, Student Verified, Traveller Verified, Buyer/Seller Verified, Business Verified — never separate ID cards per role) → **Permissions** (role-derived, not identical to roles) → **Security** (password, 2FA, active sessions) → **Settings**. **(b) Terra Trust Marks.** All verification badges belong to TERRA ("Terra Verified"): Identity (blue+gold shield ✔), Business (gold), Organization, Merchant (orange), Professional, Institution (emerald), Government (deep blue+gold, reserved), Developer (purple), Partner (silver), Ambassador. Unique mark design (shield/orbit — never another platform's checkmark); statuses always icon+word, never color alone; credentials follow the user across every service; recognition is earned by transparent, consistently-enforced verification policy — not appearance. **(c) Business law:** anyone engaging in ANY business activity in the ecosystem must be legally and strictly verified regardless of country; verified sellers and buyers see products, quantity and quality, negotiate, bargain and arrange shipping — in real time, between real people. **(d) YUNEX five pillars:** Trade · Investment (verified project/opportunity marketplace) · Assets (land, farms, property, machinery — verified participant, listed asset clearly distinguished) · Business (verified profiles, sourcing, distribution, expansion) · Finance (only with licensed partners, per each country's law). **(e) Partner-not-replace principle:** YUNEX never becomes a bank, customs authority, shipping company, regulator or land registry — it is the trusted platform that connects participants and integrates licensed specialists. **(f) NORIA is a platform, not a widget:** /noria is its home (assistant, reception, drafting, teachers live; translation, fraud-intelligence, business-intelligence growing; APIs horizon); opening NORIA opens the platform — the assistant answers when asked. |
+| 2026-07 | Amendment 3 — The YUNEX Trade trust doctrine. Identity-verified marketplace, no exceptions: individuals register with real national identity (KYC verified through TERRA); businesses register with government-issued business registration **plus** the legal identity of every owner and partner, from their own country. End-to-end encryption. Real-time buyer–seller communication between verified humans only. Zero tolerance for illegal activity — detection, blocking and reporting built in, with full platform control over every user interface. Applies to all corridors and all continents. **No verification, no trade.** |
