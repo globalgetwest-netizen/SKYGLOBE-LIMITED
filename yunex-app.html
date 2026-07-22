@@ -53,6 +53,10 @@ a{text-decoration:none;color:inherit}
 .vwrap{position:relative;width:100%;padding-top:56.25%;margin-top:12px;border-radius:12px;overflow:hidden;background:#000}
 .vwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .listing-body{display:grid;gap:14px;margin-top:18px}
+.crumbs{font-size:.8rem;color:#67708f;margin-bottom:12px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.crumbs a{color:#3d5af1;font-weight:600;cursor:pointer}.crumbs b{color:#0f1c3a}
+.buybox{position:sticky;top:76px}
+@media(max-width:840px){.buybox{position:static}}
 /* premium marketplace listing card — consistent 4:3 image, tight rhythm */
 .lcard{padding:12px;border-radius:15px}
 .lc-img{position:relative;aspect-ratio:4/3;overflow:hidden;margin:-12px -12px 12px;border-radius:15px 15px 0 0;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:linear-gradient(125deg,#eef1fb,#f6f0fb)}
@@ -66,6 +70,20 @@ a{text-decoration:none;color:inherit}
 .lc-price{margin-top:6px;font-size:1rem;color:#0f1c3a}.lc-price b{font-weight:800}
 .lc-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:.74rem;color:#67708f}
 .lc-seller{margin-top:9px;padding-top:9px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:.75rem}
+/* verified ribbon + hover quick-actions */
+.lc-ribbon{position:absolute;top:8px;right:8px;z-index:3;background:rgba(30,87,201,.94);color:#fff;font-size:.58rem;font-weight:800;letter-spacing:.03em;padding:3px 8px 3px 6px;border-radius:100px;display:inline-flex;align-items:center;gap:4px}
+.lc-hover{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;gap:8px;padding:10px;transform:translateY(130%);transition:transform .26s cubic-bezier(.2,.7,.2,1);background:linear-gradient(0deg,rgba(6,18,48,.5),transparent)}
+.lcard:hover .lc-hover{transform:translateY(0)}
+.lc-hover button{flex:1;background:rgba(255,255,255,.96);border:none;border-radius:9px;padding:7px 0;font-weight:800;font-size:.76rem;color:#0f1c3a;cursor:pointer}
+.lc-hover button:hover{background:#fff}
+.lc-hover .save.on{color:#c0392b}
+@media(hover:none){.lc-hover{display:none}}
+/* skeleton loading shimmer */
+.skel{border-radius:15px;overflow:hidden;border:1px solid #eef0f6;background:#fff;padding:12px}
+.skel .b{background:linear-gradient(90deg,#eef1f8 25%,#f5f7fc 37%,#eef1f8 63%);background-size:400% 100%;animation:shimmer 1.3s ease infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.skel .img{aspect-ratio:4/3;margin:-12px -12px 12px;border-radius:15px 15px 0 0}
+.skel .l1{height:11px;width:55%;margin-top:8px}.skel .l2{height:14px;width:92%;margin-top:9px}.skel .l3{height:16px;width:42%;margin-top:11px}.skel .l4{height:10px;width:70%;margin-top:12px}
 .card .ic{font-size:1.7rem}
 .card h3{margin-top:12px;font-size:1.05rem}
 .card p{color:#67708f;font-size:.86rem;margin-top:6px;line-height:1.55}
@@ -223,7 +241,7 @@ html,body{max-width:100%;overflow-x:clip}
     </div>
     <div id="pillarTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px"></div>
     <div id="corridorTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 2px"></div>
-    <div class="grid g3" id="listings"><div class="empty" style="grid-column:1/-1"><div class="ic">⏳</div><p class="muted" style="margin-top:8px">Loading listings…</p></div></div>
+    <div class="grid g3" id="listings"><div class="skel"><div class="b img"></div><div class="b l1"></div><div class="b l2"></div><div class="b l3"></div></div><div class="skel"><div class="b img"></div><div class="b l1"></div><div class="b l2"></div><div class="b l3"></div></div><div class="skel"><div class="b img"></div><div class="b l1"></div><div class="b l2"></div><div class="b l3"></div></div><div class="skel"><div class="b img"></div><div class="b l1"></div><div class="b l2"></div><div class="b l3"></div></div></div>
   </section>
 
   <!-- NORIA SEARCH -->
@@ -415,10 +433,13 @@ function renderCurrencyPicker(){ const el=document.getElementById('curPick'); if
 function setCurrency(c){ MYCUR=c; localStorage.setItem('sky_cur',c); if($('v-market').classList.contains('on'))loadMarket(); }
 function listingCard(l){
   const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color};padding:3px 9px;font-size:.7rem">${terraBadge(13)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ');
-  const sampleTag=l.showcase?`<span style="position:absolute;top:8px;left:8px;z-index:2;background:rgba(6,18,48,.72);color:#fff;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:100px">SAMPLE</span>`:'';
+  const sampleTag=l.showcase?`<span style="position:absolute;top:8px;left:8px;z-index:3;background:rgba(6,18,48,.72);color:#fff;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:100px">SAMPLE</span>`:'';
+  const ribbon=(l.seller.trust_marks||[]).length?`<span class="lc-ribbon">${terraBadge(11)} Verified</span>`:'';
+  const hover=`<div class="lc-hover"><button class="save${l.saved?' on':''}" onclick="event.stopPropagation();quickSave(this,'${l.ref}')">${l.saved?'❤ Saved':'♡ Save'}</button><button onclick="event.stopPropagation();openListing('${l.ref}')">View details</button></div>`;
+  const inner=`${sampleTag}${ribbon}${l.pillar_icon}`;
   const img=(l.images&&l.images[0])
-    ?`<div class="lc-img">${sampleTag}${l.pillar_icon}<img src="${esc(l.images[0])}" alt="" loading="lazy" onerror="this.remove()"></div>`
-    :`<div class="lc-img lc-noimg">${sampleTag}${l.pillar_icon}</div>`;
+    ?`<div class="lc-img">${inner}<img src="${esc(l.images[0])}" alt="" loading="lazy" onerror="this.remove()">${hover}</div>`
+    :`<div class="lc-img lc-noimg">${inner}${hover}</div>`;
   return `<div class="card lcard" style="cursor:pointer" onclick="openListing('${l.ref}')">
     ${img}
     <div class="lc-cat">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div class="lc-corr">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
@@ -488,7 +509,7 @@ function marketTab(t){
   loadMarket();
 }
 async function loadMarket(){
-  const grid=$('listings'); grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">⏳</div><p class="muted" style="margin-top:8px">Loading…</p></div>';
+  const grid=$('listings'); grid.innerHTML=skeletonCards(8);
   const tab=MARKET_TAB; // stale-response guard: only the branch matching the CURRENT tab may write
   try{
     if(tab==='sell'){ renderSellPane(grid); return; }
@@ -562,21 +583,26 @@ async function openListing(ref,fromView){
     const specTable=specRows.length?`<table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:.88rem">${specRows.map((r,i)=>`<tr style="background:${i%2?'#f8fafc':'#fff'}"><td style="padding:9px 13px;color:#67708f;font-weight:600;width:40%;border-bottom:1px solid #eef0f6">${esc(r[0])}</td><td style="padding:9px 13px;color:#111827;font-weight:600;border-bottom:1px solid #eef0f6">${esc(r[1])}</td></tr>`).join('')}</table>`:'';
     host.innerHTML=`
       ${sampleBanner}
+      <div class="crumbs"><a onclick="go('market')">Marketplace</a> <span>›</span> <a onclick="MARKET_PILLAR='${l.pillar}';go('market')">${esc(l.pillar_label)}</a>${l.category?` <span>›</span> <b>${esc(l.category)}</b>`:''}</div>
       <div class="listing-hero">
         <div class="lg-col">${gallery}${videoEmbed(d.video_url)}</div>
         <div class="buy-col">
-          <div class="panel" style="position:sticky;top:76px">
-            <div style="font-size:.72rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>
+          <div class="panel buybox">
+            <div style="font-size:.72rem;font-weight:800;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>
             ${l.corridor_label?`<div style="font-size:.7rem;color:#3d5af1;margin-top:2px">${l.corridor_flag||''} ${esc(l.corridor_label)}</div>`:''}
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-              <h1 style="margin:7px 0 2px;font-size:1.5rem;line-height:1.25">${esc(l.title)}</h1>
+              <h1 style="margin:8px 0 2px;font-size:1.45rem;line-height:1.25">${esc(l.title)}</h1>
               <button id="saveBtn_${l.ref}" onclick="toggleSave('${l.ref}')" title="Save" style="background:none;border:none;cursor:pointer;font-size:1.5rem;line-height:1;margin-top:6px">${l.saved?'❤️':'🤍'}</button>
             </div>
             ${d.brand?`<div class="muted" style="font-size:.84rem">by ${esc(d.brand)}</div>`:''}
-            <div style="font-size:1.7rem;font-weight:800;margin-top:12px">${money(l)}</div>
+            ${(l.seller.rating&&l.seller.rating.count)?`<div style="margin-top:6px">${ratingLine(l.seller.rating)}</div>`:''}
+            <div style="font-size:1.8rem;font-weight:800;margin-top:12px">${money(l)}</div>
             ${d.unit?`<div class="muted" style="font-size:.82rem">per ${esc(d.unit)}${d.min_order?' · min order '+esc(d.min_order):''}</div>`:''}
-            ${l.quantity?`<div class="muted" style="font-size:.82rem;margin-top:4px">📦 ${esc(l.quantity)}</div>`:''}
-            ${l.location?`<div class="muted" style="margin-top:6px">📍 ${esc(l.location)}</div>`:''}
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px;font-size:.84rem;color:#475069">
+              ${l.quantity?`<div>📦 ${esc(l.quantity)}</div>`:''}
+              ${l.location?`<div>📍 ${esc(l.location)}</div>`:''}
+            </div>
+            ${marks?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${marks}</div>`:''}
             <button class="btn g grad" style="width:100%;margin-top:14px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
             <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
             <div class="notice" style="margin-top:12px">🛡️ Verified by the TERRA Credential Network. Agree a price and pay into secure escrow — funds release only when you confirm delivery.</div>
@@ -606,6 +632,17 @@ async function toggleSave(ref){
   const d=await r.json(); if(!r.ok)return;
   const b=$('saveBtn_'+ref); if(b)b.textContent=d.saved?'❤️':'🤍';
 }
+/* Card hover quick-save — toggles without opening the listing. */
+async function quickSave(btn,ref){
+  if(!ME){ openAuth('login'); return; }
+  try{
+    const r=await fetch(API+'/api/yunex/saved/'+ref,{method:'POST',headers:H()});
+    const d=await r.json(); if(!r.ok)return;
+    btn.innerHTML=d.saved?'❤ Saved':'♡ Save'; btn.classList.toggle('on',d.saved);
+  }catch(e){}
+}
+/* Skeleton shimmer placeholders while listings load. */
+function skeletonCards(n){ n=n||8; let h=''; for(let i=0;i<n;i++)h+='<div class="skel"><div class="b img"></div><div class="b l1"></div><div class="b l2"></div><div class="b l3"></div><div class="b l4"></div></div>'; return h; }
 async function loadRelated(ref){
   try{
     const d=await fetch(API+'/api/yunex/listings/'+ref+'/related').then(r=>r.json());
