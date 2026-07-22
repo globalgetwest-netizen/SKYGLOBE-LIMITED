@@ -135,7 +135,7 @@ section{scroll-margin-top:80px}
 .hero .pill{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);border-radius:100px;padding:9px 20px;font-size:.84rem;font-weight:600;color:#DDE6FB}
 
 /* ── ECOSYSTEM NAVIGATOR ── */
-.navigator{position:relative;margin-top:-64px;z-index:5}
+.navigator{position:relative;margin-top:24px;z-index:5}
 .navigator .panel{background:rgba(255,255,255,.98);border-radius:24px;box-shadow:0 24px 80px rgba(4,19,47,.25);padding:40px 44px;max-width:1080px;margin:0 auto}
 .navigator h2{font-size:1.5rem;font-weight:800;text-align:center}
 .navigator p.lead{text-align:center;color:var(--muted);margin-top:8px;font-size:.95rem}
@@ -296,6 +296,38 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .msgc .authtabs button.on{background:linear-gradient(135deg,var(--gold),#E8C566);color:#04132F;border-color:transparent}
 .msgc .au-badge{margin:12px 0 2px;padding:9px 12px;border-radius:10px;background:rgba(212,167,58,.16);color:#F2D98A;font-size:.82rem;font-weight:700;text-align:center;display:none}
 .msgc .au-fine{font-size:.74rem;color:#8FA0C4;text-align:center;margin-top:12px;line-height:1.5}
+/* ═══ CLEAN PROFESSIONAL NAV + HERO ═══ */
+.pnav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #ececf1}
+.pwrap{max-width:1440px;margin:0 auto;height:64px;display:flex;align-items:center;gap:16px;padding:0 28px}
+.pleft{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.plogo{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.02em;color:#0b1220;font-size:.98rem;text-decoration:none;flex-shrink:0}
+.plogo img{width:30px;height:30px;object-fit:contain}
+.pcenter{flex:1;display:flex;justify-content:center;align-items:center;gap:22px;font-size:.9rem;font-weight:500}
+.pcenter a{color:#1d1d1f;text-decoration:none;white-space:nowrap}.pcenter a:hover{color:#0a5bd6}
+.pright{display:flex;align-items:center;gap:16px;flex-shrink:0}
+.psupport{color:#1d1d1f;font-size:.9rem;font-weight:500;text-decoration:none;white-space:nowrap}.psupport:hover{color:#0a5bd6}
+.psearch{background:none;border:none;cursor:pointer;color:#424551;padding:4px;display:flex}
+.pburger{display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:5px;padding:6px}
+.pburger span{width:22px;height:2px;background:#0b1220;border-radius:2px}
+@media(max-width:1080px){.pcenter,.psupport{display:none}.pburger{display:flex}}
+.phero{text-align:center;padding:90px 24px 84px;max-width:940px;margin:0 auto}
+.phero .eyebrow{font-size:.82rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#0a5bd6}
+.phero h1{margin-top:20px;font-size:clamp(2.4rem,5.4vw,4rem);font-weight:800;line-height:1.1;letter-spacing:-.02em;color:#0b1220}
+.phero .psub{max-width:600px;margin:22px auto 0;font-size:clamp(1.05rem,1.7vw,1.26rem);line-height:1.65;color:#5b6472}
+.phero .pcta{margin-top:32px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.pbtn{height:52px;padding:0 28px;border-radius:10px;font-weight:600;font-size:1rem;display:inline-flex;align-items:center;cursor:pointer;border:none;text-decoration:none;transition:transform .2s}
+.pbtn:hover{transform:translateY(-1px)}
+.pbtn.primary{background:#0a2e65;color:#fff}.pbtn.secondary{background:#fff;color:#0a2e65;border:1.5px solid #d3dae8}
+.pplats{max-width:1040px;margin:0 auto;padding:0 24px 40px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+@media(max-width:760px){.pplats{grid-template-columns:repeat(2,1fr)}}
+.pplat{border:1px solid #ececf1;border-radius:14px;padding:22px 16px;text-align:center;text-decoration:none;transition:.2s;display:block}
+.pplat:hover{border-color:#c7d0e2;box-shadow:0 8px 24px rgba(10,46,101,.06)}
+.pplat .n{font-weight:700;color:#0b1220;font-size:1rem}.pplat .d{font-size:.82rem;color:#7a8395;margin-top:4px}
+.psearchbar{position:fixed;top:0;left:0;right:0;z-index:60;background:#fff;border-bottom:1px solid #ececf1;padding:15px 24px;display:none;box-shadow:0 10px 30px rgba(10,46,101,.08)}
+.psearchbar.on{display:block}
+.psearchbar form{max-width:720px;margin:0 auto;display:flex;gap:12px;align-items:center}
+.psearchbar input{flex:1;border:none;font-size:1.12rem;outline:none;color:#0b1220;font-family:inherit}
+.psearchbar .x{background:none;border:none;font-size:1.2rem;color:#7a8395;cursor:pointer;line-height:1}
 </style>
 </head>
 <body>
@@ -303,24 +335,25 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 <!-- ANNOUNCEMENT — admin-managed, hidden until set -->
 <div class="annc" id="annc"></div>
 
-<!-- NAV -->
-<nav class="nav">
-  <div class="wrap">
-    <a class="logo" href="/"><img src="/skyglobe-logo-t.png" alt="" style="border-radius:0"><span class="sgg">SKYGLOBEGROUP</span> <span style="color:var(--gold-2)">✦</span></a>
-    <div class="links">
-      <a href="#solutions">Solutions</a>
-      <a href="#ecosystem">Ecosystem</a>
-      <a href="#intelligence">Intelligence</a>
-      <a href="#trust">Trust</a>
-      <a href="/academy">Academy</a>
+<!-- NAV — clean, professional, balanced (Apple-style) -->
+<nav class="pnav">
+  <div class="pwrap">
+    <a class="plogo" href="/"><img src="/skyglobe-logo-t.png" alt="SKYGLOBEGROUP"><span>SKYGLOBEGROUP</span></a>
+    <div class="pcenter">
+      <a href="/noria">Noria</a><a href="/terra">Terra</a><a href="/yunex">Yunex</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a><a href="/yunex/app">Store</a><a href="/noria/chat">AI Mode</a><a href="/academy#finance">Forex</a><a href="/certificate-verify">Certificate</a><a href="#" onclick="return openMsg('general')">Support</a>
     </div>
-    <div class="cta">
-      <a class="btn btn-outline btn-sm" href="#" data-auth-kind="login" onclick="return openAuth('login')">Sign In</a>
-      <a class="btn btn-gold btn-sm" href="#" data-auth-kind="signup" onclick="return openAuth('signup')" style="display:var(--cta-d,inline-flex)">Create SKYGLOBE ID</a>
-      <button class="burger" onclick="document.getElementById('mmenu').classList.add('on')" aria-label="Menu"><span></span><span></span><span></span></button>
+    <div class="pright">
+      <button class="psearch" onclick="openSiteSearch()" aria-label="Search"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      <button class="pburger" onclick="document.getElementById('mmenu').classList.add('on')" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
+<!-- Site search bar -->
+<div class="psearchbar" id="psearchbar"><form onsubmit="return doSiteSearch(event)">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7a8395" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+  <input id="psearchinput" placeholder="Search SKYGLOBEGROUP — products, services, courses, anything">
+  <button type="button" class="x" onclick="closeSiteSearch()" aria-label="Close">✕</button>
+</form></div>
 
 <!-- MOBILE MENU — the whole ecosystem in one tap -->
 <div class="mmenu" id="mmenu">
@@ -348,37 +381,23 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
   </div>
 </div>
 
-<!-- HERO -->
-<header class="hero">
-  <canvas id="net"></canvas>
-  <div class="wrap">
-    <div class="wordmark"><svg class="nstar" width="30" height="30" viewBox="0 0 24 24"><defs><linearGradient id="nsl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E8C566"/><stop offset=".5" stop-color="#4E86F0"/><stop offset="1" stop-color="#F0742E"/></linearGradient></defs><path d="M12 0l2.6 8.2L24 12l-9.4 3.8L12 24l-2.6-8.2L0 12l9.4-3.8z" fill="url(#nsl)"/></svg><span class="sgg">SKYGLOBEGROUP</span><svg class="nstar" width="30" height="30" viewBox="0 0 24 24"><defs><linearGradient id="nsl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E8C566"/><stop offset=".5" stop-color="#4E86F0"/><stop offset="1" stop-color="#F0742E"/></linearGradient></defs><path d="M12 0l2.6 8.2L24 12l-9.4 3.8L12 24l-2.6-8.2L0 12l9.4-3.8z" fill="url(#nsl)"/></svg></div>
-    <div class="wm-flourish"><span class="ln l"></span><span class="gem"></span><span class="ln r"></span></div>
-    <div class="mission">Building Africa's Digital Infrastructure</div>
-    <div class="mission2">Connected to the World</div>
-    <div class="pillars-line"><span style="color:#B9A0F7">Intelligence</span><i style="color:var(--gold)">•</i><span style="color:#8FD6AC">Trust</span><i style="color:var(--orange)">•</i><span style="color:#FFC08A">Commerce</span><i style="color:var(--gold)">•</i><span style="color:#F2D98A">Learning</span><i style="color:var(--pink)">•</i><span style="color:#9DBEFF">Mobility</span></div>
-    <p class="sub">One intelligent ecosystem connecting <b>people</b>, <b>businesses</b>, <b>governments</b>, <b>investors</b> and <b>institutions</b> through AI, digital trust, trade, education and global mobility.</p>
-    <div class="actions">
-      <a class="btn btn-gold" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
-      <a class="btn btn-outline" href="#ecosystem">Explore Ecosystem</a>
-    </div>
-    <div class="dock">
-      <a href="/noria"><img src="/noria-logo-t.png" alt=""><span>NORIA<small>Artificial Intelligence</small></span></a>
-      <a href="/terra"><img src="/terra-logo-t.png" alt=""><span>TERRA<small>Identity &amp; Trust</small></span></a>
-      <a href="/yunex"><img src="/yunex-logo-t.png" alt=""><span>YUNEX<small>Commerce &amp; Investment</small></span></a>
-      <a href="/academy"><span style="font-size:1.3rem">🎓</span><span>Academy<small>Knowledge &amp; Skills</small></span></a>
-      <a href="/mobility#services"><span style="font-size:1.3rem">🌍</span><span>Mobility<small>Travel &amp; Opportunities</small></span></a>
-    </div>
-    <div class="livebar">
-      <div class="meter"><div class="l">Members</div><div class="bar"><i></i></div></div>
-      <div class="meter m2"><div class="l">Verified Identities</div><div class="bar"><i></i></div></div>
-      <div class="meter m3"><div class="l">Live Listings</div><div class="bar"><i></i></div></div>
-      <div class="m"><div class="n">6</div><div class="l">Trade Corridors</div></div>
-      <div class="m"><div class="n">23</div><div class="l">Currencies</div></div>
-      <div class="m status"><span class="d"></span> Live Ecosystem · Operational</div>
-    </div>
+<!-- HERO — clean & professional -->
+<header class="phero">
+  <div class="eyebrow">One World · One Mission</div>
+  <h1>Where the world meets possibility</h1>
+  <p class="psub">Intelligence, trust, commerce, learning and mobility — one trusted ecosystem, connecting people, businesses and nations across the world.</p>
+  <div class="pcta">
+    <a class="pbtn primary" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
+    <a class="pbtn secondary" href="#ecosystem">Explore the ecosystem</a>
   </div>
 </header>
+<div class="pplats">
+  <a class="pplat" href="/noria"><div class="n">NORIA</div><div class="d">Intelligence</div></a>
+  <a class="pplat" href="/terra"><div class="n">TERRA</div><div class="d">Trust</div></a>
+  <a class="pplat" href="/yunex"><div class="n">YUNEX</div><div class="d">Commerce</div></a>
+  <a class="pplat" href="/academy"><div class="n">Academy</div><div class="d">Learning</div></a>
+  <a class="pplat" href="/mobility"><div class="n">Mobility</div><div class="d">Travel</div></a>
+</div>
 
 <!-- ECOSYSTEM NAVIGATOR -->
 <div class="navigator wrap">
@@ -637,6 +656,12 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 </div>
 
 <script>
+/* Site search (nav 🔍) — opens the search bar; routes the query to NORIA, the
+   ecosystem's intelligence/search layer. */
+function openSiteSearch(){ var b=document.getElementById('psearchbar'); if(b){b.classList.add('on'); var i=document.getElementById('psearchinput'); if(i)i.focus();} }
+function closeSiteSearch(){ var b=document.getElementById('psearchbar'); if(b)b.classList.remove('on'); }
+function doSiteSearch(e){ e.preventDefault(); var q=(document.getElementById('psearchinput').value||'').trim(); if(!q)return false; try{localStorage.setItem('noria_q',q);}catch(_){} location.href='/noria/chat'; return false; }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeSiteSearch(); });
 /* Living-network hero: slow particles + connection lines (calm, never flashy) */
 (function(){
   const c=document.getElementById('net'); if(!c)return;
