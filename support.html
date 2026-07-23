@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support — SKYGLOBEGROUP</title>
+<meta name="description" content="SKYGLOBEGROUP Support — Help Center, Contact Support, Live Chat, FAQs, Technical Support, Track a Request and Report a Problem. One place for help across the whole ecosystem.">
+<link rel="icon" href="/skyglobe-logo-t.png">
+<style>
+:root{--navy:#0A2E65;--navy2:#0b1230;--ink:#0b1220;--muted:#5b6472;--line:#ececf1;--gold:#D4A73A;--blue:#0a5bd6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',Roboto,Arial,sans-serif;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1080px;margin:0 auto;height:62px;display:flex;align-items:center;gap:12px;padding:0 22px}
+.nav .brand{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--ink);font-size:.98rem}
+.nav .brand img{width:28px;height:28px;object-fit:contain}
+.nav .in a.back{margin-left:auto;color:var(--blue);font-weight:600;font-size:.9rem}
+.hero{max-width:820px;margin:0 auto;text-align:center;padding:56px 22px 10px}
+.hero .eyebrow{font-size:.76rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.hero h1{margin-top:12px;font-size:clamp(2rem,4.4vw,2.9rem);font-weight:800;letter-spacing:-.02em;color:var(--navy)}
+.hero p{margin-top:12px;color:var(--muted);font-size:1.05rem}
+.hsearch{max-width:620px;margin:22px auto 0;display:flex;gap:8px;border:1.5px solid var(--line);border-radius:14px;padding:6px 6px 6px 16px;align-items:center;box-shadow:0 8px 24px rgba(10,46,101,.05)}
+.hsearch input{flex:1;border:none;outline:none;font-size:1rem;font-family:inherit;color:var(--ink)}
+.hsearch button{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:11px 20px;font-weight:600;cursor:pointer}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:40px}
+.tile{border:1px solid var(--line);border-radius:16px;padding:24px;transition:.2s;cursor:pointer;background:#fff}
+.tile:hover{border-color:#c7d0e2;box-shadow:0 12px 30px rgba(10,46,101,.08);transform:translateY(-2px)}
+.tile .ic{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#eef2fb,#f6f0fb);display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.tile h3{margin-top:14px;font-size:1.08rem;color:var(--ink)}
+.tile p{margin-top:6px;color:var(--muted);font-size:.9rem}
+.tile .go{margin-top:12px;color:var(--blue);font-weight:600;font-size:.88rem}
+.sec{max-width:820px;margin:56px auto 0;padding:0 22px;scroll-margin-top:80px}
+.sec h2{font-size:1.5rem;font-weight:800;color:var(--navy)}
+.sec .lead{color:var(--muted);margin-top:6px}
+.card{border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:18px}
+label{display:block;font-size:.82rem;font-weight:700;color:var(--ink);margin:12px 0 6px}
+input.f,select.f,textarea.f{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 14px;font-size:.96rem;font-family:inherit;color:var(--ink);outline:none}
+input.f:focus,select.f:focus,textarea.f:focus{border-color:var(--blue)}
+textarea.f{min-height:120px;resize:vertical}
+.btn{margin-top:16px;background:var(--navy);color:#fff;border:none;border-radius:11px;padding:13px 26px;font-weight:600;font-size:1rem;cursor:pointer}
+.btn.alt{background:#fff;color:var(--navy);border:1.5px solid #d3dae8}
+.msg{margin-top:10px;font-size:.9rem}
+.faq{border:1px solid var(--line);border-radius:14px;margin-top:12px;overflow:hidden}
+.faq details{padding:0}
+.faq summary{list-style:none;padding:16px 18px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--blue);font-size:1.3rem}
+.faq details[open] summary::after{content:"–"}
+.faq .a{padding:0 18px 16px;color:var(--muted);font-size:.94rem}
+.chatrow{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.chatrow a{flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:14px;padding:18px;display:flex;align-items:center;gap:12px;transition:.2s}
+.chatrow a:hover{border-color:#c7d0e2;box-shadow:0 10px 24px rgba(10,46,101,.06)}
+.chatrow .e{font-size:1.6rem}
+.chatrow b{color:var(--ink)}.chatrow span{display:block;color:var(--muted);font-size:.84rem}
+footer{margin-top:72px;background:#04132F;color:#AEC0EC;padding:36px 22px;text-align:center}
+footer .wm{font-weight:900;font-size:1.1rem;background:linear-gradient(95deg,#fff,#F2D98A 45%,#D4A73A 60%,#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
+footer .mm{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#D4A73A;margin-top:6px}
+footer .lk{margin-top:14px;font-size:.86rem}footer .lk a{color:#AEC0EC;margin:0 10px}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="in">
+  <a class="brand" href="/"><img src="/skyglobe-logo-t.png" alt=""><span>SKYGLOBEGROUP</span></a>
+  <a class="back" href="/">← Back to home</a>
+</div></nav>
+
+<header class="hero">
+  <div class="eyebrow">Support Centre</div>
+  <h1>How can we help?</h1>
+  <p>One place for help across the whole ecosystem — NORIA, TERRA, YUNEX, Academy and Mobility.</p>
+  <form class="hsearch" onsubmit="return helpSearch(event)">
+    <input id="hq" placeholder="Search help articles, FAQs, how-to guides…">
+    <button type="submit">Search</button>
+  </form>
+</header>
+
+<section class="wrap">
+  <div class="grid">
+    <div class="tile" onclick="jump('help')"><div class="ic">📚</div><h3>Help Center</h3><p>Guides and how-tos for every platform.</p><div class="go">Browse articles →</div></div>
+    <div class="tile" onclick="jump('contact')"><div class="ic">✉️</div><h3>Contact Support</h3><p>Message the right team and get a reply by email.</p><div class="go">Send a message →</div></div>
+    <div class="tile" onclick="jump('chat')"><div class="ic">💬</div><h3>Live Chat</h3><p>Chat with NORIA now, or reach us on WhatsApp.</p><div class="go">Start chatting →</div></div>
+    <div class="tile" onclick="jump('faqs')"><div class="ic">❓</div><h3>FAQs</h3><p>Quick answers to the most common questions.</p><div class="go">View FAQs →</div></div>
+    <div class="tile" onclick="jump('tech')"><div class="ic">🛠️</div><h3>Technical Support</h3><p>Trouble logging in, payments or uploads? We'll fix it.</p><div class="go">Get technical help →</div></div>
+    <div class="tile" onclick="jump('track')"><div class="ic">🔎</div><h3>Track a Request</h3><p>Check the status of a request or application.</p><div class="go">Track now →</div></div>
+    <div class="tile" onclick="jump('report')"><div class="ic">🚩</div><h3>Report a Problem</h3><p>Found a bug or something suspicious? Tell us.</p><div class="go">Report it →</div></div>
+  </div>
+</section>
+
+<!-- HELP CENTER -->
+<section class="sec" id="help">
+  <h2>Help Center</h2>
+  <p class="lead">Start with the platform you need help with.</p>
+  <div class="grid" style="margin-top:18px">
+    <a class="tile" href="/noria"><div class="ic">✦</div><h3>NORIA</h3><p>AI assistant, translation & documents.</p></a>
+    <a class="tile" href="/terra"><div class="ic">🛡️</div><h3>TERRA</h3><p>Identity, verification & credentials.</p></a>
+    <a class="tile" href="/yunex/app"><div class="ic">🛍️</div><h3>YUNEX</h3><p>Marketplace, deals, wallet & escrow.</p></a>
+    <a class="tile" href="/academy"><div class="ic">🎓</div><h3>Academy</h3><p>Courses, exams & certificates.</p></a>
+    <a class="tile" href="/mobility"><div class="ic">🌍</div><h3>Mobility</h3><p>Visas, travel & relocation.</p></a>
+    <a class="tile" href="/id"><div class="ic">🪪</div><h3>SKYGLOBE ID</h3><p>Your account & verification status.</p></a>
+  </div>
+</section>
+
+<!-- CONTACT SUPPORT -->
+<section class="sec" id="contact">
+  <h2>Contact Support</h2>
+  <p class="lead">Message the right department — we reply to your email.</p>
+  <div class="card">
+    <form onsubmit="return sendSupport(event,'contact')">
+      <label>Your name</label><input class="f" name="name" required>
+      <label>Your email</label><input class="f" type="email" name="email" required>
+      <label>Department</label>
+      <select class="f" name="dept">
+        <option value="general">General enquiry</option>
+        <option value="yunex">YUNEX — Commerce & Trade</option>
+        <option value="terra">TERRA — Verification & Trust</option>
+        <option value="education">Academy — Learning</option>
+        <option value="mobility">Mobility — Travel & Visas</option>
+        <option value="billing">Billing & Payments</option>
+      </select>
+      <label>How can we help?</label><textarea class="f" name="message" required placeholder="Describe your question or issue…"></textarea>
+      <button class="btn" type="submit">Send message</button>
+      <div class="msg" id="contact_msg"></div>
+    </form>
+  </div>
+</section>
+
+<!-- LIVE CHAT -->
+<section class="sec" id="chat">
+  <h2>Live Chat</h2>
+  <p class="lead">Get an instant answer now.</p>
+  <div class="chatrow">
+    <a href="/noria/chat"><span class="e">✦</span><span><b>Chat with NORIA</b><span>Instant AI answers across the ecosystem, 24/7.</span></span></a>
+    <a href="https://wa.me/17373998522" target="_blank" rel="noopener"><span class="e">💬</span><span><b>WhatsApp our team</b><span>+1 737 399 8522 — real people, business hours.</span></span></a>
+  </div>
+</section>
+
+<!-- FAQs -->
+<section class="sec" id="faqs">
+  <h2>Frequently asked questions</h2>
+  <div class="faq"><details><summary>What is SKYGLOBEGROUP?</summary><div class="a">One connected ecosystem — NORIA (intelligence), TERRA (trust & verification), YUNEX (commerce), Academy (learning) and Mobility (travel). One SKYGLOBE ID works across all of them.</div></details></div>
+  <div class="faq"><details><summary>How do I verify my account?</summary><div class="a">Create a SKYGLOBE ID, then confirm your email using the link or code we send you. For full trust, complete TERRA identity verification from your SKYGLOBE ID page.</div></details></div>
+  <div class="faq"><details><summary>How does payment and escrow work on YUNEX?</summary><div class="a">Agree a price with a verified seller, pay into secure escrow, and funds are released to the seller only when you confirm delivery.</div></details></div>
+  <div class="faq"><details><summary>Are the certificates from Academy recognised?</summary><div class="a">Each completed programme issues a TERRA-verified digital certificate with a unique verification reference that anyone can check.</div></details></div>
+  <div class="faq"><details><summary>How do I become a verified seller?</summary><div class="a">Complete TERRA identity (and business) verification from your SKYGLOBE ID. No verification, no trade — this protects every buyer.</div></details></div>
+</section>
+
+<!-- TECHNICAL SUPPORT -->
+<section class="sec" id="tech">
+  <h2>Technical Support</h2>
+  <p class="lead">Login, payment, upload or performance issues — our engineers will help.</p>
+  <div class="card">
+    <form onsubmit="return sendSupport(event,'tech')">
+      <label>Your email</label><input class="f" type="email" name="email" required>
+      <label>What are you trying to do?</label>
+      <select class="f" name="area">
+        <option>Logging in / verification</option><option>Payments / wallet</option><option>Uploads / documents</option>
+        <option>Marketplace / listings</option><option>Courses / certificates</option><option>Something else</option>
+      </select>
+      <label>Describe the problem (what happened, on which device/browser)</label><textarea class="f" name="message" required></textarea>
+      <button class="btn" type="submit">Submit technical request</button>
+      <div class="msg" id="tech_msg"></div>
+    </form>
+  </div>
+</section>
+
+<!-- TRACK A REQUEST -->
+<section class="sec" id="track">
+  <h2>Track a Request</h2>
+  <p class="lead">Enter your reference (e.g. SKY-2026-AB12) to see the latest status.</p>
+  <div class="card">
+    <form onsubmit="return trackReq(event)">
+      <label>Reference number</label><input class="f" id="track_ref" placeholder="SKY-2026-XXXX" required>
+      <button class="btn" type="submit">Track request</button>
+      <div class="msg" id="track_msg"></div>
+    </form>
+  </div>
+</section>
+
+<!-- REPORT A PROBLEM -->
+<section class="sec" id="report">
+  <h2>Report a Problem</h2>
+  <p class="lead">Report a bug, a suspicious listing, or anything that doesn't look right. Every report is reviewed.</p>
+  <div class="card">
+    <form onsubmit="return sendSupport(event,'report')">
+      <label>Your email (optional)</label><input class="f" type="email" name="email">
+      <label>What are you reporting?</label>
+      <select class="f" name="kind">
+        <option>A bug or technical fault</option><option>A suspicious seller or listing</option>
+        <option>Fraud or a scam attempt</option><option>Inappropriate content</option><option>Other</option>
+      </select>
+      <label>Details</label><textarea class="f" name="message" required></textarea>
+      <button class="btn" type="submit">Submit report</button>
+      <div class="msg" id="report_msg"></div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wm">SKYGLOBEGROUP</div>
+  <div class="mm">One World · One Mission</div>
+  <div class="lk"><a href="/">Home</a><a href="/noria">NORIA</a><a href="/terra">TERRA</a><a href="/yunex">YUNEX</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a></div>
+</footer>
+
+<script>
+function jump(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+function helpSearch(e){ e.preventDefault(); var q=document.getElementById('hq').value.trim(); if(q) location.href='/search?q='+encodeURIComponent(q); return false; }
+async function sendSupport(e,which){
+  e.preventDefault(); var f=e.target; var m=document.getElementById(which+'_msg'); m.style.color='#5b6472'; m.textContent='Sending…';
+  var data={}; new FormData(f).forEach((v,k)=>data[k]=v);
+  var dept=data.dept||(which==='tech'?'general':'general');
+  var message=(which==='tech'?('[Technical · '+(data.area||'')+'] '):which==='report'?('[Report · '+(data.kind||'')+'] '):'')+(data.message||'');
+  try{
+    var r=await fetch('/api/dept-message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:data.name||'Support user',email:data.email||'noreply@skyglobegroup.com',message:message,dept:dept})});
+    var d=await r.json();
+    if(r.ok){ m.style.color='#12864e'; m.textContent='✔ Received — our team will reply to your email shortly.'; f.reset(); }
+    else { m.style.color='#c0392b'; m.textContent=d.error||'Could not send. Please try again.'; }
+  }catch(_){ m.style.color='#c0392b'; m.textContent='Network issue — please try again.'; }
+  return false;
+}
+async function trackReq(e){
+  e.preventDefault(); var ref=document.getElementById('track_ref').value.trim(); var m=document.getElementById('track_msg');
+  if(!/^SKY-/i.test(ref)){ m.style.color='#c0392b'; m.textContent='Please enter a valid reference (e.g. SKY-2026-AB12).'; return false; }
+  m.style.color='#5b6472'; m.textContent='Checking…';
+  try{
+    var r=await fetch('/api/track/'+encodeURIComponent(ref));
+    var d=await r.json();
+    if(r.ok&&d.status){ m.style.color='#12864e'; m.innerHTML='<b>'+ref.toUpperCase()+'</b> — status: <b>'+d.status+'</b>'+(d.detail?'<br>'+d.detail:''); }
+    else { m.style.color='#c0392b'; m.textContent=d.error||'No request found for that reference. Check the number and try again.'; }
+  }catch(_){ m.style.color='#c0392b'; m.textContent='Could not check right now — please try again.'; }
+  return false;
+}
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
+</script>
+</body>
+</html>

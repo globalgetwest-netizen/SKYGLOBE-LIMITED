@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NORIA — Translation</title>
+<meta name="description" content="Translate text into 80+ languages — including every major African language — inside NORIA, the intelligence layer of SKYGLOBEGROUP.">
+<meta name="theme-color" content="#061A52">
+<link rel="icon" href="/noria-logo-t.png">
+<style>
+:root{--navy:#04132F;--navy2:#061A52;--blue:#0A2E65;--purple:#7C3AED;--purple-2:#9F67F5;--soft:#C9B3F7;--gold:#D4A73A;--gold-2:#E8C566;--ink:#0F1C3A;--muted:#5A6B8C;--line:#e4e8f0;--bg:#F8F9FB;--font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:clip}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.6}
+a{text-decoration:none;color:inherit}
+button,select,textarea{font-family:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.isvg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+/* nav — NORIA identity, no self-link */
+.eco-nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22)}
+.eco-nav .in{max-width:1080px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
+.eco-nav .bd{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.eco-nav .bd img{height:30px;width:30px;object-fit:contain}
+.eco-nav .wm{font-weight:900;letter-spacing:.04em;font-size:1.02rem;background:linear-gradient(95deg,#FFFFFF,#C9B3F7 40%,#9F67F5 55%,#C9B3F7 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:20px}
+.eco-nav .lk a{color:#C9D4E5;font-size:.86rem;font-weight:600}
+.eco-nav .lk a:hover{color:#C9B3F7}
+.eco-nav .id{background:linear-gradient(135deg,#7C3AED,#9F67F5);color:#fff;padding:8px 16px;border-radius:9px;font-weight:800;font-size:.84rem}
+@media(max-width:760px){.eco-nav .lk .eh{display:none}}
+/* breadcrumb */
+.crumb{background:#fff;border-bottom:1px solid var(--line)}
+.crumb .in{max-width:1080px;margin:0 auto;padding:11px 20px;font-size:.82rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.crumb a{color:#7C3AED;font-weight:600}.crumb b{color:var(--ink)}
+/* hero-lite */
+.head{text-align:center;padding:40px 20px 8px}
+.head .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--purple)}
+.head h1{margin-top:8px;font-weight:900;font-size:clamp(1.9rem,4.6vw,2.7rem);color:var(--navy2)}
+.head p{max-width:600px;margin:10px auto 0;color:var(--muted)}
+/* translator */
+.tr{max-width:1000px;margin:26px auto 0;padding:0 20px 60px}
+.langbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.lang{flex:1;min-width:0}
+.lang label{display:block;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.lang select{width:100%;appearance:none;-webkit-appearance:none;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237C3AED' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 6l4 4 4-4'/></svg>") no-repeat right 14px center;border:1.5px solid var(--line);border-radius:13px;padding:12px 40px 12px 14px;font-size:.95rem;font-weight:700;color:var(--ink);cursor:pointer;transition:border-color .2s}
+.lang select:focus{outline:none;border-color:var(--purple)}
+.swap{flex-shrink:0;margin-top:22px;width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--purple);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
+.swap:hover{border-color:var(--purple);background:#F6F2FF;transform:rotate(180deg)}
+.panes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.panes{grid-template-columns:1fr}.swap{transform:rotate(90deg)}.swap:hover{transform:rotate(270deg)}}
+.pane{background:#fff;border:1.5px solid var(--line);border-radius:18px;box-shadow:0 12px 34px rgba(4,19,47,.05);display:flex;flex-direction:column;min-height:230px;overflow:hidden;transition:border-color .2s}
+.pane.src:focus-within{border-color:var(--purple)}
+.pane textarea{flex:1;border:none;outline:none;resize:none;padding:18px;font-size:1.02rem;line-height:1.7;color:var(--ink);background:none;font-family:inherit}
+.pane .out{flex:1;padding:18px;font-size:1.02rem;line-height:1.7;white-space:pre-wrap;overflow-y:auto;color:var(--ink)}
+.pane .out.ph{color:#9AA6BE}
+.pane .bar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-top:1px solid var(--line);min-height:46px}
+.pane .bar .ct{font-size:.72rem;color:#9AA6BE;font-weight:600}
+.pane .bar .sp{flex:1}
+.pane .bar button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.pane .bar button:hover{border-color:var(--purple);color:var(--purple)}
+.pane .bar button.on{border-color:var(--purple);color:var(--purple);background:#F6F2FF}
+.pane .bar button .isvg{width:16px;height:16px}
+.go{display:flex;justify-content:center;margin-top:18px}
+.go button{display:inline-flex;align-items:center;gap:9px;height:50px;padding:0 34px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--purple),var(--purple-2));color:#fff;font-weight:800;font-size:1rem;cursor:pointer;box-shadow:0 10px 26px rgba(124,58,237,.35);transition:.2s}
+.go button:hover{transform:translateY(-2px)}
+.go button:disabled{opacity:.55;box-shadow:none;transform:none;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px}
+.chips span{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);width:100%;text-align:center;margin-bottom:2px}
+.chips button{border:1px solid var(--line);background:#fff;border-radius:100px;padding:7px 15px;font-size:.82rem;font-weight:700;color:var(--navy2);cursor:pointer;transition:.15s}
+.chips button:hover{border-color:var(--purple);color:var(--purple)}
+.note{text-align:center;color:#9AA6BE;font-size:.78rem;margin-top:22px}
+/* footer */
+.eco-foot{background:#04132F;color:#AEC0EC;padding:44px 20px 28px;border-top:1px solid rgba(212,167,58,.18)}
+.eco-foot .ft{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
+@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr}}@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
+.eco-foot .wm{font-weight:900;font-size:1.3rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-foot .tag{color:#D4A73A;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;margin-top:10px}
+.eco-foot p.m{color:#8FA0C4;font-size:.86rem;margin-top:12px;max-width:280px}
+.eco-foot h4{color:#fff;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;font-weight:800}
+.eco-foot a{display:block;color:#AEC0EC;font-size:.88rem;margin-bottom:9px}
+.eco-foot a:hover{color:#C9B3F7}
+.eco-foot .bot{max-width:1080px;margin:32px auto 0;border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#8FA0C4}
+.eco-foot .bot b{color:#fff}
+.eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
+.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
+</style>
+</head>
+<body>
+
+<nav class="eco-nav"><div class="in">
+  <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
+  <div class="lk"><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
+</div></nav>
+
+<div class="crumb"><div class="in"><a href="/">SKYGLOBEGROUP</a> <span>›</span> <a href="/noria">NORIA</a> <span>›</span> <b>Translation</b></div></div>
+
+<header class="head">
+  <div class="eyebrow">NORIA · Translation Centre</div>
+  <h1>Translate anything</h1>
+  <p>Type or paste your text, choose your languages, and NORIA translates it — across <b id="langCount">80+</b> languages, including every major African language.</p>
+</header>
+
+<section class="tr">
+  <div class="langbar">
+    <div class="lang">
+      <label for="from">From</label>
+      <select id="from"></select>
+    </div>
+    <button class="swap" id="swap" title="Swap languages" aria-label="Swap languages"><svg class="isvg" viewBox="0 0 24 24"><path d="M7 4L3 8l4 4M3 8h13a4 4 0 0 1 4 4M17 20l4-4-4-4M21 16H8a4 4 0 0 1-4-4"/></svg></button>
+    <div class="lang">
+      <label for="to">To</label>
+      <select id="to"></select>
+    </div>
+  </div>
+
+  <div class="panes">
+    <div class="pane src">
+      <textarea id="input" placeholder="Enter text to translate…" oninput="count()" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter')runTranslate()"></textarea>
+      <div class="bar">
+        <span class="ct" id="ct">0 characters</span>
+        <span class="sp"></span>
+        <button title="Listen to source" aria-label="Listen to source" onclick="speak('input',this)"><svg class="isvg" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.4 5.6a9 9 0 0 1 0 12.8"/></svg></button>
+        <button title="Clear" aria-label="Clear" onclick="clearIn()"><svg class="isvg" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+    </div>
+    <div class="pane">
+      <div class="out ph" id="output">Translation appears here.</div>
+      <div class="bar">
+        <span class="sp"></span>
+        <button title="Copy translation" aria-label="Copy translation" onclick="copyOut(this)"><svg class="isvg" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+        <button title="Listen to translation" aria-label="Listen to translation" onclick="speak('output',this)"><svg class="isvg" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.4 5.6a9 9 0 0 1 0 12.8"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="go">
+    <button id="goBtn" onclick="runTranslate()"><svg class="isvg" viewBox="0 0 24 24"><path d="M5 8h9M9.5 4.2V8c0 4-1.8 6.8-5 8.2M8 8.5c0 3 1.8 5 5.5 6.8"/><path d="M14 20.5l4-9 4 9M15.4 17.5h5.2"/></svg> Translate</button>
+  </div>
+
+  <div class="chips" id="chips"><span>Quick languages</span></div>
+  <p class="note">Powered by NORIA · translations are AI-generated — verify official or legal documents with our professional team.</p>
+</section>
+
+<footer class="eco-foot">
+  <div class="ft">
+    <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
+    <div><h4>NORIA</h4><a href="/noria/chat">Conversations</a><a href="/noria/knowledge">Knowledge</a><a href="/noria/documents">Documents</a><a href="/noria/translation">Translation</a></div>
+    <div><h4>Ecosystem</h4><a href="/terra">TERRA</a><a href="/yunex">YUNEX</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a></div>
+    <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
+  </div>
+  <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · NORIA · All Rights Reserved</div><div class="live"><i></i> Intelligence · Operational</div></div>
+</footer>
+
+<script src="/noria-voice.js"></script>
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+/* ── Language catalogue — Africa-forward, grouped ── */
+var LANGS=[
+ ['Popular',['English','French','Spanish','Portuguese','Arabic','Chinese (Simplified)','Hindi','Swahili']],
+ ['African languages',['Swahili','Hausa','Yoruba','Igbo','Amharic','Zulu','Xhosa','Afrikaans','Somali','Oromo','Tigrinya','Twi (Akan)','Ewe','Fula (Fulani)','Wolof','Lingala','Kikongo','Shona','Ndebele','Kinyarwanda','Kirundi','Luganda','Kikuyu','Luo','Sesotho','Setswana','Chichewa (Nyanja)','Bambara','Malagasy','Tamazight (Berber)','Kanuri','Tiv']],
+ ['European',['English','French','Spanish','Portuguese','German','Italian','Dutch','Russian','Ukrainian','Polish','Romanian','Greek','Czech','Hungarian','Swedish','Norwegian','Danish','Finnish','Turkish','Serbian','Croatian','Bulgarian']],
+ ['Middle East & South Asia',['Arabic','Hebrew','Persian (Farsi)','Urdu','Hindi','Bengali','Punjabi','Tamil','Telugu','Gujarati','Marathi','Pashto','Kurdish']],
+ ['East & Southeast Asia',['Chinese (Simplified)','Chinese (Traditional)','Japanese','Korean','Vietnamese','Thai','Indonesian','Malay','Filipino (Tagalog)','Khmer','Burmese']]
+];
+var UNIQUE=(function(){var s={},o=[];LANGS.forEach(function(g){g[1].forEach(function(l){if(!s[l]){s[l]=1;o.push(l);}});});return o;})();
+document.getElementById('langCount').textContent=UNIQUE.length+'+';
+function fillSelect(sel,withAuto,def){
+  var h=withAuto?'<option value="Auto">Detect language</option>':'';
+  LANGS.forEach(function(g){
+    h+='<optgroup label="'+g[0]+'">';
+    g[1].forEach(function(l){ h+='<option value="'+l+'"'+(l===def?' selected':'')+'>'+l+'</option>'; });
+    h+='</optgroup>';
+  });
+  sel.innerHTML=h;
+}
+fillSelect(document.getElementById('from'),true,'English');
+document.getElementById('from').value='Auto';
+fillSelect(document.getElementById('to'),false,'French');
+/* quick-language chips */
+['French','Arabic','Swahili','Spanish','Chinese (Simplified)','Portuguese','Hausa','English'].forEach(function(l){
+  var b=document.createElement('button'); b.textContent=l;
+  b.onclick=function(){ document.getElementById('to').value=l; if(document.getElementById('input').value.trim())runTranslate(); };
+  document.getElementById('chips').appendChild(b);
+});
+
+function count(){ var n=document.getElementById('input').value.length; document.getElementById('ct').textContent=n+' character'+(n===1?'':'s'); }
+function clearIn(){ document.getElementById('input').value=''; count(); var o=document.getElementById('output'); o.className='out ph'; o.textContent='Translation appears here.'; }
+document.getElementById('swap').onclick=function(){
+  var f=document.getElementById('from'),t=document.getElementById('to');
+  var out=document.getElementById('output');
+  if(f.value==='Auto'){ /* cannot swap into auto-detect */ f.value=t.value; }
+  else { var tmp=f.value; f.value=t.value; t.value=tmp; }
+  // move the translated text up to the source
+  if(!out.classList.contains('ph')){ document.getElementById('input').value=out.innerText; count(); out.className='out ph'; out.textContent='Translation appears here.'; }
+};
+var BUSY=false;
+async function runTranslate(){
+  if(BUSY)return;
+  var txt=document.getElementById('input').value.trim();
+  var out=document.getElementById('output');
+  if(!txt){ document.getElementById('input').focus(); return; }
+  var from=document.getElementById('from').value, to=document.getElementById('to').value;
+  BUSY=true; var btn=document.getElementById('goBtn'); btn.disabled=true;
+  out.className='out'; out.textContent='Translating…';
+  try{
+    var r=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,from:from,to:to})});
+    var d=await r.json();
+    var ans=(d&&(d.translation||d.reply)||'').trim();
+    out.textContent=ans||(d&&d.error)||'NORIA could not translate that just now — please try again.';
+  }catch(e){ out.textContent='Network issue — please try again.'; }
+  BUSY=false; btn.disabled=false;
+}
+function copyOut(btn){ var t=document.getElementById('output'); if(t.classList.contains('ph'))return;
+  navigator.clipboard.writeText(t.innerText).then(function(){ btn.classList.add('on'); setTimeout(function(){btn.classList.remove('on');},1200); }); }
+/* ── Natural, language-correct voice (not the robotic default) ── */
+/* Map each catalogue language to a BCP-47 locale so the browser reads it with
+   the RIGHT pronunciation and the best available natural/neural voice. */
+var BCP={
+ 'English':'en-US','French':'fr-FR','Spanish':'es-ES','Portuguese':'pt-PT','Arabic':'ar-SA',
+ 'Chinese (Simplified)':'zh-CN','Chinese (Traditional)':'zh-TW','Hindi':'hi-IN','Swahili':'sw-KE',
+ 'Hausa':'ha-NG','Yoruba':'yo-NG','Igbo':'ig-NG','Amharic':'am-ET','Zulu':'zu-ZA','Xhosa':'xh-ZA',
+ 'Afrikaans':'af-ZA','Somali':'so-SO','Oromo':'om-ET','Tigrinya':'ti-ET','Shona':'sn-ZW','Ndebele':'nr-ZA',
+ 'Kinyarwanda':'rw-RW','Kirundi':'rn-BI','Luganda':'lg-UG','Kikuyu':'ki-KE','Luo':'luo-KE','Sesotho':'st-ZA',
+ 'Setswana':'tn-ZA','Chichewa (Nyanja)':'ny-MW','Bambara':'bm-ML','Malagasy':'mg-MG','Wolof':'wo-SN',
+ 'Lingala':'ln-CD','Kikongo':'kg-CD','Twi (Akan)':'ak-GH','Ewe':'ee-GH','Fula (Fulani)':'ff-SN',
+ 'Tamazight (Berber)':'zgh-MA','Kanuri':'kr-NG','Tiv':'tiv-NG',
+ 'German':'de-DE','Italian':'it-IT','Dutch':'nl-NL','Russian':'ru-RU','Ukrainian':'uk-UA','Polish':'pl-PL',
+ 'Romanian':'ro-RO','Greek':'el-GR','Czech':'cs-CZ','Hungarian':'hu-HU','Swedish':'sv-SE','Norwegian':'nb-NO',
+ 'Danish':'da-DK','Finnish':'fi-FI','Turkish':'tr-TR','Serbian':'sr-RS','Croatian':'hr-HR','Bulgarian':'bg-BG',
+ 'Hebrew':'he-IL','Persian (Farsi)':'fa-IR','Urdu':'ur-PK','Bengali':'bn-BD','Punjabi':'pa-IN','Tamil':'ta-IN',
+ 'Telugu':'te-IN','Gujarati':'gu-IN','Marathi':'mr-IN','Pashto':'ps-AF','Kurdish':'ku-TR',
+ 'Japanese':'ja-JP','Korean':'ko-KR','Vietnamese':'vi-VN','Thai':'th-TH','Indonesian':'id-ID','Malay':'ms-MY',
+ 'Filipino (Tagalog)':'fil-PH','Khmer':'km-KH','Burmese':'my-MM'
+};
+function bcpFor(name){ if(!name||name==='Auto')return ''; return BCP[name]||name.split(' ')[0].toLowerCase().slice(0,2); }
+var VOICES=[];
+function loadVoices(){ try{ VOICES=window.speechSynthesis.getVoices()||[]; }catch(_){ VOICES=[]; } }
+if('speechSynthesis' in window){ loadVoices(); window.speechSynthesis.onvoiceschanged=loadVoices; }
+/* Choose the most natural voice for a locale. NORIA's voice is neutral: we rank
+   natural / neural / cloud voices first (they sound human, not robotic) and, all
+   else equal, prefer a gender-neutral option over a strongly gendered one. */
+function pickVoice(code){
+  if(!VOICES.length) loadVoices();
+  if(!VOICES.length) return null;
+  var base=(code||'en').toLowerCase().split('-')[0];
+  var cands=VOICES.filter(function(v){ return v.lang && v.lang.toLowerCase().split('-')[0]===base; });
+  if(!cands.length) return null;
+  function score(v){
+    var n=(v.name+' '+v.lang).toLowerCase(), s=0;
+    if(/natural|neural/.test(n)) s+=8;          // Microsoft/Google natural voices — clearest
+    if(/google/.test(n)) s+=5;
+    if(/premium|enhanced|siri|online/.test(n)) s+=4;
+    if(!v.localService) s+=3;                    // cloud voices are usually higher quality
+    if(/neutral|neu\b/.test(n)) s+=3;            // prefer explicitly neutral voices
+    if(/\bmale\b|\bfemale\b|man|woman/.test(n)) s-=1; // mild nudge away from strongly gendered
+    if(v.lang.toLowerCase()===(code||'').toLowerCase()) s+=1; // exact region match
+    return s;
+  }
+  cands.sort(function(a,b){ return score(b)-score(a); });
+  return cands[0];
+}
+/* Natural-sentence cleaner — shared logic from /noria-voice.js (fallback inline). */
+function spoken(s){
+  if(typeof noriaSpeechText==='function') return noriaSpeechText(s);
+  return String(s||'').replace(/[*_#>`~|]/g,' ').replace(/["“”«»]/g,'').replace(/\s+/g,' ').trim();
+}
+var SPK=null;
+function stopVoice(){
+  if(!SPK)return;
+  try{ if(SPK.audio){ SPK.audio.pause(); SPK.audio.currentTime=0; } }catch(_){}
+  try{ window.speechSynthesis.cancel(); }catch(_){}
+  if(SPK.btn)SPK.btn.classList.remove('on');
+  SPK=null;
+}
+function browserSpeak(txt,code,btn){
+  var u=new SpeechSynthesisUtterance(txt.slice(0,3000));
+  if(code){ u.lang=code; var v=pickVoice(code); if(v)u.voice=v; }
+  u.rate=0.98; u.pitch=1.0; u.volume=1;   // calm, clear, human cadence
+  SPK={btn:btn};
+  u.onend=u.onerror=function(){ if(SPK&&SPK.btn===btn){btn.classList.remove('on');SPK=null;} };
+  window.speechSynthesis.speak(u);
+}
+async function speak(id,btn){
+  var el=document.getElementById(id);
+  var raw=el.value!==undefined?el.value:(el.classList&&el.classList.contains('ph')?'':el.innerText);
+  var txt=spoken(raw);
+  if(!txt||!txt.trim())return;
+  if(SPK&&SPK.btn===btn){ stopVoice(); return; }   // click again to stop
+  stopVoice();
+  // read the translation in the TARGET language, the source in the FROM language
+  var langName=(id==='output')?document.getElementById('to').value:document.getElementById('from').value;
+  var code=bcpFor(langName);
+  btn.classList.add('on');
+  // 1) premium NORIA server voice (same on every device)
+  var audio=(typeof noriaServerVoice==='function')?await noriaServerVoice(txt,code):null;
+  if(SPK||!btn.classList.contains('on')){ /* superseded/cancelled while awaiting */ if(audio){try{audio.pause();}catch(_){}} return; }
+  if(audio){
+    SPK={btn:btn,audio:audio};
+    audio.onended=audio.onerror=function(){ if(SPK&&SPK.audio===audio){btn.classList.remove('on');SPK=null;} };
+    try{ await audio.play(); return; }catch(_){ SPK=null; }
+  }
+  // 2) fall back to the on-device natural voice
+  browserSpeak(txt,code,btn);
+}
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
+</script>
+</body>
+</html>

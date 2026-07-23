@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Home -->
+  <url><loc>https://skyglobegroup.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://skyglobegroup.com/#services</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://skyglobegroup.com/#about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://skyglobegroup.com/#destinations</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://skyglobegroup.com/#countries</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://skyglobegroup.com/#apply</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://skyglobegroup.com/#contact</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- NORIA — the intelligence layer -->
+  <url><loc>https://skyglobegroup.com/noria</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://skyglobegroup.com/noria/chat</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://skyglobegroup.com/noria/translation</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://skyglobegroup.com/noria/knowledge</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://skyglobegroup.com/noria/documents</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- TERRA — trust & verification -->
+  <url><loc>https://skyglobegroup.com/terra</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+
+  <!-- YUNEX — commerce & investment -->
+  <url><loc>https://skyglobegroup.com/yunex</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://skyglobegroup.com/yunex/app</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+
+  <!-- Academy — learning -->
+  <url><loc>https://skyglobegroup.com/academy</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+
+  <!-- Mobility — travel & migration -->
+  <url><loc>https://skyglobegroup.com/mobility</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+
+  <!-- SKYGLOBE ID -->
+  <url><loc>https://skyglobegroup.com/id</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+
+  <!-- Legal -->
+  <url><loc>https://skyglobegroup.com/#privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://skyglobegroup.com/#terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://skyglobegroup.com/#antiFraud</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+</urlset>

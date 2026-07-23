@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKYGLOBEGROUP NORIA — Workspace</title>
+<meta name="description" content="A SKYGLOBEGROUP NORIA workspace — every intelligence capability, conversation and tool in its own dedicated space.">
+<meta name="theme-color" content="#061A52">
+<link rel="icon" href="/noria-logo-t.png">
+<style>
+:root{--navy:#04132F;--navy2:#061A52;--blue:#0A2E65;--blue3:#123E87;--gold:#D4A73A;--gold-2:#E8C566;--gold-hi:#F2D98A;--acad:#B8860B;--acad-2:#D4A73A;--ink:#0F1C3A;--muted:#5A6B8C;--line:#e4e8f0;--purple:#7C3AED;--orange:#F0742E;--green:#12864E;--font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:clip}
+body{font-family:var(--font);color:var(--ink);background:#F8F9FB;line-height:1.6}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+/* ecosystem nav */
+.eco-nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22)}
+.eco-nav .in{max-width:1180px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
+.eco-nav .bd{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.eco-nav .bd img{height:30px;width:30px;object-fit:contain}
+.eco-nav .wm{font-weight:900;letter-spacing:.04em;font-size:1.02rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:20px}
+.eco-nav .lk a{color:#C9D4E5;font-size:.86rem;font-weight:600}
+.eco-nav .lk a:hover{color:#F2D98A}
+.eco-nav .id{background:linear-gradient(135deg,#D4A73A,#E8C566);color:#04132F;padding:8px 16px;border-radius:9px;font-weight:800;font-size:.84rem}
+@media(max-width:860px){.eco-nav .lk .eh{display:none}}
+/* breadcrumb */
+.crumb{background:#fff;border-bottom:1px solid var(--line)}
+.crumb .in{max-width:1180px;margin:0 auto;padding:11px 20px;font-size:.82rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.crumb a{color:#7C3AED;font-weight:600}.crumb b{color:var(--ink)}
+/* workspace hero */
+.whero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(160deg,#061A52 0%,#0A2E65 45%,#3B1D6E 100%)}
+.whero::after{content:"";position:absolute;inset:0;background:radial-gradient(620px 300px at 50% -6%,rgba(124,58,237,.24),transparent 62%);pointer-events:none}
+.whero .in{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:52px 20px 56px;text-align:center}
+.whero .ic{font-size:2.4rem}
+.whero .eyebrow{margin-top:10px;font-size:.74rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#C9B3F7}
+.whero h1{margin-top:8px;font-weight:900;font-size:clamp(1.9rem,5vw,3.1rem);line-height:1.06;background:linear-gradient(95deg,#FFFFFF,#C9B3F7 42%,#9F67F5 58%,#C9B3F7 74%,#FFFFFF);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 9s ease-in-out infinite alternate}
+@keyframes flow{0%{background-position:0}100%{background-position:100%}}
+.whero p{max-width:640px;margin:16px auto 0;color:#C9D4E5;font-size:1.04rem;line-height:1.8}
+.whero .flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:20px;font-size:.8rem;font-weight:700;color:#9DBEFF;letter-spacing:.04em}
+.whero .flow i{font-style:normal;color:#9F67F5}
+/* modules grid */
+.sec{padding:52px 0 64px}
+.sec-h{text-align:center;margin-bottom:8px;font-size:.72rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#7C3AED}
+.sec-t{text-align:center;font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;color:var(--navy2);margin-bottom:6px}
+.sec-s{text-align:center;color:var(--muted);max-width:640px;margin:0 auto 34px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.mod{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px 22px;box-shadow:0 12px 34px rgba(4,19,47,.05);transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column}
+.mod:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(4,19,47,.1);border-color:rgba(212,167,58,.5)}
+.mod .mic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:linear-gradient(150deg,#F2ECFF,#E4D8FB)}
+.mod h3{font-size:1.05rem;margin:12px 0 6px;color:var(--navy2)}
+.mod p{font-size:.88rem;color:var(--muted);flex:1}
+.mod .go{margin-top:14px;font-size:.84rem;font-weight:800;color:#7C3AED}
+.mod .soon{margin-top:14px;font-size:.72rem;font-weight:700;color:#9AA6BE;letter-spacing:.04em}
+/* sibling workspaces strip */
+.sibs{background:#fff;border-top:1px solid var(--line);padding:34px 0 44px}
+.sibs .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.sibs a{border:1px solid var(--line);border-radius:100px;padding:9px 18px;font-size:.86rem;font-weight:700;color:var(--navy2);background:#F8F9FB;transition:.2s}
+.sibs a:hover{border-color:#7C3AED;color:#7C3AED}
+.sibs a.on{background:linear-gradient(135deg,#7C3AED,#9F67F5);color:#fff;border-color:transparent}
+/* footer */
+.eco-foot{background:#04132F;color:#AEC0EC;padding:48px 20px 30px;border-top:1px solid rgba(212,167,58,.18)}
+.eco-foot .ft{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
+@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr}}@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
+.eco-foot .wm{font-weight:900;font-size:1.35rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-foot .tag{color:#D4A73A;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;margin-top:10px}
+.eco-foot p.m{color:#8FA0C4;font-size:.86rem;margin-top:12px;max-width:280px}
+.eco-foot h4{color:#fff;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;font-weight:800}
+.eco-foot a{display:block;color:#AEC0EC;font-size:.88rem;margin-bottom:9px}
+.eco-foot a:hover{color:#F2D98A}
+.eco-foot .bot{max-width:1180px;margin:34px auto 0;border-top:1px solid rgba(255,255,255,.1);padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#8FA0C4}
+.eco-foot .bot b{color:#fff}
+.eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
+.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
+.mod .mic{color:#7C3AED}.mod .mic .sgic{width:24px;height:24px}
+.whero .ic .sgic{width:46px;height:46px;stroke:#fff}
+</style>
+</head>
+<body>
+
+<nav class="eco-nav"><div class="in">
+  <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
+  <div class="lk"><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
+</div></nav>
+
+<div class="crumb"><div class="in"><a href="/">SKYGLOBEGROUP</a> <span>›</span> <a href="/noria">NORIA</a> <span>›</span> <b id="crumbNow">Workspace</b></div></div>
+
+<header class="whero"><div class="in">
+  <div class="ic" id="wIcon">🎓</div>
+  <div class="eyebrow" id="wEyebrow">NORIA</div>
+  <h1 id="wTitle">Workspace</h1>
+  <p id="wDesc"></p>
+  <div class="flow" id="wFlow"></div>
+</div></header>
+
+<section class="sec"><div class="wrap">
+  <div class="sec-h" id="wSecH">Inside this workspace</div>
+  <h2 class="sec-t" id="wSecT">Modules</h2>
+  <p class="sec-s" id="wSecS"></p>
+  <div class="grid" id="wGrid"></div>
+</div></section>
+
+<section class="sibs"><div class="wrap">
+  <div class="sec-h">NORIA</div>
+  <h2 class="sec-t" style="font-size:1.3rem">Move between workspaces</h2>
+  <div class="row" id="wSibs"></div>
+</div></section>
+
+<footer class="eco-foot">
+  <div class="ft">
+    <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
+    <div><h4>NORIA</h4><a href="/noria/chat">Conversations</a><a href="/noria/knowledge">Knowledge</a><a href="/noria/documents">Documents</a><a href="/noria/translation">Translation</a></div>
+    <div><h4>Ecosystem</h4><a href="/terra">TERRA</a><a href="/yunex">YUNEX</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a></div>
+    <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
+  </div>
+  <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · NORIA · All Rights Reserved</div><div class="live"><i></i> Intelligence · Operational</div></div>
+</footer>
+
+<script src="/sg-icons.js"></script>
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+/* ── ACADEMY WORKSPACE REGISTRY — every module is a real, unique destination ── */
+var WS={
+ chat:{icon:'💬',eyebrow:'Conversation Workspace',title:'Conversations',desc:'Talk to NORIA — the intelligence layer of the ecosystem. Ask about visas, learning, trade, documents and more.',
+   flow:['Ask','Understand','Act','Remember'],
+   mods:[
+     {i:'💬',t:'Start a Conversation',d:'Open NORIA and ask anything.',act:'chat'},
+     {i:'🧭',t:'Guidance Across the Ecosystem',d:'Ask about any platform or service.',act:'chat'},
+     {i:'📚',t:'Knowledge & Answers',d:'Explore the Knowledge Centre.',h:'/noria/knowledge'},
+     {i:'🪪',t:'My Space',d:'Your account and history.',h:'/id'}]},
+ knowledge:{icon:'📚',eyebrow:'Knowledge Centre',title:'Knowledge',desc:'Ask, research and learn — NORIA’s knowledge, connected to the Academy and the whole ecosystem.',
+   flow:['Ask','Research','Learn','Apply'],
+   mods:[
+     {i:'💬',t:'Ask NORIA',d:'Instant answers and explanations.',act:'chat'},
+     {i:'📖',t:'Academy Library',d:'Curated study material and resources.',h:'/academy/library'},
+     {i:'🔬',t:'Research Centre',d:'Method-driven discovery.',h:'/academy/research'},
+     {i:'🎓',t:'Programmes',d:'Structured learning tracks.',h:'/courses'}]},
+ documents:{icon:'📄',eyebrow:'Document Intelligence',title:'Documents',desc:'Understand, prepare and verify documents — with NORIA’s help and TERRA’s seal.',
+   flow:['Upload','Understand','Prepare','Verify'],
+   mods:[
+     {i:'💬',t:'Ask about a Document',d:'NORIA explains and guides.',act:'chat'},
+     {i:'📜',t:'Legal Documents',d:'Prepare a sealed legal document.',h:'/terra/legal'},
+     {i:'🔎',t:'Verify a Document',d:'Confirm a document against the register.',h:'/terra/verify'},
+     {i:'🗂️',t:'Digitalization',d:'Digital documentation and archiving.',h:'/digitalization'}]},
+ translation:{icon:'🈯',eyebrow:'Translation Centre',title:'Translation',desc:'Translate text and documents — communicate confidently across every language.',
+   flow:['Text','Translate','Refine','Use'],
+   mods:[
+     {i:'💬',t:'Translate with NORIA',d:'Ask NORIA to translate for you.',act:'chat'},
+     {i:'📄',t:'Document Translation',d:'Certified translation for documents.',h:'/terra/legal'},
+     {i:'🗣️',t:'Learn a Language',d:'Language programmes in the Academy.',h:'/courses'},
+     {i:'🌍',t:'For Travel',d:'Translation for your journey.',h:'/mobility/visas'}]},
+ voice:{icon:'🎙️',eyebrow:'Voice Workspace',title:'Voice',desc:'Speak with NORIA — natural voice interaction across the ecosystem.',
+   flow:['Speak','Understand','Respond','Act'],
+   mods:[
+     {i:'💬',t:'Talk to NORIA',d:'Open NORIA and start the conversation.',act:'chat'},
+     {i:'🧭',t:'Voice Guidance',d:'Ask for help across platforms.',act:'chat'},
+     {i:'📚',t:'Knowledge by Voice',d:'Explore the Knowledge Centre.',h:'/noria/knowledge'},
+     {i:'🪪',t:'My Space',d:'Your account and preferences.',h:'/id'}]},
+ automation:{icon:'⚙️',eyebrow:'Automation Centre',title:'Automation',desc:'Let NORIA help you get things done — guidance, drafting and workflow across the ecosystem.',
+   flow:['Describe','Plan','Execute','Review'],
+   mods:[
+     {i:'💬',t:'Ask NORIA to Help',d:'Describe a task and get moving.',act:'chat'},
+     {i:'📄',t:'Draft a Document',d:'Prepare documents with TERRA.',h:'/terra/legal'},
+     {i:'🎓',t:'Plan Your Learning',d:'Build a learning path.',h:'/academy/learning'},
+     {i:'🌍',t:'Plan a Journey',d:'Organise study, work or travel.',h:'/mobility/countries'}]}
+};
+var ORDER=['chat','knowledge','documents','translation','voice','automation'];
+var key=(location.pathname.split('/')[2]||'chat').toLowerCase();
+if(!WS[key])key='chat';
+var w=WS[key];
+document.title='SKYGLOBEGROUP NORIA — '+w.title;
+document.getElementById('crumbNow').textContent=w.title;
+document.getElementById('wIcon').innerHTML=sgIcon(w.icon,46);
+document.getElementById('wEyebrow').textContent='NORIA · '+w.eyebrow;
+document.getElementById('wTitle').textContent=w.title;
+document.getElementById('wDesc').textContent=w.desc;
+document.getElementById('wFlow').innerHTML=w.flow.map(function(f,ix){return (ix?'<i>→</i>':'')+'<span>'+f+'</span>';}).join('');
+document.getElementById('wSecT').textContent='Inside '+w.title;
+document.getElementById('wSecS').textContent='Every item below is a real destination — choose where to go.';
+document.getElementById('wGrid').innerHTML=w.mods.map(function(m){
+  if(m.act==='chat'){return '<a class="mod" href="/noria/chat"><div class="mic">'+sgIcon(m.i)+'</div><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="go">Open NORIA →</div></a>';}
+  return '<a class="mod" href="'+m.h+'"><div class="mic">'+sgIcon(m.i)+'</div><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="go">Open →</div></a>';
+}).join('');
+document.getElementById('wSibs').innerHTML=ORDER.map(function(k){
+  return '<a href="/noria/'+k+'"'+(k===key?' class="on"':'')+'>'+WS[k].title+'</a>';
+}).join('');
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
+</script>
+</body>
+</html>

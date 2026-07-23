@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NORIA — The Intelligence Layer | SKYGLOBEGROUP</title>
+<meta name="description" content="NORIA is the intelligence layer of the SKYGLOBEGROUP ecosystem — conversations, knowledge, documents, translation, voice and automation. A SKYGLOBEGROUP platform.">
+<meta name="theme-color" content="#061A52">
+<link rel="icon" href="/noria-logo-t.png">
+<style>
+:root{--navy:#04132F;--navy2:#061A52;--blue:#0A2E65;--gold:#D4A73A;--gold-2:#E8C566;--purple:#7C3AED;--purple-2:#9F67F5;--purple-soft:#C9B3F7;--ink:#0F1C3A;--muted:#5A6B8C;--line:#e4e8f0;--font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:clip}
+body{font-family:var(--font);color:var(--ink);background:#F8F9FB;line-height:1.6}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.eco-nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22)}
+.eco-nav .in{max-width:1180px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
+.eco-nav .bd{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.eco-nav .bd img{height:30px;width:30px;object-fit:contain}
+.eco-nav .wm{font-weight:900;letter-spacing:.04em;font-size:1.02rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:20px}
+.eco-nav .lk a{color:#C9D4E5;font-size:.86rem;font-weight:600}
+.eco-nav .lk a:hover{color:#C9B3F7}
+.eco-nav .id{background:linear-gradient(135deg,#7C3AED,#9F67F5);color:#fff;padding:8px 16px;border-radius:9px;font-weight:800;font-size:.84rem}
+@media(max-width:860px){.eco-nav .lk .eh{display:none}}
+.hero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(160deg,#061A52 0%,#0A2E65 45%,#3B1D6E 100%);text-align:center}
+.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(640px 320px at 50% -6%,rgba(124,58,237,.28),transparent 62%);pointer-events:none}
+.hero .in{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:64px 20px 70px}
+.hero .eyebrow{font-size:.76rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#C9B3F7;margin-bottom:14px}
+.hero h1{font-weight:900;font-size:clamp(2.4rem,7vw,4.4rem);letter-spacing:.02em;line-height:1;display:flex;align-items:center;justify-content:center;gap:16px;background:linear-gradient(95deg,#FFFFFF,#C9B3F7 42%,#9F67F5 58%,#C9B3F7 74%,#FFFFFF);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 9s ease-in-out infinite alternate}
+@keyframes flow{0%{background-position:0}100%{background-position:100%}}
+.hero .nstar{width:38px;height:38px;flex-shrink:0}
+.hero .label{margin-top:12px;font-size:.86rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#9DBEFF}
+.hero .flour{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:22px}
+.hero .flour .ln{height:2px;width:min(150px,26vw);border-radius:2px}
+.hero .flour .l{background:linear-gradient(90deg,transparent,var(--purple-2))}
+.hero .flour .r{background:linear-gradient(90deg,var(--purple-2),transparent)}
+.hero .flour .gem{width:9px;height:9px;transform:rotate(45deg);background:linear-gradient(135deg,var(--purple-2),#9DC2FF,var(--gold-2));border-radius:2px;box-shadow:0 0 14px rgba(124,58,237,.6)}
+.hero p.lead{max-width:660px;margin:22px auto 0;color:#C9D4E5;font-size:1.06rem;line-height:1.85}
+.hero .acts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 26px;border-radius:14px;font-weight:800;font-size:.95rem;cursor:pointer;border:none;font-family:inherit}
+.btn.solid{background:linear-gradient(135deg,var(--purple),var(--purple-2));color:#fff;box-shadow:0 8px 26px rgba(124,58,237,.4)}
+.btn.ghost{background:transparent;border:1.5px solid rgba(255,255,255,.45);color:#fff}
+.sec{padding:56px 0 64px}
+.sec-h{text-align:center;font-size:.72rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--purple);margin-bottom:8px}
+.sec-t{text-align:center;font-size:clamp(1.6rem,3.6vw,2.3rem);font-weight:800;color:var(--navy2);margin-bottom:6px}
+.sec-s{text-align:center;color:var(--muted);max-width:640px;margin:0 auto 36px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.mod{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px 22px;box-shadow:0 12px 34px rgba(4,19,47,.05);transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column}
+.mod:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(4,19,47,.1);border-color:rgba(124,58,237,.5)}
+.mod .mic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:linear-gradient(150deg,#F2ECFF,#E4D8FB)}
+.mod .mic .sgic{width:24px;height:24px;stroke:#7C3AED}
+.mod h3{font-size:1.05rem;margin:12px 0 6px;color:var(--navy2)}
+.mod p{font-size:.88rem;color:var(--muted);flex:1}
+.mod .go{margin-top:14px;font-size:.84rem;font-weight:800;color:var(--purple)}
+.warm{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mission{max-width:760px;margin:0 auto;text-align:center}
+.mission p{color:#33415C;font-size:1.08rem;line-height:1.9;margin-top:14px}
+.mission .sig{margin-top:20px;color:var(--purple);font-weight:800;letter-spacing:.02em}
+.eco-foot{background:#04132F;color:#AEC0EC;padding:48px 20px 30px;border-top:1px solid rgba(212,167,58,.18)}
+.eco-foot .ft{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
+@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr}}@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
+.eco-foot .wm{font-weight:900;font-size:1.35rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-foot .tag{color:#D4A73A;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;margin-top:10px}
+.eco-foot p.m{color:#8FA0C4;font-size:.86rem;margin-top:12px;max-width:280px}
+.eco-foot h4{color:#fff;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;font-weight:800}
+.eco-foot a{display:block;color:#AEC0EC;font-size:.88rem;margin-bottom:9px}
+.eco-foot a:hover{color:#C9B3F7}
+.eco-foot .bot{max-width:1180px;margin:34px auto 0;border-top:1px solid rgba(255,255,255,.1);padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#8FA0C4}
+.eco-foot .bot b{color:#fff}
+.eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
+.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
+</style>
+</head>
+<body>
+
+<nav class="eco-nav"><div class="in">
+  <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
+  <div class="lk"><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
+</div></nav>
+
+<header class="hero"><div class="in">
+  <div class="eyebrow">A SKYGLOBEGROUP Platform</div>
+  <h1>NORIA
+    <svg class="nstar" viewBox="0 0 24 24"><defs><linearGradient id="ns" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E8C566"/><stop offset=".5" stop-color="#7C3AED"/><stop offset="1" stop-color="#F0742E"/></linearGradient></defs><path d="M12 0l2.6 8.2L24 12l-9.4 3.8L12 24l-2.6-8.2L0 12l9.4-3.8z" fill="url(#ns)"/></svg>
+  </h1>
+  <div class="label">The Intelligence Layer</div>
+  <div class="flour"><span class="ln l"></span><span class="gem"></span><span class="ln r"></span></div>
+  <p class="lead">NORIA is the intelligence of the ecosystem — it understands your questions, connects to TERRA, YUNEX, the Academy and Mobility, drafts and translates documents, and supports you across every platform. One intelligence, everywhere.</p>
+  <div class="acts">
+    <a class="btn solid" href="/noria/chat">Start a Conversation</a>
+    <a class="btn ghost" href="/noria/knowledge">Explore Knowledge</a>
+  </div>
+</div></header>
+
+<section class="sec"><div class="wrap">
+  <div class="sec-h">NORIA Workspaces</div>
+  <h2 class="sec-t">Every capability, its own workspace.</h2>
+  <p class="sec-s">NORIA is not a single chatbox — it is a set of connected intelligence workspaces. Open any one.</p>
+  <div class="grid">
+    <a class="mod" href="/noria/chat"><div class="mic" data-ic="💬"></div><h3>Conversations</h3><p>Talk to NORIA about anything across the ecosystem.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/knowledge"><div class="mic" data-ic="📚"></div><h3>Knowledge</h3><p>Ask, research and learn — connected to the Academy.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/documents"><div class="mic" data-ic="📄"></div><h3>Documents</h3><p>Understand, draft and verify documents with TERRA.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/translation"><div class="mic" data-ic="🈯"></div><h3>Translation</h3><p>Translate text and documents across languages.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/voice"><div class="mic" data-ic="🎙"></div><h3>Voice</h3><p>Speak with NORIA — natural voice interaction.</p><div class="go">Open workspace →</div></a>
+    <a class="mod" href="/noria/automation"><div class="mic" data-ic="⚙"></div><h3>Automation</h3><p>Get things done — guidance, drafting and workflow.</p><div class="go">Open workspace →</div></a>
+  </div>
+</div></section>
+
+<section class="sec warm"><div class="wrap">
+  <div class="mission">
+    <div class="sec-h">Why NORIA</div>
+    <h2 class="sec-t">Intelligence that belongs to everyone.</h2>
+    <p>NORIA carries the honour star that marks every SKYGLOBEGROUP platform — the reminder that inside every product of this ecosystem, an intelligence is working for you: guiding learners, supporting travellers, drafting documents, and connecting every part of the ecosystem into one experience.</p>
+    <p class="sig">— NORIA · A SKYGLOBEGROUP Platform</p>
+  </div>
+</div></section>
+
+<footer class="eco-foot">
+  <div class="ft">
+    <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
+    <div><h4>NORIA</h4><a href="/noria/chat">Conversations</a><a href="/noria/knowledge">Knowledge</a><a href="/noria/documents">Documents</a><a href="/noria/translation">Translation</a></div>
+    <div><h4>Ecosystem</h4><a href="/terra">TERRA</a><a href="/yunex">YUNEX</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a></div>
+    <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
+  </div>
+  <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · NORIA · All Rights Reserved</div><div class="live"><i></i> Intelligence · Operational</div></div>
+</footer>
+
+<script src="/sg-icons.js"></script>
+<script>
+document.querySelectorAll('.mic[data-ic]').forEach(function(e){e.innerHTML=sgIcon(e.getAttribute('data-ic'));});
+document.getElementById('yr').textContent=new Date().getFullYear();
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
+</script>
+</body>
+</html>
