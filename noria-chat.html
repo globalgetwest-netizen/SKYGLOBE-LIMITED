@@ -507,8 +507,16 @@ async function send(){
   txtEl.innerHTML='<span class="think"><i></i><i></i><i></i></span>';
   try{
     var history=CONVS[CUR].msgs.slice(0,-1).slice(-10).map(function(m){return {role:m.role==='user'?'user':'assistant',content:m.content};});
-    var r=await fetch('/api/noria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history,system:buildSystem()})});
-    var d=await r.json();
+    /* NORIA agent handles everything — it carries the full ecosystem knowledge
+       AND real tools (marketplace search, certificate verify, live currency).
+       Falls back to the knowledge engine only if the agent is unavailable. */
+    var d=null;
+    try{ var ar=await fetch('/api/noria/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history})});
+      var ad=await ar.json(); if(ar.ok&&ad&&ad.reply){ d=ad; } }catch(_){ }
+    if(!d||!d.reply){
+      var r=await fetch('/api/noria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history,system:buildSystem()})});
+      d=await r.json();
+    }
     var ans=(d&&(d.reply||d.answer))||'NORIA is momentarily unavailable — please try again.';
     /* typewriter render for a live, streaming feel */
     txtEl.innerHTML=''; var i=0; var chunk=Math.max(2,Math.round(ans.length/220));
