@@ -29,6 +29,32 @@ const fs = require('fs');
 
 const app = express();
 
+// ── UNIFIED DESIGN SYSTEM · auto-inject ───────────────────────────────────────
+// Every HTML page the server sends gets the shared premium stylesheet, without
+// having to hand-edit 40+ files (which is fragile). One source of truth, applied
+// globally: skyglobe-ds.css. Injected right after <head> so page CSS still wins.
+const SG_DS_LINK = '<link rel="stylesheet" href="/skyglobe-ds.css">';
+function sgInjectDS(html) {
+  if (typeof html !== 'string' || html.indexOf('skyglobe-ds.css') !== -1) return html;
+  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => m + '\n' + SG_DS_LINK);
+  return SG_DS_LINK + html;
+}
+// (a) Patch res.sendFile so every route handler that serves an .html file injects.
+app.use((req, res, next) => {
+  const _sendFile = res.sendFile.bind(res);
+  res.sendFile = function (fp, opts, cb) {
+    try {
+      if (typeof fp === 'string' && /\.html?$/i.test(fp)) {
+        const html = fs.readFileSync(fp, 'utf8');
+        res.type('html');
+        return res.send(sgInjectDS(html));
+      }
+    } catch (_) { /* fall back to normal streaming */ }
+    return _sendFile(fp, opts, cb);
+  };
+  next();
+});
+
 // ── §1 MIDDLEWARE STACK ───────────────────────────────────────────────────────
 // #17 Security headers (helmet equivalent, no extra package needed) ───────────
 // Protects against clickjacking, MIME sniffing, XSS reflection, and enforces HTTPS.
@@ -181,6 +207,20 @@ for (const w of MOBILITY_WORKSPACES) {
 // for accounts; the workspace itself lives in the shared app shell.
 app.get(['/id', '/skyglobe-id'], (req, res) =>
   res.sendFile(path.join(__dirname, 'yunex-app.html')));
+
+// (b) Intercept direct static HTML ('/', '/index.html', '/anything.html') so
+// they also receive the design system before express.static streams them raw.
+app.get([/\/[^.]*\.html?$/i, '/'], (req, res, next) => {
+  const rel = req.path === '/' ? 'index.html' : req.path.replace(/^\/+/, '');
+  const fp = path.join(__dirname, rel);
+  if (!fp.startsWith(__dirname)) return next();
+  fs.readFile(fp, 'utf8', (err, html) => {
+    if (err) return next();
+    res.type('html');
+    res.set('Cache-Control', 'no-cache, must-revalidate');
+    res.send(sgInjectDS(html));
+  });
+});
 
 app.use(express.static(path.join(__dirname), {
   etag: true,
