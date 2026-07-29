@@ -415,6 +415,10 @@ async function speakInto(body,raw){
 var CONVS=JSON.parse(localStorage.getItem('noria_convs')||'[]'); // [{id,title,msgs:[{role,content}]}]
 var CUR=null, BUSY=false, ATTACH=null;
 function saveAll(){ try{ localStorage.setItem('noria_convs',JSON.stringify(CONVS.slice(0,30))); }catch(_){} }
+/* ── Long-term memory: durable facts NORIA remembers across sessions ── */
+function getMemory(){ try{ return localStorage.getItem('noria_memory')||''; }catch(_){ return ''; } }
+function addMemory(fact){ try{ var lines=getMemory().split('\n').filter(Boolean); var f='- '+String(fact).trim(); if(lines.indexOf(f)===-1){ lines.push(f); if(lines.length>40) lines=lines.slice(-40); localStorage.setItem('noria_memory',lines.join('\n')); } }catch(_){} }
+function forgetMemory(){ try{ localStorage.removeItem('noria_memory'); }catch(_){} }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 /* light markdown: **bold**, `code`, ```blocks```, - lists */
 function md(s){
@@ -485,7 +489,7 @@ function pickFile(inp){
   var f=inp.files&&inp.files[0]; if(!f)return;
   if(f.size>400*1024&&!f.type.startsWith('image/')){ alert('Please choose a text file under 400 KB.'); inp.value=''; return; }
   var r=new FileReader();
-  if(f.type.startsWith('image/')){ ATTACH={name:f.name,text:'[The user attached an image: '+f.name+'. Describe what you can help with regarding images and ask them to describe its contents if needed.]'}; showAttach(f.name); }
+  if(f.type.startsWith('image/')){ if(f.size>6*1024*1024){ alert('Please choose an image under 6 MB.'); inp.value=''; return; } r.onload=function(){ ATTACH={name:f.name,image:r.result,isImage:true}; showAttach('🖼️ '+f.name); }; r.readAsDataURL(f); }
   else{ r.onload=function(){ ATTACH={name:f.name,text:String(r.result).slice(0,6000)}; showAttach(f.name); }; r.readAsText(f); }
   inp.value='';
 }
@@ -496,8 +500,10 @@ async function send(){
   if(BUSY)return;
   var inp=document.getElementById('input'); var q=inp.value.trim();
   if(!q&&!ATTACH)return;
-  var visible=q||('Attached: '+(ATTACH?ATTACH.name:'file'));
-  var full=q+(ATTACH?'\n\n[Attached file "'+ATTACH.name+'" contents]:\n'+ATTACH.text:'');
+  var isImg=ATTACH&&ATTACH.isImage;
+  var visible=q||(isImg?('🖼️ '+ATTACH.name):('Attached: '+(ATTACH?ATTACH.name:'file')));
+  var full=q+((ATTACH&&!isImg)?'\n\n[Attached file "'+ATTACH.name+'" contents]:\n'+ATTACH.text:'');
+  var IMG=isImg?ATTACH.image:null;
   inp.value=''; grow(inp); clearAttach();
   if(CUR===null){ CONVS.unshift({id:Date.now(),title:q.slice(0,44)||'Attachment',msgs:[]}); CUR=0; }
   CONVS[CUR].msgs.push({role:'user',content:visible}); saveAll(); renderConvs();
@@ -507,8 +513,22 @@ async function send(){
   txtEl.innerHTML='<span class="think"><i></i><i></i><i></i></span>';
   try{
     var history=CONVS[CUR].msgs.slice(0,-1).slice(-10).map(function(m){return {role:m.role==='user'?'user':'assistant',content:m.content};});
-    var r=await fetch('/api/noria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history,system:buildSystem()})});
-    var d=await r.json();
+    /* NORIA agent handles everything — it carries the full ecosystem knowledge
+       AND real tools (marketplace search, certificate verify, live currency).
+       Falls back to the knowledge engine only if the agent is unavailable. */
+    var d=null;
+    if(IMG){ /* multimodal — NORIA looks at the uploaded image */
+      try{ var vr=await fetch('/api/noria/vision',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q||'What is in this image? Describe it and tell me anything useful.',image:IMG})});
+        var vd=await vr.json(); if(vr.ok&&vd&&vd.reply){ d=vd; } }catch(_){ }
+    }
+    if(!IMG&&(!d||!d.reply)){
+    try{ var ar=await fetch('/api/noria/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history,memory:getMemory()})});
+      var ad=await ar.json(); if(ar.ok&&ad&&ad.reply){ d=ad; if(ad.tools_used){ ad.tools_used.forEach(function(t){ if(t.name==='remember'&&t.args&&t.args.fact) addMemory(t.args.fact); }); } } }catch(_){ }
+    }
+    if(!d||!d.reply){
+      var r=await fetch('/api/noria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,history:history,system:buildSystem()})});
+      d=await r.json();
+    }
     var ans=(d&&(d.reply||d.answer))||'NORIA is momentarily unavailable — please try again.';
     /* typewriter render for a live, streaming feel */
     txtEl.innerHTML=''; var i=0; var chunk=Math.max(2,Math.round(ans.length/220));
