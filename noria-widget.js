@@ -104,8 +104,14 @@
     _nb = true; _open(); _addMsg(q, 'user');
     _addMsg('<span style="display:inline-flex;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite 0s"></span><span style="width:6px;height:6px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#D4A73A;animation:aiDot 1.2s infinite .4s"></span></span>', 'bot', 'noriaOvTyping');
     try {
-      var r = await fetch('/api/noria', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: q, history: _nh.slice(-10) }) });
-      var d = await r.json();
+      var hist = _nh.slice(-8).map(function(m){ return { role: m.role === 'model' ? 'assistant' : 'user', content: (m.parts && m.parts[0] && m.parts[0].text) || '' }; });
+      var d = null;
+      try { var ar = await fetch('/api/noria/agent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: q, history: hist }) });
+        var ad = await ar.json(); if (ar.ok && ad && ad.reply) { d = ad; } } catch (_) {}
+      if (!d || !d.reply) {
+        var r = await fetch('/api/noria', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: q, history: _nh.slice(-10) }) });
+        d = await r.json();
+      }
       document.getElementById('noriaOvTyping')?.remove();
       var rep = d.reply || 'Please WhatsApp us at +1 737-399-8522.';
       _addMsg(rep, 'bot');

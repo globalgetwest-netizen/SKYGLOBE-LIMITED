@@ -74,6 +74,26 @@ section{scroll-margin-top:80px}
 .hero .pillars-line i{font-style:normal;margin:0 10px}
 .hero .pillars-line span{white-space:nowrap}
 @media(max-width:640px){.hero .pillars-line{font-size:.86rem}.hero .pillars-line i{margin:0 7px}}
+/* Professional, compact hero + clean nav on phones (Apple/Google-style) */
+@media(max-width:640px){
+  .hero .wrap{padding-top:52px!important;padding-bottom:56px!important}
+  .hero .wrap>div:first-child img{height:58px!important}
+  .hero .wordmark{margin-top:12px!important}
+  .hero .mission{margin-top:20px!important}
+  .hero .mission2{margin-top:8px!important}
+  .hero .pillars-line{margin-top:16px!important}
+  .hero .wordmark{font-size:2.1rem!important}
+  .hero .mission{font-size:1.35rem!important;line-height:1.2!important}
+  .hero .mission2{font-size:1rem!important}
+  .dock{margin-top:26px!important;gap:8px}
+  .dock a{padding:10px 14px;font-size:.82rem}
+  .livebar{margin-top:28px!important;padding-top:16px;gap:20px}
+  .nav{--cta-d:none}
+  .navback{display:inline-flex!important}
+}
+.navback{display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;width:38px;height:38px;border-radius:50%;font-size:1.25rem;line-height:1;cursor:pointer;margin-right:10px;flex:0 0 auto;text-decoration:none}
+.navback:hover{background:rgba(255,255,255,.16)}
+
 .dock{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:52px}
 .dock a{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(10px);border-radius:16px;padding:13px 22px;font-weight:700;font-size:.92rem;color:#fff;transition:transform .3s ease,background .3s ease}
 .dock a:hover{transform:translateY(-3px);background:rgba(255,255,255,.13)}
@@ -318,6 +338,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 <!-- NAV -->
 <nav class="nav">
   <div class="wrap">
+    <a class="navback" href="/" aria-label="Back to home">←</a>
     <a class="logo" href="/yunex"><img src="/yunex-logo-t.png" alt="" style="border-radius:0"><span class="ywm">YUNEX</span> <span style="color:var(--yx-o2)">✦</span></a>
     <div class="links">
       <a href="/yunex/app#market">Marketplace</a>

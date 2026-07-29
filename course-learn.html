@@ -142,7 +142,8 @@ async function load(){
     setWatermark();
     renderSteps();
   }catch(e){
-    document.getElementById('steplist').innerHTML = '<p style="color:#a93226">' + e.message + '</p>';
+    document.getElementById('hTrack').textContent = 'Your Programme';
+    document.getElementById('steplist').innerHTML = '<div style="text-align:center;padding:44px 20px"><div style="font-size:2.6rem">📚</div><h3 style="margin-top:12px;color:#0f1c3a">We couldn’t open your programme just now</h3><p style="color:#67708f;margin-top:8px;max-width:440px;margin:8px auto 0;line-height:1.6">This is usually temporary. Please refresh the page, and make sure you’re signed in with the account you enrolled with. If it keeps happening, contact support with your enrolment reference.</p><button onclick="load()" style="margin-top:18px;background:#0A2E65;color:#fff;border:none;border-radius:11px;padding:11px 22px;font-weight:700;font-size:.95rem;cursor:pointer;font-family:inherit">Try again</button></div>';
   }
 }
 
@@ -204,6 +205,7 @@ function toggleListen(i){
 /* ── ASK YOUR TEACHER — typed or spoken ── */
 function toggleAsk(i){ const b=document.getElementById('ask'+i); b.style.display = b.style.display==='none'?'block':'none'; }
 async function askTeacher(i){
+  if(EXAM_ACTIVE){ alert('Asking your teacher is disabled during an exam. Please finish and submit your exam first.'); return; }
   const inp = document.getElementById('askInput'+i);
   const q = inp.value.trim(); if(!q) return;
   const ans = document.getElementById('ans'+i);
@@ -261,6 +263,44 @@ async function submitQuiz(i,n){
   }catch(e){ alert(e.message); }
 }
 
+/* ── EXAM INTEGRITY (anti-cheat) ──
+   While an exam is in progress: no asking the teacher, no copy/paste/right-click,
+   and if the learner leaves the screen (switches tab/app or reloads) the exam is
+   abandoned and a COMPLETELY FRESH set of questions is issued on return. */
+var EXAM_ACTIVE=false;
+function examBlock(e){ if(EXAM_ACTIVE){ e.preventDefault(); return false; } }
+function examBeforeUnload(e){ if(!EXAM_ACTIVE) return; e.preventDefault(); e.returnValue='Your exam is in progress. If you leave now, it ends and you will get a fresh set of questions.'; return e.returnValue; }
+function examVisibility(){ if(EXAM_ACTIVE && document.hidden){ abandonExam('You left the exam screen'); } }
+function beginExamGuard(){
+  EXAM_ACTIVE=true;
+  document.addEventListener('visibilitychange', examVisibility);
+  window.addEventListener('beforeunload', examBeforeUnload);
+  window.addEventListener('pagehide', examVisibility);
+  document.addEventListener('contextmenu', examBlock);
+  document.addEventListener('copy', examBlock);
+  document.addEventListener('cut', examBlock);
+  document.addEventListener('paste', examBlock);
+  document.body.style.userSelect='none'; document.body.style.webkitUserSelect='none';
+}
+function endExamGuard(){
+  EXAM_ACTIVE=false;
+  document.removeEventListener('visibilitychange', examVisibility);
+  window.removeEventListener('beforeunload', examBeforeUnload);
+  window.removeEventListener('pagehide', examVisibility);
+  document.removeEventListener('contextmenu', examBlock);
+  document.removeEventListener('copy', examBlock);
+  document.removeEventListener('cut', examBlock);
+  document.removeEventListener('paste', examBlock);
+  document.body.style.userSelect=''; document.body.style.webkitUserSelect='';
+}
+function abandonExam(reason){
+  if(!EXAM_ACTIVE) return;
+  endExamGuard();
+  try{ navigator.sendBeacon('/api/courses/enrollment/'+ENR_ID+'/final-exam/abandon'); }catch(_){}
+  fetch('/api/courses/enrollment/'+ENR_ID+'/final-exam/abandon',{method:'POST'}).catch(function(){});
+  var area=document.getElementById('examArea');
+  if(area) area.innerHTML='<div style="text-align:center;padding:26px 16px"><div style="font-size:2.2rem">⚠️</div><h3 style="color:#a93226;margin-top:8px">Exam ended</h3><p style="color:#67708f;margin-top:8px;line-height:1.6">'+esc(reason)+'. To protect exam integrity, your questions have been reset. Please start a completely fresh exam and finish it in one sitting.</p><button class="btn" onclick="startExam()" style="margin-top:16px">Start a fresh exam</button></div>';
+}
 /* ── FINAL EXAM ── */
 async function startExam(){
   const area=document.getElementById('examArea');
@@ -269,8 +309,10 @@ async function startExam(){
     const r=await fetch(`/api/courses/enrollment/${ENR_ID}/final-exam`,{method:'POST'});
     const d=await r.json();
     if(!r.ok) throw new Error(d.error||'Could not prepare the exam.');
-    area.innerHTML = d.exam.map((q,qi)=>`<div class="q" style="margin-bottom:14px"><p style="font-weight:600;color:var(--navy);font-size:.9rem;margin-bottom:6px">${qi+1}. ${esc(q.q)}</p>${q.options.map((o,oi)=>`<label style="display:block;padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:6px;font-size:.86rem;cursor:pointer"><input type="radio" name="ex_${qi}" value="${oi}"> ${esc(o)}</label>`).join('')}</div>`).join('')
+    area.innerHTML = '<div style="background:#fff4e0;border:1px solid #f0d290;border-radius:12px;padding:12px 14px;font-size:.82rem;color:#8a5a00;margin-bottom:14px;line-height:1.5">🔒 <b>Exam in progress.</b> Finish in one sitting — if you leave this screen or switch away, the exam ends and you receive a fresh set of questions. Asking your teacher is disabled during the exam.</div>'
+      + d.exam.map((q,qi)=>`<div class="q" style="margin-bottom:14px"><p style="font-weight:600;color:var(--navy);font-size:.9rem;margin-bottom:6px">${qi+1}. ${esc(q.q)}</p>${q.options.map((o,oi)=>`<label style="display:block;padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:6px;font-size:.86rem;cursor:pointer"><input type="radio" name="ex_${qi}" value="${oi}"> ${esc(o)}</label>`).join('')}</div>`).join('')
       + `<button class="btn" onclick="submitExam(${d.exam.length})">Submit Final Exam</button>`;
+    beginExamGuard();
   }catch(e){ area.innerHTML='<p style="color:#a93226">'+esc(e.message)+'</p><button class="btn small" onclick="startExam()" style="margin-top:10px">Try again</button>'; }
 }
 async function submitExam(n){
@@ -280,6 +322,7 @@ async function submitExam(n){
     const r=await fetch(`/api/courses/enrollment/${ENR_ID}/final-exam/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answers})});
     const d=await r.json();
     if(!r.ok) throw new Error(d.error||'Could not grade the exam.');
+    endExamGuard();
     document.getElementById('examArea').innerHTML = `<p style="font-weight:700;color:${d.passed?'var(--ok)':'#a93226'};font-size:1.05rem">${d.passed?'🎉':'📚'} ${d.score}% — ${esc(d.message)}</p>`
       + (d.passed ? '' : '<button class="btn" onclick="startExam()" style="margin-top:12px">Retake a fresh exam</button>');
     if(d.passed){ setTimeout(()=>{ load(); }, 1800); }

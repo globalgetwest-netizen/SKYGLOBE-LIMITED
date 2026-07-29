@@ -52,26 +52,38 @@ a{text-decoration:none;color:inherit}
 .lg-thumbs img.on{border-color:#7c3aed}
 .vwrap{position:relative;width:100%;padding-top:56.25%;margin-top:12px;border-radius:12px;overflow:hidden;background:#000}
 .vwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.listing-body{display:grid;gap:14px;margin-top:18px}
+.listing-body{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:18px}
 .crumbs{font-size:.8rem;color:#67708f;margin-bottom:12px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
 .crumbs a{color:#3d5af1;font-weight:600;cursor:pointer}.crumbs b{color:#0f1c3a}
 .buybox{position:sticky;top:76px}
 @media(max-width:840px){.buybox{position:static}}
 /* premium marketplace listing card — consistent 4:3 image, tight rhythm */
 .lcard{padding:12px;border-radius:15px}
-.lc-img{position:relative;aspect-ratio:4/3;overflow:hidden;margin:-12px -12px 12px;border-radius:15px 15px 0 0;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:linear-gradient(125deg,#eef1fb,#f6f0fb)}
+.lc-img{position:relative;aspect-ratio:1/1;overflow:hidden;margin:-12px -12px 12px;border-radius:15px 15px 0 0;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:linear-gradient(125deg,#eef1fb,#f6f0fb)}
 .lc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#eef1f8;transition:transform .4s ease}
 .lcard:hover .lc-img img{transform:scale(1.05)}
 .card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(10,18,48,.1)}
 .lcard:hover{box-shadow:0 14px 30px rgba(10,18,48,.12)}
-.lc-cat{font-size:.66rem;font-weight:800;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em;line-height:1.3}
-.lc-corr{font-size:.66rem;color:#3d5af1;margin-top:2px;font-weight:600}
-.lc-title{font-size:.92rem;line-height:1.34;margin-top:5px;font-weight:700;color:#0f1c3a;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.48em}
-.lc-price{margin-top:6px;font-size:1rem;color:#0f1c3a}.lc-price b{font-weight:800}
-.lc-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:.74rem;color:#67708f}
-.lc-seller{margin-top:9px;padding-top:9px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:.75rem}
+/* Premium type scale — Inter. title 15/600 · price 19.5/700 · meta 12.5/500 */
+.lc-cat{font-size:.68rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.05em;line-height:1.3}
+.lc-corr{font-size:.68rem;color:#3d5af1;margin-top:2px;font-weight:600}
+.lc-title{font-size:.94rem;line-height:1.35;margin-top:6px;font-weight:600;color:#0f1c3a;letter-spacing:-.005em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.55em}
+.lc-price{margin-top:7px;font-size:1.22rem;line-height:1.15;color:#0f1c3a;font-weight:700;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}.lc-price b{font-weight:700}
+.lc-was{font-size:.8rem;color:#9aa4b8;text-decoration:line-through;font-weight:400}
+.lc-extra{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:5px}
+.lc-rate{font-size:.78rem;font-weight:500;color:#0f1c3a}
+.lc-rev{color:#8b93b8;font-weight:400}
+.lc-ship{font-size:.74rem;color:#12864e;font-weight:500}
+.lc-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:.78rem;font-weight:500;color:#67708f}
+.lc-seller{margin-top:10px;padding-top:10px;border-top:1px solid #eef0f6;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:.78rem;font-weight:500}
 /* verified ribbon + hover quick-actions */
 .lc-ribbon{position:absolute;top:8px;right:8px;z-index:3;background:rgba(30,87,201,.94);color:#fff;font-size:.58rem;font-weight:800;letter-spacing:.03em;padding:3px 8px 3px 6px;border-radius:100px;display:inline-flex;align-items:center;gap:4px}
+/* availability badge */
+.lc-avail{position:absolute;bottom:8px;left:8px;z-index:4;font-size:.6rem;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:100px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.lc-avail.sold{background:#c0392b}
+.lc-avail.limited{background:#b5730a}
+.lcard.is-sold .lc-img img{filter:grayscale(.65) brightness(.94)}
+.lcard.is-sold .lc-title{color:#67708f}
 .lc-hover{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;gap:8px;padding:10px;transform:translateY(130%);transition:transform .26s cubic-bezier(.2,.7,.2,1);background:linear-gradient(0deg,rgba(6,18,48,.5),transparent)}
 .lcard:hover .lc-hover{transform:translateY(0)}
 .lc-hover button{flex:1;background:rgba(255,255,255,.96);border:none;border-radius:9px;padding:7px 0;font-weight:800;font-size:.76rem;color:#0f1c3a;cursor:pointer}
@@ -82,7 +94,7 @@ a{text-decoration:none;color:inherit}
 .skel{border-radius:15px;overflow:hidden;border:1px solid #eef0f6;background:#fff;padding:12px}
 .skel .b{background:linear-gradient(90deg,#eef1f8 25%,#f5f7fc 37%,#eef1f8 63%);background-size:400% 100%;animation:shimmer 1.3s ease infinite;border-radius:8px}
 @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-.skel .img{aspect-ratio:4/3;margin:-12px -12px 12px;border-radius:15px 15px 0 0}
+.skel .img{aspect-ratio:1/1;margin:-12px -12px 12px;border-radius:15px 15px 0 0}
 .skel .l1{height:11px;width:55%;margin-top:8px}.skel .l2{height:14px;width:92%;margin-top:9px}.skel .l3{height:16px;width:42%;margin-top:11px}.skel .l4{height:10px;width:70%;margin-top:12px}
 .card .ic{font-size:1.7rem}
 .card h3{margin-top:12px;font-size:1.05rem}
@@ -100,6 +112,30 @@ input,select,textarea{width:100%;border:1px solid #d7dbe8;border-radius:11px;pad
 .empty .ic{font-size:2.6rem}
 .muted{color:#8b93b8;font-size:.86rem}
 .notice{background:linear-gradient(120deg,rgba(61,90,241,.08),rgba(179,38,217,.08));border:1px solid rgba(61,90,241,.2);border-radius:14px;padding:16px 18px;font-size:.9rem;color:#334;line-height:1.6}
+/* premium marketplace grid — exactly 2 tidy columns on phones, never touching
+   the screen edge, columns that can never blow the layout wider than the screen */
+@media(max-width:600px){
+  .wrap{padding:16px 12px 64px}
+  .g3{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+  .g5{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+  .lcard{padding:8px}
+  .lc-img{margin:-8px -8px 10px;border-radius:12px 12px 0 0}
+  .lc-title{font-size:.86rem;line-height:1.3;min-height:2.35em;font-weight:600}
+  .lc-price{font-size:1.06rem}
+  .lc-cat{font-size:.62rem}.lc-corr{font-size:.62rem}
+  .lc-meta{font-size:.72rem;gap:7px}
+  .lc-seller{font-size:.7rem}
+  .sec-h{font-size:1.05rem}
+  .panel{padding:16px 14px}
+  .hero{padding:26px 18px}
+  table{table-layout:fixed;width:100%}
+  td{word-break:break-word}
+  .buy-col h1{font-size:1.25rem}
+}
+@media(max-width:360px){
+  .wrap{padding:14px 10px 60px}
+  .g3,.g5{gap:8px}
+}
 @media(max-width:640px){
   .row2{grid-template-columns:1fr}.hero h1{font-size:1.55rem}.brand small{display:none}
   /* Native app feel on phones: brand + account on row 1, search full-width on
@@ -326,7 +362,7 @@ html,body{max-width:100%;overflow-x:clip}
 
   <!-- SKYGLOBE ID -->
   <section class="view" id="v-id">
-    <div id="idContent"><div class="panel"><div class="empty"><div class="ic">🪪</div><p style="margin-top:8px;font-weight:700">Log in to see your SKYGLOBE ID</p><p class="muted">One account for the whole ecosystem — Academy, Travel, YUNEX and more.</p><button class="btn g grad" style="margin-top:14px" onclick="openAuth('login')">Log in</button></div></div></div>
+    <div id="idContent"><div class="panel" style="text-align:center;padding:36px 22px;max-width:520px;margin:0 auto"><div style="font-size:2.9rem;line-height:1">🪪</div><h3 style="margin-top:10px;color:#0f1c3a;font-size:1.2rem;font-weight:800">See your SKYGLOBE ID</h3><p class="muted" style="margin-top:6px;max-width:380px;margin:6px auto 0;line-height:1.55">One verified identity for the whole ecosystem — Academy, Travel, YUNEX and more.</p><div style="max-width:300px;margin:16px auto 0;text-align:left"><div style="display:flex;align-items:center;gap:9px;font-size:.88rem;color:#475069;margin-top:9px"><span style="color:#12864e;font-weight:800">✓</span> <span>One account across every platform</span></div><div style="display:flex;align-items:center;gap:9px;font-size:.88rem;color:#475069;margin-top:9px"><span style="color:#12864e;font-weight:800">✓</span> <span>TERRA-verified, trusted everywhere</span></div><div style="display:flex;align-items:center;gap:9px;font-size:.88rem;color:#475069;margin-top:9px"><span style="color:#12864e;font-weight:800">✓</span> <span>Your documents, private &amp; secure</span></div></div><button class="btn g grad" style="margin-top:18px;min-width:150px" onclick="openAuth('login')">Log in</button><div style="margin-top:11px;font-size:.86rem">New here? <a style="color:#3d5af1;font-weight:700;cursor:pointer" onclick="openAuth('signup')">Create a SKYGLOBE ID →</a></div></div></div>
   </section>
 </div>
 
@@ -440,18 +476,38 @@ function listingCard(l){
   const marks=(l.seller.trust_marks||[]).map(m=>`<span class="st ok" style="background:${m.color}1a;color:${m.color};padding:3px 9px;font-size:.7rem">${terraBadge(13)} ${esc(m.label.replace(' Verified',''))}</span>`).join(' ');
   const sampleTag=l.showcase?`<span style="position:absolute;top:8px;left:8px;z-index:3;background:rgba(6,18,48,.72);color:#fff;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:100px">SAMPLE</span>`:'';
   const ribbon=(l.seller.trust_marks||[]).length?`<span class="lc-ribbon">${terraBadge(11)} Verified</span>`:'';
+  const av=l.avail||'in_stock';
+  const availBadge=av==='sold'?`<span class="lc-avail sold">Sold</span>`:av==='limited'?`<span class="lc-avail limited">Limited stock</span>`:'';
   const hover=`<div class="lc-hover"><button class="save${l.saved?' on':''}" onclick="event.stopPropagation();quickSave(this,'${l.ref}')">${l.saved?'❤ Saved':'♡ Save'}</button><button onclick="event.stopPropagation();openListing('${l.ref}')">View details</button></div>`;
-  const inner=`${sampleTag}${ribbon}${l.pillar_icon}`;
+  const disc=(l.list_price&&l.price&&l.list_price>l.price)?Math.round((1-l.price/l.list_price)*100):0;
+  const offBadge=disc>0?`<span class="lc-avail" style="background:#c0392b;bottom:8px;left:8px">-${disc}%</span>`:'';
+  const inner=`${sampleTag}${ribbon}${availBadge||offBadge}${l.pillar_icon}`;
   const img=(l.images&&l.images[0])
     ?`<div class="lc-img">${inner}<img src="${esc(l.images[0])}" alt="" loading="lazy" onerror="this.remove()">${hover}</div>`
     :`<div class="lc-img lc-noimg">${inner}${hover}</div>`;
-  return `<div class="card lcard" style="cursor:pointer" onclick="openListing('${l.ref}')">
+  const oldPrice=disc>0?`<span class="lc-was">${fmtCur(l.list_price,l.currency)}</span>`:'';
+  const rating=l.rating?`<span class="lc-rate"><span style="color:#f5a623">★</span> ${l.rating.avg.toFixed(1)} <span class="lc-rev">(${l.rating.count})</span></span>`:'';
+  const ship=l.shipping?`<div class="lc-ship">🚚 ${esc(l.shipping)}</div>`:'';
+  return `<div class="card lcard${av==='sold'?' is-sold':''}" style="cursor:pointer" onclick="openListing('${l.ref}')">
     ${img}
     <div class="lc-cat">${l.pillar_icon} ${esc(l.pillar_label)}${l.category?' · '+esc(l.category):''}</div>${l.corridor_label?`<div class="lc-corr">${l.corridor_flag} ${esc(l.corridor_label)}</div>`:''}
     <h3 class="lc-title">${esc(l.title)}</h3>
-    <div class="lc-price">${money(l)}</div>
+    <div class="lc-price">${money(l)}${oldPrice}</div>
+    ${(rating||ship)?`<div class="lc-extra">${rating}${ship}</div>`:''}
     <div class="lc-meta">${l.location?`<span>📍 ${esc(l.location)}</span>`:''}${l.saves?`<span style="color:#c0392b">❤️ ${l.saves}</span>`:''}</div>
     <div class="lc-seller"><span class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%">${esc(l.seller.name)}</span>${marks}</div>
+  </div>`;
+}
+/* Premium, consistent logged-out state used across every YUNEX tab. */
+function loginGate(icon,title,sub,perks){
+  const bullets=(perks||[]).map(p=>`<div style="display:flex;align-items:center;gap:9px;font-size:.88rem;color:#475069;margin-top:9px"><span style="color:#12864e;font-weight:800">✓</span> <span>${p}</span></div>`).join('');
+  return `<div class="panel" style="text-align:center;padding:36px 22px;max-width:520px;margin-left:auto;margin-right:auto">
+    <div style="font-size:2.9rem;line-height:1">${icon}</div>
+    <h3 style="margin-top:10px;color:#0f1c3a;font-size:1.2rem;font-weight:800">${title}</h3>
+    <p class="muted" style="margin-top:6px;max-width:380px;margin-left:auto;margin-right:auto;line-height:1.55">${sub}</p>
+    ${bullets?`<div style="max-width:300px;margin:16px auto 0;text-align:left">${bullets}</div>`:''}
+    <button class="btn g grad" style="margin-top:18px;min-width:150px" onclick="openAuth('login')">Log in</button>
+    <div style="margin-top:11px;font-size:.86rem">New here? <a style="color:#3d5af1;font-weight:700;cursor:pointer" onclick="openAuth('signup')">Create a SKYGLOBE ID →</a></div>
   </div>`;
 }
 /* Marketplace › Sell — the ONE place that owns product management (IA standard) */
@@ -475,6 +531,8 @@ const SELL_PANE=`    <div class="panel">
         <div style="grid-column:1/-1"><label>Title</label><input id="nl_title" placeholder="e.g. Solar Power Bank 30000mAh — Wholesale"></div>
         <div><label>Price</label><input id="nl_price" type="number" placeholder="e.g. 45"></div>
         <div><label>Currency</label><select id="nl_cur"></select></div>
+        <div><label>Original price (optional — shows a discount)</label><input id="nl_list_price" type="number" placeholder="e.g. 59"></div>
+        <div><label>Shipping (optional)</label><input id="nl_shipping" placeholder="e.g. Ships worldwide · 5–9 days"></div>
         <div><label>Unit</label><input id="nl_unit" placeholder="e.g. piece, tonne, box"></div>
         <div><label>Minimum order</label><input id="nl_moq" placeholder="e.g. 50 units"></div>
         <div><label>Quantity / stock available</label><input id="nl_qty" placeholder="e.g. 500 units in stock"></div>
@@ -601,16 +659,25 @@ async function openListing(ref,fromView){
             </div>
             ${d.brand?`<div class="muted" style="font-size:.84rem">by ${esc(d.brand)}</div>`:''}
             ${(l.seller.rating&&l.seller.rating.count)?`<div style="margin-top:6px">${ratingLine(l.seller.rating)}</div>`:''}
-            <div style="font-size:1.8rem;font-weight:800;margin-top:12px">${money(l)}</div>
-            ${d.unit?`<div class="muted" style="font-size:.82rem">per ${esc(d.unit)}${d.min_order?' · min order '+esc(d.min_order):''}</div>`:''}
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:12px">
+              <div style="font-size:1.8rem;font-weight:800">${money(l)}</div>
+              ${(l.list_price&&l.price&&l.list_price>l.price)?`<span class="lc-was" style="font-size:1rem">${fmtCur(l.list_price,l.currency)}</span><span class="lc-avail limited" style="position:static;box-shadow:none">Save ${Math.round((1-l.price/l.list_price)*100)}%</span>`:''}
+            </div>
+            ${l.rating?`<div style="margin-top:6px;font-size:.9rem"><span style="color:#f5a623">★</span> <b>${l.rating.avg.toFixed(1)}</b> <span class="muted">(${l.rating.count} reviews)</span></div>`:''}
+            ${d.unit?`<div class="muted" style="font-size:.82rem;margin-top:4px">per ${esc(d.unit)}${d.min_order?' · min order '+esc(d.min_order):''}</div>`:''}
             <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px;font-size:.84rem;color:#475069">
+              ${l.shipping?`<div style="color:#12864e;font-weight:600">🚚 ${esc(l.shipping)}</div>`:''}
               ${l.quantity?`<div>📦 ${esc(l.quantity)}</div>`:''}
               ${l.location?`<div>📍 ${esc(l.location)}</div>`:''}
             </div>
+            <div style="margin-top:12px">${(l.avail==='sold')?'<span class="st no" style="background:#fdecea;color:#c0392b">● Sold</span>':(l.avail==='limited')?'<span class="st pend">● Limited stock</span>':'<span class="st ok">● In stock</span>'}</div>
             ${marks?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${marks}</div>`:''}
-            <button class="btn g grad" style="width:100%;margin-top:14px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
-            <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
-            <div class="notice" style="margin-top:12px">🛡️ Verified by the TERRA Credential Network. Agree a price and pay into secure escrow — funds release only when you confirm delivery.</div>
+            ${(l.avail==='sold')
+              ?`<button class="btn" disabled style="width:100%;margin-top:14px;background:#eef0f6;color:#8b93b8;cursor:not-allowed">Sold — no longer available</button>
+                <div class="muted" style="margin-top:6px;font-size:.8rem">This listing has been sold. Browse similar verified listings below.</div>`
+              :`<button class="btn g grad" style="width:100%;margin-top:14px" onclick="startDeal('${l.ref}')">🤝 Contact seller / Make an offer</button>
+                <div class="muted" id="startDealMsg" style="margin-top:6px;font-size:.8rem"></div>
+                <div class="notice" style="margin-top:12px">🛡️ Verified by the TERRA Credential Network. Agree a price and pay into secure escrow — funds release only when you confirm delivery.</div>`}
           </div>
         </div>
       </div>
@@ -653,7 +720,7 @@ async function loadRelated(ref){
     const d=await fetch(API+'/api/yunex/listings/'+ref+'/related').then(r=>r.json());
     const box=$('relatedBox'); if(!box)return;
     if(!d.listings.length){ box.innerHTML=''; return; }
-    box.innerHTML=`<div style="font-weight:700;margin-bottom:8px">Related listings</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${d.listings.map(l=>`<div class="card" style="cursor:pointer;padding:10px" onclick="openListing('${l.ref}')"><div style="font-size:.66rem;font-weight:700;color:#8b5cf6;text-transform:uppercase">${l.pillar_icon} ${esc(l.category||l.pillar_label)}</div><div style="font-weight:600;font-size:.86rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.title)}</div><div style="margin-top:4px;font-size:.9rem">${money(l)}</div></div>`).join('')}</div>`;
+    box.innerHTML=`<div style="font-weight:700;margin-bottom:8px">Related listings</div><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">${d.listings.map(l=>`<div class="card" style="cursor:pointer;padding:10px;min-width:0" onclick="openListing('${l.ref}')"><div style="font-size:.66rem;font-weight:700;color:#8b5cf6;text-transform:uppercase">${l.pillar_icon} ${esc(l.category||l.pillar_label)}</div><div style="font-weight:600;font-size:.86rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.title)}</div><div style="margin-top:4px;font-size:.9rem">${money(l)}</div></div>`).join('')}</div>`;
   }catch(e){}
 }
 function closeListing(){ $('listingModal').classList.remove('on'); }
@@ -1042,7 +1109,7 @@ async function loadVerifyList(){
 /* Business Centre gate */
 function renderBiz(){
   const el=$('bizGate');
-  if(!ME){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">🏢</div><p style="margin-top:8px;font-weight:700">Log in to open your Business Centre</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return; }
+  if(!ME){ el.innerHTML=loginGate('🏢','Open your Business Centre','Manage your verified company profile, listings, sourcing and growth — all in one place.',['Publish & manage your listings','Receive buyer offers and deals','Grow with a verified company page']); return; }
   if(!ME.can_sell){
     el.innerHTML=`<div class="panel"><div class="notice">🛡️ <b>No verification, no trade.</b> To sell, list assets, or offer services on YUNEX, your identity${ (ME.roles||[]).includes('business')?' and business':'' } must be verified by TERRA. This protects every buyer and gives you a verified trust mark that investors and partners can check worldwide.</div>
       <div style="margin-top:16px"><button class="btn g grad" onclick="go('id')">Go to My SKYGLOBE ID to get verified →</button></div></div>`;
@@ -1252,7 +1319,7 @@ async function createListing(){
   const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
   const specs=[...document.querySelectorAll('#nl_specs > div')].map(r=>{const i=r.querySelectorAll('input');return {k:i[0].value.trim(),v:i[1].value.trim()};}).filter(x=>x.k);
   const body={pillar:g('nl_pillar')||document.getElementById('nl_pillar').value,category:g('nl_cat'),corridor:document.getElementById('nl_corridor')?document.getElementById('nl_corridor').value:'',title:g('nl_title'),price:g('nl_price'),currency:document.getElementById('nl_cur').value,quantity:g('nl_qty'),location:g('nl_loc'),description:g('nl_desc'),images:NL_IMAGES,
-    details:{brand:g('nl_brand'),manufacturer:g('nl_maker'),origin:g('nl_origin'),condition:document.getElementById('nl_cond').value,warranty:g('nl_warr'),unit:g('nl_unit'),min_order:g('nl_moq'),video_url:g('nl_video'),specs}};
+    details:{brand:g('nl_brand'),manufacturer:g('nl_maker'),origin:g('nl_origin'),condition:document.getElementById('nl_cond').value,warranty:g('nl_warr'),unit:g('nl_unit'),min_order:g('nl_moq'),video_url:g('nl_video'),list_price:g('nl_list_price')||null,shipping:g('nl_shipping')||null,specs}};
   if(!body.title){ $('nl_msg').style.color='#c0392b'; $('nl_msg').textContent='A title is required.'; return; }
   if(!NL_IMAGES.length){ $('nl_msg').style.color='#c0392b'; $('nl_msg').textContent='Please add at least one real photo of your actual product, asset or project — no stock images. Buyers trust listings they can see.'; return; }
   $('nl_msg').style.color=''; $('nl_msg').textContent='Publishing…';
@@ -1261,7 +1328,7 @@ async function createListing(){
     const d=await r.json();
     if(!r.ok||!d.success){ $('nl_msg').textContent=d.error||'Could not publish'; return; }
     $('nl_msg').textContent='✔ Published — live in the Marketplace';
-    NL_IMAGES=[]; $('nl_imgs').innerHTML=''; ['nl_title','nl_price','nl_qty','nl_loc','nl_desc','nl_video','nl_brand','nl_maker','nl_origin','nl_warr','nl_unit','nl_moq'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    NL_IMAGES=[]; $('nl_imgs').innerHTML=''; ['nl_title','nl_price','nl_list_price','nl_shipping','nl_qty','nl_loc','nl_desc','nl_video','nl_brand','nl_maker','nl_origin','nl_warr','nl_unit','nl_moq'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
     loadMyListings();
   }catch(e){ $('nl_msg').textContent='Network error'; }
 }
@@ -1439,7 +1506,7 @@ async function startDeal(listingRef){
     closeListing(); openDeal(d.ref);
   }catch(e){ $('startDealMsg').textContent='Network error.'; }
 }
-async function go_deals_guard(){ if(!ME){ $('dealsList').innerHTML='<div class="panel"><div class="empty"><div class="ic">🤝</div><p style="margin-top:8px;font-weight:700">Log in to see your deals</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return false;} return true; }
+async function go_deals_guard(){ if(!ME){ $('dealsList').innerHTML=loginGate('🤝','See your deals','Track every offer, escrow-protected payment and shipment in one secure deal room.',['Escrow-protected payments','Offer, accept & track shipments','Dispute resolution if anything goes wrong']); return false;} return true; }
 async function loadDeals(){
   if(!await go_deals_guard()) return;
   const el=$('dealsList'); el.innerHTML='<div class="muted">Loading…</div>';
@@ -1540,7 +1607,7 @@ async function dealAction(action,body){
 /* WALLET */
 async function loadWallet(){
   const el=document.getElementById('walletContent'); if(!el)return;
-  if(!ME){ el.innerHTML='<div class="panel"><div class="empty"><div class="ic">💳</div><p style="margin-top:8px;font-weight:700">Log in to open your wallet</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; return; }
+  if(!ME){ el.innerHTML=loginGate('💳','Open your YUNEX Wallet','Your money in motion — fund escrow, settle deals and withdraw, backed by licensed payment partners.',['Fund deals into secure escrow','Track balances & transactions','Withdraw to your bank account']); return; }
   el.innerHTML='<div class="panel"><div class="muted">Loading…</div></div>';
   try{
     const w=await fetch(API+'/api/yunex/wallet',{headers:H()}).then(r=>r.json());
@@ -1584,7 +1651,7 @@ async function loadCommunity(){
   const compose=$('communityCompose'), topics=$('communityTopics'), feed=$('communityFeed');
   if(!compose)return;
   // composer — only for identity-verified members
-  if(!ME){ compose.innerHTML='<div class="panel"><div class="empty"><div class="ic">🌍</div><p style="margin-top:8px;font-weight:700">Join the verified network</p><p class="muted">Log in and verify your identity with TERRA to share, connect and post opportunities.</p><button class="btn g grad" style="margin-top:12px" onclick="openAuth(\'login\')">Log in</button></div></div>'; }
+  if(!ME){ compose.innerHTML=loginGate('🌍','Join the verified network','Verify your identity with TERRA to share knowledge, post opportunities and connect with trusted businesses.',['Post & connect with verified members','Share opportunities & tenders','Every voice is identity-verified']); }
   else if(ME.verification&&ME.verification.identity!=='verified'){ compose.innerHTML='<div class="notice">🛡️ Verify your identity with TERRA to post in the Community. You can read the feed freely.<div style="margin-top:10px"><button class="btn g grad sm" onclick="go(\'id\')">Verify my identity</button></div></div>'; }
   else compose.innerHTML=`<div class="panel">
     <div style="display:flex;gap:10px;align-items:flex-start">

@@ -71,9 +71,21 @@ body>header,body>nav:not(.eco-nav),nav.topnav,.topnav,body>footer:not(.eco-foot)
   <div id="content"><div class="ic">⏳</div><h1>Checking…</h1></div>
 </div>
 <script>
-const certRef = location.pathname.split('/verify/')[1] || location.pathname.split('/').pop();
+const _m = location.pathname.match(/\/verify\/([^\/]+)\/?$/);
+const certRef = _m ? decodeURIComponent(_m[1]) : '';
+function goCheck(){ var v=(document.getElementById('refIn').value||'').trim(); if(v){ location.href='/verify/'+encodeURIComponent(v); } }
+function portalForm(){
+  document.getElementById('content').innerHTML = '<div class="ic">🔎</div><h1>Verify a Certificate</h1>'
+    + '<p class="note">Enter the certificate reference (printed on the certificate) to confirm it is genuine, issued and verified by SKYGLOBEGROUP.</p>'
+    + '<div style="display:flex;gap:8px;max-width:380px;margin:18px auto 0">'
+    + '<input id="refIn" placeholder="e.g. SKY-2026-XXXX" onkeydown="if(event.key===\'Enter\')goCheck()" style="flex:1;padding:12px 14px;border:1px solid #d7dbe8;border-radius:10px;font-size:.95rem;font-family:inherit">'
+    + '<button onclick="goCheck()" style="background:#0A2E65;color:#fff;border:none;border-radius:10px;padding:12px 20px;font-weight:700;cursor:pointer;font-family:inherit">Verify</button>'
+    + '</div>';
+  var i=document.getElementById('refIn'); if(i) i.focus();
+}
 async function run(){
   const box = document.getElementById('content');
+  if(!certRef){ portalForm(); return; }
   try{
     const r = await fetch('/api/certificates/verify/' + encodeURIComponent(certRef));
     const d = await r.json();

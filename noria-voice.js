@@ -22,7 +22,13 @@
     s = s.replace(/^\s*[-*•]\s+/gm, '');               // bullet markers
     s = s.replace(/^\s*\d+[.)]\s+/gm, '');             // numbered-list markers
     s = s.replace(/[*_#>`~|]+/g, ' ');                 // leftover md symbols
-    s = s.replace(/["“”«»]/g, '');                     // quotes (voice adds tone itself)
+    // Strip emojis & pictographic symbols so the voice never reads "sparkles",
+    // "globe", "check mark" etc. — it should read the WORDS only.
+    try { s = s.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{25A0}-\u{25FF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}]/gu, ''); } catch (_) {}
+    s = s.replace(/["“”«»•·]/g, '');                   // quotes/bullets (voice adds tone itself)
+    // Read ALL-CAPS brand words as WORDS, not letter-by-letter (YUNEX → Yunex).
+    s = s.replace(/\bSKYGLOBEGROUP\b/g, 'SkyGlobe Group').replace(/\bSKYGLOBE\b/g, 'SkyGlobe');
+    s = s.replace(/\b[A-Z][A-Z0-9]{2,}\b/g, function (m) { return m.charAt(0) + m.slice(1).toLowerCase(); });
     // Each line should read as a sentence: add a period where one is missing so
     // the voice pauses naturally between lines instead of running them together.
     s = s.split(/\n+/).map(function (line) {

@@ -243,9 +243,9 @@ function renderTiers(){
   const sym={USD:'$',EUR:'€',GBP:'£'}[state.currency];
   state.catalog.tiers.forEach((t,i)=>{
     const c=document.createElement('div'); c.className='tier'+(i===2?' featured':'');
-    c.innerHTML=(i===2?'<span class="badge">Most complete</span>':'')+
+    c.innerHTML=(t.free?'<span class="badge" style="background:#12864e">Free</span>':(i===2?'<span class="badge">Most complete</span>':''))+
       '<div class="name">'+t.name+'</div>'+
-      '<div class="price">'+sym+t.price[state.currency]+' <small>one-time</small></div>'+
+      '<div class="price">'+(t.free?'<span style="color:#12864e">FREE</span>':sym+t.price[state.currency]+' <small>one-time</small>')+'</div>'+
       '<div class="blurb">'+t.blurb+' · '+t.steps+' guided lessons over '+t.months+' month'+(t.months>1?'s':'')+'</div>'+
       '<ul>'+t.perks.map(p=>'<li>'+p+'</li>').join('')+'</ul>';
     c.onclick=()=>{ state.product=t.product; state.tierName=t.name; state.tierId=t.id;
@@ -271,19 +271,33 @@ function collectFields(){
 function renderSummary(){
   const f=collectFields(); const sym={USD:'$',EUR:'€',GBP:'£'}[state.currency];
   const tier=state.catalog.tiers.find(t=>t.product===state.product);
+  const isFree=tier&&tier.free;
   document.getElementById('paySummary').innerHTML=
     '<b>Track:</b> '+state.trackName+'<br>'+
     '<b>Programme:</b> '+state.tierName+'<br>'+
     '<b>Student:</b> '+(f.fullName||'—')+'<br>'+
     '<b>Email:</b> '+(f.email||'—')+'<br>'+
     '<b>Graduation year:</b> '+(f.graduationYear||'—')+'<br>'+
-    '<b>Total:</b> '+sym+(tier?tier.price[state.currency]:'')+' '+state.currency;
+    '<b>Total:</b> '+(isFree?'<span style="color:#12864e;font-weight:800">FREE</span>':(sym+(tier?tier.price[state.currency]:'')+' '+state.currency));
+  const pb=document.getElementById('payBtn'); if(pb) pb.textContent=isFree?'Enrol Free →':'Pay & Start →';
 }
 
 async function startPayment(){
   const f=collectFields();
   const fe=document.getElementById('payErr'); fe.style.display='none';
   if(!f.fullName||!f.email){ goStep(3); const e=document.getElementById('formErr'); e.textContent='Please fill in full name and email.'; e.style.display='block'; return; }
+  const tierF=state.catalog.tiers.find(t=>t.product===state.product);
+  if(tierF&&tierF.free){
+    const btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Enrolling…';
+    try{
+      const r=await fetch('/api/courses/enroll',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({trackId:state.trackId,tierId:state.tierId,...f})});
+      const d=await r.json();
+      if(!r.ok||!d.success) throw new Error(d.error||'Enrolment failed.');
+      try{ localStorage.removeItem('sky_course_pending'); }catch(e){}
+      location.href='/courses/learn?id='+d.enrollmentId; return;
+    }catch(e){ btn.disabled=false; btn.textContent='Enrol Free →'; fe.textContent=e.message; fe.style.display='block'; return; }
+  }
   const btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Starting secure payment…';
   try{ localStorage.setItem('sky_course_pending', JSON.stringify({product:state.product,trackId:state.trackId,trackName:state.trackName,tierId:state.tierId,tierName:state.tierName,fields:f})); }catch(e){}
   if(sessionStorage.getItem('sky_unlock_'+state.product)){ location.href=location.pathname+'?resume=1'; return; }

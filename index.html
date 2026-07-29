@@ -10,6 +10,7 @@
 <link rel="manifest" href="/manifest.json?v=3">
 <meta name="theme-color" content="#061A52">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SkyGlobe">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 /* ═════════ SKYGLOBEGROUP HOMEPAGE DESIGN SYSTEM ═════════
@@ -231,7 +232,7 @@ footer::after{content:'';position:absolute;width:700px;height:700px;border-radiu
 .foot-eco span{font-size:.74rem;color:#C9D4E5}
 .foot-grid{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:56px;position:relative}
 @media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr;gap:32px}.fc-mail{grid-column:1/-1}}
-@media(max-width:520px){.foot-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.foot-grid{grid-template-columns:1fr 1fr;gap:20px 28px}.fc-mail{grid-column:1/-1}}
 /* Column headers — each carries its brand color with a gradient underline */
 footer h4{color:#fff;font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;font-weight:800;display:inline-block;position:relative;padding-bottom:10px}
 footer h4::after{content:'';position:absolute;left:0;bottom:0;height:2.5px;width:100%;border-radius:3px}
@@ -329,6 +330,16 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .psearchbar form{max-width:720px;margin:0 auto;display:flex;gap:12px;align-items:center}
 .psearchbar input{flex:1;border:none;font-size:1.12rem;outline:none;color:#0b1220;font-family:inherit}
 .psearchbar .x{background:none;border:none;font-size:1.2rem;color:#7a8395;cursor:pointer;line-height:1}
+/* Compact, premium hero on phones (Apple/Google-style — smaller text, tight rhythm) */
+@media(max-width:640px){
+  .phero{padding:38px 20px 34px}
+  .phero h1{font-size:1.95rem;margin-top:12px;line-height:1.12}
+  .phero .psub{font-size:1rem;margin-top:14px;line-height:1.55}
+  .phero .pcta{margin-top:22px;gap:10px}
+  .pplats{padding:0 16px 30px;gap:12px}
+  .pplat{padding:15px 12px}
+  .pplat .n{font-size:.94rem}.pplat .d{font-size:.76rem}
+}
 </style>
 </head>
 <body>
@@ -341,7 +352,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
   <div class="pwrap">
     <a class="plogo" href="/"><img src="/skyglobe-logo-t.png" alt="SKYGLOBEGROUP"><span>SKYGLOBEGROUP</span></a>
     <div class="pcenter">
-      <a href="/noria">Noria</a><a href="/terra">Terra</a><a href="/yunex">Yunex</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a><a href="/yunex/app">Store</a><a href="/noria/chat">AI Mode</a><a href="/academy#finance">Forex</a><a href="/certificate-verify">Certificate</a><a href="/corridors">Corridors</a><a href="/africa">Africa</a><a href="/support">Support</a>
+      <a href="/noria">Noria</a><a href="/skyraai">SkyraAI</a><a href="/terra">Terra</a><a href="/yunex">Yunex</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a><a href="/yunex/app">Store</a><a href="/noria/chat">AI Mode</a><a href="/academy#finance">Forex</a><a href="/certificate-verify">Certificate</a><a href="/corridors">Corridors</a><a href="/africa">Africa</a><a href="/support">Support</a>
     </div>
     <div class="pright">
       <button class="psearch" onclick="openSiteSearch()" aria-label="Search"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
@@ -364,6 +375,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
   </div>
   <div style="margin-top:20px">
     <a class="plat" href="/noria"><img src="/noria-logo-t.png" alt=""><span>NORIA<small>Artificial Intelligence</small></span></a>
+    <a class="plat" href="/skyraai"><img src="/skyglobe-logo-t.png" alt=""><span>SkyraAI<small>AI &amp; Technology</small></span></a>
     <a class="plat" href="/terra"><img src="/terra-logo-t.png" alt=""><span>TERRA<small>Identity &amp; Trust</small></span></a>
     <a class="plat" href="/yunex"><img src="/yunex-logo-t.png" alt=""><span>YUNEX<small>Commerce &amp; Investment</small></span></a>
     <a class="plat" href="/academy"><img src="/skyglobe-logo-t.png" alt=""><span>Academy<small>Knowledge &amp; Skills</small></span></a>

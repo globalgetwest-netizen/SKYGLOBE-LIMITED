@@ -807,7 +807,7 @@
               <h3 style="margin:0">⚖️ Legal Digital Documentation — Order Desk</h3>
               <button onclick="loadLegalDocs()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
             </div>
-            <p style="color:var(--muted);font-size:0.86rem;margin:-6px 0 14px">Every AI-generated, paid legal document. Review it, resend the secure link, or refresh an expired link. Facilitated &amp; Verified by SKYGLOBEGROUP.</p>
+            <p style="color:var(--muted);font-size:0.86rem;margin:-6px 0 14px">Every NORIA-generated, paid legal document. Review it, resend the secure link, or refresh an expired link. Facilitated &amp; Verified by SKYGLOBEGROUP.</p>
             <div id="legalDocsTable" style="overflow-x:auto">
               <p style="color:var(--muted);font-size:0.9rem">Loading documents…</p>
             </div>
@@ -1429,7 +1429,7 @@
 
           <div class="panel" style="margin-bottom:18px">
             <h3>👩‍🏫 Add a Teacher — and the subject they teach</h3>
-            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Create a brand-new AI teacher for any subject — they go live for students instantly. <span style="color:var(--gold)">One-time SQL:</span> <code style="color:var(--txt)">alter table academy_teachers add column if not exists subject text; alter table academy_teachers add column if not exists color text;</code></p>
+            <p style="color:var(--muted);font-size:.88rem;margin:6px 0 14px">Create a brand-new teacher for any subject — they go live for students instantly. <span style="color:var(--gold)">One-time SQL:</span> <code style="color:var(--txt)">alter table academy_teachers add column if not exists subject text; alter table academy_teachers add column if not exists color text;</code></p>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <input id="ntEmoji" placeholder="🎓" maxlength="4" style="width:64px;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;text-align:center;font-size:1.05rem">
               <input id="ntName" placeholder="Teacher name — e.g. Kofi" maxlength="40" style="flex:1;min-width:160px;background:var(--navy3);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 14px">
@@ -1440,12 +1440,19 @@
           </div>
 
           <div class="panel">
-            <h3>🎓 SkyGlobe Academy — AI Teachers</h3>
+            <h3>🎓 SkyGlobe Academy — Teachers</h3>
             <p style="color:var(--muted);font-size:.9rem;margin:6px 0 4px">
-              Each subject has its own AI teacher with a unique name. You can rename any teacher below — the new name takes effect instantly for every child. (These teachers are completely separate from SKYGLOBE CORE.)
+              Each subject has its own teacher with a unique name. You can rename any teacher below — the new name takes effect instantly for every child. (These teachers are completely separate from SKYGLOBE CORE.)
             </p>
             <p style="color:var(--muted);font-size:.82rem;margin-bottom:16px">🟢 Live = available to students now · ⚪ Coming soon = reserved for upcoming phases.</p>
             <div id="academyTeachers"><div class="skeleton">Loading teachers…</div></div>
+          </div>
+
+          <div class="panel">
+            <h3>🎟️ Free Certificate Access</h3>
+            <p style="color:var(--muted);font-size:.9rem;margin:6px 0 14px">Toggle a certificate <b>ON</b> to make it <b>FREE</b> — students enrol without paying. Toggle <b>OFF</b> to require payment again. Changes apply instantly across the Academy.</p>
+            <div id="freeCertList"><div class="skeleton">Loading…</div></div>
+            <div id="freeCertMsg" style="margin-top:8px;font-size:.85rem;color:var(--gold)"></div>
           </div>
         </section>
 
@@ -1747,9 +1754,27 @@ async function removeCourse(id,name){
 
 
 /* ══════════════════════════════════════════════════════
-   KIDS ACADEMY — AI TEACHER NAME MANAGEMENT (CEO)
+   KIDS ACADEMY — TEACHER NAME MANAGEMENT (CEO)
 ══════════════════════════════════════════════════════ */
+async function loadFreeCerts(){
+  const el=document.getElementById('freeCertList'); if(!el) return;
+  try{
+    const d=await fetch(API+'/api/admin/academy/free-products',{headers:{'x-admin-key':KEY}}).then(r=>r.json());
+    const free=new Set(d.products||[]);
+    el.innerHTML=(d.tiers||[]).map(t=>'<label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px"><span><b>'+t.name+'</b><br><small style="color:var(--muted)">'+(free.has(t.product)?'🟢 FREE — students enrol without paying':'💳 Paid — payment required')+'</small></span><input type="checkbox" data-product="'+t.product+'" '+(free.has(t.product)?'checked':'')+' onchange="saveFreeCerts()" style="width:24px;height:24px;cursor:pointer"></label>').join('');
+  }catch(e){ el.innerHTML='<div style="color:#c0392b">Could not load certificate settings.</div>'; }
+}
+async function saveFreeCerts(){
+  const products=[].slice.call(document.querySelectorAll('#freeCertList input[type=checkbox]:checked')).map(function(c){return c.dataset.product;});
+  const msg=document.getElementById('freeCertMsg'); if(msg) msg.textContent='Saving…';
+  try{
+    await fetch(API+'/api/admin/academy/free-products',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({products:products})});
+    if(msg) msg.textContent='✔ Saved.'; setTimeout(function(){if(msg)msg.textContent='';},1500);
+    loadFreeCerts();
+  }catch(e){ if(msg) msg.textContent='Could not save.'; }
+}
 async function loadAcademyTeachers(){
+  loadFreeCerts();
   const box=document.getElementById('academyTeachers');
   box.innerHTML='<div class="skeleton">Loading teachers…</div>';
   try{
