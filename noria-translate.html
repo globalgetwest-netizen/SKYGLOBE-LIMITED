@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="/skyglobe-ds.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NORIA — Translation</title>
-<meta name="description" content="Translate text into 80+ languages — including every major African language — inside NORIA, the intelligence layer of SKYGLOBEGROUP.">
-<meta name="theme-color" content="#061A52">
+<title>Noria — Translation</title>
+<meta name="description" content="Translate text into 80+ languages — including every major African language — inside Noria, the intelligence layer of SKYGLOBEGROUP.">
+<meta name="theme-color" content="#ffffff">
 <link rel="icon" href="/noria-logo-t.png">
 <style>
 :root{--navy:#04132F;--navy2:#061A52;--blue:#0A2E65;--purple:#7C3AED;--purple-2:#9F67F5;--soft:#C9B3F7;--gold:#D4A73A;--gold-2:#E8C566;--ink:#0F1C3A;--muted:#5A6B8C;--line:#e4e8f0;--bg:#F8F9FB;--font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif}
@@ -16,25 +17,26 @@ a{text-decoration:none;color:inherit}
 button,select,textarea{font-family:inherit}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 .isvg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
-/* nav — NORIA identity, no self-link */
-.eco-nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22)}
-.eco-nav .in{max-width:1080px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
-.eco-nav .bd{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.eco-nav .bd img{height:30px;width:30px;object-fit:contain}
-.eco-nav .wm{font-weight:900;letter-spacing:.04em;font-size:1.02rem;background:linear-gradient(95deg,#FFFFFF,#C9B3F7 40%,#9F67F5 55%,#C9B3F7 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
-.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:20px}
-.eco-nav .lk a{color:#C9D4E5;font-size:.86rem;font-weight:600}
-.eco-nav .lk a:hover{color:#C9B3F7}
-.eco-nav .id{background:linear-gradient(135deg,#7C3AED,#9F67F5);color:#fff;padding:8px 16px;border-radius:9px;font-weight:800;font-size:.84rem}
-@media(max-width:760px){.eco-nav .lk .eh{display:none}}
+/* nav — Noria identity, no self-link */
+.eco-nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid #ececf1}
+.eco-nav .in{max-width:1080px;margin:0 auto;padding:9px 20px;display:flex;align-items:center;gap:16px;height:56px}
+.eco-nav .bd{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.eco-nav .bd img{height:26px;width:26px;object-fit:contain}
+.eco-nav .wm{font-weight:600;letter-spacing:-.01em;font-size:1.15rem;color:#1d1d1f}
+.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:22px}
+.eco-nav .lk a{color:#5f6368;font-size:.88rem;font-weight:500}
+.eco-nav .lk a:hover{color:#1d1d1f}
+.eco-nav .id{background:#0a2e65;color:#fff;padding:8px 16px;border-radius:8px;font-weight:600;font-size:.85rem}
+.eco-nav .id:hover{background:#0c3876}
+@media(max-width:720px){.eco-nav .lk .eh{display:none}}
 /* breadcrumb */
 .crumb{background:#fff;border-bottom:1px solid var(--line)}
 .crumb .in{max-width:1080px;margin:0 auto;padding:11px 20px;font-size:.82rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.crumb a{color:#7C3AED;font-weight:600}.crumb b{color:var(--ink)}
+.crumb a{color:#5f6368;font-weight:500}.crumb a:hover{color:#0a5bd6}.crumb b{color:#1d1d1f;font-weight:600}
 /* hero-lite */
-.head{text-align:center;padding:40px 20px 8px}
-.head .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--purple)}
-.head h1{margin-top:8px;font-weight:900;font-size:clamp(1.9rem,4.6vw,2.7rem);color:var(--navy2)}
+.head{text-align:center;padding:36px 20px 8px}
+.head .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5f6368}
+.head h1{margin-top:6px;font-weight:600;letter-spacing:-.015em;font-size:clamp(1.7rem,3.6vw,2.4rem);color:#1d1d1f}
 .head p{max-width:600px;margin:10px auto 0;color:var(--muted)}
 /* translator */
 .tr{max-width:1000px;margin:26px auto 0;padding:0 20px 60px}
@@ -69,34 +71,34 @@ button,select,textarea{font-family:inherit}
 .chips button:hover{border-color:var(--purple);color:var(--purple)}
 .note{text-align:center;color:#9AA6BE;font-size:.78rem;margin-top:22px}
 /* footer */
-.eco-foot{background:#04132F;color:#AEC0EC;padding:44px 20px 28px;border-top:1px solid rgba(212,167,58,.18)}
-.eco-foot .ft{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
-@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr}}@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
-.eco-foot .wm{font-weight:900;font-size:1.3rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
-.eco-foot .tag{color:#D4A73A;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;margin-top:10px}
-.eco-foot p.m{color:#8FA0C4;font-size:.86rem;margin-top:12px;max-width:280px}
-.eco-foot h4{color:#fff;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;font-weight:800}
-.eco-foot a{display:block;color:#AEC0EC;font-size:.88rem;margin-bottom:9px}
-.eco-foot a:hover{color:#C9B3F7}
-.eco-foot .bot{max-width:1080px;margin:32px auto 0;border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#8FA0C4}
-.eco-foot .bot b{color:#fff}
-.eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
-.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
+.eco-foot{background:#fff;color:#5f6368;padding:34px 20px 22px;border-top:1px solid #ececf1}
+.eco-foot .ft{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:28px}
+@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr;gap:22px}}@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
+.eco-foot .wm{font-weight:600;font-size:1.1rem;letter-spacing:-.01em;color:#1d1d1f}
+.eco-foot .tag{color:#9a7012;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;margin-top:8px}
+.eco-foot p.m{color:#5f6368;font-size:.86rem;margin-top:10px;max-width:280px;line-height:1.55}
+.eco-foot h4{color:#1d1d1f;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin:0 0 12px;font-weight:600}
+.eco-foot a{display:block;color:#5f6368;font-size:.88rem;margin-bottom:8px;transition:color .2s}
+.eco-foot a:hover{color:#0a5bd6}
+.eco-foot .bot{max-width:1080px;margin:26px auto 0;border-top:1px solid #ececf1;padding-top:18px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#80868b}
+.eco-foot .bot b{color:#1d1d1f}
+.eco-foot .live{display:flex;align-items:center;gap:7px;color:#12864E;font-weight:600}
+.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.16);font-style:normal}
 </style>
 </head>
 <body>
 
 <nav class="eco-nav"><div class="in">
-  <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
-  <div class="lk"><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
+  <a class="bd" href="/noria"><img src="/noria-logo-t.png" alt=""><span class="wm">Noria</span></a>
+  <div class="lk"><a class="eh" href="/noria/chat">Chat</a><a class="eh" href="/noria/knowledge">Knowledge</a><a class="eh" href="/noria/documents">Documents</a><a class="id" href="/id">Sign in</a></div>
 </div></nav>
 
-<div class="crumb"><div class="in"><a href="/">SKYGLOBEGROUP</a> <span>›</span> <a href="/noria">NORIA</a> <span>›</span> <b>Translation</b></div></div>
+<div class="crumb"><div class="in"><a href="/noria">Noria</a> <span>›</span> <b>Translation</b></div></div>
 
 <header class="head">
-  <div class="eyebrow">NORIA · Translation Centre</div>
+  <div class="eyebrow">Noria · Translation Centre</div>
   <h1>Translate anything</h1>
-  <p>Type or paste your text, choose your languages, and NORIA translates it — across <b id="langCount">80+</b> languages, including every major African language.</p>
+  <p>Type or paste your text, choose your languages, and Noria translates it — across <b id="langCount">80+</b> languages, including every major African language.</p>
 </header>
 
 <section class="tr">
@@ -137,17 +139,17 @@ button,select,textarea{font-family:inherit}
   </div>
 
   <div class="chips" id="chips"><span>Quick languages</span></div>
-  <p class="note">Powered by NORIA · translations are NORIA-generated — verify official or legal documents with our professional team.</p>
+  <p class="note">Powered by Noria · translations are Noria-generated — verify official or legal documents with our professional team.</p>
 </section>
 
 <footer class="eco-foot">
   <div class="ft">
     <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
-    <div><h4>NORIA</h4><a href="/noria/chat">Conversations</a><a href="/noria/knowledge">Knowledge</a><a href="/noria/documents">Documents</a><a href="/noria/translation">Translation</a></div>
+    <div><h4>Noria</h4><a href="/noria/chat">Conversations</a><a href="/noria/knowledge">Knowledge</a><a href="/noria/documents">Documents</a><a href="/noria/translation">Translation</a></div>
     <div><h4>Ecosystem</h4><a href="/terra">TERRA</a><a href="/yunex">YUNEX</a><a href="/academy">Academy</a><a href="/mobility">Mobility</a></div>
     <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
   </div>
-  <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · NORIA · All Rights Reserved</div><div class="live"><i></i> Intelligence · Operational</div></div>
+  <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · Noria · All Rights Reserved</div><div class="live"><i></i> Intelligence · Operational</div></div>
 </footer>
 
 <script src="/noria-voice.js"></script>
@@ -205,7 +207,7 @@ async function runTranslate(){
     var r=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,from:from,to:to})});
     var d=await r.json();
     var ans=(d&&(d.translation||d.reply)||'').trim();
-    out.textContent=ans||(d&&d.error)||'NORIA could not translate that just now — please try again.';
+    out.textContent=ans||(d&&d.error)||'Noria could not translate that just now — please try again.';
   }catch(e){ out.textContent='Network issue — please try again.'; }
   BUSY=false; btn.disabled=false;
 }
@@ -235,7 +237,7 @@ function bcpFor(name){ if(!name||name==='Auto')return ''; return BCP[name]||name
 var VOICES=[];
 function loadVoices(){ try{ VOICES=window.speechSynthesis.getVoices()||[]; }catch(_){ VOICES=[]; } }
 if('speechSynthesis' in window){ loadVoices(); window.speechSynthesis.onvoiceschanged=loadVoices; }
-/* Choose the most natural voice for a locale. NORIA's voice is neutral: we rank
+/* Choose the most natural voice for a locale. Noria's voice is neutral: we rank
    natural / neural / cloud voices first (they sound human, not robotic) and, all
    else equal, prefer a gender-neutral option over a strongly gendered one. */
 function pickVoice(code){
@@ -290,7 +292,7 @@ async function speak(id,btn){
   var langName=(id==='output')?document.getElementById('to').value:document.getElementById('from').value;
   var code=bcpFor(langName);
   btn.classList.add('on');
-  // 1) premium NORIA server voice (same on every device)
+  // 1) premium Noria server voice (same on every device)
   var audio=(typeof noriaServerVoice==='function')?await noriaServerVoice(txt,code):null;
   if(SPK||!btn.classList.contains('on')){ /* superseded/cancelled while awaiting */ if(audio){try{audio.pause();}catch(_){}} return; }
   if(audio){
