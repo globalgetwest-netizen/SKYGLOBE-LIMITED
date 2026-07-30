@@ -123,8 +123,8 @@ section{scroll-margin-top:80px}
 .meter.m2 .bar i{animation-delay:-1.2s}
 .meter.m3 .bar i{animation-delay:-2.4s}
 @keyframes meterflow{0%{background-position:120% 0}100%{background-position:-120% 0}}
-.meter-dark .l{color:#8FA6DC}
-.meter-dark .bar{background:rgba(255,255,255,.14)}
+.meter-dark .l{color:var(--muted)}
+.meter-dark .bar{background:#eef1f6}
 .hero::after{content:'';position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,.14),transparent 60%);top:-420px;left:50%;transform:translateX(-50%);pointer-events:none}
 .nstar{vertical-align:-4px;margin-left:14px;filter:drop-shadow(0 0 10px rgba(212,167,58,.55));animation:starbreathe 4.5s ease-in-out infinite}
 @keyframes starbreathe{0%,100%{opacity:.92;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
@@ -138,8 +138,8 @@ section{scroll-margin-top:80px}
 
 /* ── ECOSYSTEM NAVIGATOR ── */
 .navigator{position:relative;margin-top:24px;z-index:5}
-.navigator .panel{background:rgba(255,255,255,.98);border-radius:24px;box-shadow:0 24px 80px rgba(4,19,47,.25);padding:40px 44px;max-width:1080px;margin:0 auto}
-.navigator h2{font-size:1.5rem;font-weight:800;text-align:center}
+.navigator .panel{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 44px rgba(4,19,47,.10);padding:clamp(24px,4vw,36px);max-width:1080px;margin:0 auto}
+.navigator h2{font-size:clamp(1.3rem,2.2vw,1.6rem);font-weight:650;letter-spacing:-.015em;text-align:center}
 .navigator p.lead{text-align:center;color:var(--muted);margin-top:8px;font-size:.95rem}
 .nav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:32px}
 .nav-item{border-radius:var(--r);padding:22px 20px;background:var(--warm);cursor:pointer;transition:transform .35s ease,box-shadow .35s ease;display:block}
@@ -150,11 +150,11 @@ section{scroll-margin-top:80px}
 .nav-item .go{display:block;margin-top:12px;font-size:.8rem;font-weight:700}
 
 /* ── SECTION HEADERS ── */
-.sec{padding:112px 0}
+.sec{padding:clamp(46px,7vw,78px) 0}
 .sec.warm{background:var(--warm)}
-.sec-eyebrow{font-size:.78rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--blue-3);text-align:center}
-.sec-eyebrow::after{content:'';display:block;width:56px;height:3px;border-radius:3px;margin:14px auto 0;background:linear-gradient(90deg,var(--gold),#4E86F0,var(--orange))}
-.sec-title{font-size:clamp(1.8rem,3.4vw,2.5rem);font-weight:800;text-align:center;margin-top:12px;line-height:1.25}
+.sec-eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-3);text-align:center}
+.sec-eyebrow::after{content:'';display:block;width:34px;height:2px;border-radius:3px;margin:12px auto 0;background:linear-gradient(90deg,var(--gold),#4E86F0)}
+.sec-title{font-size:clamp(1.45rem,2.6vw,2rem);font-weight:650;letter-spacing:-.02em;text-align:center;margin-top:12px;line-height:1.18}
 .sec-sub{text-align:center;color:var(--muted);max-width:640px;margin:16px auto 0;font-size:1rem}
 
 /* ── ECOSYSTEM ARCHITECTURE ── */
@@ -184,9 +184,9 @@ section{scroll-margin-top:80px}
 .sol .go{display:inline-block;margin-top:16px;font-weight:700;font-size:.85rem;color:var(--blue-3)}
 
 /* ── LIVE INTELLIGENCE ── */
-.stats-band{background:linear-gradient(135deg,var(--blue-1),var(--blue-2));border-radius:28px;color:#fff;padding:56px 48px;margin-top:56px;box-shadow:var(--shadow-h)}
+.stats-band{background:#fff;border:1px solid var(--line);border-radius:22px;color:var(--ink);padding:clamp(22px,4vw,38px);margin-top:34px;box-shadow:0 12px 40px rgba(10,46,101,.06)}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:32px;text-align:center}
-.stat .n{font-size:2.3rem;font-weight:900;background:linear-gradient(120deg,#fff,var(--gold-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .n{font-size:1.9rem;font-weight:800;color:#0a2e65;letter-spacing:-.01em}
 .stat .l{font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#B9C7EC;margin-top:6px}
 
 /* ── TRUST ── */
@@ -210,13 +210,13 @@ section{scroll-margin-top:80px}
 .cta-final .actions{margin-top:40px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative}
 
 /* ── FOOTER ── */
-footer{background:linear-gradient(180deg,#051636 0%,var(--navy-footer) 40%);color:#AEBBDD;padding:0 0 40px;margin-top:112px;position:relative;overflow:hidden}
-footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),#4E86F0 35%,var(--orange) 65%,var(--pink))}
+footer{background:var(--navy-footer);color:#AEBBDD;padding:0 0 40px;margin-top:clamp(52px,8vw,76px);position:relative;overflow:hidden}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:rgba(212,167,58,.35)}
 footer::after{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,.08),transparent 65%);bottom:-460px;left:50%;transform:translateX(-50%);pointer-events:none}
 /* The signature crown of the footer */
-.foot-sig{text-align:center;padding:72px 0 56px;position:relative}
+.foot-sig{text-align:center;padding:clamp(40px,6vw,60px) 0 clamp(32px,4vw,44px);position:relative}
 .foot-sig .wm{font-size:clamp(1.5rem,3.4vw,2.2rem)}
-.foot-sig .tag{margin-top:12px;font-size:.78rem;font-weight:700;letter-spacing:.34em;text-transform:uppercase;color:var(--gold)}
+.foot-sig .tag{margin-top:12px;font-size:.72rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
 .foot-sig .ln{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:26px}
 .foot-sig .ln span{height:1.5px;width:min(180px,30vw)}
 .foot-sig .ln .l{background:linear-gradient(90deg,transparent,rgba(212,167,58,.7))}
@@ -235,12 +235,8 @@ footer::after{content:'';position:absolute;width:700px;height:700px;border-radiu
 @media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr;gap:32px}.fc-mail{grid-column:1/-1}}
 @media(max-width:520px){.foot-grid{grid-template-columns:1fr 1fr;gap:20px 28px}.fc-mail{grid-column:1/-1}}
 /* Column headers — each carries its brand color with a gradient underline */
-footer h4{color:#fff;font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;font-weight:800;display:inline-block;position:relative;padding-bottom:10px}
-footer h4::after{content:'';position:absolute;left:0;bottom:0;height:2.5px;width:100%;border-radius:3px}
-.fc-eco h4::after{background:linear-gradient(90deg,var(--gold),var(--gold-2))}
-.fc-start h4::after{background:linear-gradient(90deg,#4E86F0,#9DC2FF)}
-.fc-co h4::after{background:linear-gradient(90deg,var(--orange),#F79B5B)}
-.fc-mail h4::after{background:linear-gradient(90deg,var(--pink),#FF9DC7)}
+footer h4{color:#fff;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px;font-weight:600;display:inline-block;position:relative;padding-bottom:9px}
+footer h4::after{content:'';position:absolute;left:0;bottom:0;height:2px;width:24px;border-radius:3px;background:rgba(212,167,58,.55)}
 footer a{display:flex;align-items:center;gap:9px;font-size:.9rem;margin:12px 0;transition:color .25s,transform .25s}
 footer a:hover{color:#fff;transform:translateX(4px)}
 footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
@@ -511,7 +507,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
         <div class="stat" style="text-align:left"><div class="n" style="font-size:1.5rem">6</div><div class="l" style="margin-top:4px">Trade Corridors</div></div>
         <div class="stat" style="text-align:left"><div class="n" style="font-size:1.5rem">23</div><div class="l" style="margin-top:4px">Currencies</div></div>
       </div>
-      <div style="margin-top:26px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:#7FD6A3"><span style="width:8px;height:8px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.2)"></span> Live Ecosystem · Operational — every signal drawn from real activity, never invented.</div>
+      <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;color:#12864E"><span style="width:8px;height:8px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18)"></span> Live Ecosystem · Operational — every signal drawn from real activity, never invented.</div>
     </div>
   </div>
 </section>
