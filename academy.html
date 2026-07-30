@@ -286,14 +286,14 @@ footer{padding:40px 0 44px;background:#fff}
   <div class="cta">
     <a class="btn solid" href="/id">Create SKYGLOBE ID</a>
     <a class="txt" href="#programmes">Explore programmes</a>
-    <a class="txt" href="/academy/learn">Student portal</a>
+    <a class="txt" href="/courses">Student portal</a>
   </div>
 </div></section>
 
 <footer><div class="wrap">
   <div class="foot">
     <div class="bd"><b>SKYGLOBEGROUP Academy</b><p>A global learning ecosystem — knowledge, skills, discovery and leadership, for every kind of learner.</p></div>
-    <div><h5>Study</h5><a href="#programmes">Programmes</a><a href="#schools">Schools</a><a href="#path">Find your path</a><a href="/academy/learn">Student portal</a></div>
+    <div><h5>Study</h5><a href="#programmes">Programmes</a><a href="#schools">Schools</a><a href="#path">Find your path</a><a href="/courses">Student portal</a></div>
     <div><h5>Trust</h5><a href="#credentials">Verify a certificate</a><a href="/terra">TERRA</a><a href="/id">SKYGLOBE ID</a></div>
     <div><h5>Ecosystem</h5><a href="/noria">NORIA</a><a href="/yunex">YUNEX</a><a href="/mobility">Mobility</a><a href="/">SKYGLOBEGROUP</a></div>
     <div class="btm"><div>© <span id="yr">2026</span> SKYGLOBEGROUP · Academy · All Rights Reserved</div><div>One World · One Mission</div></div>
@@ -364,7 +364,7 @@ function applyFilters(){
   document.getElementById('pCount').textContent=list.length+' programme'+(list.length===1?'':'s')+(sch?' · '+sch.replace(/^School of /,''):'');
   if(!list.length){ grid.innerHTML='<div class="empty">No programmes match your search.</div>'; return; }
   grid.innerHTML=list.slice(0,60).map(function(t){
-    return '<a class="pcard" href="/academy/learn?track='+encodeURIComponent(t.id)+'"><div class="sch">'+esc(t.school.replace(/^School of /,''))+'</div><h3 class="serif">'+esc(t.name)+'</h3><div class="go">View programme →</div></a>';
+    return '<a class="pcard" href="/courses?track='+encodeURIComponent(t.id)+'"><div class="sch">'+esc(t.school.replace(/^School of /,''))+'</div><h3 class="serif">'+esc(t.name)+'</h3><div class="go">View programme →</div></a>';
   }).join('');
 }
 document.getElementById('progSearch').addEventListener('input',applyFilters);

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="/skyglobe-ds.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SKYGLOBEGROUP Academy — Certificate Programs</title>
@@ -196,6 +197,10 @@ async function loadCatalog(){
   try{
     const r=await fetch('/api/courses/catalog'); state.catalog=await r.json();
     renderTracks(); renderTiers();
+    // Deep-link: /courses?track=<id> preselects the programme and jumps to tier choice.
+    try{ var pre=new URLSearchParams(location.search).get('track');
+      if(pre && state.catalog.tracks){ var t=state.catalog.tracks.find(function(x){return x.id===pre;});
+        if(t){ state.trackId=t.id; state.trackName=t.name; goStep(2); } } }catch(_){ }
   }catch(e){ document.getElementById('trackGrid').innerHTML='<p style="text-align:center;color:#a93226">Could not load programmes. Please refresh.</p>'; }
 }
 
