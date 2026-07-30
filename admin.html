@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="/skyglobe-ds.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
@@ -380,6 +381,7 @@
         <div class="sb-sec sb-sec--vert"><span class="dot"></span>🌍 Mobility</div>
         <button class="sb-link" data-view="applications" onclick="switchView('applications')"><span class="ic">📋</span> Applications <span class="badge-n" id="navAppsBadge"></span></button>
         <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
+        <button class="sb-link" data-view="mobility" onclick="switchView('mobility');mobInit()"><span class="ic">🧭</span> Mobility Directories</button>
 
         <div class="sb-sec sb-sec--vert"><span class="dot"></span>🎓 Academy</div>
         <button class="sb-link" data-view="academy" onclick="switchView('academy')"><span class="ic">🎓</span> SkyGlobeGroup Academy</button>
@@ -676,6 +678,30 @@
               <button onclick="loadWpRates()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
             </div>
             <div id="wpRatesTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading rates…</p></div>
+          </div>
+        </section>
+
+        <!-- MOBILITY DIRECTORIES (admin-managed) -->
+        <section class="view" id="view-mobility">
+          <div class="panel" style="margin-bottom:18px">
+            <h3 style="margin:0 0 6px">🧭 Mobility Directories</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 14px">Add countries, opportunities, universities and employers. Anything you add here appears on the public Mobility platform instantly — no redeploy.</p>
+            <div id="mobTabs" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+          </div>
+          <div class="panel" style="margin-bottom:18px">
+            <h3 id="mobFormTitle" style="margin:0 0 12px">Add</h3>
+            <div id="mobForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px"></div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <button class="btn" onclick="mobAdd()">➕ Add</button>
+              <div id="mobMsg" style="font-size:0.85rem;color:var(--muted)"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+              <h3 id="mobListTitle" style="margin:0">Items</h3>
+              <button onclick="mobLoad()" style="background:var(--gold);color:#1a1300;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">↻ Refresh</button>
+            </div>
+            <div id="mobList"><p style="color:var(--muted);font-size:0.9rem">Choose a directory above.</p></div>
           </div>
         </section>
 
@@ -4519,6 +4545,57 @@ function removeCEOMsg(id) {
     try{ recog.start(); }catch(e){}
     startWave();
     recStart=Date.now(); updateTimer(); timerInt=setInterval(updateTimer,250);
+  };
+})();
+</script>
+
+<!-- MOBILITY DIRECTORIES manager -->
+<script>
+(function(){
+  var MOB={
+    countries:{label:'Countries',fields:[['name','Country name',1],['region','Region (e.g. Europe)'],['flag','Flag code (e.g. DE)'],['summary','Short summary']]},
+    opportunities:{label:'Opportunities',fields:[['title','Title',1],['org','Organisation'],['type','Type (Study/Work/Internship)'],['country','Country'],['duration','Duration'],['deadline','Deadline'],['visa','Visa support (Yes/No)'],['url','Link (https://…)']]},
+    universities:{label:'Universities',fields:[['name','University name',1],['country','Country'],['city','City'],['type','Type'],['programmes','No. of programmes'],['url','Link']]},
+    employers:{label:'Employers',fields:[['name','Company name',1],['industry','Industry'],['country','Country'],['hiring','International hiring (Yes/No)'],['positions','Open positions'],['url','Link']]}
+  };
+  var cur='countries';
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function msg(t,err){ var m=document.getElementById('mobMsg'); if(m){m.textContent=t;m.style.color=err?'#e57373':'var(--muted)';} }
+  function renderTabs(){
+    document.getElementById('mobTabs').innerHTML=Object.keys(MOB).map(function(k){
+      return '<button onclick="mobTab(\''+k+'\')" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);cursor:pointer;font-weight:700;font-size:.85rem;'+(k===cur?'background:var(--gold);color:#1a1300':'background:var(--navy);color:#fff')+'">'+MOB[k].label+'</button>';
+    }).join('');
+  }
+  function inp(id,ph){ return '<div><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">'+ph+'</label><input id="mf_'+id+'" placeholder="'+ph+'" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>'; }
+  function renderForm(){
+    document.getElementById('mobFormTitle').textContent='Add '+MOB[cur].label.replace(/s$/,'');
+    document.getElementById('mobListTitle').textContent=MOB[cur].label;
+    document.getElementById('mobForm').innerHTML=MOB[cur].fields.map(function(f){return inp(f[0],f[1]+(f[2]?' *':''));}).join('');
+  }
+  window.mobInit=function(){ renderTabs(); renderForm(); mobLoad(); };
+  window.mobTab=function(k){ cur=k; renderTabs(); renderForm(); mobLoad(); };
+  window.mobAdd=function(){
+    var body={}; MOB[cur].fields.forEach(function(f){ var el=document.getElementById('mf_'+f[0]); body[f[0]]=el?el.value.trim():''; });
+    if(!body[MOB[cur].fields[0][0]]){ msg('Please fill in the '+MOB[cur].fields[0][1],true); return; }
+    msg('Adding…');
+    fetch(API+'/api/admin/mobility/'+cur,{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify(body)})
+      .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+      .then(function(x){ if(!x.ok||!x.d.success)throw new Error(x.d.error||'Failed'); msg('Added ✓'); MOB[cur].fields.forEach(function(f){var el=document.getElementById('mf_'+f[0]);if(el)el.value='';}); mobLoad(); })
+      .catch(function(e){ msg(e.message,true); });
+  };
+  window.mobLoad=function(){
+    var el=document.getElementById('mobList'); if(!el)return; el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">Loading…</p>';
+    fetch(API+'/api/admin/mobility/'+cur,{headers:{'x-admin-key':KEY}}).then(function(r){return r.json();}).then(function(d){
+      var items=d.items||[]; if(!items.length){ el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">Nothing yet — add one above.</p>'; return; }
+      el.innerHTML=items.map(function(it){
+        var title=it.name||it.title||'—';
+        var sub=[it.region,it.type,it.city,it.country,it.industry,it.org].filter(Boolean).join(' · ');
+        return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)"><div style="flex:1"><div style="font-weight:700">'+esc(title)+'</div><div style="color:var(--muted);font-size:.82rem">'+esc(sub)+'</div></div><button onclick="mobDel(\''+it.id+'\')" style="background:none;border:1px solid var(--line);color:#e57373;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;font-weight:700">Remove</button></div>';
+      }).join('');
+    }).catch(function(){ el.innerHTML='<p style="color:#e57373">Could not load.</p>'; });
+  };
+  window.mobDel=function(id){ if(!confirm('Remove this item?'))return;
+    fetch(API+'/api/admin/mobility/'+cur+'/'+id,{method:'DELETE',headers:{'x-admin-key':KEY}}).then(function(){ mobLoad(); });
   };
 })();
 </script>

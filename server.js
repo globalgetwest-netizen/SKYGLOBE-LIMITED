@@ -9481,6 +9481,71 @@ app.delete('/api/admin/academy/tracks/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── MOBILITY DIRECTORIES — admin-managed (countries, opportunities, universities, employers) ──
+// Stored as JSON collections in the existing academy_bank store (no new Supabase
+// table required). Public GET feeds the Mobility frontend; admin CRUD manages them.
+const MOB_COLLECTIONS = ['countries', 'opportunities', 'universities', 'employers'];
+async function mobCollRead(name) {
+  const row = await bankGet('mobility_' + name, '__mobility');
+  const items = (row && row.content && Array.isArray(row.content.items)) ? row.content.items : [];
+  return { items, id: row ? row.id : null };
+}
+async function mobCollWrite(name, items, existingId) {
+  await bankPut('mobility_' + name, '__mobility', null, { items }, existingId);
+}
+function mobItemShape(name, b) {
+  const s = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 300);
+  const id = 'm_' + crypto.randomBytes(5).toString('hex');
+  if (name === 'countries')     return { id, name: s(b.name, 80), region: s(b.region, 40) || 'Other', flag: s(b.flag, 2).toUpperCase(), summary: s(b.summary, 400) };
+  if (name === 'opportunities') return { id, title: s(b.title, 140), org: s(b.org, 120), type: s(b.type, 40) || 'Opportunity', country: s(b.country, 80), duration: s(b.duration, 60), deadline: s(b.deadline, 60), visa: s(b.visa, 40), url: s(b.url, 400) };
+  if (name === 'universities')  return { id, name: s(b.name, 140), country: s(b.country, 80), city: s(b.city, 80), type: s(b.type, 60) || 'University', programmes: s(b.programmes, 60), url: s(b.url, 400) };
+  if (name === 'employers')     return { id, name: s(b.name, 140), industry: s(b.industry, 80), country: s(b.country, 80), hiring: s(b.hiring, 40) || 'Yes', positions: s(b.positions, 60), url: s(b.url, 400) };
+  return null;
+}
+// Public — the Mobility frontend reads these.
+app.get('/api/mobility/:coll', async (req, res) => {
+  if (!MOB_COLLECTIONS.includes(req.params.coll)) return res.status(404).json({ error: 'Unknown collection' });
+  try { const { items } = await mobCollRead(req.params.coll); res.json({ items }); }
+  catch (e) { res.json({ items: [] }); }
+});
+// Admin — list / add / delete.
+app.get('/api/admin/mobility/:coll', async (req, res) => {
+  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!MOB_COLLECTIONS.includes(req.params.coll)) return res.status(404).json({ error: 'Unknown collection' });
+  try { const { items } = await mobCollRead(req.params.coll); res.json({ items }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post('/api/admin/mobility/:coll', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  const name = req.params.coll;
+  if (!MOB_COLLECTIONS.includes(name)) return res.status(404).json({ error: 'Unknown collection' });
+  const item = mobItemShape(name, req.body || {});
+  const label = item.name || item.title;
+  if (!label) return res.status(400).json({ error: 'A name or title is required.' });
+  try {
+    const { items, id } = await mobCollRead(name);
+    items.unshift(item);
+    await mobCollWrite(name, items, id);
+    logActivity(who, 'ceo', 'mobility_add', `Added ${name.replace(/s$/, '')} "${label}"`, item.id);
+    res.json({ success: true, item });
+  } catch (e) {
+    const missing = /relation|does not exist/i.test(e.message || '');
+    res.status(500).json({ error: missing ? 'Storage table (academy_bank) is required — it is created with the Academy setup.' : e.message });
+  }
+});
+app.delete('/api/admin/mobility/:coll/:id', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'Unauthorized' });
+  const name = req.params.coll;
+  if (!MOB_COLLECTIONS.includes(name)) return res.status(404).json({ error: 'Unknown collection' });
+  try {
+    const { items, id } = await mobCollRead(name);
+    await mobCollWrite(name, items.filter(x => x.id !== req.params.id), id);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Generic 14-phase outline, trimmed to the tier's step count. Deterministic
 // (no AI JSON parsing risk) — the AI is used per-step, on demand, to write the
 // actual lesson content in that track's specific context.

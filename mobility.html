@@ -362,6 +362,14 @@ function renderCountries(){
 function openCountry(c){ goNoria('Give me a complete mobility guide for moving to '+c+': studying, working, immigration and residency pathways, visas and permits, cost of living, essential services, and the step-by-step process. Clearly separate general information from official requirements, and note where professional or current advice is needed.'); }
 document.getElementById('cSearch').addEventListener('input',renderCountries);
 renderCountries();
+/* Merge in countries added from the admin portal. */
+fetch('/api/mobility/countries').then(function(r){return r.json();}).then(function(d){
+  var added=false;
+  (d.items||[]).forEach(function(c){ if(!c.name)return; var r=c.region||'Other';
+    if(!COUNTRIES[r]){COUNTRIES[r]=[];REGIONS.push(r);}
+    if(COUNTRIES[r].indexOf(c.name)<0){COUNTRIES[r].push(c.name);added=true;} });
+  if(added) renderCountries();
+}).catch(function(){});
 
 /* NORIA ask */
 function askNoria(){ var v=(document.getElementById('noriaAsk').value||'').trim(); if(v) goNoria(v); }

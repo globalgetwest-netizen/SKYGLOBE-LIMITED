@@ -67,6 +67,15 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
 .mod h3{font-size:1.05rem;font-weight:600;color:var(--ink)}
 .mod p{font-size:.9rem;color:var(--muted);flex:1;margin-top:5px;line-height:1.5}
 .mod .go{margin-top:14px;font-size:.84rem;font-weight:500;color:var(--navy)}
+/* admin-managed directory (opportunities / universities / employers) */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:24px}
+.dcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column}
+.dcard .tag{font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.dcard h3{font-size:1.1rem;font-weight:600;margin-top:6px}
+.dcard .meta{margin-top:10px;font-size:.88rem;color:var(--muted);line-height:1.7;flex:1}
+.dcard .meta b{color:var(--ink);font-weight:500}
+.dcard .act{margin-top:14px;display:flex;gap:14px}.dcard .act a{font-size:.84rem;font-weight:500;color:var(--navy)}
+.dempty{padding:36px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line-2);border-radius:12px;margin-top:24px}
 
 footer{padding:40px 0 44px}
 .fin{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--faint);border-top:1px solid var(--line);padding-top:18px}
@@ -95,6 +104,12 @@ footer a:hover{color:var(--navy)}
     <div class="eyebrow">The journey</div>
     <h2 class="sh" id="wJT">Your journey</h2>
     <div class="journey" id="wFlow"></div>
+  </section>
+
+  <section class="sec" id="wDirSec" style="display:none">
+    <div class="eyebrow" id="wDirEy">Directory</div>
+    <h2 class="sh" id="wDirT">Directory</h2>
+    <div class="dgrid" id="wDir"></div>
   </section>
 
   <section class="sec">
@@ -172,6 +187,25 @@ document.getElementById('subnav').innerHTML=NAV.map(function(n){
   var href=n[0]==='__apps'?'/mobility/applications':'/mobility/'+n[0];
   return '<a href="'+href+'"'+(n[0]===key?' class="on"':'')+'>'+n[1]+'</a>';
 }).join('');
+
+/* Admin-managed directory for opportunities / universities / employers. */
+var DIR={opportunities:{t:'opportunities',ey:'Opportunity Centre'},universities:{t:'universities',ey:'University Directory'},employers:{t:'employers',ey:'Employer Directory'}};
+function edir(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function renderDir(k,it){
+  if(k==='opportunities') return '<div class="dcard"><div class="tag">'+edir(it.type||'Opportunity')+'</div><h3>'+edir(it.title)+'</h3><div class="meta">'+(it.org?'<b>'+edir(it.org)+'</b><br>':'')+[it.country,it.duration].filter(Boolean).map(edir).join(' · ')+(it.deadline?'<br>Deadline: '+edir(it.deadline):'')+(it.visa?'<br>Visa support: '+edir(it.visa):'')+'</div><div class="act">'+(it.url?'<a href="'+edir(it.url)+'" target="_blank" rel="noopener">Details →</a>':'')+'<a href="/mobility/applications">Apply →</a></div></div>';
+  if(k==='universities') return '<div class="dcard"><div class="tag">'+edir(it.type||'University')+'</div><h3>'+edir(it.name)+'</h3><div class="meta">'+(([it.city,it.country].filter(Boolean).length)?'<b>'+edir([it.city,it.country].filter(Boolean).join(', '))+'</b><br>':'')+(it.programmes?'Programmes: '+edir(it.programmes):'')+'</div><div class="act">'+(it.url?'<a href="'+edir(it.url)+'" target="_blank" rel="noopener">View university →</a>':'<a href="/courses">Explore programmes →</a>')+'</div></div>';
+  return '<div class="dcard"><div class="tag">Employer</div><h3>'+edir(it.name)+'</h3><div class="meta">'+(it.industry?'<b>'+edir(it.industry)+'</b><br>':'')+edir(it.country||'')+(it.positions?'<br>Open positions: '+edir(it.positions):'')+(it.hiring?'<br>International hiring: '+edir(it.hiring):'')+'</div><div class="act">'+(it.url?'<a href="'+edir(it.url)+'" target="_blank" rel="noopener">View →</a>':'')+'<a href="/mobility/opportunities">View opportunities →</a></div></div>';
+}
+if(DIR[key]){
+  var sec=document.getElementById('wDirSec'); sec.style.display='block';
+  document.getElementById('wDirEy').textContent=DIR[key].ey;
+  document.getElementById('wDirT').textContent='Browse '+DIR[key].t;
+  fetch('/api/mobility/'+key).then(function(r){return r.json();}).then(function(d){
+    var items=d.items||[]; var g=document.getElementById('wDir');
+    if(!items.length){ g.outerHTML='<div class="dempty">No '+DIR[key].t+' listed yet — these are added from the admin portal.</div>'; return; }
+    g.innerHTML=items.map(function(it){return renderDir(key,it);}).join('');
+  }).catch(function(){ var g=document.getElementById('wDir'); if(g) g.outerHTML='<div class="dempty">Directory temporarily unavailable.</div>'; });
+}
 if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>
 </body>
