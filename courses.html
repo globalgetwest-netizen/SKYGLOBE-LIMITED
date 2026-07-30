@@ -45,10 +45,10 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
 .phead h1{font-family:var(--serif);font-size:clamp(2.1rem,4.6vw,3.4rem);font-weight:600;line-height:1.06;letter-spacing:-.01em;margin-top:8px;max-width:20ch}
 .phead .intro{max-width:60ch;margin-top:16px;color:var(--ink-2);font-size:1.05rem}
 .phead .cta{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap}
-/* Native, instant programme identity — an academic medallion (no external images) */
-.phero-img{margin-top:clamp(22px,3vw,32px);height:clamp(150px,20vw,220px);border-radius:3px;border:1px solid var(--line);background:linear-gradient(135deg,#f3f5f9 0%,#faf7ef 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.phero-img .em{width:84px;height:84px;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 10px 28px rgba(10,46,101,.10);display:flex;align-items:center;justify-content:center;font-size:2.4rem}
-.phero-img .sc{font-family:var(--serif);color:var(--muted);font-size:1.05rem;letter-spacing:.01em}
+/* Native, instant programme identity — a premium, discipline-themed medallion */
+.phero-img{margin-top:clamp(22px,3vw,32px);height:clamp(180px,23vw,260px);border-radius:4px;border:1px solid var(--line);background:linear-gradient(135deg,#fbfbf9 0%,#f6f7f4 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.phero-img .em{width:112px;height:112px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:3.3rem;box-shadow:0 16px 40px rgba(10,46,101,.14),inset 0 1px 0 rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.7)}
+.phero-img .sc{font-family:var(--serif);color:var(--muted);font-size:1.1rem;letter-spacing:.01em}
 
 /* Overview facts */
 .facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:clamp(26px,4vw,40px);background:var(--line);border:1px solid var(--line)}
@@ -130,8 +130,11 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
 .catlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;margin-top:14px;background:var(--line);border:1px solid var(--line)}
 .catitem{background:#fff;padding:16px 18px;cursor:pointer;transition:background .15s var(--ease)}
 .catitem:hover{background:var(--wash)}
-.catitem .nm{font-family:var(--serif);font-size:1.1rem;color:var(--ink);display:flex;align-items:center;gap:10px}
-.catitem .cem{font-size:1.2rem;flex:0 0 auto}
+.catitem{display:flex;align-items:center;gap:14px}
+.catitem .cem{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex:0 0 auto;box-shadow:0 6px 16px rgba(10,46,101,.08),inset 0 1px 0 rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.6)}
+.catitem .nm{font-family:var(--serif);font-size:1.12rem;color:var(--ink);line-height:1.25}
+.catitem .go{font-size:.8rem;color:var(--navy);margin-top:3px}
+.catitem .txt{min-width:0}
 .catitem .go{margin-top:6px;font-size:.8rem;color:var(--navy)}
 
 /* Enrolment */
@@ -292,6 +295,22 @@ for(var y=curYear;y<=curYear+6;y++) gradSel.innerHTML+='<option value="'+y+'">'+
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 var state={ trackId:null, trackName:null, school:null, product:null, tierName:null, tierId:null, currency:'USD', catalog:null };
+/* Discipline colour themes — soft, refined gradients that colour-code each School. */
+var SCHOOL_THEME={
+  'School of Technology & Digital Sciences':['#E7F0FF','#D5E4FF'],
+  'School of Business & Entrepreneurship':['#EDF1F8','#DEE7F4'],
+  'School of Finance & Investment':['#E7F6EE','#D4EFDE'],
+  'School of Health & Wellbeing':['#E6F6F4','#D3EEEA'],
+  'School of Creative Arts & Media':['#F4ECFB','#E9DEF7'],
+  'School of Education':['#FBF2DF','#F3E5C3'],
+  'School of Environment & Sustainability':['#E9F6EA','#D6EFDA'],
+  'School of Hospitality & Tourism':['#FBEEE2','#F5E0CA'],
+  'School of the Built Environment':['#F1F0EA','#E4E1D8'],
+  'School of Agriculture & Natural Resources':['#EEF5E2','#DEEFCA'],
+  'School of Vocational Trades & Safety':['#FBEDE2','#F5D9C6'],
+  'School of Professional Studies':['#EDF1F8','#DEE7F4']
+};
+function themeFor(s){ var t=SCHOOL_THEME[s]||['#EDF1F8','#DEE7F4']; return 'linear-gradient(140deg,'+t[0]+' 0%,'+t[1]+' 100%)'; }
 var PATH_LABELS=['Foundation','Advanced','Professional','Executive'];
 var PATH_DESC=['For learners beginning their journey.','For learners developing deeper capability.','For learners seeking advanced capability.','For experienced professionals and leaders.'];
 var PATH_ASSESS=['Foundational coursework','Coursework + practical project','Coursework + capstone project','Executive capstone'];
@@ -314,7 +333,7 @@ function renderCatalogue(){
   var grouped={}; (state.catalog.tracks||[]).forEach(function(t){var k=t.school||'School of Professional Studies';(grouped[k]=grouped[k]||[]).push(t);});
   document.getElementById('catalogue').innerHTML=Object.keys(grouped).sort().map(function(sc){
     return '<div class="catgrp"><h3 class="serif">'+esc(sc.replace(/^School of /,''))+'</h3><div class="catlist">'+
-      grouped[sc].map(function(t){return '<div class="catitem" data-id="'+esc(t.id)+'"><div class="nm serif"><span class="cem">'+esc(t.emoji||'📘')+'</span>'+esc(t.name)+'</div><div class="go">View programme →</div></div>';}).join('')+
+      grouped[sc].map(function(t){return '<div class="catitem" data-id="'+esc(t.id)+'"><span class="cem" style="background:'+themeFor(t.school||sc)+'">'+esc(t.emoji||'📘')+'</span><div class="txt"><div class="nm serif">'+esc(t.name)+'</div><div class="go">View programme →</div></div></div>';}).join('')+
       '</div></div>';
   }).join('');
   document.querySelectorAll('.catitem').forEach(function(el){el.addEventListener('click',function(){
@@ -336,7 +355,7 @@ function renderProgramme(){
   document.getElementById('enrCrumb').textContent=subject;
   document.getElementById('pName').textContent=subject;
   document.getElementById('pIntro').textContent='Develop practical knowledge and professional capability in '+subject+' through a structured programme designed for learners seeking to build skills and advance their careers.';
-  document.getElementById('pHeroImg').innerHTML='<div class="em">'+esc(state.emoji||'📘')+'</div><div class="sc serif">'+esc(schoolShort)+'</div>';
+  document.getElementById('pHeroImg').innerHTML='<div class="em" style="background:'+themeFor(state.school)+'">'+esc(state.emoji||'📘')+'</div><div class="sc serif">'+esc(schoolShort)+'</div>';
   var tiers=state.catalog.tiers||[];
   var maxMonths=tiers.length?Math.max.apply(null,tiers.map(function(x){return x.months;})):3;
   document.getElementById('pFacts').innerHTML=[

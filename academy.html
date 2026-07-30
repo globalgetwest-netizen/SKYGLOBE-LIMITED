@@ -90,8 +90,8 @@ section{padding:clamp(46px,6vw,78px) 0;border-bottom:1px solid var(--line)}
 .pcard{background:#fff;padding:22px 22px 20px;display:flex;flex-direction:column;transition:background .15s var(--ease)}
 .pcard:hover{background:var(--wash)}
 .pcard .sch{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
-.pcard h3{font-family:var(--serif);font-size:1.28rem;font-weight:600;color:var(--ink);margin:8px 0 auto;line-height:1.18;display:flex;align-items:baseline;gap:9px}
-.pcard .pem{font-size:1.15rem;flex:0 0 auto}
+.pcard h3{font-family:var(--serif);font-size:1.28rem;font-weight:600;color:var(--ink);margin:8px 0 auto;line-height:1.18}
+.pcard .pem{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:14px;box-shadow:0 8px 20px rgba(10,46,101,.08),inset 0 1px 0 rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.6)}
 .pcard .go{margin-top:16px;font-size:.84rem;font-weight:500;color:var(--navy);display:inline-flex;align-items:center;gap:6px}
 .pcount{margin-top:14px;font-size:.82rem;color:var(--faint)}
 .empty{padding:40px 10px;text-align:center;color:var(--muted);grid-column:1/-1;background:#fff}
@@ -305,6 +305,15 @@ footer{padding:40px 0 44px;background:#fff}
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var SCHOOL_THEME={
+  'School of Technology & Digital Sciences':['#E7F0FF','#D5E4FF'],'School of Business & Entrepreneurship':['#EDF1F8','#DEE7F4'],
+  'School of Finance & Investment':['#E7F6EE','#D4EFDE'],'School of Health & Wellbeing':['#E6F6F4','#D3EEEA'],
+  'School of Creative Arts & Media':['#F4ECFB','#E9DEF7'],'School of Education':['#FBF2DF','#F3E5C3'],
+  'School of Environment & Sustainability':['#E9F6EA','#D6EFDA'],'School of Hospitality & Tourism':['#FBEEE2','#F5E0CA'],
+  'School of the Built Environment':['#F1F0EA','#E4E1D8'],'School of Agriculture & Natural Resources':['#EEF5E2','#DEEFCA'],
+  'School of Vocational Trades & Safety':['#FBEDE2','#F5D9C6'],'School of Professional Studies':['#EDF1F8','#DEE7F4']
+};
+function themeFor(s){ var t=SCHOOL_THEME[s]||['#EDF1F8','#DEE7F4']; return 'linear-gradient(140deg,'+t[0]+' 0%,'+t[1]+' 100%)'; }
 function focusSearch(){var s=document.getElementById('progSearch');document.getElementById('programmes').scrollIntoView({behavior:'smooth'});setTimeout(function(){s.focus();},400);}
 document.querySelectorAll('.mnav a, .hdr .nav a').forEach(function(a){a.addEventListener('click',function(){document.getElementById('mnav').classList.remove('on');});});
 
@@ -366,7 +375,7 @@ function applyFilters(){
   document.getElementById('pCount').textContent=list.length+' programme'+(list.length===1?'':'s')+(sch?' · '+sch.replace(/^School of /,''):'');
   if(!list.length){ grid.innerHTML='<div class="empty">No programmes match your search.</div>'; return; }
   grid.innerHTML=list.slice(0,60).map(function(t){
-    return '<a class="pcard" href="/courses?track='+encodeURIComponent(t.id)+'"><div class="sch">'+esc(t.school.replace(/^School of /,''))+'</div><h3 class="serif"><span class="pem">'+esc(t.emoji||'📘')+'</span>'+esc(t.name)+'</h3><div class="go">View programme →</div></a>';
+    return '<a class="pcard" href="/courses?track='+encodeURIComponent(t.id)+'"><span class="pem" style="background:'+themeFor(t.school)+'">'+esc(t.emoji||'📘')+'</span><div class="sch">'+esc(t.school.replace(/^School of /,''))+'</div><h3 class="serif">'+esc(t.name)+'</h3><div class="go">View programme →</div></a>';
   }).join('');
 }
 document.getElementById('progSearch').addEventListener('input',applyFilters);
