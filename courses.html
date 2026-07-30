@@ -3,149 +3,250 @@
 <head>
 <link rel="stylesheet" href="/skyglobe-ds.css">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SKYGLOBEGROUP Academy — Certificate Programs</title>
-<meta name="description" content="Recognised, verifiable certificate programs from SKYGLOBEGROUP Academy — structured, expert-designed lessons with QR-verifiable digital certificates, sealed by TERRA.">
-<meta name="theme-color" content="#061A52">
-<link rel="icon" href="/icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SKYGLOBEGROUP Academy — Programmes</title>
+<meta name="description" content="SKYGLOBEGROUP Academy programmes — structured academic pathways with TERRA-verifiable credentials.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="/skyglobe-logo-t.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --navy:#04132F;--navy2:#061A52;--blue:#0A2E65;--blue3:#123E87;
-    --gold:#D4A73A;--gold-2:#E8C566;--gold-hi:#F2D98A;--gold-deep:#B8860B;
-    --acad:#B8860B;--acad-2:#D4A73A;
-    --ink:#0F1C3A;--muted:#5A6B8C;--line:#e4e8f0;
-    --font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--font);color:var(--ink);background:#F8F9FB;line-height:1.6;overflow-x:clip}
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+:root{
+  --ink:#1a1a1c;--ink-2:#3a3a3e;--muted:#63636a;--faint:#8a8a92;
+  --line:#e6e4de;--line-2:#d9d6cd;--paper:#fff;--wash:#faf9f6;
+  --navy:#0a2e65;--navy-2:#0c3a80;--gold:#9a7b2e;
+  --serif:"Cormorant Garamond",Georgia,serif;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.2,.7,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.6}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1080px;margin:0 auto;padding:0 clamp(18px,4vw,40px)}
+.serif{font-family:var(--serif)}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 24px;border-radius:2px;font-size:.94rem;font-weight:500;border:none;transition:.18s var(--ease)}
+.btn.solid{background:var(--navy);color:#fff}.btn.solid:hover{background:var(--navy-2)}
+.btn.line{background:#fff;border:1px solid var(--line-2);color:var(--navy)}.btn.line:hover{border-color:var(--navy);background:var(--wash)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 
-  header{background:linear-gradient(180deg,#061A52,#04132F);color:#fff;padding:14px 0;position:sticky;top:0;z-index:40;border-bottom:1px solid rgba(212,167,58,.2)}
-  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.04em}
-  .brand img{height:34px;width:34px;object-fit:contain}
-  .awm{font-weight:900;letter-spacing:.05em;background:linear-gradient(95deg,#FFFFFF 0%,#F2D98A 40%,var(--acad-2) 55%,#F2D98A 70%,#FFFFFF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .brand small{display:block;color:var(--gold);font-size:.58rem;letter-spacing:.2em;font-weight:700}
-  header .back{color:#AEC0EC;font-size:.86rem;font-weight:600}
-  header .back:hover{color:#fff}
+.hdr{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
+.hdr .in{max-width:1080px;margin:0 auto;height:54px;display:flex;align-items:center;gap:14px;padding:0 clamp(18px,4vw,40px)}
+.hdr .brand{display:flex;align-items:center;gap:10px}
+.hdr .brand img{width:24px;height:24px}.hdr .brand b{font-family:var(--serif);font-size:1.15rem;font-weight:600}
+.hdr .back{margin-left:auto;font-size:.85rem;color:var(--muted)}.hdr .back:hover{color:var(--navy)}
 
-  .hero{background:linear-gradient(160deg,#061A52 0%,#0A2E65 45%,#4A3608 100%);color:#fff;padding:56px 0 62px;text-align:center;position:relative;overflow:hidden}
-  .hero:before{content:"";position:absolute;inset:0;background:radial-gradient(620px 320px at 50% -10%,rgba(212,167,58,.18),transparent 60%);pointer-events:none}
-  .hero .tag{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#F2D98A;border:1px solid rgba(212,167,58,.4);padding:6px 16px;border-radius:30px;margin-bottom:18px}
-  .hero h1{font-weight:900;letter-spacing:.01em;font-size:clamp(1.9rem,5vw,3rem);line-height:1.1}
-  .hero h1 span{background:linear-gradient(95deg,#F2D98A,#D4A73A);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .hero p{max-width:640px;margin:14px auto 0;color:#C9D4E5;font-weight:400;font-size:clamp(.92rem,2.2vw,1.02rem)}
+.view{display:none}.view.on{display:block}
+.crumb{font-size:.82rem;color:var(--muted);padding-top:clamp(20px,3vw,30px)}
+.crumb a:hover{color:var(--navy)}.crumb span{color:var(--faint)}
 
-  .steps{display:flex;justify-content:center;gap:0;margin:30px 0 6px;flex-wrap:wrap}
-  .step{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.82rem;font-weight:600;padding:0 12px}
-  .step .dot{width:26px;height:26px;border-radius:50%;background:#e6e9ef;color:#8a93a3;display:flex;align-items:center;justify-content:center;font-size:.8rem}
-  .step.active{color:var(--navy)}
-  .step.active .dot{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#04132F}
-  .step.done .dot{background:var(--blue3);color:#fff}
+/* Programme header */
+.phead{padding:8px 0 clamp(26px,4vw,40px);border-bottom:1px solid var(--line)}
+.phead h1{font-family:var(--serif);font-size:clamp(2.1rem,4.6vw,3.4rem);font-weight:600;line-height:1.06;letter-spacing:-.01em;margin-top:8px;max-width:20ch}
+.phead .intro{max-width:60ch;margin-top:16px;color:var(--ink-2);font-size:1.05rem}
+.phead .cta{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap}
 
-  .section{padding:34px 0 60px}
-  .panel{display:none}
-  .panel.show{display:block}
-  .p-head{text-align:center;margin-bottom:24px}
-  .p-head h2{font-weight:800;letter-spacing:.01em;font-size:clamp(1.5rem,3.4vw,2.1rem);color:var(--navy)}
-  .p-head p{color:var(--muted);font-weight:300;margin-top:6px}
+/* Overview facts */
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:clamp(26px,4vw,40px);background:var(--line);border:1px solid var(--line)}
+@media(max-width:820px){.facts{grid-template-columns:1fr 1fr}}
+.fact{background:#fff;padding:16px 18px}
+.fact .k{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.fact .v{font-family:var(--serif);font-size:1.2rem;color:var(--ink);margin-top:4px}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
-  .trk-card{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:20px;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;text-align:center}
-  .trk-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(4,16,34,.08);border-color:rgba(212,167,58,.5)}
-  .trk-card.sel{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,167,58,.18)}
-  .trk-card .em{font-size:1.8rem;display:block;margin-bottom:8px}
-  .trk-card h3{font-size:.98rem;color:var(--navy)}
+/* Academic sub-nav */
+.subnav{position:sticky;top:54px;z-index:40;background:#fff;border-bottom:1px solid var(--line);margin-top:2px}
+.subnav .row{display:flex;gap:24px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 2px}
+.subnav a{white-space:nowrap;padding:14px 0;font-size:.86rem;font-weight:450;color:var(--muted);border-bottom:2px solid transparent;transition:.15s var(--ease)}
+.subnav a:hover{color:var(--ink)}.subnav a.on{color:var(--navy);border-color:var(--navy)}
 
-  .cur-switch{display:flex;justify-content:center;gap:6px;margin-bottom:22px}
-  .cur-switch button{background:#fff;border:1.5px solid var(--line);color:var(--muted);font-weight:600;padding:7px 16px;border-radius:30px;cursor:pointer;font-size:.84rem}
-  .cur-switch button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-  .tier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-  .tier{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:24px;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;display:flex;flex-direction:column}
-  .tier:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(4,16,34,.1);border-color:rgba(212,167,58,.5)}
-  .tier.sel{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,167,58,.18)}
-  .tier.featured{border-color:rgba(212,167,58,.6)}
-  .tier .name{font-size:1.3rem;font-weight:800;color:var(--navy2)}
-  .tier .price{font-size:1.9rem;font-weight:700;color:var(--navy);margin:8px 0 2px}
-  .tier .price small{font-size:.8rem;font-weight:400;color:var(--muted)}
-  .tier .blurb{font-size:.86rem;color:var(--muted);font-weight:300;margin-bottom:14px}
-  .tier ul{list-style:none;display:flex;flex-direction:column;gap:7px;margin-top:auto}
-  .tier li{font-size:.85rem;color:#3c465a;padding-left:20px;position:relative;font-weight:300}
-  .tier li:before{content:"✦";position:absolute;left:0;color:var(--acad-2);font-weight:700}
-  .tier .badge{display:inline-block;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#1a1300;background:var(--gold);padding:3px 10px;border-radius:20px;margin-bottom:8px;align-self:flex-start}
+.sec{padding:clamp(38px,5vw,60px) 0;border-bottom:1px solid var(--line)}
+.sh{font-family:var(--serif);font-size:clamp(1.5rem,3vw,2.1rem);font-weight:600;letter-spacing:-.01em;margin-top:6px;line-height:1.14}
+.body{max-width:66ch;margin-top:14px;color:var(--ink-2);font-size:1.02rem}
+.learn{list-style:none;margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px 30px;max-width:760px}
+@media(max-width:600px){.learn{grid-template-columns:1fr}}
+.learn li{padding-left:20px;position:relative;color:var(--ink-2)}
+.learn li:before{content:"—";position:absolute;left:0;color:var(--gold)}
 
-  .form{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(22px,4vw,34px);max-width:640px;margin:0 auto}
-  .field{margin-bottom:16px}
-  .field label{display:block;font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:6px}
-  .field label .req{color:#c0392b}
-  .field input,.field select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-family:inherit;font-size:.92rem;color:var(--ink);background:#fbfcfe}
-  .field input:focus,.field select:focus{outline:none;border-color:var(--gold);background:#fff}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:540px){.row2{grid-template-columns:1fr}}
+/* Curriculum */
+.mod{border-top:1px solid var(--line)}
+.mod:last-child{border-bottom:1px solid var(--line)}
+.mod .h{display:flex;align-items:baseline;gap:16px;padding:16px 4px;cursor:pointer}
+.mod .no{font-family:var(--serif);color:var(--gold);width:34px}
+.mod .nm{font-family:var(--serif);font-size:1.2rem;font-weight:500}
+.mod .ls{margin-left:auto;font-size:.82rem;color:var(--faint)}
+.mod .body2{display:none;padding:0 4px 16px 50px}
+.mod.open .body2{display:block}
+.mod .body2 ol{list-style:none;counter-reset:l}
+.mod .body2 li{counter-increment:l;padding:5px 0;color:var(--ink-2);font-size:.92rem}
+.mod .body2 li:before{content:counter(l,decimal-leading-zero) "  ";color:var(--faint)}
 
-  .summary{background:#FBF6E8;border:1px solid #E6D9AE;border-radius:14px;padding:16px 18px;max-width:640px;margin:0 auto 18px;font-size:.9rem;color:#5a4a16}
-  .summary b{color:#3a2f0a}
+/* Pathways */
+.paths{margin-top:8px}
+.path{border-top:1px solid var(--line);padding:22px 4px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr auto;gap:16px;align-items:center}
+.path:last-child{border-bottom:1px solid var(--line)}
+@media(max-width:820px){.path{grid-template-columns:1fr 1fr;gap:12px}}
+.path .lvl{font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.path .nm{font-family:var(--serif);font-size:1.35rem;font-weight:600;margin-top:2px}
+.path .ds{font-size:.86rem;color:var(--muted);margin-top:4px}
+.path .m .k{font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.path .m .v{margin-top:2px;color:var(--ink-2);font-size:.92rem}
+.path .act{grid-column:auto}
+@media(max-width:820px){.path .col-desc{grid-column:1/-1}.path .act{grid-column:1/-1}}
 
-  .actions{display:flex;justify-content:space-between;gap:12px;max-width:640px;margin:24px auto 0}
-  .btn{display:inline-block;background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#04132F;border:none;padding:14px 30px;border-radius:40px;font-weight:700;font-size:.92rem;cursor:pointer;letter-spacing:.03em;box-shadow:0 10px 26px rgba(212,167,58,.32);transition:transform .2s,box-shadow .2s;font-family:inherit}
-  .btn:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(212,167,58,.45)}
-  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-  .btn.ghost{background:transparent;border:1.5px solid rgba(4,16,34,.2);color:var(--navy);box-shadow:none}
-  .btn.ghost:hover{border-color:var(--gold);color:var(--gold-deep)}
+/* Fees */
+.fees{margin-top:16px;border:1px solid var(--line)}
+.fees .r{display:flex;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);font-size:.96rem}
+.fees .r:last-child{border-bottom:none}
+.fees .r.head{background:var(--wash);font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.fees .r .pw{color:var(--ink)}.fees .r .tu{font-weight:600;color:var(--navy)}
+.curr{display:inline-flex;gap:6px;margin-top:16px}
+.curr button{border:1px solid var(--line-2);background:#fff;color:var(--muted);border-radius:2px;padding:7px 14px;font-size:.82rem;font-weight:500}
+.curr button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.admissions{margin-top:20px;font-size:.94rem;color:var(--ink-2)}.admissions a{color:var(--navy);font-weight:500}
 
-  .note{font-size:.8rem;color:var(--muted);text-align:center;max-width:560px;margin:18px auto 0;font-weight:300}
-  .err{background:#fdecea;border:1px solid #f5c6c0;color:#a93226;border-radius:10px;padding:12px 14px;font-size:.86rem;max-width:640px;margin:0 auto 16px;display:none}
+/* Verify */
+.verify{margin-top:18px;max-width:520px;display:flex;gap:10px;flex-wrap:wrap}
+.verify input{flex:1;min-width:200px;border:1px solid var(--line-2);border-radius:3px;padding:13px 15px;font-family:inherit;font-size:1rem;outline:none}
+.verify input:focus{border-color:var(--navy)}
+.vres{margin-top:14px;border:1px solid var(--line);border-radius:3px;padding:16px 18px;display:none;font-size:.92rem;line-height:1.7}
+.vres.on{display:block}.vres.ok{border-color:#bfe3cd;background:#f4fbf6}.vres.bad{border-color:#f0cfc9;background:#fdf5f3}
+.certlist{margin-top:16px;columns:2;column-gap:30px;color:var(--ink-2)}
+.certlist div{margin-bottom:8px}@media(max-width:520px){.certlist{columns:1}}
 
-  footer{background:#04132F;color:#AEC0EC;text-align:center;padding:34px 20px;font-size:.84rem;margin-top:40px;border-top:1px solid rgba(212,167,58,.18)}
-  footer .m{color:var(--gold);letter-spacing:.16em;font-size:.72rem;text-transform:uppercase;margin-top:10px;font-weight:700}footer a{color:#AEC0EC}footer a:hover{color:var(--gold-2)}
+/* FAQ */
+.faq{border-top:1px solid var(--line)}
+.faq .q{padding:16px 4px;cursor:pointer;font-family:var(--serif);font-size:1.15rem;display:flex;justify-content:space-between;gap:14px}
+.faq .a{display:none;padding:0 4px 16px;color:var(--ink-2);max-width:66ch}
+.faq.open .a{display:block}.faq{border-bottom:1px solid var(--line)}
+
+/* Catalogue */
+.catgrp{margin-top:26px}
+.catgrp h3{font-family:var(--serif);font-size:1.4rem;font-weight:600;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.catgrp .sub{font-size:.82rem;color:var(--muted);margin-top:2px}
+.catlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;margin-top:14px;background:var(--line);border:1px solid var(--line)}
+.catitem{background:#fff;padding:16px 18px;cursor:pointer;transition:background .15s var(--ease)}
+.catitem:hover{background:var(--wash)}
+.catitem .nm{font-family:var(--serif);font-size:1.1rem;color:var(--ink)}
+.catitem .go{margin-top:6px;font-size:.8rem;color:var(--navy)}
+
+/* Enrolment */
+.stepper{display:flex;gap:0;flex-wrap:wrap;padding:22px 0 6px}
+.stp{display:flex;align-items:center;gap:8px;color:var(--faint);font-size:.8rem;font-weight:500;padding-right:22px}
+.stp .n{width:24px;height:24px;border-radius:50%;background:#eee;color:var(--faint);display:flex;align-items:center;justify-content:center;font-size:.76rem}
+.stp.on{color:var(--navy)}.stp.on .n{background:var(--navy);color:#fff}.stp.done .n{background:#12864E;color:#fff}
+.form{max-width:640px;margin-top:20px}
+.field{margin-bottom:16px}.field label{display:block;font-size:.82rem;font-weight:500;color:var(--ink-2);margin-bottom:6px}.field .req{color:#b23a2c}
+.field input,.field select{width:100%;border:1px solid var(--line-2);border-radius:3px;padding:12px 14px;font-family:inherit;font-size:.96rem;color:var(--ink);background:#fff;outline:none}
+.field input:focus,.field select:focus{border-color:var(--navy)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:540px){.row2{grid-template-columns:1fr}}
+.summary{max-width:640px;border:1px solid var(--line);border-radius:3px;padding:18px 20px;margin-top:8px;font-size:.95rem;line-height:1.9}.summary b{color:var(--ink)}
+.actions{display:flex;justify-content:space-between;gap:12px;max-width:640px;margin-top:22px}
+.err{background:#fdf5f3;border:1px solid #f0cfc9;color:#b23a2c;border-radius:3px;padding:12px 14px;font-size:.88rem;max-width:640px;margin-top:14px;display:none}
+.note{font-size:.82rem;color:var(--muted);max-width:640px;margin-top:16px}
+
+footer{padding:38px 0 42px}
+footer .in{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:18px}
+footer a:hover{color:var(--navy)}
 </style>
 </head>
 <body>
 
-<header><div class="wrap">
-  <a href="/academy" class="brand"><img src="/skyglobe-logo-t.png" alt="SKYGLOBEGROUP Academy"><div><span class="awm">ACADEMY</span><small>A SKYGLOBEGROUP PLATFORM</small></div></a>
-  <a class="back" href="/academy">← Back to Academy</a>
+<header class="hdr"><div class="in">
+  <a class="brand" href="/academy"><img src="/skyglobe-logo-t.png" alt=""><b>SKYGLOBEGROUP Academy</b></a>
+  <a class="back" href="/academy">← Academy</a>
 </div></header>
 
-<section class="hero"><div class="wrap">
-  <span class="tag">SKYGLOBEGROUP Academy · Certificate Programs</span>
-  <h1>Real Skills. <span>Recognised Certificates.</span></h1>
-  <p>Choose a program, choose your length, and follow structured lessons designed by our professional team of educators. Complete every lesson and earn a premium certificate — sealed by TERRA and verifiable for life.</p>
-</div></section>
+<!-- CATALOGUE VIEW -->
+<main class="view" id="vCatalogue"><div class="wrap">
+  <div class="crumb"><a href="/academy">Academy</a> <span>›</span> Programmes</div>
+  <div style="padding:8px 0 6px"><div class="eyebrow">Programmes</div><h1 class="sh" style="font-size:clamp(1.9rem,3.6vw,2.6rem)">The academic catalogue.</h1><p class="body">Browse every programme by School. Select one to view its full academic page.</p></div>
+  <div id="catalogue"></div>
+</div></main>
 
-<div class="wrap">
-  <div class="steps">
-    <div class="step active" id="st1"><span class="dot">1</span> Track</div>
-    <div class="step" id="st2"><span class="dot">2</span> Programme</div>
-    <div class="step" id="st3"><span class="dot">3</span> Register</div>
-    <div class="step" id="st4"><span class="dot">4</span> Pay</div>
-  </div>
-</div>
-
-<section class="section"><div class="wrap">
-
-  <!-- STEP 1: TRACK -->
-  <div class="panel show" id="panel1">
-    <div class="p-head"><h2>Choose your track</h2><p>Every sector, one trusted certification standard.</p></div>
-    <div id="trackGrid" class="grid"><p style="text-align:center;color:var(--muted)">Loading…</p></div>
-  </div>
-
-  <!-- STEP 2: TIER -->
-  <div class="panel" id="panel2">
-    <div class="p-head"><h2>Choose your programme</h2><p>Amateur, Advanced or Pro — pick the depth that fits your goals.</p></div>
-    <div class="cur-switch" id="curSwitch">
-      <button data-cur="USD" class="on">USD $</button>
-      <button data-cur="EUR">EUR €</button>
-      <button data-cur="GBP">GBP £</button>
+<!-- PROGRAMME VIEW -->
+<main class="view" id="vProgramme">
+  <div class="wrap">
+    <div class="crumb"><a href="/academy">Academy</a> <span>›</span> <a href="#" id="crumbSchool" onclick="showCatalogue();return false">School</a> <span>›</span> <b id="crumbProg">Programme</b></div>
+    <div class="phead">
+      <div class="eyebrow" id="pSchool">School</div>
+      <h1 class="serif" id="pName">Programme</h1>
+      <p class="intro" id="pIntro"></p>
+      <div class="cta"><a class="btn solid" href="#pathways" onclick="jump('pathways')">Apply / Enrol</a><a class="btn line" href="#curriculum" onclick="jump('curriculum')">View curriculum</a></div>
+      <div class="facts" id="pFacts"></div>
     </div>
-    <div class="tier-grid" id="tierGrid"></div>
-    <div class="actions"><button class="btn ghost" onclick="goStep(1)">← Back</button><button class="btn" onclick="if(!state.product){alert('Please choose a programme tier first.');return}goStep(3)">Continue →</button></div>
+  </div>
+  <div class="subnav"><div class="wrap"><div class="row" id="subnav">
+    <a href="#overview" class="on" onclick="jump('overview')">Overview</a>
+    <a href="#curriculum" onclick="jump('curriculum')">Curriculum</a>
+    <a href="#pathways" onclick="jump('pathways')">Pathways</a>
+    <a href="#fees" onclick="jump('fees')">Fees &amp; Funding</a>
+    <a href="#certification" onclick="jump('certification')">Certification</a>
+    <a href="#faqs" onclick="jump('faqs')">FAQs</a>
+  </div></div></div>
+
+  <div class="wrap">
+    <section class="sec" id="overview">
+      <div class="eyebrow">About this programme</div>
+      <h2 class="sh">A structured academic programme.</h2>
+      <p class="body" id="pAbout"></p>
+      <div class="eyebrow" style="margin-top:26px">What you will learn</div>
+      <ul class="learn" id="pLearn"></ul>
+    </section>
+
+    <section class="sec" id="curriculum">
+      <div class="eyebrow">Curriculum</div>
+      <h2 class="sh">What you will study.</h2>
+      <p class="body">A structured sequence of modules and guided lessons, culminating in a capstone project. Depth scales with the pathway you choose.</p>
+      <div id="pCurriculum" style="margin-top:20px"></div>
+    </section>
+
+    <section class="sec" id="pathways">
+      <div class="eyebrow">Choose your pathway</div>
+      <h2 class="sh">Select the pathway that matches your goals.</h2>
+      <div class="paths" id="pPaths"></div>
+    </section>
+
+    <section class="sec" id="fees">
+      <div class="eyebrow">Fees &amp; Funding</div>
+      <h2 class="sh">Programme tuition.</h2>
+      <div class="curr" id="feesCurr"><button data-c="USD" class="on">USD</button><button data-c="EUR">EUR</button><button data-c="GBP">GBP</button></div>
+      <div class="fees" id="pFees"></div>
+      <p class="admissions">All fees are one-time programme fees unless otherwise stated. Need assistance with fees or enrolment? <a href="/academy#credentials">Contact Academy Admissions →</a></p>
+    </section>
+
+    <section class="sec" id="certification">
+      <div class="eyebrow">Certification</div>
+      <h2 class="sh">A credential you can verify.</h2>
+      <p class="body">Upon successful completion, learners receive a <b>SKYGLOBEGROUP Academy certificate</b> with a <b>TERRA-verifiable credential</b>. Each certificate includes:</p>
+      <div class="certlist"><div>TERRA verification</div><div>Permanent credential reference</div><div>QR verification</div><div>Digital credential</div><div>Certificate record</div><div>Employer confirmation</div></div>
+      <div class="eyebrow" style="margin-top:26px">Verify a credential</div>
+      <div class="verify"><input id="certRef" placeholder="Certificate reference (e.g. CERT-XXXXXXXX)"><button class="btn solid" onclick="verifyCert()">Verify credential</button></div>
+      <div class="vres" id="vRes" aria-live="polite"></div>
+    </section>
+
+    <section class="sec" id="faqs">
+      <div class="eyebrow">FAQs</div>
+      <h2 class="sh">Common questions.</h2>
+      <div id="pFaqs" style="margin-top:14px"></div>
+    </section>
+  </div>
+</main>
+
+<!-- ENROLMENT VIEW -->
+<main class="view" id="vEnrol"><div class="wrap">
+  <div class="crumb"><a href="/academy">Academy</a> <span>›</span> <a href="#" onclick="backToProgramme();return false" id="enrCrumb">Programme</a> <span>›</span> <b>Enrolment</b></div>
+  <div class="stepper">
+    <div class="stp done"><span class="n">✓</span>Programme</div>
+    <div class="stp" id="es1"><span class="n">1</span>Applicant</div>
+    <div class="stp" id="es2"><span class="n">2</span>Review</div>
+    <div class="stp" id="es3"><span class="n">3</span>Payment</div>
+    <div class="stp"><span class="n">4</span>Confirmation</div>
   </div>
 
-  <!-- STEP 3: REGISTER -->
-  <div class="panel" id="panel3">
-    <div class="p-head"><h2>Register</h2><p>Your details for the certificate record.</p></div>
+  <!-- Applicant -->
+  <div id="enrApplicant">
+    <h2 class="sh" style="margin-top:14px">Applicant details</h2>
+    <p class="body">Your details for the certificate record.</p>
     <div class="err" id="formErr"></div>
     <div class="form">
       <div class="field"><label>Full name <span class="req">*</span></label><input id="f_fullName" placeholder="As it should appear on your certificate"></div>
@@ -159,194 +260,228 @@
       </div>
       <div class="field"><label>Address</label><input id="f_address" placeholder="City, country"></div>
     </div>
-    <div class="actions"><button class="btn ghost" onclick="goStep(2)">← Back</button><button class="btn" onclick="goStep(4)">Review &amp; Continue →</button></div>
+    <div class="actions"><button class="btn line" onclick="backToProgramme()">← Back to programme</button><button class="btn solid" onclick="toReview()">Continue to review →</button></div>
   </div>
 
-  <!-- STEP 4: PAY -->
-  <div class="panel" id="panel4">
-    <div class="p-head"><h2>Confirm &amp; pay</h2><p>Secure payment — your programme unlocks instantly after payment.</p></div>
+  <!-- Review & Payment -->
+  <div id="enrReview" style="display:none">
+    <h2 class="sh" style="margin-top:14px">Review &amp; confirm</h2>
+    <p class="body">Please confirm your programme and details before payment.</p>
     <div class="err" id="payErr"></div>
     <div class="summary" id="paySummary"></div>
-    <div class="actions"><button class="btn ghost" onclick="goStep(3)">← Back</button><button class="btn" id="payBtn" onclick="startPayment()">Pay &amp; Start →</button></div>
-    <p class="note">🔒 Secure payment · 📚 Structured, expert-designed lessons · 🏅 QR-verifiable certificate on completion. One payment = one program enrolment.</p>
+    <div class="actions"><button class="btn line" onclick="enrolStep('applicant')">← Edit details</button><button class="btn solid" id="payBtn" onclick="startPayment()">Confirm &amp; pay →</button></div>
+    <p class="note">Secure payment · your programme unlocks instantly after payment · a SKYGLOBEGROUP Academy certificate with a TERRA-verifiable credential on completion.</p>
   </div>
+</div></main>
 
-</div></section>
-
-<footer>
-  © <span id="yr"></span> <b style="color:#fff">SKYGLOBEGROUP</b> Academy · All Rights Reserved · <a href="/academy">Academy</a> · <a href="/terra#documents">Verify a Certificate</a>
-  <div class="m">One World · One Mission</div>
-</footer>
+<footer><div class="wrap"><div class="in">
+  <div>© <span id="yr"></span> SKYGLOBEGROUP · Academy · All Rights Reserved</div>
+  <div><a href="/academy">Academy</a> · <a href="/academy#credentials">Verify a certificate</a> · One World · One Mission</div>
+</div></div></footer>
 
 <script>
-document.getElementById('yr').textContent = new Date().getFullYear();
-const gradSel = document.getElementById('f_gradYear');
-const curYear = new Date().getFullYear();
-for (let y = curYear; y <= curYear + 6; y++) gradSel.innerHTML += `<option value="${y}">${y}</option>`;
+document.getElementById('yr').textContent=new Date().getFullYear();
+var gradSel=document.getElementById('f_gradYear'); var curYear=new Date().getFullYear();
+for(var y=curYear;y<=curYear+6;y++) gradSel.innerHTML+='<option value="'+y+'">'+y+'</option>';
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-const state = { trackId:null, trackName:null, product:null, tierName:null, tierId:null, currency:'USD', catalog:null };
+var state={ trackId:null, trackName:null, school:null, product:null, tierName:null, tierId:null, currency:'USD', catalog:null };
+var PATH_LABELS=['Foundation','Advanced','Professional','Executive'];
+var PATH_DESC=['For learners beginning their journey.','For learners developing deeper capability.','For learners seeking advanced capability.','For experienced professionals and leaders.'];
+var PATH_ASSESS=['Foundational coursework','Coursework + practical project','Coursework + capstone project','Executive capstone'];
 
-function goStep(n){
-  for(let i=1;i<=4;i++){ const p=document.getElementById('panel'+i); if(p)p.classList.toggle('show',i===n); }
-  for(let i=1;i<=4;i++){ const s=document.getElementById('st'+i); if(!s)continue; s.classList.toggle('active',i===n); s.classList.toggle('done',i<n); }
-  if(n===4) renderSummary();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+function showView(v){ ['vCatalogue','vProgramme','vEnrol'].forEach(function(id){document.getElementById(id).classList.toggle('on',id===v);}); window.scrollTo({top:0,behavior:'smooth'}); }
+function showCatalogue(){ history.replaceState({},'','/courses'); renderCatalogue(); showView('vCatalogue'); }
+function jump(id){ var el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('#subnav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+id);}); }
 
+/* ── Load catalogue ── */
 async function loadCatalog(){
   try{
-    const r=await fetch('/api/courses/catalog'); state.catalog=await r.json();
-    renderTracks(); renderTiers();
-    // Deep-link: /courses?track=<id> preselects the programme and jumps to tier choice.
-    try{ var pre=new URLSearchParams(location.search).get('track');
-      if(pre && state.catalog.tracks){ var t=state.catalog.tracks.find(function(x){return x.id===pre;});
-        if(t){ state.trackId=t.id; state.trackName=t.name; goStep(2); } } }catch(_){ }
-  }catch(e){ document.getElementById('trackGrid').innerHTML='<p style="text-align:center;color:#a93226">Could not load programmes. Please refresh.</p>'; }
+    var r=await fetch('/api/courses/catalog'); state.catalog=await r.json();
+    var pre=new URLSearchParams(location.search).get('track');
+    if(pre && state.catalog.tracks){ var t=state.catalog.tracks.find(function(x){return x.id===pre;}); if(t){ selectProgramme(t); return; } }
+    renderCatalogue(); showView('vCatalogue');
+  }catch(e){ document.getElementById('catalogue').innerHTML='<p style="color:#b23a2c;margin-top:20px">Could not load programmes. Please refresh.</p>'; showView('vCatalogue'); }
+}
+function renderCatalogue(){
+  var grouped={}; (state.catalog.tracks||[]).forEach(function(t){var k=t.school||'School of Professional Studies';(grouped[k]=grouped[k]||[]).push(t);});
+  document.getElementById('catalogue').innerHTML=Object.keys(grouped).sort().map(function(sc){
+    return '<div class="catgrp"><h3 class="serif">'+esc(sc.replace(/^School of /,''))+'</h3><div class="catlist">'+
+      grouped[sc].map(function(t){return '<div class="catitem" data-id="'+esc(t.id)+'"><div class="nm serif">'+esc(t.name)+'</div><div class="go">View programme →</div></div>';}).join('')+
+      '</div></div>';
+  }).join('');
+  document.querySelectorAll('.catitem').forEach(function(el){el.addEventListener('click',function(){
+    var t=state.catalog.tracks.find(function(x){return x.id===el.dataset.id;}); if(t) selectProgramme(t);
+  });});
 }
 
-function renderTracks(){
-  const wrap=document.getElementById('trackGrid'); wrap.innerHTML='';
-  // The catalog is organised by the Academy's Schools — exactly as the
-  // certificates are issued. Every programme appears under its faculty.
-  const SCHOOLS=[
-    {name:'School of Technology & Digital Sciences', icon:'💻', sub:'Coding, cloud, cybersecurity, data & AI'},
-    {name:'School of Business & Entrepreneurship', icon:'💼', sub:'Business, management, marketing & commerce'},
-    {name:'School of Finance & Investment', icon:'💰', sub:'Accounting, tax, planning & investment'},
-    {name:'School of Health & Wellbeing', icon:'🩺', sub:'Clinical support, care & wellness professions'},
-    {name:'School of Creative Arts & Media', icon:'🎨', sub:'Design, photography, film & content'},
-    {name:'School of Education', icon:'🎓', sub:'Teaching, instructional design & leadership'},
-    {name:'School of Environment & Sustainability', icon:'🌍', sub:'Sustainability, renewable energy & conservation'},
-    {name:'School of Hospitality & Tourism', icon:'🌴', sub:'Hospitality, tourism & culinary arts'},
-    {name:'School of the Built Environment', icon:'📐', sub:'Surveying, construction & the built world'},
-    {name:'School of Agriculture & Natural Resources', icon:'🌾', sub:'Farming, fishing & agribusiness'},
-    {name:'School of Vocational Trades & Safety', icon:'🛠️', sub:'Hands-on trades — learn a skill, earn proof'},
-    {name:'School of Professional Studies', icon:'✨', sub:'Specialty programmes'},
-  ];
-  const grouped={};
-  state.catalog.tracks.forEach(t=>{ const k=t.school||'School of Professional Studies'; (grouped[k]=grouped[k]||[]).push(t); });
-  const known=new Set(SCHOOLS.map(g=>g.name));
-  Object.keys(grouped).forEach(k=>{ if(!known.has(k)) SCHOOLS.push({name:k,icon:'📘',sub:''}); });
-  SCHOOLS.forEach(g=>{
-    const list=grouped[g.name]||[]; if(!list.length) return;
-    const head=document.createElement('div');
-    head.style.cssText='grid-column:1/-1;margin:16px 0 2px;text-align:left';
-    head.innerHTML=`<div style="font-weight:800;color:#04132F;font-size:1.02rem;letter-spacing:.02em">${g.icon} ${g.name}</div>${g.sub?`<div style="font-size:.78rem;color:#6b7689">${g.sub}</div>`:''}`;
-    wrap.appendChild(head);
-    list.forEach(t=>{
-      const c=document.createElement('div'); c.className='trk-card';
-      c.innerHTML=`<span class="em">${t.emoji}</span><h3>${t.name}</h3>`;
-      c.onclick=()=>{ state.trackId=t.id; state.trackName=t.name;
-        document.querySelectorAll('.trk-card').forEach(x=>x.classList.remove('sel'));
-        c.classList.add('sel'); setTimeout(()=>goStep(2),180); };
-      wrap.appendChild(c);
-    });
-  });
+/* ── Programme page ── */
+function selectProgramme(t){
+  state.trackId=t.id; state.trackName=t.name; state.school=t.school||'School of Professional Studies';
+  history.replaceState({},'','/courses?track='+encodeURIComponent(t.id));
+  renderProgramme(); showView('vProgramme');
+}
+function renderProgramme(){
+  var subject=state.trackName, schoolShort=state.school.replace(/^School of /,'');
+  document.getElementById('pSchool').textContent=state.school;
+  document.getElementById('crumbSchool').textContent=schoolShort;
+  document.getElementById('crumbProg').textContent=subject;
+  document.getElementById('enrCrumb').textContent=subject;
+  document.getElementById('pName').textContent=subject;
+  document.getElementById('pIntro').textContent='Develop practical knowledge and professional capability in '+subject+' through a structured programme designed for learners seeking to build skills and advance their careers.';
+  var tiers=state.catalog.tiers||[];
+  var maxMonths=tiers.length?Math.max.apply(null,tiers.map(function(x){return x.months;})):3;
+  document.getElementById('pFacts').innerHTML=[
+    ['Level','Professional'],['Duration','1–'+maxMonths+' months'],['Study mode','Online'],['Award','Academy Certificate'],
+    ['Language','English'],['Assessment','Coursework + Project'],['Credential','TERRA Verified'],['Intake','Rolling']
+  ].map(function(f){return '<div class="fact"><div class="k">'+f[0]+'</div><div class="v serif">'+f[1]+'</div></div>';}).join('');
+  document.getElementById('pAbout').textContent='This programme provides structured learning in '+subject+', combining academic foundations with practical application. Learners develop the knowledge, skills and confidence required to apply their learning in professional and real-world environments.';
+  document.getElementById('pLearn').innerHTML=['Core principles and concepts','Practical application','Professional methods','Problem-solving','Project development','Industry-relevant skills'].map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
+  renderCurriculum(); renderPathways(); renderFees(); renderFaqs();
+  jump('overview');
+}
+function renderCurriculum(){
+  var tiers=state.catalog.tiers||[]; var steps=tiers.length?Math.max.apply(null,tiers.map(function(x){return x.steps;})):14;
+  var mods=[['Foundations','Introduction, core concepts, key principles and foundations'],
+    ['Core Principles','The essential theory and frameworks of the subject'],
+    ['Practical Application','Applying knowledge to realistic tasks and tools'],
+    ['Professional Practice','Working methods, standards and professional judgement'],
+    ['Capstone Project','A culminating project demonstrating mastery']];
+  var per=Math.max(1,Math.round((steps-1)/(mods.length-1)));
+  document.getElementById('pCurriculum').innerHTML=mods.map(function(m,i){
+    var count = i===mods.length-1 ? 'Project' : (per+' lessons');
+    var lessons = i===mods.length-1 ? ['Project brief','Development','Submission & review'] :
+      ['Introduction','Core concepts','Key principles','Practical foundations','Knowledge assessment','Review'].slice(0,Math.min(6,per+1));
+    return '<div class="mod"><div class="h" onclick="this.parentNode.classList.toggle(\'open\')"><span class="no serif">'+('0'+(i+1)).slice(-2)+'</span><span class="nm serif">'+esc(m[0])+'</span><span class="ls">'+count+'</span></div><div class="body2"><p style="color:#63636a;margin-bottom:8px">'+esc(m[1])+'</p><ol>'+lessons.map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ol></div></div>';
+  }).join('');
+}
+function renderPathways(){
+  document.getElementById('pPaths').innerHTML=(state.catalog.tiers||[]).map(function(t,i){
+    var lvl=PATH_LABELS[i]||('Level '+(i+1)), sym={USD:'$',EUR:'€',GBP:'£'}[state.currency];
+    var tuition=t.free?'Free':(sym+t.price[state.currency]);
+    return '<div class="path"><div class="col-desc"><div class="lvl">'+esc(lvl)+'</div><div class="nm serif">'+esc(t.name)+'</div><div class="ds">'+esc(PATH_DESC[i]||'')+'</div></div>'+
+      '<div class="m"><div class="k">Duration</div><div class="v">'+t.months+' month'+(t.months>1?'s':'')+'</div></div>'+
+      '<div class="m"><div class="k">Guided lessons</div><div class="v">'+t.steps+'</div></div>'+
+      '<div class="m"><div class="k">Tuition</div><div class="v">'+esc(tuition)+'</div></div>'+
+      '<div class="act"><button class="btn solid" onclick="selectPathway(\''+t.id+'\')">Select pathway →</button></div></div>';
+  }).join('');
+}
+function renderFees(){
+  var sym={USD:'$',EUR:'€',GBP:'£'}[state.currency];
+  document.getElementById('pFees').innerHTML='<div class="r head"><span>Pathway</span><span>Tuition</span></div>'+
+    (state.catalog.tiers||[]).map(function(t,i){
+      var tuition=t.free?'Free':(sym+t.price[state.currency]+' '+state.currency);
+      return '<div class="r"><span class="pw">'+esc((PATH_LABELS[i]||'')+' — '+t.name)+'</span><span class="tu">'+esc(tuition)+'</span></div>';
+    }).join('');
+}
+document.getElementById('feesCurr').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  state.currency=b.dataset.c; document.querySelectorAll('#feesCurr button').forEach(function(x){x.classList.toggle('on',x===b);});
+  renderFees(); renderPathways();});
+function renderFaqs(){
+  var faqs=[['Is this programme accredited?','Programmes lead to a SKYGLOBEGROUP Academy certificate with a TERRA-verifiable credential. We do not claim government accreditation; every certificate can be independently verified by its reference.'],
+    ['How long do I have to complete it?','Each pathway runs over its stated duration, with guided lessons you can take at your own pace within the programme.'],
+    ['How is it assessed?','Through coursework and a project appropriate to the pathway, culminating in a capstone for higher pathways.'],
+    ['How do employers verify my certificate?','Anyone can verify a certificate instantly by its reference on the Academy or TERRA — a public confirmation that it is genuine.']];
+  document.getElementById('pFaqs').innerHTML=faqs.map(function(f){
+    return '<div class="faq" onclick="this.classList.toggle(\'open\')"><div class="q serif">'+esc(f[0])+'<span>+</span></div><div class="a">'+esc(f[1])+'</div></div>';
+  }).join('');
 }
 
-function renderTiers(){
-  const grid=document.getElementById('tierGrid'); grid.innerHTML='';
-  const sym={USD:'$',EUR:'€',GBP:'£'}[state.currency];
-  state.catalog.tiers.forEach((t,i)=>{
-    const c=document.createElement('div'); c.className='tier'+(i===2?' featured':'');
-    c.innerHTML=(t.free?'<span class="badge" style="background:#12864e">Free</span>':(i===2?'<span class="badge">Most complete</span>':''))+
-      '<div class="name">'+t.name+'</div>'+
-      '<div class="price">'+(t.free?'<span style="color:#12864e">FREE</span>':sym+t.price[state.currency]+' <small>one-time</small>')+'</div>'+
-      '<div class="blurb">'+t.blurb+' · '+t.steps+' guided lessons over '+t.months+' month'+(t.months>1?'s':'')+'</div>'+
-      '<ul>'+t.perks.map(p=>'<li>'+p+'</li>').join('')+'</ul>';
-    c.onclick=()=>{ state.product=t.product; state.tierName=t.name; state.tierId=t.id;
-      document.querySelectorAll('.tier').forEach(x=>x.classList.remove('sel'));
-      c.classList.add('sel'); setTimeout(()=>goStep(3),180); };
-    grid.appendChild(c);
-  });
+/* ── Certificate verify (real API) ── */
+async function verifyCert(){
+  var ref=(document.getElementById('certRef').value||'').trim(); var box=document.getElementById('vRes');
+  if(!ref){ box.className='vres on bad'; box.textContent='Enter a certificate reference to verify.'; return; }
+  box.className='vres on'; box.textContent='Checking…';
+  try{ var r=await fetch('/api/certificates/verify/'+encodeURIComponent(ref)); var d=await r.json();
+    var ok=r.ok&&d&&(d.valid||d.status==='valid'||d.holder||d.full_name);
+    if(ok){ box.className='vres on ok'; box.innerHTML='<b>✓ Genuine credential</b><br>Reference: '+esc(d.reference||d.cert_ref||ref)+'<br>Holder: '+esc(d.holder||d.full_name||'—')+'<br>Programme: '+esc(d.programme||d.track||d.track_id||'—')+'<br>Issued by: SkyGlobe Group · TERRA Credential Network'; }
+    else{ box.className='vres on bad'; box.innerHTML='<b>✕ No matching credential found</b><br>Please check the reference and try again.'; }
+  }catch(e){ box.className='vres on bad'; box.textContent='Verification is momentarily unavailable — please try again.'; }
 }
 
-document.getElementById('curSwitch').addEventListener('click',e=>{
-  const b=e.target.closest('button'); if(!b)return;
-  state.currency=b.dataset.cur;
-  document.querySelectorAll('#curSwitch button').forEach(x=>x.classList.toggle('on',x===b));
-  renderTiers();
-});
-
+/* ── Enrolment (preserves the real payment engine) ── */
+function selectPathway(tierId){
+  var t=(state.catalog.tiers||[]).find(function(x){return x.id===tierId;}); if(!t) return;
+  state.product=t.product; state.tierId=t.id; state.tierName=t.name;
+  showView('vEnrol'); enrolStep('applicant');
+}
+function backToProgramme(){ showView('vProgramme'); jump('pathways'); }
+function enrolStep(s){
+  document.getElementById('enrApplicant').style.display = s==='applicant'?'block':'none';
+  document.getElementById('enrReview').style.display = s==='review'?'block':'none';
+  document.getElementById('es1').className='stp'+(s==='applicant'?' on':' done');
+  document.getElementById('es2').className='stp'+(s==='review'?' on':'');
+  document.getElementById('es3').className='stp';
+  if(s==='review') renderSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 function val(id){return document.getElementById(id).value.trim();}
-function collectFields(){
-  return { fullName:val('f_fullName'), email:val('f_email'), dob:val('f_dob'), nationality:val('f_nationality'),
-    address:val('f_address'), graduationYear:val('f_gradYear') };
+function collectFields(){ return { fullName:val('f_fullName'), email:val('f_email'), dob:val('f_dob'), nationality:val('f_nationality'), address:val('f_address'), graduationYear:val('f_gradYear') }; }
+function toReview(){
+  var f=collectFields(); var e=document.getElementById('formErr');
+  if(!f.fullName||!f.email){ e.textContent='Please fill in full name and email.'; e.style.display='block'; return; }
+  e.style.display='none'; enrolStep('review');
 }
-
 function renderSummary(){
-  const f=collectFields(); const sym={USD:'$',EUR:'€',GBP:'£'}[state.currency];
-  const tier=state.catalog.tiers.find(t=>t.product===state.product);
-  const isFree=tier&&tier.free;
+  var f=collectFields(); var sym={USD:'$',EUR:'€',GBP:'£'}[state.currency];
+  var tier=state.catalog.tiers.find(function(t){return t.product===state.product;}); var isFree=tier&&tier.free;
   document.getElementById('paySummary').innerHTML=
-    '<b>Track:</b> '+state.trackName+'<br>'+
-    '<b>Programme:</b> '+state.tierName+'<br>'+
-    '<b>Student:</b> '+(f.fullName||'—')+'<br>'+
-    '<b>Email:</b> '+(f.email||'—')+'<br>'+
-    '<b>Graduation year:</b> '+(f.graduationYear||'—')+'<br>'+
-    '<b>Total:</b> '+(isFree?'<span style="color:#12864e;font-weight:800">FREE</span>':(sym+(tier?tier.price[state.currency]:'')+' '+state.currency));
-  const pb=document.getElementById('payBtn'); if(pb) pb.textContent=isFree?'Enrol Free →':'Pay & Start →';
+    '<b>Programme:</b> '+esc(state.trackName)+'<br><b>School:</b> '+esc(state.school)+'<br><b>Pathway:</b> '+esc(state.tierName)+' · '+(tier?tier.months:'')+' month'+((tier&&tier.months>1)?'s':'')+'<br>'+
+    '<b>Student:</b> '+esc(f.fullName||'—')+'<br><b>Email:</b> '+esc(f.email||'—')+'<br><b>Graduation year:</b> '+esc(f.graduationYear||'—')+'<br>'+
+    '<b>Tuition:</b> '+(isFree?'<span style="color:#12864e;font-weight:700">Free</span>':(sym+(tier?tier.price[state.currency]:'')+' '+state.currency));
+  var pb=document.getElementById('payBtn'); if(pb) pb.textContent=isFree?'Enrol (Free) →':'Confirm & pay →';
+  document.getElementById('es3').className='stp on';
 }
 
 async function startPayment(){
-  const f=collectFields();
-  const fe=document.getElementById('payErr'); fe.style.display='none';
-  if(!f.fullName||!f.email){ goStep(3); const e=document.getElementById('formErr'); e.textContent='Please fill in full name and email.'; e.style.display='block'; return; }
-  const tierF=state.catalog.tiers.find(t=>t.product===state.product);
+  var f=collectFields(); var fe=document.getElementById('payErr'); fe.style.display='none';
+  if(!f.fullName||!f.email){ enrolStep('applicant'); var e=document.getElementById('formErr'); e.textContent='Please fill in full name and email.'; e.style.display='block'; return; }
+  var tierF=state.catalog.tiers.find(function(t){return t.product===state.product;});
   if(tierF&&tierF.free){
-    const btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Enrolling…';
+    var btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Enrolling…';
     try{
-      const r=await fetch('/api/courses/enroll',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({trackId:state.trackId,tierId:state.tierId,...f})});
-      const d=await r.json();
-      if(!r.ok||!d.success) throw new Error(d.error||'Enrolment failed.');
+      var r=await fetch('/api/courses/enroll',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(Object.assign({trackId:state.trackId,tierId:state.tierId},f))});
+      var d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Enrolment failed.');
       try{ localStorage.removeItem('sky_course_pending'); }catch(e){}
       location.href='/courses/learn?id='+d.enrollmentId; return;
-    }catch(e){ btn.disabled=false; btn.textContent='Enrol Free →'; fe.textContent=e.message; fe.style.display='block'; return; }
+    }catch(e){ btn.disabled=false; btn.textContent='Enrol (Free) →'; fe.textContent=e.message; fe.style.display='block'; return; }
   }
-  const btn=document.getElementById('payBtn'); btn.disabled=true; btn.textContent='Starting secure payment…';
+  var btn2=document.getElementById('payBtn'); btn2.disabled=true; btn2.textContent='Starting secure payment…';
   try{ localStorage.setItem('sky_course_pending', JSON.stringify({product:state.product,trackId:state.trackId,trackName:state.trackName,tierId:state.tierId,tierName:state.tierName,fields:f})); }catch(e){}
-  if(sessionStorage.getItem('sky_unlock_'+state.product)){ location.href=location.pathname+'?resume=1'; return; }
+  if(sessionStorage.getItem('sky_unlock_'+state.product)){ location.href=location.pathname+'?track='+encodeURIComponent(state.trackId)+'&resume=1'; return; }
   try{
-    const r=await fetch('/api/pay/init',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({product:state.product,provider:await pickProvider(),email:f.email,currency:state.currency,
-        meta:{trackId:state.trackId,service:'courses'}})});
-    const d=await r.json();
-    if(!r.ok||!d.authorization_url) throw new Error(d.error||'Could not start payment.');
-    window.location.href=d.authorization_url;
-  }catch(e){
-    btn.disabled=false; btn.textContent='Pay & Start →';
-    fe.textContent=e.message; fe.style.display='block';
-  }
+    var r2=await fetch('/api/pay/init',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({product:state.product,provider:await pickProvider(),email:f.email,currency:state.currency,meta:{trackId:state.trackId,service:'courses'}})});
+    var d2=await r2.json(); if(!r2.ok||!d2.authorization_url) throw new Error(d2.error||'Could not start payment.');
+    window.location.href=d2.authorization_url;
+  }catch(e){ btn2.disabled=false; btn2.textContent='Confirm & pay →'; fe.textContent=e.message; fe.style.display='block'; }
 }
-let PAY_CFG=null;
+var PAY_CFG=null;
 async function pickProvider(){
   if(!PAY_CFG){ try{ PAY_CFG=await (await fetch('/api/pay/config')).json(); }catch(e){ PAY_CFG={providers:[]}; } }
-  const provs=(PAY_CFG&&PAY_CFG.providers)||[];
-  const order=['stripe','flutterwave','paystack','grey'];
-  for(const p of order){ const m=provs.find(x=>x.name===p); if(m) return p; }
-  return provs[0]?.name || 'grey';
+  var provs=(PAY_CFG&&PAY_CFG.providers)||[]; var order=['stripe','flutterwave','paystack','grey'];
+  for(var i=0;i<order.length;i++){ var m=provs.find(function(x){return x.name===order[i];}); if(m) return order[i]; }
+  return (provs[0]&&provs[0].name)||'grey';
 }
-
-// ---- Resume + enrol after payment ----
 async function resumeIfPaid(){
-  const isResume=new URLSearchParams(location.search).get('resume')==='1';
-  let pending=null; try{ pending=JSON.parse(localStorage.getItem('sky_course_pending')||'null'); }catch(e){}
+  var isResume=new URLSearchParams(location.search).get('resume')==='1';
+  var pending=null; try{ pending=JSON.parse(localStorage.getItem('sky_course_pending')||'null'); }catch(e){}
   if(!isResume||!pending) return;
-  const unlock=sessionStorage.getItem('sky_unlock_'+pending.product);
-  if(!unlock) return;
+  var unlock=sessionStorage.getItem('sky_unlock_'+pending.product); if(!unlock) return;
   try{
-    const r=await fetch('/api/courses/enroll',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({unlock,trackId:pending.trackId,tierId:pending.tierId,...pending.fields})});
-    const d=await r.json();
-    if(!r.ok||!d.success) throw new Error(d.error||'Enrolment failed.');
+    var r=await fetch('/api/courses/enroll',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({unlock:unlock,trackId:pending.trackId,tierId:pending.tierId},pending.fields))});
+    var d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Enrolment failed.');
     try{ localStorage.removeItem('sky_course_pending'); sessionStorage.removeItem('sky_unlock_'+pending.product); }catch(e){}
     location.href='/courses/learn?id='+d.enrollmentId;
-  }catch(e){
-    alert('We could not complete your enrolment automatically: '+e.message+'. Please contact support with your payment reference.');
-  }
+  }catch(e){ alert('We could not complete your enrolment automatically: '+e.message+'. Please contact support with your payment reference.'); }
 }
+document.getElementById('certRef').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();verifyCert();}});
 
 loadCatalog(); resumeIfPaid();
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>
 <script src="/announcements.js?v=2" defer></script>
 <script src="/dept-contact.js?v=7" defer></script>
