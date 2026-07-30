@@ -1,216 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="/skyglobe-ds.css">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SKYGLOBEGROUP Mobility — Workspace</title>
-<meta name="description" content="A SKYGLOBEGROUP Mobility workspace — every movement service, from visas to travel, in its own dedicated space.">
-<meta name="theme-color" content="#061A52">
+<meta name="description" content="A SKYGLOBEGROUP Mobility workspace — study, work, travel, immigration and opportunities, connected to your SKYGLOBE ID.">
+<meta name="theme-color" content="#ffffff">
 <link rel="icon" href="/skyglobe-logo-t.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#04132F;--navy2:#061A52;--blue:#0A2E65;--blue3:#123E87;--gold:#D4A73A;--gold-2:#E8C566;--gold-hi:#F2D98A;--acad:#B8860B;--acad-2:#D4A73A;--ink:#0F1C3A;--muted:#5A6B8C;--line:#e4e8f0;--purple:#7C3AED;--orange:#F0742E;--green:#12864E;--font:"SF Pro Display","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif}
+:root{
+  --ink:#111827;--ink-2:#374151;--muted:#6B7280;--faint:#9aa1ad;
+  --line:#E7E9EE;--line-2:#d7dbe3;--paper:#fff;--wash:#F7F8FA;
+  --navy:#0a2e65;--navy-2:#0c3a80;--blue:#0a5bd6;
+  --font:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;--ease:cubic-bezier(.22,.7,.3,1);
+}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{overflow-x:clip}
-body{font-family:var(--font);color:var(--ink);background:#F8F9FB;line-height:1.6}
-a{text-decoration:none;color:inherit}
-.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
-/* ecosystem nav */
-.eco-nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22)}
-.eco-nav .in{max-width:1180px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
-.eco-nav .bd{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.eco-nav .bd img{height:30px;width:30px;object-fit:contain}
-.eco-nav .wm{font-weight:900;letter-spacing:.04em;font-size:1.02rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
-.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:20px}
-.eco-nav .lk a{color:#C9D4E5;font-size:.86rem;font-weight:600}
-.eco-nav .lk a:hover{color:#F2D98A}
-.eco-nav .id{background:linear-gradient(135deg,#D4A73A,#E8C566);color:#04132F;padding:8px 16px;border-radius:9px;font-weight:800;font-size:.84rem}
-@media(max-width:860px){.eco-nav .lk .eh{display:none}}
-/* breadcrumb */
-.crumb{background:#fff;border-bottom:1px solid var(--line)}
-.crumb .in{max-width:1180px;margin:0 auto;padding:11px 20px;font-size:.82rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.crumb a{color:#E0642A;font-weight:600}.crumb b{color:var(--ink)}
-/* workspace hero */
-.whero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(160deg,#061A52 0%,#0A2E65 45%,#5A2A0C 100%)}
-.whero::after{content:"";position:absolute;inset:0;background:radial-gradient(620px 300px at 50% -6%,rgba(240,116,46,.2),transparent 62%);pointer-events:none}
-.whero .in{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:52px 20px 56px;text-align:center}
-.whero .ic{font-size:2.4rem}
-.whero .eyebrow{margin-top:10px;font-size:.74rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#FFC08A}
-.whero h1{margin-top:8px;font-weight:900;font-size:clamp(1.9rem,5vw,3.1rem);line-height:1.06;background:linear-gradient(95deg,#FFFFFF,#FFC08A 42%,#F0742E 58%,#FFC08A 74%,#FFFFFF);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 9s ease-in-out infinite alternate}
-@keyframes flow{0%{background-position:0}100%{background-position:100%}}
-.whero p{max-width:640px;margin:16px auto 0;color:#C9D4E5;font-size:1.04rem;line-height:1.8}
-.whero .flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:20px;font-size:.8rem;font-weight:700;color:#9DBEFF;letter-spacing:.04em}
-.whero .flow i{font-style:normal;color:#F0742E}
-/* modules grid */
-.sec{padding:52px 0 64px}
-.sec-h{text-align:center;margin-bottom:8px;font-size:.72rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#E0642A}
-.sec-t{text-align:center;font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;color:var(--navy2);margin-bottom:6px}
-.sec-s{text-align:center;color:var(--muted);max-width:640px;margin:0 auto 34px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
-.mod{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px 22px;box-shadow:0 12px 34px rgba(4,19,47,.05);transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column}
-.mod:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(4,19,47,.1);border-color:rgba(212,167,58,.5)}
-.mod .mic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:linear-gradient(150deg,#FFF0E4,#FDE0CC)}
-.mod h3{font-size:1.05rem;margin:12px 0 6px;color:var(--navy2)}
-.mod p{font-size:.88rem;color:var(--muted);flex:1}
-.mod .go{margin-top:14px;font-size:.84rem;font-weight:800;color:#E0642A}
-.mod .soon{margin-top:14px;font-size:.72rem;font-weight:700;color:#9AA6BE;letter-spacing:.04em}
-/* sibling workspaces strip */
-.sibs{background:#fff;border-top:1px solid var(--line);padding:34px 0 44px}
-.sibs .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
-.sibs a{border:1px solid var(--line);border-radius:100px;padding:9px 18px;font-size:.86rem;font-weight:700;color:var(--navy2);background:#F8F9FB;transition:.2s}
-.sibs a:hover{border-color:#E0642A;color:#E0642A}
-.sibs a.on{background:linear-gradient(135deg,#E0642A,#F0742E);color:#fff;border-color:transparent}
-/* footer */
-.eco-foot{background:#04132F;color:#AEC0EC;padding:48px 20px 30px;border-top:1px solid rgba(212,167,58,.18)}
-.eco-foot .ft{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
-@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr}}@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
-.eco-foot .wm{font-weight:900;font-size:1.35rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
-.eco-foot .tag{color:#D4A73A;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;margin-top:10px}
-.eco-foot p.m{color:#8FA0C4;font-size:.86rem;margin-top:12px;max-width:280px}
-.eco-foot h4{color:#fff;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;font-weight:800}
-.eco-foot a{display:block;color:#AEC0EC;font-size:.88rem;margin-bottom:9px}
-.eco-foot a:hover{color:#F2D98A}
-.eco-foot .bot{max-width:1180px;margin:34px auto 0;border-top:1px solid rgba(255,255,255,.1);padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#8FA0C4}
-.eco-foot .bot b{color:#fff}
-.eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
-.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
-.mod .mic{color:#E0642A}.mod .mic .sgic{width:24px;height:24px}
-.whero .ic .sgic{width:46px;height:46px;stroke:#fff}
+body{font-family:var(--font);color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:46px;padding:0 22px;border-radius:24px;font-size:.92rem;font-weight:500;border:none;transition:.18s var(--ease)}
+.btn.dark{background:var(--navy);color:#fff}.btn.dark:hover{background:var(--navy-2)}
+.btn.line{background:#fff;border:1px solid var(--line-2);color:var(--navy)}.btn.line:hover{border-color:var(--navy);background:var(--wash)}
+
+/* top bar */
+.nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1180px;margin:0 auto;height:56px;display:flex;align-items:center;gap:14px;padding:0 clamp(20px,4vw,40px)}
+.nav .brand{display:flex;align-items:center;gap:9px}.nav .brand img{width:24px;height:24px}.nav .brand b{font-size:.98rem;font-weight:600}.nav .brand small{color:var(--muted);font-weight:500;font-size:.98rem}
+.nav .right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.nav .right a{font-size:.85rem;font-weight:500;color:var(--ink-2)}.nav .right a:hover{color:var(--navy)}
+.nav .id{height:38px;border-radius:20px;padding:0 16px;display:inline-flex;align-items:center;background:var(--navy);color:#fff}
+
+/* secondary workspace nav */
+.subnav{position:sticky;top:56px;z-index:50;background:#fff;border-bottom:1px solid var(--line)}
+.subnav .row{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,40px);display:flex;gap:24px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.subnav a{white-space:nowrap;padding:13px 0;font-size:.86rem;font-weight:500;color:var(--muted);border-bottom:2px solid transparent}
+.subnav a:hover{color:var(--ink)}.subnav a.on{color:var(--navy);border-color:var(--navy)}
+
+.crumb{font-size:.82rem;color:var(--muted);padding-top:clamp(20px,3vw,28px)}.crumb a:hover{color:var(--navy)}.crumb b{color:var(--ink)}
+
+/* hero */
+.whero{padding:8px 0 clamp(30px,4vw,46px);border-bottom:1px solid var(--line)}
+.whero h1{font-size:clamp(2.1rem,4.4vw,3.2rem);font-weight:600;letter-spacing:-.03em;line-height:1.06;margin-top:8px}
+.whero p{max-width:60ch;margin-top:16px;font-size:1.06rem;color:var(--muted)}
+.whero .cta{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap}
+.whero .img{margin-top:clamp(24px,3vw,34px);height:clamp(200px,26vw,340px);border-radius:4px;border:1px solid var(--line);background:#eef1f4 center/cover no-repeat;box-shadow:0 14px 40px rgba(10,46,101,.10)}
+
+/* journey */
+.sec{padding:clamp(46px,6vw,72px) 0;border-bottom:1px solid var(--line)}
+.sh{font-size:clamp(1.5rem,3vw,2rem);font-weight:600;letter-spacing:-.02em;margin-top:6px}
+.ssub{margin-top:10px;color:var(--muted);font-size:1rem;max-width:60ch}
+.journey{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:28px;background:var(--line);border:1px solid var(--line)}
+@media(max-width:820px){.journey{grid-template-columns:1fr 1fr}}@media(max-width:520px){.journey{grid-template-columns:1fr}}
+.jstep{background:#fff;padding:22px 20px}.jstep .no{font-size:1.2rem;font-weight:600;color:var(--faint)}.jstep .nm{font-size:1.05rem;font-weight:600;margin-top:8px}
+
+/* inside cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:28px}
+.mod{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;transition:.2s var(--ease)}
+.mod:hover{border-color:#c9ccd2;transform:translateY(-2px);box-shadow:0 12px 30px rgba(10,46,101,.06)}
+.mod .mic{width:42px;height:42px;border-radius:11px;background:#EAF1FF;color:var(--blue);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.mod .mic .sgic{width:22px;height:22px}
+.mod h3{font-size:1.05rem;font-weight:600;color:var(--ink)}
+.mod p{font-size:.9rem;color:var(--muted);flex:1;margin-top:5px;line-height:1.5}
+.mod .go{margin-top:14px;font-size:.84rem;font-weight:500;color:var(--navy)}
+
+footer{padding:40px 0 44px}
+.fin{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--faint);border-top:1px solid var(--line);padding-top:18px}
+footer a:hover{color:var(--navy)}
 </style>
 </head>
 <body>
 
-<nav class="eco-nav"><div class="in">
-  <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
-  <div class="lk"><a class="eh" href="/noria">NORIA</a><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="id" href="/id">SKYGLOBE ID</a></div>
+<nav class="nav"><div class="in">
+  <a class="brand" href="/mobility"><img src="/skyglobe-logo-t.png" alt=""><b>SKYGLOBEGROUP</b>&nbsp;<small>Mobility</small></a>
+  <div class="right"><a href="/mobility">← Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
 </div></nav>
+<div class="subnav"><div class="row" id="subnav"></div></div>
 
-<div class="crumb"><div class="in"><a href="/">SKYGLOBEGROUP</a> <span>›</span> <a href="/mobility">Mobility</a> <span>›</span> <b id="crumbNow">Workspace</b></div></div>
+<div class="wrap">
+  <div class="crumb"><a href="/mobility">Mobility</a> › <b id="crumbNow">Workspace</b></div>
+  <header class="whero">
+    <div class="eyebrow" id="wEyebrow">Mobility</div>
+    <h1 id="wTitle">Workspace</h1>
+    <p id="wDesc"></p>
+    <div class="cta"><a class="btn dark" id="wCta1" href="#">Get started</a><a class="btn line" href="/mobility#countries">Explore countries</a></div>
+    <div class="img" id="wImg" role="img" aria-label="" style="display:none"></div>
+  </header>
 
-<header class="whero"><div class="in">
-  <div class="ic" id="wIcon">🎓</div>
-  <div class="eyebrow" id="wEyebrow">Mobility</div>
-  <h1 id="wTitle">Workspace</h1>
-  <p id="wDesc"></p>
-  <div class="flow" id="wFlow"></div>
-</div></header>
+  <section class="sec">
+    <div class="eyebrow">The journey</div>
+    <h2 class="sh" id="wJT">Your journey</h2>
+    <div class="journey" id="wFlow"></div>
+  </section>
 
-<section class="sec"><div class="wrap">
-  <div class="sec-h" id="wSecH">Inside this workspace</div>
-  <h2 class="sec-t" id="wSecT">Modules</h2>
-  <p class="sec-s" id="wSecS"></p>
-  <div class="grid" id="wGrid"></div>
-</div></section>
+  <section class="sec">
+    <div class="eyebrow">Inside this workspace</div>
+    <h2 class="sh" id="wSecT">Inside</h2>
+    <p class="ssub" id="wSecS">Every item below is a real destination — choose where to go.</p>
+    <div class="grid" id="wGrid"></div>
+  </section>
+</div>
 
-<section class="sibs"><div class="wrap">
-  <div class="sec-h">Mobility</div>
-  <h2 class="sec-t" style="font-size:1.3rem">Move between workspaces</h2>
-  <div class="row" id="wSibs"></div>
-</div></section>
-
-<footer class="eco-foot">
-  <div class="ft">
-    <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
-    <div><h4>Mobility</h4><a href="/mobility/countries">Countries</a><a href="/mobility/visas">Visas</a><a href="/mobility/travel">Travel</a><a href="/mobility/conferences">Conferences</a></div>
-    <div><h4>Ecosystem</h4><a href="/noria">NORIA</a><a href="/terra">TERRA</a><a href="/yunex">YUNEX</a><a href="/academy">Academy</a></div>
-    <div><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">WhatsApp</a><a href="/id">SKYGLOBE ID</a><a href="/terra#documents">Documents &amp; Legal</a></div>
-  </div>
-  <div class="bot"><div>© <span id="yr">2026</span> <b>SKYGLOBEGROUP</b> · Mobility · All Rights Reserved</div><div class="live"><i></i> Mobility Network · Operational</div></div>
-</footer>
+<footer><div class="wrap"><div class="fin">
+  <div>© <span id="yr">2026</span> SKYGLOBEGROUP · Mobility · All Rights Reserved</div>
+  <div><a href="/mobility">Mobility</a> · <a href="/id">SKYGLOBE ID</a> · One World · One Mission</div>
+</div></div></footer>
 
 <script src="/sg-icons.js"></script>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
-/* ── ACADEMY WORKSPACE REGISTRY — every module is a real, unique destination ── */
+/* ── MOBILITY WORKSPACE REGISTRY — every module is a real destination ── */
 var WS={
- countries:{icon:'🌍',eyebrow:'Country Directory',title:'Countries',desc:'Every continent and country — the same professional profile everywhere: immigration, study, work, cost of living and more.',
-   flow:['Continent','Country','Opportunity','Apply'],
-   mods:[
-     {i:'🌍',t:'Browse the Directory',d:'All continents and countries in one place.',h:'/mobility#countries'},
-     {i:'🛂',t:'Visas by Country',d:'Requirements and visa routes.',h:'/mobility/visas'},
-     {i:'🎓',t:'Study Destinations',d:'Universities and student pathways.',h:'/mobility/universities'},
-     {i:'💼',t:'Work Destinations',d:'Employers and work permits.',h:'/mobility/employers'}]},
- visas:{icon:'🛂',eyebrow:'Visa Centre',title:'Visas',desc:'Student, work, tourist and residence visas — prepared, submitted and tracked by our team.',
-   flow:['Choose','Prepare','Submit','Track'],
-   mods:[
-     {i:'📄',t:'Work Permits',d:'Europe & global work permits, professionally handled.',h:'/work-permit'},
-     {i:'🧳',t:'Visa Packages',d:'Full visa preparation packages.',h:'/packages'},
-     {i:'📝',t:'Start an Application',d:'Begin your visa application.',h:'/id?auth=signup&from=mobility'},
-     {i:'🌍',t:'Requirements by Country',d:'Visa routes for each country.',h:'/mobility#countries'}]},
- immigration:{icon:'🏛️',eyebrow:'Immigration',title:'Immigration',desc:'Residence, citizenship, family and business migration — with compliance handled end to end.',
-   flow:['Assess','Prepare','Submit','Settle'],
-   mods:[
-     {i:'📄',t:'Work Permit & Residence',d:'Permit and residence routes.',h:'/work-permit'},
-     {i:'🧳',t:'Migration Packages',d:'Full migration support.',h:'/packages'},
-     {i:'🏠',t:'Relocation & Settlement',d:'Arrival, housing and orientation.',h:'/mobility/travel'},
-     {i:'📝',t:'Start Here',d:'Begin your immigration journey.',h:'/id?auth=signup&from=mobility'}]},
- universities:{icon:'🎓',eyebrow:'University Directory',title:'Universities',desc:'Universities, admissions, student visas and scholarships — study abroad with confidence.',
-   flow:['Choose','Apply','Visa','Enrol'],
-   mods:[
-     {i:'🎓',t:'Study Programmes',d:'Academy programmes and pathways.',h:'/courses'},
-     {i:'📝',t:'Admissions',d:'Apply through the Academy admission centre.',h:'/academy/admission'},
-     {i:'🛂',t:'Student Visas',d:'Visa preparation for students.',h:'/mobility/visas'},
-     {i:'🧳',t:'Study Packages',d:'End-to-end study-abroad support.',h:'/packages'}]},
- employers:{icon:'💼',eyebrow:'Employer Directory',title:'Employers',desc:'International jobs, employer sponsorship, professional migration and recruitment.',
-   flow:['Find','Apply','Sponsor','Relocate'],
-   mods:[
-     {i:'💼',t:'Opportunities Board',d:'Verified international openings.',h:'/mobility#opportunities'},
-     {i:'📄',t:'Work Permits',d:'Sponsored work permit routes.',h:'/work-permit'},
-     {i:'🧳',t:'Professional Migration',d:'Full relocation packages.',h:'/packages'},
-     {i:'📝',t:'Start Here',d:'Begin your work-abroad journey.',h:'/id?auth=signup&from=mobility'}]},
- travel:{icon:'✈️',eyebrow:'Travel Services',title:'Travel',desc:'Flights, hotels, insurance, reservations and business travel — everything for the journey.',
-   flow:['Plan','Book','Insure','Depart'],
-   mods:[
-     {i:'🧳',t:'Travel Packages',d:'Complete travel preparation.',h:'/packages'},
-     {i:'✈️',t:'Flights & Hotels',d:'Reservations and bookings.',h:'/mobility/flights'},
-     {i:'🛡️',t:'Travel Insurance',d:'Cover for study, work and travel.',h:'/mobility/insurance'},
-     {i:'🗓️',t:'Conferences & Events',d:'Business travel and events.',h:'/mobility/conferences'}]},
- flights:{icon:'🛫',eyebrow:'Flight Centre',title:'Flights',desc:'Flight reservations, bookings and confirmations — arranged and confirmed by our team.',
-   flow:['Search','Reserve','Confirm','Fly'],
-   mods:[
-     {i:'🧳',t:'Travel Packages',d:'Flights bundled with your journey.',h:'/packages'},
-     {i:'🛡️',t:'Travel Insurance',d:'Protect your trip.',h:'/mobility/insurance'},
-     {i:'✈️',t:'Business Travel',d:'Corporate and delegation travel.',h:'/mobility/conferences'},
-     {i:'📝',t:'Request a Booking',d:'Start a flight request.',h:'/id?auth=signup&from=mobility'}]},
- insurance:{icon:'🛡️',eyebrow:'Insurance Centre',title:'Insurance',desc:'Travel, study and work insurance — the cover you need, wherever you go.',
-   flow:['Choose','Cover','Travel','Claim'],
-   mods:[
-     {i:'🧳',t:'Insurance in Packages',d:'Cover bundled with travel packages.',h:'/packages'},
-     {i:'✈️',t:'Travel Services',d:'Insurance alongside flights & hotels.',h:'/mobility/travel'},
-     {i:'📝',t:'Request Cover',d:'Start an insurance request.',h:'/id?auth=signup&from=mobility'},
-     {i:'🌍',t:'By Destination',d:'Cover matched to your country.',h:'/mobility#countries'}]},
- conferences:{icon:'🗓️',eyebrow:'Conferences & Events',title:'Conferences',desc:'Conference sourcing, business missions and events — worldwide, professionally arranged.',
-   flow:['Discover','Register','Travel','Attend'],
-   mods:[
-     {i:'🗓️',t:'Conference Sourcing',d:'Find and register for conferences.',h:'/conferences'},
-     {i:'✈️',t:'Travel & Flights',d:'Get there with full travel support.',h:'/mobility/travel'},
-     {i:'💼',t:'Business Missions',d:'Trade delegations and market visits.',h:'/mobility#opportunities'},
-     {i:'📝',t:'Request Sourcing',d:'Ask us to source an event.',h:'/id?auth=signup&from=mobility'}]},
- opportunities:{icon:'✦',eyebrow:'Opportunity Centre',title:'Opportunities',desc:'Verified opportunities worldwide — study, employment, internships, research and more.',
-   flow:['Explore','Choose','Apply','Go'],
-   mods:[
-     {i:'💼',t:'Opportunities Board',d:'Verified openings across the world.',h:'/mobility#opportunities'},
-     {i:'🎓',t:'Study & Research',d:'Academy programmes and pathways.',h:'/courses'},
-     {i:'🗓️',t:'Events & Conferences',d:'Global events and missions.',h:'/conferences'},
-     {i:'📝',t:'Start Here',d:'Create your SKYGLOBE ID to apply.',h:'/id?auth=signup&from=mobility'}]}
+ countries:{icon:'🌍',eyebrow:'Country Directory',title:'Countries',jt:'Your journey, country by country',desc:'Every continent and country — the same professional profile everywhere: immigration, study, work, cost of living and more.',
+   flow:['Continent','Country','Opportunity','Apply'],cta:'/mobility#countries',
+   mods:[{i:'🌍',t:'Browse the Directory',d:'All continents and countries in one place.',h:'/mobility#countries'},{i:'🛂',t:'Visas by Country',d:'Requirements and visa routes.',h:'/mobility/visas'},{i:'🎓',t:'Study Destinations',d:'Universities and student pathways.',h:'/mobility/universities'},{i:'💼',t:'Work Destinations',d:'Employers and work permits.',h:'/mobility/employers'}]},
+ universities:{icon:'🎓',eyebrow:'Study',title:'Universities',jt:'From application to arrival',desc:'Explore universities, discover programmes, understand admission requirements and prepare your study-abroad journey with confidence.',
+   flow:['Discover','Choose','Apply','Arrive'],cta:'/courses',
+   mods:[{i:'🎓',t:'Programmes',d:'Academy programmes and academic pathways.',h:'/courses'},{i:'📝',t:'Admissions',d:'Apply through the Academy admission centre.',h:'/academy/admission'},{i:'🛂',t:'Student Visas',d:'Prepare for the visa stage of your journey.',h:'/mobility/visas'},{i:'🧳',t:'Study Packages',d:'End-to-end study-abroad support.',h:'/packages'}]},
+ employers:{icon:'💼',eyebrow:'Work',title:'Employers',jt:'Discover, apply, sponsor, relocate',desc:'Discover international employers, professional opportunities and pathways to work across borders.',
+   flow:['Discover','Apply','Sponsor','Relocate'],cta:'/mobility/opportunities',
+   mods:[{i:'💼',t:'Opportunities Board',d:'Verified international openings.',h:'/mobility/opportunities'},{i:'📄',t:'Work Permits',d:'Sponsored work-permit routes.',h:'/work-permit'},{i:'🧳',t:'Professional Migration',d:'Full relocation packages.',h:'/packages'},{i:'🌍',t:'Work Destinations',d:'Explore countries hiring internationally.',h:'/mobility#countries'}]},
+ travel:{icon:'✈️',eyebrow:'Travel',title:'Travel',jt:'Plan, book, prepare, depart',desc:'Plan and manage your journey — from flights and accommodation to insurance and business travel.',
+   flow:['Plan','Book','Prepare','Depart'],cta:'/mobility/flights',
+   mods:[{i:'✈️',t:'Flights & Hotels',d:'Search and arrange travel reservations.',h:'/mobility/flights'},{i:'🛡️',t:'Travel Insurance',d:'Find appropriate cover for your journey.',h:'/mobility/insurance'},{i:'🗓️',t:'Conferences & Events',d:'Events, business travel and conferences.',h:'/mobility/conferences'},{i:'🧳',t:'Travel Packages',d:'End-to-end travel preparation.',h:'/packages'}]},
+ immigration:{icon:'🏛️',eyebrow:'Immigration',title:'Immigration',jt:'Assess, prepare, submit, settle',desc:'Understand residence, migration and relocation pathways — with guidance throughout the journey. Information and guidance, distinct from regulated legal advice.',
+   flow:['Assess','Prepare','Submit','Settle'],cta:'/work-permit',
+   mods:[{i:'🏛️',t:'Residency & Work',d:'Permit and residence routes.',h:'/work-permit'},{i:'🧳',t:'Migration Packages',d:'Full migration support.',h:'/packages'},{i:'🏠',t:'Relocation & Settlement',d:'Arrival, housing and orientation.',h:'/mobility/travel'},{i:'🌍',t:'Pathways by Country',d:'Migration routes for each country.',h:'/mobility#countries'}]},
+ opportunities:{icon:'✦',eyebrow:'Opportunity Centre',title:'Opportunities',jt:'Explore, choose, apply, go',desc:'Explore verified opportunities across study, work, research, internships, exchange and global events.',
+   flow:['Explore','Choose','Apply','Go'],cta:'/mobility#opportunities',img:false,
+   mods:[{i:'🎓',t:'Study & Research',d:'Academy programmes and pathways.',h:'/courses'},{i:'💼',t:'Work & Internships',d:'Verified international openings.',h:'/mobility/employers'},{i:'🗓️',t:'Events & Conferences',d:'Global events and business missions.',h:'/conferences'},{i:'📝',t:'Start an Application',d:'Open your Application Centre.',h:'/mobility/applications'}]},
+ visas:{icon:'🛂',eyebrow:'Visa Centre',title:'Visas',jt:'Choose, prepare, submit, track',desc:'Student, work, tourist and residence visas — prepared, submitted and tracked in one place.',
+   flow:['Choose','Prepare','Submit','Track'],cta:'/mobility/applications',img:false,
+   mods:[{i:'📄',t:'Work Permits',d:'Europe & global work permits.',h:'/work-permit'},{i:'🧳',t:'Visa Packages',d:'Full visa preparation packages.',h:'/packages'},{i:'📝',t:'Start an Application',d:'Begin your visa application.',h:'/mobility/applications'},{i:'🌍',t:'Requirements by Country',d:'Visa routes for each country.',h:'/mobility#countries'}]},
+ flights:{icon:'🛫',eyebrow:'Travel · Flights',title:'Flights',jt:'Search, reserve, confirm, fly',desc:'Flight reservations, bookings and confirmations — search options and arrange your travel.',
+   flow:['Search','Reserve','Confirm','Fly'],cta:'/packages',
+   mods:[{i:'🧳',t:'Travel Packages',d:'Flights bundled with your journey.',h:'/packages'},{i:'🛡️',t:'Travel Insurance',d:'Protect your trip.',h:'/mobility/insurance'},{i:'🗓️',t:'Business Travel',d:'Corporate and delegation travel.',h:'/mobility/conferences'},{i:'✈️',t:'Travel Services',d:'Everything for the journey.',h:'/mobility/travel'}]},
+ insurance:{icon:'🛡️',eyebrow:'Travel · Insurance',title:'Insurance',jt:'Choose, cover, travel, claim',desc:'Travel, study and work insurance — the cover you need, wherever you go.',
+   flow:['Choose','Cover','Travel','Claim'],cta:'/packages',img:false,
+   mods:[{i:'🧳',t:'Insurance in Packages',d:'Cover bundled with travel packages.',h:'/packages'},{i:'✈️',t:'Travel Services',d:'Insurance alongside flights & hotels.',h:'/mobility/travel'},{i:'🌍',t:'By Destination',d:'Cover matched to your country.',h:'/mobility#countries'},{i:'📝',t:'Request Cover',d:'Start an insurance request.',h:'/mobility/applications'}]},
+ conferences:{icon:'🗓️',eyebrow:'Travel · Conferences',title:'Conferences',jt:'Discover, register, travel, attend',desc:'Conference sourcing, business missions and events — worldwide, professionally arranged.',
+   flow:['Discover','Register','Travel','Attend'],cta:'/conferences',
+   mods:[{i:'🗓️',t:'Conference Sourcing',d:'Find and register for conferences.',h:'/conferences'},{i:'✈️',t:'Travel & Flights',d:'Get there with full travel support.',h:'/mobility/travel'},{i:'💼',t:'Business Missions',d:'Trade delegations and market visits.',h:'/mobility/opportunities'},{i:'📝',t:'Request Sourcing',d:'Ask us to source an event.',h:'/mobility/applications'}]}
 };
-var ORDER=['countries','visas','immigration','universities','employers','travel','flights','insurance','conferences','opportunities'];
+/* selective hero photography — marketing/context workspaces only (not visa/insurance/opportunities forms) */
+var UQ='?auto=format&fit=crop&w=1200&q=60',UB='https://images.unsplash.com/photo-';
+var IMG={countries:UB+'1502920917128-1aa500764cbd'+UQ,universities:UB+'1523240795612-9a054b0db644'+UQ,employers:UB+'1497215728101-856f4ea42174'+UQ,travel:UB+'1436491865332-7a61a109cc05'+UQ,immigration:UB+'1529070538774-1843cb3265df'+UQ,flights:UB+'1436491865332-7a61a109cc05'+UQ,conferences:UB+'1540575467063-178a50c2df87'+UQ};
+
+/* consistent secondary nav */
+var NAV=[['countries','Countries'],['universities','Universities'],['employers','Employers'],['travel','Travel'],['immigration','Immigration'],['opportunities','Opportunities'],['__apps','Applications']];
 var key=(location.pathname.split('/')[2]||'countries').toLowerCase();
 if(!WS[key])key='countries';
 var w=WS[key];
 document.title='SKYGLOBEGROUP Mobility — '+w.title;
 document.getElementById('crumbNow').textContent=w.title;
-document.getElementById('wIcon').innerHTML=sgIcon(w.icon,46);
 document.getElementById('wEyebrow').textContent='Mobility · '+w.eyebrow;
 document.getElementById('wTitle').textContent=w.title;
 document.getElementById('wDesc').textContent=w.desc;
-document.getElementById('wFlow').innerHTML=w.flow.map(function(f,ix){return (ix?'<i>→</i>':'')+'<span>'+f+'</span>';}).join('');
+document.getElementById('wJT').textContent=w.jt||'Your journey';
+var cta=document.getElementById('wCta1'); cta.href=w.cta||'/mobility'; cta.textContent='Get started';
+if(w.img!==false && IMG[key]){ var im=document.getElementById('wImg'); im.style.display='block'; im.style.backgroundImage='url('+IMG[key]+')'; }
+document.getElementById('wFlow').innerHTML=w.flow.map(function(f,ix){return '<div class="jstep"><div class="no">'+('0'+(ix+1)).slice(-2)+'</div><div class="nm">'+f+'</div></div>';}).join('');
 document.getElementById('wSecT').textContent='Inside '+w.title;
-document.getElementById('wSecS').textContent='Every item below is a real destination — choose where to go.';
 document.getElementById('wGrid').innerHTML=w.mods.map(function(m){
   return '<a class="mod" href="'+m.h+'"><div class="mic">'+sgIcon(m.i)+'</div><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="go">Open →</div></a>';
 }).join('');
-document.getElementById('wSibs').innerHTML=ORDER.map(function(k){
-  return '<a href="/mobility/'+k+'"'+(k===key?' class="on"':'')+'>'+WS[k].title+'</a>';
+document.getElementById('subnav').innerHTML=NAV.map(function(n){
+  var href=n[0]==='__apps'?'/mobility/applications':'/mobility/'+n[0];
+  return '<a href="'+href+'"'+(n[0]===key?' class="on"':'')+'>'+n[1]+'</a>';
 }).join('');
 if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>

@@ -197,6 +197,7 @@ app.get(['/mobility', '/services', '/travel'], (req, res) =>
   res.sendFile(path.join(__dirname, 'mobility.html')));
 // ── MOBILITY MODULE REGISTRY (Architecture Blueprint · Phase 4) ──────────────
 // Every Mobility workspace is a REAL, UNIQUE destination.
+app.get('/mobility/applications', (req, res) => res.sendFile(path.join(__dirname, 'mobility-applications.html')));
 const MOBILITY_WORKSPACES = ['countries','visas','immigration','universities','employers','travel','flights','insurance','conferences','opportunities'];
 for (const w of MOBILITY_WORKSPACES) {
   app.get('/mobility/' + w, (req, res) => res.sendFile(path.join(__dirname, 'mobility-workspace.html')));
