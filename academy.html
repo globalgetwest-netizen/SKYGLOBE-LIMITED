@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="/skyglobe-logo-t.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -55,11 +56,11 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
 .btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 24px;border-radius:2px;font-size:.94rem;font-weight:500;transition:background .18s var(--ease),color .18s var(--ease),border-color .18s var(--ease)}
 .btn.solid{background:var(--navy);color:#fff}.btn.solid:hover{background:var(--navy-2)}
 .btn.line{background:#fff;border:1px solid var(--line-2);color:var(--navy)}.btn.line:hover{border-color:var(--navy);background:var(--wash)}
-.hero .band{margin-top:clamp(30px,4vw,48px);height:clamp(180px,26vw,320px);border-radius:3px;background:
-  linear-gradient(180deg,rgba(10,46,101,.04),rgba(10,46,101,.10)),
-  radial-gradient(120% 140% at 82% 10%,rgba(154,123,46,.14),transparent 55%),var(--wash);
-  border:1px solid var(--line);display:flex;align-items:flex-end;padding:clamp(18px,3vw,30px)}
-.hero .band .cap{font-family:var(--serif);font-size:clamp(1.3rem,2.6vw,2rem);color:var(--navy);font-weight:500;max-width:22ch;line-height:1.15}
+.hero .band{margin-top:clamp(30px,4vw,48px);height:clamp(210px,30vw,380px);border-radius:3px;background:
+  linear-gradient(180deg,rgba(6,20,45,.10) 0%,rgba(6,20,45,.20) 45%,rgba(6,20,45,.66) 100%),
+  #eef0f4 url("https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1500&q=72") center 28%/cover no-repeat;
+  border:1px solid var(--line);display:flex;align-items:flex-end;padding:clamp(20px,3vw,34px)}
+.hero .band .cap{font-family:var(--serif);font-size:clamp(1.35rem,2.6vw,2.05rem);color:#fff;font-weight:500;max-width:24ch;line-height:1.15;text-shadow:0 1px 14px rgba(0,0,0,.35)}
 
 /* ── Section scaffold ── */
 section{padding:clamp(46px,6vw,78px) 0;border-bottom:1px solid var(--line)}
