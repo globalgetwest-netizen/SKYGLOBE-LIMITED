@@ -8,11 +8,11 @@
  * NOTE: we do NOT call skipWaiting() on install — the page asks the user first,
  *       then posts {type:'SKIP_WAITING'} when they tap "Update".
  */
-const CACHE = 'skyglobe-v79';
+const CACHE = 'skyglobe-v83';
 const STATIC_ASSETS = [
   '/', '/index.html', '/offline.html',
   '/icon.svg?v=3', '/icon-192.png?v=3', '/icon-512.png?v=3', '/apple-touch-icon.png?v=3', '/favicon-32.png?v=3',
-  '/stamp.svg', '/signature.png', '/manifest.json?v=3'
+  '/stamp.svg', '/signature.png', '/manifest.json?v=3', '/skyglobe-ds.css'
 ];
 
 self.addEventListener('install', (e) => {
