@@ -125,6 +125,9 @@ section{scroll-margin-top:80px}
 @keyframes meterflow{0%{background-position:120% 0}100%{background-position:-120% 0}}
 .meter-dark .l{color:var(--muted)}
 .meter-dark .bar{background:#eef1f6}
+/* value meter — same scoreline, with the number inside the bar */
+.meter.val .bar{height:36px;border-radius:9px;background:linear-gradient(90deg,#0a2e65,#123E87);display:flex;align-items:center;padding:0 14px;overflow:hidden}
+.meter.val .bar b{color:#fff;font-size:1.15rem;font-weight:800;letter-spacing:-.01em;font-style:normal}
 .hero::after{content:'';position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,58,.14),transparent 60%);top:-420px;left:50%;transform:translateX(-50%);pointer-events:none}
 .nstar{vertical-align:-4px;margin-left:14px;filter:drop-shadow(0 0 10px rgba(212,167,58,.55));animation:starbreathe 4.5s ease-in-out infinite}
 @keyframes starbreathe{0%,100%{opacity:.92;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
@@ -138,11 +141,11 @@ section{scroll-margin-top:80px}
 
 /* ── ECOSYSTEM NAVIGATOR ── */
 .navigator{position:relative;margin-top:24px;z-index:5}
-.navigator .panel{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 44px rgba(4,19,47,.10);padding:clamp(24px,4vw,36px);max-width:1080px;margin:0 auto}
+.navigator .panel{background:none;border:none;border-radius:0;box-shadow:none;padding:clamp(8px,2vw,20px) 0;max-width:1080px;margin:0 auto}
 .navigator h2{font-size:clamp(1.3rem,2.2vw,1.6rem);font-weight:650;letter-spacing:-.015em;text-align:center}
 .navigator p.lead{text-align:center;color:var(--muted);margin-top:8px;font-size:.95rem}
 .nav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:32px}
-.nav-item{border-radius:var(--r);padding:22px 20px;background:var(--warm);cursor:pointer;transition:transform .35s ease,box-shadow .35s ease;display:block}
+.nav-item{border-radius:var(--r);padding:22px 20px;background:#fff;border:1px solid var(--line);cursor:pointer;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;display:block}
 .nav-item:hover{transform:translateY(-6px);box-shadow:var(--shadow-h);background:#fff}
 .nav-item .ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;color:#fff;margin-bottom:14px}
 .nav-item h3{font-size:.98rem;font-weight:700}
@@ -408,7 +411,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 <header class="phero">
   <div class="eyebrow">One World · One Mission</div>
   <h1>Where the world meets <span class="accent">possibility</span></h1>
-  <p class="psub">Intelligence, trust, commerce, learning and mobility — one trusted ecosystem, connecting people, businesses and nations across the world.</p>
+  <div style="height:clamp(20px,3vw,30px)"></div>
   <div class="pcta">
     <a class="pbtn primary" href="#" data-auth-kind="signup" onclick="return openAuth('signup')">Create SKYGLOBE ID</a>
     <a class="pbtn secondary" href="#ecosystem">Explore the ecosystem</a>
@@ -506,8 +509,8 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
         <div class="meter meter-dark m2"><div class="l">Verified Identities</div><div class="bar"><i></i></div></div>
         <div class="meter meter-dark m3"><div class="l">Live Listings</div><div class="bar"><i></i></div></div>
         <div class="meter meter-dark"><div class="l">Escrow Deals</div><div class="bar"><i></i></div></div>
-        <div class="stat" style="text-align:left"><div class="n" style="font-size:1.5rem">6</div><div class="l" style="margin-top:4px">Trade Corridors</div></div>
-        <div class="stat" style="text-align:left"><div class="n" style="font-size:1.5rem">23</div><div class="l" style="margin-top:4px">Currencies</div></div>
+        <div class="meter meter-dark val"><div class="l">Trade Corridors</div><div class="bar"><b>6</b></div></div>
+        <div class="meter meter-dark val"><div class="l">Currencies</div><div class="bar"><b>194</b></div></div>
       </div>
       <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;color:#12864E"><span style="width:8px;height:8px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18)"></span> Live Ecosystem · Operational — every signal drawn from real activity, never invented.</div>
     </div>
