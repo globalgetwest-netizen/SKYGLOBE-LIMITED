@@ -210,61 +210,58 @@ section{scroll-margin-top:80px}
 .cta-final .actions{margin-top:40px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative}
 
 /* ── FOOTER ── */
-footer{background:#fff;border-top:1px solid var(--line);color:var(--muted);padding:0 0 30px;margin-top:clamp(46px,7vw,70px);position:relative;overflow:hidden}
+footer{background:linear-gradient(180deg,#051636 0%,var(--navy-footer) 45%);color:#AEBBDD;padding:0 0 22px;margin-top:clamp(40px,6vw,60px);position:relative;overflow:hidden}
 footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:rgba(212,167,58,.4)}
 footer::after{display:none}
 /* The signature crown of the footer */
-.foot-sig{text-align:center;padding:clamp(40px,6vw,60px) 0 clamp(32px,4vw,44px);position:relative}
-.foot-sig .wm{font-size:clamp(1.25rem,2.6vw,1.65rem)}
-.foot-sig .sgg{color:var(--ink)!important;-webkit-text-fill-color:var(--ink)!important;background:none!important;font-weight:800}
-.foot-sig .tag{margin-top:10px;font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#9a7012}
+.foot-sig{text-align:center;padding:clamp(26px,3.5vw,38px) 0 clamp(20px,2.5vw,28px);position:relative}
+.foot-sig .wm{font-size:clamp(1.25rem,2.6vw,1.6rem)}
+.foot-sig .tag{margin-top:8px;font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
 .foot-sig .ln{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:26px}
 .foot-sig .ln span{height:1.5px;width:min(180px,30vw)}
 .foot-sig .ln .l{background:linear-gradient(90deg,transparent,rgba(212,167,58,.7))}
 .foot-sig .ln .r{background:linear-gradient(90deg,rgba(212,167,58,.7),transparent)}
 .foot-sig .gem{width:8px;height:8px;transform:rotate(45deg);background:linear-gradient(135deg,var(--gold-2),#9DC2FF,var(--orange));border-radius:2px;box-shadow:0 0 12px rgba(212,167,58,.55)}
-.foot-sig .gem{background:var(--gold)!important;box-shadow:none!important}
-.foot-sig .ln .l{background:linear-gradient(90deg,transparent,rgba(212,167,58,.5))!important}
-.foot-sig .ln .r{background:linear-gradient(90deg,rgba(212,167,58,.5),transparent)!important}
-.foot-sig .mission-f{max-width:500px;margin:14px auto 0;color:var(--muted);font-size:.92rem;line-height:1.7}
+.foot-sig .ln{margin-top:16px}
+.foot-sig .mission-f{max-width:500px;margin:12px auto 0;color:#C9D4E5;font-size:.9rem;line-height:1.65}
 /* Zone 2 — the five pillars, official logos, equal weight */
-.foot-eco{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:clamp(30px,4vw,42px)}
+.foot-eco{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:clamp(24px,3vw,32px)}
 @media(max-width:860px){.foot-eco{grid-template-columns:repeat(2,1fr)}.foot-eco a:last-child{grid-column:1/-1}}
-.foot-eco a{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 12px;margin:0;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
-.foot-eco a:hover{transform:translateY(-3px);border-color:#dfe4ee;box-shadow:0 12px 30px rgba(10,46,101,.08)}
-.foot-eco img{width:36px;height:36px;object-fit:contain}
-.foot-eco b{color:var(--ink);font-size:.9rem;letter-spacing:.02em}
-.foot-eco span{font-size:.72rem;color:var(--muted)}
-.foot-grid{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:clamp(28px,4vw,48px);position:relative}
+.foot-eco a{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:14px 12px;margin:0;transition:transform .25s ease,border-color .25s ease,background .25s ease}
+.foot-eco a:hover{transform:translateY(-3px);border-color:rgba(212,167,58,.4);background:rgba(255,255,255,.08)}
+.foot-eco img{width:34px;height:34px;object-fit:contain}
+.foot-eco b{color:#fff;font-size:.88rem;letter-spacing:.02em}
+.foot-eco span{font-size:.72rem;color:#C9D4E5}
+.foot-grid{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:clamp(24px,3vw,40px);position:relative}
 @media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr;gap:32px}.fc-mail{grid-column:1/-1}}
 @media(max-width:520px){.foot-grid{grid-template-columns:1fr 1fr;gap:20px 28px}.fc-mail{grid-column:1/-1}}
 /* Column headers — each carries its brand color with a gradient underline */
-footer h4{color:var(--ink);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;font-weight:600;display:inline-block;position:relative;padding-bottom:8px}
+footer h4{color:#fff;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;font-weight:600;display:inline-block;position:relative;padding-bottom:8px}
 footer h4::after{content:'';position:absolute;left:0;bottom:0;height:2px;width:22px;border-radius:3px;background:rgba(212,167,58,.6)}
-footer a{display:flex;align-items:center;gap:8px;font-size:.88rem;margin:10px 0;color:var(--muted);transition:color .2s,transform .2s}
-footer a:hover{color:var(--ink);transform:translateX(3px)}
+footer a{display:flex;align-items:center;gap:8px;font-size:.86rem;margin:8px 0;color:#AEBBDD;transition:color .2s,transform .2s}
+footer a:hover{color:#fff;transform:translateX(3px)}
 footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .fc-eco a:hover{color:var(--gold-2)} .fc-start a:hover{color:#9DC2FF} .fc-co a:hover{color:#F79B5B}
 /* Email chips — glass capsules */
-.mailchip{display:flex;align-items:center;gap:11px;background:#f7f8fb;border:1px solid var(--line);border-radius:12px;padding:9px 13px;margin:7px 0;font-size:.82rem;line-height:1.4;color:var(--muted);transition:background .2s,border-color .2s,transform .2s,box-shadow .2s}
-.mailchip b{color:var(--ink);font-size:.78rem;letter-spacing:.02em}
-.mailchip:hover{background:#fff;border-color:#dfe4ee;transform:translateX(3px);color:var(--ink);box-shadow:0 8px 22px rgba(10,46,101,.06)}
+.mailchip{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:8px 12px;margin:6px 0;font-size:.82rem;line-height:1.35;color:#C9D4E5;transition:background .2s,border-color .2s,transform .2s}
+.mailchip b{color:#fff;font-size:.78rem;letter-spacing:.02em}
+.mailchip:hover{background:rgba(255,255,255,.1);border-color:rgba(212,167,58,.4);transform:translateX(3px);color:#fff}
 .mailchip .mi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
 /* Social band — official icons, white by default, brand color on hover */
-.foot-social{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:clamp(30px,4vw,42px)}
-.foot-social .icons{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
-.foot-social .icons a{width:44px;height:44px;border-radius:13px;background:#f7f8fb;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:#5A6684;margin:0;transition:transform .2s ease,color .2s ease,border-color .2s ease}
+.foot-social{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:clamp(24px,3vw,34px)}
+.foot-social .icons{display:flex;justify-content:center;gap:11px;flex-wrap:wrap}
+.foot-social .icons a{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff;margin:0;transition:transform .2s ease,color .2s ease,border-color .2s ease}
 .foot-social .icons a:hover{transform:translateY(-4px)}
 .foot-social .icons a.tk:hover{color:#69C9D0;border-color:#69C9D0}
 .foot-social .icons a.yt:hover{color:#FF4444;border-color:#FF4444}
 .foot-social .icons a.ig:hover{color:#E4405F;border-color:#E4405F}
 .foot-social .icons a.th:hover{color:var(--gold-2);border-color:var(--gold-2)}
 .foot-social .icons a.wa:hover{color:#25D366;border-color:#25D366}
-.foot-social .handle{font-size:.82rem;color:var(--muted);letter-spacing:.04em}
-.foot-social .handle b{color:var(--ink)}
-.foot-bottom{border-top:1px solid var(--line);margin-top:clamp(30px,4vw,42px);padding-top:22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
-.foot-bottom .gold{color:#b8892a}
-.foot-bottom .live{display:flex;align-items:center;gap:8px;color:#12864E;font-weight:600}
+.foot-social .handle{font-size:.82rem;color:#C9D4E5;letter-spacing:.04em}
+.foot-social .handle b{color:#fff}
+.foot-bottom{border-top:1px solid rgba(255,255,255,.1);margin-top:clamp(24px,3vw,34px);padding-top:18px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#AEBBDD}
+.foot-bottom .gold{color:var(--gold)}
+.foot-bottom .live{display:flex;align-items:center;gap:8px;color:#7FD6A3;font-weight:600}
 .foot-bottom .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
 
 /* calm entrance */
@@ -613,7 +610,7 @@ footer .fk{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 
     <!-- Bottom bar -->
     <div class="foot-bottom">
-      <div>© 2026 <b style="color:#0b1220">SKYGLOBEGROUP</b> · All Rights Reserved</div>
+      <div>© 2026 <b style="color:#fff">SKYGLOBEGROUP</b> · All Rights Reserved</div>
       <div class="live"><i></i> Live Ecosystem · Operational</div>
       <div><span class="gold">✦</span> Verified on skyglobegroup.com · <a href="/mobility#privacy" style="display:inline;margin:0">Privacy</a> · <a href="/mobility#terms" style="display:inline;margin:0">Terms</a></div>
     </div>
