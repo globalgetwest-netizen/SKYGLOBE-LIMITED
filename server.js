@@ -9584,12 +9584,18 @@ function trackCompetencies(track) {
 // Which certificate tiers the admin has set FREE (enrolment skips payment).
 // Stored in the shared academy_bank config; cached 30s.
 let FREE_CACHE = { at: 0, products: [] };
+// The 1-Month Amateur certificate is ALWAYS free — it never passes any payment
+// route. Admins can additionally mark other tiers free; this one is guaranteed.
+const ALWAYS_FREE_PRODUCTS = ['cert_amateur'];
 async function getFreeProducts() {
   if (Date.now() - FREE_CACHE.at < 30000) return FREE_CACHE.products;
+  let products = [];
   try {
     const row = await bankGet('config', 'free_products', null);
-    FREE_CACHE = { at: Date.now(), products: Array.isArray(row && row.content && row.content.products) ? row.content.products : [] };
+    products = Array.isArray(row && row.content && row.content.products) ? row.content.products : [];
   } catch (_) {}
+  ALWAYS_FREE_PRODUCTS.forEach(p => { if (!products.includes(p)) products.push(p); });
+  FREE_CACHE = { at: Date.now(), products };
   return FREE_CACHE.products;
 }
 app.get('/api/courses/catalog', async (_req, res) => {
