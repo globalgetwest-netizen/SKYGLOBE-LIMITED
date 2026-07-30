@@ -46,12 +46,17 @@ a{text-decoration:none;color:inherit}
 .sec-t{text-align:center;font-size:clamp(1.4rem,3vw,1.9rem);font-weight:600;letter-spacing:-.015em;color:#1d1d1f;margin-bottom:6px}
 .sec-s{text-align:center;color:var(--muted);max-width:620px;margin:0 auto 28px;font-size:.98rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
-.mod{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 20px;box-shadow:0 8px 26px rgba(4,19,47,.04);transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column}
-.mod:hover{transform:translateY(-3px);box-shadow:0 16px 38px rgba(4,19,47,.08);border-color:#dfe4ee}
-.mod .mic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:#F3F0FD}
-.mod h3{font-size:1rem;font-weight:600;margin:12px 0 5px;color:#1d1d1f}
+.mod{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 8px 26px rgba(4,19,47,.04);transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column}
+.mod:hover{transform:translateY(-3px);box-shadow:0 16px 38px rgba(4,19,47,.09);border-color:#dfe4ee}
+.mod .mimg{height:130px;background-size:cover;background-position:center;background-color:#eef1f7}
+.mod .mic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:#F3F0FD;margin:20px 20px 0}
+.mod .body2{padding:16px 20px 20px;display:flex;flex-direction:column;flex:1}
+.mod h3{font-size:1rem;font-weight:600;margin:0 0 5px;color:#1d1d1f}
 .mod p{font-size:.88rem;color:var(--muted);flex:1;line-height:1.5}
 .mod .go{margin-top:14px;font-size:.84rem;font-weight:600;color:#0a5bd6}
+/* premium workspace hero banner (real image) */
+.wbanner{max-width:720px;margin:22px auto 0;height:200px;border-radius:18px;background-size:cover;background-position:center;background-color:#eef1f7;box-shadow:0 16px 44px rgba(4,19,47,.12)}
+@media(max-width:600px){.wbanner{height:150px;margin-top:18px}}
 .mod .soon{margin-top:14px;font-size:.72rem;font-weight:700;color:#9AA6BE;letter-spacing:.04em}
 /* sibling workspaces strip */
 .sibs{background:#fff;border-top:1px solid var(--line);padding:34px 0 44px}
@@ -178,10 +183,38 @@ document.getElementById('wDesc').textContent=w.desc;
 document.getElementById('wFlow').innerHTML=w.flow.map(function(f,ix){return (ix?'<i>→</i>':'')+'<span>'+f+'</span>';}).join('');
 document.getElementById('wSecT').textContent='Inside '+w.title;
 document.getElementById('wSecS').textContent='Every item below is a real destination — choose where to go.';
+/* Real, professional photography per topic (free-licensed Unsplash). Keyed by
+   glyph so cards show a real image, not an icon. Falls back to the icon tile. */
+var U='https://images.unsplash.com/photo-',Q='?auto=format&fit=crop&w=640&q=70';
+var IMG={
+  '💬':U+'1521737711867-e3b97375f902'+Q,   // conversation
+  '🧭':U+'1524661135-423995f22d0b'+Q,        // guidance / map
+  '📚':U+'1507842217343-583bb7270b66'+Q,     // library books
+  '📖':U+'1519682337058-a94d519337bc'+Q,     // open book / study
+  '🎓':U+'1523050854058-8df90110c9f1'+Q,     // graduation (academic)
+  '🔬':U+'1532094349884-543bc11b234d'+Q,     // research / microscope
+  '📄':U+'1450101499163-c8848c66ca85'+Q,     // documents / writing
+  '📜':U+'1589829545856-d10d557cf95f'+Q,     // legal
+  '🔎':U+'1554224155-6726b3ff858f'+Q,        // verify / inspect
+  '🗂':U+'1541888946425-d81bb19240f5'+Q,     // archive / files
+  '🈯':U+'1546410531-bb4caa6b424d'+Q,        // language
+  '🗣':U+'1543269865-cbf427effbad'+Q,        // speaking / collaborate
+  '🌍':U+'1502920917128-1aa500764cbd'+Q,     // travel / world
+  '🎙':U+'1478737270239-2f02b77fc618'+Q,     // voice / mic
+  '⚙':U+'1518770660439-4636190af475'+Q,      // technology / automation
+  '🪪':U+'1560250097-0b93528c311a'+Q         // profile / account
+};
+function imgFor(g){ return IMG[g] || IMG[(g||'').replace(/️/g,'')] || ''; }
 document.getElementById('wGrid').innerHTML=w.mods.map(function(m){
-  if(m.act==='chat'){return '<a class="mod" href="/noria/chat"><div class="mic">'+sgIcon(m.i)+'</div><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="go">Open Noria →</div></a>';}
-  return '<a class="mod" href="'+m.h+'"><div class="mic">'+sgIcon(m.i)+'</div><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="go">Open →</div></a>';
+  var href=m.act==='chat'?'/noria/chat':m.h, go=m.act==='chat'?'Open Noria →':'Open →';
+  var src=imgFor(m.i);
+  var media=src?'<div class="mimg" style="background-image:url('+src+')"></div>':'<div class="mic">'+sgIcon(m.i)+'</div>';
+  return '<a class="mod" href="'+href+'">'+media+'<div class="body2"><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="go">'+go+'</div></div></a>';
 }).join('');
+/* Premium hero banner — a real image for this workspace (Google-style). */
+var hb=imgFor(w.icon);
+if(hb){ var b=document.createElement('div'); b.className='wbanner'; b.style.backgroundImage='url('+hb+')';
+  document.querySelector('.whero .in').appendChild(b); }
 document.getElementById('wSibs').innerHTML=ORDER.map(function(k){
   return '<a href="/noria/'+k+'"'+(k===key?' class="on"':'')+'>'+WS[k].title+'</a>';
 }).join('');
