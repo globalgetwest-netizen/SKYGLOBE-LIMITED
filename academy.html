@@ -90,7 +90,8 @@ section{padding:clamp(46px,6vw,78px) 0;border-bottom:1px solid var(--line)}
 .pcard{background:#fff;padding:22px 22px 20px;display:flex;flex-direction:column;transition:background .15s var(--ease)}
 .pcard:hover{background:var(--wash)}
 .pcard .sch{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
-.pcard h3{font-family:var(--serif);font-size:1.28rem;font-weight:600;color:var(--ink);margin:8px 0 auto;line-height:1.18}
+.pcard h3{font-family:var(--serif);font-size:1.28rem;font-weight:600;color:var(--ink);margin:8px 0 auto;line-height:1.18;display:flex;align-items:baseline;gap:9px}
+.pcard .pem{font-size:1.15rem;flex:0 0 auto}
 .pcard .go{margin-top:16px;font-size:.84rem;font-weight:500;color:var(--navy);display:inline-flex;align-items:center;gap:6px}
 .pcount{margin-top:14px;font-size:.82rem;color:var(--faint)}
 .empty{padding:40px 10px;text-align:center;color:var(--muted);grid-column:1/-1;background:#fff}
@@ -336,7 +337,7 @@ renderPath(AUD[3]);
 /* ── Programmes + Schools (live from /api/courses/catalog) ── */
 var TRACKS=[], SCHOOLS=[];
 fetch('/api/courses/catalog').then(function(r){return r.json();}).then(function(d){
-  TRACKS=(d&&d.tracks||[]).map(function(t){return {id:t.id,name:t.name,school:t.school||'School of Professional Studies'};});
+  TRACKS=(d&&d.tracks||[]).map(function(t){return {id:t.id,name:t.name,school:t.school||'School of Professional Studies',emoji:t.emoji||'📘'};});
   var counts={}; TRACKS.forEach(function(t){counts[t.school]=(counts[t.school]||0)+1;});
   SCHOOLS=Object.keys(counts).sort();
   var sel=document.getElementById('fSchool');
@@ -365,7 +366,7 @@ function applyFilters(){
   document.getElementById('pCount').textContent=list.length+' programme'+(list.length===1?'':'s')+(sch?' · '+sch.replace(/^School of /,''):'');
   if(!list.length){ grid.innerHTML='<div class="empty">No programmes match your search.</div>'; return; }
   grid.innerHTML=list.slice(0,60).map(function(t){
-    return '<a class="pcard" href="/courses?track='+encodeURIComponent(t.id)+'"><div class="sch">'+esc(t.school.replace(/^School of /,''))+'</div><h3 class="serif">'+esc(t.name)+'</h3><div class="go">View programme →</div></a>';
+    return '<a class="pcard" href="/courses?track='+encodeURIComponent(t.id)+'"><div class="sch">'+esc(t.school.replace(/^School of /,''))+'</div><h3 class="serif"><span class="pem">'+esc(t.emoji||'📘')+'</span>'+esc(t.name)+'</h3><div class="go">View programme →</div></a>';
   }).join('');
 }
 document.getElementById('progSearch').addEventListener('input',applyFilters);

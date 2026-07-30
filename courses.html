@@ -9,7 +9,6 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="/skyglobe-logo-t.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -46,7 +45,10 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
 .phead h1{font-family:var(--serif);font-size:clamp(2.1rem,4.6vw,3.4rem);font-weight:600;line-height:1.06;letter-spacing:-.01em;margin-top:8px;max-width:20ch}
 .phead .intro{max-width:60ch;margin-top:16px;color:var(--ink-2);font-size:1.05rem}
 .phead .cta{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap}
-.phero-img{margin-top:clamp(24px,3.5vw,36px);height:clamp(200px,28vw,360px);border-radius:3px;border:1px solid var(--line);background:#eef1f4 center/cover no-repeat;box-shadow:0 14px 40px rgba(10,46,101,.10)}
+/* Native, instant programme identity — an academic medallion (no external images) */
+.phero-img{margin-top:clamp(22px,3vw,32px);height:clamp(150px,20vw,220px);border-radius:3px;border:1px solid var(--line);background:linear-gradient(135deg,#f3f5f9 0%,#faf7ef 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.phero-img .em{width:84px;height:84px;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 10px 28px rgba(10,46,101,.10);display:flex;align-items:center;justify-content:center;font-size:2.4rem}
+.phero-img .sc{font-family:var(--serif);color:var(--muted);font-size:1.05rem;letter-spacing:.01em}
 
 /* Overview facts */
 .facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:clamp(26px,4vw,40px);background:var(--line);border:1px solid var(--line)}
@@ -128,7 +130,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
 .catlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;margin-top:14px;background:var(--line);border:1px solid var(--line)}
 .catitem{background:#fff;padding:16px 18px;cursor:pointer;transition:background .15s var(--ease)}
 .catitem:hover{background:var(--wash)}
-.catitem .nm{font-family:var(--serif);font-size:1.1rem;color:var(--ink)}
+.catitem .nm{font-family:var(--serif);font-size:1.1rem;color:var(--ink);display:flex;align-items:center;gap:10px}
+.catitem .cem{font-size:1.2rem;flex:0 0 auto}
 .catitem .go{margin-top:6px;font-size:.8rem;color:var(--navy)}
 
 /* Enrolment */
@@ -289,23 +292,6 @@ for(var y=curYear;y<=curYear+6;y++) gradSel.innerHTML+='<option value="'+y+'">'+
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 var state={ trackId:null, trackName:null, school:null, product:null, tierName:null, tierId:null, currency:'USD', catalog:null };
-/* One restrained editorial image per School — relevant, high-quality, free-licensed. */
-var UQ='?auto=format&fit=crop&w=1300&q=66', UB='https://images.unsplash.com/photo-';
-var SCHOOL_IMAGES={
-  'School of Technology & Digital Sciences':UB+'1517245386807-bb43f82c33c4'+UQ,
-  'School of Business & Entrepreneurship':UB+'1497215728101-856f4ea42174'+UQ,
-  'School of Finance & Investment':UB+'1554224155-6726b3ff858f'+UQ,
-  'School of Health & Wellbeing':UB+'1576091160550-2173dba999ef'+UQ,
-  'School of Creative Arts & Media':UB+'1493934558415-9d19f0b2b4d2'+UQ,
-  'School of Education':UB+'1523240795612-9a054b0db644'+UQ,
-  'School of Environment & Sustainability':UB+'1466611653911-95081537e5b7'+UQ,
-  'School of Hospitality & Tourism':UB+'1551632436-cbf8dd35adfa'+UQ,
-  'School of the Built Environment':UB+'1503387762-592deb58ef4e'+UQ,
-  'School of Agriculture & Natural Resources':UB+'1500937386664-56d1dfef3854'+UQ,
-  'School of Vocational Trades & Safety':UB+'1581092160562-40aa08e78837'+UQ,
-  'School of Professional Studies':UB+'1524178232363-1fb2b075b655'+UQ
-};
-var SCHOOL_IMG_DEFAULT=UB+'1524178232363-1fb2b075b655'+UQ;
 var PATH_LABELS=['Foundation','Advanced','Professional','Executive'];
 var PATH_DESC=['For learners beginning their journey.','For learners developing deeper capability.','For learners seeking advanced capability.','For experienced professionals and leaders.'];
 var PATH_ASSESS=['Foundational coursework','Coursework + practical project','Coursework + capstone project','Executive capstone'];
@@ -328,7 +314,7 @@ function renderCatalogue(){
   var grouped={}; (state.catalog.tracks||[]).forEach(function(t){var k=t.school||'School of Professional Studies';(grouped[k]=grouped[k]||[]).push(t);});
   document.getElementById('catalogue').innerHTML=Object.keys(grouped).sort().map(function(sc){
     return '<div class="catgrp"><h3 class="serif">'+esc(sc.replace(/^School of /,''))+'</h3><div class="catlist">'+
-      grouped[sc].map(function(t){return '<div class="catitem" data-id="'+esc(t.id)+'"><div class="nm serif">'+esc(t.name)+'</div><div class="go">View programme →</div></div>';}).join('')+
+      grouped[sc].map(function(t){return '<div class="catitem" data-id="'+esc(t.id)+'"><div class="nm serif"><span class="cem">'+esc(t.emoji||'📘')+'</span>'+esc(t.name)+'</div><div class="go">View programme →</div></div>';}).join('')+
       '</div></div>';
   }).join('');
   document.querySelectorAll('.catitem').forEach(function(el){el.addEventListener('click',function(){
@@ -338,7 +324,7 @@ function renderCatalogue(){
 
 /* ── Programme page ── */
 function selectProgramme(t){
-  state.trackId=t.id; state.trackName=t.name; state.school=t.school||'School of Professional Studies';
+  state.trackId=t.id; state.trackName=t.name; state.school=t.school||'School of Professional Studies'; state.emoji=t.emoji||'📘';
   history.replaceState({},'','/courses?track='+encodeURIComponent(t.id));
   renderProgramme(); showView('vProgramme');
 }
@@ -350,7 +336,7 @@ function renderProgramme(){
   document.getElementById('enrCrumb').textContent=subject;
   document.getElementById('pName').textContent=subject;
   document.getElementById('pIntro').textContent='Develop practical knowledge and professional capability in '+subject+' through a structured programme designed for learners seeking to build skills and advance their careers.';
-  document.getElementById('pHeroImg').style.backgroundImage='url('+(SCHOOL_IMAGES[state.school]||SCHOOL_IMG_DEFAULT)+')';
+  document.getElementById('pHeroImg').innerHTML='<div class="em">'+esc(state.emoji||'📘')+'</div><div class="sc serif">'+esc(schoolShort)+'</div>';
   var tiers=state.catalog.tiers||[];
   var maxMonths=tiers.length?Math.max.apply(null,tiers.map(function(x){return x.months;})):3;
   document.getElementById('pFacts').innerHTML=[
