@@ -1710,6 +1710,8 @@ function skyraHeaders(json){
 // session back to the sign-in gate on 401 so an expired token is obvious.
 async function skyraFetch(path, opts){
   opts = opts || {};
+  // Always attach the admin token; callers may still override/add headers.
+  opts.headers = Object.assign({ 'Authorization': 'Bearer ' + SKYRA_TOKEN }, opts.headers || {});
   const r = await fetch(SKYRA_API + path, opts);
   if(r.status === 401){
     skyraLogout();
