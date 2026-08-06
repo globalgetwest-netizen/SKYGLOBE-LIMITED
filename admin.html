@@ -1697,7 +1697,7 @@ function switchView(v){
    Skyra is a separate product with its own backend + admin auth (JWT).
    We keep its session apart from the SkyGlobe admin key.
    ══════════════════════════════════════════════════════════════════ */
-const SKYRA_API = 'https://skyara-data-backend.onrender.com/admin/api';
+const SKYRA_API = 'https://skyra-data-backend.fly.dev/admin/api';
 let SKYRA_TOKEN = sessionStorage.getItem('skyra_token') || '';
 
 function skyraHeaders(json){
