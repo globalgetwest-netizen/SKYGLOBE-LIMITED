@@ -48,7 +48,7 @@ app.use((req, res, next) => {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
       "media-src 'self' data: blob:",
-      "connect-src 'self' https://api.groq.com https://api.cerebras.ai https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com http://localhost:*",
+      "connect-src 'self' https://api.groq.com https://api.cerebras.ai https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com https://skyra-data-backend.fly.dev http://localhost:*",
       // Allow our own pages (e.g. the showreel) to be embedded in same-origin
       // iframes, and allow YouTube video embeds in the homepage video panel.
       "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://youtube.com",
