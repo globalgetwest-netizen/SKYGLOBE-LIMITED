@@ -97,7 +97,37 @@
   .sk-tab:hover{color:var(--txt);background:var(--navy3)}
   .sk-tab.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
   .sk-lbl{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px}
-  .sk-in{width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem}
+  .sk-in{width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:var(--txt);font-size:0.88rem}
+  /* ── Skyra Data — its own light violet identity, scoped to #view-skyra ── */
+  #view-skyra{
+    --gold:#5b2eff; --gold2:#7c4dff; --gold-soft:#efebff;
+    --navy:#ffffff; --navy2:#ffffff; --navy3:#f6f5ff;
+    --line:#e7e3f7; --line2:#efedfb;
+    --txt:#1c1740; --muted:#6b6890; --muted2:#918eaf;
+    background:#f4f2fe; border-radius:16px; padding:6px;
+    color:var(--txt);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  #view-skyra .panel{ background:#ffffff; border:1px solid #ece9f9; box-shadow:0 1px 3px rgba(30,15,70,.05); }
+  #view-skyra h3{ color:var(--txt); }
+  #view-skyra .btn{ background:#5b2eff; color:#fff; }
+  #view-skyra .btn:hover{ background:#4a22e6; }
+  #view-skyra .btn-ghost{ background:#efecfb; color:#5b2eff; }
+  #view-skyra .btn-ghost:hover{ background:#e4dffa; }
+  #view-skyra .sk-tab{ color:#6b6890; }
+  #view-skyra .sk-tab:hover{ background:#f0edfd; color:#3a2f7a; }
+  #view-skyra .sk-tab.active{ background:#5b2eff; color:#fff; border-color:#5b2eff; }
+  #view-skyra .sk-stat{ background:#faf9ff; border-color:#ece9f9; }
+  #view-skyra .sk-stat .n{ color:#1c1740; }
+  #view-skyra .sk-tbl th{ color:#8a87a8; }
+  #view-skyra .sk-tbl td{ border-top:1px solid #efedf8; }
+  /* Force all Skyra inputs to the light look (overrides inline dark styles) */
+  #view-skyra input, #view-skyra select, #view-skyra textarea{
+    background:#ffffff !important; color:#1c1740 !important; border:1px solid #ded9f3 !important;
+  }
+  #view-skyra input::placeholder, #view-skyra textarea::placeholder{ color:#a5a2c0 !important; }
+  #view-skyra input:focus, #view-skyra select:focus, #view-skyra textarea:focus{ border-color:#5b2eff !important; }
+  /* Connected status dot / labels adapt to the light panel automatically via tokens */
   .sk-stat{background:var(--navy3);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
   .sk-stat .n{font-size:1.6rem;font-weight:800;color:var(--txt);line-height:1.1}
   .sk-stat .l{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:4px}
