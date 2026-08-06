@@ -92,6 +92,19 @@
   /* Panels */
   .grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-bottom:24px}
   .panel{background:var(--navy2);border:1px solid var(--line);border-radius:16px;padding:22px}
+  /* Skyra Data view helpers */
+  .sk-tab{background:transparent;color:var(--muted);border:1px solid transparent;padding:8px 14px;border-radius:9px;font-weight:600;font-size:0.85rem;cursor:pointer;transition:.15s}
+  .sk-tab:hover{color:var(--txt);background:var(--navy3)}
+  .sk-tab.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+  .sk-lbl{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px}
+  .sk-in{width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.88rem}
+  .sk-stat{background:var(--navy3);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .sk-stat .n{font-size:1.6rem;font-weight:800;color:var(--txt);line-height:1.1}
+  .sk-stat .l{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:4px}
+  .sk-tbl{width:100%;border-collapse:collapse;font-size:0.85rem}
+  .sk-tbl th{padding:8px;text-align:left;color:var(--muted);text-transform:uppercase;font-size:0.7rem;letter-spacing:.06em}
+  .sk-tbl td{padding:8px;border-top:1px solid var(--line);vertical-align:middle}
+  .sk-chip{font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:100px;display:inline-block}
   .panel h3{font-size:1rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px}
   .panel h3 .mini{font-size:0.72rem;color:var(--muted);font-weight:500;margin-left:auto}
 
@@ -377,6 +390,9 @@
         <button class="sb-link" data-view="finance" onclick="switchView('finance')"><span class="ic">💰</span> Finance</button>
         <button class="sb-link" data-view="grants" onclick="switchView('grants')"><span class="ic">🎁</span> Complimentary</button>
 
+        <div class="sb-sec sb-sec--yunex"><span class="dot"></span>📱 Skyra Data</div>
+        <button class="sb-link" data-view="skyra" onclick="switchView('skyra')"><span class="ic">📶</span> Data &amp; Airtime</button>
+
         <div class="sb-sec sb-sec--vert"><span class="dot"></span>🌍 Mobility</div>
         <button class="sb-link" data-view="applications" onclick="switchView('applications')"><span class="ic">📋</span> Applications <span class="badge-n" id="navAppsBadge"></span></button>
         <button class="sb-link" data-view="wprates" onclick="switchView('wprates')"><span class="ic">🌍</span> Work Permit Rates</button>
@@ -551,6 +567,133 @@
             <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Change a price here and it goes live immediately across the whole site — work permit, legal documents, conferences, checkout — no redeploy needed.</p>
             <div id="pricingMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
             <div id="pricingTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading pricing…</p></div>
+          </div>
+        </section>
+
+        <!-- SKYRA DATA (native — talks to the Skyra Data backend) -->
+        <section class="view" id="view-skyra">
+          <!-- Sign-in gate: shown until the Skyra admin session is established -->
+          <div class="panel" id="skyraLoginGate" style="max-width:460px;margin:0 auto">
+            <h3 style="margin:0 0 6px">📶 Connect Skyra Data</h3>
+            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Skyra Data is a separate product with its own backend. Sign in once here to manage bundles, prices, networks, transactions and support — changes go live on the Skyra app instantly.</p>
+            <div style="margin-bottom:12px"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Admin email</label>
+              <input type="email" id="skyraEmail" autocomplete="username" placeholder="admin@skyra" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+            <div style="margin-bottom:16px"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Password</label>
+              <input type="password" id="skyraPassword" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')skyraLogin()" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
+            <button class="btn" onclick="skyraLogin()" style="width:100%">Connect</button>
+            <div id="skyraLoginMsg" style="font-size:0.85rem;margin-top:12px;text-align:center;color:var(--muted)"></div>
+          </div>
+
+          <!-- Workspace: shown once connected -->
+          <div id="skyraWorkspace" style="display:none">
+            <div class="panel" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span style="width:9px;height:9px;border-radius:50%;background:#4caf50;display:inline-block;box-shadow:0 0 0 3px #4caf5033"></span>
+                <span style="font-weight:700;color:var(--txt)">Connected to Skyra Data</span>
+                <span id="skyraConnEmail" style="color:var(--muted);font-size:0.8rem"></span>
+              </div>
+              <button class="btn btn-sm btn-ghost" onclick="skyraLogout()">Disconnect</button>
+            </div>
+
+            <!-- Sub-tabs -->
+            <div class="panel" style="padding:8px;margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
+              <button class="sk-tab active" data-tab="overview" onclick="skyraTab('overview')">📊 Overview</button>
+              <button class="sk-tab" data-tab="bundles" onclick="skyraTab('bundles')">📦 Bundles</button>
+              <button class="sk-tab" data-tab="networks" onclick="skyraTab('networks')">📡 Networks</button>
+              <button class="sk-tab" data-tab="orders" onclick="skyraTab('orders')">🧾 Transactions</button>
+              <button class="sk-tab" data-tab="tickets" onclick="skyraTab('tickets')">🎫 Support</button>
+              <button class="sk-tab" data-tab="settings" onclick="skyraTab('settings')">⚙️ Settings</button>
+            </div>
+
+            <!-- Overview -->
+            <div class="sk-pane" id="sk-pane-overview">
+              <div id="skyraOverview" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+                <p style="color:var(--muted);font-size:0.9rem">Loading…</p>
+              </div>
+            </div>
+
+            <!-- Bundles -->
+            <div class="sk-pane" id="sk-pane-bundles" style="display:none">
+              <div class="panel" style="margin-bottom:16px">
+                <h3 style="margin:0 0 6px">➕ Add a bundle</h3>
+                <p style="color:var(--muted);font-size:0.85rem;margin:0 0 14px">New bundles appear on the Skyra app the moment you add them.</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px">
+                  <div><label class="sk-lbl">Network</label>
+                    <select id="skbNetwork" class="sk-in"><option value="MTN">MTN</option><option value="TELECEL">Telecel</option><option value="AT">AT</option></select></div>
+                  <div><label class="sk-lbl">Name</label><input id="skbName" class="sk-in" placeholder="e.g. 5GB Weekly"></div>
+                  <div><label class="sk-lbl">Volume</label><input id="skbVolume" type="number" min="0" step="0.01" class="sk-in" placeholder="5"></div>
+                  <div><label class="sk-lbl">Unit</label><select id="skbUnit" class="sk-in"><option>GB</option><option>MB</option></select></div>
+                  <div><label class="sk-lbl">Price (GHS)</label><input id="skbPrice" type="number" min="0" step="0.01" class="sk-in" placeholder="25"></div>
+                  <div><label class="sk-lbl">Validity</label><input id="skbValidity" class="sk-in" placeholder="7 days"></div>
+                  <div><label class="sk-lbl">Category</label><select id="skbCategory" class="sk-in"><option value="data">Data</option><option value="social">Social</option><option value="night">Night</option><option value="unlimited">Unlimited</option></select></div>
+                  <div><label class="sk-lbl">Badge (optional)</label><input id="skbBadge" class="sk-in" placeholder="Popular"></div>
+                </div>
+                <button class="btn" onclick="skyraAddBundle(this)">+ Add bundle</button>
+                <div id="skbAddMsg" style="font-size:0.85rem;margin-top:10px"></div>
+              </div>
+              <div class="panel">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px">
+                  <h3 style="margin:0">📦 Bundles</h3>
+                  <button class="btn btn-sm" onclick="skyraLoadBundles()">↻ Refresh</button>
+                </div>
+                <div id="skyraBundlesMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
+                <div id="skyraBundlesTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
+              </div>
+            </div>
+
+            <!-- Networks -->
+            <div class="sk-pane" id="sk-pane-networks" style="display:none">
+              <div class="panel">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px">
+                  <h3 style="margin:0">📡 Networks</h3>
+                  <button class="btn btn-sm" onclick="skyraLoadNetworks()">↻ Refresh</button>
+                </div>
+                <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Set a network to maintenance to temporarily stop sales on the app.</p>
+                <div id="skyraNetworksMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
+                <div id="skyraNetworksTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
+              </div>
+            </div>
+
+            <!-- Transactions -->
+            <div class="sk-pane" id="sk-pane-orders" style="display:none">
+              <div class="panel">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+                  <h3 style="margin:0">🧾 Transactions</h3>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <input id="skyraOrderQ" class="sk-in" style="width:auto;min-width:180px" placeholder="Search ref, phone, network, status" onkeydown="if(event.key==='Enter')skyraLoadOrders()">
+                    <button class="btn btn-sm" onclick="skyraLoadOrders()">Search</button>
+                  </div>
+                </div>
+                <div id="skyraOrdersMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
+                <div id="skyraOrdersTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
+              </div>
+            </div>
+
+            <!-- Support tickets -->
+            <div class="sk-pane" id="sk-pane-tickets" style="display:none">
+              <div class="panel">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+                  <h3 style="margin:0">🎫 Support tickets</h3>
+                  <button class="btn btn-sm" onclick="skyraLoadTickets()">↻ Refresh</button>
+                </div>
+                <div id="skyraTicketsMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
+                <div id="skyraTicketsTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
+              </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="sk-pane" id="sk-pane-settings" style="display:none">
+              <div class="panel" style="max-width:520px">
+                <h3 style="margin:0 0 6px">⚙️ Skyra settings</h3>
+                <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">These apply across the Skyra app immediately.</p>
+                <div style="margin-bottom:14px"><label class="sk-lbl">Processing fee (GHS)</label>
+                  <input id="skyraFee" type="number" min="0" step="0.01" class="sk-in"></div>
+                <div style="margin-bottom:16px"><label class="sk-lbl">USSD short code</label>
+                  <input id="skyraUssd" class="sk-in" placeholder="*123#"></div>
+                <button class="btn" onclick="skyraSaveSettings(this)">Save settings</button>
+                <div id="skyraSettingsMsg" style="font-size:0.85rem;margin-top:12px"></div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -1518,7 +1661,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  const titles={dashboard:'Executive Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobeGroup Academy',credentials:'Business & Recognition — TERRA Credentials',trustdesk:'TERRA Trust Desk — Verification, Moderation & Resolution',tools:'Quick Tools',siteconfig:'Site Settings — Dynamic Content'};
+  const titles={dashboard:'Executive Dashboard',applications:'Applications',messages:'Client Messages',team:'Team Chat',payments:'Payments',pricing:'Pricing',wprates:'Work Permit Rates',reception:'AI Reception',grants:'Complimentary Grants',announcements:'Announcements',legaldocs:'Legal Documents',finance:'Financial Dashboard',payroll:'Staff Payroll',departments:'Departments',directory:'Staff Directory',channels:'Department Channels',tasks:'Task Board',attendance:'Attendance & Performance',activity:'Activity Log',analytics:'Site Analytics',ipregistry:'Brand & IP Registry',academy:'SkyGlobeGroup Academy',credentials:'Business & Recognition — TERRA Credentials',trustdesk:'TERRA Trust Desk — Verification, Moderation & Resolution',tools:'Quick Tools',siteconfig:'Site Settings — Dynamic Content',skyra:'Skyra Data — Bundles, Airtime & Transactions'};
   document.getElementById('viewTitle').textContent=titles[v]||v;
   if(v==='messages') loadMessages();
   if(v==='team') loadTeam();
@@ -1545,7 +1688,338 @@ function switchView(v){
   if(v==='trustdesk'){ loadVerifyQueue('pending'); loadUsers(); loadDisputeQueue(); }
   if(v==='departments') loadDivisions();
   if(v==='siteconfig') loadSiteConfig();
+  if(v==='skyra') skyraInit();
   toggleSidebar(false);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SKYRA DATA — native panel talking to the Skyra Data backend.
+   Skyra is a separate product with its own backend + admin auth (JWT).
+   We keep its session apart from the SkyGlobe admin key.
+   ══════════════════════════════════════════════════════════════════ */
+const SKYRA_API = 'https://skyara-data-backend.onrender.com/admin/api';
+let SKYRA_TOKEN = sessionStorage.getItem('skyra_token') || '';
+
+function skyraHeaders(json){
+  const h = { 'Authorization': 'Bearer ' + SKYRA_TOKEN };
+  if(json) h['Content-Type'] = 'application/json';
+  return h;
+}
+
+// Central fetch wrapper: attaches the token, surfaces API errors, and drops the
+// session back to the sign-in gate on 401 so an expired token is obvious.
+async function skyraFetch(path, opts){
+  opts = opts || {};
+  const r = await fetch(SKYRA_API + path, opts);
+  if(r.status === 401){
+    skyraLogout();
+    throw new Error('Session expired — please connect again.');
+  }
+  let data = null;
+  try{ data = await r.json(); }catch(e){}
+  if(!r.ok) throw new Error((data && (data.message || data.error)) || ('Request failed ('+r.status+')'));
+  return data;
+}
+
+function skyraInit(){
+  if(SKYRA_TOKEN){
+    document.getElementById('skyraLoginGate').style.display = 'none';
+    document.getElementById('skyraWorkspace').style.display = 'block';
+    skyraTab('overview');
+  } else {
+    document.getElementById('skyraLoginGate').style.display = 'block';
+    document.getElementById('skyraWorkspace').style.display = 'none';
+  }
+}
+
+async function skyraLogin(){
+  const email = document.getElementById('skyraEmail').value.trim();
+  const password = document.getElementById('skyraPassword').value;
+  const msg = document.getElementById('skyraLoginMsg');
+  if(!email || !password){ msg.style.color='#e57373'; msg.textContent='Enter email and password.'; return; }
+  msg.style.color='var(--muted)'; msg.textContent='Connecting…';
+  try{
+    const r = await fetch(SKYRA_API + '/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const d = await r.json();
+    if(!r.ok || !d.token) throw new Error(d.message || d.error || 'Invalid credentials.');
+    SKYRA_TOKEN = d.token;
+    sessionStorage.setItem('skyra_token', d.token);
+    if(d.email) sessionStorage.setItem('skyra_email', d.email);
+    document.getElementById('skyraPassword').value = '';
+    msg.textContent = '';
+    skyraInit();
+  }catch(e){ msg.style.color='#e57373'; msg.textContent = e.message; }
+}
+
+function skyraLogout(){
+  SKYRA_TOKEN = '';
+  sessionStorage.removeItem('skyra_token');
+  sessionStorage.removeItem('skyra_email');
+  const gate = document.getElementById('skyraLoginGate');
+  const ws = document.getElementById('skyraWorkspace');
+  if(gate) gate.style.display = 'block';
+  if(ws) ws.style.display = 'none';
+}
+
+function skyraTab(tab){
+  document.querySelectorAll('#view-skyra .sk-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('#view-skyra .sk-pane').forEach(p=>p.style.display='none');
+  const pane = document.getElementById('sk-pane-'+tab);
+  if(pane) pane.style.display = 'block';
+  const email = sessionStorage.getItem('skyra_email');
+  const ce = document.getElementById('skyraConnEmail');
+  if(ce && email) ce.textContent = '· ' + email;
+  if(tab==='overview') skyraLoadOverview();
+  if(tab==='bundles') skyraLoadBundles();
+  if(tab==='networks') skyraLoadNetworks();
+  if(tab==='orders') skyraLoadOrders();
+  if(tab==='tickets') skyraLoadTickets();
+  if(tab==='settings') skyraLoadSettings();
+}
+
+const skyStatusColor = { SUCCESS:'#4caf50', PENDING:'#e0a34c', PROCESSING:'#4a9edb', FAILED:'#e05c5c', REFUNDED:'#8899bb', CANCELLED:'#8899bb' };
+function skyChip(status){
+  const c = skyStatusColor[status] || '#8899bb';
+  return `<span class="sk-chip" style="background:${c}22;color:${c}">${esc(status)}</span>`;
+}
+
+/* Overview ------------------------------------------------------- */
+async function skyraLoadOverview(){
+  const el = document.getElementById('skyraOverview');
+  el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">Loading…</p>';
+  try{
+    const d = await skyraFetch('/overview');
+    const cards = [
+      ['Networks', d.networks],
+      ['Bundles', d.bundles],
+      ['Transactions', d.orders],
+      ['Successful', d.successful],
+      ['Revenue', 'GHS ' + Number(d.revenue||0).toLocaleString('en-GH',{minimumFractionDigits:2})],
+      ['Open tickets', d.openTickets],
+    ];
+    el.innerHTML = cards.map(([l,n])=>`<div class="sk-stat"><div class="n">${esc(String(n))}</div><div class="l">${esc(l)}</div></div>`).join('')
+      + `<div class="sk-stat" style="grid-column:1/-1"><div class="l">Payment provider</div><div style="color:var(--txt);font-weight:700;margin-top:4px;text-transform:capitalize">${esc(d.paymentProvider||'—')}</div></div>`;
+  }catch(e){ el.innerHTML = '<p style="color:#e57373;font-size:0.9rem">'+esc(e.message)+'</p>'; }
+}
+
+/* Bundles -------------------------------------------------------- */
+async function skyraLoadBundles(){
+  const el = document.getElementById('skyraBundlesTable');
+  el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">Loading…</p>';
+  try{
+    const d = await skyraFetch('/bundles');
+    const rows = d.bundles || [];
+    if(!rows.length){ el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">No bundles yet.</p>'; return; }
+    el.innerHTML = `<table class="sk-tbl"><thead><tr>
+      <th>Network</th><th>Name</th><th>Volume</th><th>Price (GHS)</th><th>Validity</th><th>Live</th><th></th>
+      </tr></thead><tbody>${rows.map(b=>`
+      <tr data-id="${esc(b.id)}">
+        <td style="font-weight:700">${esc(b.network)}</td>
+        <td><input class="sk-in" style="min-width:130px" value="${esc(b.name)}" data-f="name"></td>
+        <td style="white-space:nowrap"><input type="number" min="0" step="0.01" class="sk-in" style="width:70px;display:inline-block" value="${esc(b.volume)}" data-f="volume"> <span style="color:var(--muted)">${esc(b.unit)}</span></td>
+        <td><input type="number" min="0" step="0.01" class="sk-in" style="width:90px" value="${esc(b.price)}" data-f="price"></td>
+        <td><input class="sk-in" style="width:90px" value="${esc(b.validity)}" data-f="validity"></td>
+        <td><input type="checkbox" ${b.available!==false?'checked':''} data-f="available" style="width:18px;height:18px;cursor:pointer"></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-sm" onclick="skyraSaveBundle('${esc(b.id)}',this)">Save</button>
+          <button class="btn btn-sm btn-ghost" onclick="skyraDeleteBundle('${esc(b.id)}',this)">Delete</button>
+        </td>
+      </tr>`).join('')}</tbody></table>`;
+  }catch(e){ el.innerHTML = '<p style="color:#e57373;font-size:0.9rem">'+esc(e.message)+'</p>'; }
+}
+
+function skyBundleRowValues(id){
+  const row = document.querySelector(`#skyraBundlesTable tr[data-id="${CSS.escape(id)}"]`);
+  const g = f => row.querySelector(`[data-f="${f}"]`);
+  return {
+    name: g('name').value.trim(),
+    volume: Number(g('volume').value),
+    price: Number(g('price').value),
+    validity: g('validity').value.trim(),
+    available: g('available').checked,
+  };
+}
+
+async function skyraSaveBundle(id, btn){
+  const msg = document.getElementById('skyraBundlesMsg');
+  const body = skyBundleRowValues(id);
+  btn.disabled = true; const t = btn.textContent; btn.textContent = 'Saving…';
+  try{
+    await skyraFetch('/bundles/'+encodeURIComponent(id), { method:'PATCH', headers: skyraHeaders(true), body: JSON.stringify(body) });
+    msg.style.color = '#4caf50'; msg.textContent = '✓ Bundle updated — live on the app.';
+  }catch(e){ msg.style.color = '#e57373'; msg.textContent = 'Error: ' + e.message; }
+  finally{ btn.disabled = false; btn.textContent = t; setTimeout(()=>{ if(msg.textContent.startsWith('✓')) msg.textContent=''; }, 4000); }
+}
+
+async function skyraDeleteBundle(id, btn){
+  if(!confirm('Delete this bundle? It disappears from the app immediately.')) return;
+  btn.disabled = true;
+  const msg = document.getElementById('skyraBundlesMsg');
+  try{
+    await skyraFetch('/bundles/'+encodeURIComponent(id), { method:'DELETE', headers: skyraHeaders(false) });
+    skyraLoadBundles();
+  }catch(e){ btn.disabled=false; msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+}
+
+async function skyraAddBundle(btn){
+  const msg = document.getElementById('skbAddMsg');
+  const body = {
+    network: document.getElementById('skbNetwork').value,
+    name: document.getElementById('skbName').value.trim(),
+    volume: Number(document.getElementById('skbVolume').value),
+    unit: document.getElementById('skbUnit').value,
+    price: Number(document.getElementById('skbPrice').value),
+    validity: document.getElementById('skbValidity').value.trim(),
+    category: document.getElementById('skbCategory').value,
+  };
+  const badge = document.getElementById('skbBadge').value.trim();
+  if(badge) body.badge = badge;
+  if(!body.name || !body.volume || !body.validity){ msg.style.color='#e57373'; msg.textContent='Name, volume and validity are required.'; return; }
+  btn.disabled = true; const t = btn.textContent; btn.textContent = 'Adding…';
+  try{
+    await skyraFetch('/bundles', { method:'POST', headers: skyraHeaders(true), body: JSON.stringify(body) });
+    msg.style.color = '#4caf50'; msg.textContent = '✓ Bundle added.';
+    ['skbName','skbVolume','skbPrice','skbValidity','skbBadge'].forEach(i=>document.getElementById(i).value='');
+    skyraLoadBundles();
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+  finally{ btn.disabled=false; btn.textContent=t; setTimeout(()=>{ if(msg.textContent.startsWith('✓')) msg.textContent=''; }, 4000); }
+}
+
+/* Networks ------------------------------------------------------- */
+async function skyraLoadNetworks(){
+  const el = document.getElementById('skyraNetworksTable');
+  el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">Loading…</p>';
+  try{
+    const d = await skyraFetch('/networks');
+    const rows = d.networks || [];
+    if(!rows.length){ el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No networks.</p>'; return; }
+    el.innerHTML = `<table class="sk-tbl"><thead><tr>
+      <th>Code</th><th>Name</th><th>Status</th><th></th>
+      </tr></thead><tbody>${rows.map(n=>`
+      <tr data-code="${esc(n.code)}">
+        <td style="font-weight:700">${esc(n.code)}</td>
+        <td><input class="sk-in" style="min-width:140px" value="${esc(n.name)}" data-f="name"></td>
+        <td><select class="sk-in" style="width:150px" data-f="status">
+          ${['available','unavailable','maintenance'].map(s=>`<option value="${s}" ${n.status===s?'selected':''}>${s}</option>`).join('')}
+        </select></td>
+        <td><button class="btn btn-sm" onclick="skyraSaveNetwork('${esc(n.code)}',this)">Save</button></td>
+      </tr>`).join('')}</tbody></table>`;
+  }catch(e){ el.innerHTML='<p style="color:#e57373;font-size:0.9rem">'+esc(e.message)+'</p>'; }
+}
+
+async function skyraSaveNetwork(code, btn){
+  const msg = document.getElementById('skyraNetworksMsg');
+  const row = document.querySelector(`#skyraNetworksTable tr[data-code="${CSS.escape(code)}"]`);
+  const body = { name: row.querySelector('[data-f="name"]').value.trim(), status: row.querySelector('[data-f="status"]').value };
+  btn.disabled=true; const t=btn.textContent; btn.textContent='Saving…';
+  try{
+    await skyraFetch('/networks/'+encodeURIComponent(code), { method:'PATCH', headers: skyraHeaders(true), body: JSON.stringify(body) });
+    msg.style.color='#4caf50'; msg.textContent='✓ '+code+' updated.';
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+  finally{ btn.disabled=false; btn.textContent=t; setTimeout(()=>{ if(msg.textContent.startsWith('✓')) msg.textContent=''; }, 4000); }
+}
+
+/* Transactions --------------------------------------------------- */
+async function skyraLoadOrders(){
+  const el = document.getElementById('skyraOrdersTable');
+  el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">Loading…</p>';
+  const q = document.getElementById('skyraOrderQ').value.trim();
+  try{
+    const d = await skyraFetch('/orders' + (q ? ('?q='+encodeURIComponent(q)) : ''));
+    const rows = d.orders || [];
+    if(!rows.length){ el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No transactions found.</p>'; return; }
+    el.innerHTML = `<table class="sk-tbl"><thead><tr>
+      <th>Reference</th><th>Network</th><th>Recipient</th><th>Total</th><th>Status</th><th>When</th><th></th>
+      </tr></thead><tbody>${rows.map(o=>{
+        const when = o.createdAt ? new Date(o.createdAt).toLocaleString('en-GH',{dateStyle:'medium',timeStyle:'short'}) : '';
+        const canRetry = o.status==='FAILED';
+        return `<tr>
+          <td style="font-family:monospace;font-size:0.78rem">${esc(o.reference||o.id)}</td>
+          <td>${esc(o.network)}</td>
+          <td>${esc(o.recipient)}</td>
+          <td style="white-space:nowrap">GHS ${esc(Number(o.total||0).toFixed(2))}</td>
+          <td>${skyChip(o.status)}</td>
+          <td style="color:var(--muted);white-space:nowrap;font-size:0.78rem">${esc(when)}</td>
+          <td>${canRetry?`<button class="btn btn-sm" onclick="skyraRetryOrder('${esc(o.id)}',this)">Retry</button>`:''}</td>
+        </tr>`;}).join('')}</tbody></table>`;
+  }catch(e){ el.innerHTML='<p style="color:#e57373;font-size:0.9rem">'+esc(e.message)+'</p>'; }
+}
+
+async function skyraRetryOrder(id, btn){
+  const msg = document.getElementById('skyraOrdersMsg');
+  btn.disabled=true; const t=btn.textContent; btn.textContent='Retrying…';
+  try{
+    await skyraFetch('/orders/'+encodeURIComponent(id)+'/retry', { method:'POST', headers: skyraHeaders(false) });
+    msg.style.color='#4caf50'; msg.textContent='✓ Retry queued.';
+    skyraLoadOrders();
+  }catch(e){ btn.disabled=false; btn.textContent=t; msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+}
+
+/* Support tickets ------------------------------------------------ */
+async function skyraLoadTickets(){
+  const el = document.getElementById('skyraTicketsTable');
+  el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">Loading…</p>';
+  try{
+    const d = await skyraFetch('/tickets');
+    const rows = d.tickets || [];
+    if(!rows.length){ el.innerHTML='<p style="color:var(--muted);font-size:0.9rem">No support tickets. 🎉</p>'; return; }
+    const statusColor = { open:'#e0a34c', in_review:'#4a9edb', resolved:'#4caf50' };
+    el.innerHTML = `<table class="sk-tbl"><thead><tr>
+      <th>Subject</th><th>Contact</th><th>Status</th><th>When</th><th>Set status</th>
+      </tr></thead><tbody>${rows.map(t=>{
+        const when = t.createdAt ? new Date(t.createdAt).toLocaleString('en-GH',{dateStyle:'medium',timeStyle:'short'}) : '';
+        const c = statusColor[t.status] || '#8899bb';
+        return `<tr>
+          <td style="min-width:200px"><div style="font-weight:700">${esc(t.subject||'(no subject)')}</div><div style="color:var(--muted);font-size:0.76rem">${esc((t.message||'').slice(0,90))}</div></td>
+          <td style="font-size:0.8rem">${esc(t.contact||t.phone||t.email||'—')}</td>
+          <td><span class="sk-chip" style="background:${c}22;color:${c};text-transform:capitalize">${esc((t.status||'').replace('_',' '))}</span></td>
+          <td style="color:var(--muted);white-space:nowrap;font-size:0.78rem">${esc(when)}</td>
+          <td><select class="sk-in" style="width:150px" onchange="skyraSetTicket('${esc(t.id)}',this.value,this)">
+            ${['open','in_review','resolved'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s.replace('_',' ')}</option>`).join('')}
+          </select></td>
+        </tr>`;}).join('')}</tbody></table>`;
+  }catch(e){ el.innerHTML='<p style="color:#e57373;font-size:0.9rem">'+esc(e.message)+'</p>'; }
+}
+
+async function skyraSetTicket(id, status, sel){
+  const msg = document.getElementById('skyraTicketsMsg');
+  sel.disabled = true;
+  try{
+    await skyraFetch('/tickets/'+encodeURIComponent(id), { method:'PATCH', headers: skyraHeaders(true), body: JSON.stringify({ status }) });
+    msg.style.color='#4caf50'; msg.textContent='✓ Ticket updated.';
+    setTimeout(()=>{ if(msg.textContent.startsWith('✓')) msg.textContent=''; }, 3000);
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+  finally{ sel.disabled = false; }
+}
+
+/* Settings ------------------------------------------------------- */
+async function skyraLoadSettings(){
+  const msg = document.getElementById('skyraSettingsMsg');
+  msg.textContent = '';
+  try{
+    const d = await skyraFetch('/settings');
+    const s = d.settings || {};
+    document.getElementById('skyraFee').value = s.processingFeeGhs != null ? s.processingFeeGhs : '';
+    document.getElementById('skyraUssd').value = s.ussdShortCode || '';
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+}
+
+async function skyraSaveSettings(btn){
+  const msg = document.getElementById('skyraSettingsMsg');
+  const fee = document.getElementById('skyraFee').value;
+  const ussd = document.getElementById('skyraUssd').value.trim();
+  const body = {};
+  if(fee !== '') body.processingFeeGhs = Number(fee);
+  if(ussd) body.ussdShortCode = ussd;
+  btn.disabled=true; const t=btn.textContent; btn.textContent='Saving…';
+  try{
+    await skyraFetch('/settings', { method:'PATCH', headers: skyraHeaders(true), body: JSON.stringify(body) });
+    msg.style.color='#4caf50'; msg.textContent='✓ Settings saved — live on the app.';
+  }catch(e){ msg.style.color='#e57373'; msg.textContent='Error: '+e.message; }
+  finally{ btn.disabled=false; btn.textContent=t; setTimeout(()=>{ if(msg.textContent.startsWith('✓')) msg.textContent=''; }, 4000); }
 }
 
 /* ══ Course Catalog manager (CEO adds courses — no code) ══ */
