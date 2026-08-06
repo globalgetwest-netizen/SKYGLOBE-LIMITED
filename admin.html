@@ -600,130 +600,15 @@
           </div>
         </section>
 
-        <!-- SKYRA DATA (native — talks to the Skyra Data backend) -->
+        <!-- SKYRA DATA — embeds the real Skyra Data console (its own product, own UI) -->
         <section class="view" id="view-skyra">
-          <!-- Sign-in gate: shown until the Skyra admin session is established -->
-          <div class="panel" id="skyraLoginGate" style="max-width:460px;margin:0 auto">
-            <h3 style="margin:0 0 6px">📶 Connect Skyra Data</h3>
-            <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Skyra Data is a separate product with its own backend. Sign in once here to manage bundles, prices, networks, transactions and support — changes go live on the Skyra app instantly.</p>
-            <div style="margin-bottom:12px"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Admin email</label>
-              <input type="email" id="skyraEmail" autocomplete="username" placeholder="admin@skyra" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
-            <div style="margin-bottom:16px"><label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px">Password</label>
-              <input type="password" id="skyraPassword" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')skyraLogin()" style="width:100%;padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--navy);color:#fff;font-size:0.9rem"></div>
-            <button class="btn" onclick="skyraLogin()" style="width:100%">Connect</button>
-            <div id="skyraLoginMsg" style="font-size:0.85rem;margin-top:12px;text-align:center;color:var(--muted)"></div>
-          </div>
-
-          <!-- Workspace: shown once connected -->
-          <div id="skyraWorkspace" style="display:none">
-            <div class="panel" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                <span style="width:9px;height:9px;border-radius:50%;background:#4caf50;display:inline-block;box-shadow:0 0 0 3px #4caf5033"></span>
-                <span style="font-weight:700;color:var(--txt)">Connected to Skyra Data</span>
-                <span id="skyraConnEmail" style="color:var(--muted);font-size:0.8rem"></span>
-              </div>
-              <button class="btn btn-sm btn-ghost" onclick="skyraLogout()">Disconnect</button>
+          <div id="skyraFrameWrap" style="height:calc(100vh - 150px); min-height:520px; border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#f7f7f8; position:relative;">
+            <div id="skyraFrameLoading" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:0.9rem; gap:10px;">
+              <span>Loading Skyra Data console…</span>
             </div>
-
-            <!-- Sub-tabs -->
-            <div class="panel" style="padding:8px;margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
-              <button class="sk-tab active" data-tab="overview" onclick="skyraTab('overview')">📊 Overview</button>
-              <button class="sk-tab" data-tab="bundles" onclick="skyraTab('bundles')">📦 Bundles</button>
-              <button class="sk-tab" data-tab="networks" onclick="skyraTab('networks')">📡 Networks</button>
-              <button class="sk-tab" data-tab="orders" onclick="skyraTab('orders')">🧾 Transactions</button>
-              <button class="sk-tab" data-tab="tickets" onclick="skyraTab('tickets')">🎫 Support</button>
-              <button class="sk-tab" data-tab="settings" onclick="skyraTab('settings')">⚙️ Settings</button>
-            </div>
-
-            <!-- Overview -->
-            <div class="sk-pane" id="sk-pane-overview">
-              <div id="skyraOverview" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
-                <p style="color:var(--muted);font-size:0.9rem">Loading…</p>
-              </div>
-            </div>
-
-            <!-- Bundles -->
-            <div class="sk-pane" id="sk-pane-bundles" style="display:none">
-              <div class="panel" style="margin-bottom:16px">
-                <h3 style="margin:0 0 6px">➕ Add a bundle</h3>
-                <p style="color:var(--muted);font-size:0.85rem;margin:0 0 14px">New bundles appear on the Skyra app the moment you add them.</p>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px">
-                  <div><label class="sk-lbl">Network</label>
-                    <select id="skbNetwork" class="sk-in"><option value="MTN">MTN</option><option value="TELECEL">Telecel</option><option value="AT">AT</option></select></div>
-                  <div><label class="sk-lbl">Name</label><input id="skbName" class="sk-in" placeholder="e.g. 5GB Weekly"></div>
-                  <div><label class="sk-lbl">Volume</label><input id="skbVolume" type="number" min="0" step="0.01" class="sk-in" placeholder="5"></div>
-                  <div><label class="sk-lbl">Unit</label><select id="skbUnit" class="sk-in"><option>GB</option><option>MB</option></select></div>
-                  <div><label class="sk-lbl">Price (GHS)</label><input id="skbPrice" type="number" min="0" step="0.01" class="sk-in" placeholder="25"></div>
-                  <div><label class="sk-lbl">Validity</label><input id="skbValidity" class="sk-in" placeholder="7 days"></div>
-                  <div><label class="sk-lbl">Category</label><select id="skbCategory" class="sk-in"><option value="data">Data</option><option value="social">Social</option><option value="night">Night</option><option value="unlimited">Unlimited</option></select></div>
-                  <div><label class="sk-lbl">Badge (optional)</label><input id="skbBadge" class="sk-in" placeholder="Popular"></div>
-                </div>
-                <button class="btn" onclick="skyraAddBundle(this)">+ Add bundle</button>
-                <div id="skbAddMsg" style="font-size:0.85rem;margin-top:10px"></div>
-              </div>
-              <div class="panel">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px">
-                  <h3 style="margin:0">📦 Bundles</h3>
-                  <button class="btn btn-sm" onclick="skyraLoadBundles()">↻ Refresh</button>
-                </div>
-                <div id="skyraBundlesMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
-                <div id="skyraBundlesTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
-              </div>
-            </div>
-
-            <!-- Networks -->
-            <div class="sk-pane" id="sk-pane-networks" style="display:none">
-              <div class="panel">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px">
-                  <h3 style="margin:0">📡 Networks</h3>
-                  <button class="btn btn-sm" onclick="skyraLoadNetworks()">↻ Refresh</button>
-                </div>
-                <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">Set a network to maintenance to temporarily stop sales on the app.</p>
-                <div id="skyraNetworksMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
-                <div id="skyraNetworksTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
-              </div>
-            </div>
-
-            <!-- Transactions -->
-            <div class="sk-pane" id="sk-pane-orders" style="display:none">
-              <div class="panel">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
-                  <h3 style="margin:0">🧾 Transactions</h3>
-                  <div style="display:flex;gap:8px;flex-wrap:wrap">
-                    <input id="skyraOrderQ" class="sk-in" style="width:auto;min-width:180px" placeholder="Search ref, phone, network, status" onkeydown="if(event.key==='Enter')skyraLoadOrders()">
-                    <button class="btn btn-sm" onclick="skyraLoadOrders()">Search</button>
-                  </div>
-                </div>
-                <div id="skyraOrdersMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
-                <div id="skyraOrdersTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
-              </div>
-            </div>
-
-            <!-- Support tickets -->
-            <div class="sk-pane" id="sk-pane-tickets" style="display:none">
-              <div class="panel">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
-                  <h3 style="margin:0">🎫 Support tickets</h3>
-                  <button class="btn btn-sm" onclick="skyraLoadTickets()">↻ Refresh</button>
-                </div>
-                <div id="skyraTicketsMsg" style="font-size:0.85rem;margin-bottom:10px"></div>
-                <div id="skyraTicketsTable" style="overflow-x:auto"><p style="color:var(--muted);font-size:0.9rem">Loading…</p></div>
-              </div>
-            </div>
-
-            <!-- Settings -->
-            <div class="sk-pane" id="sk-pane-settings" style="display:none">
-              <div class="panel" style="max-width:520px">
-                <h3 style="margin:0 0 6px">⚙️ Skyra settings</h3>
-                <p style="color:var(--muted);font-size:0.85rem;margin:0 0 16px">These apply across the Skyra app immediately.</p>
-                <div style="margin-bottom:14px"><label class="sk-lbl">Processing fee (GHS)</label>
-                  <input id="skyraFee" type="number" min="0" step="0.01" class="sk-in"></div>
-                <div style="margin-bottom:16px"><label class="sk-lbl">USSD short code</label>
-                  <input id="skyraUssd" class="sk-in" placeholder="*123#"></div>
-                <button class="btn" onclick="skyraSaveSettings(this)">Save settings</button>
-                <div id="skyraSettingsMsg" style="font-size:0.85rem;margin-top:12px"></div>
-              </div>
-            </div>
+            <iframe id="skyraFrame" title="Skyra Data Admin Console" src="" loading="lazy"
+              onload="var l=document.getElementById('skyraFrameLoading'); if(l) l.style.display='none';"
+              style="width:100%; height:100%; border:0; display:block; position:relative;"></iframe>
           </div>
         </section>
 
@@ -1723,10 +1608,10 @@ function switchView(v){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   SKYRA DATA — native panel talking to the Skyra Data backend.
-   Skyra is a separate product with its own backend + admin auth (JWT).
-   We keep its session apart from the SkyGlobe admin key.
+   SKYRA DATA — embeds the real Skyra Data console (its own product / UI),
+   served by the Skyra backend and shown here inside an iframe.
    ══════════════════════════════════════════════════════════════════ */
+const SKYRA_CONSOLE_URL = 'https://skyra-data-backend.fly.dev/admin/';
 const SKYRA_API = 'https://skyra-data-backend.fly.dev/admin/api';
 let SKYRA_TOKEN = sessionStorage.getItem('skyra_token') || '';
 
@@ -1753,14 +1638,11 @@ async function skyraFetch(path, opts){
   return data;
 }
 
+// Lazy-load the embedded Skyra console the first time the section is opened.
 function skyraInit(){
-  if(SKYRA_TOKEN){
-    document.getElementById('skyraLoginGate').style.display = 'none';
-    document.getElementById('skyraWorkspace').style.display = 'block';
-    skyraTab('overview');
-  } else {
-    document.getElementById('skyraLoginGate').style.display = 'block';
-    document.getElementById('skyraWorkspace').style.display = 'none';
+  var f = document.getElementById('skyraFrame');
+  if(f && !f.getAttribute('src')){
+    f.setAttribute('src', SKYRA_CONSOLE_URL);
   }
 }
 
