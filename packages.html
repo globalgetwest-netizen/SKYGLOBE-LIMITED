@@ -146,6 +146,7 @@ body>header,body>nav:not(.eco-nav),nav.topnav,.topnav,body>footer:not(.eco-foot)
   <div class="navlinks">
     <a href="/work-permit">Work Permit</a>
     <a href="/conferences">Conferences</a>
+    <a href="/membership">Membership · 10% off</a>
     <a href="/packages" class="cta">All Packages</a>
   </div>
 </nav>
@@ -254,7 +255,7 @@ const PACKAGES = [
     tagline:'Full travel readiness package for Europe',
     features:['Visa strategy & checklist','Flight booking guidance','Travel document review','Itinerary planning support','Emergency contacts & insurance tips'],
     usdAmt:'199', eurAmt:'189', gbpAmt:'169',
-    href:'/?apply=travel-europe',
+    href:'/?apply=travel-europe', payDirect:true,
     premium:false
   },
   {
@@ -264,7 +265,7 @@ const PACKAGES = [
     tagline:'For any top destination: USA, Canada, UAE, Australia & more',
     features:['Destination-specific visa guidance','Document preparation checklist','Flight & accommodation strategy','Country-specific entry requirements','24h pre-travel support call'],
     usdAmt:'259', eurAmt:'239', gbpAmt:'209',
-    href:'/?apply=travel-global',
+    href:'/?apply=travel-global', payDirect:true,
     premium:false
   },
   {
@@ -274,7 +275,7 @@ const PACKAGES = [
     tagline:'CEO-stamped official letter on SKYGLOBE letterhead',
     features:['Custom content drafted to your needs','Official SKYGLOBE letterhead','CEO signature & company stamp','Digital delivery (PDF)','Physical copy available on request'],
     usdAmt:'39', eurAmt:'35', gbpAmt:'29',
-    href:'/?apply=letter',
+    href:'/?apply=letter', payDirect:true,
     premium:false
   },
 ];
@@ -302,14 +303,32 @@ function render() {
           ? `<div class="from">Priced by</div><div class="amt" style="font-size:1.1rem">Country &amp; Role</div><small>select your destination to see the exact fee</small>`
           : `<div class="from">from</div><div class="amt">$${p.usdAmt}</div><small>€${p.eurAmt} &nbsp;·&nbsp; £${p.gbpAmt}</small>`}
       </div>
-      <button class="btn-apply" onclick="location.href='${p.href}'">${p.variable?'See Country & Role Pricing →':'Apply Now →'}</button>
+      <button class="btn-apply" onclick="${p.payDirect ? `startCheckout('${p.id}',${JSON.stringify(p.title)})` : `location.href='${p.href}'`}">${p.variable?'See Country & Role Pricing →':p.payDirect?'Pay & Get Started →':'Apply Now →'}</button>
     </div>`).join('');
+}
+
+// Fixed-price packages (payDirect:true) open the real checkout widget instead
+// of routing to a lead-capture form — PRICING in server.js already has the
+// exact amount for these product ids, so the server prices the charge itself.
+async function startCheckout(product, label) {
+  var email = null;
+  try {
+    var token = localStorage.getItem('sky_token');
+    if (token) {
+      var r = await fetch('/api/auth/me', { headers: { Authorization: 'Bearer ' + token } });
+      if (r.ok) { var d = await r.json(); email = d.email; }
+    }
+  } catch (_) {}
+  if (!email) email = prompt('Enter your email to continue to payment for "' + label + '":');
+  if (!email) return;
+  SGCheckout.open({ product: product, email: email, label: label });
 }
 
 render();
 </script>
 <script src="/announcements.js?v=2" defer></script>
 <script src="/dept-contact.js?v=7" defer></script>
+<script src="/checkout.js"></script>
 <footer class="eco-foot"><div class="in">
   <div class="ft">
     <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
