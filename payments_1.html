@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Payments — SKYGLOBEGROUP</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon-32.png">
+<style>
+  :root{--navy:#0a1c3e;--gold:#C8962A;--ink:#0b1220;--muted:#5b6573;--line:#e7e9ee;--ok:#16a34a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#f4f6f9;line-height:1.6}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 20px 60px}
+  header{background:#0a1c3e;color:#fff;padding:14px 0}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .brand img{height:32px;width:32px;border-radius:8px}
+  .brand small{display:block;color:var(--gold);font-size:.6rem;letter-spacing:.2em;font-weight:700}
+  h1{font-size:1.5rem;font-weight:760;letter-spacing:-.02em;margin:22px 0 4px}
+  .sub{color:var(--muted);margin-bottom:18px}
+  .login{max-width:360px;margin:60px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 10px 30px rgba(16,24,40,.07)}
+  .login label{display:block;font-size:.82rem;font-weight:600;margin-bottom:6px}
+  .login input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font:inherit;margin-bottom:12px}
+  .login button{width:100%;background:var(--navy);color:#fff;border:none;padding:12px;border-radius:980px;font:inherit;font-weight:700;cursor:pointer}
+  .err{color:#a02020;font-size:.85rem;margin-top:8px;display:none}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  th,td{text-align:left;padding:11px 12px;font-size:.86rem;border-bottom:1px solid var(--line)}
+  th{background:#fafbfc;color:var(--muted);font-weight:600;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  .badge{display:inline-block;padding:3px 10px;border-radius:980px;font-size:.72rem;font-weight:700}
+  .b-pending{background:#f1f5f9;color:#475569}
+  .b-await{background:#fff8e6;color:#8a6d00}
+  .b-paid{background:#e9f6ea;color:var(--ok)}
+  .confirmBtn{background:var(--gold);color:#1a1300;border:none;padding:7px 14px;border-radius:980px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+  .confirmBtn:disabled{opacity:.5;cursor:default}
+  .empty{padding:30px;text-align:center;color:var(--muted)}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+  .toolbar button{background:#fff;border:1px solid var(--line);border-radius:980px;padding:8px 16px;font:inherit;font-size:.82rem;cursor:pointer}
+</style>
+<style id="eco-chrome-css">
+.eco-nav,.eco-foot,.eco-nav *,.eco-foot *{box-sizing:border-box}
+.eco-nav,.eco-foot{width:100%;max-width:100%;flex:0 0 auto;align-self:stretch;grid-column:1/-1}
+/* hide legacy chrome, keep it in DOM so page scripts still work */
+body>header,body>nav:not(.eco-nav),nav.topnav,.topnav,body>footer:not(.eco-foot){display:none !important}
+.eco-nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,#061A52,#04132F);border-bottom:1px solid rgba(212,167,58,.22);font-family:"SF Pro Display","Inter","Segoe UI",Arial,sans-serif}
+.eco-nav .in{max-width:1180px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
+.eco-nav .bd{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.eco-nav .bd img{height:30px;width:30px;object-fit:contain}
+.eco-nav .wm{font-weight:900;letter-spacing:.04em;font-size:1.02rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-nav .lk{margin-left:auto;display:flex;align-items:center;gap:20px}
+.eco-nav .lk a{color:#C9D4E5;text-decoration:none;font-size:.86rem;font-weight:600}
+.eco-nav .lk a:hover{color:#F2D98A}
+.eco-nav .id{background:linear-gradient(135deg,#D4A73A,#E8C566);color:#04132F;padding:8px 16px;border-radius:9px;font-weight:800;font-size:.84rem;text-decoration:none;white-space:nowrap}
+@media(max-width:860px){.eco-nav .lk .eh{display:none}}
+.eco-foot{background:#04132F;color:#AEC0EC;font-family:"SF Pro Display","Inter","Segoe UI",Arial,sans-serif;padding:48px 20px 30px;border-top:1px solid rgba(212,167,58,.18)}
+.eco-foot .in{max-width:1180px;margin:0 auto}
+.eco-foot .ft{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
+@media(max-width:820px){.eco-foot .ft{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.eco-foot .ft{grid-template-columns:1fr}}
+.eco-foot .wm{font-weight:900;letter-spacing:.04em;font-size:1.35rem;background:linear-gradient(95deg,#FFFFFF,#F2D98A 40%,#D4A73A 55%,#F2D98A 70%,#FFFFFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eco-foot .tag{color:#D4A73A;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;margin-top:10px}
+.eco-foot p.m{color:#8FA0C4;font-size:.86rem;margin-top:12px;line-height:1.6;max-width:280px}
+.eco-foot h4{color:#fff;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;font-weight:800}
+.eco-foot .col a{display:block;color:#AEC0EC;text-decoration:none;font-size:.88rem;margin-bottom:9px}
+.eco-foot .col a:hover{color:#F2D98A}
+.eco-foot .social{display:flex;gap:12px;align-items:center;margin-top:22px;flex-wrap:wrap}
+.eco-foot .social a{color:#C9D4E5;font-weight:700;font-size:.84rem;text-decoration:none}
+.eco-foot .bot{border-top:1px solid rgba(255,255,255,.1);margin-top:34px;padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#8FA0C4}
+.eco-foot .bot b{color:#fff}
+.eco-foot .live{display:flex;align-items:center;gap:7px;color:#7FD6A3;font-weight:700}
+.eco-foot .live i{width:7px;height:7px;border-radius:50%;background:#2BB673;box-shadow:0 0 0 4px rgba(43,182,115,.18);font-style:normal}
+</style>
+</head>
+<body>
+<nav class="eco-nav"><div class="in">
+  <a class="bd" href="/"><img src="/skyglobe-logo-t.png" alt=""><span class="wm">SKYGLOBEGROUP</span></a>
+  <div class="lk"><a class="eh" href="/noria">NORIA</a><a class="eh" href="/terra">TERRA</a><a class="eh" href="/yunex">YUNEX</a><a class="eh" href="/academy">Academy</a><a class="eh" href="/mobility">Mobility</a><a class="id" href="/id">SKYGLOBE ID</a></div>
+</div></nav>
+<header><div class="wrap">
+  <div class="brand"><img src="/icon-192.png?v=3" alt="">SkyGlobe<small>GROUP</small></div>
+  <a href="/" style="color:#cdd6e6;text-decoration:none;font-size:.9rem">← Back to site</a>
+</div></header>
+
+<div class="wrap">
+  <div id="loginBox" class="login">
+    <label>CEO / Staff key</label>
+    <input type="password" id="key" placeholder="Your admin or staff password" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">View Payments →</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+
+  <div id="dash" style="display:none">
+    <h1>Payments</h1>
+    <div class="sub">Confirm Grey bank/crypto transfers once verified. Card payments (Paystack/Stripe/Flutterwave) confirm automatically.</div>
+    <div class="toolbar">
+      <span style="color:var(--muted);font-size:.85rem" id="count"></span>
+      <button onclick="load()">↻ Refresh</button>
+    </div>
+    <div id="tableWrap"><div class="empty">Loading…</div></div>
+  </div>
+</div>
+
+<script>
+  let ADMIN_KEY = sessionStorage.getItem('sg_admin_key') || '';
+  if (ADMIN_KEY) { showDash(); load(); }
+
+  async function login(){
+    const key = document.getElementById('key').value.trim();
+    const err = document.getElementById('loginErr');
+    if (!key) { err.textContent = 'Enter your key.'; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    ADMIN_KEY = key;
+    const ok = await load(true);
+    if (ok) { sessionStorage.setItem('sg_admin_key', key); showDash(); }
+    else { err.textContent = 'Wrong key or could not load payments.'; err.style.display = 'block'; }
+  }
+  function showDash(){
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('dash').style.display = 'block';
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function badge(status){
+    const cls = status === 'paid' ? 'b-paid' : status === 'awaiting_confirmation' ? 'b-await' : 'b-pending';
+    const label = status === 'paid' ? 'Paid' : status === 'awaiting_confirmation' ? 'Awaiting confirmation' : 'Pending';
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  async function load(silent){
+    try {
+      const r = await fetch('/api/admin/payments', { headers: { 'x-admin-key': ADMIN_KEY } });
+      if (!r.ok) { if (!silent) document.getElementById('tableWrap').innerHTML = '<div class="empty">Could not load payments.</div>'; return false; }
+      const rows = await r.json();
+      render(Array.isArray(rows) ? rows : []);
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function render(rows){
+    document.getElementById('count').textContent = rows.length + ' payment' + (rows.length===1?'':'s');
+    if (!rows.length) { document.getElementById('tableWrap').innerHTML = '<div class="empty">No payments yet.</div>'; return; }
+    const sorted = rows.slice().sort((a,b)=> new Date(b.created_at||0) - new Date(a.created_at||0));
+    document.getElementById('tableWrap').innerHTML = `
+      <table><thead><tr>
+        <th>Reference</th><th>Product</th><th>Amount</th><th>Provider</th><th>Client</th><th>Status</th><th></th>
+      </tr></thead><tbody>
+        ${sorted.map(p => `
+          <tr>
+            <td>${esc(p.reference)}${p.app_ref?`<br><span style="color:var(--muted);font-size:.75rem">App: ${esc(p.app_ref)}</span>`:''}</td>
+            <td>${esc(p.product)}</td>
+            <td>${esc(p.currency)} ${esc(p.amount)}</td>
+            <td>${esc(p.provider)}</td>
+            <td>${esc(p.email)}</td>
+            <td>${badge(p.status)}</td>
+            <td>${p.status !== 'paid' ? `<button class="confirmBtn" onclick="confirmPay('${esc(p.reference)}', this)">Confirm paid</button>` : ''}</td>
+          </tr>`).join('')}
+      </tbody></table>`;
+  }
+
+  async function confirmPay(reference, btn){
+    if (!confirm('Confirm you have verified this transfer in the Grey account? This marks it PAID and notifies the client.')) return;
+    btn.disabled = true; btn.textContent = 'Confirming…';
+    try {
+      const r = await fetch('/api/admin/payments/' + encodeURIComponent(reference) + '/confirm', {
+        method: 'POST', headers: { 'x-admin-key': ADMIN_KEY }
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Failed');
+      load();
+    } catch(e) {
+      alert('Could not confirm: ' + e.message);
+      btn.disabled = false; btn.textContent = 'Confirm paid';
+    }
+  }
+</script>
+<script src="/announcements.js?v=2" defer></script>
+<script src="/dept-contact.js?v=7" defer></script>
+<footer class="eco-foot"><div class="in">
+  <div class="ft">
+    <div><div class="wm">SKYGLOBEGROUP</div><div class="tag">One World · One Mission</div><p class="m">Building Intelligence, Trust, Commerce, Learning and Mobility — through one ecosystem.</p></div>
+    <div class="col"><h4>Ecosystem</h4><a href="/noria">NORIA — Intelligence</a><a href="/terra">TERRA — Identity &amp; Trust</a><a href="/yunex">YUNEX — Economy</a><a href="/academy">Academy — Learning</a><a href="/mobility">Mobility — Travel</a></div>
+    <div class="col"><h4>Quick Access</h4><a href="/id">SKYGLOBE ID</a><a href="/courses">Academy Programs</a><a href="/terra#documents">Documents &amp; Legal</a><a href="/#ecosystem">Explore Ecosystem</a></div>
+    <div class="col"><h4>Connect</h4><a href="https://wa.me/17373998522" target="_blank" rel="noopener">💬 WhatsApp</a><a href="/#ecosystem">Message Centre</a><div class="social"><a href="https://www.tiktok.com/@SKYGLOBEGROUP" target="_blank" rel="noopener">TikTok</a><a href="https://www.youtube.com/@SKYGLOBEGROUP" target="_blank" rel="noopener">YouTube</a><a href="https://www.instagram.com/SKYGLOBEGROUP" target="_blank" rel="noopener">Instagram</a></div><div style="color:#8FA0C4;font-size:.8rem;margin-top:14px">@SKYGLOBEGROUP · skyglobegroup.com</div></div>
+  </div>
+  <div class="bot"><div>© <span id="ecoYr">2026</span> <b>SKYGLOBEGROUP</b> · All Rights Reserved</div><div class="live"><i></i> Live Ecosystem · Operational</div><div><span style="color:#D4A73A">✦</span> Verified on skyglobegroup.com</div></div>
+</div></footer>
+</body>
+</html>
