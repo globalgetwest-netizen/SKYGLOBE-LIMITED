@@ -40,6 +40,24 @@ create table if not exists conferences (
 
 -- Mark which applications are paid
 alter table applications add column if not exists paid boolean default false;
+
+-- SkyGlobeGroup Membership — a recurring weekly/monthly subscription (separate
+-- from the one-time `payments` table above). One row per member email.
+create table if not exists memberships (
+  id                          uuid primary key default gen_random_uuid(),
+  email                       text unique not null,
+  status                      text default 'inactive',   -- inactive | active | past_due | cancelled
+  provider                    text,                       -- paystack | paddle
+  interval                    text,                       -- weekly | monthly
+  paystack_customer_code      text,
+  paystack_subscription_code  text,
+  paystack_email_token        text,
+  paddle_subscription_id      text,
+  paddle_customer_id          text,
+  current_period_end          timestamptz,
+  created_at                  timestamptz default now(),
+  updated_at                  timestamptz default now()
+);
 ```
 ---
 2. Add your payment keys to Render (when each account is ready)
@@ -56,6 +74,46 @@ webhook URL to:
 ```
 https://YOUR-DOMAIN/api/pay/webhook/paystack
 ```
+---
+2b. SkyGlobeGroup Membership (weekly/monthly subscription — separate feature)
+This is a recurring plan, not a one-time payment, so it needs its own setup
+in whichever provider(s) you use. Skip whichever provider you don't want.
+
+**Paystack** — Payments → Plans → Create Plan, twice (same product, two
+intervals):
+| Plan | Interval | Amount |
+|---|---|---|
+| SkyGlobeGroup Membership — Weekly | Weekly | your price |
+| SkyGlobeGroup Membership — Monthly | Monthly | your price |
+
+Copy each Plan Code (`PLN_…`) into Render as `PAYSTACK_PLAN_MEMBERSHIP_WEEKLY`
+and `PAYSTACK_PLAN_MEMBERSHIP_MONTHLY`.
+
+**Paddle** (optional — merchant-of-record, handles VAT/sales tax for you):
+1. Catalog → Products → create **"SkyGlobeGroup Membership"**, then add two
+   Prices under it (weekly, monthly) — copy each **Price ID** (`pri_…`) into
+   Render as `PADDLE_PRICE_MEMBERSHIP_WEEKLY` / `PADDLE_PRICE_MEMBERSHIP_MONTHLY`.
+2. Developer Tools → Authentication → create an API key → `PADDLE_API_KEY`.
+3. Developer Tools → Client-side tokens → create one → `PADDLE_CLIENT_TOKEN`.
+4. Developer Tools → Notifications → add a destination:
+   `https://YOUR-DOMAIN/api/membership/webhook/paddle`, subscribed to
+   `subscription.created`, `subscription.activated`, `subscription.updated`,
+   `subscription.canceled`, `subscription.paused` → copy its secret into
+   `PADDLE_WEBHOOK_SECRET`.
+5. Set `PADDLE_ENVIRONMENT=sandbox` while testing (Sandbox has its own
+   separate products/prices/keys — repeat steps 1–4 there first), then
+   `production` when you go live.
+
+Also set the Paystack **membership** webhook URL (different path from the
+one-time webhook above):
+```
+https://YOUR-DOMAIN/api/membership/webhook/paystack
+```
+
+The public page is `/membership` — clients must be signed in (SKYGLOBE ID) to
+subscribe. An active member automatically gets 10% off every purchase made
+through `/api/pay/init` — no extra wiring needed, it's checked server-side.
+
 ---
 3. Set your prices
 Prices live in `server.js` near the top of the payments section
@@ -88,10 +146,13 @@ or impersonate an institution. This keeps clients safe at embassies and keeps
 the company clean.
 ---
 What's wired right now
-✅ Provider-agnostic engine: Paystack, Stripe, Flutterwave
+✅ Provider-agnostic engine: Paystack, Stripe, Flutterwave (one-time)
 ✅ Server-authoritative pricing (tamper-proof)
 ✅ `/api/pay/init`, `/api/pay/verify/:ref`, Paystack webhook
 ✅ `/conferences` public marketplace + secure checkout + callback page
 ✅ Conference sourcing requests flow into the CEO queue with paid status
 ✅ CEO endpoints to manage conferences (`/api/admin/conferences`)
 ✅ Optional interview-prep paywall (env flag)
+✅ SkyGlobeGroup Membership — weekly/monthly subscription via Paystack and/or
+  Paddle, at `/membership`; active members get 10% off automatically
+✅ CEO endpoint to list members (`/api/admin/memberships`)
