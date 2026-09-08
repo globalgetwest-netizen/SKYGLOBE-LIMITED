@@ -69,15 +69,15 @@ app.use((req, res, next) => {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://fonts.googleapis.com https://cdn.paddle.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://fonts.googleapis.com https://cdn.paddle.com https://*.paddle.com https://public.profitwell.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.paddle.com https://*.paddle.com",
+      "font-src 'self' https://fonts.gstatic.com https://cdn.paddle.com",
       "img-src 'self' data: blob: https: http:",
       "media-src 'self' data: blob:",
-      "connect-src 'self' https://api.groq.com https://api.cerebras.ai https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com https://*.paddle.com http://localhost:*",
+      "connect-src 'self' https://api.groq.com https://api.cerebras.ai https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com https://*.paddle.com https://public.profitwell.com https://*.profitwell.com http://localhost:*",
       // Allow our own pages (e.g. the showreel) to be embedded in same-origin
       // iframes, and allow YouTube video embeds in the homepage video panel.
-      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://youtube.com https://*.paddle.com",
+      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://youtube.com https://*.paddle.com https://cdn.paddle.com https://buy.paddle.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
