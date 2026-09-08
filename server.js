@@ -6899,11 +6899,6 @@ app.patch('/api/admin/membership-pricing/:interval', async (req, res) => {
 app.get('/api/membership/config', (_req, res) => {
   res.json({
     plan: { label: MEMBERSHIP_PLAN.label, perks: MEMBERSHIP_PLAN.perks, weekly: { usd: MEMBERSHIP_PLAN.weekly.usd }, monthly: { usd: MEMBERSHIP_PLAN.monthly.usd } },
-    paystack: {
-      configured: !!PAY.paystack.secret,
-      publicKey: PAY.paystack.pub || null,
-      plans: { weekly: MEMBERSHIP_PLAN.weekly.paystackPlan || null, monthly: MEMBERSHIP_PLAN.monthly.paystackPlan || null },
-    },
     paddle: {
       configured: !!(process.env.PADDLE_API_KEY && process.env.PADDLE_CLIENT_TOKEN),
       clientToken: process.env.PADDLE_CLIENT_TOKEN || null,

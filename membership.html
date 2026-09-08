@@ -70,8 +70,7 @@ a{color:inherit;text-decoration:none}
     </div>
     <div class="price"><span id="amt">$10</span><span> / <span id="ivl">week</span></span></div>
     <ul class="feat" id="perks"></ul>
-    <button class="btn solid" id="payPaystack" hidden>Pay with Paystack (card / mobile money)</button>
-    <button class="btn solid" id="payPaddle" hidden>Pay with card (Paddle)</button>
+    <button class="btn solid" id="payPaddle" hidden>Subscribe with card</button>
     <p class="foot-note" id="noProviders" hidden>Payments aren't configured yet — check back shortly, or contact us on WhatsApp.</p>
   </section>
 
@@ -84,7 +83,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </section>
 
-  <p class="foot-note">Payments are processed by Paystack and/or Paddle. Questions? <a href="https://wa.me/17373998522" target="_blank" rel="noopener" style="color:var(--blue);font-weight:700">WhatsApp us</a>.</p>
+  <p class="foot-note">Payments are securely processed by Paddle. Questions? <a href="https://wa.me/17373998522" target="_blank" rel="noopener" style="color:var(--blue);font-weight:700">WhatsApp us</a>.</p>
 </div>
 
 <script>
@@ -152,9 +151,8 @@ a{color:inherit;text-decoration:none}
     $('pricing').hidden = active;
     $('subscribed').hidden = !active;
     if (active) {
-      var provider = state.sub.provider === 'paddle' ? 'Paddle' : 'Paystack';
       var until = state.sub.currentPeriodEnd ? new Date(state.sub.currentPeriodEnd).toLocaleDateString() : null;
-      $('subDetail').textContent = 'Billed ' + (state.sub.interval || 'monthly') + ' via ' + provider + (until ? (' · renews ' + until) : '');
+      $('subDetail').textContent = 'Billed ' + (state.sub.interval || 'monthly') + (until ? (' · renews ' + until) : '');
     } else {
       renderPricing();
     }
@@ -166,11 +164,9 @@ a{color:inherit;text-decoration:none}
     var interval = state.interval;
     $('amt').textContent = '$' + cfg.plan[interval].usd;
     $('ivl').textContent = interval === 'weekly' ? 'week' : 'month';
-    var paystackOk = cfg.paystack && cfg.paystack.configured && cfg.paystack.plans[interval];
     var paddleOk = cfg.paddle && cfg.paddle.configured && cfg.paddle.prices[interval];
-    $('payPaystack').hidden = !paystackOk;
     $('payPaddle').hidden = !paddleOk;
-    $('noProviders').hidden = !!(paystackOk || paddleOk);
+    $('noProviders').hidden = !!paddleOk;
   }
 
   document.querySelectorAll('.toggle button').forEach(function(btn){
@@ -180,13 +176,6 @@ a{color:inherit;text-decoration:none}
       state.interval = btn.getAttribute('data-interval');
       renderPricing();
     });
-  });
-
-  $('payPaystack').addEventListener('click', function(){
-    banner(null);
-    api('/api/membership/subscribe', { method: 'POST', body: { interval: state.interval } })
-      .then(function(d){ location.href = d.authorizationUrl; })
-      .catch(function(e){ banner(e.message); });
   });
 
   $('payPaddle').addEventListener('click', function(){
