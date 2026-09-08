@@ -40,6 +40,32 @@ create table if not exists conferences (
 
 -- Mark which applications are paid
 alter table applications add column if not exists paid boolean default false;
+
+-- ── MEMBERSHIP (Paddle subscriptions) — REQUIRED for /membership to work ──
+-- One row per member. The Paddle webhook writes here when someone subscribes,
+-- renews or cancels. Without this table a customer can pay but never becomes
+-- "active", so this is mandatory before going live.
+create table if not exists memberships (
+  id                     uuid primary key default gen_random_uuid(),
+  email                  text unique not null,
+  status                 text default 'inactive',  -- inactive | active | past_due | cancelled
+  provider               text,                     -- paddle
+  interval               text,                     -- weekly | monthly
+  paddle_subscription_id text,
+  paddle_customer_id     text,
+  current_period_end     timestamptz,
+  created_at             timestamptz default now(),
+  updated_at             timestamptz default now()
+);
+
+-- Optional: lets the CEO portal change the displayed membership price live.
+-- Safe to create now; the code works without it (falls back to env defaults).
+create table if not exists membership_pricing_overrides (
+  interval        text primary key,   -- weekly | monthly
+  usd             numeric,
+  paystack_plan   text,
+  paddle_price_id text
+);
 ```
 ---
 2. Add your payment keys to Render (when each account is ready)
