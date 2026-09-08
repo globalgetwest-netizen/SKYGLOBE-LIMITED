@@ -69,15 +69,15 @@ app.use((req, res, next) => {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://fonts.googleapis.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://fonts.googleapis.com https://cdn.paddle.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
       "media-src 'self' data: blob:",
-      "connect-src 'self' https://api.groq.com https://api.cerebras.ai https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com http://localhost:*",
+      "connect-src 'self' https://api.groq.com https://api.cerebras.ai https://generativelanguage.googleapis.com https://*.supabase.co https://api.anthropic.com https://*.paddle.com http://localhost:*",
       // Allow our own pages (e.g. the showreel) to be embedded in same-origin
       // iframes, and allow YouTube video embeds in the homepage video panel.
-      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://youtube.com",
+      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://youtube.com https://*.paddle.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -1089,6 +1089,7 @@ app.get('/packages', (req, res) => res.sendFile(path.join(__dirname, 'packages.h
 app.get('/work-permit', (req, res) => res.sendFile(path.join(__dirname, 'work-permit.html')));
 app.get('/kids-academy', (req, res) => res.sendFile(path.join(__dirname, 'skyglobe-kids-academy.html')));
 app.get('/academy', (req, res) => res.sendFile(path.join(__dirname, 'academy.html'))); // Academy pillar page — curriculum lives one level deeper at /kids-academy
+app.get('/membership', (req, res) => res.sendFile(path.join(__dirname, 'membership.html')));
 app.get('/legal-documents', (req, res) => res.sendFile(path.join(__dirname, 'legal-documents.html')));
 app.get('/support', (req, res) => res.sendFile(path.join(__dirname, 'support.html')));
 app.get(['/signin', '/login', '/signup'], (req, res) => res.sendFile(path.join(__dirname, 'signin.html')));
@@ -1106,6 +1107,7 @@ const SITE_PAGES = [
   { title: 'YUNEX — Marketplace', url: '/yunex/app', desc: 'Buy, sell, trade and invest with verified partners.', tags: 'yunex marketplace store buy sell trade invest wallet escrow deals corridors' },
   { title: 'Academy — Learning', url: '/academy', desc: 'Courses, exams and verified certificates.', tags: 'academy course learn certificate exam forex trading crypto stocks finance' },
   { title: 'Mobility — Travel', url: '/mobility', desc: 'Visas, immigration, flights and relocation.', tags: 'mobility visa travel immigration flight relocation passport' },
+  { title: 'SkyGlobeGroup Membership', url: '/membership', desc: '10% off every service, weekly or monthly — join SkyGlobeGroup Membership.', tags: 'membership subscribe subscription pricing plan weekly monthly discount pay billing join' },
   { title: 'SKYGLOBE ID', url: '/id', desc: 'Your account and verification status.', tags: 'id account profile verification sign in' },
   { title: 'Support Centre', url: '/support', desc: 'Help, contact, FAQs, technical support, track a request.', tags: 'support help faq contact chat technical report track problem' },
 ];
@@ -6740,6 +6742,354 @@ app.get('/api/admin/payments', async (req, res) => {
   if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
   try { res.json(await dbQuery('GET', 'payments', null, { order: 'created_at.desc', limit: 500 })); }
   catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+//  §9b  SKYGLOBEGROUP MEMBERSHIP — a recurring subscription (separate from the
+//  one-time PRICING catalog above), billed weekly or monthly via Paystack
+//  and/or Paddle. Active members get 10% off every one-time service purchased
+//  through /api/pay/init.
+//
+//  Required Supabase table (see PAYMENTS_SETUP.md for the exact SQL):
+//    memberships  — one row per client email, tracks provider + status
+//
+//  Env (all optional — a provider with no key just doesn't appear as an
+//  option; nothing breaks):
+//    PAYSTACK_SECRET_KEY / PAYSTACK_PUBLIC_KEY        (already used above)
+//    PAYSTACK_PLAN_MEMBERSHIP_WEEKLY / _MONTHLY       PLN_… Paystack plan codes
+//    PADDLE_API_KEY / PADDLE_CLIENT_TOKEN / PADDLE_WEBHOOK_SECRET / PADDLE_ENVIRONMENT
+//    PADDLE_PRICE_MEMBERSHIP_WEEKLY / _MONTHLY        pri_… Paddle price ids
+// ════════════════════════════════════════════════════════════════════════════
+
+const PADDLE_ENVIRONMENT = (process.env.PADDLE_ENVIRONMENT || 'sandbox').toLowerCase();
+const PADDLE_API_BASE = PADDLE_ENVIRONMENT === 'production' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com';
+
+const MEMBERSHIP_PLAN = {
+  label: 'SkyGlobeGroup Membership',
+  perks: [
+    '10% off every SkyGlobeGroup service booked through the site',
+    'Priority processing on visa, work permit & document requests',
+    'Priority WhatsApp support line',
+  ],
+  weekly: {
+    usd: 10,
+    paystackPlan: process.env.PAYSTACK_PLAN_MEMBERSHIP_WEEKLY || '',
+    paddlePriceId: process.env.PADDLE_PRICE_MEMBERSHIP_WEEKLY || '',
+  },
+  monthly: {
+    usd: 20,
+    paystackPlan: process.env.PAYSTACK_PLAN_MEMBERSHIP_MONTHLY || '',
+    paddlePriceId: process.env.PADDLE_PRICE_MEMBERSHIP_MONTHLY || '',
+  },
+};
+function membershipIntervalFromPaystackPlan(code) {
+  if (code && code === MEMBERSHIP_PLAN.weekly.paystackPlan) return 'weekly';
+  if (code && code === MEMBERSHIP_PLAN.monthly.paystackPlan) return 'monthly';
+  return null;
+}
+function membershipIntervalFromPaddlePrice(id) {
+  if (id && id === MEMBERSHIP_PLAN.weekly.paddlePriceId) return 'weekly';
+  if (id && id === MEMBERSHIP_PLAN.monthly.paddlePriceId) return 'monthly';
+  return null;
+}
+async function paddleApi(path, { method = 'GET', body } = {}) {
+  const r = await fetch(`${PADDLE_API_BASE}${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${process.env.PADDLE_API_KEY || ''}`, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(`Paddle ${path} → ${r.status}: ${d?.error?.detail || d?.error?.code || 'error'}`);
+  return d.data;
+}
+
+async function getMembershipByEmail(email) {
+  if (!email) return null;
+  const rows = await dbQuery('GET', 'memberships', null, { email: `eq.${String(email).toLowerCase()}`, limit: 1 });
+  return rows[0] || null;
+}
+// Correctness note: dbQuery sends `Prefer: return=minimal` on PATCH, so a
+// PATCH response is always empty — we look the row up first instead of
+// branching on the PATCH result, so we never double-insert.
+async function upsertMembership(email, fields) {
+  email = String(email).toLowerCase();
+  const existing = await getMembershipByEmail(email);
+  const stamped = { ...fields, updated_at: new Date().toISOString() };
+  if (existing) await dbQuery('PATCH', 'memberships', stamped, { email: `eq.${email}` });
+  else await dbQuery('POST', 'memberships', { email, status: 'inactive', ...stamped });
+}
+async function isActiveMember(email) {
+  try {
+    const m = await getMembershipByEmail(email);
+    if (!m || m.status !== 'active') return false;
+    if (m.current_period_end && new Date(m.current_period_end).getTime() < Date.now()) return false;
+    return true;
+  } catch (e) {
+    return false; // membership table missing/unreachable → fail open to full price, never block checkout
+  }
+}
+
+// ── Live-editable Membership pricing (CEO portal) ────────────────────────────
+// MEMBERSHIP_PLAN above holds the defaults (from environment variables). On
+// startup we overlay any saved overrides from Supabase, so a price change
+// made in the CEO portal takes effect everywhere instantly — no redeploy, no
+// code edit — same pattern as the one-time PRICING catalog above.
+//
+// Note on what this actually changes: the *displayed* usd amount is free to
+// set to anything. The amount actually *charged* is still whatever the
+// referenced Paystack Plan / Paddle Price is configured for in that
+// provider's own dashboard — an industry-wide constraint of recurring billing
+// (Paystack/Paddle/Stripe all require a pre-created Plan/Price object for
+// subscriptions). A genuine price change is two steps: create the new
+// Plan/Price in the provider dashboard, then paste its code/id — and the
+// matching display amount — into the CEO portal here. No code touched.
+async function loadMembershipPricingOverrides() {
+  try {
+    const rows = await dbQuery('GET', 'membership_pricing_overrides', null, {});
+    for (const row of rows) {
+      const p = MEMBERSHIP_PLAN[row.interval];
+      if (!p) continue;
+      if (row.usd != null) p.usd = Number(row.usd);
+      if (row.paystack_plan) p.paystackPlan = row.paystack_plan;
+      if (row.paddle_price_id) p.paddlePriceId = row.paddle_price_id;
+    }
+    console.log(`✓ Membership pricing overrides loaded (${rows.length})`);
+  } catch (e) {
+    console.log('• No Membership pricing overrides loaded (table missing or empty) — using code/env defaults.');
+  }
+}
+loadMembershipPricingOverrides();
+
+// CEO/staff: view Membership's live pricing (defaults + any saved overrides).
+app.get('/api/admin/membership-pricing', (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  res.json({ label: MEMBERSHIP_PLAN.label, weekly: MEMBERSHIP_PLAN.weekly, monthly: MEMBERSHIP_PLAN.monthly });
+});
+
+// CEO only: change Membership's price for one interval. Takes effect
+// immediately, sitewide. Body: { usd?, paystackPlan?, paddlePriceId? } — only
+// the fields you send are changed.
+app.patch('/api/admin/membership-pricing/:interval', async (req, res) => {
+  const who = checkAdmin(req);
+  if (!who) return res.status(401).json({ error: 'CEO only.' });
+  const interval = req.params.interval;
+  const entry = MEMBERSHIP_PLAN[interval];
+  if (!entry) return res.status(404).json({ error: 'interval must be "weekly" or "monthly".' });
+
+  const { usd, paystackPlan, paddlePriceId } = req.body || {};
+  if (usd != null && !isNaN(usd)) entry.usd = Number(usd);
+  if (paystackPlan != null) entry.paystackPlan = String(paystackPlan).trim();
+  if (paddlePriceId != null) entry.paddlePriceId = String(paddlePriceId).trim();
+
+  try {
+    const patch = { usd: entry.usd, paystack_plan: entry.paystackPlan || null, paddle_price_id: entry.paddlePriceId || null };
+    const existing = await dbQuery('GET', 'membership_pricing_overrides', null, { interval: `eq.${interval}`, limit: 1 });
+    if (existing[0]) await dbQuery('PATCH', 'membership_pricing_overrides', patch, { interval: `eq.${interval}` });
+    else await dbQuery('POST', 'membership_pricing_overrides', { interval, ...patch });
+  } catch (e) {
+    console.error('membership_pricing_overrides persist failed:', e.message);
+    return res.status(500).json({ error: 'Price updated live, but could not be saved permanently — it will reset next restart. Check the membership_pricing_overrides table exists in Supabase (see PAYMENTS_SETUP.md).' });
+  }
+
+  logActivity(who, 'ceo', 'membership_pricing_update', `Updated Membership price for ${interval}: usd=${entry.usd}`, interval);
+  res.json({ ok: true, interval, plan: entry });
+});
+
+// What the frontend needs to render the membership pricing screen.
+app.get('/api/membership/config', (_req, res) => {
+  res.json({
+    plan: { label: MEMBERSHIP_PLAN.label, perks: MEMBERSHIP_PLAN.perks, weekly: { usd: MEMBERSHIP_PLAN.weekly.usd }, monthly: { usd: MEMBERSHIP_PLAN.monthly.usd } },
+    paystack: {
+      configured: !!PAY.paystack.secret,
+      publicKey: PAY.paystack.pub || null,
+      plans: { weekly: MEMBERSHIP_PLAN.weekly.paystackPlan || null, monthly: MEMBERSHIP_PLAN.monthly.paystackPlan || null },
+    },
+    paddle: {
+      configured: !!(process.env.PADDLE_API_KEY && process.env.PADDLE_CLIENT_TOKEN),
+      clientToken: process.env.PADDLE_CLIENT_TOKEN || null,
+      environment: PADDLE_ENVIRONMENT,
+      prices: { weekly: MEMBERSHIP_PLAN.weekly.paddlePriceId || null, monthly: MEMBERSHIP_PLAN.monthly.paddlePriceId || null },
+    },
+  });
+});
+
+// Start a Paystack membership subscription (client must be signed in).
+// Paddle needs no server call — the frontend opens Paddle.js's checkout
+// overlay directly using the price ids from /api/membership/config.
+app.post('/api/membership/subscribe', loginLimiter, async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please sign in first.' });
+  try {
+    if (!PAY.paystack.secret) return res.status(503).json({ error: 'Paystack is not configured yet.' });
+    const interval = String(req.body?.interval || 'monthly').toLowerCase();
+    const price = MEMBERSHIP_PLAN[interval];
+    if (!price || (interval !== 'weekly' && interval !== 'monthly')) return res.status(400).json({ error: 'interval must be "weekly" or "monthly".' });
+    if (!price.paystackPlan) return res.status(503).json({ error: `No Paystack plan configured for ${interval} billing yet.` });
+    const r = await fetch('https://api.paystack.co/transaction/initialize', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${PAY.paystack.secret}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email, plan: price.paystackPlan,
+        callback_url: `${baseUrl(req)}/membership?paid=1`,
+        metadata: { email, interval, kind: 'membership' },
+      }),
+    });
+    const d = await r.json();
+    if (!d.status) throw new Error(d.message || 'Paystack init failed');
+    res.json({ authorizationUrl: d.data.authorization_url, reference: d.data.reference, provider: 'paystack' });
+  } catch (e) {
+    console.error('/api/membership/subscribe error:', e.message);
+    res.status(502).json({ error: 'Could not start checkout. Please try again.' });
+  }
+});
+
+app.get('/api/membership/status', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please sign in first.' });
+  const m = await getMembershipByEmail(email);
+  const active = await isActiveMember(email);
+  res.json({
+    active,
+    status: m?.status || 'inactive',
+    interval: m?.interval || null,
+    provider: m?.provider || null,
+    currentPeriodEnd: m?.current_period_end || null,
+  });
+});
+
+app.post('/api/membership/cancel', async (req, res) => {
+  const email = clientAuth(req);
+  if (!email) return res.status(401).json({ error: 'Please sign in first.' });
+  try {
+    const m = await getMembershipByEmail(email);
+    if (!m || m.status !== 'active') return res.status(400).json({ error: 'No active membership to cancel.' });
+    if (m.provider === 'paddle' && m.paddle_subscription_id) {
+      await paddleApi(`/subscriptions/${m.paddle_subscription_id}/cancel`, { method: 'POST', body: { effective_from: 'immediately' } });
+    } else if (m.paystack_subscription_code && m.paystack_email_token) {
+      await fetch('https://api.paystack.co/subscription/disable', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${PAY.paystack.secret}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: m.paystack_subscription_code, token: m.paystack_email_token }),
+      });
+    } else {
+      return res.status(400).json({ error: 'No cancellable subscription found for this account.' });
+    }
+    await upsertMembership(email, { status: 'cancelled' });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('/api/membership/cancel error:', e.message);
+    res.status(502).json({ error: 'Could not cancel membership.' });
+  }
+});
+
+// CEO/staff: list members (same shape as /api/admin/payments).
+app.get('/api/admin/memberships', async (req, res) => {
+  if (!checkStaffOrAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try { res.json(await dbQuery('GET', 'memberships', null, { order: 'created_at.desc', limit: 500 })); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── Membership webhooks — entitlement is only ever granted here, never from
+// the browser, exactly like the Paystack webhook above. ─────────────────────
+app.post('/api/membership/webhook/paystack', async (req, res) => {
+  try {
+    const secret = PAY.paystack.secret;
+    if (!secret) return res.sendStatus(200);
+    const sig = req.headers['x-paystack-signature'];
+    const hash = crypto.createHmac('sha512', secret).update(req.rawBody || Buffer.from('')).digest('hex');
+    if (hash !== sig) return res.sendStatus(401);
+    const evt = req.body || {};
+    const data = evt.data || {};
+    const email = (data?.customer?.email || data?.metadata?.email || '').toLowerCase() || null;
+    if (!email) return res.sendStatus(200); // not enough to attribute — ignore safely
+
+    switch (evt.event) {
+      case 'subscription.create': {
+        await upsertMembership(email, {
+          status: 'active',
+          provider: 'paystack',
+          interval: membershipIntervalFromPaystackPlan(data?.plan?.plan_code) || data?.metadata?.interval || undefined,
+          paystack_customer_code: data?.customer?.customer_code || null,
+          paystack_subscription_code: data?.subscription_code || null,
+          paystack_email_token: data?.email_token || null,
+          current_period_end: data?.next_payment_date || null,
+        });
+        break;
+      }
+      case 'charge.success':
+      case 'invoice.create':
+      case 'invoice.update':
+      case 'invoice.payment_success': {
+        const fields = { status: 'active', provider: 'paystack' };
+        const next = data?.subscription?.next_payment_date || data?.next_payment_date;
+        if (next) fields.current_period_end = next;
+        const interval = membershipIntervalFromPaystackPlan(data?.plan?.plan_code || data?.subscription?.plan?.plan_code);
+        if (interval) fields.interval = interval;
+        await upsertMembership(email, fields);
+        break;
+      }
+      case 'invoice.payment_failed':
+        await upsertMembership(email, { status: 'past_due' });
+        break;
+      case 'subscription.disable':
+      case 'subscription.not_renew':
+        await upsertMembership(email, { status: 'cancelled' });
+        break;
+      default:
+        break;
+    }
+    res.sendStatus(200);
+  } catch (e) {
+    console.error('membership paystack webhook error:', e.message);
+    res.sendStatus(200);
+  }
+});
+
+app.post('/api/membership/webhook/paddle', async (req, res) => {
+  try {
+    const secret = process.env.PADDLE_WEBHOOK_SECRET;
+    if (!secret) return res.sendStatus(200);
+    const sigHeader = String(req.headers['paddle-signature'] || '');
+    const parts = Object.fromEntries(sigHeader.split(';').map((p) => p.split('=')));
+    const raw = req.rawBody || Buffer.from('');
+    const expected = parts.ts ? crypto.createHmac('sha256', secret).update(`${parts.ts}:${raw}`).digest('hex') : null;
+    if (!expected || !parts.h1 || parts.h1 !== expected) return res.sendStatus(401);
+
+    const evt = req.body || {};
+    const data = evt.data || {};
+    const email = (data?.custom_data?.email || '').toLowerCase() || null;
+    const priceId = data?.items?.[0]?.price?.id || data?.items?.[0]?.price_id || null;
+    const interval = membershipIntervalFromPaddlePrice(priceId);
+    if (!email) return res.sendStatus(200);
+
+    switch (evt.event_type) {
+      case 'subscription.created':
+      case 'subscription.activated':
+      case 'subscription.updated': {
+        const rawStatus = data?.status;
+        const status = rawStatus === 'canceled' ? 'cancelled' : rawStatus === 'past_due' ? 'past_due' : 'active';
+        const fields = {
+          status, provider: 'paddle',
+          paddle_subscription_id: data?.id || null,
+          paddle_customer_id: data?.customer_id || null,
+          current_period_end: data?.current_billing_period?.ends_at || null,
+        };
+        if (interval) fields.interval = interval;
+        await upsertMembership(email, fields);
+        break;
+      }
+      case 'subscription.canceled':
+      case 'subscription.paused':
+        await upsertMembership(email, { status: 'cancelled' });
+        break;
+      default:
+        break;
+    }
+    res.sendStatus(200);
+  } catch (e) {
+    console.error('membership paddle webhook error:', e.message);
+    res.sendStatus(200);
+  }
 });
 
 // ── §10 CONFERENCES & WORK PERMIT ────────────────────────────────────────────
