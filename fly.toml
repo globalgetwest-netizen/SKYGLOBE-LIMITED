@@ -1,4 +1,4 @@
-﻿# fly.io configuration — SKYGLOBEGROUP platform.
+# fly.io configuration - SKYGLOBEGROUP platform.
 app = "skyglobe-limited-1"
 primary_region = "iad"
 
